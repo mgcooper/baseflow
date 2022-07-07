@@ -1,0 +1,37 @@
+{
+   "_schemaVersion": "1.0.0",
+   "figformat":
+  {
+      "inputs":
+      [
+         {"name":"reformat",           "kind":"namevalue","type":["logical"]},
+         {"name":"textfontsize",       "kind":"namevalue","type":["scalar"]},
+         {"name":"axesfontsize",       "kind":"namevalue","type":["scalar"]},
+         {"name":"labelfontsize",      "kind":"namevalue","type":["scalar"]},
+         {"name":"legendfontsize",     "kind":"namevalue","type":["scalar"]},
+         {"name":"textfontname",       "kind":"namevalue","type":["char"]},
+         {"name":"axesfontname",       "kind":"namevalue","type":["char"]},
+         {"name":"labelfontname",      "kind":"namevalue","type":["char"]},
+         {"name":"legendfontname",     "kind":"namevalue","type":["char"]},
+         {"name":"textinterpreter",    "kind":"namevalue","type":["char"]},
+         {"name":"axesinterpreter",    "kind":"namevalue","type":["char"]},
+         {"name":"labelinterpreter",   "kind":"namevalue","type":["char"]},
+         {"name":"legendinterpreter",  "kind":"namevalue","type":["char"]},
+         {"name":"legendlocation",     "kind":"namevalue","type":["char"]},
+         {"name":"xgrid",              "kind":"namevalue","type":["char"]},
+         {"name":"ygrid",              "kind":"namevalue","type":["char"]},
+         {"name":"xgridminor",         "kind":"namevalue","type":["char"]},
+         {"name":"ygridminor",         "kind":"namevalue","type":["char"]},
+         {"name":"linelinewidth",      "kind":"namevalue","type":["scalar"]},
+         {"name":"axeslinewidth",      "kind":"namevalue","type":["scalar"]},
+         {"name":"patchlinewidth",     "kind":"namevalue","type":["scalar"]},
+         {"name":"ticklength",         "kind":"namevalue","type":["numeric"]},
+         {"name":"suppliedaxis",       "kind":"namevalue", 
+                                 "type":["matlab.graphics.axis.Axes"]},
+         {"name":"suppliedline",       "kind":"namevalue", 
+                                 "type":["matlab.graphics.chart.primitive.Line"]},
+         {"name":"suppliedfigure",     "kind":"namevalue", 
+                                 "type":["matlab.ui.Figure"]}
+      ]
+   }
+}

@@ -1,0 +1,52 @@
+{
+   "_schemaVersion": "1.0.0",
+   "bfra_pointcloud":
+   {
+      "inputs":
+      [
+         {"name":"q",         "kind":"required",   "type":["numeric","double"]},
+         {"name":"dqdt",      "kind":"required",   "type":["numeric","double"]},
+         {"name":"mask",      "kind":"namevalue",  "type":["logical"]},
+         {"name":"reflines",  "kind":"namevalue",  "type":["cell", "choices={'upperenvelope','lowerenvelope','bestfit','late','early','userfit'}"]},
+         {"name":"reflabels", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"refpoints", "kind":"namevalue",  "type":["numeric","vector","double"]},
+         {"name":"blate",     "kind":"namevalue",  "type":["numeric","scalar","double"]},
+         {"name":"userab",    "kind":"namevalue",  "type":["numeric","double"]},
+         {"name":"precision", "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"timestep",  "kind":"namevalue",  "type":[["numeric","scalar"],["duration"]]},
+         {"name":"addlegend", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rain",      "kind":"namevalue",  "type":["numeric","double"]},
+         {"name":"ax",        "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]}
+      ]
+   },
+   "bfra_plplot":
+  {
+     "inputs":
+     [
+        {"name":"x",          "kind":"required",   "type":["numeric","double"]}, 
+        {"name":"xmin",       "kind":"required",   "type":["numeric","scalar","double"]},
+        {"name":"alpha",      "kind":"required",   "type":["numeric","scalar","double"]},
+        {"name":"alphaci",    "kind":"namevalue",  "type":["numeric","double"]},
+        {"name":"varsym",     "kind":"namevalue",  "type":["char"]},
+        {"name":"trimline",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+        {"name":"suppliedaxis","kind":"namevalue", "type":["matlab.graphics.axis.Axes"]}
+     ]
+  },
+   "bfra_refline":
+  {
+     "inputs":
+     [
+         {"name":"x",         "kind":"required",   "type":["numeric","column","double"]},
+         {"name":"y",         "kind":"required",   "type":["numeric","column","double"]},
+         {"name":"refslope",  "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"refline",   "kind":"namevalue",  "type":["char", "choices={'upperenvelope','lowerenvelope','bestfit','userfit'}"]},
+         {"name":"userab",    "kind":"namevalue",  "type":["numeric","double"]},
+         {"name":"labels",    "kind":"namevalue",  "type":["logical","scalar"]},
+         {"name":"refpoint",  "kind":"namevalue",  "type":["numeric","vector","double"]},
+         {"name":"plotline",  "kind":"namevalue",  "type":["logical","scalar"]},
+         {"name":"precision", "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"timestep",  "kind":"namevalue",  "type":[["numeric","scalar"],["duration"]]},
+         {"name":"ax",        "kind":"namevalue",  "type":["matlab.graphics.axis.Axes"]}
+     ]
+  }
+}

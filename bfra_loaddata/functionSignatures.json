@@ -1,0 +1,75 @@
+{
+   "_schemaVersion": "1.0.0",
+   "bfra_loadbounds":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "ordered",
+                              "type": ["char","choices=bfra_stationlist"]},
+         {"name":"projection","kind": "namevalue",
+                              "type": ["char","choices={'geo','ease'}"]}
+      ]
+   },
+   "bfra_loadgrace":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "ordered",
+                              "type": ["char","choices=bfra_stationlist"]},
+         {"name":"t1",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]}
+      ]
+   },
+   "bfra_loadflow":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",
+                              "type": ["char","choices=bfra_stationlist"]},
+         {"name":"t1",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"units",     "kind": "namevalue",
+                              "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]}
+      ]
+   },
+   "bfra_loadcalm":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",
+                              "type": ["char","choices=bfra_stationlist"]}
+      ]
+   },
+   "bfra_loadmeta":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",
+                              "type": ["char","choices=bfra_stationlist"]}
+      ]
+   },
+   "bfra_merraWaterBalance":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "ordered",
+                              "type": ["char","choices=bfra_stationlist"]},
+         {"name":"t1",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]}
+      ]
+   },
+   "bfra_basinname":
+   {
+      "inputs":
+      [
+         {"name":"typenamehere","kind": "required",
+                              "type": ["char","choices=bfra_stationlist"]}
+      ]
+   }
+}

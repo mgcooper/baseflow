@@ -1,0 +1,96 @@
+function fdc = fdcurve(flow,varargin)
+%FDCURVE Flow duration curve
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   p = MipInputParser;
+   p.FunctionName='fdcurve';
+   p.addRequired('flow',@(x)isnumeric(x));
+   p.addParameter('axscale','semilogy',@(x)ischar(x));
+   p.addParameter('units','',@(x)ischar(x));
+   p.addParameter('refpoints',nan,@(x)isnumeric(x));
+   p.parseMagically('caller');
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   
+   N     = length(flow);
+   M     = 1:N;
+   x     = sort(flow,'descend');
+   f     = 1-M./(N+1);
+
+   figure;
+   switch axscale
+      case 'loglog'
+         h.fdc = loglog(100.*f,x); ax = gca;
+      case 'semilogy'
+         h.fdc = semilogy(100.*f,x); ax = gca;
+      case 'semilogx'
+         h.fdc = semilogx(100.*f,x); ax = gca;
+      case 'linear'
+         h.fdc = plot(100.*f,x); ax = gca;
+   end
+   
+   % if requested, add a refpoint line
+   xref = nan; fref = nan;
+   if ~isnan(refpoints)
+      hold on;
+      for n = 1:numel(refpoints)
+         iref     = find(x>=refpoints(n),1,'last');
+         xref     = x(iref);
+         fref     = f(iref);
+         xplot    = [min(xlim) 100*fref 100*fref 100*fref];
+         yplot    = [xref xref min(ylim) xref];
+         h.ref(n) = plot(xplot,yplot,'Color',[0.85 0.325 0.098],'LineWidth',1);
+      end
+   end
+      
+
+   ylabel(['$x$ [' units ']']);
+   xlabel 'flow exceedence probability, $P(Q\ge x)$'
+   
+   ax.YAxis.TickLabels = compose('%g',ax.YAxis.TickValues);
+   ax.XAxis.TickLabels = compose('$%g\\%%$',ax.XAxis.TickValues);
+   
+   % since i manually set the ticklabels, i think this is necessary
+   % otherwise if the figure is resized, matlab will make new ticks
+   set(gca,'XTickMode','manual','YTickMode','manual');
+   
+   figformat('suppliedline',h.fdc,'linelinewidth',3); 
+   
+   fdc.h    = h;
+   fdc.f    = f;
+   fdc.x    = x;
+   fdc.xref = xref;
+   fdc.fref = fref;
+   
+%    % this would also work, adapted from num2ltext
+%    ax.XAxis.TickLabels = cellstr(num2str(ax.XAxis.TickValues','$%g\\%%$'))
+   
+%    % thought I could let matlab compose them and then get the ticklabels:
+%    ax.XAxis.TickLabelInterpreter = 'latex';
+%    xtickformat 'percentage'
+%    % but they disappear when latex is set
+
+end
+
+function [F,x] = ecdfpot(x,xmin,alpha,sigma)
+   
+   % not implemented
+   
+   % http://sfb649.wiwi.hu-berlin.de/fedc_homepage/xplore/tutorials/sfehtmlnode91.html
+   
+   % peaks over threshold exceedance probability:
+   % F(x) = N(u)/n(1+gamma(x-u)/beta)^(-1/gamm), 
+   % N(u) is the number of obs>u
+   % n is totla number, i think
+   % x would be tau
+   % u would be taumin
+   % gamma/beta would be b-1/tau0 i think
+   % so 1/gamm would be 1/b-1
+
+
+   N     = numel(x(x>xmin));
+   n     = numel(x);
+   gamma = b-1; % might be 1-b;
+   beta  = tau0;
+   F     = N/n.*(1+gamma.*(x-x0)/beta)^(-1/gamm);
+   
+end
