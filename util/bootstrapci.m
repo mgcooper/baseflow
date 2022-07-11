@@ -1,14 +1,6 @@
 function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
 
 % calculate confidence intervals using bootstrap resampling of residuals      
-   
-% see the methods i used in yorkfit to clarify how to define the cost
-% fucntion for linear regression, the one in here might not be right, might
-% be specific
-
-% i also had a note to revisit this after getting this function to work, to
-% compute bootstrap ci's on custom function passed to fitdist
-% https://www.research.manchester.ac.uk/portal/files/62039509/q_weibull.pdf
 
 % NOTE: i moved the bootstrap ci stuff out of quantreg to this dedicated
 % funciton, but the fitting function in quantreg involves tau, the quantile
@@ -81,21 +73,3 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
 % mgc rsq statistic is not relevant to quantile regression, see method here
 % https://stats.stackexchange.com/questions/129200/r-squared-in-quantile-regression
 
-
-
-% abse is std. dev of bootstrapped coefficients
-% this computes the student's CI's from the standard errors
-% N       = numel(x);
-% alpha   = 0.05;
-% t_c     = tinv(1-alpha/2,N-2);
-% a_ci    = mean(pboot(:,2))+t_c*pse(2)*[-1 1];
-% b_ci    = mean(pboot(:,1))+t_c*pse(1)*[-1 1];
-
-% but instead, use bootstrapped confidence intervals on slope and intercept
-% bootstrap options: 'norm','per','cper','bca','student'
-% takes way too long
-% norm = 0.7515 seconds
-% per = 0.7761
-% cper = 0.7532
-% 'bca' (default) fails on call to jacknife
-% 'stud' = 67 sec, also requires more advnaced usage I am unclear on
