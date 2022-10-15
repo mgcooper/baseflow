@@ -3,23 +3,23 @@ function [phi,solns,desc] = bfra_fitphi(a1,a2,b2,A,D,L,varargin)
 %late-time solution. input 'soln' is the early-time
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   p = MipInputParser;
-   p.StructExpand = false;
-   p.FunctionName = 'bfra_fitphi';
-   p.addRequired('a1',@(x)isnumeric(x));
-   p.addRequired('a2',@(x)isnumeric(x));
-   p.addRequired('b2',@(x)isnumeric(x));
-   p.addRequired('A',@(x)isnumeric(x));
-   p.addRequired('D',@(x)isnumeric(x));
-   p.addRequired('L',@(x)isnumeric(x));
-   p.addParameter('theta',0,@(x)isnumeric(x));
-   p.addParameter('isflat',true,@(x)islogical(x));
-   p.addParameter('dispfit',false,@(x)islogical(x));
-   p.addParameter('soln1','Rupp and Selker, 2005',@(x)ischar(x));
-   p.addParameter('soln2','Rupp and Selker, 2005',@(x)ischar(x));
-   p.parseMagically('caller');
-   soln1 = p.Results.soln1;
-   soln2 = p.Results.soln2;
+p = MipInputParser;
+p.StructExpand = false;
+p.FunctionName = 'bfra_fitphi';
+p.addRequired('a1',@(x)isnumeric(x));
+p.addRequired('a2',@(x)isnumeric(x));
+p.addRequired('b2',@(x)isnumeric(x));
+p.addRequired('A',@(x)isnumeric(x));
+p.addRequired('D',@(x)isnumeric(x));
+p.addRequired('L',@(x)isnumeric(x));
+p.addParameter('theta',0,@(x)isnumeric(x));
+p.addParameter('isflat',true,@(x)islogical(x));
+p.addParameter('dispfit',false,@(x)islogical(x));
+p.addParameter('soln1','Rupp and Selker, 2005',@(x)ischar(x));
+p.addParameter('soln2','Rupp and Selker, 2005',@(x)ischar(x));
+p.parseMagically('caller');
+soln1 = p.Results.soln1;
+soln2 = p.Results.soln2;
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % b1  = early-time b (not needed for any solutions but assumed)
 % b2  = late-time b

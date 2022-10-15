@@ -13,6 +13,7 @@ p.addParameter('userab',[1 1],@(x)isnumeric(x));
 p.addParameter('labels',false,@(x)islogical(x));
 p.addParameter('refpoint',nan,@(x)isnumeric(x));
 p.addParameter('plotline',true,@(x)islogical(x));
+p.addParameter('linecolor',rgb('black'),@(x)isnumeric(x));
 p.addParameter('precision',1,@(x)isnumeric(x)); % default = 1 m3/s
 p.addParameter('timestep',1,@(x)isnumeric(x)); % default = 1 day
 p.addParameter('ax',nan,@(x)isaxis(x));
@@ -97,9 +98,9 @@ ax          = p.Results.ax;
       yref     = axb(a,xref,b);
       
       if strcmp(refline,'bestfit')
-         href  = loglog(xref,yref,':k','LineWidth',2);
+         href  = loglog(xref,yref,':','LineWidth',2,'Color',linecolor);
       else
-         href  = loglog(xref,yref,'-k','LineWidth',0.5);
+         href  = loglog(xref,yref,'-','LineWidth',0.5,'Color',linecolor);
       end
 
       % reset the x,ylims

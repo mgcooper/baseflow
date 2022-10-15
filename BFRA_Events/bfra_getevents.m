@@ -1,12 +1,13 @@
+
 function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
 %BFRA_GETEVENTS returns flow Q and time T values of each individual
-%recession event, and info about the applied filters.
+%recession event, and info about the applied filters
 
 % Inputs:
-%  t           =  time
-%  q           =  flow
-%  r           =  rain
-%  opts        =  (optional) structure containing the following fields:
+%  t     =  time
+%  q     =  flow
+%  r     =  rain
+%  opts  =  (optional) structure containing the following fields:
 %  qmin        =  minimum flow value, below which values are set nan
 %  nmin        =  minimum event length
 %  fmax        =  maximum # of missing values gap-filled
@@ -18,6 +19,10 @@ function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
 %  rmrain      =  remove rainfall
 %  pickevents  =  option to manually pick events
 %  plotevents  =  option to plot picked events
+
+% NOTE: events are identified by their indices on the t,q,r arrays, so if
+% any filtering is applied prior to passing in the arrays, the data needs
+% to be used in subsequent functions or the indices won't be correct
    
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % input handling

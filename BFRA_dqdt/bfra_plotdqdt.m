@@ -459,7 +459,6 @@ function addRotatedText(xtxt,ytxt,txt,slope,axpos)
 end
 
 % PLOT EVENT
-
 function pickFig = eventPlotter(q,dqdt)
    
    pickFig = figure;
@@ -468,6 +467,7 @@ function pickFig = eventPlotter(q,dqdt)
    
 end
 
+% DETECT TRANSITION
 function [istart, istop] = detectTransition(q,dqdt,istart,istop)
    
    nPicks   = numel(istart);

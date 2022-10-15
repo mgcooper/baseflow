@@ -1,5 +1,5 @@
-function [b,xmin,alpha,k] = bfra_fittau(x,varargin)
-%BFRA_FITTAU returns [b,alpha,k]=bfra_fittau(x,varargin) where x is
+function [b,xmin,alpha,k] = bfra_plfitb(x,varargin)
+%BFRA_PLFITB returns [b,alpha,k]=bfra_plfitb(x,varargin) where x is
 %continuous data believed to follow an untruncated Pareto distribution with 
 %some unknown xmin such that xhat=x-xmin. Any inputs to plfit can be passed
 %in as varargin, where plfit is Aaron Clauset's function.
