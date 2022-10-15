@@ -1,0 +1,14 @@
+{
+   "_schemaVersion": "1.0.0",
+   "bfra_gpfitb":
+   {
+      "inputs":
+      [
+         {"name":"x",         "kind": "required",  "type": ["numeric","column","double"]},
+         {"name":"xmin",      "kind": "namevalue", "type": ["numeric","scalar","double"]},
+         {"name":"varsym",    "kind":"namevalue",  "type":["char"]},
+         {"name":"bootstrap", "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"plotfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
+      ]
+   }
+}
