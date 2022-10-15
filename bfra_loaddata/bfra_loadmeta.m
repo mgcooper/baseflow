@@ -17,5 +17,5 @@ function Meta = bfra_loadmeta(basinname)
    
    % find the flow data
    allnames    =  lower(Meta.name);
-   istation    =  contains(allnames,lower(basinname));
+   istation    =  ismember(allnames,lower(basinname));
    Meta        =  Meta(istation,:);
