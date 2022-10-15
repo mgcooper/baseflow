@@ -44,6 +44,22 @@
                               "type": ["char","choices=bfra_stationlist"]}
       ]
    },
+   "bfra_loadghcnd":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",
+                              "type": ["char","choices=bfra_stationlist"]},
+         {"name":"t1",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue",
+                              "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"units",     "kind": "namevalue",
+                              "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
+         {"name":"gapfill",   "kind":"namevalue", 
+                              "type":["logical"],"purpose":"Option"}
+      ]
+   },
    "bfra_loadmeta":
    {
       "inputs":

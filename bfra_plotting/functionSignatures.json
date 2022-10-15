@@ -20,22 +20,22 @@
       ]
    },
    "bfra_plplot":
-  {
-     "inputs":
-     [
-        {"name":"x",          "kind":"required",   "type":["numeric","double"]}, 
-        {"name":"xmin",       "kind":"required",   "type":["numeric","scalar","double"]},
-        {"name":"alpha",      "kind":"required",   "type":["numeric","scalar","double"]},
-        {"name":"alphaci",    "kind":"namevalue",  "type":["numeric","double"]},
-        {"name":"varsym",     "kind":"namevalue",  "type":["char"]},
-        {"name":"trimline",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-        {"name":"suppliedaxis","kind":"namevalue", "type":["matlab.graphics.axis.Axes"]}
-     ]
-  },
+   {
+      "inputs":
+      [
+         {"name":"x",          "kind":"required",   "type":["numeric","double"]}, 
+         {"name":"xmin",       "kind":"required",   "type":["numeric","scalar","double"]},
+         {"name":"alpha",      "kind":"required",   "type":["numeric","scalar","double"]},
+         {"name":"alphaci",    "kind":"namevalue",  "type":["numeric","double"]},
+         {"name":"varsym",     "kind":"namevalue",  "type":["char"]},
+         {"name":"trimline",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"suppliedaxis","kind":"namevalue", "type":["matlab.graphics.axis.Axes"]}
+      ]
+   },
    "bfra_refline":
-  {
-     "inputs":
-     [
+   {
+      "inputs":
+      [
          {"name":"x",         "kind":"required",   "type":["numeric","column","double"]},
          {"name":"y",         "kind":"required",   "type":["numeric","column","double"]},
          {"name":"refslope",  "kind":"namevalue",  "type":["numeric","scalar"]},

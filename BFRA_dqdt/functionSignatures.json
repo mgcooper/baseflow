@@ -69,7 +69,7 @@
          {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra_fitdQdt":
+   "bfra_fitdqdt":
    {
       "inputs":
       [
