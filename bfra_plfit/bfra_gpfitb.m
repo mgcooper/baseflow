@@ -4,19 +4,20 @@ function [Fit,b,alpha,k] = bfra_gpfitb(x,varargin)
 %distribution with some known xmin that has been subtracted from the
 %true x such that xhat=x-xmin. If xmin is not provided, we assume
 %xmin=0. 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   p = MipInputParser;
-   p.FunctionName = 'bfra_gpfitb';
-   p.PartialMatching=true;
-   p.addRequired('x',@(x)isnumeric(x));
-   p.addParameter('xmin',0,@(x)isnumeric(x));
-   p.addParameter('varsym','\tau',@(x)ischar(x));
-   p.addParameter('bootstrap',false,@(x)islogical(x));
-   p.addParameter('plotfit',true,@(x)islogical(x));
-   p.addParameter('labelplot',true,@(x)islogical(x));
-   p.parseMagically('caller');
-   plotfit = p.Results.plotfit;
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%------------------------------------------------------------------------------
+p = MipInputParser;
+p.FunctionName = 'bfra_gpfitb';
+p.PartialMatching=true;
+p.addRequired('x',@(x)isnumeric(x));
+p.addParameter('xmin',0,@(x)isnumeric(x));
+p.addParameter('varsym','\tau',@(x)ischar(x));
+p.addParameter('bootstrap',false,@(x)islogical(x));
+p.addParameter('plotfit',true,@(x)islogical(x));
+p.addParameter('labelplot',true,@(x)islogical(x));
+p.parseMagically('caller');
+plotfit = p.Results.plotfit;
+varsym = p.Results.varsym;
+%------------------------------------------------------------------------------
 
    if nargin == 1
       xmin = 0;

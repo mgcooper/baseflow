@@ -1,15 +1,22 @@
-function Meta = bfra_loadmeta(basinname)
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+function Meta = bfra_loadmeta(basinname,varargin)
+%------------------------------------------------------------------------------
    p                = MipInputParser;
    p.FunctionName   = 'bfra_loadmeta';
    p.addRequired('basinname',@(x)ischar(x));
+   p.addOptional('version','current',@(x)ischar(x));
    p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   version = p.Results.version;
+%------------------------------------------------------------------------------
    
    % load the meta data - use the one from 'Bounds'
-   pathbounds  = '/Users/coop558/MATLAB/INTERFACE/data/recession/basins/';    
-   filebounds  = [pathbounds 'basin_boundaries.mat'];
+   pathbounds  = [getenv('USERDATAPATH') 'interface/basins/matfiles/'];
    
+   switch version
+      case 'current'
+         filebounds  = [pathbounds 'basin_boundaries.mat'];
+      case 'archive'
+         filebounds  = [pathbounds 'basin_boundaries_tmp.mat'];
+   end
    load(filebounds,'Meta');
 
    % check for categorical station name
