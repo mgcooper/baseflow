@@ -1,5 +1,8 @@
 function out = bfra_pointcloud(q,dqdt,varargin)
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%BFRA_POINTCLOUD plots a 'point cloud' diagram to estimate aquifer parameters
+%from recession flow data
+
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName = 'bfra_pointcloud';
 p.addRequired('q',@(x)isnumeric(x));
@@ -18,7 +21,7 @@ p.addParameter('rain',nan,@(x)isnumeric(x));
 p.parseMagically('caller');
 
 % Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    
    if ~isaxis(ax)
       fig = figure('Position',[380 200 460 380]); ax = gca;
@@ -53,50 +56,66 @@ p.parseMagically('caller');
       switch reflines{n}
          
          case 'early'
-            [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refslope',3,        ...
-                                                   'labels',reflabels,  ...
-                                                   'refpoint',max(refpoints));
+            [h(n),ab(n,:)] =  bfra_refline(                 ...
+                              q,-dqdt,                      ...
+                              'refslope',3,                 ...
+                              'labels',reflabels,           ...
+                              'refpoint',max(refpoints),    ...
+                              'mask',mask                   ... % TEST
+                              );
             
             % might want to increase the line thickness
             h(n).LineWidth = 1;
             
          case 'late'
-            [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refslope',blate,    ...
-                                                   'labels',reflabels,  ...
-                                                   'refpoint',min(refpoints));
+            [h(n),ab(n,:)] =  bfra_refline(                 ...
+                              q,-dqdt,                      ...
+                              'refslope',blate,             ...
+                              'labels',reflabels,           ...
+                              'refpoint',min(refpoints),    ...
+                              'mask',mask                   ... % TEST
+                              );
             
             h(n).LineWidth = 1;
             
          case 'upperenvelope'
-            [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refline','upperenvelope', ...
-                                                   'labels',reflabels);
+            [h(n),ab(n,:)] =  bfra_refline(                 ...
+                              q,-dqdt,                      ...
+                              'refline','upperenvelope',    ...
+                              'labels',reflabels            ...
+                              );
                                                 
             % make the ylimits span the minimum dq/dt to the upper envelope at max Q
             yupplim  = ab(n,1)*max(xlims)^ab(n,2);
             
          case 'lowerenvelope'
-            [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refline','lowerenvelope', ...
-                                                   'labels',reflabels);
+            [h(n),ab(n,:)] =  bfra_refline(                 ...
+                              q,-dqdt,                      ...
+                              'refline','lowerenvelope',    ...
+                              'labels',reflabels            ...
+                              );
                                                 
             ylowlim  = min(0.8.*ab(n,1),0.8*min(ylims));
             
          case 'bestfit'
             [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refline','bestfit');
-            
-%             h(n).LineWidth = 1;
-%             h(n).LineStyle = '--';
-            h(n).LineWidth = 2;
-            h(n).LineStyle = ':';
+            h(n).LineWidth = 2;     % 1
+            h(n).LineStyle = ':';   % '--'
             
             % dummy plot to make space in legend
             hdum = plot(0,0,'Color','none');
-            
             bestfit = true;
             
          case 'userfit'
-            [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refline','userfit', ...
-                                                   'userab',userab,     ...
-                                                   'labels',reflabels);
+            % i turned off 'labels' for userfit, that way it goes to the legend
+            % just like 'bestfit' and the arrows are reserved for reflines
+            [h(n),ab(n,:)] =  bfra_refline(                 ...
+                              q,-dqdt,                      ...
+                              'refline','userfit',          ...
+                              'userab',userab,              ...
+                              'labels',false,               ...
+                              'mask',mask                   ... % TEST
+                              );
       end
       
       out.ab.(reflines{n}) = ab(n,:);
@@ -115,10 +134,16 @@ p.parseMagically('caller');
    % leaving this out for now   
    if addlegend == true
       
-      if any(ismember(reflines,'bestfit'))
-         ibf   = ismember(reflines,'bestfit');
+      if any(ismember(reflines,{'bestfit','userfit'}))
+         ibf   = ismember(reflines,{'bestfit','userfit'});
          hleg  = h(ibf);
          ltext = bfra_aQbString(ab(ibf,:),'printvalues',true);
+         
+         if ~any(ismember(reflines,'userfit'))
+            ltext = [ltext ' (NLS fit)'];
+         elseif ~any(ismember(reflines,'bestfit'))
+            ltext = [ltext ' (MLE fit)'];
+         end
       end
       
       if isobject(hrain)

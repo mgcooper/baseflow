@@ -1,7 +1,8 @@
 function [href,ab] = bfra_refline(x,y,varargin)
-%BFRA_REFLINE
+%BFRA_REFLINE adds a reference line to a point cloud plot
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+% NOTE: y comes in as -dq/dt, send it to bfra_fitab as -y, and to refline as y
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName = 'bfra_refline';
 p.PartialMatching = true;
@@ -13,9 +14,10 @@ p.addParameter('userab',[1 1],@(x)isnumeric(x));
 p.addParameter('labels',false,@(x)islogical(x));
 p.addParameter('refpoint',nan,@(x)isnumeric(x));
 p.addParameter('plotline',true,@(x)islogical(x));
-p.addParameter('linecolor',rgb('black'),@(x)isnumeric(x));
+p.addParameter('linecolor','k',@(x)isnumeric(x));
 p.addParameter('precision',1,@(x)isnumeric(x)); % default = 1 m3/s
 p.addParameter('timestep',1,@(x)isnumeric(x)); % default = 1 day
+p.addParameter('mask',true(size(x)),@(x)islogical(x));
 p.addParameter('ax',nan,@(x)isaxis(x));
 
 p.parseMagically('caller');
@@ -26,12 +28,16 @@ userab      = p.Results.userab;
 labels      = p.Results.labels;
 precision   = p.Results.precision;
 timestep    = p.Results.timestep;
+mask        = p.Results.mask;
 ax          = p.Results.ax;
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
       
+% need options for how/if to apply the mask - e.g., we might want to show the
+% 'bestfit' to all data, and use the mask for late-time fit. also keep in mind
+% bfra_eventphi calls this. mask is default true in parsing. 
 
    % use this to find the equation of the line
-   axb      = @(a,x,b) a.*x.^b;
+   axb = @(a,x,b) a.*x.^b;
    
    % keep track of the original axis limits
    if plotline == true
@@ -52,24 +58,34 @@ ax          = p.Results.ax;
          b = 0;                           % slope = 0 unless stage precision is known
          a = precision*3600*24/timestep;  % 1 m3/s converted to m3/timestep with timestep in days         
       case 'linear'
-         F = bfra_fitab(x,-y,'method','ols','order',1);
+         F = bfra_fitab(x(mask),-y(mask),'method','ols','order',1);
          a = F.ab(1);
          b = F.ab(2);
       case 'bestfit'
-         F = bfra_fitab(x,-y,'method','nls');
+         F = bfra_fitab(x(mask),-y(mask),'method','nls');
          a = F.ab(1);
          b = F.ab(2);
       case 'userfit'
          a = userab(1);
          b = userab(2);
+      case 'phifit'
+         
+         if refslope==3    % use the upper 95th pctl
+            refpoint = quantile(y,0.95);
+         elseif refslope<2 % use the lower 5th pctl
+            refpoint = quantile(y,0.05);
+%             refpoint = quantile(y,0.5);
+         end
+         b = refslope;
+         a = reflineintercept(x,y,b,refpoint,'power');
          
       otherwise % user must provide a refslope past here
       
          % use the user provided refslope, then find the intercept
          b = refslope;
          
+         % this is invoked for bfra_eventphi 
          if isnan(refpoint)   % use the 5th/95th pctl refpoints
-
             if refslope==3    % use the upper 95th pctl
                refpoint = quantile(y,0.95);
             elseif refslope<2 % use the lower 5th pctl
@@ -82,8 +98,29 @@ ax          = p.Results.ax;
          elseif refslope<2            
             refline  = 'late';
          end
-
-         a  = reflineintercept(x,y,b,refpoint,'power');
+         
+         % this is the 'blate' = bhat case, used to estimate ahat
+         % a  = reflineintercept(x,y,b,refpoint,'power');
+         
+         % this is the method that forces the early-time slope through the 95th
+         % percentile and the late-time fit through the median, while allowing
+         % the user to adjust the refpoint e.g. setting refpoint =
+         % quantile(-dqdt,0.3) to move the line down a la brutsaert
+         if refslope==3    
+            %a = max(refpoint)/median(x(~mask),'omitnan')^b;
+            a = reflineintercept(x,y,b,refpoint,'power');
+         elseif refslope<2            
+            a = refpoint/median(x(mask),'omitnan')^b;
+            
+            % use this to replicate the og fitphi method (see phitfi notes)
+            %a = reflineintercept(x,y,b,refpoint,'power');
+         end
+         
+%          % this is the same, but uses the centroid. this fails b/c refpoint
+%          % isn't used to force the line through the right point
+%          F = bfra_fitab(x(mask),-y(mask),'method','mean','order',refslope);
+%          a = F.ab(1);
+%          b = F.ab(2);
    end
       
    % send back the ab
@@ -97,7 +134,7 @@ ax          = p.Results.ax;
       xref     = linspace(xlims(1),xlims(2),100);
       yref     = axb(a,xref,b);
       
-      if strcmp(refline,'bestfit')
+      if strcmp(refline,'bestfit') || strcmp(refline,'userfit')
          href  = loglog(xref,yref,':','LineWidth',2,'Color',linecolor);
       else
          href  = loglog(xref,yref,'-','LineWidth',0.5,'Color',linecolor);
@@ -114,7 +151,7 @@ ax          = p.Results.ax;
    end
 
    % if discharge were measured directly, then the lower envelope would be
-   % the precision of the measurements, here I assume that's 1 m3/s, and
+   % the precision of the measurements, here I assume that it is 1 m3/s, and
    % this lower envelope would appear as a horizontal line, also at
    % integer multiples of it. 
    

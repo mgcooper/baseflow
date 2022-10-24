@@ -1,6 +1,6 @@
 function h = bfra_plplot(x,xmin,alpha,varargin)
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+%-------------------------------------------------------------------------------
 p               = inputParser;
 p.FunctionName  = 'bfra_plplot';
 p.CaseSensitive = false;
@@ -10,6 +10,7 @@ addRequired(   p, 'x',                          @(x)isnumeric(x)     );
 addRequired(   p, 'xmin',                       @(x)isnumeric(x)     );
 addRequired(   p, 'alpha',                      @(x)isnumeric(x)     );
 addParameter(  p, 'alphaci',        nan,        @(x)isnumeric(x)     );
+addParameter(  p, 'xminci',         nan,        @(x)isnumeric(x)     );
 addParameter(  p, 'varsym',         '\tau',     @(x)ischar(x)        );
 addParameter(  p, 'suppliedaxis',   gca,        @(x)isaxis(x)        );
 addParameter(  p, 'trimline',       false,      @(x)islogical(x)     );
@@ -17,11 +18,12 @@ addParameter(  p, 'labelplot',      true,       @(x)islogical(x)     );
 
 parse(p,x,xmin,alpha,varargin{:});
 alphaci  = p.Results.alphaci;
+xminci   = p.Results.xminci;
 varsym   = p.Results.varsym;
 ax       = p.Results.suppliedaxis;
 trimline = p.Results.trimline;
 labelplot = p.Results.labelplot;
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    
 % get the complementary cumulative distribution function
    numData     =  numel(x);
@@ -67,8 +69,16 @@ labelplot = p.Results.labelplot;
    
    figformat('suppliedline',h.fit,'linelinewidth',3);
    
+   if ~isnan(xminci)
+      xminL = xminci(1);
+      xminH = xminci(2);
+   else
+      xminL = xmin;
+      xminH = xmin;
+   end
+   
    if labelplot == true
-      addlabels(xccfit,ccfit,xmin,xmin-1,xmin+1,b,bL,bH,refy);
+      addlabels(xccfit,ccfit,xmin,xminL,xminH,b,bL,bH,refy);
    end
 
    h.ax = gca;
@@ -92,9 +102,16 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b,bL,bH,yref)
    %    xa    = [xmin+xmin/2 xmin];
    %    text(1.05*xa(1),ya(1),ta)
    
-   % tauExp
-   xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);
-   xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));
+   % deactivate this and reactive the two lines below to go back
+   % test using the new xminL/H
+   xexp = tau0*(2-b)/(3-2*b);
+   tauL = tau0L*(2-b)/(3-2*b);
+   tauH = tau0H*(2-b)/(3-2*b);
+   xexpc = (tauH-tauL)/2;
+   
+%    % tauExp
+%    xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);
+%    xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));
    xa    = [xexp-xexp/2 xexp];
    
    ya    = yfit(find(xfit>=xa(2),1,'first'));
