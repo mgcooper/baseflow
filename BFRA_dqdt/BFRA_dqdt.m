@@ -1,7 +1,7 @@
 function [K,Fits] = BFRA_dqdt(Events,varargin)
 %BFRA_DQDT   
 % Inputs:
-%  Events: output of BFRA_Events (flow comes in as m3/day/day)
+%  Events: output of BFRA_Events (flow comes in as m3 d-1 posted daily)
 % Outputs:
 %  K: table of fitted values e.g., a, b, tau, for each event
 %  Fits: structure containing the fitted q/dqdt
@@ -27,10 +27,10 @@ p.parseMagically('caller');
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 % pull out the events
-   A           =  drainagearea;           % drainage area in m2
-   T           =  Events.t;
-   Q           =  Events.q;
-   R           =  Events.r;
+   A           =  drainagearea;           % drainage area [m2]
+   T           =  Events.t;               % time [days]
+   Q           =  Events.q;               % daily discharge [m3 d-1] 
+   R           =  Events.r;               % daily rainfall [mm d-1]
    eventTags   =  Events.tag;
    numEvents   =  max(Events.tag);
    ax          =  'none';
@@ -102,21 +102,29 @@ for thisEvent = 1:numEvents
 %       %autoArrangeFigures(0,0,2);
 %       disp(['event fitting finished' newline]); % pause;
       clf; % close all
-  end
-   
-end
-   
-close all
-% save the data for this gage and this derivative method
-K   =   struct2table(K);
+   end 
 
-if all(isnan(K.a))
-   K           =   [];
-else
-   K.method    =   categorical(cellstr(K.method));
-   K.deriv     =   categorical(cellstr(K.deriv));
-   K.station   =   categorical(cellstr(K.station));
-end   
+end
+
+   % done with fitting, process outputs
+   close all
+   
+   % save the data for this gage and this derivative method
+   K = struct2table(K);
+
+   if all(isnan(K.a))
+      K           =   [];
+   else
+      K.method    =   categorical(cellstr(K.method));
+      K.deriv     =   categorical(cellstr(K.deriv));
+      K.station   =   categorical(cellstr(K.station));
+   end   
+   
+%    % should convert Fits to timetable and add units
+%    Fits.Time = Events.Time;
+%    % variables are: t, q, r, dt, dqdt, eventTag, fitTag
+%    units = ["days","m3 d-1","mm d-1","days","m3 d-2","-","-"];
+%    Fits = struct2timetable(Fits,'VariableUnits',units);
    
 end
 

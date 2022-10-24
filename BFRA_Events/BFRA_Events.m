@@ -1,26 +1,26 @@
 function [Events] = BFRA_Events(T,Q,R,varargin)
 %BFRA_EVENTS get recession events.
 % 
-% This is basically a wrapper around bfra_getevents for multi-year
-% timeseries. 
+% This is basically a wrapper around bfra_getevents for multi-year timeseries. 
 % 
 % Inputs:
 %   T    =  nx1 array of dates
 %   Q    =  nxm array of daily flow in units m3/day, organized as calendar
 %           years, meaning n/365 = # of years
-%   R    =  nxm array of daily rainfall
+%   R    =  nxm array of daily rainfall in (mm/day?)
 %  opts  =  structure containing the following fields:
 %  qmin        =  minimum flow value, below which values are set nan
 %  nmin        =  minimum event length
 %  fmax        =  maximum # of missing values gap-filled
 %  rmax        =  maximum run of sequential constant values
+%  rmin        =  minimum rainfall required to censor flow
 %  rmconvex    =  remove convex derivatives
 %  rmnochange  =  remove consecutive constant derivates
 %  rmrain      =  remove rainfall
    
 % flow comes in as m3/day/day
-   
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%------------------------------------------------------------------------------   
+%------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName = 'BFRA_Events';
 p.StructExpand = true;
@@ -40,7 +40,7 @@ p.addParameter('pickevents',  false,   @(x) islogical(x) & isscalar(x)        );
 p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
 p.parseMagically('caller');
 if isempty(R); R = zeros(size(Q)); end
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%------------------------------------------------------------------------------
 
 % % for now, re-build opts to send to bfra_getevents
    opts.qmin         = qmin;
@@ -86,9 +86,9 @@ if isempty(R); R = zeros(size(Q)); end
    tags        =  nan(size(Qlist));
    eventCount  =  0;                      % initialize event counter
    
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%------------------------------------------------------------------------------
 % compute the recession constants
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%------------------------------------------------------------------------------
    
    for thisYear = 1:numyears      % events for this year at this gage
       
@@ -138,7 +138,8 @@ if isempty(R); R = zeros(size(Q)); end
          dQsave( si:ei,thisYear)    =   dQ;
          qQsave( si:ei,thisYear)    =   qQ;
          tsave(  si:ei,thisYear)    =   datenum(eventT);
-         tags(   si:ei,thisYear)    =   eventCount; % tag events with index in K struct
+         tags(   si:ei,thisYear)    =   eventCount; 
+         % eventCount tags events with index in K struct
          
       end
       
@@ -156,6 +157,10 @@ if isempty(R); R = zeros(size(Q)); end
    Events.qq      =   reshape(qQsave,ndays*numyears, 1);
    Events.tag     =   reshape(tags,  ndays*numyears, 1);
    
+%    % should convert to timetable and add units
+%    units = ["m3 d-1","mm d-1","days","m3 d-1","mm d-1","m3 d-2","m3 d-1","-"];
+%    Events = struct2timetable(Events,'VariableUnits',units);
+   
 end
 
 %==========================================================================
@@ -169,12 +174,13 @@ function [T,Q,R,numyears,timestep]  =  prepinput(T,Q,R)
    hasleap = month(T)==2 & day(T)==29;
    
    % if the time is regular, we can get the timestep here
-   test = timetable(T);
+   test = timetable(T,'RowTimes',T);
    if isregular(test,'time')
-      timestep    =  T(2)-T(1);
+      timestep = T(2)-T(1);
    else
-      % only warn if leap inds are not already missing
-      if ~any(hasleap)
+      % if leap inds are already removed, the time won't be regular, so only
+      % warn if time includes leap inds
+      if any(hasleap)
          warning('irregular calendar, results may be inconsistent')
       end
    end

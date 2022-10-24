@@ -5,14 +5,14 @@ function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
 
 % Inputs:
 %  t     =  time
-%  q     =  flow
-%  r     =  rain
+%  q     =  flow (m3/time)
+%  r     =  rain (mm/time)
 %  opts  =  (optional) structure containing the following fields:
 %  qmin        =  minimum flow value, below which values are set nan
 %  nmin        =  minimum event length
 %  fmax        =  maximum # of missing values gap-filled
 %  rmax        =  maximum run of sequential constant values
-%  rmin        =  minimum rainfall required to censor flow
+%  rmin        =  minimum rainfall required to censor flow (mm/day?)
 %  cmax        =  maximum run of sequential convex dQ/dt values
 %  rmconvex    =  remove convex derivatives
 %  rmnochange  =  remove consecutive constant derivates
