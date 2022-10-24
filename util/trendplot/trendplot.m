@@ -1,6 +1,6 @@
 function h = trendplot(t,y,varargin)
    
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    p                 = MipInputParser;
    p.FunctionName    = 'trendplot';
    p.PartialMatching = true;
@@ -41,7 +41,7 @@ function h = trendplot(t,y,varargin)
    qtl         = p.Results.quantile; clear quantile
    alpha       = p.Results.alpha;
    varargs     = unmatched2varargin(p.Unmatched);
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    % convert to anomalies etc.
    [t,y,yerr] = prepInput(t,y,yerr,anomalies,reference);

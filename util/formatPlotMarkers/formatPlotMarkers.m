@@ -11,7 +11,7 @@ function h = formatPlotMarkers(varargin)
 %where lineobj is a handle to a plotted line. Note, the function checks in
 %lineobj is in fact an axis and if so, 
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    p               = inputParser;
    p.FunctionName  = 'formatPlotMarkers';
@@ -40,7 +40,7 @@ function h = formatPlotMarkers(varargin)
    % convert unmatched to varargin
    varargs        = unmatched2varargin(unmatched);
       
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+%-------------------------------------------------------------------------------
    
 % %  rather than isobject, I could use this to check the line input handle:
 %    if isa(suppliedline,'matlab.graphics.chart.primitive.Line')
