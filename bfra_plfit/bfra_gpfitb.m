@@ -11,7 +11,7 @@ p.PartialMatching=true;
 p.addRequired('x',@(x)isnumeric(x));
 p.addParameter('xmin',0,@(x)isnumeric(x));
 p.addParameter('varsym','\tau',@(x)ischar(x));
-p.addParameter('bootstrap',false,@(x)islogical(x));
+p.addParameter('bootfit',false,@(x)islogical(x));
 p.addParameter('plotfit',true,@(x)islogical(x));
 p.addParameter('labelplot',true,@(x)islogical(x));
 p.parseMagically('caller');
@@ -47,7 +47,7 @@ varsym = p.Results.varsym;
    tau0H    = k_ci(2,2)/gpdist.k;
 
    % bootstrap confidence intervals
-   if bootstrap == true
+   if bootfit == true
       reps     = bootstrp(1000,@gpfit,x);
       kreps    = reps(:,1);
       sigreps  = reps(:,2);                           % tau0
@@ -93,7 +93,7 @@ varsym = p.Results.varsym;
    Fit.tauExpH = tau0H*(2-bH)/(3-2*bH);
    Fit.numtau  = numel(x0(x0>xmin));
    
-   if bootstrap == true
+   if bootfit == true
       Fit.breps   = breps;
       Fit.tau0reps   = sigreps;
    end
@@ -127,9 +127,9 @@ varsym = p.Results.varsym;
       end
       
       % resume plotting
-      h.data   = loglog(x0,F0,'o','LineWidth',0.5,'MarkerSize',10,   ...
+      h.data = loglog(x0,F0,'o','LineWidth',0.5,'MarkerSize',10,   ...
                   'MarkerFaceColor','w'); hold on;
-      h.fit    = loglog(xplot,F2.*yref,'LineStyle','-');
+      h.fit = loglog(xplot,F2.*yref,'LineStyle','-');
                                        
     
       % h.data   = loglog(xplot,F1,'o'); hold on;
@@ -178,7 +178,13 @@ varsym = p.Results.varsym;
       Fit.thresholdprobability = yref;
       Fit.xplot = xplot;
       Fit.Fplot = F2.*yref;
-       
+
+%       % test using plplot instead
+%       aci = [alphaH alphaL];
+%       x = x0(x0>0);
+%       [x,~] = prepareCurveData(x,x);
+%       figure;
+%       bfra_plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
    end
 
 end

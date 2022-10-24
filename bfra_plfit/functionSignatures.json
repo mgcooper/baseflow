@@ -1,14 +1,29 @@
 {
    "_schemaVersion": "1.0.0",
+   "bfra_plfitb":
+   {
+      "inputs":
+      [
+         {"name":"x",         "kind": "required",  "type": ["numeric","column","double"]},
+         {"name":"xmin",      "kind": "namevalue", "type": ["numeric","scalar","double"]},
+         {"name":"range",     "kind": "namevalue", "type": ["numeric","double"]},
+         {"name":"limit",     "kind": "namevalue", "type": ["numeric","scalar","double"]},
+         {"name":"method",    "kind": "namevalue", "type": ["char","choices={'clauset','hanel'}"]},
+         {"name":"bootfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"nreps",     "kind":"namevalue",  "type": ["numeric","scalar"]},
+         {"name":"plotfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"}
+      ]
+   },
    "bfra_gpfitb":
    {
       "inputs":
       [
          {"name":"x",         "kind": "required",  "type": ["numeric","column","double"]},
          {"name":"xmin",      "kind": "namevalue", "type": ["numeric","scalar","double"]},
-         {"name":"varsym",    "kind":"namevalue",  "type":["char"]},
-         {"name":"bootstrap", "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"plotfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
+         {"name":"varsym",    "kind": "namevalue", "type": ["char"]},
+         {"name":"bootfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"plotfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"labelplot", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    }
 }
