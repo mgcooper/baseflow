@@ -1,5 +1,7 @@
 function [D,S] = bfra_aquiferthickness(b,tau,phi,Qb,varargin)
-
+%BFRA_AQUIFERTHICKNESS compute the aquifer thickness from recession parameters
+%b, tau, phi, and baseflow Qb.
+% 
 % Inputs:
 %     b (dimensionless) = baseflow recession parameter b in -dQ/dt = aQ^b 
 %     tau (Time) = aquifer drainage timescale, dQ/dS, where S = aquifer storage

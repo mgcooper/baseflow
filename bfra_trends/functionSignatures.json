@@ -4,10 +4,14 @@
    {
       "inputs":
       [
-         {"name":"Flow",      "kind":"required",
-                              "type":"timetable"},
+         {"name":"t",         "kind":"required",
+                              "type":[["double"],["datetime"]]},
+         {"name":"q",         "kind": "required",
+                              "type": ["double","column"]},
          {"name":"method",    "kind":"namevalue",
-                              "type":["char", "choices={'quantile','interannual','q7min'}"],"default":"'annualquantile'"},
+                              "type":["char", 
+                              "choices={'quantile','interannual','q7min'}"],
+                              "default":"'annualquantile'"},
          {"name":"pctl",      "kind":"namevalue",
                               "type":["numeric","scalar"]},
          {"name":"showfig",   "kind":"namevalue",
