@@ -1,8 +1,9 @@
-
 function [q,dqdt,dt,tq,rq,r] = bfra_fitdqdt(T,Q,R,method,varargin)
 %BFRA_FITDQDT
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%
+
 % input parsing
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName = 'bfra_fitdqdt';
 p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
@@ -16,13 +17,13 @@ p.addParameter('fitab',true,@(x)islogical(x));
 p.addParameter('plotfit',false,@(x)islogical(x));
 p.parseMagically('caller');
 plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % Todo: call the individual fitVTS, fitETS, etc. functions
 % added 'Fit' output to access the original data that gets retimed in ets,
 % need to decide if just passing back a strucutre is better for all opts
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    % temporary patch, for event-based fitting, i want the actual rain, not
    % rq, but that's only implemented for ETS, so return empty otherwise

@@ -6,7 +6,7 @@ function [K,Fits] = BFRA_dqdt(Events,varargin)
 %  K: table of fitted values e.g., a, b, tau, for each event
 %  Fits: structure containing the fitted q/dqdt
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName = 'BFRA_dqdt';
 p.addRequired( 'Events',               @(x) isstruct(x)                 );
@@ -24,7 +24,7 @@ p.addParameter('gageID',      'none',  @(x) ischar(x)                   );
 p.addParameter('fitopts',     struct(),@(x) isstruct(x)                 );
 p.parseMagically('caller');
 % note: fitopts not implemented
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
 % pull out the events
    A           =  drainagearea;           % drainage area [m2]
@@ -46,9 +46,9 @@ p.parseMagically('caller');
    Fits.fitTag    =  nan(size(Q));        % 1:numFits
    nFits          =  0;
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % compute the recession constants
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    
 for thisEvent = 1:numEvents
 

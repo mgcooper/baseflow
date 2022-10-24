@@ -1,13 +1,12 @@
-
 function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
 %BFRA_GETEVENTS returns flow Q and time T values of each individual
 %recession event, and info about the applied filters
-
+% 
 % Inputs:
-%  t     =  time
-%  q     =  flow (m3/time)
-%  r     =  rain (mm/time)
-%  opts  =  (optional) structure containing the following fields:
+%  t           =  time
+%  q           =  flow (m3/time)
+%  r           =  rain (mm/time)
+%  opts        =  (optional) structure containing the following fields:
 %  qmin        =  minimum flow value, below which values are set nan
 %  nmin        =  minimum event length
 %  fmax        =  maximum # of missing values gap-filled
@@ -19,14 +18,14 @@ function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
 %  rmrain      =  remove rainfall
 %  pickevents  =  option to manually pick events
 %  plotevents  =  option to plot picked events
-
-% NOTE: events are identified by their indices on the t,q,r arrays, so if
+% 
+% Tip: events are identified by their indices on the t,q,r arrays, so if
 % any filtering is applied prior to passing in the arrays, the data needs
 % to be used in subsequent functions or the indices won't be correct
    
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % input handling
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName    = 'bfra_getevents';
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
@@ -45,8 +44,7 @@ p.addParameter('rmrain',      false,   @(x) islogical(x) & isscalar(x)  );
 p.addParameter('pickevents',  false,   @(x) islogical(x) & isscalar(x)  );
 p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)  );
 p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
     
 % iF is the first non-nan index, to recover indices after removing nans
    q(q<qmin)   = nan;                      % set values < qmin nan

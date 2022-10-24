@@ -8,7 +8,7 @@ function [q,dqdt,dt,tq,rq,varargout] = bfra_getdqdt(T,Q,R,derivmethod,varargin)
 % bfra_getevents to pick Events, then bfra_fitdQdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % input handling    
 p = MipInputParser;
 p.FunctionName = 'bfra_getdqdt';
@@ -28,9 +28,7 @@ p.addParameter('ax',          'none',  @(x) isaxis(x) | ischar(x)       );
 p.parseMagically('caller');
 
 if isdatetime(T); T = datenum(T); end
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    warning off
 

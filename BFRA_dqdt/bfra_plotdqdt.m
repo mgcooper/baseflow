@@ -3,10 +3,10 @@ function [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt,varargin)
 %portion of data to fit and then fits the data
 %   Syntax:
 %     [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'fitMethod',fitmethod)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'pickMethod',pickmethod)
+%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'fitmethod',fitmethod)
+%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'pickmethod',pickmethod)
 %     [hFits,Picks,Fits] = bfra_plotdqdt(_,'weights',weights)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'useAx',axis_object)
+%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'useax',axis_object)
 
 % NOTE: now that pickFitter calls bfra_fitab, this function does everything
 % that an official workflow would do, i think, and therefore should be
@@ -14,7 +14,7 @@ function [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt,varargin)
 
 % NOTE: rain is optional b/c at this point, events are picked
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+%-------------------------------------------------------------------------------  
 % input parser
 p               = MipInputParser;
 p.FunctionName  = 'bfra_plotdqdt';
@@ -81,7 +81,7 @@ weights  = p.Results.weights;
 % INIT OUTPUT
 [hFits,Fits,Picks] = initOutput();
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%------------------------------------------------------------------------------
    
    % Prep fits
    [~,~,logx,logy,weights,ok] = bfra_prepfits(q,dqdt,'weights',weights);
