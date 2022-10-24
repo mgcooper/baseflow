@@ -1,19 +1,19 @@
 function GHCN = bfra_loadghcnd(basinname,varargin)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   p=MipInputParser;
-   p.FunctionName='bfra_loadghcnd';
-   p.PartialMatching=true;
-   p.addRequired('basinname',@(x)ischar(x));
-   p.addParameter('t1',NaT,@(x) isdatetime(x)|isnumeric(x));
-   p.addParameter('t2',NaT,@(x) isdatetime(x)|isnumeric(x));
-   p.addParameter('units',NaN,@(x) ischar(x));
-   p.addParameter('gapfill',false,@(x) islogical(x));
-   p.parseMagically('caller');
-   
-   if isnumeric(t1) %#ok<*NODEF>
-      t1 = datetime(t1,'ConvertFrom','datenum');
-      t2 = datetime(t2,'ConvertFrom','datenum');
-   end
+p=MipInputParser;
+p.FunctionName='bfra_loadghcnd';
+p.PartialMatching=true;
+p.addRequired('basinname',@(x)ischar(x));
+p.addParameter('t1',NaT,@(x) isdatetime(x)|isnumeric(x));
+p.addParameter('t2',NaT,@(x) isdatetime(x)|isnumeric(x));
+p.addParameter('units',NaN,@(x) ischar(x));
+p.addParameter('gapfill',false,@(x) islogical(x));
+p.parseMagically('caller');
+
+if isnumeric(t1) %#ok<*NODEF>
+   t1 = datetime(t1,'ConvertFrom','datenum');
+   t2 = datetime(t2,'ConvertFrom','datenum');
+end
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    % to get this to a full fledged function, i could use lat,lon + radius

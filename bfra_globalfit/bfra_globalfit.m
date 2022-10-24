@@ -21,9 +21,9 @@ function GlobalFit = bfra_globalfit(K,Events,Fits,Meta,varargin)
 %  TODO: make the inputs more general, rather than these hard-coded structures
 %  and tables
 
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 % input parsing
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 p                 = inputParser;
 p.FunctionName    = 'bfra_globalfit';
 p.PartialMatching = true;
@@ -40,7 +40,7 @@ parse(p,K,Events,Fits,Meta,varargin{:});
 plotfits = p.Results.plotfits;
 bootfit = p.Results.bootfit;
 nreps = p.Results.nreps;
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
 % take values out of the data structures that are needed
 Q  = Events.Q;       % daily streamflow [m3 d-1]
