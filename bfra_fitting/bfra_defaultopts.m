@@ -1,5 +1,6 @@
 function opts = bfra_defaultopts(type)
-%BFRA_DEFAULTOPTS set default algo options
+%BFRA_DEFAULTOPTS set default bfra algorithm options for type 'events' or
+%'fits'
    
 % default bfra settings
 switch type

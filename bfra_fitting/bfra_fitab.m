@@ -1,7 +1,8 @@
-
 function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
-   
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+%BFRA_FITAB fits -dq/dt = aQ^b to estimate parameters a and b
+% 
+% 
+%-------------------------------------------------------------------------------
    p = MipInputParser;
    p.addRequired('q',                           @(x)isnumeric(x)     );
    p.addRequired('dqdt',                        @(x)isnumeric(x)     );
@@ -20,7 +21,7 @@ function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
    quantile = p.Results.quantile;
    plotfit  = p.Results.plotfit;
    
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    
    [x,y,logx,logy,weights,ok] = bfra_prepfits(q,dqdt, 'weights',weights,...
                                                       'mask',mask);
@@ -46,7 +47,7 @@ function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
       case 'mean'
          [ab,ci,ok]  = fitLIN(logx,logy,weights,alpha,order,fitopts);
       case 'median'
-         [ab,ci,ok]  = fitMED(x,y,logx,logy,weights,alpha,order,fitopts);
+         [ab,ci,ok]  = fitMED(logx,logy,weights,order,fitopts);
       case 'envelope'
          [ab,ci,ok]  = fitENV(logx,logy,weights,order,quantile,fitopts);
    end
@@ -174,13 +175,15 @@ function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,fitopts)
      
 end
 
-function [ab,ci,ok] = fitMED(logx,logy,weights,fitopts)
+function [ab,ci,ok] = fitMED(logx,logy,weights,order,fitopts)
    
-   order = 1;
-      
-      if isfield(fitopts,'order')
-            order =  fitopts.order;
-      end
+% % not sure why this was here, order is passed in with default 1, maybe i was
+% gonna do away wiht that or maybe i was testing here before implementing that
+%    order = 1;
+%       
+%       if isfield(fitopts,'order')
+%             order =  fitopts.order;
+%       end
       
       % apply the mask / weights
          logx     =  logx(weights>0);

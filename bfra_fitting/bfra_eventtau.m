@@ -1,15 +1,19 @@
 function [tau,q,dqdt,tags,t,L,s,dq] = bfra_eventtau(K,Events,Fits,varargin)
+%BFRA_EVENTTAU computes drainage timescale tau from the event-scale parameters
+%a,b, and flow Q using the structures K, Events, and Fits produced with
+%bfra_getevents and bfra_dqdt
+% 
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   p = MipInputParser;
-   p.StructExpand = false;
-   p.FunctionName = 'bfra_eventtau';
-   p.addRequired('K',@(x)istable(x));
-   p.addRequired('Events',@(x)isstruct(x));
-   p.addRequired('Fits',@(x)isstruct(x));
-   p.addParameter('usefits',false,@(x)islogical(x));
-   p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
+p = MipInputParser;
+p.StructExpand = false;
+p.FunctionName = 'bfra_eventtau';
+p.addRequired('K',@(x)istable(x));
+p.addRequired('Events',@(x)isstruct(x));
+p.addRequired('Fits',@(x)isstruct(x));
+p.addParameter('usefits',false,@(x)islogical(x));
+p.parseMagically('caller');
+%-------------------------------------------------------------------------------
 
    dqfnc    = @(a,dqdt) -dqdt./a;   % must have derived this at some point
    Taufnc   = bfra_taufunc;

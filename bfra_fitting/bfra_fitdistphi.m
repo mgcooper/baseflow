@@ -1,33 +1,75 @@
-function [PD,h] = bfra_fitdistphi(phi,plottype)
+function [Fit,h] = bfra_fitdistphi(phi,varargin)
+%BFRA_FITDISTPHI fits a Beta distribution to a sample of drainable porosity
+%(phi) values 
+% 
+% Syntax:
+% 
+%  FIT = BFRA_FITDISTPHI(phi);
+%  FIT = BFRA_FITDISTPHI(___,plottype);
+%  FIT = BFRA_FITDISTPHI(___,outputtype);
+% 
+%  Fit = bfra_fitdistphi(phi) returns probability distribution object 'Fit'
+%  which is a Beta Distribution fit to the input data in phi
+% 
+%  Fit = bfra_fitdistphi(phi,outputtype) returns a Beta Distribution fit to the
+%  input data in phi. 'outputtype' is 'PD', 'mean', 'median', or 'std', where
+%  default 'PD' is the Probability Distribution object.
+% 
+%  Fit = bfra_fitdistphi(__,plottype) returns any of the prior options plus a
+%  figure showing the fit. plottype can be 'cdf' or 'pdf'. default is 'none'.
+% 
+% Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
+%-------------------------------------------------------------------------------
+% input parsing
+%-------------------------------------------------------------------------------
+p                 = inputParser;
+p.FunctionName    = 'BFRA_FITDISTPHI';
+
+addRequired(p,    'phi',                  @(x)isvector(x)            );
+addOptional(p,    'outputtype',  'PD',    @(x)ischar(x)              );
+addOptional(p,    'plottype',    'none',  @(x)ischar(x)              );
+
+parse(p,phi,varargin{:});
+outputtype = p.Results.outputtype;
+plottype = p.Results.plottype;
+%-------------------------------------------------------------------------------
+   
    % Force all inputs to be column vectors
    phi = phi(:);
    
    % Fit the beta distribution
-   PD       = fitdist(phi, 'beta');
+   PD = fitdist(phi, 'beta');
 
    % Create the figure
-   h.figure    = figure;
-   
    switch plottype
-      
       case 'cdf'
-         
-         h = bfra_cdfplotphi(phi,PD,h);
-         
+         h = bfra_cdfplotphi(phi,PD);
       case 'probplot'
-         
-         h = bfra_probplotphi(phi,PD,h);
-         
-      case 'pdf'
-         
+         h = bfra_probplotphi(phi,PD);
+      case 'pdf'   
    end
    
-   h.ax = gca;
+   % package output
+   switch outputtype
+      case 'PD'
+         % send back the ProbabilityDistribution object
+         Fit = PD;
+      case {'mean','avg','mu'}
+         % send back the mean
+         Fit = PD.mean;
+      case {'std','stdv'}
+         % send back the mean
+         Fit = PD.std;
+      case 'median'
+         Fit = PD.median;
+   end
 end
 
-function h = bfra_cdfplotphi(phi,PD,h)
+function h = bfra_cdfplotphi(phi,PD)
    
+   % Create the figure
+   h.figure = figure;
    
    % Get the cdf
    [cdfY,cdfX] = ecdf(phi,'Function','cdf');  % compute empirical function
@@ -88,11 +130,15 @@ function h = bfra_cdfplotphi(phi,PD,h)
    h.legend.Position(2) = 0.68*h.legend.Position(2);
    h.legend.Position(1) = 0.85*h.legend.Position(1);
    
+   h.ax  = gca;
    h.mu  = mu;
    h.pm  = pm;
 end
 
-function h = bfra_probplotphi(phi,PD,h);
+function h = bfra_probplotphi(phi,PD);
+   
+   % Create the figure
+   h.figure = figure;
    
    % plot the data, suppressing the normal plot with 'noref'
    h.data      = probplot('normal',phi,[],[],'noref'); hold on;
@@ -110,4 +156,6 @@ function h = bfra_probplotphi(phi,PD,h);
 %    ylabel('Probability')
    title('')
    set(gca,'XLim',[0 0.2])
+   
+   h.ax  = gca;
 end

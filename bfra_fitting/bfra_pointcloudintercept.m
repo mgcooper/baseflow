@@ -2,7 +2,7 @@ function varargout = bfra_pointcloudintercept(q,dqdt,bhat,varargin)
 %bfra_pointcloudintercept estimate parameter 'a' from the point cloud intercept
 
 % input parsing
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 p=inputParser;
 p.FunctionName='bfra_pointcloudintercept';
 addRequired(p,'q',@(x)isnumeric(x));
@@ -18,8 +18,7 @@ taumask = p.Results.taumask;
 method = p.Results.method;
 qtl = p.Results.qtl;
 bci = p.Results.bci;
-
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
 switch method
    case 'median'

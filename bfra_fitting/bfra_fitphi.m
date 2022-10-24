@@ -2,7 +2,7 @@ function [phi,solns,desc] = bfra_fitphi(a1,a2,b2,A,D,L,varargin)
 %BFRA_FITPHI estimates drainable porosity phi using an early-time and
 %late-time solution. input 'soln' is the early-time
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.StructExpand = false;
 p.FunctionName = 'bfra_fitphi';
@@ -20,7 +20,7 @@ p.addParameter('soln2','Rupp and Selker, 2005',@(x)ischar(x));
 p.parseMagically('caller');
 soln1 = p.Results.soln1;
 soln2 = p.Results.soln2;
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % b1  = early-time b (not needed for any solutions but assumed)
 % b2  = late-time b
 % a1  = early-time a
@@ -61,7 +61,7 @@ soln2 = p.Results.soln2;
 % the two soln options dictate the early-time expression for 'a'. the
 % late-time value is dictated by 'blate', but warn the user in case
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
 % parse the soln options
    [solns,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);

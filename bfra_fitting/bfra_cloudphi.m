@@ -1,6 +1,6 @@
 function [phi,a] = bfra_cloudphi(q,dqdt,A,D,L,varargin)
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.StructExpand = false;
 p.FunctionName = 'bfra_cloudphi';
@@ -16,10 +16,11 @@ p.addParameter('theta',0,@(x)isnumeric(x));
 p.addParameter('isflat',true,@(x)islogical(x));
 p.addParameter('dispfit',false,@(x)islogical(x));
 p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
 % constrain the late-time line to pass through the centroid of {tau>tau0}
-ab    = bfra_fitab(q,dqdt,'method','mean','mask',mask,'order',blate);
+% ab    = bfra_fitab(q,dqdt,'method','mean','mask',mask,'order',blate);
+ab    = bfra_fitab(q,dqdt,'method','median','mask',mask,'order',blate);
 ab    = [ab.a ab.b];
 h     = bfra_pointcloud(q,dqdt,'blate',blate,'userab',ab,'mask',mask,  ...
          'reflines',{'early','userfit'},'reflabels',true);

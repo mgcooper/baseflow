@@ -3,7 +3,7 @@ function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
 
 %BFRA_FIT estimates the recession coefficient (wrapper around bfra_fitab)
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 %   Inputs:
 %               q       = discharge timeseries
 %               dqdt    = dQ/dt, t = time
@@ -11,7 +11,7 @@ function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
 %               order   = power law exponent
 %   
 %   Outputs:    K
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    warning off
 
