@@ -55,10 +55,10 @@ plottype = p.Results.plottype;
       case 'PD'
          % send back the ProbabilityDistribution object
          Fit = PD;
-      case {'mean','avg','mu'}
+      case 'mean'
          % send back the mean
          Fit = PD.mean;
-      case {'std','stdv'}
+      case 'std'
          % send back the mean
          Fit = PD.std;
       case 'median'

@@ -1,7 +1,17 @@
 function [x,y,logx,logy,weights,success] = bfra_prepfits(q,dqdt,varargin)
 %BFRA_PREPFITS preps q and -dq/dt for event-scale fitting
+% Required inputs:
+%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%  dqdt        =  discharge rate of change (L T^-2)
+% 
+% Optional inputs:
+%  weights  =  nx1 double of weights for the fitting algorithm
+%  mask     =  nx1 logical mask to exclude values from fitting
+% 
+%  note: dqdt comes in as its actual value i.e. negative
+% 
+%  See also: fitab
 
-% note: dqdt comes in as its actual value i.e. negative
 %-------------------------------------------------------------------------------
    p = MipInputParser;
    p.addRequired('q',                           @(x)isnumeric(x)  );

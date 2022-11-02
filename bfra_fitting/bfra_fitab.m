@@ -2,13 +2,13 @@ function [Fit,ok] = bfra_fitab(q,dqdt,method,varargin)
 %BFRA_FITAB fits -dq/dt = aQ^b to estimate parameters a and b
 % 
 % Required inputs:
-%  q        =  nx1 double of discharge data (L T^-1)
-%  dqdt     =  nx1 double of discharge rate of change (L T^-2)
+%  q        =  vector double of discharge data (L T^-1)
+%  dqdt     =  vector double of discharge rate of change (L T^-2)
 %  method   =  char indicating the fitting method
 % 
 % Optional inputs:
-%  weights  =  nx1 double of weights for the fitting algorithm
-%  mask     =  nx1 logical mask to exclude values from fitting
+%  weights  =  vector double of weights for the fitting algorithm
+%  mask     =  vector logical mask to exclude values from fitting
 %  order    =  scalar, exponent in -dq/dt = aQ^b 
 %  refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
 %  quantile =  scalar double, quantile used if 'method' == 'qtl' (quantile regression)
@@ -35,8 +35,7 @@ p.addParameter('refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
 p.addParameter('Nboot',    100,              @(x)isnumeric(x)     );
 p.addParameter('plotfit',  false,            @(x)islogical(x)     );
 p.addParameter('fitopts',  struct(),         @(x)isstruct(x)      );
-p.parseMagically('caller');
-
+p.parseMagically('caller');         
 
 weights  = p.Results.weights;
 order    = p.Results.order;

@@ -1,6 +1,13 @@
 function opts = bfra_defaultopts(type)
 %BFRA_DEFAULTOPTS set default bfra algorithm options for type 'events' or
 %'fits'
+% 
+% Required inputs:
+%  type = 'events' or 'fits' indicates whether to send back the default options
+%  for the event detection algorithm 'getfits' or the fitting algorithm
+%  'fitdqdt'
+% 
+%  See also getfits, fitdqdt
    
 % default bfra settings
 switch type

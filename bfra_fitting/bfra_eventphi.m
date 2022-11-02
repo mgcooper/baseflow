@@ -29,12 +29,12 @@ p.addRequired('A',@(x)isnumeric(x));
 p.addRequired('D',@(x)isnumeric(x));
 p.addRequired('L',@(x)isnumeric(x));
 p.addRequired('blate',@(x)isnumeric(x));
+p.addParameter('method',@(x)ischar(x));
 p.addParameter('refqtls',[0.50 0.50],@(x)isnumeric(x));
-p.addParameter('soln1','',@(x)ischar(x));
-p.addParameter('soln2','',@(x)ischar(x));
 p.addParameter('theta',0,@(x)isnumeric(x));
 p.addParameter('isflat',true,@(x)islogical(x));
-p.addParameter('usefits',false,@(x)islogical(x));
+p.addParameter('soln1','',@(x)ischar(x));
+p.addParameter('soln2','',@(x)ischar(x));
 p.parseMagically('caller');
 %-------------------------------------------------------------------------------
 

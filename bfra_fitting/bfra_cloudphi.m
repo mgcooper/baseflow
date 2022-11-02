@@ -46,6 +46,7 @@ p.addParameter('soln1','RS05',@(x)ischar(x));
 p.addParameter('soln2','RS05',@(x)ischar(x));
 p.addParameter('dispfit',false,@(x)islogical(x));
 p.parseMagically('caller');
+
 %-------------------------------------------------------------------------------
 
 % note: the method used for ahat = pointcloudintercept should also be used here

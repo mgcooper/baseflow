@@ -1,8 +1,7 @@
 function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
                         eventtag,fittag,fitcount,fitopts,K)
-
 %BFRA_FIT estimates the recession coefficient (wrapper around bfra_fitab)
-
+% 
 %-------------------------------------------------------------------------------
 %   Inputs:
 %               q       = discharge timeseries
@@ -16,7 +15,7 @@ function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
    warning off
 
 % fit a/b
-   [Fit,ok] = bfra_fitab(q,dqdt,'method',method,'fitopts',fitopts);
+   [Fit,ok] = bfra_fitab(q,dqdt,method,'fitopts',fitopts);
    
 % check for fitting failure
 if ok == false

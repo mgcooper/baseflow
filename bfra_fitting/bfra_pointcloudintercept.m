@@ -1,11 +1,19 @@
 function varargout = bfra_pointcloudintercept(q,dqdt,bhat,method,varargin)
 %bfra_pointcloudintercept estimate parameter 'a' from the point cloud intercept
 % 
+% Required inputs:
+%  q        =  vector double of discharge data (L T^-1)
+%  dqdt     =  vector double of discharge rate of change (L T^-2)
+%  bhat     =  late-time b parameter in -dqdt = aq^b (dimensionless)
+%  method   =  char indicating the fitting method
+% 
+% Optional inputs:
+%  mask     =  logical mask to exclude data
+%  refqtls  =  reference quantiles that together define a pivot point through
+%              which the straight line must pass. use with method 'envelope'.
 % 
 % 
-% 
-% 
-% see also bfra_fitab
+% See also: bfra_fitab
 
 % input parsing
 %-------------------------------------------------------------------------------
