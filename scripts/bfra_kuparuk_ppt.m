@@ -5,9 +5,9 @@ clean
 
 % set the main options
 %----------------------
-savedata    = true;
+savedata    = false;
 getfits     = false;
-fitdata     = true;
+fitdata     = false;
 plotfigs    = true;
 sitename    = bfra_basinname('KUPARUK R NR DEADHORSE AK');
 casenames   = {'coop','lter','both'};   % 'coop', 'lter', or 'both'
@@ -148,12 +148,12 @@ end
 % 
 %       % fit phi
 %       %---------
-%       phid(:,1)   = bfra_eventphi(K,Fits,A,D,L,'blate',1);
-%       phid(:,2)   = bfra_eventphi(K,Fits,A,D,L,'blate',3/2);
+%       phid(:,1)   = bfra_eventphi(K,Fits,A,D,L,1);
+%       phid(:,2)   = bfra_eventphi(K,Fits,A,D,L,3/2);
 %       phid        = vertcat(phid(:,1),phid(:,2));
 %       phi         = bfra_fitdistphi(phid,'cdf','mu');
 % 
-%       % phid  = bfra_eventphi(K,Fits,A,D,L,'blate',TauFit.b);
+%       % phid  = bfra_eventphi(K,Fits,A,D,L,TauFit.b);
 %       % phi   = bfra_fitdistphi(phidist(:,3),'cdf');
 % 
 %       % fit a
