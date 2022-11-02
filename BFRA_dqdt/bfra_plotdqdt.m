@@ -1,12 +1,22 @@
 function [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt,varargin)
 %BFRA_PLOTDQDT Plots the log-log q vs dq/dt with options to select the
 %portion of data to fit and then fits the data
-%   Syntax:
+% 
+%  Syntax:
 %     [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt)
 %     [hFits,Picks,Fits] = bfra_plotdqdt(_,'fitmethod',fitmethod)
 %     [hFits,Picks,Fits] = bfra_plotdqdt(_,'pickmethod',pickmethod)
 %     [hFits,Picks,Fits] = bfra_plotdqdt(_,'weights',weights)
 %     [hFits,Picks,Fits] = bfra_plotdqdt(_,'useax',axis_object)
+% 
+%  Required inputs:
+%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%  dqdt        =  discharge rate of change (L T^-2)
+% 
+%  Optional name-value pairs:
+% 
+% 
+%  See also getdqdt, fitdqdt
 
 % NOTE: now that pickFitter calls bfra_fitab, this function does everything
 % that an official workflow would do, i think, and therefore should be
@@ -208,11 +218,11 @@ function Fits = pickFitter(Picks,fitmethod)
       switch fitmethod
          
          case {'ols','qtl','nls','mle'}
-            Fit   = bfra_fitab(q,dqdt,'method','nls');
+            Fit   = bfra_fitab(q,dqdt,'nls');
          case 'comp'
-            FitO  = bfra_fitab(q,dqdt,'weights',weights,'method','ols');
-            FitQ  = bfra_fitab(q,dqdt,'weights',weights,'method','qtl');
-            FitN  = bfra_fitab(q,dqdt,'weights',weights,'method','nls');
+            FitO  = bfra_fitab(q,dqdt,'ols','weights',weights);
+            FitQ  = bfra_fitab(q,dqdt,'qtl','weights',weights);
+            FitN  = bfra_fitab(q,dqdt,'nls','weights',weights);
             
             Fits.abqtl(n,:)   = FitO.ab;
             Fits.abnls(n,:)   = FitN.ab;

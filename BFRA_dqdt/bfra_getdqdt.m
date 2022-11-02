@@ -1,10 +1,26 @@
 function [q,dqdt,dt,tq,rq,varargout] = bfra_getdqdt(T,Q,R,derivmethod,varargin)
-%BFRA_GETDQDT Numerical estimation of the time derivative of
-%discharge dQ/dt using variable time stepping, exponential time
-%stepping, or one of six standard numerical derivatives given in
-%Thomas et al. 2015, Table 2
-
-% NOTE: this accepts pre-selected events, not raw timeseries. Use
+%BFRA_GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
+%using variable time stepping, exponential time stepping, or one of six
+%standard numerical derivatives given in Thomas et al. 2015, Table 2
+% 
+%  Syntax:
+%     [q,dqdt,dt,tq,rq] = bfra_getdqdt(T,Q,R,derivmethod)
+%     [q,dqdt,dt,tq,rq] = bfra_getdqdt(_,'fitwindow',fitwindow)
+%     [q,dqdt,dt,tq,rq] = bfra_getdqdt(_,'fitwindow',fitmethod)
+%     [q,dqdt,dt,tq,rq] = bfra_getdqdt(_,'pickmethod',pickmethod)
+%     [q,dqdt,dt,tq,rq] = bfra_getdqdt(_,'ax',axis_object)
+% 
+%  Required inputs:
+%     q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%     dqdt        =  discharge rate of change (L T^-2)
+% 
+%  Optional name-value pairs:
+% 
+% 
+% 
+%  See also getdqdt, fitdqdt
+% 
+% Tip: this accepts pre-selected events, not raw timeseries. Use
 % bfra_getevents to pick Events, then bfra_fitdQdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
