@@ -74,8 +74,8 @@ end
 
 % fit phi
 %---------
-phid(:,1)   = bfra_eventphi(K,Fits,A,D,L,'blate',1);
-phid(:,2)   = bfra_eventphi(K,Fits,A,D,L,'blate',3/2);
+phid(:,1)   = bfra_eventphi(K,Fits,A,D,L,1);
+phid(:,2)   = bfra_eventphi(K,Fits,A,D,L,3/2);
 phid        = vertcat(phid(:,1),phid(:,2));
 
 if plotfit == true
@@ -84,7 +84,7 @@ else
    phi = bfra_fitdistphi(phid,'mu');
 end
 
-% phid   = bfra_eventphi(K,Fits,A,D,L,'blate',TauFit.b);
+% phid   = bfra_eventphi(K,Fits,A,D,L,TauFit.b);
 % phi    = bfra_fitdistphi(phid,'mu','cdf'); 
 % % % % % % % % % % % % % % % % % % % % % % % % % % 
 

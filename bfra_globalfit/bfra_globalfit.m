@@ -13,7 +13,7 @@ function GlobalFit = bfra_globalfit(K,Events,Fits,Meta,varargin)
 % 
 % Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
-% Inputs:
+% Required inputs:
 %  K, Events, Fits - output of bfra_getevents and bfra_dqdt
 %  Meta - struct containing fields area, D0, and L (see below)
 %  AnnualFlow - timetable or table of annual flow containing field Qcmd which
@@ -27,19 +27,24 @@ function GlobalFit = bfra_globalfit(K,Events,Fits,Meta,varargin)
 p                 = inputParser;
 p.FunctionName    = 'bfra_globalfit';
 p.PartialMatching = true;
-addRequired(p,    'K',                    @(x)istable(x)             );
-addRequired(p,    'Events',               @(x)isstruct(x)            );
-addRequired(p,    'Fits',                 @(x)isstruct(x)            );
-addRequired(p,    'Meta',                 @(x)isstruct(x)|istable(x) );
-addParameter(p,   'plotfits',    false,   @(x)islogical(x)           );
-addParameter(p,   'bootfit',     false,   @(x)islogical(x)           );
-addParameter(p,   'nreps',       1000,    @(x)isnumeric(x)           );
+addRequired(p,    'K',                       @(x)istable(x)             );
+addRequired(p,    'Events',                  @(x)isstruct(x)            );
+addRequired(p,    'Fits',                    @(x)isstruct(x)            );
+addRequired(p,    'Meta',                    @(x)isstruct(x)|istable(x) );
+addParameter(p,   'plotfits', false,         @(x)islogical(x)           );
+addParameter(p,   'bootfit',  false,         @(x)islogical(x)           );
+addParameter(p,   'nreps',    1000,          @(x)isnumeric(x)           );
+addParameter(p,   'phimethod','pointcloud',  @(x)ischar(x)              );
+addParameter(p,   'refqtls',  [0.50 0.50],   @(x)isnumeric(x)           );
 
 parse(p,K,Events,Fits,Meta,varargin{:});
 
-plotfits = p.Results.plotfits;
-bootfit = p.Results.bootfit;
-nreps = p.Results.nreps;
+plotfits    = p.Results.plotfits;
+bootfit     = p.Results.bootfit;
+nreps       = p.Results.nreps;
+phimethod   = p.Results.phimethod;
+refqtls     = p.Results.refqtls;
+
 %-------------------------------------------------------------------------------
 
 % take values out of the data structures that are needed
@@ -51,25 +56,8 @@ tf = Meta.isflat;    % use the horizontal or sloped aquifer solution
 
 % fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 %---------------
-[tau,q,dqdt]   = bfra_eventtau(K,Events,Fits,'usefits',false);
-TauFit         = bfra_plfitb(tau,'plot',plotfits,'boot',bootfit,'nreps',nreps);
-
-
-% fit phi
-%---------
-phid(:,1)   = bfra_eventphi(K,Fits,A,D,L,'blate',1);
-phid(:,2)   = bfra_eventphi(K,Fits,A,D,L,'blate',3/2);
-phid        = vertcat(phid(:,1),phid(:,2));
-
-if plotfits == true
-   phi = bfra_fitdistphi(phid,'mu','cdf');
-else
-   phi = bfra_fitdistphi(phid,'mu');
-end
-
-% phid   = bfra_eventphi(K,Fits,A,D,L,'blate',TauFit.b);
-% phi    = bfra_fitdistphi(phid,'mu','cdf'); 
-% % % % % % % % % % % % % % % % % % % % % % % % % % 
+[tau,q,dqdt,tags] = bfra_eventtau(K,Events,Fits,'usefits',false);
+TauFit = bfra_plfitb(tau,'plot',plotfits,'boot',bootfit,'nreps',nreps);
 
 
 % parameters needed for next steps
@@ -78,36 +66,31 @@ bhat     = TauFit.b;
 bhatL    = TauFit.b_L;
 bhatH    = TauFit.b_H;
 tau0     = TauFit.tau0;
+tauhat   = TauFit.tau;
 itau     = TauFit.taumask;
 
-% =========================================================
 
-% here to test this method given new methods to compute ahat ... need to
-% confirm eventphi, cloudphi, and ahat are computed using the same mehtod
+% fit phi
+%---------
+switch phimethod 
+   case 'distfit'
+      phid = bfra_eventphi(K,Fits,A,D,L,bhat,'refqtls',refqtls);
+      phi = bfra_fitdistphi(phid,'mu','cdf');
+   case 'pointcloud'
+      phi = bfra_cloudphi(q,dqdt,bhat,A,D,L,'envelope','refqtls',refqtls,'mask',itau);
+end
 
-% method 1: point cloud b=3 and b=1,1.5, and b=bhat
-%----------
-
-% phic(1) = bfra_cloudphi(q,dqdt,A,D,L,'blate',1,'mask',itau,'disp',false);
-% phic(2) = bfra_cloudphi(q,dqdt,A,D,L,'blate',3/2,'mask',itau,'disp',false);
-% phic(3) = bfra_cloudphi(q,dqdt,A,D,L,'blate',bhat,'mask',itau,'disp',false);
-% 
-% [mean(phi) std(phi)] % mean +/- 1 std = 0.07 pm 0.03
-
-% =========================================================
 
 % fit a
-%-------
-[ahat,ahatLH,xbar,ybar] = bfra_pointcloudintercept(               ...
-                           q,dqdt,bhat,'taumask',itau,            ...
-                           'method','median','bci',[bhatL bhatH]  ...
-                           );
-
+% -------
+[ahat,ahatLH,xbar,ybar] =  bfra_pointcloudintercept(q,dqdt,bhat,'envelope',  ...
+                           'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
+                        
 % fit Q0 and Qhat
 %-----------------
-Q0    = (ahat*tau0)^(1/(1-bhat));   % m3/d
-Qhat  = Q0*(bhat-2)/(bhat-3);       % m3/d
-u     = 'm$^3$ d$^{-1}$';
+u = 'm$^3$ d$^{-1}$';
+Qhat  = (ahat*tauhat)^(1/(1-bhat));
+Q0    = Qhat*(3-bhat)/(2-bhat);
 fdc   = fdcurve(Q(Q>0),'refpoints',[Q0 Qhat],'units',u,'plotcurve',plotfits);
 pQ0   = fdc.fref(1);
 pQhat = fdc.fref(2);
@@ -116,7 +99,6 @@ pQhat = fdc.fref(2);
 % are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units
 % d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we get:
 % (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1
-
 
 % plot the pointcloud if requested
 %----------------------------------
@@ -140,6 +122,7 @@ GlobalFit      = TauFit;
 GlobalFit.phi  = phi;
 GlobalFit.q    = q;
 GlobalFit.dqdt = dqdt;
+GlobalFit.tags = tags;
 GlobalFit.a    = ahat;
 GlobalFit.a_L  = ahatLH(1);
 GlobalFit.a_H  = ahatLH(2);
