@@ -1,4 +1,23 @@
 function h = bfra_plplot(x,xmin,alpha,varargin)
+%BFRA_PLPLOT plots the power law fit to the P(tau) pareto distribution
+%
+% Required inputs:
+%  x     = vector double of data that follows an untruncated Pareto distribution 
+%  xmin  = scalar double indicating the lower bound of the distribution
+%  alpha = scalar double indicating the exponent of the distribution
+%
+% Optional inputs:
+%  alphaci  = 2x1 double of lower and upper confidence intervals for alpha
+%  xminci   = 2x1 double of lower and upper confidence intervals for xmin
+%  varsym   = char in latex format representing the data symbol, used for plot
+%  trimline = logical scalar indicating whether to 'trim' the fitted line
+%              similar to 'axis tight' option (b/c power law data is often
+%              covering many orders of magnitude)
+%  labelplot = logical scalar indicating whether to add a label showing the
+%              value of xmin and the expected value of x
+%  ax       =  graphic axis to plot into
+% 
+% See also: plfitb, eventtau
 
 %-------------------------------------------------------------------------------
 p               = inputParser;
@@ -12,17 +31,18 @@ addRequired(   p, 'alpha',                      @(x)isnumeric(x)     );
 addParameter(  p, 'alphaci',        nan,        @(x)isnumeric(x)     );
 addParameter(  p, 'xminci',         nan,        @(x)isnumeric(x)     );
 addParameter(  p, 'varsym',         '\tau',     @(x)ischar(x)        );
-addParameter(  p, 'suppliedaxis',   gca,        @(x)isaxis(x)        );
 addParameter(  p, 'trimline',       false,      @(x)islogical(x)     );
 addParameter(  p, 'labelplot',      true,       @(x)islogical(x)     );
+addParameter(  p, 'ax',             gca,        @(x)isaxis(x)        );
 
 parse(p,x,xmin,alpha,varargin{:});
-alphaci  = p.Results.alphaci;
-xminci   = p.Results.xminci;
-varsym   = p.Results.varsym;
-ax       = p.Results.suppliedaxis;
-trimline = p.Results.trimline;
-labelplot = p.Results.labelplot;
+
+alphaci     = p.Results.alphaci;
+xminci      = p.Results.xminci;
+varsym      = p.Results.varsym;
+trimline    = p.Results.trimline;
+labelplot   = p.Results.labelplot;
+ax          = p.Results.ax;
 %-------------------------------------------------------------------------------
    
 % get the complementary cumulative distribution function
