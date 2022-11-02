@@ -29,6 +29,9 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
    % rq, but that's only implemented for ETS, so return empty otherwise
    r       = [];
 
+   % convert to columns (confirmed vectors on input)
+   T = T(:); Q = Q(:); R = R(:);
+   
    % initialize the approximations for dq/dt and Q (and dq and dt)
    q       = nan(size(Q));
    dq      = nan(size(Q));
