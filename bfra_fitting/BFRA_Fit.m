@@ -6,10 +6,22 @@ function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
 %   Inputs:
 %               q       = discharge timeseries
 %               dqdt    = dQ/dt, t = time
+%               deriv   = derivative method
 %               method  = 'ols','mle','qtl','mean','median'
 %               order   = power law exponent
+%               station = char used to designate the discharge station
+%               eventdate = datenum, datetime, or any other date
+%               eventtag = scalar that numbers events from 1:numevents
+%               fittag = scalar that numbers fits within events
+%               fitcount = running count of all fits b/c we don't know ahead of
+%                          time how many events will be fit but we need to
+%                          index into the table K
+%               fitopts = struct of fitting options to pass to fitab (not
+%                          implemented)
+%               K       = pre-allocated table for storing the output
 %   
-%   Outputs:    K
+%   Outputs:    K = table of computed values including a,b,tau,S, and
+%              confidence intervals
 %-------------------------------------------------------------------------------
 
    warning off
