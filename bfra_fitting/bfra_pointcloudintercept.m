@@ -19,6 +19,7 @@ function varargout = bfra_pointcloudintercept(q,dqdt,bhat,method,varargin)
 %-------------------------------------------------------------------------------
 p=inputParser;
 p.FunctionName='bfra_pointcloudintercept';
+p.PartialMatching = true;
 addRequired(p,'q',@(x)isnumeric(x));
 addRequired(p,'dqdt',@(x)isnumeric(x));
 addRequired(p,'bhat',@(x)isnumeric(x));
@@ -28,6 +29,7 @@ addParameter(p,'refqtls',[0.5 0.5],@(x)isnumeric(x));
 addParameter(p,'bci',nan,@(x)isnumeric(x));
 parse(p,q,dqdt,bhat,method,varargin{:});
 
+method = p.Results.method;
 mask = p.Results.mask;
 qtls = p.Results.refqtls;
 bci = p.Results.bci;
