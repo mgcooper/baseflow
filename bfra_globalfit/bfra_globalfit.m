@@ -88,12 +88,7 @@ end
                         
 % fit Q0 and Qhat
 %-----------------
-u = 'm$^3$ d$^{-1}$';
-Qhat  = (ahat*tauhat)^(1/(1-bhat));
-Q0    = Qhat*(3-bhat)/(2-bhat);
-fdc   = fdcurve(Q(Q>0),'refpoints',[Q0 Qhat],'units',u,'plotcurve',plotfits);
-pQ0   = fdc.fref(1);
-pQhat = fdc.fref(2);
+[Qexp,Q0,pQexp,pQ0] = bfra_expectedQ(ahat,bhat,tauhat);
 
 % note on units: ahat is estimated from the point cloud. the dimensions of ahat
 % are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units
@@ -129,8 +124,8 @@ GlobalFit.a_H  = ahatLH(2);
 GlobalFit.xbar = xbar;
 GlobalFit.ybar = ybar;
 GlobalFit.Q0   = Q0;
-GlobalFit.Qhat = Qhat;
-GlobalFit.pQhat = pQhat;
+GlobalFit.Qhat = Qexp;
+GlobalFit.pQhat = pQexp;
 GlobalFit.pQ0  = pQ0;
 
 

@@ -57,6 +57,18 @@
          {"name":"aggfunc",   "kind": "namevalue", "type": ["char", "choices={'mean','median'}"],"default":"'median'","purpose":"Option"}
       ]
    },
+   "bfra_expectedQ":
+   {
+      "inputs":
+      [
+         {"name":"a",      "kind": "required",  "type": ["scalar","double"]},
+         {"name":"b",      "kind": "required",  "type": ["scalar","double"]},
+         {"name":"tau",    "kind": "required",  "type": ["scalar","double"]},
+         {"name":"qtls",   "kind": "ordered",   "type": ["char","choices={'qtls'}"],"purpose":"Option"},
+         {"name":"Q",      "kind": "ordered",   "type": ["vector","double"]},
+         {"name":"plotfit","kind": "ordered",   "type": ["char","choices={'plotfit'}"],"purpose":"Option"}
+      ]
+   },
    "bfra_fitab":
    {
       "inputs":
