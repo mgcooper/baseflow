@@ -27,25 +27,34 @@ function [phi,a] = bfra_cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 %  See also eventphi, fitphi, fitdistphi
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p = inputParser;
 p.StructExpand = false;
 p.PartialMatching = true;
 p.FunctionName = 'bfra_cloudphi';
-p.addRequired('q',@(x)isnumeric(x));
-p.addRequired('dqdt',@(x)isnumeric(x));
-p.addRequired('blate',@(x)isnumeric(x));
-p.addRequired('A',@(x)isnumeric(x));
-p.addRequired('D',@(x)isnumeric(x));
-p.addRequired('L',@(x)isnumeric(x));
-p.addRequired('method',@(x)ischar(x));
-p.addParameter('refqtls',[0.5 0.5],@(x)isnumeric(x));
-p.addParameter('mask',nan,@(x)islogical(x));
-p.addParameter('theta',0,@(x)isnumeric(x));
-p.addParameter('isflat',true,@(x)islogical(x));
-p.addParameter('soln1','RS05',@(x)ischar(x));
-p.addParameter('soln2','RS05',@(x)ischar(x));
-p.addParameter('dispfit',false,@(x)islogical(x));
-p.parseMagically('caller');
+addRequired(p,'q',@(x)isnumeric(x));
+addRequired(p,'dqdt',@(x)isnumeric(x));
+addRequired(p,'blate',@(x)isnumeric(x));
+addRequired(p,'A',@(x)isnumeric(x));
+addRequired(p,'D',@(x)isnumeric(x));
+addRequired(p,'L',@(x)isnumeric(x));
+addRequired(p,'method',@(x)ischar(x));
+addParameter(p,'refqtls',[0.5 0.5],@(x)isnumeric(x));
+addParameter(p,'mask',nan,@(x)islogical(x));
+addParameter(p,'theta',0,@(x)isnumeric(x));
+addParameter(p,'isflat',true,@(x)islogical(x));
+addParameter(p,'soln1','RS05',@(x)ischar(x));
+addParameter(p,'soln2','RS05',@(x)ischar(x));
+addParameter(p,'dispfit',false,@(x)islogical(x));
+
+parse(p,q,dqdt,blate,A,D,L,method,varargin{:});
+
+refqtls  = p.Results.refqtls;
+mask     = p.Results.mask;
+theta    = p.Results.theta;
+isflat   = p.Results.isflat;
+soln1    = p.Results.soln1;
+soln2    = p.Results.soln2;
+dispfit  = p.Results.dispfit;
 
 %-------------------------------------------------------------------------------
 
@@ -82,54 +91,3 @@ bfra_pointcloud(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
 hdum  = plot(0,0,'Color','none','HandleVisibility','off');
 txt   = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
 legend(hdum,txt,'Interpreter','latex','Location','nw','box','off');
-
-
-
-% constrain the late-time line to pass through the centroid of {tau>tau0}
-% ab    = bfra_fitab(q,dqdt,'method','median','mask',mask,'order',blate);
-% ab    = [ab.a ab.b];
-
-% a1 = bfra_pointcloudintercept(q,dqdt,3,'envelope','refqtls',[0.95 0.95]);
-% a2 = bfra_pointcloudintercept(q,dqdt,b2,method,'refqtls',refqtls,'mask',mask);
-
-% the old method to get a1
-% h = bfra_pointcloud(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
-%             {'early','userfit'},'userab',[a2 blate],'reflabels',true);
-% a1 = h.ab.early(1);
-
-% % older option to put the line through a ref point
-% if ~isnan(refpoints)
-%    a2    = h.ab.late(1);
-%    b2    = h.ab.late(2);
-% else
-%    a2    = h.ab.userfit(1);
-%    b2    = h.ab.userfit(2);
-% end
-% % % % % % %  
-
-
-% % % % % % % %  this is the method used in eventphi
-% [~,ab1] = bfra_refline(q,-dqdt,'refslope',3,'plot',false,'refline','phifit');
-% a1 = ab1(1);
-% a2 = bfra_pointcloudintercept(q,dqdt,blate,method,'mask',mask,'refqtls',refqtls);
-% b2 = blate;
-% 
-% % % this calls reflineintercept and puts the late-time line through the 5th prctl
-% % [~,ab2] = bfra_refline(q(mask),-dqdt(mask),'refslope',blate,'plot',false,'refline','phifit');
-% % a2 = ab2(1);
-% % b2 = ab2(2);
-
-% the reason this gives a different answer is because the call to refline
-% doesn't use the 'phifit' option and instead it uses the refpoint which uses
-% the median of the q value and the refpont for the y value, whereas the phifit
-% method calls reflineintercept. note this agrees with pointcloudintercept for
-% that same reason (pointcloudintercept uses the xmedian / yrefpoint method
-
-% refpt1 = quantile(-dqdt,0.95);
-% refpt2 = quantile(-dqdt(mask),0.05);
-% [~,ab1] = bfra_refline(q,-dqdt,'refslope',3,'plot',false,'refpoint',refpt1);
-% [~,ab2] = bfra_refline(q(mask),-dqdt(mask),'refslope',blate,'plot',false,'refpoint',refpt2);
-
-% % % % % % %  
-
-
