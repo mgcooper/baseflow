@@ -1,6 +1,28 @@
 function out = bfra_pointcloud(q,dqdt,varargin)
 %BFRA_POINTCLOUD plots a 'point cloud' diagram to estimate aquifer parameters
-%from recession flow data
+%from recession flow data.
+%
+% Required inputs:
+%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%  dqdt        =  discharge rate of change (L T^-2)
+%
+% Optional name-value pairs
+%  mask        =  vector logical mask to exclude values from fitting
+%  reflines    =  cell array of chars indicating what type of reflines to plot
+%  reflabels   =  logical indicating whether to add labels
+%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
+%  userab      =  2x1 double indicating a user-defined intercept,slope pair
+%  precision   =  scalar double indicating the precision in the x data, used to
+%                 compute the 'lower envelope'
+%  timestep    =  scalar double indicating the timestep of the x data, used to
+%                 compute the 'lower envelope'
+%  addlegend   =  logical indicating whether to add a legend or not
+%  usertext    =  char that gets added to the legend if refline 'userfit' (to
+%                 indicate what is being plotted, maybe a custom user model)
+%  rain        =  vector double of rainfall (mm/time)
+%  ax          =  graphic axis to plot into
+% 
+% See also fitab, plotdqdt
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
@@ -8,17 +30,18 @@ p.FunctionName = 'bfra_pointcloud';
 p.addRequired('q',@(x)isnumeric(x));
 p.addRequired('dqdt',@(x)isnumeric(x));
 p.addParameter('mask',false,@(x)islogical(x));
-p.addParameter('reflines',{'none'},@(x)iscell(x));
+p.addParameter('reflines',{'bestfit'},@(x)iscell(x));
 p.addParameter('reflabels',false,@(x)islogical(x)&isscalar(x));
-p.addParameter('refpoints',nan,@(x)isnumeric(x));
 p.addParameter('blate',1,@(x)isnumeric(x));
 p.addParameter('userab',[1 1],@(x)isnumeric(x));
 p.addParameter('precision',1,@(x)isnumeric(x));
 p.addParameter('timestep',1,@(x)isnumeric(x));
-p.addParameter('addlegend',false,@(x)islogical(x));
-p.addParameter('ax','none',@(x)isaxis(x)|ischar(x));
+p.addParameter('addlegend',true,@(x)islogical(x));
+p.addParameter('usertext','',@(x)ischar(x));
 p.addParameter('rain',nan,@(x)isnumeric(x));
+p.addParameter('ax','none',@(x)isaxis(x)|ischar(x));
 p.parseMagically('caller');
+reflines = p.Results.reflines;
 
 % Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
 %-------------------------------------------------------------------------------
@@ -58,9 +81,9 @@ p.parseMagically('caller');
          case 'early'
             [h(n),ab(n,:)] =  bfra_refline(                 ...
                               q,-dqdt,                      ...
+                              'refline','earlytime',        ...
                               'refslope',3,                 ...
                               'labels',reflabels,           ...
-                              'refpoint',max(refpoints),    ...
                               'mask',mask                   ... % TEST
                               );
             
@@ -70,9 +93,9 @@ p.parseMagically('caller');
          case 'late'
             [h(n),ab(n,:)] =  bfra_refline(                 ...
                               q,-dqdt,                      ...
+                              'refline','latetime',         ...
                               'refslope',blate,             ...
                               'labels',reflabels,           ...
-                              'refpoint',min(refpoints),    ...
                               'mask',mask                   ... % TEST
                               );
             
@@ -100,7 +123,6 @@ p.parseMagically('caller');
          case 'bestfit'
             [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refline','bestfit');
             h(n).LineWidth = 2;     % 1
-            h(n).LineStyle = ':';   % '--'
             
             % dummy plot to make space in legend
             hdum = plot(0,0,'Color','none');
@@ -134,8 +156,36 @@ p.parseMagically('caller');
    % leaving this out for now   
    if addlegend == true
       
-      if any(ismember(reflines,{'bestfit','userfit'}))
-         ibf   = ismember(reflines,{'bestfit','userfit'});
+      % check if both userfit and bestfit are requested
+      fitcheck = {'bestfit','userfit'};
+      if all(ismember(fitcheck,reflines))
+
+         % put them both in the legend
+         ibf   = strcmp(reflines,fitcheck);
+         hleg  = h(ibf);
+         
+         ibest = strcmp(reflines,'bestfit');
+         iuser = strcmp(reflines,'userfit');
+         tbest = [bfra_aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
+         tuser = [bfra_aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
+         % if user text provided, swap it out
+         if ~isempty(usertext)
+            tuser = [bfra_aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
+         end
+         ltext = {tbest; tuser};
+
+         % this would just put on in the legend
+         % % use bestfit for the legend
+         % ibf   = strcmp(reflines,'bestfit');
+         % hleg  = h(ibf);
+         % ltext = bfra_aQbString(ab(ibf,:),'printvalues',true);
+         % ltext = [ltext ' (NLS fit)'];
+         
+      % check if either userfit or bestfit are requested
+      elseif any(ismember(fitcheck,reflines))
+         
+         % use whichever one was requested
+         ibf   = ismember(reflines,fitcheck);
          hleg  = h(ibf);
          ltext = bfra_aQbString(ab(ibf,:),'printvalues',true);
          
@@ -144,6 +194,7 @@ p.parseMagically('caller');
          elseif ~any(ismember(reflines,'bestfit'))
             ltext = [ltext ' (MLE fit)'];
          end
+         
       end
       
       if isobject(hrain)
