@@ -24,6 +24,7 @@ validmethod = @(x)any(validatestring(x,methodlist));
 
 p = MipInputParser;
 p.StructExpand = false;
+p.PartialMatching = true;
 p.addRequired('q',                           @(x)isnumeric(x)     );
 p.addRequired('dqdt',                        @(x)isnumeric(x)     );
 p.addRequired('method',                      validmethod          );
@@ -519,7 +520,8 @@ end
 
 
 function [Fit,ok] = evalFit(ab,x,y,ci,ok)
-
+   
+   warning off % otherwise rsquare issues warning
 
    Fit.ab      =  ab;
 
@@ -543,6 +545,8 @@ function [Fit,ok] = evalFit(ab,x,y,ci,ok)
          ok    =  false;
       end
    
+   warning on
+      
 %    % any log-log regressions need the ci's transormed like this:
 %    aL      = exp(ci(1,1)); % 95% CI
 %    aH      = exp(ci(1,2));
