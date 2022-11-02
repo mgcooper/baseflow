@@ -1,4 +1,23 @@
-function [phi,a] = bfra_eventphi(K,Fits,A,D,L,varargin)
+function [phi,a] = bfra_eventphi(K,Fits,A,D,L,blate,varargin)
+%BFRA_EVENTPHI estimates drainable porosity phi from individual recession
+%events using the method of Troch, Troch, and Brutsaert, 1993.
+% 
+% Required inputs:
+%  K     =  table of fitted values of a, b, tau, for each event (output of BFRA_dqdt) 
+%  Fits  =  structure containing the fitted q/dqdt timeseries (output of BFRA_dqdt)
+%  A     =  basin area contributing to baseflow (L^2)
+%  D     =  saturated aquifer thickness (L)
+%  L     =  active stream length (L)
+%  blate =  late-time b parameter in -dqdt = aq^b (dimensionless)
+% 
+% Optional name-value inputs:
+%  theta    =  effective slope of basin contributing area
+%  isflat   =  logical flag indicating if horizontal or sloped aquifer
+%              solution is applicable
+%  soln1    =  optional early-time theoretical solution
+%  soln2    =  optional late-time theoretical solution
+% 
+% See also cloudphi, fitphi, fitdistphi
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
@@ -9,18 +28,21 @@ p.addRequired('Fits',@(x)isstruct(x));
 p.addRequired('A',@(x)isnumeric(x));
 p.addRequired('D',@(x)isnumeric(x));
 p.addRequired('L',@(x)isnumeric(x));
-p.addParameter('blate',1,@(x)isnumeric(x));
+p.addRequired('blate',@(x)isnumeric(x));
+p.addParameter('refqtls',[0.50 0.50],@(x)isnumeric(x));
 p.addParameter('soln1','',@(x)ischar(x));
 p.addParameter('soln2','',@(x)ischar(x));
-p.addParameter('usefits',false,@(x)islogical(x));
 p.addParameter('theta',0,@(x)isnumeric(x));
 p.addParameter('isflat',true,@(x)islogical(x));
+p.addParameter('usefits',false,@(x)islogical(x));
 p.parseMagically('caller');
 %-------------------------------------------------------------------------------
 
 warning off
 
 % take out the data and init the output
+b1          = 3;
+b2          = p.Results.blate; 
 q           = Fits.q;
 dqdt        = Fits.dqdt;
 tags        = Fits.eventTag;
@@ -40,21 +62,9 @@ for n = 1:numevents
       continue;
    end
       
-   % put a line of slope 3 and 1/1.5 through the point cloud. note that
-   % a in ab is returned as the transformed value i.e. exp(intercept)
-   [~,ab1] = bfra_refline(thisq,-thisdqdt,'refslope',3,'plot',false,'refline','phifit');
-   [~,ab2] = bfra_refline(thisq,-thisdqdt,'refslope',blate,'plot',false,'refline','phifit');
-
-%       % this method with bhat late time yields similar results as the b=1/b=1.5
-%       % combined method with the method above, which is equivalent to this
-%       % method but in bfra_refline change the late-time a estimate to use the
-%       % reflineintercept method.
-%       refpt1 = quantile(-thisdqdt,0.95);
-%       refpt2 = quantile(-thisdqdt,0.05);
-%       [~,ab1] = bfra_refline(thisq,-thisdqdt,'refslope',3,'plot',false,'refpoint',refpt1);
-%       [~,ab2] = bfra_refline(thisq,-thisdqdt,'refslope',blate,'plot',false,'refpoint',refpt2);
-
-   a1 = ab1(1); a2 = ab2(1); b2 = ab2(2);
+   % put a line of slope 3 and 1/1.5/bhat through the point cloud
+   a1 = bfra_pointcloudintercept(thisq,thisdqdt,b1,'envelope','refqtls',[0.95 0.95]);
+   a2 = bfra_pointcloudintercept(thisq,thisdqdt,b2,'envelope','refqtls',refqtls);
 
    % choose appropriate solutions
    if isempty(soln1) && isempty(soln2)
@@ -78,7 +88,7 @@ for n = 1:numevents
                                        'soln1',soln1,'soln2',soln2);
    end
 
-   a(n)     = a2;
+   a(n) = a2;
 end
 
 warning on
