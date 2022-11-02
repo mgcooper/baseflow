@@ -1,6 +1,24 @@
 function [phi,solns,desc] = bfra_fitphi(a1,a2,b2,A,D,L,varargin)
 %BFRA_FITPHI estimates drainable porosity phi using an early-time and
-%late-time solution. input 'soln' is the early-time
+%late-time solution. 
+% 
+% Required inputs:
+%  a1          =  early-time a in -dq/dt = aq^b
+%  a2          =  late-time a in -dq/dt = aq^b
+%  b2          =  late-time b
+%  A           =  basin area contributing to baseflow (L^2)
+%  D           =  saturated aquifer thickness (L)
+%  L           =  active stream length (L)
+% 
+% Optional inputs:
+%  theta       =  effective slope of basin contributing area
+%  isflat      =  logical flag indicating if horizontal or sloped aquifer
+%                 solution is applicable
+%  soln1       =  optional early-time theoretical solution
+%  soln2       =  optional late-time theoretical solution
+%  dispfit     =  logical flag indicating whether to plot the result
+%
+%  See also eventphi, cloudphi, fitdistphi
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
