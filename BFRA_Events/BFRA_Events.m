@@ -3,12 +3,13 @@ function [Events] = BFRA_Events(T,Q,R,varargin)
 % 
 % This is basically a wrapper around bfra_getevents for multi-year timeseries. 
 % 
-% Inputs:
-%   T    =  nx1 array of dates
-%   Q    =  nxm array of daily flow in units m3/day, organized as calendar
-%           years, meaning n/365 = # of years
-%   R    =  nxm array of daily rainfall in (mm/day?)
-%  opts  =  structure containing the following fields:
+% Required inputs:
+%   T          =  nx1 array of dates
+%   Q          =  nxm array of daily flow in units m3/day, organized as calendar
+%                 years, meaning n/365 = # of years
+%   R          =  nxm array of daily rainfall in (mm/day?)
+% 
+% Optional name-value inputs:
 %  qmin        =  minimum flow value, below which values are set nan
 %  nmin        =  minimum event length
 %  fmax        =  maximum # of missing values gap-filled
@@ -17,6 +18,9 @@ function [Events] = BFRA_Events(T,Q,R,varargin)
 %  rmconvex    =  remove convex derivatives
 %  rmnochange  =  remove consecutive constant derivates
 %  rmrain      =  remove rainfall
+% 
+%  opts        =  structure containing the fields listed above, in lieu of
+%                 entering them individually
    
 % flow comes in as m3/day/day
 %------------------------------------------------------------------------------   

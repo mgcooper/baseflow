@@ -1,22 +1,26 @@
-
-% this is the main program
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 %eventsplitter splits events into useable segments eg if an event is
-%interrupted by rainfall or convex dq/dt.
+%interrupted by rainfall or convex dq/dt, the event is split into separate
+%segments.
+% 
+% Required inputs:
+%  t           =  time
+%  q           =  flow (m3/time)
+%  r           =  rain (mm/time)
+%
+% Optional name-value inputs:
+%  nmin        =  minimum event length
+%  fmax        =  maximum # of missing values gap-filled
+%  rmax        =  maximum run of sequential constant values
+%  rmin        =  minimum rainfall required to censor flow (mm/day?)
+%  rmconvex    =  remove convex derivatives
+%  rmnochange  =  remove consecutive constant derivates
+%  rmrain      =  remove rainfall
+% 
+%  See also: getevents, eventfinder, eventpicker, eventplotter
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
-% % other way to parse inputs:
-%    arguments
-%       t           datetime                         = 1
-%       q           double                           = 2
-%       r           double                           = 3
-%       opts.nmin   double {mustBePositive}          = 4
-%       opts.rmin   double {mustBePositive}          = 5
-%       opts.rmax   double {mustBePositive}          = 6
-%    end
-    
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% parse inputs
+%-------------------------------------------------------------------------------
 p = MipInputParser();
 p.FunctionName = 'eventsplitter';
 p.addRequired( 't',                  @(x) isnumeric(x) | isdatetime(x)  );
@@ -30,9 +34,17 @@ p.addParameter('rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
 p.addParameter('rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
 p.addParameter('rmrain',      false, @(x) islogical(x) & isscalar(x)    );
 p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
+% % other way to parse inputs:
+%    arguments
+%       t           datetime                         = 1
+%       q           double                           = 2
+%       r           double                           = 3
+%       opts.nmin   double {mustBePositive}          = 4
+%       opts.rmin   double {mustBePositive}          = 5
+%       opts.rmax   double {mustBePositive}          = 6
+%    end    
+%-------------------------------------------------------------------------------
 
 % below follows recommendations in Dralle et al. 2017
 

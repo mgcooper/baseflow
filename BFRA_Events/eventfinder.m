@@ -1,6 +1,25 @@
 function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
-%eventfinder 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+%EVENTFINDER finds recession events on input hydrographs with time 't',
+%discharge 'q', and rain 'r'. Use optional inputs to set parameters that
+%determine how events are identified. 
+% 
+% Required inputs:
+%  t           =  time
+%  q           =  flow (m3/time)
+%  r           =  rain (mm/time)
+% 
+% Optional name-value inputs:
+%  nmin        =  minimum event length
+%  fmax        =  maximum # of missing values gap-filled
+%  rmax        =  maximum run of sequential constant values
+%  rmin        =  minimum rainfall required to censor flow (mm/day?)
+%  rmconvex    =  remove convex derivatives
+%  rmnochange  =  remove consecutive constant derivates
+%  rmrain      =  remove rainfall
+% 
+%  See also: getevents, eventsplitter, eventpicker, eventplotter
+
+%-------------------------------------------------------------------------------
 p = MipInputParser();
 p.FunctionName = 'eventfinder';
 p.addRequired( 't',                  @(x) isnumeric(x) | isdatetime(x)  );
@@ -14,7 +33,7 @@ p.addParameter('rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
 p.addParameter('rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
 p.addParameter('rmrain',      false, @(x) islogical(x) & isscalar(x)    );
 p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    
 
    iS  = [1;find(diff(isnan(q))==-1)+1];       % start non-nan segments

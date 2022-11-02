@@ -1,13 +1,22 @@
 function h = eventplotter(t,q,r,Info,varargin)
-%PLOTEVENTS plots q and dq/dt with pos/neg values
-%
-% Variable input:
+%EVENTPLOTTER plots recession events detected by getevents, with options to
+%plot dq/dt as positive or negative values
+% 
+% Required inputs:
+%  t           =  time
+%  q           =  flow (m3/time)
+%  r           =  rain (mm/time)
+%  Info        =  Info structure returned by getevents.m
+% 
+% Optional inputs:
 % 
 % dqdt:         user-provided dqdt, default = centered finite diff
 % plotevents:   logical, name-value e.g. 'plotevents',true
 % plotneg:      logical, name-value
+% 
+% %  See also: getevents, eventfinder, eventpicker, eventsplitter
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % input handling
 p = MipInputParser();
 p.FunctionName = 'eventplotter';
@@ -20,11 +29,13 @@ p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
 p.addParameter('dqdt',        derivative(q),isnumeric(x) & numel(x)==numel(t) );
 p.parseMagically('caller');
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%  See also: getevents, eventfinder, eventsplitter, eventplotter
+%-------------------------------------------------------------------------------
+
 % short circuits
     if plotevents == false; h = []; return; end
     if isempty(Info.istart); disp('no valid events'); h = []; return; end
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
     
     ikeep   = Info.ikeep;
     imax    = Info.imaxima;

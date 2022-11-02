@@ -1,5 +1,16 @@
 function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%EVENTPICKER automated or user-guided recession event selection from input
+%hydrograph with time 't', discharge 'q', and rain 'r'. Use optional inputs to
+%set parameters that determine how events are identified and 
+% 
+% Required inputs:
+%  t           =  time
+%  q           =  flow (m3/time)
+%  r           =  rain (mm/time)
+%  nmin        =  minimum event length
+% 
+%  See also: getevents, eventfinder, eventsplitter, eventplotter
+%-------------------------------------------------------------------------------
 p = MipInputParser();
 p.FunctionName = 'eventpicker';
 p.StructExpand = false;             % for 'Info' input
@@ -9,7 +20,7 @@ p.addRequired( 'r',     @(x) isnumeric(x)                         );
 p.addRequired( 'nmin',  @(x) isnumeric(x) & isscalar(x)           );
 p.addRequired( 'Info',  @(x) isstruct(x)                          );
 p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+%-------------------------------------------------------------------------------
    
    % compute the first derivative
    qdot        = derivative(q);
