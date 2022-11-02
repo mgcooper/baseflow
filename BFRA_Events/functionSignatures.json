@@ -4,8 +4,8 @@
    {
       "inputs":
       [
-         {"name":"T",            "kind":"required",   "type":[["numeric","column"],["datetime","column"]]},
-         {"name":"Q",            "kind":"required",   "type":["numeric","column"]}, 
+         {"name":"T",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"Q",            "kind":"required",   "type":["numeric","vector"]}, 
          {"name":"R",            "kind":"required",   "type":["numeric"]},
          {"name":"qmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
          {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
@@ -24,8 +24,8 @@
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",   "type":[["numeric","column"],["datetime","column"]]},
-         {"name":"q",            "kind":"required",   "type":["numeric","column"]},
+         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
          {"name":"r",            "kind":"required",   "type":["numeric"]},
          {"name":"qmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
          {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
@@ -44,8 +44,8 @@
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",   "type":[["numeric","column"],["datetime","column"]]},
-         {"name":"q",            "kind":"required",   "type":["numeric","column"]},
+         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
          {"name":"r",            "kind":"required",   "type":["numeric"]},
          {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
          {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
@@ -60,8 +60,8 @@
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",  "type":[["numeric","column"],["datetime","column"]]},
-         {"name":"q",            "kind":"required",  "type":["numeric","column"]},
+         {"name":"t",            "kind":"required",  "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",  "type":["numeric","vector"]},
          {"name":"r",            "kind":"required",  "type":["numeric"]},
          {"name":"nmin",         "kind":"required",  "type":["numeric","scalar"]},
          {"name":"Info",         "kind":"required",  "type":["struct"]}
@@ -71,21 +71,21 @@
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",  "type":[["numeric","column"],["datetime","column"]]},
-         {"name":"q",            "kind":"required",  "type":["numeric","column"]},
+         {"name":"t",            "kind":"required",  "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",  "type":["numeric","vector"]},
          {"name":"r",            "kind":"required",  "type":["numeric"]},
          {"name":"Info",         "kind":"required",  "type":["struct"]},
          {"name":"plotneg",      "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotevents",   "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"dqdt",         "kind":"namevalue", "type":["numeric","column"]}
+         {"name":"dqdt",         "kind":"namevalue", "type":["numeric","vector"]}
       ]
    },
    "eventsplitter":
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",   "type":[["numeric","column"],["datetime","column"]]},
-         {"name":"q",            "kind":"required",   "type":["numeric","column"]},
+         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
          {"name":"r",            "kind":"required",   "type":["numeric"]},
          {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
          {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
