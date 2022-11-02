@@ -18,17 +18,17 @@ p.parseMagically('caller');
 if ~isdatetime(t); t = datetime(t,'convertfrom','datenum'); end
 %-------------------------------------------------------------------------------
 
-   % flow comes in as cm/day, posted annually, regressed against t in
-   % years, so the trend is in cm/day/year
+% flow comes in as cm/day, posted annually, regressed against t in
+% years, so the trend is in cm/day/year
 
-   % get the baseflow trend, adjusted as an anomaly
-   hatrend  = trendplot(t,Q,'anom',false,'units','cm/d/y',             ...
-               'title','mean flow','leg','mean flow regression',        ...
-               'showfig',showfig,'method',method);
-   hbtrend  = trendplot(t,Q,'anom',false,'units','cm/d/y','quan',      ...
-               pctl,'title','baseflow','leg','baseflow regression',    ...
-               'showfig',showfig);
-   dQadt    = hatrend.trend.YData(:);  % mean flow trend         
-   dQbdt    = hbtrend.trend.YData(:);  % baseflow trend     
-   Qb       = Q-(dQadt-dQbdt);         % baseflow timeseries, cm/day  
+% get the baseflow trend, adjusted as an anomaly
+hatrend  = trendplot(t,Q,'anom',false,'units','cm/d/y',             ...
+            'title','mean flow','leg','mean flow regression',        ...
+            'showfig',showfig,'method',method);
+hbtrend  = trendplot(t,Q,'anom',false,'units','cm/d/y','quan',      ...
+            pctl,'title','baseflow','leg','baseflow regression',    ...
+            'showfig',showfig);
+dQadt    = hatrend.trend.YData(:);  % mean flow trend         
+dQbdt    = hbtrend.trend.YData(:);  % baseflow trend     
+Qb       = Q-(dQadt-dQbdt);         % baseflow timeseries, cm/day  
    
