@@ -1,8 +1,7 @@
 function [tau,q,dqdt,tags,t,L,s,dq] = bfra_eventtau(K,Events,Fits,varargin)
 %BFRA_EVENTTAU computes drainage timescale tau from the event-scale parameters
 %a,b, and flow Q using the structures K, Events, and Fits produced with
-%bfra_getevents and bfra_dqdt
-% 
+%bfra_getevents and bfra_dqdt 
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
@@ -12,8 +11,12 @@ p.addRequired('K',@(x)istable(x));
 p.addRequired('Events',@(x)isstruct(x));
 p.addRequired('Fits',@(x)isstruct(x));
 p.addParameter('usefits',false,@(x)islogical(x));
+p.addParameter('aggfunc','none',@(x)ischar(x));
 p.parseMagically('caller');
 %-------------------------------------------------------------------------------
+
+% TODO: implement aggfunc option to compute an event-aggregate tau e.g. using
+% the mean flow, median flow, max flow, or min flow
 
    dqfnc    = @(a,dqdt) -dqdt./a;   % must have derived this at some point
    Taufnc   = bfra_taufunc;
