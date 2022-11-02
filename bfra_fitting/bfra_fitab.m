@@ -1,26 +1,60 @@
-function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
+function [Fit,ok] = bfra_fitab(q,dqdt,method,varargin)
 %BFRA_FITAB fits -dq/dt = aQ^b to estimate parameters a and b
 % 
+% Required inputs:
+%  q        =  nx1 double of discharge data (L T^-1)
+%  dqdt     =  nx1 double of discharge rate of change (L T^-2)
+%  method   =  char indicating the fitting method
 % 
+% Optional inputs:
+%  weights  =  nx1 double of weights for the fitting algorithm
+%  mask     =  nx1 logical mask to exclude values from fitting
+%  order    =  scalar, exponent in -dq/dt = aQ^b 
+%  refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
+%  quantile =  scalar double, quantile used if 'method' == 'qtl' (quantile regression)
+%  Nboot    =  scalar double, bootstrap sample size for quantile regression
+%  plotfit  =  logical scalar indicating whether to make a plot or not
+%  fitopts  =  struct containing fitting options (not currently implemented)
+% 
+% See also: prepfits
+
 %-------------------------------------------------------------------------------
-   p = MipInputParser;
-   p.addRequired('q',                           @(x)isnumeric(x)     );
-   p.addRequired('dqdt',                        @(x)isnumeric(x)     );
-   p.addParameter('weights',  ones(size(q)),    @(x)isnumeric(x)     );
-   p.addParameter('method',   'nls',            @(x)ischar(x)        );
-   p.addParameter('order',    1,                @(x)isnumeric(x)     );
-   p.addParameter('mask',     true(size(q)),    @(x)islogical(x)     );
-   p.addParameter('quantile', nan,              @(x)isnumeric(x)     );
-   p.addParameter('Nboot',    100,              @(x)isnumeric(x)     );
-   p.addParameter('plotfit',  false,            @(x)islogical(x)     );
-   p.addParameter('fitopts',  struct(),         @(x)isstruct(x)      );
-   p.parseMagically('caller');
-   
-   weights  = p.Results.weights;
-   order    = p.Results.order;
-   quantile = p.Results.quantile;
-   plotfit  = p.Results.plotfit;
-   
+methodlist = {'nls','ols','mle','qtl','mean','median','envelope'};
+validmethod = @(x)any(validatestring(x,methodlist));
+
+p = MipInputParser;
+p.StructExpand = false;
+p.addRequired('q',                           @(x)isnumeric(x)     );
+p.addRequired('dqdt',                        @(x)isnumeric(x)     );
+p.addRequired('method',                      validmethod          );
+p.addParameter('weights',  ones(size(q)),    @(x)isnumeric(x)     );
+p.addParameter('order',    1,                @(x)isnumeric(x)     );
+p.addParameter('mask',     true(size(q)),    @(x)islogical(x)     );
+p.addParameter('quantile', 0.05,             @(x)isnumeric(x)     );
+p.addParameter('refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
+p.addParameter('Nboot',    100,              @(x)isnumeric(x)     );
+p.addParameter('plotfit',  false,            @(x)islogical(x)     );
+p.addParameter('fitopts',  struct(),         @(x)isstruct(x)      );
+p.parseMagically('caller');
+
+
+weights  = p.Results.weights;
+order    = p.Results.order;
+qtl      = p.Results.quantile;
+refqtls  = p.Results.refqtls;
+plotfit  = p.Results.plotfit;
+fitopts  = p.Unmatched;
+
+% NOTE: fitopts is not implemented, but see BFRA_Fit, where it could be used
+% to simplify calling this function from wrapper functions. Using the
+% unmatched method, it can be used to pass in arbitrary fitopts accepted
+% by any function but requires that the user know what to pass in.
+
+% could require:
+% if method = 'qtl', fitopts.quantile, fitopts.Nboot
+% if method = 'mle', fitopts.sigx, fitopts.sigy, fitopts.rxy
+% for all methods, fitopts.order, fitopts.alpha, fitopts.
+
 %-------------------------------------------------------------------------------
    
    [x,y,logx,logy,weights,ok] = bfra_prepfits(q,dqdt, 'weights',weights,...
@@ -32,14 +66,27 @@ function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
       Fit = nan; return;
    end
    
-   alpha    = 0.68;
+   alpha = 0.68;
+   
+   % method 'envelope' allows for passing a line through an arbitrary x,y
+   % pair (refpoints), specified in terms of the quantile of the x/y data
+   % distributions. this method is similar to 'mean' or 'median', but allows
+   % different ref points for the x/y values, for example the median of the x
+   % values (0.50 quantile) and some other quantile of the y values. The
+   % default (recommended) behavior is to keep the x-quantile = 0.5 and vary the
+   % y-quantile to move the line up and down as desired to define an "envelope"
+   
+   % if method = 'ols' and 'order' = 1, assume they want a line of slope 1
+   if strcmp(method,'ols') && order == 1
+      method = 'mean';
+   end
    
    switch method
          
       case 'ols'
          [ab,ci,ok]  = fitOLS(logx,logy,weights,alpha);
       case 'qtl'
-         [ab,ci,ok]  = fitQTL(logx,logy,weights,alpha,order,quantile,Nboot,fitopts);
+         [ab,ci,ok]  = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,fitopts);
       case 'mle'
          [ab,ci,ok]  = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
       case 'nls'
@@ -49,7 +96,7 @@ function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
       case 'median'
          [ab,ci,ok]  = fitMED(logx,logy,weights,order,fitopts);
       case 'envelope'
-         [ab,ci,ok]  = fitENV(logx,logy,weights,order,quantile,fitopts);
+         [ab,ci,ok]  = fitENV(logx,logy,weights,order,refqtls);
    end
       
    
@@ -61,14 +108,15 @@ function [Fit,ok] = bfra_fitab(q,dqdt,varargin)
    end
    
    if plotfit == true
-      Fit.h = bfra_pointcloud(q,dqdt,'reflines',{'userfit'},            ...
-                              'userab',ab,'mask',mask);
+      Fit.h = bfra_pointcloud(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
    end
 end
 
-
+%-------------------------------------------------------------------------------
 % FITTING METHODS
+%-------------------------------------------------------------------------------
 function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
+% ordinary least squares linear regression in log-log
 
    % Set up fittype and options.
             ft       =  fittype(     'poly1'                         );
@@ -91,68 +139,14 @@ function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
    
 end
 
-function [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy)
-
-   % Set default values for maximum likelihood estimation
-      if nargin == 2
-            sigx     =  std(logx);       % error in x
-            sigy     =  std(logy);       % error in y
-            rxy      =  0;               % correlation b/w error in x and y
-            alpha    =  0.68;            % confidence level
-      end
-
-   % fit 
-         [ab,s]      =  yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
-
-            ab       = [exp(ab(1)); ab(2)];
-            
-   % transpose ci to be consistent with stats functions
-            ci       = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
-
-   % generic failure check
-            ok = true;
-         if any(~isreal(ab))
-            ok = false;
-         end
-end
-
-function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,quantile,Nboot,fitopts)
-                      
-   % quantile regression
-      if isfield(fitopts,'quantile')
-            quantile =  fitopts.pctl;
-            order    =  fitopts.order; % 1=linear regression
-            Nboot    =  fitopts.Nboot;
-          % alpha    =  fitopts.alpha; 
-      elseif isnan(quantile)
-         quantile    = 0.05;
-      end
-   
-      % apply the mask / weights
-      logx     = logx(weights>0);
-      logy     = logy(weights>0);
-      
-      [ab,s]   =  quantreg(logx,logy,quantile,order,Nboot,1-alpha);
-      ab       =  [exp(ab(1)); ab(2)];
-
-   % transpose ci to be consistent with stats functions      
-      ci       =  transpose(s.ci_boot);   % comes in the same order as confint
-      ci(1,:)  =  exp(ci(1,:));
-        
-   % generic failure check
-            ok =  true;
-         if any(~isreal(ab))
-            ok =  false;
-         end
-            
-end
-
 function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,fitopts)
+% linear model fit in log-log, equivalent to forcing a line of slope 1 through
+% the mean x-y, with option to control the slope using input parameter 'order'
 
-   % check fitopts
-      if isfield(fitopts,'order')
-         if isnumeric(fitopts.order); order = fitopts.order; end
-      end
+%    % check fitopts
+%       if isfield(fitopts,'order')
+%          if isnumeric(fitopts.order); order = fitopts.order; end
+%       end
       
    % apply the mask / weights
          logx        =  logx(weights>0);
@@ -176,7 +170,8 @@ function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,fitopts)
 end
 
 function [ab,ci,ok] = fitMED(logx,logy,weights,order,fitopts)
-   
+% force a line of slope 'order' through the median x-y
+
 % % not sure why this was here, order is passed in with default 1, maybe i was
 % gonna do away wiht that or maybe i was testing here before implementing that
 %    order = 1;
@@ -210,35 +205,40 @@ function [ab,ci,ok] = fitMED(logx,logy,weights,order,fitopts)
 
 end
 
-function [ab,ci,ok] = fitENV(logx,logy,weights,order,quantile,fitopts)
-         
-   % check fitopts
-      if isfield(fitopts,'order')
-         if isnumeric(fitopts.order); order = fitopts.order; end
-      end
-      
-      if isfield(fitopts,'quantile')
-         quantile = fitopts.quantile;
-      end
-      
-    % force the line through the provided quantile
-      if isnan(quantile)
-         quantile    = 0.05;
-      end
+function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls)
+% force a line of slope 'order' through any two points 'refpoints' that
+% together define an 'envelope'. default x refpoint is median(x). To control
+% the vertical location of the line, set y refpoint higher or lower while
+% keeping x refpoint constant.
+
+% note: require that quantiles are passed in rather than precomputed refpoints
+% so this can use the log values or linear values
+
+% % removed fitopts for now
+%    % check fitopts
+%       if isfield(fitopts,'order')
+%          if isnumeric(fitopts.order); order = fitopts.order; end
+%       end
+%       
+%       if isfield(fitopts,'quantile')
+%          quantile = fitopts.quantile;
+%       end
       
    % apply the mask / weights
-         logx        =  logx(weights>0);
-         logy        =  logy(weights>0);
+         logx     =  logx(weights>0);
+         logy     =  logy(weights>0);
       
-         logx        =  order.*logx;
+         logx     =  order.*logx;
 
+    % force the line through the provided quantile
+         xbar     =  quantile(logx,refqtls(1),'Method','approximate');
+         ybar     =  quantile(logy,refqtls(2),'Method','approximate');
+      
    % note: mean(x-y) = mean(x)-mean(y)
-         xref        =  prctile(logx,100*quantile);
-         yref        =  prctile(logy,100*quantile);
-         ab          =  [ exp(-(xref-yref)); order];
+         ab       =  [ exp(-(xbar-ybar)); order];
          
    % transpose ci to be consistent with stats functions
-         ci          =  [nan nan; nan, nan];
+         ci       =  [nan nan; nan, nan];
          
    % generic failure check
             ok    =  true;
@@ -248,6 +248,62 @@ function [ab,ci,ok] = fitENV(logx,logy,weights,order,quantile,fitopts)
      
 end
 
+function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,quantile,Nboot,fitopts)
+                      
+   % quantile regression
+      if isfield(fitopts,'quantile')
+            quantile =  fitopts.pctl;
+            order    =  fitopts.order; % 1=linear regression
+            Nboot    =  fitopts.Nboot;
+          % alpha    =  fitopts.alpha; 
+      elseif isnan(quantile)
+         quantile    = 0.05;
+      end
+   
+      % apply the mask / weights
+      logx     = logx(weights>0);
+      logy     = logy(weights>0);
+      
+      [ab,s]   =  quantreg(logx,logy,quantile,order,Nboot,1-alpha);
+      ab       =  [exp(ab(1)); ab(2)];
+
+   % transpose ci to be consistent with stats functions      
+      ci       =  transpose(s.ci_boot);   % comes in the same order as confint
+      ci(1,:)  =  exp(ci(1,:));
+        
+   % generic failure check
+            ok =  true;
+         if any(~isreal(ab))
+            ok =  false;
+         end
+            
+end
+
+
+function [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy)
+
+   % Set default values for maximum likelihood estimation
+      if nargin == 2
+            sigx     =  std(logx);       % error in x
+            sigy     =  std(logy);       % error in y
+            rxy      =  0;               % correlation b/w error in x and y
+            alpha    =  0.68;            % confidence level
+      end
+
+   % fit 
+         [ab,s]      =  yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
+
+            ab       = [exp(ab(1)); ab(2)];
+            
+   % transpose ci to be consistent with stats functions
+            ci       = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
+
+   % generic failure check
+            ok = true;
+         if any(~isreal(ab))
+            ok = false;
+         end
+end
 
 function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
 
