@@ -3,6 +3,20 @@ function Fit = bfra_plfitb(x,varargin)
 %continuous data believed to follow an untruncated Pareto distribution with 
 %some unknown xmin such that xhat=x-xmin. Any inputs to plfit can be passed
 %in as varargin, where plfit is Aaron Clauset's function.
+% 
+% Required inputs:
+%  x     = vector double of data believed to follow an untruncated Pareto distribution 
+% 
+% Optional inputs:
+%  xmin  = scalar double indicating the lower bound of the distribution
+%  range = the range of scaling parameters considered (see plfit.m)
+%  limit = scalar double that sets the upper bound of fitted exponent
+%  method = char indicating one of two algorithms (Clauset's or Hanel's)
+%  bootfit = logical indicating whether to bootstrap the uncertainties (slow)
+%  nreps = scalar double indicating how many replicates in the boot fit
+%  plotfit = logical indicating whether to call plplot
+%
+% See also: plplot, plfit
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
