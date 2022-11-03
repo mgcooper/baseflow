@@ -1,6 +1,6 @@
-function K = Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
+function K = wrapFits( q,dqdt,deriv,method,order,station,eventdate,    ...
                         eventtag,fittag,fitcount,fitopts,K)
-%bfra.FIT estimates the recession coefficient (wrapper around bfra.fitab)
+%BFRA.WRAPFITS estimates the recession coefficient (wrapper around bfra.fitab)
 % 
 %-------------------------------------------------------------------------------
 %   Inputs:

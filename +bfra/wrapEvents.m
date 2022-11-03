@@ -1,5 +1,5 @@
-function [Events] = Events(T,Q,R,varargin)
-%BFRA.EVENTS get recession events.
+function [Events] = wrapEvents(T,Q,R,varargin)
+%BFRA.WRAPEVENTS get recession events.
 % 
 % This is basically a wrapper around bfra.getevents for multi-year timeseries. 
 % 
@@ -26,7 +26,7 @@ function [Events] = Events(T,Q,R,varargin)
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra.Events';
+p.FunctionName = 'wrapEvents';
 p.StructExpand = true;
 p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
 p.addRequired( 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );

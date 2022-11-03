@@ -1,4 +1,4 @@
-function ETS = fitETS(T,Q,R,varargin)
+function ETS = fitets(T,Q,R,varargin)
 %BFRA.FITETS
 
 % note: only pass in identified recession events (not timeseries of
@@ -12,7 +12,7 @@ function ETS = fitETS(T,Q,R,varargin)
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    p = MipInputParser;
-   p.FunctionName = 'bfra.fitETS';
+   p.FunctionName = 'bfra.fitets';
    p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
    p.addRequired('Q',@(x)isnumeric(x));
    p.addRequired('R',@(x)isnumeric(x));

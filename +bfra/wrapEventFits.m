@@ -1,14 +1,14 @@
-function [K,Fits] = dqdt(Events,varargin)
-%BFRA.DQDT   
+function [K,Fits] = wrapEventFits(Events,varargin)
+%BFRA.wrapEventFits
 % Inputs:
-%  Events: output of bfra.Events (flow comes in as m3 d-1 posted daily)
+%  Events: output of bfra.wrapEvents (flow comes in as m3 d-1 posted daily)
 % Outputs:
 %  K: table of fitted values e.g., a, b, tau, for each event
 %  Fits: structure containing the fitted q/dqdt
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra.dqdt';
+p.FunctionName = 'wrapEventFits';
 p.addRequired( 'Events',               @(x) isstruct(x)                 );
 p.addParameter('derivmethod', 'ETS',   @(x) ischar(x)                   );
 p.addParameter('fitmethod',   'nls',   @(x) ischar(x)                   );
