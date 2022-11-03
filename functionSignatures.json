@@ -4,31 +4,14 @@
    {
       "inputs":
       [
-         {"name":"t",         "kind":"required",
-                              "type":[["double"],["datetime"]]},
-         {"name":"q",         "kind": "required",
-                              "type": ["double","column"]},
-         {"name":"method",    "kind":"namevalue",
-                              "type":["char", 
+         {"name":"t",         "kind":"required","type":[["double"],["datetime"]]},
+         {"name":"q",         "kind": "required","type": ["double","column"]},
+         {"name":"method",    "kind":"namevalue","type":["char", 
                               "choices={'quantile','interannual','q7min'}"],
                               "default":"'annualquantile'"},
-         {"name":"pctl",      "kind":"namevalue",
-                              "type":["numeric","scalar"]},
-         {"name":"showfig",   "kind":"namevalue",
-                              "type":["logical","scalar"],"purpose":"Option"}
+         {"name":"pctl",      "kind":"namevalue","type":["numeric","scalar"]},
+         {"name":"showfig",   "kind":"namevalue","type":["logical","scalar"],"purpose":"Option"}
 
-      ]
-   },
-      "bfra.boxChartTrends":
-   {
-      "inputs":
-      [
-         {"name":"Trends",    "kind":"required",
-                              "type":[["datetime","column"],["numeric","column"]]},
-         {"name":"groupVar",  "kind":"required",
-                              "type":["char"]},
-         {"name":"plotVars",  "kind":"required",    
-                              "type":["cell"]}
       ]
    },
    "bfra.cloudphi":
@@ -55,14 +38,12 @@
    {
      "inputs":
      [
-        {"name":"inputvalue",    "kind":"required",
-                                 "type":["numeric","double"]}, 
-        {"name":"inputvarname",  "kind":"required",
-                                 "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
-        {"name":"outputvarname", "kind":"required",
-                                 "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
-        {"name":"isflat",        "kind":"namevalue", 
-                                 "type":["logical"],"purpose":"Option"}
+        {"name":"inputvalue",    "kind":"required","type":["numeric","double"]}, 
+        {"name":"inputvarname",  "kind":"required","type":[["scalar"],
+                                 ["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
+        {"name":"outputvarname", "kind":"required","type":[["scalar"],
+                                 ["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
+        {"name":"isflat",        "kind":"namevalue","type":["logical"],"purpose":"Option"}
      ]
    },
    "bfra.defaultopts":
@@ -253,26 +234,6 @@
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]}
       ]
    },
-   "bfra.printtrend":
-   {
-      "inputs":
-      [
-         {"name":"Data",      "kind":"required",
-                              "type":["timetable"]},
-         {"name":"var",       "kind":"namevalue",
-                              "type":["char","choices=fieldnames(Data)"]},
-         {"name":"alpha",     "kind":"namevalue",    
-                              "type":["numeric","scalar"]},
-         {"name":"unitcf",    "kind":"namevalue",    
-                              "type":["numeric","scalar"]},
-         {"name":"metric",    "kind":"namevalue",    
-                              "type":["char","scalar"]},
-         {"name":"method",    "kind":"namevalue",    
-                              "type": ["char", "choices={'ols','ts','qtl'}"],"default":"'ols'","purpose":"Option"},
-         {"name":"qtl",       "kind":"namevalue",    
-                              "type":["numeric","scalar"]}
-      ]
-   },
    "bfra.QtauString":
    {
       "inputs":
@@ -336,40 +297,6 @@
                                     "type":["char"]},
          {"name":"units",           "kind":"namevalue", 
                                     "type":["logical"],"purpose":"Option"}
-      ]
-   },
-   "bfra.trendplot":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",
-                                 "type":[["numeric"],["datetime"]]},
-         {"name":"Y",            "kind":"required",
-                                 "type":["numeric"]},
-         {"name":"units",        "kind":"namevalue",    
-                                 "type":["char"]},
-         {"name":"ylabeltext",   "kind":"namevalue",    
-                                 "type":["char"]},
-         {"name":"xlabeltext",   "kind":"namevalue",    
-                                 "type":["char"]},
-         {"name":"titletext",    "kind":"namevalue",    
-                                 "type":["char"]},
-         {"name":"legtext",      "kind":"namevalue",    
-                                 "type":["char"]},
-         {"name":"method",       "kind":"namevalue",    
-                                 "type": ["char", "choices={'ols','ts','qtl','mean','median'}"],"default":"'ols'","purpose":"Option"},
-         {"name":"alpha",        "kind":"namevalue",    
-                                 "type":["numeric","scalar"]},
-         {"name":"anomalies",    "kind":"namevalue",    
-                                 "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"quantile",     "kind":"namevalue",    
-                                 "type":["numeric"]},
-         {"name":"figpos",       "kind":"namevalue",    
-                                 "type":["numeric"]},
-         {"name":"useax",        "kind":"namevalue",    
-                                 "type":["matlab.graphics.axis.Axes"]},
-         {"name":"showfig",      "kind":"namevalue",
-                                 "type":["logical"]}
       ]
    },
    "bfra.dqdt":
@@ -507,7 +434,7 @@
          {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "eventfinder":
+   "bfra.eventfinder":
    {
       "inputs":
       [
@@ -523,7 +450,7 @@
          {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "eventpicker":
+   "bfra.eventpicker":
    {
       "inputs":
       [
@@ -534,7 +461,7 @@
          {"name":"Info",         "kind":"required",  "type":["struct"]}
       ]
    },
-   "eventplotter":
+   "bfra.eventplotter":
    {
       "inputs":
       [
@@ -547,7 +474,7 @@
          {"name":"dqdt",         "kind":"namevalue", "type":["numeric","vector"]}
       ]
    },
-   "eventsplitter":
+   "bfra.eventsplitter":
    {
       "inputs":
       [
@@ -561,42 +488,6 @@
          {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-"bfra.loadbounds":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "ordered",
-                              "type": ["char","choices=bfra.stationlist"]},
-         {"name":"projection","kind": "namevalue",
-                              "type": ["char","choices={'geo','ease'}"]}
-      ]
-   },
-   "bfra.loadgrace":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "ordered",
-                              "type": ["char","choices=bfra.stationlist"]},
-         {"name":"t1",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]},
-         {"name":"t2",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]}
-      ]
-   },
-   "bfra.loadflow":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "required",
-                              "type": ["char","choices=bfra.stationlist"]},
-         {"name":"t1",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]},
-         {"name":"t2",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]},
-         {"name":"units",     "kind": "namevalue",
-                              "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]}
       ]
    },
    "bfra.loadcalm":
@@ -627,28 +518,14 @@
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required",
-                              "type": ["char","choices=bfra.stationlist"]}
-      ]
-   },
-   "bfra.merraWaterBalance":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "ordered",
-                              "type": ["char","choices=bfra.stationlist"]},
-         {"name":"t1",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]},
-         {"name":"t2",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]}
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
       ]
    },
    "bfra.basinname":
    {
       "inputs":
       [
-         {"name":"typenamehere","kind": "required",
-                              "type": ["char","choices=bfra.stationlist"]}
+         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.stationlist"]}
       ]
    }
 }
