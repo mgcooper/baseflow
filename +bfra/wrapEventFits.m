@@ -1,5 +1,5 @@
 function [K,Fits] = wrapEventFits(Events,varargin)
-%BFRA.wrapEventFits
+%wrapEventFits wrapper around eventFit functions to fit all events
 % Inputs:
 %  Events: output of bfra.wrapEvents (flow comes in as m3 d-1 posted daily)
 % Outputs:

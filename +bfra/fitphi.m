@@ -23,7 +23,7 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 %-------------------------------------------------------------------------------
 p = MipInputParser;
 p.StructExpand = false;
-p.FunctionName = 'bfra.fitphi';
+p.FunctionName = 'fitphi';
 p.addRequired('a1',@(x)isnumeric(x));
 p.addRequired('a2',@(x)isnumeric(x));
 p.addRequired('b2',@(x)isnumeric(x));

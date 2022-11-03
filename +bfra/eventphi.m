@@ -22,7 +22,7 @@ function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)
 %-------------------------------------------------------------------------------
 p = MipInputParser;
 p.StructExpand = false;
-p.FunctionName = 'bfra.eventphi';
+p.FunctionName = 'eventphi';
 p.addRequired('K',@(x)istable(x));
 p.addRequired('Fits',@(x)isstruct(x));
 p.addRequired('A',@(x)isnumeric(x));

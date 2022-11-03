@@ -1,5 +1,5 @@
 function ETS = fitets(T,Q,R,varargin)
-%BFRA.FITETS
+%FITETS fits recession event using the exponential timestep method
 
 % note: only pass in identified recession events (not timeseries of
 % flow) because this first fits the ENTIRE recession to estimate 'gamma'
@@ -10,9 +10,9 @@ function ETS = fitets(T,Q,R,varargin)
 % is an estimate of dq/dt and the average q within the window and those
 % two values are used to compute -dq/dt = aQ^b.
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    p = MipInputParser;
-   p.FunctionName = 'bfra.fitets';
+   p.FunctionName = 'fitets';
    p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
    p.addRequired('Q',@(x)isnumeric(x));
    p.addRequired('R',@(x)isnumeric(x));
@@ -20,7 +20,7 @@ function ETS = fitets(T,Q,R,varargin)
    p.addParameter('fitab',true,@(x)islogical(x));
    p.addParameter('plotfit',false,@(x)islogical(x));
    p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    % first we call the fitting algorithm
    [q,dqdt,dt,tq,rq,rsq] = fitdQdt(T,Q,R,etsparam);

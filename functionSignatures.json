@@ -1,17 +1,31 @@
 {
    "_schemaVersion": "1.0.0",
+   "bfra.aQbString":
+   {
+      "inputs":
+      [
+         {"name":"ab",           "kind":"ordered","type":["vector","double"]},
+         {"name":"Q0",           "kind":"ordered","type":["scalar","double"]},
+         {"name":"printvalues",  "kind":"namevalue", "type":["logical"],"purpose":"Option"}
+      ]
+   },
    "bfra.baseflow":
    {
       "inputs":
       [
          {"name":"t",         "kind":"required","type":[["double"],["datetime"]]},
-         {"name":"q",         "kind": "required","type": ["double","column"]},
-         {"name":"method",    "kind":"namevalue","type":["char", 
-                              "choices={'quantile','interannual','q7min'}"],
-                              "default":"'annualquantile'"},
-         {"name":"pctl",      "kind":"namevalue","type":["numeric","scalar"]},
+         {"name":"q",         "kind": "required","type": ["double","vector"]},
+         {"name":"method",    "kind":"namevalue","type":["char", "choices={'quantile','interannual','q7min'}"],"default":"'annualquantile'"},
+         {"name":"pctl",      "kind":"namevalue","type":["double","scalar"]},
          {"name":"showfig",   "kind":"namevalue","type":["logical","scalar"],"purpose":"Option"}
 
+      ]
+   },
+   "bfra.basinname":
+   {
+      "inputs":
+      [
+         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.stationlist"]}
       ]
    },
    "bfra.cloudphi":
@@ -36,21 +50,75 @@
    },
    "bfra.conversions":
    {
-     "inputs":
-     [
-        {"name":"inputvalue",    "kind":"required","type":["numeric","double"]}, 
-        {"name":"inputvarname",  "kind":"required","type":[["scalar"],
-                                 ["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
-        {"name":"outputvarname", "kind":"required","type":[["scalar"],
-                                 ["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
-        {"name":"isflat",        "kind":"namevalue","type":["logical"],"purpose":"Option"}
-     ]
+      "inputs":
+      [
+         {"name":"inputvalue",    "kind":"required",   "type":["numeric","double"]}, 
+         {"name":"inputvarname",  "kind":"required",   "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
+         {"name":"outputvarname", "kind":"required",   "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
+         {"name":"isflat",        "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
+      ]
    },
    "bfra.defaultopts":
    {
       "inputs":
       [
          {"name":"type",   "kind": "required",  "type": ["char", "choices={'fits','events'}"],"default":"'events'","purpose":"Option"}
+      ]
+   },
+   "bfra.eventfinder":
+   {
+      "inputs":
+      [
+         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
+         {"name":"r",            "kind":"required",   "type":["numeric"]},
+         {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "bfra.eventpicker":
+   {
+      "inputs":
+      [
+         {"name":"t",            "kind":"required",  "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",  "type":["numeric","vector"]},
+         {"name":"r",            "kind":"required",  "type":["numeric"]},
+         {"name":"nmin",         "kind":"required",  "type":["numeric","scalar"]},
+         {"name":"Info",         "kind":"required",  "type":["struct"]}
+      ]
+   },
+   "bfra.eventplotter":
+   {
+      "inputs":
+      [
+         {"name":"t",            "kind":"required",  "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",  "type":["numeric","vector"]},
+         {"name":"r",            "kind":"required",  "type":["numeric"]},
+         {"name":"Info",         "kind":"required",  "type":["struct"]},
+         {"name":"plotneg",      "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"plotevents",   "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"dqdt",         "kind":"namevalue", "type":["numeric","vector"]}
+      ]
+   },
+   "bfra.eventsplitter":
+   {
+      "inputs":
+      [
+         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
+         {"name":"r",            "kind":"required",   "type":["numeric"]},
+         {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
    "bfra.eventphi":
@@ -112,13 +180,31 @@
          {"name":"fitopts",   "kind": "namevalue", "type": "struct"}
       ]
    },
-   "bfra.fitdistphi":
+   "bfra.fitdqdt":
    {
       "inputs":
       [
-         {"name":"phi",        "kind": "required",  "type": ["vector","double"]},
-         {"name":"outputtype", "kind": "ordered",   "type": ["char", "choices={'PD','mean','std','median'}"],"default":"'PD'","purpose":"Option"},
-         {"name":"plottype",   "kind": "ordered",   "type": ["char", "choices={'pdf','cdf','probplot','none'}"],"default":"'none'","purpose":"Option"}
+         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["vector"]]},
+         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
+         {"name":"R",         "kind":"required",   "type":["vector","double"]},
+         {"name":"method",    "kind":"required",   "type":["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"default":"'ETS'"},
+         {"name":"window",    "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"vtsparam",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "bfra.fitets":
+   {
+      "inputs":
+      [
+         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["vector"]]},
+         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
+         {"name":"R",         "kind":"required",   "type":["vector","double"]},
+         {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
    "bfra.fitphi":
@@ -136,6 +222,69 @@
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','Brutsaert, 1994','PK62','RS05','BR94'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
          {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','Brutsaert, 1994','Rupp and Selker, 2006 b=1','Rupp and Selker, 2006 b=f(n)','BS04','BS03','BR94','RS06b1','RS06','RS05'}"],"default":"'RS05bn'","purpose":"Option"}
+      ]
+   },
+   "bfra.fitphidist":
+   {
+      "inputs":
+      [
+         {"name":"phi",        "kind": "required",  "type": ["vector","double"]},
+         {"name":"outputtype", "kind": "ordered",   "type": ["char", "choices={'PD','mean','std','median'}"],"default":"'PD'","purpose":"Option"},
+         {"name":"plottype",   "kind": "ordered",   "type": ["char", "choices={'pdf','cdf','probplot','none'}"],"default":"'none'","purpose":"Option"}
+      ]
+   },
+   "bfra.getdqdt":
+   {
+      "inputs":
+      [
+         {"name":"T",            "kind": "required",  "type": [["vector","double"],["vector","datetime"]]},
+         {"name":"Q",            "kind": "required",  "type": ["vector","double"] },
+         {"name":"R",            "kind": "required",  "type": ["vector","double"] },
+         {"name":"derivmethod",  "kind": "required",  "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
+         {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
+         {"name":"fitwindow",    "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
+         {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
+         {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option", "default":"'false'" },
+         {"name":"gageID",       "kind": "namevalue", "type": ["char"] },
+         {"name":"eventID",      "kind": "namevalue", "type": ["char"] },
+         {"name":"ax",           "kind": "namevalue", "type": [["matlab.graphics.axis.Axes"],["char"]]}
+      ],
+
+      "outputs":
+      [
+         {"name":"q",         "type": ["double"] },
+         {"name":"dqdt",      "type": ["double"] },
+         {"name":"dt",        "type": ["double"] },
+         {"name":"tq",        "type": ["double"] },
+         {"name":"rq",        "type": ["double"] }
+      ]
+   },
+   "bfra.getevents":
+   {
+      "inputs":
+      [
+         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
+         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
+         {"name":"r",            "kind":"required",   "type":["numeric"]},
+         {"name":"qmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"cmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
+         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "bfra.getstring":
+   {
+      "inputs":
+      [
+         {"name":"requestedstring", "kind":"required",   "type":["char"]},
+         {"name":"units",           "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
       ]
    },
    "bfra.globalfit":
@@ -163,6 +312,31 @@
          {"name":"labelplot", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
+   "bfra.loadcalm":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
+      ]
+   },
+   "bfra.loadghcnd":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra.stationlist"]},
+         {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
+         {"name":"gapfill",   "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
+      ]
+   },
+   "bfra.loadmeta":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
+      ]
+   },
    "bfra.plfitb":
    {
       "inputs":
@@ -175,6 +349,26 @@
          {"name":"bootfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"nreps",     "kind":"namevalue",  "type": ["scalar","double"]},
          {"name":"plotfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "bfra.plotdqdt":
+   {
+      "inputs":
+      [
+         {"name":"q",         "kind":"required",   "type":["vector","double"]}, 
+         {"name":"dqdt",      "kind":"required",   "type":["vector","double"]},
+         {"name":"fitmethod", "kind":"namevalue",  "type":["char", "choices={'nls','ols','mle','qtl'}"]},
+         {"name":"pickmethod","kind":"namevalue",  "type":["char", "choices={'auto','none','manual'}"]},
+         {"name":"plotfits",  "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"showfig",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"weights",   "kind":"namevalue",  "type":["vector","double"]},
+         {"name":"rain",      "kind":"namevalue",  "type":["vector","double"]},
+         {"name":"ax",        "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]},
+         {"name":"blate",     "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"precision", "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"timestep",  "kind":"namevalue",  "type":["scalar","double"]},      
+         {"name":"eventID",   "kind":"namevalue",  "type":["char"]},
+         {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
    "bfra.plplot":
@@ -238,36 +432,18 @@
    {
       "inputs":
       [
-         {"name":"ab",           "kind":"ordered",
-                                 "type":["numeric","double"]},
-         {"name":"tau0",         "kind":"ordered",
-                                 "type":["numeric","double"]},
-         {"name":"printvalues",  "kind":"namevalue", 
-                                 "type":["logical"],"purpose":"Option"}
+         {"name":"ab",           "kind":"ordered", "type":["numeric","double"]},
+         {"name":"tau0",         "kind":"ordered", "type":["numeric","double"]},
+         {"name":"printvalues",  "kind":"namevalue", "type":["logical"],"purpose":"Option"}
       ]
    },
    "bfra.QtString":
    {
       "inputs":
       [
-         {"name":"ab",           "kind":"ordered",
-                                 "type":["numeric","double"]},
-         {"name":"Q0",           "kind":"ordered",
-                                 "type":["numeric","double"]},
-         {"name":"printvalues",  "kind":"namevalue", 
-                                 "type":["logical"],"purpose":"Option"}
-      ]
-   },
-   "bfra.aQbString":
-   {
-      "inputs":
-      [
-         {"name":"ab",           "kind":"ordered",
-                                 "type":["numeric","double"]},
-         {"name":"Q0",           "kind":"ordered",
-                                 "type":["numeric","double"]},
-         {"name":"printvalues",  "kind":"namevalue", 
-                                 "type":["logical"],"purpose":"Option"}
+         {"name":"ab",           "kind":"ordered", "type":["numeric","double"]},
+         {"name":"Q0",           "kind":"ordered", "type":["numeric","double"]},
+         {"name":"printvalues",  "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
       ]
    },
    "bfra.refline":
@@ -289,17 +465,7 @@
          {"name":"ax",        "kind":"namevalue",  "type":["matlab.graphics.axis.Axes"]}
       ]
    },
-   "bfra.strings":
-   {
-      "inputs":
-      [
-         {"name":"requestedstring", "kind":"required",
-                                    "type":["char"]},
-         {"name":"units",           "kind":"namevalue", 
-                                    "type":["logical"],"purpose":"Option"}
-      ]
-   },
-   "bfra.dqdt":
+   "bfra.wrapEventFits":
    {
       "inputs":
       [
@@ -321,80 +487,7 @@
          {"name":"Fits",      "type": ["struct"] }
       ]
    },
-   "bfra.fitdqdt":
-   {
-      "inputs":
-      [
-         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["vector"]]},
-         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
-         {"name":"R",         "kind":"required",   "type":["vector","double"]},
-         {"name":"method",    "kind":"required",   "type":["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"default":"'ETS'"},
-         {"name":"window",    "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"vtsparam",  "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.fitETS":
-   {
-      "inputs":
-      [
-         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["vector"]]},
-         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
-         {"name":"R",         "kind":"required",   "type":["vector","double"]},
-         {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.getdqdt":
-   {
-      "inputs":
-      [
-         {"name":"T",            "kind": "required",  "type": [["vector","double"],["vector","datetime"]]},
-         {"name":"Q",            "kind": "required",  "type": ["vector","double"] },
-         {"name":"R",            "kind": "required",  "type": ["vector","double"] },
-         {"name":"derivmethod",  "kind": "required",  "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
-         {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
-         {"name":"fitwindow",    "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
-         {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
-         {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option", "default":"'false'" },
-         {"name":"gageID",       "kind": "namevalue", "type": ["char"] },
-         {"name":"eventID",      "kind": "namevalue", "type": ["char"] },
-         {"name":"ax",           "kind": "namevalue", "type": [["matlab.graphics.axis.Axes"],["char"]]}
-      ],
-
-      "outputs":
-      [
-         {"name":"q",         "type": ["double"] },
-         {"name":"dqdt",      "type": ["double"] },
-         {"name":"dt",        "type": ["double"] },
-         {"name":"tq",        "type": ["double"] },
-         {"name":"rq",        "type": ["double"] }
-      ]
-   },
-   "bfra.plotdqdt":
-   {
-      "inputs":
-      [
-         {"name":"q",         "kind":"required",   "type":["vector","double"]}, 
-         {"name":"dqdt",      "kind":"required",   "type":["vector","double"]},
-         {"name":"fitmethod", "kind":"namevalue",  "type":["char", "choices={'nls','ols','mle','qtl'}"]},
-         {"name":"pickmethod","kind":"namevalue",  "type":["char", "choices={'auto','none','manual'}"]},
-         {"name":"plotfits",  "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"showfig",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"weights",   "kind":"namevalue",  "type":["vector","double"]},
-         {"name":"rain",      "kind":"namevalue",  "type":["vector","double"]},
-         {"name":"ax",        "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]},
-         {"name":"blate",     "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"precision", "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"timestep",  "kind":"namevalue",  "type":["scalar","double"]},      
-         {"name":"eventID",   "kind":"namevalue",  "type":["char"]},
-         {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.Events":
+   "bfra.wrapEvents":
    {
       "inputs":
       [
@@ -412,120 +505,6 @@
          {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.getevents":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
-         {"name":"r",            "kind":"required",   "type":["numeric"]},
-         {"name":"qmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"cmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.eventfinder":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
-         {"name":"r",            "kind":"required",   "type":["numeric"]},
-         {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.eventpicker":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",  "type":[["numeric","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",  "type":["numeric","vector"]},
-         {"name":"r",            "kind":"required",  "type":["numeric"]},
-         {"name":"nmin",         "kind":"required",  "type":["numeric","scalar"]},
-         {"name":"Info",         "kind":"required",  "type":["struct"]}
-      ]
-   },
-   "bfra.eventplotter":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",  "type":[["numeric","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",  "type":["numeric","vector"]},
-         {"name":"r",            "kind":"required",  "type":["numeric"]},
-         {"name":"Info",         "kind":"required",  "type":["struct"]},
-         {"name":"plotneg",      "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"plotevents",   "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"dqdt",         "kind":"namevalue", "type":["numeric","vector"]}
-      ]
-   },
-   "bfra.eventsplitter":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",   "type":[["numeric","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",   "type":["numeric","vector"]},
-         {"name":"r",            "kind":"required",   "type":["numeric"]},
-         {"name":"nmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"fmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmax",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmin",         "kind":"namevalue",  "type":["numeric","scalar"]},
-         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.loadcalm":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "required",
-                              "type": ["char","choices=bfra.stationlist"]}
-      ]
-   },
-   "bfra.loadghcnd":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "required",
-                              "type": ["char","choices=bfra.stationlist"]},
-         {"name":"t1",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]},
-         {"name":"t2",        "kind": "namevalue",
-                              "type": [["datetime","scalar"],["numeric","scalar"]]},
-         {"name":"units",     "kind": "namevalue",
-                              "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
-         {"name":"gapfill",   "kind":"namevalue", 
-                              "type":["logical"],"purpose":"Option"}
-      ]
-   },
-   "bfra.loadmeta":
-   {
-      "inputs":
-      [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
-      ]
-   },
-   "bfra.basinname":
-   {
-      "inputs":
-      [
-         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.stationlist"]}
       ]
    }
 }

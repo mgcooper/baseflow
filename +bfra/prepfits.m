@@ -14,6 +14,7 @@ function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
 
 %-------------------------------------------------------------------------------
    p = MipInputParser;
+   p.FunctionName='prepfits';
    p.addRequired('q',                           @(x)isnumeric(x)  );
    p.addRequired('dqdt',                        @(x)isnumeric(x)  );
    p.addParameter('weights',  ones(size(q)),    @(x)isnumeric(x)  );

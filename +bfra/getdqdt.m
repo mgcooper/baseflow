@@ -27,7 +27,7 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %-------------------------------------------------------------------------------
 % input handling    
 p = MipInputParser;
-p.FunctionName = 'bfra.getdqdt';
+p.FunctionName = 'getdqdt';
 p.CaseSensitive = true;
 p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x));
 p.addRequired( 'Q',                    @(x) isnumeric(x)                );

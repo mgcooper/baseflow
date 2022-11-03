@@ -5,7 +5,7 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
 % input parsing
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra.fitdqdt';
+p.FunctionName = 'fitdqdt';
 p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
 p.addRequired('Q',@(x)isnumeric(x));
 p.addRequired('R',@(x)isnumeric(x));

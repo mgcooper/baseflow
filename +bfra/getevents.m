@@ -30,7 +30,7 @@ function [T,Q,R,Info] = getevents(t,q,r,varargin)
 % input handling
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName    = 'bfra.getevents';
+p.FunctionName    = 'getevents';
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
 p.addRequired( 't',                    @(x) isnumeric(x) | isdatetime(x));
 p.addRequired( 'q',                    @(x) isnumeric(x) & numel(x)==numel(t));
