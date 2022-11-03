@@ -1,5 +1,5 @@
-function str = strings(requestedstring,varargin)
-%BFRA.STRINGS returns various latex-formatted strings
+function str = getstring(requestedstring,varargin)
+%BFRA.GETSTRING returns various latex-formatted strings
 %
 % INPUTS:
   % 'aQb'
@@ -9,7 +9,7 @@ function str = strings(requestedstring,varargin)
 % see also bfra.aQbString  
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 p               = inputParser;
-p.FunctionName  = 'bfra.strings';
+p.FunctionName  = 'getstring';
 p.CaseSensitive = false;
 
 addRequired(   p,'requestedstring',          @(x)ischar(x)     );
