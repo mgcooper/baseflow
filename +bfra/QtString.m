@@ -1,11 +1,11 @@
-function [Qtstr,aQbstr] = bfra_QtString(varargin)
-%BFRA_QTSTRING
+function [Qtstr,aQbstr] = QtString(varargin)
+%BFRA.QTSTRING
    
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % input handling
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    p = MipInputParser;
-   p.FunctionName = 'bfra_QtString';
+   p.FunctionName = 'bfra.QtString';
    p.addOptional('ab',[],@(x)isnumeric(x));
    p.addOptional('Q0',[],@(x)isnumeric(x));
    p.addParameter('printvalues',false,@(x)islogical(x));

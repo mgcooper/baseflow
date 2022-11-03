@@ -1,5 +1,5 @@
-function [href,ab] = bfra_refline(x,y,varargin)
-%BFRA_REFLINE adds a reference line to a point cloud plot
+function [href,ab] = refline(x,y,varargin)
+%BFRA.REFLINE adds a reference line to a point cloud plot
 %
 % Required inputs:
 %  x  = vector of type double (nominally discharge q)
@@ -23,10 +23,10 @@ function [href,ab] = bfra_refline(x,y,varargin)
 %
 % See also fitab, pointcloudintercept, pointcloud
 
-% NOTE: y comes in as -dq/dt, send it to bfra_fitab as -y, and to refline as y
+% NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra_refline';
+p.FunctionName = 'bfra.refline';
 p.PartialMatching = true;
 p.addRequired('x',@(x)isnumeric(x));
 p.addRequired('y',@(x)isnumeric(x));
@@ -57,7 +57,7 @@ ax          = p.Results.ax;
       
 % need options for how/if to apply the mask - e.g., we might want to show the
 % 'bestfit' to all data, and use the mask for late-time fit. also keep in mind
-% bfra_eventphi calls this. mask is default true in parsing. 
+% bfra.eventphi calls this. mask is default true in parsing. 
 
    % use this to find the equation of the line
    axb = @(a,x,b) a.*x.^b;
@@ -81,27 +81,27 @@ ax          = p.Results.ax;
          b = 0;                           % slope = 0 unless stage precision is known
          a = precision*3600*24/timestep;  % 1 m3/s converted to m3/timestep with timestep in days         
       case 'linear'
-         F = bfra_fitab(x(mask),-y(mask),'ols','order',1);
+         F = bfra.fitab(x(mask),-y(mask),'ols','order',1);
          a = F.ab(1);
          b = F.ab(2);
       case 'bestfit'
-         F = bfra_fitab(x(mask),-y(mask),'nls');
+         F = bfra.fitab(x(mask),-y(mask),'nls');
          a = F.ab(1);
          b = F.ab(2);
       case 'userfit'
          a = userab(1);
          b = userab(2);
       case 'envelope'
-         F = bfra_fitab(x(mask),-y(mask),'envelope','refqtls',refqtls,'order',refslope);
+         F = bfra.fitab(x(mask),-y(mask),'envelope','refqtls',refqtls,'order',refslope);
          a = F.ab(1);
          b = F.ab(2);
       case 'earlytime'
          if refslope == 1; refslope = 3; end
-         F = bfra_fitab(x,-y,'envelope','refqtls',[0.95 0.95],'order',refslope);
+         F = bfra.fitab(x,-y,'envelope','refqtls',[0.95 0.95],'order',refslope);
          a = F.ab(1);
          b = F.ab(2);
       case 'latetime'
-         F = bfra_fitab(x(mask),-y(mask),'envelope','refqtls',[0.5 0.5],'order',refslope);
+         F = bfra.fitab(x(mask),-y(mask),'envelope','refqtls',[0.5 0.5],'order',refslope);
          a = F.ab(1);
          b = F.ab(2);
       otherwise
@@ -114,9 +114,9 @@ ax          = p.Results.ax;
             else
                % deal with refpoints. they aren't really supported anymore
             end
-            F = bfra_fitab(x(mask),-y(mask),'envelope','refqtls',refqtls,'order',refslope);
+            F = bfra.fitab(x(mask),-y(mask),'envelope','refqtls',refqtls,'order',refslope);
          else
-            F = bfra_fitab(x(mask),-y(mask),'mean','order',refslope);
+            F = bfra.fitab(x(mask),-y(mask),'mean','order',refslope);
          end
          a = F.ab(1);
          b = F.ab(2);

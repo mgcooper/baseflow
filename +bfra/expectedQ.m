@@ -1,10 +1,10 @@
-function [Qexp,Q0,pQexp,pQ0] = bfra_expectedQ(a,b,tau,varargin)
-%BFRA_EXPECTEDQ general description of function
+function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,varargin)
+%BFRA.EXPECTEDQ general description of function
 % 
 % Syntax:
 % 
-%  [Qexp,Q0] = BFRA_EXPECTEDQ(a,b,tau);
-%  [Qexp,Q0] = BFRA_EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
+%  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau);
+%  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
 %              Qexp/Q0 relative to the input Q
 % 
 % Author: Matt Cooper, DD-MMM-YYYY, https://github.com/mgcooper
@@ -13,7 +13,7 @@ function [Qexp,Q0,pQexp,pQ0] = bfra_expectedQ(a,b,tau,varargin)
 % input parsing
 %------------------------------------------------------------------------------
 p                 = inputParser;
-p.FunctionName    = 'bfra_expectedQ';
+p.FunctionName    = 'bfra.expectedQ';
 
 addRequired(p,    'a',                    @(x)isnumeric(x)     );
 addRequired(p,    'b',                    @(x)isnumeric(x)     );

@@ -1,5 +1,5 @@
-function [aQbstr,Qtstr] = bfra_aQbString(varargin)
-%BFRA_AQBSTRING
+function [aQbstr,Qtstr] = aQbString(varargin)
+%BFRA.AQBSTRING
 %
 % INPUTS:
    % one input:      array [a,b]
@@ -9,13 +9,13 @@ function [aQbstr,Qtstr] = bfra_aQbString(varargin)
    % aQbstr:         formatted latex string for equation dQdt = aQb
    % Qtstr:          formatted latex string for equation Q(t) = f(a,b,Q0)
 
-% TODO: merge this with bfra_strings
+% TODO: merge this with bfra.strings
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % input handling
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 p = MipInputParser;
-p.FunctionName = 'bfra_aQbString';
+p.FunctionName = 'bfra.aQbString';
 p.addOptional('ab',[],@(x)isnumeric(x));
 p.addOptional('Q0',[],@(x)isnumeric(x));
 p.addParameter('printvalues',false,@(x)islogical(x));

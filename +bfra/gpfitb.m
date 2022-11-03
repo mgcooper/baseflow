@@ -1,4 +1,4 @@
-function [Fit,b,alpha,k] = bfra_gpfitb(x,varargin)
+function [Fit,b,alpha,k] = gpfitb(x,varargin)
 %GPFIT2B returns [b,alpha,k]=gpfit2b(x,xmin) where parmhat=gpfit(xhat)
 %and xhat is continuous data believed to follow an untruncated Pareto
 %distribution with some known xmin that has been subtracted from the
@@ -6,7 +6,7 @@ function [Fit,b,alpha,k] = bfra_gpfitb(x,varargin)
 %xmin=0. 
 %------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra_gpfitb';
+p.FunctionName = 'bfra.gpfitb';
 p.PartialMatching=true;
 p.addRequired('x',@(x)isnumeric(x));
 p.addParameter('xmin',0,@(x)isnumeric(x));
@@ -33,9 +33,9 @@ varsym = p.Results.varsym;
    kL       = k_ci(1,1);
    kH       = k_ci(2,1);
 
-   bL       = bfra_conversions(kL,'k','b');
-   b        = bfra_conversions(k,'k','b');
-   bH       = bfra_conversions(kH,'k','b');
+   bL       = bfra.conversions(kL,'k','b');
+   b        = bfra.conversions(k,'k','b');
+   bH       = bfra.conversions(kH,'k','b');
 
    alpha    = 1+1/k;
    alphaL   = 1+1/kH;
@@ -51,8 +51,8 @@ varsym = p.Results.varsym;
       reps     = bootstrp(1000,@gpfit,x);
       kreps    = reps(:,1);
       sigreps  = reps(:,2);                           % tau0
-      breps    = bfra_conversions(kreps,'k','b');
-      areps    = bfra_conversions(kreps,'k','alpha');
+      breps    = bfra.conversions(kreps,'k','b');
+      areps    = bfra.conversions(kreps,'k','alpha');
 
       % As a rough check on the sampling distribution of the parameter
       % estimators, we can look at histograms of the bootstrap replicates.  
@@ -184,7 +184,7 @@ varsym = p.Results.varsym;
 %       x = x0(x0>0);
 %       [x,~] = prepareCurveData(x,x);
 %       figure;
-%       bfra_plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
+%       bfra.plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
    end
 
 end

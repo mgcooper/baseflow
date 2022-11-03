@@ -1,5 +1,5 @@
-function ETS = bfra_fitETS(T,Q,R,varargin)
-%BFRA_FITETS
+function ETS = fitETS(T,Q,R,varargin)
+%BFRA.FITETS
 
 % note: only pass in identified recession events (not timeseries of
 % flow) because this first fits the ENTIRE recession to estimate 'gamma'
@@ -12,7 +12,7 @@ function ETS = bfra_fitETS(T,Q,R,varargin)
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    p = MipInputParser;
-   p.FunctionName = 'bfra_fitETS';
+   p.FunctionName = 'bfra.fitETS';
    p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
    p.addRequired('Q',@(x)isnumeric(x));
    p.addRequired('R',@(x)isnumeric(x));

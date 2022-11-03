@@ -1,5 +1,5 @@
-function [D,S] = bfra_aquiferthickness(b,tau,phi,Qb,varargin)
-%BFRA_AQUIFERTHICKNESS compute the aquifer thickness from recession parameters
+function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
+%BFRA.AQUIFERTHICKNESS compute the aquifer thickness from recession parameters
 %b, tau, phi, and baseflow Qb.
 % 
 % Inputs:
@@ -27,6 +27,6 @@ else
    isflat = varargin{1};
 end
 
-N = bfra_conversions(b,'b','N','isflat',isflat);
+N = bfra.conversions(b,'b','N','isflat',isflat);
 D = tau./phi./(N+1).*Qb;
 S = D.*phi; % convert layer thickness to storage

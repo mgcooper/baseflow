@@ -1,5 +1,5 @@
-function [Q,dQdt,t,hFig] = bfra_Qnonlin(a,b,Q0,t,varargin)
-%BFRA_NONLINQ plots the theoretical discharge predicted by a/b values
+function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
+%BFRA.NONLINQ plots the theoretical discharge predicted by a/b values
 
 % the loop is ugly but it's the easiest way to allow any size a,b,Q0.
 % if I wanted to restrict two of the three a,b,Q0 to be scalar and let
@@ -48,12 +48,12 @@ function [Q,dQdt,t,hFig] = bfra_Qnonlin(a,b,Q0,t,varargin)
     if plotFig
         
         % get the characterisitc timescale
-        tc  = bfra_characteristicTime(a(1),b(1),Q0(1));
+        tc  = bfra.characteristicTime(a(1),b(1),Q0(1));
         
         % get formatted strings for the legend
         showAB  = false;
-        Qtstr   = bfra_QtString(a,b,Q0,showAB);
-        tcstr   = bfra_tcString(a,b,Q0,showAB);
+        Qtstr   = bfra.QtString(a,b,Q0,showAB);
+        tcstr   = bfra.tcString(a,b,Q0,showAB);
         
         % make a figure
         tileFigure();

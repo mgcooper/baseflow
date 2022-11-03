@@ -1,4 +1,4 @@
-function varargout = bfra_specialfunctions(funcname,varargin)
+function varargout = specialfunctions(funcname,varargin)
    
 %    L2      = L.*L;
 %    phiA2   = phi.*A.^2;

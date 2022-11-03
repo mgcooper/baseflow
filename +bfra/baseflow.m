@@ -1,5 +1,5 @@
-function [Qb,dQbdt,Q,dQadt,hbtrend,hatrend] = bfra_baseflow(t,Q,varargin)
-%bfra_baseflow computes the expected value of baseflow and rate of change
+function [Qb,dQbdt,Q,dQadt,hbtrend,hatrend] = baseflow(t,Q,varargin)
+%baseflow computes the expected value of baseflow and rate of change
 %posted on an annual basis
 % Inputs:
 %  t = time, posted annually [years]
@@ -7,7 +7,7 @@ function [Qb,dQbdt,Q,dQadt,hbtrend,hatrend] = bfra_baseflow(t,Q,varargin)
 
 %-------------------------------------------------------------------------------
 p=MipInputParser;
-p.FunctionName='bfra_baseflow';
+p.FunctionName='bfra.baseflow';
 p.PartialMatching = true;
 p.addRequired('t',@(x)isdatetime(x)|isnumeric(x));
 p.addRequired('Q',@(x)isnumeric(x));

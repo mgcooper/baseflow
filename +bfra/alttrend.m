@@ -1,5 +1,5 @@
-function [D,dDdt,dDadt,C] = bfra_alttrend(tau,phi,N,Qb,dQbdt)
-%BFRA_ALTTREND computes the linear trend in active layer (aquifer) thickness
+function [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt)
+%BFRA.ALTTREND computes the linear trend in active layer (aquifer) thickness
 % Inputs:
 %  tau = drainage timescale, scalar [time in days]
 %  phi = drainable porosity, scalar [volume/volume]

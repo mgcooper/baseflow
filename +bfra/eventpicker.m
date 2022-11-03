@@ -168,7 +168,7 @@ end
 
 function h = eventPlotter(t,q,r,dqdt,Info)
    
-   % stripped down version of bfra_plotevents with ginput picking added
+   % stripped down version of bfra.plotevents with ginput picking added
    
    if isempty(Info.istart)
       disp('no valid events')

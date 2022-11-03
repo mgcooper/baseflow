@@ -1,19 +1,19 @@
-function Calm = bfra_loadcalm(basinname,varargin)
-%BFRA_LOADCALM loads calm ALT data for a basin in the Bounds struct
+function Calm = loadcalm(basinname,varargin)
+%BFRA.LOADCALM loads calm ALT data for a basin in the Bounds struct
 
 % since I think in terms of basins right now, not calm sites, this accepts
 % the basin name not the calm site name
 
 %------------------------------------------------------------------------------
    p                = MipInputParser;
-   p.FunctionName   = 'bfra_loadcalm';
+   p.FunctionName   = 'bfra.loadcalm';
    p.addRequired('basinname',@(x)ischar(x));
    p.addOptional('version','current',@(x)ischar(x));
    p.parseMagically('caller');
    version = p.Results.version;
 %------------------------------------------------------------------------------
    
-   Meta = bfra_loadmeta(basinname,version);
+   Meta = bfra.loadmeta(basinname,version);
 
    % load the calm data
    pathdata = [getenv('USERDATAPATH') 'interface/permafrost/alt/CALM/archive/'];    

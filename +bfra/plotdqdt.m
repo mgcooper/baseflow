@@ -1,13 +1,13 @@
-function [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt,varargin)
-%bfra_plotdqdt Plots the log-log q vs dq/dt with options to select the
+function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
+%plotdqdt Plots the log-log q vs dq/dt with options to select the
 %portion of data to fit and then fits the data
 % 
 %  Syntax:
-%     [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'fitmethod',fitmethod)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'pickmethod',pickmethod)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'weights',weights)
-%     [hFits,Picks,Fits] = bfra_plotdqdt(_,'useax',axis_object)
+%     [hFits,Picks,Fits] = bfra.plotdqdt(q,dqdt)
+%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'fitmethod',fitmethod)
+%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'pickmethod',pickmethod)
+%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'weights',weights)
+%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)
 % 
 %  Required inputs:
 %  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
@@ -18,7 +18,7 @@ function [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt,varargin)
 % 
 %  See also getdqdt, fitdqdt
 
-% NOTE: now that pickFitter calls bfra_fitab, this function does everything
+% NOTE: now that pickFitter calls bfra.fitab, this function does everything
 % that an official workflow would do, i think, and therefore should be
 % renamed eventually (except it doesn't pick events)
 
@@ -30,43 +30,43 @@ function [hFits,Picks,Fits] = bfra_plotdqdt(q,dqdt,varargin)
 %-------------------------------------------------------------------------------  
 % input parser
 p               = MipInputParser;
-p.FunctionName  = 'bfra_plotdqdt';
+p.FunctionName  = 'bfra.plotdqdt';
 p.CaseSensitive = false;
 
 validq         = @(x)validateattributes(x,{'numeric'},               ...
                      {'real','column','size',size(dqdt)},            ...
-                     'bfra_plotdqdt','q',1);
+                     'bfra.plotdqdt','q',1);
 validqdt       = @(x)validateattributes(x,{'numeric'},               ...
                      {'real','column','size',size(q)},               ...
-                     'bfra_plotdqdt','dqdt',2);
+                     'bfra.plotdqdt','dqdt',2);
 validfitmethod = @(x)validateattributes(x,{'char','string'},         ...
                      {'scalartext'},                                 ...
-                     'bfra_plotdqdt','fitmethod');
+                     'bfra.plotdqdt','fitmethod');
 validpickmethod= @(x)validateattributes(x,{'char','string'},         ...
                      {'scalartext'},                                 ...
-                     'bfra_plotdqdt','pickmethod');
+                     'bfra.plotdqdt','pickmethod');
 validplotopt   = @(x)validateattributes(x,{'logical','scalar'},      ...
                      {'nonempty'},                                   ...
-                     'bfra_plotdqdt','plotfits');
+                     'bfra.plotdqdt','plotfits');
 validweights   = @(x)validateattributes(x,{'numeric'},               ...
                      {'real','column','size',size(q)},               ...
-                     'bfra_plotdqdt','weights');
+                     'bfra.plotdqdt','weights');
 validax        = @(x)validateattributes(x,                           ...
                      {'matlab.graphics.axis.Axes','char'},           ...
                      { 'scalar' },     ...
-                     'bfra_plotdqdt','ax');
+                     'bfra.plotdqdt','ax');
 validtimestep  = @(x)validateattributes(x,{'numeric','duration'},    ...
                      {'nonempty'},                                   ...
-                     'bfra_plotdqdt','timestep');
+                     'bfra.plotdqdt','timestep');
 validprecision = @(x)validateattributes(x,{'numeric'},               ...
                      {'nonempty'},                                   ...
-                     'bfra_plotdqdt','precision');                     
+                     'bfra.plotdqdt','precision');                     
 validblate     = @(x)validateattributes(x,{'numeric'},               ...
                      {'real','scalar'},                              ...
-                     'bfra_plotdqdt','blate');
+                     'bfra.plotdqdt','blate');
 validrain      = @(x)validateattributes(x,{'numeric'},               ...
                      {'real','column','size',size(dqdt)},            ...
-                     'bfra_plotdqdt','rain');
+                     'bfra.plotdqdt','rain');
 
 p.addRequired(   'q',                           validq            );
 p.addRequired(   'dqdt',                        validqdt          );
@@ -93,7 +93,7 @@ weights  = p.Results.weights;
 %------------------------------------------------------------------------------
    
    % Prep fits
-   [~,~,logx,logy,weights,ok] = bfra_prepfits(q,dqdt,'weights',weights);
+   [~,~,logx,logy,weights,ok] = bfra.prepfits(q,dqdt,'weights',weights);
    
    if ok == false
       return;
@@ -217,11 +217,11 @@ function Fits = pickFitter(Picks,fitmethod)
       switch fitmethod
          
          case {'ols','qtl','nls','mle'}
-            Fit   = bfra_fitab(q,dqdt,'nls');
+            Fit   = bfra.fitab(q,dqdt,'nls');
          case 'comp'
-            FitO  = bfra_fitab(q,dqdt,'ols','weights',weights);
-            FitQ  = bfra_fitab(q,dqdt,'qtl','weights',weights);
-            FitN  = bfra_fitab(q,dqdt,'nls','weights',weights);
+            FitO  = bfra.fitab(q,dqdt,'ols','weights',weights);
+            FitQ  = bfra.fitab(q,dqdt,'qtl','weights',weights);
+            FitN  = bfra.fitab(q,dqdt,'nls','weights',weights);
             
             Fits.abqtl(n,:)   = FitO.ab;
             Fits.abnls(n,:)   = FitN.ab;
@@ -294,7 +294,7 @@ function h = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,    ...
          yplot       = abnls(1).*xplot.^abnls(2);
 
          h.plots{n}  = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
-         ltext{n}    = bfra_aQbString(abnls,'printvalues',true);
+         ltext{n}    = bfra.aQbString(abnls,'printvalues',true);
          
       else
 %          if Fits.ab(n,2)<0; continue; end
@@ -307,7 +307,7 @@ function h = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,    ...
             % otherwise cycle through the colors
             h.plots{n}  = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
          end
-         ltext{n}    = bfra_aQbString(Fits.ab(n,:),'printvalues',true);
+         ltext{n}    = bfra.aQbString(Fits.ab(n,:),'printvalues',true);
       end
    end
    
@@ -329,8 +329,8 @@ function h = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,    ...
    %    h.leg       = legend([h.plots{:}],ltext,'Location','best',      ...
    %                   'Interpreter','latex','AutoUpdate','off');
 
-   xlabel(bfra_strings('Q','units',true));
-   ylabel(bfra_strings('dQdt','units',true));
+   xlabel(bfra.strings('Q','units',true));
+   ylabel(bfra.strings('dQdt','units',true));
 
    xlimkeep = get(gca,'XLim');
    ylimkeep = get(gca,'YLim');
@@ -339,13 +339,13 @@ function h = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,    ...
       refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl
    end
    
-   [hUpper,abUpper]  = bfra_refline(x,y,  'refline',  'upperenvelope',     ...
+   [hUpper,abUpper]  = bfra.refline(x,y,  'refline',  'upperenvelope',     ...
                                           'timestep', timestep             );
-   [hLower,abLower]  = bfra_refline(x,y,  'refline',  'lowerenvelope',     ...
+   [hLower,abLower]  = bfra.refline(x,y,  'refline',  'lowerenvelope',     ...
                                           'precision',precision            );
-   [hLate,abLate]    = bfra_refline(x,y,  'refline',  'latetime',          ...
+   [hLate,abLate]    = bfra.refline(x,y,  'refline',  'latetime',          ...
                                           'refslope', blate                );
-   [hEarly,abEarly]  = bfra_refline(x,y,  'refline',  'earlytime'          );
+   [hEarly,abEarly]  = bfra.refline(x,y,  'refline',  'earlytime'          );
 
    % add the ref-point a/b values
    h.aEarly    = abEarly(1);
@@ -488,9 +488,9 @@ function [istart, istop] = detectTransition(q,dqdt,istart,istop)
          dq1   = dqdt(istart(1):istop(1));
          dq2   = dqdt(istart(2):istop(2));
          dq3   = dqdt(istart(3):istop(3));
-         ab1   = bfra_wols(log(q1),log(-dq1));
-         ab2   = bfra_wols(log(q2),log(-dq2));
-         ab3   = bfra_wols(log(q3),log(-dq3));
+         ab1   = bfra.wols(log(q1),log(-dq1));
+         ab2   = bfra.wols(log(q2),log(-dq2));
+         ab3   = bfra.wols(log(q3),log(-dq3));
 
          % three cases we want to :
          % 1: a flat period between two recessions

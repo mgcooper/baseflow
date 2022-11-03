@@ -1,17 +1,17 @@
-function [Calm,Meta] = bfra_loadcalm(basinname)
-%BFRA_LOADCALM loads calm ALT data for a basin in the Bounds struct
+function [Calm,Meta] = loadcalm(basinname)
+%BFRA.LOADCALM loads calm ALT data for a basin in the Bounds struct
 
 % since I think in terms of basins right now, not calm sites, this accepts
 % the basin name not the calm site name
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    p                = MipInputParser;
-   p.FunctionName   = 'bfra_loadcalm';
+   p.FunctionName   = 'bfra.loadcalm';
    p.addRequired('basinname',@(x)ischar(x));
    p.parseMagically('caller');
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    
-   MetaBasin   =  bfra_loadmeta(basinname);
+   MetaBasin   =  bfra.loadmeta(basinname);
 
    % load the calm data
    pathdata    =  setpath('/interface/data/permafrost/');
@@ -48,7 +48,7 @@ end
 
 % function [Calm,Meta] = aggregateCalmData(Calm,Meta)
 %    
-%    % this stuff could be moved to bfra_loadcalm
+%    % this stuff could be moved to bfra.loadcalm
 %    % this converts all the site data into one timeseries with stats
 %    Data     = timetablereduce(Data);
 % 
@@ -66,7 +66,7 @@ end
 %    S        = geopoint(S);
 % 
 % % %    this was here as an example of how i might write a function
-% % bfra_writeshapefile
+% % bfra.writeshapefile
 % %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % % save the data
 % %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

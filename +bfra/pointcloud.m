@@ -1,5 +1,5 @@
-function out = bfra_pointcloud(q,dqdt,varargin)
-%BFRA_POINTCLOUD plots a 'point cloud' diagram to estimate aquifer parameters
+function out = pointcloud(q,dqdt,varargin)
+%BFRA.POINTCLOUD plots a 'point cloud' diagram to estimate aquifer parameters
 %from recession flow data.
 %
 % Required inputs:
@@ -26,7 +26,7 @@ function out = bfra_pointcloud(q,dqdt,varargin)
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra_pointcloud';
+p.FunctionName = 'bfra.pointcloud';
 p.addRequired('q',@(x)isnumeric(x));
 p.addRequired('dqdt',@(x)isnumeric(x));
 p.addParameter('mask',false,@(x)islogical(x));
@@ -70,8 +70,8 @@ reflines = p.Results.reflines;
 %    xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
 
    grid off; 
-   xlabel(bfra_strings('Q','units',true),'FontSize',14);
-   ylabel(bfra_strings('dQdt','units',true),'FontSize',14);
+   xlabel(bfra.strings('Q','units',true),'FontSize',14);
+   ylabel(bfra.strings('dQdt','units',true),'FontSize',14);
 
    % add reflines
    for n = 1:numel(reflines)
@@ -79,7 +79,7 @@ reflines = p.Results.reflines;
       switch reflines{n}
          
          case 'early'
-            [h(n),ab(n,:)] =  bfra_refline(                 ...
+            [h(n),ab(n,:)] =  bfra.refline(                 ...
                               q,-dqdt,                      ...
                               'refline','earlytime',        ...
                               'refslope',3,                 ...
@@ -91,7 +91,7 @@ reflines = p.Results.reflines;
             h(n).LineWidth = 1;
             
          case 'late'
-            [h(n),ab(n,:)] =  bfra_refline(                 ...
+            [h(n),ab(n,:)] =  bfra.refline(                 ...
                               q,-dqdt,                      ...
                               'refline','latetime',         ...
                               'refslope',blate,             ...
@@ -102,7 +102,7 @@ reflines = p.Results.reflines;
             h(n).LineWidth = 1;
             
          case 'upperenvelope'
-            [h(n),ab(n,:)] =  bfra_refline(                 ...
+            [h(n),ab(n,:)] =  bfra.refline(                 ...
                               q,-dqdt,                      ...
                               'refline','upperenvelope',    ...
                               'labels',reflabels            ...
@@ -112,7 +112,7 @@ reflines = p.Results.reflines;
             yupplim  = ab(n,1)*max(xlims)^ab(n,2);
             
          case 'lowerenvelope'
-            [h(n),ab(n,:)] =  bfra_refline(                 ...
+            [h(n),ab(n,:)] =  bfra.refline(                 ...
                               q,-dqdt,                      ...
                               'refline','lowerenvelope',    ...
                               'labels',reflabels            ...
@@ -121,7 +121,7 @@ reflines = p.Results.reflines;
             ylowlim  = min(0.8.*ab(n,1),0.8*min(ylims));
             
          case 'bestfit'
-            [h(n),ab(n,:)] = bfra_refline(q,-dqdt, 'refline','bestfit');
+            [h(n),ab(n,:)] = bfra.refline(q,-dqdt, 'refline','bestfit');
             h(n).LineWidth = 2;     % 1
             
             % dummy plot to make space in legend
@@ -131,7 +131,7 @@ reflines = p.Results.reflines;
          case 'userfit'
             % i turned off 'labels' for userfit, that way it goes to the legend
             % just like 'bestfit' and the arrows are reserved for reflines
-            [h(n),ab(n,:)] =  bfra_refline(                 ...
+            [h(n),ab(n,:)] =  bfra.refline(                 ...
                               q,-dqdt,                      ...
                               'refline','userfit',          ...
                               'userab',userab,              ...
@@ -166,11 +166,11 @@ reflines = p.Results.reflines;
          
          ibest = strcmp(reflines,'bestfit');
          iuser = strcmp(reflines,'userfit');
-         tbest = [bfra_aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
-         tuser = [bfra_aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
+         tbest = [bfra.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
+         tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
          % if user text provided, swap it out
          if ~isempty(usertext)
-            tuser = [bfra_aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
+            tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
          end
          ltext = {tbest; tuser};
 
@@ -178,7 +178,7 @@ reflines = p.Results.reflines;
          % % use bestfit for the legend
          % ibf   = strcmp(reflines,'bestfit');
          % hleg  = h(ibf);
-         % ltext = bfra_aQbString(ab(ibf,:),'printvalues',true);
+         % ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
          % ltext = [ltext ' (NLS fit)'];
          
       % check if either userfit or bestfit are requested
@@ -187,7 +187,7 @@ reflines = p.Results.reflines;
          % use whichever one was requested
          ibf   = ismember(reflines,fitcheck);
          hleg  = h(ibf);
-         ltext = bfra_aQbString(ab(ibf,:),'printvalues',true);
+         ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
          
          if ~any(ismember(reflines,'userfit'))
             ltext = [ltext ' (NLS fit)'];

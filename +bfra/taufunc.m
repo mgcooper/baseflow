@@ -1,4 +1,4 @@
-function [taufunc,tau] = bfra_taufunc(a,b,Q)
+function [taufunc,tau] = taufunc(a,b,Q)
 
     % first get tau function
     taufunc = @(a,b,Q) 1./a.*Q.^(1-b);

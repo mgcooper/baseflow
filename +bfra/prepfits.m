@@ -1,5 +1,5 @@
-function [x,y,logx,logy,weights,success] = bfra_prepfits(q,dqdt,varargin)
-%BFRA_PREPFITS preps q and -dq/dt for event-scale fitting
+function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
+%BFRA.PREPFITS preps q and -dq/dt for event-scale fitting
 % Required inputs:
 %  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
 %  dqdt        =  discharge rate of change (L T^-2)

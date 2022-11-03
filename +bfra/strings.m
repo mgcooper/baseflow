@@ -1,15 +1,15 @@
-function str = bfra_strings(requestedstring,varargin)
-%BFRA_STRINGS returns various latex-formatted strings
+function str = strings(requestedstring,varargin)
+%BFRA.STRINGS returns various latex-formatted strings
 %
 % INPUTS:
   % 'aQb'
   % 'Q'
   % 'dQ/dt [m3 d-1]
         
-% see also bfra_aQbString  
+% see also bfra.aQbString  
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 p               = inputParser;
-p.FunctionName  = 'bfra_strings';
+p.FunctionName  = 'bfra.strings';
 p.CaseSensitive = false;
 
 addRequired(   p,'requestedstring',          @(x)ischar(x)     );

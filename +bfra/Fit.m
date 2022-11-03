@@ -1,6 +1,6 @@
-function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
+function K = Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
                         eventtag,fittag,fitcount,fitopts,K)
-%BFRA_FIT estimates the recession coefficient (wrapper around bfra_fitab)
+%bfra.FIT estimates the recession coefficient (wrapper around bfra.fitab)
 % 
 %-------------------------------------------------------------------------------
 %   Inputs:
@@ -27,7 +27,7 @@ function K = BFRA_Fit( q,dqdt,deriv,method,order,station,eventdate,    ...
    warning off
 
 % fit a/b
-   [Fit,ok] = bfra_fitab(q,dqdt,method,'fitopts',fitopts);
+   [Fit,ok] = bfra.fitab(q,dqdt,method,'fitopts',fitopts);
    
 % check for fitting failure
 if ok == false
@@ -46,7 +46,7 @@ end
    tauH  =  1/a*(min(q))^(1-b);
 
 % event-scale storage range
-   [Smin,Smax,dS] = bfra_dynamicS(a,b,min(q),max(q));
+   [Smin,Smax,dS] = bfra.dynamicS(a,b,min(q),max(q));
 
 
 % package output

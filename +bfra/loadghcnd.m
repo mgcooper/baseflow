@@ -1,7 +1,7 @@
-function GHCN = bfra_loadghcnd(basinname,varargin)
+function GHCN = loadghcnd(basinname,varargin)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 p=MipInputParser;
-p.FunctionName='bfra_loadghcnd';
+p.FunctionName='bfra.loadghcnd';
 p.PartialMatching=true;
 p.addRequired('basinname',@(x)ischar(x));
 p.addParameter('t1',NaT,@(x) isdatetime(x)|isnumeric(x));

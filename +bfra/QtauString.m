@@ -1,5 +1,5 @@
-function [Qtaustr,aQbstr] = bfra_QtauString(varargin)
-%BFRA_QTAUSTRING
+function [Qtaustr,aQbstr] = QtauString(varargin)
+%BFRA.QTAUSTRING
    
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % input handling

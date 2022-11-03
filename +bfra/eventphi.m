@@ -1,10 +1,10 @@
-function [phi,a] = bfra_eventphi(K,Fits,A,D,L,blate,varargin)
-%BFRA_EVENTPHI estimates drainable porosity phi from individual recession
+function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)
+%BFRA.EVENTPHI estimates drainable porosity phi from individual recession
 %events using the method of Troch, Troch, and Brutsaert, 1993.
 % 
 % Required inputs:
-%  K     =  table of fitted values of a, b, tau, for each event (output of BFRA_dqdt) 
-%  Fits  =  structure containing the fitted q/dqdt timeseries (output of BFRA_dqdt)
+%  K     =  table of fitted values of a, b, tau, for each event (output of bfra.dqdt) 
+%  Fits  =  structure containing the fitted q/dqdt timeseries (output of bfra.dqdt)
 %  A     =  basin area contributing to baseflow (L^2)
 %  D     =  saturated aquifer thickness (L)
 %  L     =  active stream length (L)
@@ -22,7 +22,7 @@ function [phi,a] = bfra_eventphi(K,Fits,A,D,L,blate,varargin)
 %-------------------------------------------------------------------------------
 p = MipInputParser;
 p.StructExpand = false;
-p.FunctionName = 'bfra_eventphi';
+p.FunctionName = 'bfra.eventphi';
 p.addRequired('K',@(x)istable(x));
 p.addRequired('Fits',@(x)isstruct(x));
 p.addRequired('A',@(x)isnumeric(x));
@@ -63,20 +63,20 @@ for n = 1:numevents
    end
       
    % put a line of slope 3 and 1/1.5/bhat through the point cloud
-   a1 = bfra_pointcloudintercept(thisq,thisdqdt,b1,'envelope','refqtls',[0.95 0.95]);
-   a2 = bfra_pointcloudintercept(thisq,thisdqdt,b2,'envelope','refqtls',refqtls);
+   a1 = bfra.pointcloudintercept(thisq,thisdqdt,b1,'envelope','refqtls',[0.95 0.95]);
+   a2 = bfra.pointcloudintercept(thisq,thisdqdt,b2,'envelope','refqtls',refqtls);
 
    % choose appropriate solutions
    if isempty(soln1) && isempty(soln2)
 
       if blate==1
-         phi(n) = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',true,          ...
+         phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true,          ...
                                        'soln1','PK62','soln2','BS03');
       elseif blate==3/2
-         phi(n) = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',true,          ...
+         phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true,          ...
                                        'soln1','PK62','soln2','BS04');
       elseif blate>1 && blate<2
-         phi(n) = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',true,          ...
+         phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true,          ...
                                        'soln1','RS05','soln2','RS05');
       else
          % phi remains nan
@@ -84,7 +84,7 @@ for n = 1:numevents
 
    % user-specified solutions
    else
-      phi(n) = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',true,             ...
+      phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true,             ...
                                        'soln1',soln1,'soln2',soln2);
    end
 

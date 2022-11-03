@@ -1,5 +1,5 @@
-function [phi,solns,desc] = bfra_fitphi(a1,a2,b2,A,D,L,varargin)
-%BFRA_FITPHI estimates drainable porosity phi using an early-time and
+function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
+%BFRA.FITPHI estimates drainable porosity phi using an early-time and
 %late-time solution. 
 % 
 % Required inputs:
@@ -23,7 +23,7 @@ function [phi,solns,desc] = bfra_fitphi(a1,a2,b2,A,D,L,varargin)
 %-------------------------------------------------------------------------------
 p = MipInputParser;
 p.StructExpand = false;
-p.FunctionName = 'bfra_fitphi';
+p.FunctionName = 'bfra.fitphi';
 p.addRequired('a1',@(x)isnumeric(x));
 p.addRequired('a2',@(x)isnumeric(x));
 p.addRequired('b2',@(x)isnumeric(x));
@@ -97,7 +97,7 @@ for m = 1:numsoln
       % NOTE: this is probably not a valid choice, because B94 is for
       % homogeneous soils whereas RS06 is heterogeneous.
       case 'BR94_RS06'        % Brutsaert 1994, early-time, b=3
-         n     = bfra_conversions(b2,'b','n','isflat',false);
+         n     = bfra.conversions(b2,'b','n','isflat',false);
         
          
          % a1 = 1.133/(k*phi*D^3*L^2*cos(theta))
@@ -125,9 +125,9 @@ for m = 1:numsoln
       case 'RS05_RS05'     % Rupp and Selker, 2005 (early-time, b=3)
                            % Rupp and Selker, 2005 (late-time, b=f(n))
          
-         n        = bfra_conversions(b2,'b','n','isflat',true);         
-         fR1      = bfra_specialfunctions('fR1',n);
-         fR2      = bfra_specialfunctions('fR2',n);
+         n        = bfra.conversions(b2,'b','n','isflat',true);         
+         fR1      = bfra.specialfunctions('fR1',n);
+         fR2      = bfra.specialfunctions('fR2',n);
          
          n1       = n+1;
          n2       = n+2;

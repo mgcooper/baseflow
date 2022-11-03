@@ -1,4 +1,4 @@
-function varargout = bfra_conversions(inputvalue,inputvarname,outputvarname,varargin)
+function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    p = MipInputParser;
@@ -12,14 +12,14 @@ function varargout = bfra_conversions(inputvalue,inputvarname,outputvarname,vara
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    
 % convert whatever is passed in to b, then from b to whatever is requested
-   b              = bfra_convert2b(inputvalue,inputvarname,isflat);
-   varargout{1}   = bfra_convertb(b,outputvarname,isflat);
+   b              = bfra.convert2b(inputvalue,inputvarname,isflat);
+   varargout{1}   = bfra.convertb(b,outputvarname,isflat);
 
 end
 
 
-function b = bfra_convert2b(inputvalue,inputvarname,isflat)
-%BFRA_CONVERT2B Convert the recession flow power law exponent b to any
+function b = bfra.convert2b(inputvalue,inputvarname,isflat)
+%bfra.CONVERT2B Convert the recession flow power law exponent b to any
 %of several other recession flow parameters
    
    %   Inputs:   alpha,    from Q ~ t*^-alpha
@@ -77,8 +77,8 @@ function b = bfra_convert2b(inputvalue,inputvarname,isflat)
     
 end
 
-function varargout = bfra_convertb(b,outputvarname,isflat)
-%BFRA_BCONVERSIONS Convert the recession flow power law exponent b to any
+function varargout = bfra.convertb(b,outputvarname,isflat)
+%bfra.BCONVERSIONS Convert the recession flow power law exponent b to any
 %of several other recession flow parameters
    
    %  Inputs:        b,    from dQ(t)=a*Q^b

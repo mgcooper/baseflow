@@ -1,20 +1,20 @@
-function GlobalFit = bfra_globalfit(K,Events,Fits,Meta,varargin)
-%BFRA_GLOBALFIT takes the event-scale recession analysis parameters saved in
+function GlobalFit = globalfit(K,Events,Fits,Meta,varargin)
+%BFRA.GLOBALFIT takes the event-scale recession analysis parameters saved in
 %data table K and the event-scale data saved in Events and Fits and computes
 %'global' parameters tau, tau0, phi, bhat, ahat, Qexp, and Q0
 % 
 % Syntax:
 % 
-%  FIT = BFRA_GLOBALFIT(K,Events,Fits,Meta);
-%  FIT = BFRA_GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
-%  FIT = BFRA_GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
-%  FIT = BFRA_GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
-%  FIT = BFRA_GLOBALFIT(___,)
+%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta);
+%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
+%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
+%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
+%  FIT = bfra.GLOBALFIT(___,)
 % 
 % Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
 % Required inputs:
-%  K, Events, Fits - output of bfra_getevents and bfra_dqdt
+%  K, Events, Fits - output of bfra.getevents and bfra.dqdt
 %  Meta - struct containing fields area, D0, and L (see below)
 %  AnnualFlow - timetable or table of annual flow containing field Qcmd which
 %  is the average daily flow (units cm/day) posted annually. 
@@ -25,7 +25,7 @@ function GlobalFit = bfra_globalfit(K,Events,Fits,Meta,varargin)
 % input parsing
 %-------------------------------------------------------------------------------
 p                 = inputParser;
-p.FunctionName    = 'bfra_globalfit';
+p.FunctionName    = 'bfra.globalfit';
 p.PartialMatching = true;
 addRequired(p,    'K',                       @(x)istable(x)             );
 addRequired(p,    'Events',                  @(x)isstruct(x)            );
@@ -56,8 +56,8 @@ tf = Meta.isflat;    % use the horizontal or sloped aquifer solution
 
 % fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 %---------------
-[tau,q,dqdt,tags] = bfra_eventtau(K,Events,Fits,'usefits',false);
-TauFit = bfra_plfitb(tau,'plot',plotfits,'boot',bootfit,'nreps',nreps);
+[tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
+TauFit = bfra.plfitb(tau,'plot',plotfits,'boot',bootfit,'nreps',nreps);
 
 
 % parameters needed for next steps
@@ -74,21 +74,21 @@ itau     = TauFit.taumask;
 %---------
 switch phimethod 
    case 'distfit'
-      phid = bfra_eventphi(K,Fits,A,D,L,bhat,'refqtls',refqtls);
-      phi = bfra_fitdistphi(phid,'mu','cdf');
+      phid = bfra.eventphi(K,Fits,A,D,L,bhat,'refqtls',refqtls);
+      phi = bfra.fitdistphi(phid,'mu','cdf');
    case 'pointcloud'
-      phi = bfra_cloudphi(q,dqdt,bhat,A,D,L,'envelope','refqtls',refqtls,'mask',itau);
+      phi = bfra.cloudphi(q,dqdt,bhat,A,D,L,'envelope','refqtls',refqtls,'mask',itau);
 end
 
 
 % fit a
 % -------
-[ahat,ahatLH,xbar,ybar] =  bfra_pointcloudintercept(q,dqdt,bhat,'envelope',  ...
+[ahat,ahatLH,xbar,ybar] =  bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
                            'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
                         
 % fit Q0 and Qhat
 %-----------------
-[Qexp,Q0,pQexp,pQ0] = bfra_expectedQ(ahat,bhat,tauhat);
+[Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauhat);
 
 % note on units: ahat is estimated from the point cloud. the dimensions of ahat
 % are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units
@@ -101,7 +101,7 @@ if plotfits == true
    
    refpts = [ybar quantile(-dqdt,0.95)];
 
-   h = bfra_pointcloud(q,dqdt,'blate',1,'mask',itau,    ...
+   h = bfra.pointcloud(q,dqdt,'blate',1,'mask',itau,    ...
    'reflines',{'early','late','userfit'},'reflabels',true, ...
    'refpoints',refpts,'userab',[ahat bhat],'addlegend',true);
    

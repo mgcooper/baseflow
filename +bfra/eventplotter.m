@@ -72,7 +72,7 @@ p.parseMagically('caller');
     
     h.s1g   =   hline(q50,':');
 
-    % plot the events identified by bfra_getevents, just to be sure
+    % plot the events identified by bfra.getevents, just to be sure
 %     for i = 1:length(T)
 %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);
 %     end

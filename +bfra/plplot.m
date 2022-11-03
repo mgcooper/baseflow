@@ -1,5 +1,5 @@
-function h = bfra_plplot(x,xmin,alpha,varargin)
-%BFRA_PLPLOT plots the power law fit to the P(tau) pareto distribution
+function h = plplot(x,xmin,alpha,varargin)
+%BFRA.PLPLOT plots the power law fit to the P(tau) pareto distribution
 %
 % Required inputs:
 %  x     = vector double of data that follows an untruncated Pareto distribution 
@@ -21,7 +21,7 @@ function h = bfra_plplot(x,xmin,alpha,varargin)
 
 %-------------------------------------------------------------------------------
 p               = inputParser;
-p.FunctionName  = 'bfra_plplot';
+p.FunctionName  = 'bfra.plplot';
 p.CaseSensitive = false;
 p.KeepUnmatched = true;
 
@@ -76,12 +76,12 @@ ax          = p.Results.ax;
    % build a legend, labels, etc.
    ltxt1    = ['$' varsym '$ (data)'];
    if ~isnan(alphaci)
-      b     = bfra_conversions(alpha,'alpha','b');
-      bL    = bfra_conversions(alphaci(1),'alpha','b');
-      bH    = bfra_conversions(alphaci(2),'alpha','b');
+      b     = bfra.conversions(alpha,'alpha','b');
+      bL    = bfra.conversions(alphaci(1),'alpha','b');
+      bH    = bfra.conversions(alphaci(2),'alpha','b');
       ltxt2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)',b,bL,bH);
    else
-      ltxt2 = sprintf('MLE fit ($b=%.2f$)',bfra_conversions(alpha,'alpha','b'));
+      ltxt2 = sprintf('MLE fit ($b=%.2f$)',bfra.conversions(alpha,'alpha','b'));
    end
    xlabel('$x$');
    ylabel(['$p(' varsym '\ge x)$'],'Interpreter','latex'); 

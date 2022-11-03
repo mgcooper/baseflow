@@ -1,11 +1,11 @@
-function [q,dqdt,dt,tq,rq,r] = bfra_fitdqdt(T,Q,R,method,varargin)
-%BFRA_FITDQDT
+function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
+%BFRA.FITDQDT
 %
 
 % input parsing
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra_fitdqdt';
+p.FunctionName = 'bfra.fitdqdt';
 p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
 p.addRequired('Q',@(x)isnumeric(x));
 p.addRequired('R',@(x)isnumeric(x));
@@ -74,7 +74,7 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
    elseif strcmp(method,'ETS')
       
       % this assumes the event t,q are passed in
-      Fit     =   bfra_fitETS(T,Q,R,'nsteps',etsparam,'fitab',fitab,'plot',plotfit);
+      Fit     =   bfra.fitETS(T,Q,R,'nsteps',etsparam,'fitab',fitab,'plot',plotfit);
       q       =   Fit.T.q;
       dq      =   Fit.T.dq;
       dt      =   Fit.T.dt;
@@ -154,7 +154,7 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
     % ord         = opts.spn.order;
       ord         = 3;
       nbreaks     = 2+fix(length(T)/4);
-      breaks      = bfra_splinebreaks(T,Q,nbreaks,ord);
+      breaks      = bfra.splinebreaks(T,Q,nbreaks,ord);
       pspline     = splinefit(T,Q,breaks,ord);  % piecewise cubic
       dspline     = fnder(pspline,1); % ppdiff(p_spline,1) works too
       Qspline     = ppval(pspline,T);
@@ -172,7 +172,7 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
       
       ord         = spnorder;
       %nbreaks    = 2+fix(length(T1)/4);
-      %breaks     = unique(bfra_splinebreaks(T1,Q1,nbreaks,ord));
+      %breaks     = unique(bfra.splinebreaks(T1,Q1,nbreaks,ord));
       pslm        = slmengine(T,Q,'degree',ord-1,'interiorknots',   ...
                      'free','knots',100);
       dQslm       = slmeval(T,pslm,1);    % differentiate

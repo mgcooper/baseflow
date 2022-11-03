@@ -1,5 +1,5 @@
-function [Fit,ok] = bfra_fitab(q,dqdt,method,varargin)
-%BFRA_FITAB fits -dq/dt = aQ^b to estimate parameters a and b
+function [Fit,ok] = fitab(q,dqdt,method,varargin)
+%BFRA.FITAB fits -dq/dt = aQ^b to estimate parameters a and b
 % 
 % Required inputs:
 %  q        =  vector double of discharge data (L T^-1)
@@ -45,7 +45,7 @@ refqtls  = p.Results.refqtls;
 plotfit  = p.Results.plotfit;
 fitopts  = p.Unmatched;
 
-% NOTE: fitopts is not implemented, but see BFRA_Fit, where it could be used
+% NOTE: fitopts is not implemented, but see bfra.Fit, where it could be used
 % to simplify calling this function from wrapper functions. Using the
 % unmatched method, it can be used to pass in arbitrary fitopts accepted
 % by any function but requires that the user know what to pass in.
@@ -57,7 +57,7 @@ fitopts  = p.Unmatched;
 
 %-------------------------------------------------------------------------------
    
-   [x,y,logx,logy,weights,ok] = bfra_prepfits(q,dqdt, 'weights',weights,...
+   [x,y,logx,logy,weights,ok] = bfra.prepfits(q,dqdt, 'weights',weights,...
                                                       'mask',mask);
 
    % weights will equal zero anywhere mask is false
@@ -108,7 +108,7 @@ fitopts  = p.Unmatched;
    end
    
    if plotfit == true
-      Fit.h = bfra_pointcloud(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
+      Fit.h = bfra.pointcloud(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
    end
 end
 
@@ -359,7 +359,7 @@ function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
       if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
          
          msg            =  'Fitting failed using nlinfit at ab1';
-         causeException =  MException('MATLAB:bfra_fitK:fitting',msg);
+         causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
          ME             = addCause(ME,causeException);
          
       end
@@ -388,7 +388,7 @@ function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
          if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
             
             msg            =  'Fitting failed using fit at ab3';
-            causeException =  MException('MATLAB:bfra_fitK:fitting',msg);
+            causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
             ME             =  addCause(ME,causeException);
             
          end
@@ -423,7 +423,7 @@ function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
          if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
             
             msg            =  'Fitting failed using nlinfit at ab2';
-            causeException =  MException('MATLAB:bfra_fitK:fitting',msg);
+            causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
             ME             =  addCause(ME,causeException);
             
          end
@@ -448,7 +448,7 @@ function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
             if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
                
                msg            =  'Fitting failed using fit at ab4';
-               causeException =  MException('MATLAB:bfra_fitK:fitting',msg);
+               causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
                ME             =  addCause(ME,causeException);
                
             end

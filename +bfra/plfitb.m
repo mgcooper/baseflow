@@ -1,5 +1,5 @@
-function Fit = bfra_plfitb(x,varargin)
-%BFRA_PLFITB returns [b,alpha,k]=bfra_plfitb(x,varargin) where x is
+function Fit = plfitb(x,varargin)
+%BFRA.PLFITB returns [b,alpha,k]=bfra.plfitb(x,varargin) where x is
 %continuous data believed to follow an untruncated Pareto distribution with 
 %some unknown xmin such that xhat=x-xmin. Any inputs to plfit can be passed
 %in as varargin, where plfit is Aaron Clauset's function.
@@ -20,7 +20,7 @@ function Fit = bfra_plfitb(x,varargin)
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra_plfitb';
+p.FunctionName = 'bfra.plfitb';
 p.PartialMatching = true;
 p.addRequired('x',@(x)isnumeric(x));
 p.addParameter('xmin',nan,@(x)isnumeric(x));
@@ -102,7 +102,7 @@ nreps    = p.Results.nreps;
       xmin = Fit.tau0;
       aci = [Fit.alpha_H Fit.alpha_L];
       xci = [Fit.tau0_L Fit.tau0_H];
-      figure; bfra_plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
+      figure; bfra.plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
    end
    
    % NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should
@@ -122,7 +122,7 @@ function Fit = plbootfit(x,range,limit,nreps)
    reps.ntail  = repsmat(:,1);
    reps.tau0   = repsmat(:,2);
    reps.alpha  = repsmat(:,3);
-   reps.b      = bfra_conversions(reps.alpha,'alpha','b');
+   reps.b      = bfra.conversions(reps.alpha,'alpha','b');
    reps.tau    = reps.tau0.*(2-reps.b)./(3-2.*reps.b);
    
    for n = 1:numel(vars)

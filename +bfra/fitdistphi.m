@@ -1,21 +1,21 @@
-function [Fit,h] = bfra_fitdistphi(phi,varargin)
-%BFRA_FITDISTPHI fits a Beta distribution to a sample of drainable porosity
+function [Fit,h] = fitdistphi(phi,varargin)
+%BFRA.FITDISTPHI fits a Beta distribution to a sample of drainable porosity
 %(phi) values 
 % 
 % Syntax:
 % 
-%  FIT = BFRA_FITDISTPHI(phi);
-%  FIT = BFRA_FITDISTPHI(___,plottype);
-%  FIT = BFRA_FITDISTPHI(___,outputtype);
+%  FIT = bfra.FITDISTPHI(phi);
+%  FIT = bfra.FITDISTPHI(___,plottype);
+%  FIT = bfra.FITDISTPHI(___,outputtype);
 % 
-%  Fit = bfra_fitdistphi(phi) returns probability distribution object 'Fit'
+%  Fit = bfra.fitdistphi(phi) returns probability distribution object 'Fit'
 %  which is a Beta Distribution fit to the input data in phi
 % 
-%  Fit = bfra_fitdistphi(phi,outputtype) returns a Beta Distribution fit to the
+%  Fit = bfra.fitdistphi(phi,outputtype) returns a Beta Distribution fit to the
 %  input data in phi. 'outputtype' is 'PD', 'mean', 'median', or 'std', where
 %  default 'PD' is the Probability Distribution object.
 % 
-%  Fit = bfra_fitdistphi(__,plottype) returns any of the prior options plus a
+%  Fit = bfra.fitdistphi(__,plottype) returns any of the prior options plus a
 %  figure showing the fit. plottype can be 'cdf' or 'pdf'. default is 'none'.
 % 
 % Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
@@ -24,7 +24,7 @@ function [Fit,h] = bfra_fitdistphi(phi,varargin)
 % input parsing
 %-------------------------------------------------------------------------------
 p                 = inputParser;
-p.FunctionName    = 'BFRA_FITDISTPHI';
+p.FunctionName    = 'bfra.FITDISTPHI';
 
 addRequired(p,    'phi',                  @(x)isvector(x)            );
 addOptional(p,    'outputtype',  'PD',    @(x)ischar(x)              );
@@ -44,9 +44,9 @@ plottype = p.Results.plottype;
    % Create the figure
    switch plottype
       case 'cdf'
-         h = bfra_cdfplotphi(phi,PD);
+         h = bfra.cdfplotphi(phi,PD);
       case 'probplot'
-         h = bfra_probplotphi(phi,PD);
+         h = bfra.probplotphi(phi,PD);
       case 'pdf'   
    end
    
@@ -66,7 +66,7 @@ plottype = p.Results.plottype;
    end
 end
 
-function h = bfra_cdfplotphi(phi,PD)
+function h = bfra.cdfplotphi(phi,PD)
    
    % Create the figure
    h.figure = figure;
@@ -135,7 +135,7 @@ function h = bfra_cdfplotphi(phi,PD)
    h.pm  = pm;
 end
 
-function h = bfra_probplotphi(phi,PD);
+function h = bfra.probplotphi(phi,PD);
    
    % Create the figure
    h.figure = figure;

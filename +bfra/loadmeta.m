@@ -1,7 +1,7 @@
-function Meta = bfra_loadmeta(basinname,varargin)
+function Meta = loadmeta(basinname,varargin)
 %------------------------------------------------------------------------------
    p                = MipInputParser;
-   p.FunctionName   = 'bfra_loadmeta';
+   p.FunctionName   = 'bfra.loadmeta';
    p.addRequired('basinname',@(x)ischar(x));
    p.addOptional('version','current',@(x)ischar(x));
    p.parseMagically('caller');

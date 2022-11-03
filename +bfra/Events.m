@@ -1,7 +1,7 @@
-function [Events] = BFRA_Events(T,Q,R,varargin)
-%BFRA_EVENTS get recession events.
+function [Events] = Events(T,Q,R,varargin)
+%BFRA.EVENTS get recession events.
 % 
-% This is basically a wrapper around bfra_getevents for multi-year timeseries. 
+% This is basically a wrapper around bfra.getevents for multi-year timeseries. 
 % 
 % Required inputs:
 %   T          =  nx1 array of dates
@@ -26,7 +26,7 @@ function [Events] = BFRA_Events(T,Q,R,varargin)
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'BFRA_Events';
+p.FunctionName = 'bfra.Events';
 p.StructExpand = true;
 p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
 p.addRequired( 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
@@ -46,7 +46,7 @@ p.parseMagically('caller');
 if isempty(R); R = zeros(size(Q)); end
 %------------------------------------------------------------------------------
 
-% % for now, re-build opts to send to bfra_getevents
+% % for now, re-build opts to send to bfra.getevents
    opts.qmin         = qmin;
    opts.nmin         = nmin;
    opts.fmax         = fmax;
@@ -105,7 +105,7 @@ if isempty(R); R = zeros(size(Q)); end
       thisYearRain   = Rlist(:,thisYear);
       
       % get events for this year
-      [T,Q,R,Info]   = bfra_getevents(    thisYearTime,                 ...
+      [T,Q,R,Info]   = bfra.getevents(    thisYearTime,                 ...
                                           thisYearFlow,                 ...
                                           thisYearRain,                 ...
                                           opts                          );
@@ -120,7 +120,7 @@ if isempty(R); R = zeros(size(Q)); end
          eventR      = R{thisEvent};
          
          % get approximated flow and dq/dt without any fitting of a/b
-         [qQ,dQ]     = bfra_getdqdt(eventT,eventQ,eventR,'B1','pickmethod',...
+         [qQ,dQ]     = bfra.getdqdt(eventT,eventQ,eventR,'B1','pickmethod',...
                            'none','fitmethod','none'); 
          % if fitmethod == "none", only the dQdt is returned, for the case
          % where I don't wan't to fit events, so this function returns

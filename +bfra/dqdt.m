@@ -1,14 +1,14 @@
-function [K,Fits] = BFRA_dqdt(Events,varargin)
-%BFRA_DQDT   
+function [K,Fits] = dqdt(Events,varargin)
+%BFRA.DQDT   
 % Inputs:
-%  Events: output of BFRA_Events (flow comes in as m3 d-1 posted daily)
+%  Events: output of bfra.Events (flow comes in as m3 d-1 posted daily)
 % Outputs:
 %  K: table of fitted values e.g., a, b, tau, for each event
 %  Fits: structure containing the fitted q/dqdt
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'BFRA_dqdt';
+p.FunctionName = 'bfra.dqdt';
 p.addRequired( 'Events',               @(x) isstruct(x)                 );
 p.addParameter('derivmethod', 'ETS',   @(x) ischar(x)                   );
 p.addParameter('fitmethod',   'nls',   @(x) ischar(x)                   );
@@ -36,7 +36,7 @@ p.parseMagically('caller');
    ax          =  'none';
 
    % initialize output structure and output arrays
-   K              =  bfra_initK(10000);
+   K              =  bfra.initK(10000);
    Fits.t         =  nan(size(Q));        % fitted t
    Fits.q         =  nan(size(Q));        % fitted Q
    Fits.r         =  nan(size(Q));        % rain
@@ -63,7 +63,7 @@ for thisEvent = 1:numEvents
    end
    
    % get the q, dq/dt estimates (H=Hat)
-   [qH,dH,dtH,tH]   = bfra_getdqdt( eventT,eventQ,eventR,derivmethod,   ...
+   [qH,dH,dtH,tH]   = bfra.getdqdt( eventT,eventQ,eventR,derivmethod,   ...
                                     'pickmethod',pickmethod,            ...
                                     'fitmethod',fitmethod,              ...
                                     'etsparam',etsparam,                ...
@@ -87,7 +87,7 @@ for thisEvent = 1:numEvents
       if tf == true; continue; end
 
       % otherwise fit the model
-         K  =  BFRA_Fit(  q,dqdt,derivmethod,fitmethod,fitorder, ...
+         K  =  bfra.Fit(  q,dqdt,derivmethod,fitmethod,fitorder, ...
                            gageID,eventDate,thisEvent,thisFit, ...
                            nFits,fitopts,K);
 
@@ -212,7 +212,7 @@ function pauseToSaveFig(T,fname,pausetosavefig,savefitplots)
 end
       
 
-function K = bfra_initK(N)
+function K = bfra.initK(N)
 
    K.a         = nan(N,1);
    K.b         = nan(N,1);

@@ -1,4 +1,4 @@
-function [Smin,Smax,dS] = bfra_dynamicS(a,b,qmin,qmax,varargin)
+function [Smin,Smax,dS] = dynamicS(a,b,qmin,qmax,varargin)
 
 % input checks    
     b    = round(b,2);

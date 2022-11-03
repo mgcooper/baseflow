@@ -1,5 +1,5 @@
-function varargout = bfra_pointcloudintercept(q,dqdt,bhat,method,varargin)
-%bfra_pointcloudintercept estimate parameter 'a' from the point cloud intercept
+function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
+%pointcloudintercept estimate parameter 'a' from the point cloud intercept
 % 
 % Required inputs:
 %  q        =  vector double of discharge data (L T^-1)
@@ -13,12 +13,12 @@ function varargout = bfra_pointcloudintercept(q,dqdt,bhat,method,varargin)
 %              which the straight line must pass. use with method 'envelope'.
 % 
 % 
-% See also: bfra_fitab
+% See also: bfra.fitab
 
 % input parsing
 %-------------------------------------------------------------------------------
 p=inputParser;
-p.FunctionName='bfra_pointcloudintercept';
+p.FunctionName='bfra.pointcloudintercept';
 p.PartialMatching = true;
 addRequired(p,'q',@(x)isnumeric(x));
 addRequired(p,'dqdt',@(x)isnumeric(x));

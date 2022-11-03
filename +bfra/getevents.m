@@ -1,5 +1,5 @@
-function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
-%BFRA_GETEVENTS returns flow Q and time T values of each individual
+function [T,Q,R,Info] = getevents(t,q,r,varargin)
+%BFRA.GETEVENTS returns flow Q and time T values of each individual
 %recession event, and info about the applied filters
 % 
 % Required inputs:
@@ -30,7 +30,7 @@ function [T,Q,R,Info] = bfra_getevents(t,q,r,varargin)
 % input handling
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName    = 'bfra_getevents';
+p.FunctionName    = 'bfra.getevents';
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
 p.addRequired( 't',                    @(x) isnumeric(x) | isdatetime(x));
 p.addRequired( 'q',                    @(x) isnumeric(x) & numel(x)==numel(t));

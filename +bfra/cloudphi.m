@@ -1,5 +1,5 @@
-function [phi,a] = bfra_cloudphi(q,dqdt,blate,A,D,L,method,varargin)
-%BFRA_CLOUDPHI estimates drainable porosity phi from the point cloud using the
+function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
+%BFRA.CLOUDPHI estimates drainable porosity phi from the point cloud using the
 %method of Troch, Troch, and Brutsaert, 1993.
 % 
 % Required inputs:
@@ -30,7 +30,7 @@ function [phi,a] = bfra_cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 p = inputParser;
 p.StructExpand = false;
 p.PartialMatching = true;
-p.FunctionName = 'bfra_cloudphi';
+p.FunctionName = 'bfra.cloudphi';
 addRequired(p,'q',@(x)isnumeric(x));
 addRequired(p,'dqdt',@(x)isnumeric(x));
 addRequired(p,'blate',@(x)isnumeric(x));
@@ -60,7 +60,7 @@ dispfit  = p.Results.dispfit;
 
 % note: the method used for ahat = pointcloudintercept should also be used here
 
-% the easiest way to get a1/a2 is pointcloudintercept. bfra_fitab could also be
+% the easiest way to get a1/a2 is pointcloudintercept. bfra.fitab could also be
 % used but this function is intended to fit phi once b is known (or prescribed)
 
 % a1 = early-time a
@@ -69,24 +69,24 @@ dispfit  = p.Results.dispfit;
 % b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)
 
 b2 = blate; 
-a1 = bfra_pointcloudintercept(q,dqdt,3,'envelope','refqtls',[0.95 0.95]);
-a2 = bfra_pointcloudintercept(q,dqdt,b2,method,'refqtls',refqtls,'mask',mask);
+a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',[0.95 0.95]);
+a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',refqtls,'mask',mask);
 
 switch b2
    case 1
-      phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+      phi = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
                'soln2','BS03','dispfit',dispfit);
    case 3/2
-      phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+      phi = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
                'soln2','BS04','dispfit',dispfit);
    otherwise
-      phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
+      phi = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
                'soln2','RS05','dispfit',dispfit);
 end
 a = a2;
 
 % make a dummy handle for the legend and print the value of phi
-bfra_pointcloud(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
+bfra.pointcloud(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
             {'early','userfit'},'userab',[a2 blate],'reflabels',true);
 hdum  = plot(0,0,'Color','none','HandleVisibility','off');
 txt   = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
