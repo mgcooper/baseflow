@@ -70,8 +70,8 @@ reflines = p.Results.reflines;
 %    xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
 
    grid off; 
-   xlabel(bfra.strings('Q','units',true),'FontSize',14);
-   ylabel(bfra.strings('dQdt','units',true),'FontSize',14);
+   xlabel(bfra.getstring('Q','units',true),'FontSize',14);
+   ylabel(bfra.getstring('dQdt','units',true),'FontSize',14);
 
    % add reflines
    for n = 1:numel(reflines)

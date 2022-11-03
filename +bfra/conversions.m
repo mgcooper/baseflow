@@ -1,24 +1,24 @@
 function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-   p = MipInputParser;
-   p.addRequired('inputvalue',@(x)isnumeric(x));
-   p.addRequired('inputvarname',@(x)ischar(x));
-   p.addRequired('outputvarname',@(x)ischar(x));
-   p.addParameter('isflat',true,@(x)islogical(x));
-   
-   p.parseMagically('caller');
-   
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%BFRA.CONVERSIONS convert inputvalue from its value in terms of inputvarname to
+%its value in terms of outputvarname (use tab completion to get a list of
+%supported input and output varnames)
+%-------------------------------------------------------------------------------
+p = MipInputParser;
+p.addRequired('inputvalue',@(x)isnumeric(x));
+p.addRequired('inputvarname',@(x)ischar(x));
+p.addRequired('outputvarname',@(x)ischar(x));
+p.addParameter('isflat',true,@(x)islogical(x));
+p.parseMagically('caller');   
+%-------------------------------------------------------------------------------
    
 % convert whatever is passed in to b, then from b to whatever is requested
-   b              = bfra.convert2b(inputvalue,inputvarname,isflat);
-   varargout{1}   = bfra.convertb(b,outputvarname,isflat);
+   b              = convert2b(inputvalue,inputvarname,isflat);
+   varargout{1}   = convertb(b,outputvarname,isflat);
 
 end
 
 
-function b = bfra.convert2b(inputvalue,inputvarname,isflat)
+function b = convert2b(inputvalue,inputvarname,isflat)
 %bfra.CONVERT2B Convert the recession flow power law exponent b to any
 %of several other recession flow parameters
    
@@ -77,7 +77,7 @@ function b = bfra.convert2b(inputvalue,inputvarname,isflat)
     
 end
 
-function varargout = bfra.convertb(b,outputvarname,isflat)
+function varargout = convertb(b,outputvarname,isflat)
 %bfra.BCONVERSIONS Convert the recession flow power law exponent b to any
 %of several other recession flow parameters
    
