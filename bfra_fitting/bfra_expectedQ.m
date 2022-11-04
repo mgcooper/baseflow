@@ -18,13 +18,13 @@ p.FunctionName    = 'bfra_expectedQ';
 addRequired(p,    'a',                    @(x)isnumeric(x)     );
 addRequired(p,    'b',                    @(x)isnumeric(x)     );
 addRequired(p,    'tau',                  @(x)isnumeric(x)     );
-addOptional(p,    'pctls',    '',         @(x)ischar(x)        );
+addOptional(p,    'qtls',     '',         @(x)ischar(x)        );
 addOptional(p,    'Q',        nan,        @(x)isnumeric(x)     );
 addOptional(p,    'plotfit',  '',         @(x)ischar(x)        );
 
 parse(p,a,b,tau,varargin{:});
 
-pctls    = p.Results.pctls;
+qtls     = p.Results.qtls;
 Q        = p.Results.Q;
 plotfit  = p.Results.plotfit;
 
@@ -39,7 +39,7 @@ else
    plotfit = false;
 end
 
-if ~isempty(pctls)
+if ~isempty(qtls)
    u     = 'm$^3$ d$^{-1}$';
    fdc   = fdcurve(Q(Q>0),'refpoints',[Q0 Qexp],'units',u,'plotcurve',plotfit);
    pQ0   = fdc.fref(1);

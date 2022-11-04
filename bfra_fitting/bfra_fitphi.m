@@ -135,11 +135,29 @@ for m = 1:numsoln
          c1c2     = ((fR1*fR2^n2/(2^n*n1))^n3)/(D*A);
          a1a2     = (a1*a2^(n+2))^(1/(n+3));
          
-      case 'PK62_BS04'      % Polubarinova-Kochina, 1962 (early-time, b=3)
-                           % Boussinesq, 1904 (late-time, b=1.5)
+         % phi = c1c2/a1a2;
+         
+         % note: to compute kD in units m/d (should be around 100 m/d at most):
+         k1       = fR1/((D*4)^3*(L*10)^2*a1*c1c2/a1a2); % uses early-time
+         k2       = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*(D*4)^n*A^(n+3))/(L*10)^2; % late time
+         
+      case 'PK62_BS04'        % Polubarinova-Kochina, 1962 (early-time, b=3)
+                              % Boussinesq, 1904 (late-time, b=1.5)
+                              % see Troch et al. 1993
 
          c1c2  = (1.133^(1/3))/D * (4.804^(2/3))/A;
          a1a2  = a1^(1/3)*a2^(2/3);
+         
+         % phi = c1c2/a1a2;
+
+         % multiply by *100/86400 to go from m/d to cm/s
+         k1    = 1.133/(D^3*L^2*a1*c1c2/a1a2);   % early
+         k2    = ((a2*A^(3/2)*c1c2/a1a2)/(4.804*L))^2;
+         
+         % compute Q0
+         Q0    = 3.448*k1*D^2*L^2/A; % or: 3.448*k1*D^2*Dd*L if Dd is used
+         
+         % once phi and k are known, we can check D
          
       case 'PK62_BS03'        % Polubarinova-Kochina, 1962 (early-time)
                               % Boussinesq, 1903 (late-time)
@@ -155,6 +173,7 @@ for m = 1:numsoln
    end
    
    phi(m) = c1c2/a1a2;
+   
    if dispfit == true
       fprintf([soln ', phi = %.3f\n'],phi(m))
    end

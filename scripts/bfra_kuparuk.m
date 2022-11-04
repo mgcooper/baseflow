@@ -8,6 +8,13 @@ clean
 
 % this script runs the entire analysis for the Kuparuk
 
+% NOW I AM GETTING THE RIGHT ANSWER again, 0.31 and 0.77 ... so checkout the
+% project branches and see what happens, if it's working, i think we can move
+% on from Troch ... key thing is that L is NOT INVOLVED in estimating phi, so
+% we don't even have to report it, b/c if someone did the calculation they
+% would find that drainage density is about 0.03 so L prob needs to be a factor
+% of 10 higher, which would produce bettter ksat estiamtes otherwise other than
+% clarifying a method to get Q0 I am not sure troch rpovides anything else
 
 % set the main options
 %----------------------
@@ -20,7 +27,7 @@ nreps       = 1;
 sitename    = bfra_basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1983,1,1);
 t2          = datetime(2020,12,31);
-testrain    = 'lter';
+testrain    = 'none';
 
 % this is the filename that will be used to save the output
 fname    = 'data/Events.mat';
@@ -117,7 +124,7 @@ end
 bhat  = GlobalFit.b;
 tau   = GlobalFit.tau;
 phi   = GlobalFit.phi;
-pQhat = GlobalFit.pQhat;
+pQhat = GlobalFit.pQexp;
 
 % compute baseflow and aquifer thickenss
 %----------------------------------------
