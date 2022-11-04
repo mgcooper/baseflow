@@ -88,7 +88,11 @@ end
                         
 % fit Q0 and Qhat
 %-----------------
-[Qexp,Q0,pQexp,pQ0] = bfra_expectedQ(ahat,bhat,tauhat);
+[Qexp,Q0,pQexp,pQ0] = bfra_expectedQ(ahat,bhat,tauhat,'qtls',Q);
+
+
+[k,Q0_2,D_2] = bfra_aquiferprops(q,dqdt,ahat,bhat,phi,A,D,L,'RS05','mask',itau);
+
 
 % note on units: ahat is estimated from the point cloud. the dimensions of ahat
 % are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units
@@ -124,8 +128,8 @@ GlobalFit.a_H  = ahatLH(2);
 GlobalFit.xbar = xbar;
 GlobalFit.ybar = ybar;
 GlobalFit.Q0   = Q0;
-GlobalFit.Qhat = Qexp;
-GlobalFit.pQhat = pQexp;
+GlobalFit.Qexp = Qexp;
+GlobalFit.pQexp = pQexp;
 GlobalFit.pQ0  = pQ0;
 
 
