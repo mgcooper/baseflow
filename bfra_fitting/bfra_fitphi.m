@@ -137,9 +137,20 @@ for m = 1:numsoln
          
          % phi = c1c2/a1a2;
          
-         % note: to compute kD in units m/d (should be around 100 m/d at most):
-         k1       = fR1/((D*4)^3*(L*10)^2*a1*c1c2/a1a2); % uses early-time
-         k2       = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*(D*4)^n*A^(n+3))/(L*10)^2; % late time
+% % this is in aquiferprops. probably better to use that, but should combine.
+% trouble is that it all deepends what is known a priori (phi, D, or K)
+%          % once phi is known, this can be used to compute kD in units m/d
+%          % (should be around 100 m/d at most): 
+%          k1       = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time
+%          k2       = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time
+%          
+%          % this method is based on the same method used to estimate phi, by
+%          % equating early- and late-time and isolating k, but assumes D is known
+%          
+%          % this c1/c2 are as defined in my derivation in overleaf.
+%          c1    = fR1/(D^3*L^2);
+%          c2    = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
+%          k     = ((c1/c2)*(a2/a1))^((n+2)/(n+3));
          
       case 'PK62_BS04'        % Polubarinova-Kochina, 1962 (early-time, b=3)
                               % Boussinesq, 1904 (late-time, b=1.5)
