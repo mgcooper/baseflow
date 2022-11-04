@@ -126,19 +126,69 @@ Q0 = (aearly/alate)^(1/(blate-bearly));
 % Step 9: hydraulic conductivity using the late time soln (m/d)
 switch soln
    case 'BS04'
-      k = (alate*A^(3/2)*phi/(4.804*L))^2; % *100/86400 m/d -> cm/s 
-      % k = 1.133/(aearly*phi*D^3*L^2); % early time soln
+      
+      % method 1: phi is known, D is not
+      % --------------------------------
+      
+      % late time
+      clate    = 4.804*L/A^(3/2);
+      k        = (alate*phi/clate)^2;  % *100/86400 m/d -> cm/s 
+      
+      % early time
+      % cearly = 1.133/(D^3*L^2);
+      % k      = cearly/(aearly*phi);  % same as RS05
+      
+      % method 2: D is known, phi is not 
+      % (equates early and late time to eliminate phi)
+      % -----------------------------------------------
+      % k   = ((cearly/aearly)*(alate/clate))^(2/3);
+      
    case 'RS05'
-      n = bfra_conversions(blate,'b','n','isflat',true);
-      fR2 = bfra_specialfunctions('fR2',n);
-      k = (alate*phi/fR2)^(n+2)*(2^n*(n+1)*D^n*A^(n+3))/L^2;
-      % fR1 = bfra_specialfunctions('fR1',n);
-      % k = fR1/(aearly*phi*D^3*L^2); % early time soln
+      
+      % method 1: phi is known, D is not
+      % --------------------------------
+      
+      % late time:
+      n     = bfra_conversions(blate,'b','n','isflat',true);
+      fR2   = bfra_specialfunctions('fR2',n);
+      clate = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
+      k     = (alate*phi/clate)^(n+2);
+      
+      % early time: 
+      % fR1      = bfra_specialfunctions('fR1',n);
+      % cearly   = fR1/(D^3*L^2);
+      % k        = cearly/(aearly*phi);
+      
+      % method 2: D is known, phi is not 
+      % (equates early and late time to eliminate phi)
+      % -----------------------------------------------
+      % k   = ((cearly/clate)*(alate/aearly))^((n+2)/(n+3));
+      
+      % Note: once clate/cearly are known, the expressions for k are identical
+      % for both early and late time for RS05 and BS04, but I keep them inside
+      % the switch block b/c we only use the late-time solution right now, and
+      % it's a bit clearer to keep them separate. Note this applies to method 1
+      % and method 2. The reason is because for b=3/2, n=0, so the exponenets on
+      % the RS05 solutions equal the one for BS04 (the solutions are equivalent
+      % at b=3/2).
 end
 
 % Step 10: aquifer depth (m)
 D = sqrt(Q0/(3.448*k*L^2/A)); % sqrt(Q0/(3.448*k*Dd*L)) % if using Dd
 
+
+%-------------------------------------------------------------------------------
+
+% these can be used to get D directly from alate. for RS05, this will return the
+% D that was used to get k in the above method. These expressions don't use
+% cearly/clate (c1/c2 in the paper) b/c D is included in c2 for RS05, and there
+% isn't an easy way to express D in terms of c2 for that case. 
+
+% % RS05 non-linear sloped late time:
+% D = ((fR2/(alate*phi))^(n+2) * ( k*L^2/(2^n*(n+1)*A^(n+3))))^(1/n);
+% 
+% % RS06 non-linear sloped late time:
+% D = (2*k*L*sin(theta)/(n+1)*((n+1)^2/(alate*(n+0.01)*phi*A))^(n+1))^(1/n);
 
 
 
