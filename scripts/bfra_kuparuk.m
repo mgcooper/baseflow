@@ -20,7 +20,7 @@ nreps       = 1;
 sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1983,1,1);
 t2          = datetime(2020,12,31);
-testrain    = 'lter';
+testrain    = 'none';
 
 % this is the filename that will be used to save the output
 fname    = 'data/Events.mat';
