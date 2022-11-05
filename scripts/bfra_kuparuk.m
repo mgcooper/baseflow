@@ -1,8 +1,8 @@
 clean
 
-% PICK UP HERE - this is a test to replace the existing bfra_kuparuk. Then I
+% PICK UP HERE - this is a test to replace the existing bfra.kuparuk. Then I
 % need to figure out why the lter+coop leads to higher trends than previously,
-% most likely it is the method used in bfra_eventphi or refline or
+% most likely it is the method used in bfra.eventphi or refline or
 % poutcloudintercept. figure out the right way then make figures for respone
 % letter, confert this and other scripts to .md examples and resubmit
 
@@ -24,7 +24,7 @@ fitglobal   = true;
 plotfigs    = true;
 bootfit     = false;
 nreps       = 1;
-sitename    = bfra_basinname('KUPARUK R NR DEADHORSE AK');
+sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1983,1,1);
 t2          = datetime(2020,12,31);
 testrain    = 'none';
@@ -36,7 +36,7 @@ fname    = 'data/Events.mat';
 %-----------------------------------------
 load('dailyflow.mat','T','Q','R');
 load('annualflow.mat','Data');
-Meta = bfra_loadmeta(sitename,'archive');
+Meta = bfra.loadmeta(sitename,'archive');
 
 
 % temporary option to use different rain
@@ -48,7 +48,7 @@ end
 
 % load the active layer thickness data
 %--------------------------------------
-Calm = bfra_loadcalm(sitename,'archive');
+Calm = bfra.loadcalm(sitename,'archive');
 Calm = retime(Calm,'yearly','next'); Calm.Dc(end) =  42.571;
 
 % sychronize the CALM data with the annual flow data
@@ -71,17 +71,17 @@ if fitevents == true
 
    % set opts
    %----------
-   opts.Events = bfra_defaultopts('events');
-   opts.Fits   = bfra_defaultopts('fits');
+   opts.Events = bfra.defaultopts('events');
+   opts.Fits   = bfra.defaultopts('fits');
    opts.Fits   = setfield(opts.Fits,'drainagearea',Meta.A);
    
    % get events
    %------------
-   [Events]    = BFRA_Events(T,Q,R,opts.Events); 
+   [Events]    = bfra.wrapEvents(T,Q,R,opts.Events); 
 
    % fit events
    %------------
-   [K,Fits]    = BFRA_dqdt(Events,opts.Fits);
+   [K,Fits]    = bfra.wrapEventFits(Events,opts.Fits);
 
    if savedata == true
       save(fname,'Events','Fits','K','opts');
@@ -103,7 +103,7 @@ end
 
 if fitglobal == true
 
-   GlobalFit = bfra_globalfit(K,Events,Fits,Meta,'boot',false, ...
+   GlobalFit = bfra.globalfit(K,Events,Fits,Meta,'boot',false, ...
                               'nreps',2000,'plotfit',plotfigs);
 
    if savedata == true
@@ -124,12 +124,12 @@ end
 bhat  = GlobalFit.b;
 tau   = GlobalFit.tau;
 phi   = GlobalFit.phi;
-pQhat = GlobalFit.pQexp;
+pQexp = GlobalFit.pQexp;
 
 % compute baseflow and aquifer thickenss
 %----------------------------------------
-[Qb,~,~,~,hb,ha] = bfra_baseflow(years,Qcmd,'pctl',pQhat,'show',false); % cm/d
-[Db,Sb]  = bfra_aquiferthickness(bhat,tau,phi,Qb,true); % cm/yr
+[Qb,~,~,~,hb,ha] = bfra.baseflow(years,Qcmd,'pctl',pQexp,'show',false); % cm/d
+[Db,Sb]  = bfra.aquiferthickness(bhat,tau,phi,Qb,true); % cm/yr
 Qb       = Qb.*365.25;  % convert from cm/d/yr to cm/yr/yr
 
 f(1) = hb.figure;
@@ -215,8 +215,8 @@ autoArrangeFigures(3,2,2)
 % %% plot the point cloud
 % 
 % % see scripts/ for pub-quality figures
-% % ab       = bfra_fitab(q,dqdt,'mask',itau,'method','mean','order',1.3);
-% % pcloud   = bfra_pointcloud(q,dqdt,'mask',itau,'reflabels',true,'reflines', ...
+% % ab       = bfra.fitab(q,dqdt,'mask',itau,'method','mean','order',1.3);
+% % pcloud   = bfra.pointcloudplot(q,dqdt,'mask',itau,'reflabels',true,'reflines', ...
 % %             {'early','bestfit' ,'upperenvelope','lowerenvelope','userfit'}, ...
 % %             'userab',[ab.a ab.b]);
 % % 
@@ -247,8 +247,8 @@ autoArrangeFigures(3,2,2)
 % 
 % %       % fit tau, a, b
 % %       %---------------
-% %       [tau,q,dqdt] = bfra_eventtau(K,Events,Fits,'usefits',false);
-% %       TauFit = bfra_plfitb(tau,'plotfit',true,'bootfit',true,'nreps',2000);
+% %       [tau,q,dqdt] = bfra.eventtau(K,Events,Fits,'usefits',false);
+% %       TauFit = bfra.plfitb(tau,'plotfit',true,'bootfit',true,'nreps',2000);
 % % 
 % %       % add q/dqdt to TauFit
 % %       TauFit.q = q;
@@ -256,13 +256,13 @@ autoArrangeFigures(3,2,2)
 % % 
 % %       % fit phi
 % %       %---------
-% %       phid(:,1)   = bfra_eventphi(K,Fits,A,D,L,1);
-% %       phid(:,2)   = bfra_eventphi(K,Fits,A,D,L,3/2);
+% %       phid(:,1)   = bfra.eventphi(K,Fits,A,D,L,1);
+% %       phid(:,2)   = bfra.eventphi(K,Fits,A,D,L,3/2);
 % %       phid        = vertcat(phid(:,1),phid(:,2));
-% %       phi         = bfra_fitdistphi(phid,'cdf','mu');
+% %       phi         = bfra.fitdistphi(phid,'cdf','mu');
 % % 
-% %       % phid  = bfra_eventphi(K,Fits,A,D,L,TauFit.b);
-% %       % phi   = bfra_fitdistphi(phidist(:,3),'cdf');
+% %       % phid  = bfra.eventphi(K,Fits,A,D,L,TauFit.b);
+% %       % phi   = bfra.fitdistphi(phidist(:,3),'cdf');
 % % 
 % %       % fit a
 % %       %-------
@@ -273,7 +273,7 @@ autoArrangeFigures(3,2,2)
 % %       tauhat   = TauFit.tau;
 % %       itau     = TauFit.taumask;
 % % 
-% %       [ahat,ahatLH,xbar,ybar] = bfra_pointcloudintercept(               ...
+% %       [ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(               ...
 % %                                  q,dqdt,bhat,'taumask',itau,            ...
 % %                                  'method','median','bci',[bhatL bhatH]  ...
 % %                                  );
@@ -288,8 +288,8 @@ autoArrangeFigures(3,2,2)
 % % 
 % %       % baseflow and saturated layer thickness trends
 % %       %-----------------------------------------------
-% %       Qb    = bfra_baseflow(Data.Time,Data.Qcmd,'pctl',pQhat,'show',true); % cm/d
-% %       Db    = bfra_alttrend(tauhat,phi,N,Qb,[]); % cm posted annually
+% %       Qb    = bfra.baseflow(Data.Time,Data.Qcmd,'pctl',pQhat,'show',true); % cm/d
+% %       Db    = bfra.alttrend(tauhat,phi,N,Qb,[]); % cm posted annually
 % %       Sb    = Db.*phi;     % convert layer thickness to storage
 % %       Qb    = Qb.*365.25;  % convert from cm/d to cm/yr
 % %       
@@ -317,14 +317,14 @@ autoArrangeFigures(3,2,2)
 % %       refpts   =  [ybar quantile(-dqdt,0.95)]; % late, early
 % % 
 % %       % the og version. blate=bhat, bestfit in legend (no b=1)
-% %       h        =  bfra_pointcloud(q,dqdt,'blate',bhat,'mask',itau,    ...
+% %       h        =  bfra.pointcloudplot(q,dqdt,'blate',bhat,'mask',itau,    ...
 % %                   'reflines',{'early','late','bestfit'},'reflabels',true, ...
 % %                   'refpoints',refpts,'addlegend',true);
 % %                   h.legend.AutoUpdate = 'off';
 % %                   scatter(xbar,ybar,60,'k','filled','s');
 % % 
 % %       % new version. blate=1, bhat in legend (no bestfit)
-% %       h        =  bfra_pointcloud(q,dqdt,'blate',1,'mask',itau,    ...
+% %       h        =  bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
 % %                   'reflines',{'early','late','userfit'},'reflabels',true, ...
 % %                   'refpoints',refpts,'userab',[ahat bhat],'addlegend',true);
 % %                   h.legend.AutoUpdate = 'off';
