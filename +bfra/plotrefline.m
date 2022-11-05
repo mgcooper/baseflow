@@ -21,12 +21,12 @@ function [href,ab] = plotrefline(x,y,varargin)
 %              compute the 'lower envelope'
 %  ax       =  graphic axis to plot into
 %
-% See also fitab, pointcloudintercept, pointcloud
+% See also fitab, pointcloudintercept, pointcloudplot
 
 % NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra.refline';
+p.FunctionName = 'bfra.plotrefline';
 p.PartialMatching = true;
 p.addRequired('x',@(x)isnumeric(x));
 p.addRequired('y',@(x)isnumeric(x));

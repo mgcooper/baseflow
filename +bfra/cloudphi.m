@@ -86,7 +86,7 @@ end
 a = a2;
 
 % make a dummy handle for the legend and print the value of phi
-bfra.pointcloud(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
+bfra.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
             {'early','userfit'},'userab',[a2 blate],'reflabels',true);
 hdum  = plot(0,0,'Color','none','HandleVisibility','off');
 txt   = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);

@@ -108,7 +108,7 @@ fitopts  = p.Unmatched;
    end
    
    if plotfit == true
-      Fit.h = bfra.pointcloud(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
+      Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
    end
 end
 
