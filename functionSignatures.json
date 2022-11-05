@@ -9,6 +9,25 @@
          {"name":"printvalues",  "kind":"namevalue", "type":["logical"],"purpose":"Option"}
       ]
    },
+   "bfra.aquiferprops":
+   {
+      "inputs":
+      [
+         {"name":"q",         "kind": "required",  "type": ["vector","double"]},
+         {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
+         {"name":"alate",     "kind": "required",  "type": ["scalar","double"]},
+         {"name":"blate",     "kind": "required",  "type": ["scalar","double"]},
+         {"name":"phi",       "kind": "required",  "type": ["scalar","double"]},
+         {"name":"A",         "kind": "required",  "type": ["scalar","double"]},
+         {"name":"D",         "kind": "required",  "type": ["scalar","double"]},
+         {"name":"L",         "kind": "required",  "type": ["scalar","double"]},
+         {"name":"soln",      "kind": "namevalue", "type": ["char", "choices={'RS05','BS04','Rupp and Selker, 2005','Boussinesq, 1904 b=3/2'}"],"default":"'RS05'","purpose":"Option"},
+         {"name":"earlyqtls", "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"lateqtls",  "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"mask",      "kind": "namevalue", "type": ["logical"]},
+         {"name":"Dd",        "kind": "namevalue", "type": ["scalar","double"]}
+      ]
+   },
    "bfra.baseflow":
    {
       "inputs":
@@ -159,7 +178,7 @@
          {"name":"b",      "kind": "required",  "type": ["scalar","double"]},
          {"name":"tau",    "kind": "required",  "type": ["scalar","double"]},
          {"name":"qtls",   "kind": "ordered",   "type": ["char","choices={'qtls'}"],"purpose":"Option"},
-         {"name":"Q",      "kind": "ordered",   "type": ["vector","double"]},
+         {"name":"flow",   "kind": "ordered",   "type": ["vector","double"]},
          {"name":"plotfit","kind": "ordered",   "type": ["char","choices={'plotfit'}"],"purpose":"Option"}
       ]
    },
@@ -199,7 +218,7 @@
    {
       "inputs":
       [
-         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["vector"]]},
+         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["double","vector"]]},
          {"name":"Q",         "kind":"required",   "type":["vector","double"]},
          {"name":"R",         "kind":"required",   "type":["vector","double"]},
          {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},

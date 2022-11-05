@@ -20,7 +20,7 @@ nreps       = 1;
 sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1983,1,1);
 t2          = datetime(2020,12,31);
-testrain    = 'both';
+testrain    = 'lter';
 
 % this is the filename that will be used to save the output
 fname    = 'data/Events.mat';
@@ -117,11 +117,11 @@ end
 bhat  = GlobalFit.b;
 tau   = GlobalFit.tau;
 phi   = GlobalFit.phi;
-pQhat = GlobalFit.pQhat;
+pQexp = GlobalFit.pQexp;
 
 % compute baseflow and aquifer thickenss
 %----------------------------------------
-[Qb,~,~,~,hb,ha] = bfra.baseflow(years,Qcmd,'pctl',pQhat,'show',false); % cm/d
+[Qb,~,~,~,hb,ha] = bfra.baseflow(years,Qcmd,'pctl',pQexp,'show',false); % cm/d
 [Db,Sb]  = bfra.aquiferthickness(bhat,tau,phi,Qb,true); % cm/yr
 Qb       = Qb.*365.25;  % convert from cm/d/yr to cm/yr/yr
 

@@ -69,6 +69,15 @@ tau0     = TauFit.tau0;
 tauhat   = TauFit.tau;
 itau     = TauFit.taumask;
 
+% fit a
+% -------
+[ahat,ahatLH,xbar,ybar] =  bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
+                           'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
+
+% fit Q0 and Qhat
+%-----------------
+[Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauhat,q,dqdt,tau0,'qtls',Q,'mask',itau);
+
 
 % fit phi
 %---------
@@ -81,14 +90,12 @@ switch phimethod
 end
 
 
-% fit a
-% -------
-[ahat,ahatLH,xbar,ybar] =  bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
-                           'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
-                        
-% fit Q0 and Qhat
-%-----------------
-[Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauhat);
+% fit k
+%---------
+[k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,phi,A,D,L,'RS05','mask',itau);
+
+
+% Q0    = Qexp*(3-b)/(2-b);
 
 % note on units: ahat is estimated from the point cloud. the dimensions of ahat
 % are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units
@@ -124,9 +131,7 @@ GlobalFit.a_H  = ahatLH(2);
 GlobalFit.xbar = xbar;
 GlobalFit.ybar = ybar;
 GlobalFit.Q0   = Q0;
-GlobalFit.Qhat = Qexp;
-GlobalFit.pQhat = pQexp;
+GlobalFit.Qexp = Qexp;
+GlobalFit.pQexp = pQexp;
 GlobalFit.pQ0  = pQ0;
-
-
 
