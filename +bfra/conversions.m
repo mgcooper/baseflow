@@ -1,5 +1,5 @@
 function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
-%BFRA.CONVERSIONS convert inputvalue from its value in terms of inputvarname to
+%CONVERSIONS convert inputvalue from its value in terms of inputvarname to
 %its value in terms of outputvarname (use tab completion to get a list of
 %supported input and output varnames)
 %-------------------------------------------------------------------------------

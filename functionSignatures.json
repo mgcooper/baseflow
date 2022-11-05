@@ -390,7 +390,7 @@
          {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.plplot":
+   "bfra.plplotb":
    {
       "inputs":
       [
@@ -405,7 +405,7 @@
          {"name":"ax",         "kind":"namevalue", "type":["matlab.graphics.axis.Axes"]}
       ]
    },
-   "bfra.pointcloud":
+   "bfra.pointcloudplot":
    {
       "inputs":
       [
@@ -465,7 +465,7 @@
          {"name":"printvalues",  "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
       ]
    },
-   "bfra.refline":
+   "bfra.plotrefline":
    {
       "inputs":
       [

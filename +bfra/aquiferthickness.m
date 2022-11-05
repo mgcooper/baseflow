@@ -1,5 +1,5 @@
 function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
-%BFRA.AQUIFERTHICKNESS compute the aquifer thickness from recession parameters
+%AQUIFERTHICKNESS compute the aquifer thickness from recession parameters
 %b, tau, phi, and baseflow Qb.
 % 
 % Inputs:

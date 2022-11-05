@@ -1,5 +1,5 @@
 function GlobalFit = globalfit(K,Events,Fits,Meta,varargin)
-%BFRA.GLOBALFIT takes the event-scale recession analysis parameters saved in
+%GLOBALFIT takes the event-scale recession analysis parameters saved in
 %data table K and the event-scale data saved in Events and Fits and computes
 %'global' parameters tau, tau0, phi, bhat, ahat, Qexp, and Q0
 % 

@@ -1,4 +1,6 @@
-function [Smin,Smax,dS] = dynamicS(a,b,qmin,qmax,varargin)
+function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
+% AQUIFERSTORAGE computes aquifer storage given input parameters a,b and flow
+% rates qmin/qmax. 
 
 % input checks    
     b    = round(b,2);

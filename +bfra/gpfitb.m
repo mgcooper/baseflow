@@ -1,5 +1,5 @@
 function [Fit,b,alpha,k] = gpfitb(x,varargin)
-%GPFIT2B returns [b,alpha,k]=gpfit2b(x,xmin) where parmhat=gpfit(xhat)
+%GPFITB returns [b,alpha,k]=gpfitb(x,xmin) where parmhat=gpfit(xhat)
 %and xhat is continuous data believed to follow an untruncated Pareto
 %distribution with some known xmin that has been subtracted from the
 %true x such that xhat=x-xmin. If xmin is not provided, we assume
@@ -184,7 +184,7 @@ varsym = p.Results.varsym;
 %       x = x0(x0>0);
 %       [x,~] = prepareCurveData(x,x);
 %       figure;
-%       bfra.plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
+%       bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
    end
 
 end

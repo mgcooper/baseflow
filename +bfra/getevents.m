@@ -1,6 +1,6 @@
 function [T,Q,R,Info] = getevents(t,q,r,varargin)
-%BFRA.GETEVENTS returns flow Q and time T values of each individual
-%recession event, and info about the applied filters
+%GETEVENTS returns flow Q and time T values of each individual recession event,
+%and info about the applied filters 
 % 
 % Required inputs:
 %  t           =  time

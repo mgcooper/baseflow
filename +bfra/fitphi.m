@@ -1,5 +1,5 @@
 function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
-%BFRA.FITPHI estimates drainable porosity phi using an early-time and
+%FITPHI estimates drainable porosity phi using an early-time and
 %late-time solution. 
 % 
 % Required inputs:

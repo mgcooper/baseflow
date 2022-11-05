@@ -1,4 +1,6 @@
 function Meta = loadmeta(basinname,varargin)
+% LOADMETA load metadata for basin indicated by basinname
+
 %------------------------------------------------------------------------------
    p                = MipInputParser;
    p.FunctionName   = 'bfra.loadmeta';

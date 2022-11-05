@@ -1,5 +1,7 @@
 function GHCN = loadghcnd(basinname,varargin)
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% LOADGHCND reads in a global hydroclimatology network database file 
+
+%-------------------------------------------------------------------------------
 p=MipInputParser;
 p.FunctionName='bfra.loadghcnd';
 p.PartialMatching=true;
@@ -14,7 +16,7 @@ if isnumeric(t1) %#ok<*NODEF>
    t1 = datetime(t1,'ConvertFrom','datenum');
    t2 = datetime(t2,'ConvertFrom','datenum');
 end
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    % to get this to a full fledged function, i could use lat,lon + radius
    % and query the ghcdn metadata to find stations

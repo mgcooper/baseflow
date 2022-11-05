@@ -1,5 +1,5 @@
 function [Qb,dQbdt,Q,dQadt,hbtrend,hatrend] = baseflow(t,Q,varargin)
-%baseflow computes the expected value of baseflow and rate of change
+%BASEFLOW computes the expected value of baseflow and rate of change
 %posted on an annual basis
 % Inputs:
 %  t = time, posted annually [years]

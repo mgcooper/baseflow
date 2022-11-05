@@ -1,5 +1,5 @@
 function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)
-%BFRA.EVENTPHI estimates drainable porosity phi from individual recession
+%EVENTPHI estimates drainable porosity phi from individual recession
 %events using the method of Troch, Troch, and Brutsaert, 1993.
 % 
 % Required inputs:

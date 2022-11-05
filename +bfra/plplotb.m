@@ -1,5 +1,5 @@
-function h = plplot(x,xmin,alpha,varargin)
-%BFRA.PLPLOT plots the power law fit to the P(tau) pareto distribution
+function h = plplotb(x,xmin,alpha,varargin)
+%PLPLOTB plots the power law fit to the P(tau) pareto distribution
 %
 % Required inputs:
 %  x     = vector double of data that follows an untruncated Pareto distribution 
@@ -21,7 +21,7 @@ function h = plplot(x,xmin,alpha,varargin)
 
 %-------------------------------------------------------------------------------
 p               = inputParser;
-p.FunctionName  = 'bfra.plplot';
+p.FunctionName  = 'bfra.plplotb';
 p.CaseSensitive = false;
 p.KeepUnmatched = true;
 

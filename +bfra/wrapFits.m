@@ -1,6 +1,6 @@
 function K = wrapFits( q,dqdt,deriv,method,order,station,eventdate,    ...
                         eventtag,fittag,fitcount,fitopts,K)
-%BFRA.WRAPFITS estimates the recession coefficient (wrapper around bfra.fitab)
+%WRAPFITS estimates the recession coefficient (wrapper around bfra.fitab)
 % 
 %-------------------------------------------------------------------------------
 %   Inputs:
@@ -46,7 +46,7 @@ end
    tauH  =  1/a*(min(q))^(1-b);
 
 % event-scale storage range
-   [Smin,Smax,dS] = bfra.dynamicS(a,b,min(q),max(q));
+   [Smin,Smax,dS] = bfra.aquiferstorage(a,b,min(q),max(q));
 
 
 % package output

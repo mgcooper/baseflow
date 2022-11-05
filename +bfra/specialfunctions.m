@@ -1,5 +1,7 @@
 function varargout = specialfunctions(funcname,varargin)
-   
+% SPECIALFUNCTIONS libarary of special functions required for baseflow recession
+% analysis. For example, the inverse incomplete beta function. 
+
 %    L2      = L.*L;
 %    phiA2   = phi.*A.^2;
 %    phiL2   = phi.*L.^2;

@@ -1,5 +1,5 @@
 function [aQbstr,Qtstr] = aQbString(varargin)
-%BFRA.AQBSTRING
+%AQBSTRING returns a formatted string for equation aQ^b
 %
 % INPUTS:
    % one input:      array [a,b]
@@ -11,16 +11,16 @@ function [aQbstr,Qtstr] = aQbString(varargin)
 
 % TODO: merge this with bfra.strings
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 % input handling
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 p = MipInputParser;
 p.FunctionName = 'bfra.aQbString';
 p.addOptional('ab',[],@(x)isnumeric(x));
 p.addOptional('Q0',[],@(x)isnumeric(x));
 p.addParameter('printvalues',false,@(x)islogical(x));
 p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
 
    if printvalues == true
       

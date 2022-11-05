@@ -1,5 +1,5 @@
 function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
-%pointcloudintercept estimate parameter 'a' from the point cloud intercept
+%POINTCLOUDINTERCEPT estimate parameter 'a' from the point cloud intercept
 % 
 % Required inputs:
 %  q        =  vector double of discharge data (L T^-1)

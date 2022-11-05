@@ -1,5 +1,5 @@
 function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
-%BFRA.EXPECTEDQ general description of function
+%EXPECTEDQ general description of function
 % 
 % Syntax:
 % 

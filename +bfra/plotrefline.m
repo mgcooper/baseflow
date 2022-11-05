@@ -1,5 +1,5 @@
-function [href,ab] = refline(x,y,varargin)
-%BFRA.REFLINE adds a reference line to a point cloud plot
+function [href,ab] = plotrefline(x,y,varargin)
+%PLOTREFLINE adds a reference line to a point cloud plot
 %
 % Required inputs:
 %  x  = vector of type double (nominally discharge q)

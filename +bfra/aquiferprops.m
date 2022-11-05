@@ -1,6 +1,32 @@
 function [k,Q0,D] = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
-%bfra_aquiferprops
+%AQUIFERPROPS computes aquifer properties hydraulic conductivity k, depth D, and
+%critical baseflow Q0
+% 
+% Required inputs:
+%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%  dqdt        =  discharge rate of change (L T^-2)
+%  alate       =  late-time a parameter in -dqdt = aq^b ()
+%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
+%  phi         =  drainable porosity (L/L)
+%  A           =  basin area contributing to baseflow (L^2)
+%  D           =  saturated aquifer thickness (L)
+%  L           =  active stream length (L)
+%  soln        =  optional string indicating late-time theoretical solution
+% 
+% Optional name-value inputs:
+%  earlyqtls   =  reference quantiles that together define a pivot point
+%                 through which the straight line must pass (early time fit)
+%  lateqtls    =  reference quantiles that together define a pivot point
+%                 through which the straight line must pass (late time fit)
+%  mask        =  logical mask to exclude data
+%  Dd          =  drainage density. if provided, the relationship L=Dd*A will be
+%                 used to compute L instead of the input L value
+% 
+%  See also fitphi
 
+%-------------------------------------------------------------------------------
+% input parsing
+%-------------------------------------------------------------------------------
 p = inputParser;
 p.FunctionName = 'bfra_aquiferprops';
 
@@ -24,6 +50,7 @@ earlyqtls   = p.Results.earlyqtls;
 lateqtls    = p.Results.lateqtls;
 mask        = p.Results.mask;
 Dd          = p.Results.Dd;
+%-------------------------------------------------------------------------------
 
 % Note: This follows the method in Troch et al. 1993, which assumes D is unknown
 % and the goal is to estimate k and Q0 to get D. Here, only Q0 uses the

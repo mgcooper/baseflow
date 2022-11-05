@@ -1,6 +1,5 @@
 function [Fit,h] = fitphidist(phi,varargin)
-%BFRA.FITPHIDIST fits a Beta distribution to a sample of drainable porosity
-%(phi) values 
+%FITPHIDIST fits a Beta distribution to a sample of drainable porosity (phi) values 
 % 
 % Syntax:
 % 

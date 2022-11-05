@@ -1,5 +1,5 @@
-function [Calm,Meta] = loadcalm(basinname)
-%BFRA.LOADCALM loads calm ALT data for a basin in the Bounds struct
+function [Calm,Meta] = loadcalm_new(basinname)
+%LOADCALM loads calm ALT data for a basin in the Bounds struct
 
 % since I think in terms of basins right now, not calm sites, this accepts
 % the basin name not the calm site name

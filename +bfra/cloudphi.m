@@ -1,5 +1,5 @@
 function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
-%BFRA.CLOUDPHI estimates drainable porosity phi from the point cloud using the
+%CLOUDPHI estimates drainable porosity phi from the point cloud using the
 %method of Troch, Troch, and Brutsaert, 1993.
 % 
 % Required inputs:

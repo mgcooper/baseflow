@@ -1,5 +1,5 @@
-function out = pointcloud(q,dqdt,varargin)
-%BFRA.POINTCLOUD plots a 'point cloud' diagram to estimate aquifer parameters
+function out = pointcloudplot(q,dqdt,varargin)
+%POINTCLOUDPLOT plots a 'point cloud' diagram to estimate aquifer parameters
 %from recession flow data.
 %
 % Required inputs:
@@ -26,7 +26,7 @@ function out = pointcloud(q,dqdt,varargin)
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'bfra.pointcloud';
+p.FunctionName = 'bfra.pointcloudplot';
 p.addRequired('q',@(x)isnumeric(x));
 p.addRequired('dqdt',@(x)isnumeric(x));
 p.addParameter('mask',false,@(x)islogical(x));

@@ -1,5 +1,5 @@
 function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
-%BFRA.GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
+%GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
 %using variable time stepping, exponential time stepping, or one of six
 %standard numerical derivatives given in Thomas et al. 2015, Table 2
 % 

@@ -10,8 +10,8 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)
 % 
 %  Required inputs:
-%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
-%  dqdt        =  discharge rate of change (L T^-2)
+%     q     =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%     dqdt  =  discharge rate of change (L T^-2)
 % 
 %  Optional name-value pairs:
 % 

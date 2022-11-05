@@ -1,6 +1,5 @@
 function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
-%BFRA.FITDQDT
-%
+%FITDQDT estimate q and dqdt during recession events to send to fitab
 
 % input parsing
 %-------------------------------------------------------------------------------

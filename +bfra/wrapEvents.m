@@ -1,5 +1,6 @@
 function [Events] = wrapEvents(T,Q,R,varargin)
-%BFRA.WRAPEVENTS get recession events.
+%WRAPEVENTS wrapper around bfra.getevents to get recession all recession events
+%for a mulit-year timeseries of T, Q, and R
 % 
 % This is basically a wrapper around bfra.getevents for multi-year timeseries. 
 % 
@@ -21,8 +22,13 @@ function [Events] = wrapEvents(T,Q,R,varargin)
 % 
 %  opts        =  structure containing the fields listed above, in lieu of
 %                 entering them individually
-   
-% flow comes in as m3/day/day
+% 
+% Note: flow comes in as m3/day/day
+% 
+% See also getevents
+
+
+
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
 p = MipInputParser;

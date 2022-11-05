@@ -1,5 +1,5 @@
 function [Fit,ok] = fitab(q,dqdt,method,varargin)
-%BFRA.FITAB fits -dq/dt = aQ^b to estimate parameters a and b
+%FITAB fits -dq/dt = aQ^b to estimate parameters a and b
 % 
 % Required inputs:
 %  q        =  vector double of discharge data (L T^-1)

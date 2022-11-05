@@ -1,8 +1,8 @@
 function Fit = plfitb(x,varargin)
-%BFRA.PLFITB returns [b,alpha,k]=bfra.plfitb(x,varargin) where x is
-%continuous data believed to follow an untruncated Pareto distribution with 
-%some unknown xmin such that xhat=x-xmin. Any inputs to plfit can be passed
-%in as varargin, where plfit is Aaron Clauset's function.
+%PLFITB returns [b,alpha,k]=bfra.plfitb(x,varargin) where x is continuous data
+%believed to follow an untruncated Pareto distribution with some unknown xmin
+%such that xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where
+%plfit is Aaron Clauset's function.
 % 
 % Required inputs:
 %  x     = vector double of data believed to follow an untruncated Pareto distribution 
@@ -16,7 +16,7 @@ function Fit = plfitb(x,varargin)
 %  nreps = scalar double indicating how many replicates in the boot fit
 %  plotfit = logical indicating whether to call plplot
 %
-% See also: plplot, plfit
+% See also: plplotb, plfit
 
 %-------------------------------------------------------------------------------
 p = MipInputParser;
@@ -102,7 +102,7 @@ nreps    = p.Results.nreps;
       xmin = Fit.tau0;
       aci = [Fit.alpha_H Fit.alpha_L];
       xci = [Fit.tau0_L Fit.tau0_H];
-      figure; bfra.plplot(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
+      figure; bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
    end
    
    % NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should
