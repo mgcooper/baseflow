@@ -20,11 +20,12 @@ p.addParameter('pickmethod',  'none',  @(x) ischar(x)                   );
 p.addParameter('plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
 p.addParameter('savefitplots',false,   @(x) islogical(x) & isscalar(x)  );
 p.addParameter('etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
+p.addParameter('vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
 p.addParameter('drainagearea',nan,     @(x) isnumeric(x) & isscalar(x)  );
 p.addParameter('gageID',      'none',  @(x) ischar(x)                   );
-p.addParameter('fitopts',     struct(),@(x) isstruct(x)                 );
 p.parseMagically('caller');
-% note: fitopts not implemented
+% note: removed fitopts from parser, i think it will mess up auto unpacking
+fitopts = struct();
 %-------------------------------------------------------------------------------
 
 % pull out the events
