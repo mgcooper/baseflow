@@ -1,12 +1,12 @@
 function h = eventplotter(t,q,r,Info,varargin)
-%EVENTPLOTTER plots recession events detected by getevents, with options to
+%EVENTPLOTTER plots recession events detected by findevents, with options to
 %plot dq/dt as positive or negative values
 % 
 % Required inputs:
 %  t           =  time
 %  q           =  flow (m3/time)
 %  r           =  rain (mm/time)
-%  Info        =  Info structure returned by getevents.m
+%  Info        =  Info structure returned by findevents.m
 % 
 % Optional inputs:
 % 
@@ -14,7 +14,7 @@ function h = eventplotter(t,q,r,Info,varargin)
 % plotevents:   logical, name-value e.g. 'plotevents',true
 % plotneg:      logical, name-value
 % 
-% %  See also: getevents, eventfinder, eventpicker, eventsplitter
+% %  See also: getevents, findevents, eventfinder, eventpicker, eventsplitter
 
 %-------------------------------------------------------------------------------
 % input handling
@@ -28,8 +28,6 @@ p.addParameter('plotneg',     false,   @(x) islogical(x) & isscalar(x)        );
 p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
 p.addParameter('dqdt',        derivative(q),isnumeric(x) & numel(x)==numel(t) );
 p.parseMagically('caller');
-
-%  See also: getevents, eventfinder, eventsplitter, eventplotter
 %-------------------------------------------------------------------------------
 
 % short circuits
@@ -72,7 +70,7 @@ p.parseMagically('caller');
     
     h.s1g   =   hline(q50,':');
 
-    % plot the events identified by bfra.getevents, just to be sure
+    % plot the events identified by bfra.findevents, just to be sure
 %     for i = 1:length(T)
 %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);
 %     end

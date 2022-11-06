@@ -17,7 +17,7 @@ function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
 %  rmnochange  =  remove consecutive constant derivates
 %  rmrain      =  remove rainfall
 % 
-%  See also: getevents, eventsplitter, eventpicker, eventplotter
+%  See also: getevents, findevents, eventsplitter, eventpicker, eventplotter
 
 %-------------------------------------------------------------------------------
 p = MipInputParser();
@@ -52,7 +52,7 @@ p.parseMagically('caller');
                    qn      = q(iS(n):iE(n));
                    rn      = r(iS(n):iE(n));
 
-        [Tn,Qn,Rn,Infon]   = eventsplitter(tn,qn,rn,                    ...
+        [Tn,Qn,Rn,Infon]   = bfra.eventsplitter(tn,qn,rn,               ...
                                  'nmin',        nmin,                   ...
                                  'fmax',        fmax,                   ...
                                  'rmax',        rmax,                   ...

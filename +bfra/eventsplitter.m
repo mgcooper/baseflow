@@ -17,7 +17,7 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 %  rmnochange  =  remove consecutive constant derivates
 %  rmrain      =  remove rainfall
 % 
-%  See also: getevents, eventfinder, eventpicker, eventplotter
+%  See also: getevents, findevents, eventfinder, eventpicker, eventplotter
 
 % parse inputs
 %-------------------------------------------------------------------------------

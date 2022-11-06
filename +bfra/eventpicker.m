@@ -9,7 +9,7 @@ function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
 %  r           =  rain (mm/time)
 %  nmin        =  minimum event length
 % 
-%  See also: getevents, eventfinder, eventsplitter, eventplotter
+%  See also: getevents, findevents, eventfinder, eventsplitter, eventplotter
 %-------------------------------------------------------------------------------
 p = MipInputParser();
 p.FunctionName = 'eventpicker';
