@@ -1,8 +1,7 @@
-function [Events] = wrapEvents(T,Q,R,varargin)
-%WRAPEVENTS wrapper around bfra.getevents to get recession all recession events
+function [Events] = getevents(T,Q,R,varargin)
+%GETEVENTS wrapper around bfra.findevents to get recession all recession events
 %for a mulit-year timeseries of T, Q, and R
-% 
-% This is basically a wrapper around bfra.getevents for multi-year timeseries. 
+%
 % 
 % Required inputs:
 %   T          =  nx1 array of dates
@@ -25,14 +24,13 @@ function [Events] = wrapEvents(T,Q,R,varargin)
 % 
 % Note: flow comes in as m3/day/day
 % 
-% See also getevents
-
+% See also findevents
 
 
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
 p = MipInputParser;
-p.FunctionName = 'wrapEvents';
+p.FunctionName = 'getevents';
 p.StructExpand = true;
 p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
 p.addRequired( 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
@@ -52,7 +50,7 @@ p.parseMagically('caller');
 if isempty(R); R = zeros(size(Q)); end
 %------------------------------------------------------------------------------
 
-% % for now, re-build opts to send to bfra.getevents
+% % for now, re-build opts to send to bfra.findevents
    opts.qmin         = qmin;
    opts.nmin         = nmin;
    opts.fmax         = fmax;
@@ -111,7 +109,7 @@ if isempty(R); R = zeros(size(Q)); end
       thisYearRain   = Rlist(:,thisYear);
       
       % get events for this year
-      [T,Q,R,Info]   = bfra.getevents(    thisYearTime,                 ...
+      [T,Q,R,Info]   = bfra.findevents(   thisYearTime,                 ...
                                           thisYearFlow,                 ...
                                           thisYearRain,                 ...
                                           opts                          );
