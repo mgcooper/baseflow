@@ -106,7 +106,7 @@ weights  = p.Results.weights;
    Fits  = pickFitter(Picks,fitmethod);
    
    % plot the fits
-   hFits = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,         ...
+   hFits = plotFits(Fits,Picks,fitmethod,ax,plotfits,         ...
                      showfig,blate,timestep,precision,labelplot);
    
 end
@@ -238,7 +238,7 @@ end
 
 % PLOT FITS
 
-function h = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,    ...
+function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
                         showfig,blate,timestep,precision,labelplot)
    
    if plotfits == true
@@ -334,10 +334,11 @@ function h = plotFits(Fits,Picks,fitmethod,refpoints,ax,plotfits,    ...
 
    xlimkeep = get(gca,'XLim');
    ylimkeep = get(gca,'YLim');
-   
-   if isnan(refpoints)
-      refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl
-   end
+
+% % no longer used, 'earlytime' and 'latetime' reflines instead   
+%    if isnan(refpoints)
+%       refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl
+%    end
    
    [hUpper,abUpper]  = bfra.plotrefline(x,y, 'refline',  'upperenvelope',  ...
                                              'timestep', timestep             );
