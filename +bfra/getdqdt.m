@@ -3,25 +3,28 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %using variable time stepping, exponential time stepping, or one of six
 %standard numerical derivatives given in Thomas et al. 2015, Table 2
 % 
-%  Syntax:
+%  Syntax
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
 % 
-%  Required inputs:
-%     q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
-%     dqdt        =  discharge rate of change (L T^-2)
+%  Required inputs
+%     T     =  time (days)
+%     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
+%     R     =  rainfall (L T^-1, assumed to be mm d-1)
+%     derivmethod = method to compute numerical derivative dQ/dt. Options are
+%     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
 % 
-%  Optional name-value pairs:
+%  Optional name-value pairs
 % 
 % 
 % 
-%  See also getdqdt, fitdqdt
+%  See also fitdqdt
 % 
 % Tip: this accepts pre-selected events, not raw timeseries. Use
-% bfra.getevents to pick Events, then bfra.fitdQdt to fit the events.
+% bfra.findevents to pick Events, then bfra.fitdqdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
 %-------------------------------------------------------------------------------
