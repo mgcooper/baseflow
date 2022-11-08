@@ -26,19 +26,23 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
 
 % input parsing
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p = inputParser;
 p.FunctionName = 'fitdqdt';
-p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
-p.addRequired('Q',@(x)isnumeric(x));
-p.addRequired('R',@(x)isnumeric(x));
-p.addRequired('method',@(x)ischar(x));
-p.addParameter('window',1,@(x)isnumeric(x));    
-p.addParameter('etsparam',0.2,@(x)isnumeric(x));   % default=recommended 20%
-p.addParameter('vtsparam',1,@(x)isnumeric(x));     % vts min flow
-p.addParameter('fitab',true,@(x)islogical(x));
-p.addParameter('plotfit',false,@(x)islogical(x));
-p.parseMagically('caller');
-plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
+addRequired(p,    'T',                 @(x)isnumeric(x)|isdatetime(x));
+addRequired(p,    'Q',                 @(x)isnumeric(x));
+addRequired(p,    'R',                 @(x)isnumeric(x));
+addRequired(p,    'method',            @(x)ischar(x));
+addParameter(p,   'etsparam'  ,0.2,    @(x)isnumeric(x));   % default=recommended 20%
+addParameter(p,   'vtsparam', 1,       @(x)isnumeric(x));     % vts min flow
+addParameter(p,   'fitab',    false,   @(x)islogical(x));
+addParameter(p,   'plotfit',  false,   @(x)islogical(x));
+
+parse(p,T,Q,R,method,varargin{:});
+
+etsparam = p.Results.etsparam;
+vtsparam = p.Results.vtsparam;
+fitab    = p.Results.fitab;
+plotfit  = p.Results.plotfit;
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -79,7 +83,7 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
             % see notes at end on C criteria from Rupp and Selker
             
             % dq is zero or (+), or is (-) and meets the limit criteria
-            if dq(n) >= 0 || roundn(abs(dq(n)),-1) > vtsparam
+            if dq(n) >= 0 || round(abs(dq(n)),1) > vtsparam
                q(n)    = 1/(m+1) * sum(Q(n-m:n));
                tq(n)   = 1/(m+1) * sum(T(n-m:n)); % new
                rq(n)   = 1/(m+1) * sum(R(n-m:n)); % new
@@ -96,7 +100,7 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
    elseif strcmp(method,'ETS')
       
       % this assumes the event t,q are passed in
-      Fit     =   bfra.fitets(T,Q,R,'nsteps',etsparam,'fitab',fitab,'plot',plotfit);
+      Fit     =   bfra.fitets(T,Q,R,'etsparam',etsparam,'fitab',fitab,'plotfit',plotfit);
       q       =   Fit.T.q;
       dq      =   Fit.T.dq;
       dt      =   Fit.T.dt;
@@ -170,60 +174,61 @@ plotfit = p.Results.plotfit; % otherwise builtin plotfit is called
       
    elseif strcmp(method,'SPN')
       
-      % NOTE: this is not implemented
-      
-      % implement splinefit with matlab's optimal knot method
-    % ord         = opts.spn.order;
-      ord         = 3;
-      nbreaks     = 2+fix(length(T)/4);
-      breaks      = bfra.splinebreaks(T,Q,nbreaks,ord);
-      pspline     = splinefit(T,Q,breaks,ord);  % piecewise cubic
-      dspline     = fnder(pspline,1); % ppdiff(p_spline,1) works too
-      Qspline     = ppval(pspline,T);
-      dQspline    = ppval(dspline,T);
-      
-      q           = Qspline;
-      dq          = dQspline;
-      dqdt        = dQspline;
-      dt          = (T(2)-T(1)).*ones(size(T));
-      tq          = T;
+%       % NOTE: this is not implemented
+%       
+%       % implement splinefit with matlab's optimal knot method
+%     % ord         = opts.spn.order;
+%       ord         = 3;
+%       nbreaks     = 2+fix(length(T)/4);
+%       breaks      = bfra.splinebreaks(T,Q,nbreaks,ord);
+%       pspline     = splinefit(T,Q,breaks,ord);  % piecewise cubic
+%       dspline     = fnder(pspline,1); % ppdiff(p_spline,1) works too
+%       Qspline     = ppval(pspline,T);
+%       dQspline    = ppval(dspline,T);
+%       
+%       q           = Qspline;
+%       dq          = dQspline;
+%       dqdt        = dQspline;
+%       dt          = (T(2)-T(1)).*ones(size(T));
+%       tq          = T;
       
    elseif strcmp(method,'SLM')
       
-      % NOTE: this is not implemented
-      
-      ord         = spnorder;
-      %nbreaks    = 2+fix(length(T1)/4);
-      %breaks     = unique(bfra.splinebreaks(T1,Q1,nbreaks,ord));
-      pslm        = slmengine(T,Q,'degree',ord-1,'interiorknots',   ...
-                     'free','knots',100);
-      dQslm       = slmeval(T,pslm,1);    % differentiate
-      Qslm        = slmeval(T,pslm);      % evaluate
-      q           = Qslm;
-      dq          = dQslm;
-      dqdt        = dQslm;
-      dt          = (T(2)-T(1)).*ones(size(T));
-      tq          = T;
+%       % NOTE: this is not implemented
+%       
+%       ord         = spnorder;
+%       %nbreaks    = 2+fix(length(T1)/4);
+%       %breaks     = unique(bfra.splinebreaks(T1,Q1,nbreaks,ord));
+%       pslm        = slmengine(T,Q,'degree',ord-1,'interiorknots',   ...
+%                      'free','knots',100);
+%       dQslm       = slmeval(T,pslm,1);    % differentiate
+%       Qslm        = slmeval(T,pslm);      % evaluate
+%       q           = Qslm;
+%       dq          = dQslm;
+%       dqdt        = dQslm;
+%       dt          = (T(2)-T(1)).*ones(size(T));
+%       tq          = T;
       
    elseif strcmp(method,'pchip')
       
    elseif strcmp(method,'SGO')
       
-      % NOTE: this is not implemented
-      
-      
-%       ord         = opts.sgo.order;               % polynomial filter order
-%       fl          = opts.sgo.window;              % frame length
-      ord         = 3;
-      fl          = 7;
-      dt          = (T(2)-T(1));                  % time discretization
-      Qsgolay     = sgolayfilt(Q,ord,fl);
-      dQsgolay    = movingslope(Qsgolay,fl,ord,dt);
-      q           = Qsgolay;
-      dq          = dQsgolay;
-      dqdt        = dQsgolay;
-      dt          = (T(2)-T(1)).*ones(size(T));
-      tq          = T;
+%       % NOTE: this is not implemented
+%       
+%       
+% %       ord         = opts.sgo.order;               % polynomial filter order
+% %       fl          = opts.sgo.window;              % frame length
+%       ord         = 3;
+%       fl          = 7;
+%       dt          = (T(2)-T(1));                  % time discretization
+%       Qsgolay     = sgolayfilt(Q,ord,fl);
+%       dQsgolay    = movingslope(Qsgolay,fl,ord,dt);
+%       q           = Qsgolay;
+%       dq          = dQsgolay;
+%       dqdt        = dQsgolay;
+%       dt          = (T(2)-T(1)).*ones(size(T));
+%       tq          = T;
+
    end
    
 end
