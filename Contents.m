@@ -19,13 +19,15 @@
 %   eventsplitter       - eventsplitter splits events into useable segments eg if an event is
 %   eventtau            - computes drainage timescale tau from the event-scale parameters
 %   expectedQ           - general description of function
+%   findevents          - returns flow Q and time T values of each individual recession event,
 %   fitab               - fits -dq/dt = aQ^b to estimate parameters a and b
 %   fitdqdt             - estimate q and dqdt during recession events to send to fitab
+%   fitevents           - wrapper around getdqdt and fitdqdt functions to fit all events
 %   fitets              - fits recession event using the exponential timestep method
 %   fitphi              - estimates drainable porosity phi using an early-time and
 %   fitphidist          - fits a Beta distribution to a sample of drainable porosity (phi) values 
 %   getdqdt             - Numerical estimation of the time derivative of discharge dQ/dt
-%   getevents           - returns flow Q and time T values of each individual recession event,
+%   getevents           - wrapper around bfra.findevents to get recession all recession events
 %   getstring           - returns various latex-formatted strings
 %   globalfit           - takes the event-scale recession analysis parameters saved in
 %   gpfitb              - returns [b,alpha,k]=gpfitb(x,xmin) where parmhat=gpfit(xhat)
@@ -45,6 +47,4 @@
 %   QtString            - returns latex-formatted string for Q(t) function
 %   specialfunctions    - libarary of special functions required for baseflow recession
 %   taufunc             - returns inline function for tau or the value of tau
-%   wrapEventFits       - wrapper around eventFit functions to fit all events
-%   wrapEvents          - wrapper around bfra.getevents to get recession all recession events
 %   wrapFits            - estimates the recession coefficient (wrapper around bfra.fitab)
