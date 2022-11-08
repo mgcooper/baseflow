@@ -103,6 +103,7 @@ nreps    = p.Results.nreps;
       aci = [Fit.alpha_H Fit.alpha_L];
       xci = [Fit.tau0_L Fit.tau0_H];
       figure; bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
+      snapnow;
    end
    
    % NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should

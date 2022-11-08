@@ -222,6 +222,7 @@ reflines = p.Results.reflines;
    % 
 %    out.ab         = ab;
 
+   snapnow;
 end
 
 function hrain = plotrain(ax,h,rain,x,y)
