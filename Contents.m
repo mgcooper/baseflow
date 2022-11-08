@@ -11,7 +11,6 @@
 %   basinname           - returns a string 'basinname' from the bfra basin database, which can
 %   cloudphi            - estimates drainable porosity phi from the point cloud using the
 %   conversions         - convert inputvalue from its value in terms of inputvarname to
-%   defaultopts         - set default bfra algorithm options for type 'events' or 'fits'
 %   eventfinder         - finds recession events on input hydrographs with time 't',
 %   eventphi            - estimates drainable porosity phi from individual recession
 %   eventpicker         - automated or user-guided recession event selection from input
@@ -45,6 +44,7 @@
 %   Qnonlin             - plots the theoretical discharge predicted by a/b values
 %   QtauString          - returns latex-formatted string for Q(tau) function
 %   QtString            - returns latex-formatted string for Q(t) function
+%   setopts             - set default bfra algorithm options for type 'events' or 'fits'
 %   specialfunctions    - libarary of special functions required for baseflow recession
 %   taufunc             - returns inline function for tau or the value of tau
 %   wrapFits            - estimates the recession coefficient (wrapper around bfra.fitab)
