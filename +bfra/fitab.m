@@ -23,6 +23,7 @@ methodlist = {'nls','ols','mle','qtl','mean','median','envelope'};
 validmethod = @(x)any(validatestring(x,methodlist));
 
 p = MipInputParser;
+p.FunctionName = 'bfra.fitab';
 p.StructExpand = false;
 p.PartialMatching = true;
 p.addRequired('q',                           @(x)isnumeric(x)     );
@@ -88,7 +89,8 @@ fitopts  = p.Unmatched;
       case 'qtl'
          [ab,ci,ok]  = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,fitopts);
       case 'mle'
-         [ab,ci,ok]  = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
+         error('mle fitting not currently supported');
+         % [ab,ci,ok]  = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
       case 'nls'
          [ab,ci,ok,s]= fitNLS(x,y,logx,logy,weights,alpha,fitopts);
       case 'mean'
@@ -280,32 +282,34 @@ function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,quantile,Nboot,fitopt
 end
 
 
-function [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy)
-
-   % Set default values for maximum likelihood estimation
-      if nargin == 2
-            sigx     =  std(logx);       % error in x
-            sigy     =  std(logy);       % error in y
-            rxy      =  0;               % correlation b/w error in x and y
-            alpha    =  0.68;            % confidence level
-      end
-
-   % fit 
-         [ab,s]      =  yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
-
-            ab       = [exp(ab(1)); ab(2)];
-            
-   % transpose ci to be consistent with stats functions
-            ci       = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
-
-   % generic failure check
-            ok = true;
-         if any(~isreal(ab))
-            ok = false;
-         end
-end
+% function [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy)
+% 
+%    % Set default values for maximum likelihood estimation
+%       if nargin == 2
+%             sigx     =  std(logx);       % error in x
+%             sigy     =  std(logy);       % error in y
+%             rxy      =  0;               % correlation b/w error in x and y
+%             alpha    =  0.68;            % confidence level
+%       end
+% 
+%    % fit 
+%          [ab,s]      =  yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
+% 
+%             ab       = [exp(ab(1)); ab(2)];
+%             
+%    % transpose ci to be consistent with stats functions
+%             ci       = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
+% 
+%    % generic failure check
+%             ok = true;
+%          if any(~isreal(ab))
+%             ok = false;
+%          end
+% end
 
 function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
+
+warning off
 
 % initial estimates using log-log linear fit
    ok          =  true;           
