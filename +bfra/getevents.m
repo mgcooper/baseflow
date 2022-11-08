@@ -29,8 +29,9 @@ function [Events] = getevents(T,Q,R,varargin)
 
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
+
 p = MipInputParser;
-p.FunctionName = 'getevents';
+p.FunctionName = 'bfra.getevents';
 p.StructExpand = true;
 p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
 p.addRequired( 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
