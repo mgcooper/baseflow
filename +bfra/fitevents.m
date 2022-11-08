@@ -13,31 +13,32 @@ function [K,Fits] = fitevents(Events,varargin)
 % See also: getdqdt, fitdqdt
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p = inputParser;
 p.FunctionName = 'fitevents';
-p.addRequired( 'Events',               @(x) isstruct(x)                 );
-p.addParameter('derivmethod', 'ETS',   @(x) ischar(x)                   );
-p.addParameter('fitmethod',   'nls',   @(x) ischar(x)                   );
-p.addParameter('fitorder',    'free',  @(x) ischar(x) | isnumeric(x)    );
-p.addParameter('fitnmin',     4,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('pickfits',    false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('pickmethod',  'none',  @(x) ischar(x)                   );
-p.addParameter('plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('savefitplots',false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('drainagearea',nan,     @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('gageID',      'none',  @(x) ischar(x)                   );
-p.parseMagically('caller');
+addRequired(p, 'Events',               @(x) isstruct(x)                 );
+addParameter(p,'derivmethod', 'ETS',   @(x) ischar(x)                   );
+addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
+addParameter(p,'fitorder',    'free',  @(x) ischar(x) | isnumeric(x)    );
+addParameter(p,'fitnmin',     4,       @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'pickfits',    false,   @(x) islogical(x) & isscalar(x)  );
+addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
+addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
+addParameter(p,'savefitplots',false,   @(x) islogical(x) & isscalar(x)  );
+addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'drainagearea',nan,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'gageID',      'none',  @(x) ischar(x)                   );
+parse(p,Events,varargin{:});
+opts = p.Results;
 % note: removed fitopts from parser, i think it will mess up auto unpacking
 fitopts = struct();
 %-------------------------------------------------------------------------------
 
 % pull out the events
-   A           =  drainagearea;           % drainage area [m2]
-   T           =  Events.t;               % time [days]
-   Q           =  Events.q;               % daily discharge [m3 d-1] 
-   R           =  Events.r;               % daily rainfall [mm d-1]
+   A           =  opts.drainagearea;    % drainage area [m2]
+   T           =  Events.t;                  % time [days]
+   Q           =  Events.q;                  % daily discharge [m3 d-1] 
+   R           =  Events.r;                  % daily rainfall [mm d-1]
    eventTags   =  Events.tag;
    numEvents   =  max(Events.tag);
    ax          =  'none';
@@ -67,22 +68,23 @@ for thisEvent = 1:numEvents
    eventR      = R(eventIdx);
    eventDate   = mean(eventT); % keep track of the event date
 
-   if thisEvent == 1 && plotfits == true
+   if thisEvent == 1 && opts.plotfits == true
       macfig('monitor','mac','size','large'); ax = gca;
    end
    
    % get the q, dq/dt estimates (H=Hat)
-   [qH,dH,dtH,tH]   = bfra.getdqdt( eventT,eventQ,eventR,derivmethod,   ...
-                                    'pickmethod',pickmethod,            ...
-                                    'fitmethod',fitmethod,              ...
-                                    'etsparam',etsparam,                ...
-                                    'plotfits',plotfits,                ...
+   [qH,dH,dtH,tH]   = bfra.getdqdt( eventT,eventQ,eventR,               ...
+                                    opts.derivmethod,                   ...
+                                    'pickmethod',opts.pickmethod,       ...
+                                    'fitmethod',opts.fitmethod,         ...
+                                    'etsparam',opts.etsparam,           ...
+                                    'plotfits',opts.plotfits,           ...
                                     'eventID',datestr(eventDate),       ...
                                     'ax',ax                             );
 
-   if plotfits == true
-      fname = [opts.figs.dqdt 'dqdt_' gageID];
-      pauseToSaveFig(eventT,fname,pausetosave,savefitplots);
+   if opts.plotfits == true
+      fname = ['dqdt_' opts.gageID];
+      pauseToSaveFig(eventT,fname,pausetosave,opts.savefitplots);
    end
 
    % if pickFits is true, then qHat,dHat, and tHat will be cell arrays
@@ -102,8 +104,8 @@ for thisEvent = 1:numEvents
                         
                         
       % otherwise fit the model (fit a/b)
-         K  =  getFit(  q,dqdt,derivmethod,fitmethod,fitorder, ...
-                        gageID,eventDate,thisEvent,thisFit, ...
+         K  =  getFit(  q,dqdt,opts.derivmethod,opts.fitmethod,opts.fitorder, ...
+                        opts.gageID,eventDate,thisEvent,thisFit, ...
                         nFits,fitopts,K);
 
       % post-process and save the fit
@@ -112,7 +114,7 @@ for thisEvent = 1:numEvents
    end
    
    % pause to look at the fits
-   if plotfits == true || pickfits == true
+   if opts.plotfits == true || opts.pickfits == true
 %       %autoArrangeFigures(0,0,2,hEvents.f);
 %       %autoArrangeFigures(0,0,2);
 %       disp(['event fitting finished' newline]); % pause;
