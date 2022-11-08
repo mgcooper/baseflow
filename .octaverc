@@ -1,0 +1,6 @@
+source('Setup.m')
+
+# if for some reason Setup.m is not working, try something like this:
+# addpath([pwd() filesep "+bfra"]);
+# addpath([pwd() filesep "util"]);
+# rmpath([pwd() filesep "git*"]);
