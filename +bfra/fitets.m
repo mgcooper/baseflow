@@ -33,15 +33,20 @@ function ETS = fitets(T,Q,R,varargin)
 % two values are used to compute -dq/dt = aQ^b.
 
 %-------------------------------------------------------------------------------
-   p = MipInputParser;
-   p.FunctionName = 'fitets';
-   p.addRequired('T',@(x)isnumeric(x)|isdatetime(x));
-   p.addRequired('Q',@(x)isnumeric(x));
-   p.addRequired('R',@(x)isnumeric(x));
-   p.addParameter('etsparam',0.2,@(x)isnumeric(x)); % default=recommended 20%
-   p.addParameter('fitab',true,@(x)islogical(x));
-   p.addParameter('plotfit',false,@(x)islogical(x));
-   p.parseMagically('caller');
+p = inputParser;
+p.FunctionName = 'fitets';
+addRequired(p, 'T',                 @(x)isnumeric(x)|isdatetime(x));
+addRequired(p, 'Q',                 @(x)isnumeric(x));
+addRequired(p, 'R',                 @(x)isnumeric(x));
+addParameter(p,'etsparam', 0.2,     @(x)isnumeric(x)); % default=recommended 20%
+addParameter(p,'fitab',    false,   @(x)islogical(x));
+addParameter(p,'plotfit',  false,   @(x)islogical(x));
+
+parse(p,T,Q,R,varargin{:});
+
+etsparam = p.Results.etsparam;
+fitab    = p.Results.fitab;
+plotfit  = p.Results.plotfit;
 %-------------------------------------------------------------------------------
 
    % first we call the fitting algorithm
@@ -56,8 +61,12 @@ function ETS = fitets(T,Q,R,varargin)
    
    plotSmoothing(T,Q,plotfit);
    
-end   
-   
+end
+
+%-------------------------------------------------------------------------------
+%  PLOT SMOOTHING
+%-------------------------------------------------------------------------------
+
 function plotSmoothing(T,Q,plotfit)
    
    if plotfit
@@ -74,6 +83,11 @@ function plotSmoothing(T,Q,plotfit)
    end
    
 end
+
+%-------------------------------------------------------------------------------
+%  FIT DQDT
+%-------------------------------------------------------------------------------
+
 
 function [q,dqdt,dt,tq,rq,rsq] = fitdQdt(T,Q,R,etsparam)
    
@@ -140,6 +154,11 @@ function [q,dqdt,dt,tq,rq,rsq] = fitdQdt(T,Q,R,etsparam)
    
 end
 
+%-------------------------------------------------------------------------------
+%  RETIME ETS
+%-------------------------------------------------------------------------------
+
+
 function ETS = retimeETS(T,Q,R,q,dqdt,dt,tq,rq,rsq)
    
    % note: dt = m+1
@@ -173,6 +192,11 @@ function ETS = retimeETS(T,Q,R,q,dqdt,dt,tq,rq,rsq)
 
 end
 
+%-------------------------------------------------------------------------------
+%  FIT AB
+%-------------------------------------------------------------------------------
+
+
 function ETS = fitETSab(T,fitabOrNot)
    
    % Fit the power law for a and b estimation (Roques et al., 2017)
@@ -205,6 +229,11 @@ function ETS = fitETSab(T,fitabOrNot)
    
 end
 
+%-------------------------------------------------------------------------------
+%  LINREGFITW
+%-------------------------------------------------------------------------------
+
+
 function [fitted, gof] = LinRegFitW(x, y, weights)
    
    [  xData, ...
@@ -219,6 +248,11 @@ function [fitted, gof] = LinRegFitW(x, y, weights)
    
 end
 
+%-------------------------------------------------------------------------------
+%  SET ETSNAN
+%-------------------------------------------------------------------------------
+
+
 function out = ets_setnan(ETS)
    out.T    = ETS;
    out.a    = nan;
@@ -226,6 +260,10 @@ function out = ets_setnan(ETS)
    out.ets  = nan;
    out.cts  = nan;
 end
+
+%-------------------------------------------------------------------------------
+%  TRY EXPFIT
+%-------------------------------------------------------------------------------
 
 
 function abc = tryexpfit(xexp,yexp)
