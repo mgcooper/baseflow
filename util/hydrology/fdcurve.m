@@ -83,26 +83,26 @@ function fdc = fdcurve(flow,varargin)
 
 end
 
-function [F,x] = ecdfpot(x,xmin,alpha,sigma)
-   
-   % not implemented
-   
-   % http://sfb649.wiwi.hu-berlin.de/fedc_homepage/xplore/tutorials/sfehtmlnode91.html
-   
-   % peaks over threshold exceedance probability:
-   % F(x) = N(u)/n(1+gamma(x-u)/beta)^(-1/gamm), 
-   % N(u) is the number of obs>u
-   % n is totla number, i think
-   % x would be tau
-   % u would be taumin
-   % gamma/beta would be b-1/tau0 i think
-   % so 1/gamm would be 1/b-1
-
-
-   N     = numel(x(x>xmin));
-   n     = numel(x);
-   gamma = b-1; % might be 1-b;
-   beta  = tau0;
-   F     = N/n.*(1+gamma.*(x-x0)/beta)^(-1/gamm);
-   
-end
+% function [F,x] = ecdfpot(x,xmin,alpha,sigma)
+%    
+%    % not implemented
+%    
+%    % http://sfb649.wiwi.hu-berlin.de/fedc_homepage/xplore/tutorials/sfehtmlnode91.html
+%    
+%    % peaks over threshold exceedance probability:
+%    % F(x) = N(u)/n(1+gamma(x-u)/beta)^(-1/gamm), 
+%    % N(u) is the number of obs>u
+%    % n is totla number, i think
+%    % x would be tau
+%    % u would be taumin
+%    % gamma/beta would be b-1/tau0 i think
+%    % so 1/gamm would be 1/b-1
+% 
+% 
+%    N     = numel(x(x>xmin));
+%    n     = numel(x);
+%    gamma = b-1; % might be 1-b;
+%    beta  = tau0;
+%    F     = N/n.*(1+gamma.*(x-x0)/beta)^(-1/gamm);
+%    
+% end
