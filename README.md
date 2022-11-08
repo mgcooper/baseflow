@@ -1,12 +1,12 @@
 # `baseflow` - a matlab package for baseflow recession analysis
 
-Baseflow recession analysis refers to a set of methods in hydrologic science designed to infer watershed properties that cannot be observed from something that can be observed - streamflow. The underlying theory is based on idealized solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Its application here is meant for shallow unconfined riparian aquifers, those that discharge subsurface flow into adjacent stream channels.
+Baseflow recession analysis refers to a set of methods in hydrologic science designed to infer watershed properties from streamflow measurements. Specifically, properties that cannot be observed, such as hydraulic conductivity, are inferred from something that can be observed, such as streamflow. The underlying theory is based on solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Its application here is meant for shallow unconfined riparian aquifers that discharge subsurface flow into adjacent stream channels.
 
 ## Dependencies
 Developed on MATLAB Version: 9.9.0 (R2020b)  
 Mathworks Statistics and Machine Learning Toolbox&trade;  
 Mathworks Curve Fitting Toolbox&trade;  
-
+Various utility functions included in this package
 
 ## Install
 
@@ -18,11 +18,13 @@ Run `Setup.m`:
 
 ## Usage
 
-Type `doc bfra` to see the documentation.
+Type `help +bfra` at the command line then press enter to see a list of the `bfra` package contents. Also see `Contents.m`.
+
+Type `doc +bfra` to see the `bfra` package contents in the help browser.
+
+Type `doc bfra` to see the extended documentation.
 
 See `demos/demo_bfra.mlx`.
-
-Type `help +bfra` at the command line then press enter to see a list of the `bfra` package contents. Also see `Contents.m`.
 
 ## More details
 

@@ -1,7 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
 <productinfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:noNamespaceSchemaLocation="optional">
     <?xml-stylesheet type="text/xsl"href="optional"?>
-    <!-- info.xml file for the baseflow toolbox -->
+    <!-- info.xml file for the Baseflow Recession Analysis Toolbox -->
     <!-- Version 1.0.0 -->
     <!-- Copyright (07-Nov-2022) (Matt Cooper).-->
     
@@ -10,7 +11,8 @@
     <!-- to parse the file -->
     <matlabrelease>R2020b</matlabrelease>
     <!-- (Required) Title of toolbox. Appears in the Contents pane -->
-    <name>baseflow recession analysis (bfra)</name>
+    <!-- mgc NOTE: this is where Toolbox needs to be removed from the name -->
+    <name>Baseflow Recession Analysis</name>
     <!-- (Required) Label for the toolbox. pick one: -->
     <!-- matlab, toolbox, simulink, blockset, links_targets  -->
     <type>toolbox</type>
@@ -18,7 +20,7 @@
     <!-- but required to parse the file -->
     <icon></icon>
     <!-- (Required if you supply help) Relative path to help (HTML) folder -->
-    <help_location>../docs</help_location>
+    <help_location>docs/html</help_location>
     <!-- (Required if you supply help) Icon used in the Help browser TOC -->
     <!-- Ignored in R2015a and later -->
     <help_contents_icon></help_contents_icon>

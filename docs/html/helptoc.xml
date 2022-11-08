@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding="utf-8"?>
+
+<toc version="2.0">
+<!-- First tocitem specifies top level in Help browser Contents pane -->
+    <tocitem target="bfra_welcome.html">Baseflow Recession Analysis Toolbox
+        <!-- Nest tocitems to create hierarchical entries in  Contents-->
+        <!-- To include icons, use the following syntax for tocitems: -->
+        <!-- <tocitem target="foo.html" image="HelpIcon.NAME"> -->
+        <!-- Title-of-Section </tocitem> -->
+        <!-- where NAME is one of the following (use capital letters): -->
+        <!-- FUNCTION, USER_GUIDE, EXAMPLES, BLOCK, GETTING_STARTED, -->
+        <!-- DEMOS, RELEASE_NOTES --> 
+        <!-- Icon images used for these entries are also stored in -->
+        <!-- matlabroot/toolbox/matlab/icons -->
+        <!-- A Getting Started Guide usually comes first -->
+      <tocitem target="bfra_gettingStarted.html" image="HelpIcon.GETTING_STARTED">Getting Started with the Baseflow Recession Analysis Toolbox
+      </tocitem>
+        <!-- User Guide comes next -->
+      <tocitem target="bfra_demo.html" image="HelpIcon.USER_GUIDE">Baseflow Recession Analysis User Guide
+      </tocitem>
+        <!-- Function reference next -->
+        <!-- First item is page describing function categories, if any -->
+      <tocitem target="bfra_contents.html" image="HelpIcon.FUNCTION">Function Reference
+      </tocitem>
+        <!-- Optional List of Examples, with hyperlinks to examples in other files -->
+        <tocitem target="bfra_examples.html" image="HelpIcon.HelpIcon.EXAMPLES">Baseflow Recession Analysis Examples
+        </tocitem>
+    </tocitem>
+</toc>

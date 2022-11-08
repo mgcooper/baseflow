@@ -1,12 +1,18 @@
 clean
 
-% PICK UP HERE - this is a test to replace the existing bfra.kuparuk. Then I
-% need to figure out why the lter+coop leads to higher trends than previously,
-% most likely it is the method used in bfra.eventphi or refline or
-% poutcloudintercept. figure out the right way then make figures for respone
-% letter, confert this and other scripts to .md examples and resubmit
-
 % this script runs the entire analysis for the Kuparuk
+
+% something changed with the new setopts, probably rmrain or maybe qmin, need to
+% confirm what those were previously in defaultopts and in the input parser, the
+% saved opts structs should confirm. once that's fixed, should be ready to
+% generate final results
+
+% ALSO, I confirmed that input parsing is working for getevetns and fitevents,
+% and I think for globafit, nearly certain the issue is going to be the
+% discrepancy b/w defaultopts and inputparser. The results for lter+coop look
+% great eitehr way with the new setup so should be good to go
+
+% MAKE SURE NOT TO OVERWRITE ANY SAVED DATA
 
 % NOW I AM GETTING THE RIGHT ANSWER again, 0.31 and 0.77 ... so checkout the
 % project branches and see what happens, if it's working, i think we can move
@@ -19,7 +25,7 @@ clean
 % set the main options
 %----------------------
 savedata    = false;
-fitevents   = false;
+fitevents   = true;
 fitglobal   = true;
 plotfigs    = true;
 bootfit     = false;
@@ -27,7 +33,7 @@ nreps       = 1;
 sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1983,1,1);
 t2          = datetime(2020,12,31);
-testrain    = 'none';
+testrain    = 'coop';
 
 % this is the filename that will be used to save the output
 fname    = 'data/Events.mat';
@@ -36,8 +42,6 @@ fname    = 'data/Events.mat';
 %-----------------------------------------
 load('dailyflow.mat','T','Q','R');
 load('annualflow.mat','Data');
-Meta = bfra.loadmeta(sitename,'archive');
-
 
 % temporary option to use different rain
 %==========================================
@@ -55,14 +59,14 @@ Calm = retime(Calm,'yearly','next'); Calm.Dc(end) =  42.571;
 Data  = synchronize(Data,Calm,Data.Time,'fillwithmissing');
 years = Data.Time;
 Qcmd  = Data.Qcmd;
-      
-% set parameters to estimate phi
-%--------------------------------
-Meta.A = Meta.area_m2;
-Meta.D = 0.5;
-Meta.L = 320000;
-Meta.isflat = true;
-
+            
+%  [T,Q,R,Info] = bfra.findevents(T,Q,R,opts.Events);
+%  
+%  for n = 1:numel(T)
+%     semilogy(T{n},Q{n},'-o'); datetick;
+%     pause;
+%  end
+ 
 % run the analysis
 %------------------
    
@@ -71,17 +75,16 @@ if fitevents == true
 
    % set opts
    %----------
-   opts.Events = bfra.defaultopts('events');
-   opts.Fits   = bfra.defaultopts('fits');
-   opts.Fits   = setfield(opts.Fits,'drainagearea',Meta.A);
+   opts.Events = bfra.setopts('events');
+   opts.Fits   = bfra.setopts('fits','drainagearea',8.6545e9);
    
    % get events
    %------------
-   [Events]    = bfra.wrapEvents(T,Q,R,opts.Events); 
+   [Events]    = bfra.getevents(T,Q,R,opts.Events); 
 
    % fit events
    %------------
-   [K,Fits]    = bfra.wrapEventFits(Events,opts.Fits);
+   [K,Fits]    = bfra.fitevents(Events,opts.Fits);
 
    if savedata == true
       save(fname,'Events','Fits','K','opts');
@@ -103,9 +106,15 @@ end
 
 if fitglobal == true
 
-   GlobalFit = bfra.globalfit(K,Events,Fits,Meta,'boot',false, ...
-                              'nreps',2000,'plotfit',plotfigs);
-
+%    GlobalFit = bfra.globalfit(K,Events,Fits,Meta,'boot',false, ...
+%                               'nreps',2000,'plotfit',plotfigs);
+               
+   opts.Global = bfra.setopts('globalfit','drainagearea',8.6545e9, ...
+               'aquiferdepth',0.5,'streamlength',320000,'isflat',true,...
+               'plotfits',true);
+            
+   GlobalFit = bfra.globalfit(K,Events,Fits,opts.Global);
+   
    if savedata == true
       save(fname,'Events','Fits','K','GlobalFit','opts');
    end

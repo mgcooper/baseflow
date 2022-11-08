@@ -1,0 +1,198 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Baseflow Recession Analysis Toolbox Examples</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-11-08"><meta name="DC.source" content="bfra_demo.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Baseflow Recession Analysis Toolbox Examples</h1><!--introduction--><p>These examples provide an introduction to the toolbox. The <tt>demos</tt> folder contains additional scripts with examples.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Detect recession events from a timeseries of daily streamflow</a></li><li><a href="#6">Fit individual recession events</a></li><li><a href="#9">Global fit</a></li><li><a href="#13">Estimate parameter <img src="bfra_demo_eq00372779220383834832.png" alt="$\bf\hat{a}$" style="width:6px;height:8px;"> at the population-scale using the point-cloud intercept method</a></li></ul></div><h2 id="1">Description</h2><p>In this example, we apply baseflow recession analysis to daily streamflow data measured in the Kuparuk River Basin on the North Slope of Alaska.</p><h2 id="2">Detect recession events from a timeseries of daily streamflow</h2><p>Set the algorithm options</p><pre class="codeinput">opts.Events = bfra.setopts(<span class="string">'events'</span>);
+opts.Fits   = bfra.setopts(<span class="string">'fits'</span>,<span class="string">'drainagearea'</span>,8.6545e9);
+opts.Global = bfra.setopts(<span class="string">'globalfit'</span>,<span class="string">'drainagearea'</span>,8.6545e9, <span class="keyword">...</span>
+               <span class="string">'aquiferdepth'</span>,0.5,<span class="string">'streamlength'</span>,320000,<span class="string">'isflat'</span>,true,<span class="keyword">...</span>
+               <span class="string">'plotfits'</span>,true);
+</pre><p>Load the example data and run the event detection algorithm</p><pre class="codeinput">load <span class="string">dailyflow.mat</span>
+Events = bfra.getevents(T,Q,R,opts.Events);
+</pre><p>The output structure Events contains arrays that are the same size as the input time <tt>T</tt>, streamflow <tt>Q</tt>, and rainfall <tt>R</tt> arrays, but all non-recession flows are set nan.</p><h2 id="6">Fit individual recession events</h2><p>We pass the Events structure to <tt>fitevents</tt> which cycles over each individual recession event and fits a curve to estimate the parameters. Because curve-fitting all events is time-consuming, we can load pre-computed fits instead of computing them.</p><pre class="codeinput">getfits = false;
+
+<span class="keyword">if</span> getfits == true
+   [K,Fits] = bfra.fitevents(Events,opts.Fits);
+<span class="keyword">else</span>
+   load <span class="string">Events</span>
+<span class="keyword">end</span>
+</pre><p>The output structure <tt>Fits</tt> is similar to the input <tt>Events</tt>, except that the streamflow data has been fit using an exponential timestep to reduce the impact of measurement noise on the measured data. In addition, the rate of change of streamflow, <img src="bfra_demo_eq10258104965003722459.png" alt="$\frac{dQ}{dt}$" style="width:11px;height:15px;">, is included as an element of <tt>Fits</tt>.</p><p>The output table <tt>K</tt> contains the parameters of the fit to each individual recession event. These parameters form the basis for subsequent analysis.</p><h2 id="9">Global fit</h2><p>Once the individual events have been fit, we conduct inference testing on the sample population.</p><p>First we transform the observed streamflow data into a timescale parameter tau using the fitted parameters in <tt>K</tt></p><pre class="codeinput">[tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,<span class="string">'usefits'</span>,false);
+</pre><p>Then we pass that into a custom Pareto distribution fitting routine to estimate the population-sample-scale value of the parameters a and b:</p><pre class="codeinput">TauFit = bfra.plfitb(tau,<span class="string">'plot'</span>,true,<span class="string">'boot'</span>,false);
+</pre><img vspace="5" hspace="5" src="bfra_demo_01.png" alt=""> <p>The <tt>TauFit</tt> structure contains information about the Pareto Distribution fit including the minimum bound, <img src="bfra_demo_eq13107604524651516306.png" alt="$\tau_0$" style="width:9px;height:7px;">, the expected value, <img src="bfra_demo_eq14593889327204786447.png" alt="$\tau$" style="width:6px;height:5px;">, and the parameter estimate $\hat{b}. Extract these parameters for the next steps.</p><pre class="codeinput">bhat     = TauFit.b;
+bhatL    = TauFit.b_L;
+bhatH    = TauFit.b_H;
+tau0     = TauFit.tau0;
+tauhat   = TauFit.tau;
+itau     = TauFit.taumask;
+</pre><h2 id="13">Estimate parameter <img src="bfra_demo_eq00372779220383834832.png" alt="$\bf\hat{a}$" style="width:6px;height:8px;"> at the population-scale using the point-cloud intercept method</h2><p><img src="bfra_demo_eq10907152725633504988.png" alt="$\hat{a}$" style="width:6px;height:8px;"> is the intercept of the line with slope <img src="bfra_demo_eq04683343664734912066.png" alt="$\hat{b}$" style="width:5px;height:11px;"> that passes through the median value of streamflow <img src="bfra_demo_eq12795926589847895066.png" alt="$Q$" style="width:8px;height:10px;">. After fitting <img src="bfra_demo_eq10907152725633504988.png" alt="$\hat{a}$" style="width:6px;height:8px;">, display the fit using <tt>pointcloudplot</tt>. Add three 'reflines': one for 'early-time' which fits a line of slope <img src="bfra_demo_eq13798286984081834180.png" alt="$b=3$" style="width:25px;height:8px;"> to the 95th percentile of the point cloud, one for 'late-time', which fits a line of slope <tt>blate</tt> to the median of the point cloud, and one 'userfit' which fits a line of <tt>userab = [intercept slope]</tt> to the median of the point cloud.</p><pre class="codeinput">[ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,<span class="string">'envelope'</span>,<span class="string">'mask'</span>,itau);
+
+h = bfra.pointcloudplot(q,dqdt,<span class="string">'mask'</span>,itau,    <span class="keyword">...</span>
+<span class="string">'reflines'</span>,{<span class="string">'early'</span>,<span class="string">'late'</span>,<span class="string">'userfit'</span>},<span class="string">'blate'</span>,1, <span class="keyword">...</span>
+<span class="string">'userab'</span>,[ahat bhat],<span class="string">'addlegend'</span>,true,<span class="string">'reflabels'</span>,true);
+</pre><img vspace="5" hspace="5" src="bfra_demo_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Baseflow Recession Analysis Toolbox Examples
+% 
+% These examples provide an introduction to the toolbox. The |demos| folder
+% contains additional scripts with examples.
+%
+%% Description
+% In this example, we apply baseflow recession analysis to daily streamflow data
+% measured in the Kuparuk River Basin on the North Slope of Alaska.
+%
+
+%%% Detect recession events from a timeseries of daily streamflow
+% Set the algorithm options
+
+%%
+opts.Events = bfra.setopts('events');
+opts.Fits   = bfra.setopts('fits','drainagearea',8.6545e9);
+opts.Global = bfra.setopts('globalfit','drainagearea',8.6545e9, ...
+               'aquiferdepth',0.5,'streamlength',320000,'isflat',true,...
+               'plotfits',true);
+
+%%
+% Load the example data and run the event detection algorithm
+load dailyflow.mat
+Events = bfra.getevents(T,Q,R,opts.Events);
+
+%% 
+% The output structure Events contains arrays that are the same size as the
+% input time |T|, streamflow |Q|, and rainfall |R| arrays, but all non-recession
+% flows are set nan. 
+% 
+%% Fit individual recession events
+% We pass the Events structure to |fitevents| which cycles over each individual
+% recession event and fits a curve to estimate the parameters. Because
+% curve-fitting all events is time-consuming, we can load pre-computed fits
+% instead of computing them. 
+
+getfits = false;
+
+if getfits == true
+   [K,Fits] = bfra.fitevents(Events,opts.Fits);
+else
+   load Events
+end
+
+%% 
+% The output structure |Fits| is similar to the input |Events|, except that the
+% streamflow data has been fit using an exponential timestep to reduce the
+% impact of measurement noise on the measured data. In addition, the rate of
+% change of streamflow, $\frac{dQ}{dt}$, is included as an element of |Fits|.
+
+%%
+% The output table |K| contains the parameters of the fit to each individual
+% recession event. These parameters form the basis for subsequent analysis.
+% 
+%% Global fit
+% Once the individual events have been fit, we conduct inference testing on the
+% sample population. 
+
+
+%% 
+% First we transform the observed streamflow data into a timescale parameter tau
+% using the fitted parameters in |K|
+
+[tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
+
+%% 
+% Then we pass that into a custom Pareto distribution fitting routine to
+% estimate the population-sample-scale value of the parameters a and b:
+TauFit = bfra.plfitb(tau,'plot',true,'boot',false);
+
+%% 
+% The |TauFit| structure contains information about the Pareto Distribution fit
+% including the minimum bound, $\tau_0$, the expected value, $\tau$, and the
+% parameter estimate $\hat{b}. Extract these parameters for the next steps.
+% 
+
+bhat     = TauFit.b;
+bhatL    = TauFit.b_L;
+bhatH    = TauFit.b_H;
+tau0     = TauFit.tau0;
+tauhat   = TauFit.tau;
+itau     = TauFit.taumask;
+
+%%% Estimate parameter $\bf\hat{a}$ at the population-scale using the point-cloud intercept method
+% $\hat{a}$ is the intercept of the line with slope $\hat{b}$ that passes
+% through the median value of streamflow $Q$. After fitting $\hat{a}$, display
+% the fit using |pointcloudplot|. Add three 'reflines': one for 'early-time'
+% which fits a line of slope $b=3$ to the 95th percentile of the point cloud,
+% one for 'late-time', which fits a line of slope |blate| to the median of the
+% point cloud, and one 'userfit' which fits a line of |userab = [intercept
+% slope]| to the median of the point cloud.
+
+[ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope','mask',itau);
+
+h = bfra.pointcloudplot(q,dqdt,'mask',itau,    ...
+'reflines',{'early','late','userfit'},'blate',1, ...
+'userab',[ahat bhat],'addlegend',true,'reflabels',true);
+
+##### SOURCE END #####
+--></body></html>
