@@ -29,22 +29,31 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 
 %-------------------------------------------------------------------------------
 % input handling    
-p = MipInputParser;
+p = inputParser;
 p.FunctionName = 'getdqdt';
 p.CaseSensitive = true;
-p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x));
-p.addRequired( 'Q',                    @(x) isnumeric(x)                );
-p.addRequired( 'R',                    @(x) isnumeric(x)                );
-p.addRequired( 'derivmethod',          @(x) ischar(x)                   );
-p.addParameter('fitwindow',   1,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('pickmethod',  'none',  @(x) ischar(x)                   );
-p.addParameter('fitmethod',   'nls',   @(x) ischar(x)                   );
-p.addParameter('plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('gageID',      'none',  @(x) ischar(x)                   );
-p.addParameter('eventID',     'none',  @(x) ischar(x)                   );
-p.addParameter('ax',          'none',  @(x) isaxis(x) | ischar(x)       );
-p.parseMagically('caller');
+addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x));
+addRequired(p, 'Q',                    @(x) isnumeric(x)                );
+addRequired(p, 'R',                    @(x) isnumeric(x)                );
+addRequired(p, 'derivmethod',          @(x) ischar(x)                   );
+addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
+addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
+addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
+addParameter(p,'gageID',      'none',  @(x) ischar(x)                   );
+addParameter(p,'eventID',     'none',  @(x) ischar(x)                   );
+addParameter(p,'ax',          'none',  @(x) isaxis(x) | ischar(x)       );
+
+parse(p,T,Q,R,derivmethod,varargin{:});
+
+vtsparam    = p.Results.vtsparam;
+etsparam    = p.Results.etsparam;
+pickmethod  = p.Results.pickmethod;
+fitmethod   = p.Results.fitmethod;
+plotfits    = p.Results.plotfits;
+gageID      = p.Results.gageID;
+eventID     = p.Results.eventID;
 
 if isdatetime(T); T = datenum(T); end
 %-------------------------------------------------------------------------------
@@ -61,7 +70,8 @@ if isdatetime(T); T = datenum(T); end
    end
    
 % apply the chosen method to find dQ/dt for the entire event
-   [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(T,Q,R,derivmethod,'window',fitwindow);
+   [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(T,Q,R,derivmethod,'etsparam',etsparam,...
+                           'vtsparam',vtsparam);
    
 % if we just want dQ/dt and q i.e. no fit, return from here
    if string(fitmethod) == "none"
@@ -74,16 +84,19 @@ if isdatetime(T); T = datenum(T); end
 
    [q,dqdt,dt,tq,rq,hFits,~,~,Info] =  fitSelector(q,dqdt,dt,tq,r,      ...
                                        fitmethod,pickmethod,plotfits,   ...
-                                       eventID,gageID,ax);
+                                       eventID,gageID);
       varargout{1}   = Info;
       varargout{2}   = hFits;
 
 end
 
+% ------------------------------------------------------------------------------
+% FITSELECTOR
+% ------------------------------------------------------------------------------
 function [Q,dQdT,dT,T,R,hFits,Picks,Fits,Info] = fitSelector(q,dqdt,dt, ...
                                                    tq,rq,fitmethod,     ...
                                                    pickmethod,plotfits, ...
-                                                   eventID,gageID,ax)
+                                                   eventID,gageID)
 
 % this is basically just a wrapper around bfra.plotdqdt
    
@@ -126,6 +139,10 @@ function [Q,dQdT,dT,T,R,hFits,Picks,Fits,Info] = fitSelector(q,dqdt,dt, ...
       Info.runlengths(m)  = Picks.runlengths(m);
    end
 end
+
+% ------------------------------------------------------------------------------
+% PREPINPUT
+% ------------------------------------------------------------------------------
 
 function [Q,T,R,exitFlag] = prepInput(Q,T,R)
 
