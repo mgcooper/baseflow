@@ -52,7 +52,7 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
    
    % mgc added these
    [x,y] = prepareCurveData(x,y); 
-   if isempty(x) || isempty(y) || allnan(x) || allnan(y)
+   if isempty(x) || isempty(y) || all(isnan(x)) || all(isnan(y))
       ab=nan; stats=nan; return
    end
    

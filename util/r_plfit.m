@@ -360,7 +360,7 @@ else
     switch xflg
     %... default range if range is not specified
         case 0
-            x=tocol(min(zz):max(zz));        % mgc tocol
+            x=transpose(min(zz):max(zz));        % mgc transpose
             rangemin=max(rangemin,min(x));
             rangemax=min(rangemax,max(x));
     %... range property is specified
@@ -538,7 +538,8 @@ y=kk/sum(kk);
 if plotflg==1
     if newfigflg==1, out.f = figure; end
 %    y=k/sum(k);
-    out.ab = olsfit(log(xxx),log(plf)); % mgc
+    % out.ab = olsfit(log(xxx),log(plf)); % mgc
+    out.ab = [ones(numel(xxx),1),log(xxx)]\log(plf); % mgc reduce dependency on olsfit
     out.h1 = loglog(xxx,ylf,'r'); hold on;
     %out.h1 = loglog(xxx,y,'r'); hold on;
     out.h2 = loglog(xxx,plf);
