@@ -4,12 +4,18 @@ function [Qtstr,aQbstr] = QtString(varargin)
 
 % input handling
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.QtString';
-p.addOptional('ab',[],@(x)isnumeric(x));
-p.addOptional('Q0',[],@(x)isnumeric(x));
-p.addParameter('printvalues',false,@(x)islogical(x));
-p.parseMagically('caller');
+addOptional('ab',             [],      @(x)isnumeric(x));
+addOptional('Q0',             [],      @(x)isnumeric(x));
+addParameter('printvalues',   false,   @(x)islogical(x));
+
+parse(p,varargin{:});
+
+ab          = p.Results.ab;
+Q0          = p.Results.Q0;
+printvalues = p.Results.printvalues;
+
 %-------------------------------------------------------------------------------
 
 % this formats Q0 as an integer (.f)

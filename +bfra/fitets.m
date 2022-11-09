@@ -33,8 +33,9 @@ function ETS = fitets(T,Q,R,varargin)
 % two values are used to compute -dq/dt = aQ^b.
 
 %-------------------------------------------------------------------------------
-p = inputParser;
+p              = inputParser;
 p.FunctionName = 'fitets';
+
 addRequired(p, 'T',                 @(x)isnumeric(x)|isdatetime(x));
 addRequired(p, 'Q',                 @(x)isnumeric(x));
 addRequired(p, 'R',                 @(x)isnumeric(x));

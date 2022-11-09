@@ -29,8 +29,9 @@ function GlobalFit = globalfit(K,Events,Fits,varargin)
 %-------------------------------------------------------------------------------
 p                 = inputParser;
 p.FunctionName    = 'bfra.globalfit';
-% p.PartialMatching = true;
 p.StructExpand    = true;
+% p.PartialMatching = true;
+
 addRequired(p,    'K',                             @(x)isstruct(x)               );
 addRequired(p,    'Events',                        @(x)isstruct(x)               );
 addRequired(p,    'Fits',                          @(x)isstruct(x)               );
@@ -72,7 +73,7 @@ Q  = Events.Q;       % daily streamflow [m3 d-1]
 % fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 %---------------
 [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
-TauFit = bfra.plfitb(tau,'plot',plotfits,'boot',bootfit,'nreps',nreps);
+TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
 
 
 % parameters needed for next steps
@@ -100,7 +101,7 @@ switch phimethod
    case 'distfit'
       phid = bfra.eventphi(K,Fits,drainagearea,aquiferdepth,streamlength,bhat,...
                            'refqtls',refqtls);
-      phi = bfra.fitdistphi(phid,'mu','cdf');
+      phi = bfra.fitphidist(phid,'mu','cdf');
    case 'pointcloud'
       phi = bfra.cloudphi(q,dqdt,bhat,drainagearea,aquiferdepth,streamlength,...
                            'envelope','refqtls',refqtls,'mask',itau);

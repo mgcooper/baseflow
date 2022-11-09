@@ -2,11 +2,11 @@ function Meta = loadmeta(basinname,varargin)
 % LOADMETA load metadata for basin indicated by basinname
 
 %------------------------------------------------------------------------------
-   p                = MipInputParser;
+   p                = inputParser;
    p.FunctionName   = 'bfra.loadmeta';
-   p.addRequired('basinname',@(x)ischar(x));
-   p.addOptional('version','current',@(x)ischar(x));
-   p.parseMagically('caller');
+   addRequired(p, 'basinname',         @(x)ischar(x) );
+   addOptional(p, 'version','current', @(x)ischar(x) );
+   parse(p,basinname,varargin{:});
    version = p.Results.version;
 %------------------------------------------------------------------------------
    

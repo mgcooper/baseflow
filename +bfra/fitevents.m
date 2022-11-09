@@ -13,8 +13,9 @@ function [K,Fits] = fitevents(Events,varargin)
 % See also: getdqdt, fitdqdt
 
 %-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'fitevents';
+p                 = inputParser;
+p.FunctionName    = 'fitevents';
+
 addRequired(p, 'Events',               @(x) isstruct(x)                 );
 addParameter(p,'derivmethod', 'ETS',   @(x) ischar(x)                   );
 addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
@@ -28,10 +29,11 @@ addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
 addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
 addParameter(p,'drainagearea',nan,     @(x) isnumeric(x) & isscalar(x)  );
 addParameter(p,'gageID',      'none',  @(x) ischar(x)                   );
+
 parse(p,Events,varargin{:});
-opts = p.Results;
-% note: removed fitopts from parser, i think it will mess up auto unpacking
-fitopts = struct();
+
+opts     = p.Results;
+fitopts  = struct(); % removed fitopts from parser, it may mess up autounpacking
 %-------------------------------------------------------------------------------
 
 % pull out the events

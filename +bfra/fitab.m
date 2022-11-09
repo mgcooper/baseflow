@@ -19,30 +19,34 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 % See also: prepfits
 
 %-------------------------------------------------------------------------------
-methodlist = {'nls','ols','mle','qtl','mean','median','envelope'};
-validmethod = @(x)any(validatestring(x,methodlist));
+methodlist     = {'nls','ols','mle','qtl','mean','median','envelope'};
+validmethod    = @(x)any(validatestring(x,methodlist));
 
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.fitab';
 p.StructExpand = false;
-p.PartialMatching = true;
-p.addRequired('q',                           @(x)isnumeric(x)     );
-p.addRequired('dqdt',                        @(x)isnumeric(x)     );
-p.addRequired('method',                      validmethod          );
-p.addParameter('weights',  ones(size(q)),    @(x)isnumeric(x)     );
-p.addParameter('order',    1,                @(x)isnumeric(x)     );
-p.addParameter('mask',     true(size(q)),    @(x)islogical(x)     );
-p.addParameter('quantile', 0.05,             @(x)isnumeric(x)     );
-p.addParameter('refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
-p.addParameter('Nboot',    100,              @(x)isnumeric(x)     );
-p.addParameter('plotfit',  false,            @(x)islogical(x)     );
-p.addParameter('fitopts',  struct(),         @(x)isstruct(x)      );
-p.parseMagically('caller');         
+% p.PartialMatching = true;
+
+addRequired(p, 'q',                          @(x)isnumeric(x)     );
+addRequired(p, 'dqdt',                       @(x)isnumeric(x)     );
+addRequired(p, 'method',                      validmethod          );
+addParameter(p,'weights',  ones(size(q)),    @(x)isnumeric(x)     );
+addParameter(p,'order',    1,                @(x)isnumeric(x)     );
+addParameter(p,'mask',     true(size(q)),    @(x)islogical(x)     );
+addParameter(p,'quantile', 0.05,             @(x)isnumeric(x)     );
+addParameter(p,'refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
+addParameter(p,'Nboot',    100,              @(x)isnumeric(x)     );
+addParameter(p,'plotfit',  false,            @(x)islogical(x)     );
+addParameter(p,'fitopts',  struct(),         @(x)isstruct(x)      );
+
+parse(p,q,dqdt,method,varargin{:});         
 
 weights  = p.Results.weights;
 order    = p.Results.order;
+mask     = p.Results.mask;
 qtl      = p.Results.quantile;
 refqtls  = p.Results.refqtls;
+Nboot    = p.Results.Nboot;
 plotfit  = p.Results.plotfit;
 fitopts  = p.Unmatched;
 

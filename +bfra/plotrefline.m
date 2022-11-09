@@ -25,33 +25,36 @@ function [href,ab] = plotrefline(x,y,varargin)
 
 % NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.plotrefline';
-p.PartialMatching = true;
-p.addRequired('x',@(x)isnumeric(x));
-p.addRequired('y',@(x)isnumeric(x));
-p.addParameter('mask',true(size(x)),@(x)islogical(x));
-p.addParameter('refline','none',@(x)ischar(x));
-p.addParameter('refslope',1,@(x)isnumeric(x));
-p.addParameter('userab',[1 1],@(x)isnumeric(x));
-p.addParameter('labels',false,@(x)islogical(x));
-p.addParameter('refqtls',nan,@(x)isnumeric(x));
-p.addParameter('plotline',true,@(x)islogical(x));
-p.addParameter('linecolor',[0 0 0],@(x)isnumeric(x));
-p.addParameter('precision',1,@(x)isnumeric(x)); % default = 1 m3/s
-p.addParameter('timestep',1,@(x)isnumeric(x)); % default = 1 day
-p.addParameter('ax',nan,@(x)isaxis(x));
+% p.PartialMatching = true;
 
-p.parseMagically('caller');
+addRequired(p, 'x',                          @(x)isnumeric(x));
+addRequired(p, 'y',                          @(x)isnumeric(x));
+addParameter(p,'mask',        true(size(x)), @(x)islogical(x));
+addParameter(p,'refline',     'none',        @(x)ischar(x));
+addParameter(p,'refslope',    1,             @(x)isnumeric(x));
+addParameter(p,'userab',      [1 1],         @(x)isnumeric(x));
+addParameter(p,'labels',      false,         @(x)islogical(x));
+addParameter(p,'refqtls',     nan,           @(x)isnumeric(x));
+addParameter(p,'plotline',    true,          @(x)islogical(x));
+addParameter(p,'linecolor',   [0 0 0],       @(x)isnumeric(x));
+addParameter(p,'precision',   1,             @(x)isnumeric(x)); % default = 1 m3/s
+addParameter(p,'timestep',    1,             @(x)isnumeric(x)); % default = 1 day
+addParameter(p,'ax',          nan,           @(x)isaxis(x));
 
+parse(p,x,y,varargin{:});
+
+mask        = p.Results.mask;
 refline     = p.Results.refline;
 refslope    = p.Results.refslope;
-refqtls     = p.Results.refqtls;
 userab      = p.Results.userab;
 labels      = p.Results.labels;
+refqtls     = p.Results.refqtls;
+plotline    = p.Results.plotline;
+linecolor   = p.Results.linecolor;
 precision   = p.Results.precision;
 timestep    = p.Results.timestep;
-mask        = p.Results.mask;
 ax          = p.Results.ax;
 %-------------------------------------------------------------------------------
       

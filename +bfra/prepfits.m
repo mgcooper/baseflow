@@ -14,16 +14,19 @@ function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
 %  See also: fitab
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
-p.FunctionName='prepfits';
-p.addRequired('q',                           @(x)isnumeric(x)  );
-p.addRequired('dqdt',                        @(x)isnumeric(x)  );
-p.addParameter('weights',  ones(size(q)),    @(x)isnumeric(x)  );
-p.addParameter('mask',     true(size(q)),    @(x)islogical(x)  );
-p.parseMagically('caller');
+p              = inputParser;
+p.FunctionName = 'prepfits';
 
-weights = p.Results.weights;
-mask = p.Results.mask;
+addRequired(p,    'q',                           @(x)isnumeric(x)  );
+addRequired(p,    'dqdt',                        @(x)isnumeric(x)  );
+addParameter(p,   'weights',  ones(size(q)),    @(x)isnumeric(x)  );
+addParameter(p,   'mask',     true(size(q)),    @(x)islogical(x)  );
+
+parse(p,q,dqdt,varargin{:});
+
+weights  = p.Results.weights;
+mask     = p.Results.mask;
+
 %-------------------------------------------------------------------------------
 
 % take the negative dq/dt values

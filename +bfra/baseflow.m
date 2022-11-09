@@ -1,20 +1,24 @@
 function [Qb,dQbdt,Q,dQadt,hbtrend,hatrend] = baseflow(t,Q,varargin)
 %BASEFLOW computes the expected value of baseflow and rate of change
 %posted on an annual basis
-% Inputs:
-%  t = time, posted annually [years]
-%  Q = mean daily discharge, posted annually [cm/day]
+% 
+%  Inputs
+% 
+%     t = time, posted annually [years]
+%     Q = mean daily discharge, posted annually [cm/day]
 
 %-------------------------------------------------------------------------------
-p=MipInputParser;
-p.FunctionName='bfra.baseflow';
-p.PartialMatching = true;
-p.addRequired('t',@(x)isdatetime(x)|isnumeric(x));
-p.addRequired('Q',@(x)isnumeric(x));
-p.addParameter('method','ols',@(x)ischar(x));
-p.addParameter('pctl',0.25,@(x)isnumeric(x));
-p.addParameter('showfig',false,@(x)islogical(x));
-p.parseMagically('caller');
+p              = inputParser;
+p.FunctionName = 'bfra.baseflow';
+
+addRequired(   p,    't',                 @(x)isdatetime(x)|isnumeric(x)   );
+addRequired(   p,    'Q',                 @(x)isnumeric(x)                 );
+addParameter(  p,    'method',   'ols',   @(x)ischar(x)                    );
+addParameter(  p,    'pctl',     0.25,    @(x)isnumeric(x)                 );
+addParameter(  p,    'showfig',  false,   @(x)islogical(x)                 );
+
+parse(p,t,Q,varargin{:});
+
 if ~isdatetime(t); t = datetime(t,'convertfrom','datenum'); end
 %-------------------------------------------------------------------------------
 

@@ -30,24 +30,39 @@ function [Events] = getevents(T,Q,R,varargin)
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
 
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.getevents';
 p.StructExpand = true;
-p.addRequired( 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
-p.addRequired( 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
-p.addRequired( 'R',                    @(x) isnumeric(x)                      );
-p.addParameter('qmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
-p.addParameter('nmin',        4,       @(x) isnumeric(x) & isscalar(x)        );
-p.addParameter('fmax',        1,       @(x) isnumeric(x) & isscalar(x)        );
-p.addParameter('rmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
-p.addParameter('rmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
-p.addParameter('cmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
-p.addParameter('rmconvex',    false,   @(x) islogical(x) & isscalar(x)        );
-p.addParameter('rmnochange',  true,    @(x) islogical(x) & isscalar(x)        );
-p.addParameter('rmrain',      false,   @(x) islogical(x) & isscalar(x)        );
-p.addParameter('pickevents',  false,   @(x) islogical(x) & isscalar(x)        );
-p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
-p.parseMagically('caller');
+
+addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
+addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
+addRequired(p, 'R',                    @(x) isnumeric(x)                      );
+addParameter(p,'qmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'nmin',        4,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'fmax',        1,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'rmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'rmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'cmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'rmconvex',    false,   @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'rmnochange',  true,    @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'rmrain',      false,   @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'pickevents',  false,   @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
+
+parse(p,T,Q,R,varargin{:});
+
+qmin        = p.Results.qmin;
+nmin        = p.Results.nmin;
+fmax        = p.Results.fmax;
+rmax        = p.Results.rmax;
+rmin        = p.Results.rmin;
+cmax        = p.Results.cmax;
+rmconvex    = p.Results.rmconvex;
+rmnochange  = p.Results.rmnochange;
+rmrain      = p.Results.rmrain;
+pickevents  = p.Results.pickevents;
+plotevents  = p.Results.plotevents;
+
 if isempty(R); R = zeros(size(Q)); end
 %------------------------------------------------------------------------------
 

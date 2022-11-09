@@ -3,23 +3,27 @@ function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
 %hydrograph with time 't', discharge 'q', and rain 'r'. Use optional inputs to
 %set parameters that determine how events are identified and 
 % 
-% Required inputs:
-%  t           =  time
-%  q           =  flow (m3/time)
-%  r           =  rain (mm/time)
-%  nmin        =  minimum event length
+%  Required inputs
+% 
+%     t           =  time
+%     q           =  flow (m3/time)
+%     r           =  rain (mm/time)
+%     nmin        =  minimum event length
 % 
 %  See also: getevents, findevents, eventfinder, eventsplitter, eventplotter
 %-------------------------------------------------------------------------------
-p = MipInputParser();
+p              = inputParser;
 p.FunctionName = 'eventpicker';
 p.StructExpand = false;             % for 'Info' input
-p.addRequired( 't',     @(x) isnumeric(x) | isdatetime(x)         );
-p.addRequired( 'q',     @(x) isnumeric(x) & numel(x)==numel(t)    );
-p.addRequired( 'r',     @(x) isnumeric(x)                         );
-p.addRequired( 'nmin',  @(x) isnumeric(x) & isscalar(x)           );
-p.addRequired( 'Info',  @(x) isstruct(x)                          );
-p.parseMagically('caller');
+
+addRequired(p, 't',     @(x) isnumeric(x) | isdatetime(x)         );
+addRequired(p, 'q',     @(x) isnumeric(x) & numel(x)==numel(t)    );
+addRequired(p, 'r',     @(x) isnumeric(x)                         );
+addRequired(p, 'nmin',  @(x) isnumeric(x) & isscalar(x)           );
+addRequired(p, 'Info',  @(x) isstruct(x)                          );
+
+parse(p,t,q,r,nmin,Info);
+
 %-------------------------------------------------------------------------------
    
    % compute the first derivative

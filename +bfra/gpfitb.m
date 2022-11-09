@@ -5,18 +5,25 @@ function [Fit,b,alpha,k] = gpfitb(x,varargin)
 %true x such that xhat=x-xmin. If xmin is not provided, we assume
 %xmin=0. 
 %------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.gpfitb';
-p.PartialMatching=true;
-p.addRequired('x',@(x)isnumeric(x));
-p.addParameter('xmin',0,@(x)isnumeric(x));
-p.addParameter('varsym','\tau',@(x)ischar(x));
-p.addParameter('bootfit',false,@(x)islogical(x));
-p.addParameter('plotfit',true,@(x)islogical(x));
-p.addParameter('labelplot',true,@(x)islogical(x));
-p.parseMagically('caller');
-plotfit = p.Results.plotfit;
-varsym = p.Results.varsym;
+% p.PartialMatching=true;
+
+addRequired(   p, 'x',                    @(x)isnumeric(x)  );
+addParameter(  p, 'xmin',        0,       @(x)isnumeric(x)  );
+addParameter(  p, 'varsym',      '\tau',  @(x)ischar(x)     );
+addParameter(  p, 'bootfit',     false,   @(x)islogical(x)  );
+addParameter(  p, 'plotfit',     true,    @(x)islogical(x)  );
+addParameter(  p, 'labelplot',   true,    @(x)islogical(x)  );
+
+parse(p,x,varargin{:});
+
+xmin        = p.Results.xmin;
+varsym      = p.Results.varsym;
+bootfit     = p.Results.bootfit;
+plotfit     = p.Results.plotfit;
+labelplot   = p.Results.labelplot;
+
 %------------------------------------------------------------------------------
 
    if nargin == 1

@@ -14,12 +14,15 @@ function [aQbstr,Qtstr] = aQbString(varargin)
 %-------------------------------------------------------------------------------
 % input handling
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p = inputParser;
 p.FunctionName = 'bfra.aQbString';
-p.addOptional('ab',[],@(x)isnumeric(x));
-p.addOptional('Q0',[],@(x)isnumeric(x));
-p.addParameter('printvalues',false,@(x)islogical(x));
-p.parseMagically('caller');
+addOptional(p,'ab',[],@(x)isnumeric(x));
+addOptional(p,'Q0',[],@(x)isnumeric(x));
+addParameter(p,'printvalues',false,@(x)islogical(x));
+parse(p,varargin{:});
+ab = p.Results.ab;
+Q0 = p.Results.Q0;
+printvalues = p.Results.printvalues;
 %-------------------------------------------------------------------------------
 
    if printvalues == true

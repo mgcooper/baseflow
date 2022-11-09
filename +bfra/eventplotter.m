@@ -18,16 +18,23 @@ function h = eventplotter(t,q,r,Info,varargin)
 
 %-------------------------------------------------------------------------------
 % input handling
-p = MipInputParser();
+p              = inputParser;
 p.FunctionName = 'eventplotter';
-p.addRequired( 't',                    @(x) isnumeric(x) | isdatetime(x)      );
-p.addRequired( 'q',                    @(x) isnumeric(x) & numel(x)==numel(t) );
-p.addRequired( 'r',                    @(x) isnumeric(x)                      );
-p.addRequired( 'Info',                 @(x) isstruct(x)                       );
-p.addParameter('plotneg',     false,   @(x) islogical(x) & isscalar(x)        );
-p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
-p.addParameter('dqdt',        derivative(q),isnumeric(x) & numel(x)==numel(t) );
-p.parseMagically('caller');
+
+addRequired(p, 't',                    @(x) isnumeric(x) | isdatetime(x)      );
+addRequired(p, 'q',                    @(x) isnumeric(x) & numel(x)==numel(t) );
+addRequired(p, 'r',                    @(x) isnumeric(x)                      );
+addRequired(p, 'Info',                 @(x) isstruct(x)                       );
+addParameter(p,'plotneg',     false,   @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'dqdt',   derivative(q),@(x) isnumeric(x) & numel(x)==numel(t) );
+
+parse(p,t,q,r,Info,varargin{:});
+
+plotneg     = p.Results.plotneg;
+plotevents  = p.Results.plotevents;
+dqdt        = p.Results.dqdt;
+
 %-------------------------------------------------------------------------------
 
 % short circuits

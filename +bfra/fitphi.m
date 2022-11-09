@@ -21,23 +21,29 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 %  See also eventphi, cloudphi, fitdistphi
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.StructExpand = false;
 p.FunctionName = 'fitphi';
-p.addRequired('a1',@(x)isnumeric(x));
-p.addRequired('a2',@(x)isnumeric(x));
-p.addRequired('b2',@(x)isnumeric(x));
-p.addRequired('A',@(x)isnumeric(x));
-p.addRequired('D',@(x)isnumeric(x));
-p.addRequired('L',@(x)isnumeric(x));
-p.addParameter('theta',0,@(x)isnumeric(x));
-p.addParameter('isflat',true,@(x)islogical(x));
-p.addParameter('dispfit',false,@(x)islogical(x));
-p.addParameter('soln1','Rupp and Selker, 2005',@(x)ischar(x));
-p.addParameter('soln2','Rupp and Selker, 2005',@(x)ischar(x));
-p.parseMagically('caller');
-soln1 = p.Results.soln1;
-soln2 = p.Results.soln2;
+
+addRequired(p, 'a1',                @(x)isnumeric(x)  );
+addRequired(p, 'a2',                @(x)isnumeric(x)  );
+addRequired(p, 'b2',                @(x)isnumeric(x)  );
+addRequired(p, 'A',                 @(x)isnumeric(x)  );
+addRequired(p, 'D',                 @(x)isnumeric(x)  );
+addRequired(p, 'L',                 @(x)isnumeric(x)  );
+addParameter(p,'theta',    0,       @(x)isnumeric(x)  );
+addParameter(p,'isflat',   true,    @(x)islogical(x)  );
+addParameter(p,'dispfit',  false,   @(x)islogical(x)  );
+addParameter(p,'soln1',    'RS05',  @(x)ischar(x)     );
+addParameter(p,'soln2',    'RS05',  @(x)ischar(x)     );
+
+parse(p,a1,a2,b2,A,D,L,varargin{:});
+
+theta    = p.Results.theta;
+isflat   = p.Results.isflat;
+dispfit  = p.Results.dispfit;
+soln1    = p.Results.soln1;
+soln2    = p.Results.soln2;
 %-------------------------------------------------------------------------------
 % b1  = early-time b (not needed for any solutions but assumed)
 % b2  = late-time b

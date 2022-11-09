@@ -3,12 +3,18 @@ function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
 %its value in terms of outputvarname (use tab completion to get a list of
 %supported input and output varnames)
 %-------------------------------------------------------------------------------
-p = MipInputParser;
-p.addRequired('inputvalue',@(x)isnumeric(x));
-p.addRequired('inputvarname',@(x)ischar(x));
-p.addRequired('outputvarname',@(x)ischar(x));
-p.addParameter('isflat',true,@(x)islogical(x));
-p.parseMagically('caller');   
+p = inputParser;
+p.FunctionName = 'bfra.conversions';
+
+addRequired(   p,    'inputvalue',              @(x)isnumeric(x));
+addRequired(   p,    'inputvarname',            @(x)ischar(x));
+addRequired(   p,    'outputvarname',           @(x)ischar(x));
+addParameter(  p,    'isflat',         true,    @(x)islogical(x));
+
+parse(p,inputvalue,inputvarname,outputvarname,varargin{:});   
+
+isflat = p.Results.isflat;
+
 %-------------------------------------------------------------------------------
    
 % convert whatever is passed in to b, then from b to whatever is requested

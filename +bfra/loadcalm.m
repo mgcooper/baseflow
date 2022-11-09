@@ -5,11 +5,11 @@ function Calm = loadcalm(basinname,varargin)
 % the basin name not the calm site name
 
 %------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.loadcalm';
-p.addRequired('basinname',@(x)ischar(x));
-p.addOptional('version','current',@(x)ischar(x));
-p.parseMagically('caller');
+addRequired(p, 'basinname',         @(x)ischar(x));
+addOptional(p, 'version','current', @(x)ischar(x));
+parse(p,basinname,varargin{:});
 version = p.Results.version;
 %------------------------------------------------------------------------------
 

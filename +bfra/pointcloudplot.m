@@ -25,23 +25,36 @@ function out = pointcloudplot(q,dqdt,varargin)
 % See also fitab, plotdqdt
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.pointcloudplot';
-p.addRequired('q',@(x)isnumeric(x));
-p.addRequired('dqdt',@(x)isnumeric(x));
-p.addParameter('mask',false,@(x)islogical(x));
-p.addParameter('reflines',{'bestfit'},@(x)iscell(x));
-p.addParameter('reflabels',false,@(x)islogical(x)&isscalar(x));
-p.addParameter('blate',1,@(x)isnumeric(x));
-p.addParameter('userab',[1 1],@(x)isnumeric(x));
-p.addParameter('precision',1,@(x)isnumeric(x));
-p.addParameter('timestep',1,@(x)isnumeric(x));
-p.addParameter('addlegend',true,@(x)islogical(x));
-p.addParameter('usertext','',@(x)ischar(x));
-p.addParameter('rain',nan,@(x)isnumeric(x));
-p.addParameter('ax','none',@(x)isaxis(x)|ischar(x));
-p.parseMagically('caller');
-reflines = p.Results.reflines;
+
+addRequired(p, 'q',                             @(x)isnumeric(x));
+addRequired(p, 'dqdt',                          @(x)isnumeric(x));
+addParameter(p,'mask',        false,            @(x)islogical(x));
+addParameter(p,'reflines',    {'bestfit'},      @(x)iscell(x));
+addParameter(p,'reflabels',   false,            @(x)islogical(x)&isscalar(x));
+addParameter(p,'blate',       1,                @(x)isnumeric(x));
+addParameter(p,'userab',      [1 1],            @(x)isnumeric(x));
+addParameter(p,'precision',   1,                @(x)isnumeric(x));
+addParameter(p,'timestep',    1,                @(x)isnumeric(x));
+addParameter(p,'addlegend',   true,             @(x)islogical(x));
+addParameter(p,'usertext',    '',               @(x)ischar(x));
+addParameter(p,'rain',        nan,              @(x)isnumeric(x));
+addParameter(p,'ax',          'none',           @(x)isaxis(x)|ischar(x));
+
+parse(p,q,dqdt,varargin{:});
+
+mask        = p.Results.mask;
+reflines    = p.Results.reflines;
+reflabels   = p.Results.reflabels;
+blate       = p.Results.blate;
+userab      = p.Results.userab;
+precision   = p.Results.precision;
+timestep    = p.Results.timestep;
+addlegend   = p.Results.addlegend;
+usertext    = p.Results.usertext;
+rain        = p.Results.rain;
+ax          = p.Results.ax;
 
 % Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
 %-------------------------------------------------------------------------------

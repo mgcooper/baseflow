@@ -4,15 +4,17 @@ function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
 %bfra.getevents and bfra.dqdt 
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p = inputParser;
 p.StructExpand = false;
 p.FunctionName = 'eventtau';
-p.addRequired('K',@(x)isstruct(x));
-p.addRequired('Events',@(x)isstruct(x));
-p.addRequired('Fits',@(x)isstruct(x));
-p.addParameter('usefits',false,@(x)islogical(x));
-p.addParameter('aggfunc','none',@(x)ischar(x));
-p.parseMagically('caller');
+addRequired(p,'K',@(x)isstruct(x));
+addRequired(p,'Events',@(x)isstruct(x));
+addRequired(p,'Fits',@(x)isstruct(x));
+addParameter(p,'usefits',false,@(x)islogical(x));
+addParameter(p,'aggfunc','none',@(x)ischar(x));
+parse(p,K,Events,Fits,varargin{:});
+usefits = p.Results.usefits;
+aggfunc = p.Results.aggfunc;
 %-------------------------------------------------------------------------------
 
 % TODO: implement aggfunc option to compute an event-aggregate tau e.g. using

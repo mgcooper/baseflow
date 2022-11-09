@@ -3,10 +3,10 @@ function basinname = basinname(typenamehere)
 % be passed into other functions that require the basinname string in this
 % format.
 
-   p = MipInputParser;
+   p              = inputParser;
    p.FunctionName = 'bfra.basinname';
-   p.addRequired('typenamehere')
-   p.parseMagically('caller');
-   basinname = typenamehere;
+   addRequired( p,'typenamehere');
+   parse(p,typenamehere);
+   basinname = p.Results.typenamehere;
    
    

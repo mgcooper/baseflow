@@ -3,37 +3,50 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 %interrupted by rainfall or convex dq/dt, the event is split into separate
 %segments.
 % 
-% Required inputs:
-%  t           =  time
-%  q           =  flow (m3/time)
-%  r           =  rain (mm/time)
+%  Required inputs
+% 
+%     t        =  time
+%     q        =  flow (m3/time)
+%     r        =  rain (mm/time)
 %
-% Optional name-value inputs:
-%  nmin        =  minimum event length
-%  fmax        =  maximum # of missing values gap-filled
-%  rmax        =  maximum run of sequential constant values
-%  rmin        =  minimum rainfall required to censor flow (mm/day?)
-%  rmconvex    =  remove convex derivatives
-%  rmnochange  =  remove consecutive constant derivates
-%  rmrain      =  remove rainfall
+%  Optional name-value inputs
+% 
+%     nmin        =  minimum event length
+%     fmax        =  maximum # of missing values gap-filled
+%     rmax        =  maximum run of sequential constant values
+%     rmin        =  minimum rainfall required to censor flow (mm/day?)
+%     rmconvex    =  remove convex derivatives
+%     rmnochange  =  remove consecutive constant derivates
+%     rmrain      =  remove rainfall
 % 
 %  See also: getevents, findevents, eventfinder, eventpicker, eventplotter
 
 % parse inputs
 %-------------------------------------------------------------------------------
-p = MipInputParser();
+p              = inputParser;
 p.FunctionName = 'eventsplitter';
-p.addRequired( 't',                  @(x) isnumeric(x) | isdatetime(x)  );
-p.addRequired( 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
-p.addRequired( 'r',                  @(x) isnumeric(x)                  );
-p.addParameter('nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
-p.addParameter('rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
-p.addParameter('rmrain',      false, @(x) islogical(x) & isscalar(x)    );
-p.parseMagically('caller');
+
+addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)  );
+addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
+addRequired(p, 'r',                  @(x) isnumeric(x)                  );
+addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
+
+parse(p,t,q,r,varargin{:});
+
+nmin        = p.Results.nmin;
+fmax        = p.Results.fmax;
+rmax        = p.Results.rmax;
+rmin        = p.Results.rmin;
+rmconvex    = p.Results.rmconvex;
+rmnochange  = p.Results.rmnochange;
+rmrain      = p.Results.rmrain;
+
 %-------------------------------------------------------------------------------
 % % other way to parse inputs:
 %    arguments

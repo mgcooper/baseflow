@@ -20,19 +20,30 @@ function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
 %  See also: getevents, findevents, eventsplitter, eventpicker, eventplotter
 
 %-------------------------------------------------------------------------------
-p = MipInputParser();
+p              = inputParser;
 p.FunctionName = 'eventfinder';
-p.addRequired( 't',                  @(x) isnumeric(x) | isdatetime(x)  );
-p.addRequired( 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
-p.addRequired( 'r',                  @(x) isnumeric(x)                  );
-p.addParameter('nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-p.addParameter('rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
-p.addParameter('rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
-p.addParameter('rmrain',      false, @(x) islogical(x) & isscalar(x)    );
-p.parseMagically('caller');
+
+addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)  );
+addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
+addRequired(p, 'r',                  @(x) isnumeric(x)                  );
+addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
+
+parse(p,t,q,r,varargin{:});
+
+nmin        = p.Results.nmin;
+fmax        = p.Results.fmax;
+rmax        = p.Results.rmax;
+rmin        = p.Results.rmin;
+rmconvex    = p.Results.rmconvex;
+rmnochange  = p.Results.rmnochange;
+rmrain      = p.Results.rmrain;
+
 %-------------------------------------------------------------------------------
    
 

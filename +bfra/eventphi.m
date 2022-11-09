@@ -20,22 +20,31 @@ function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)
 % See also cloudphi, fitphi, fitdistphi
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.StructExpand = false;
 p.FunctionName = 'eventphi';
-p.addRequired('K',@(x)istable(x));
-p.addRequired('Fits',@(x)isstruct(x));
-p.addRequired('A',@(x)isnumeric(x));
-p.addRequired('D',@(x)isnumeric(x));
-p.addRequired('L',@(x)isnumeric(x));
-p.addRequired('blate',@(x)isnumeric(x));
-p.addParameter('method','envelope',@(x)ischar(x));
-p.addParameter('refqtls',[0.50 0.50],@(x)isnumeric(x));
-p.addParameter('theta',0,@(x)isnumeric(x));
-p.addParameter('isflat',true,@(x)islogical(x));
-p.addParameter('soln1','',@(x)ischar(x));
-p.addParameter('soln2','',@(x)ischar(x));
-p.parseMagically('caller');
+
+addRequired(   p,'K',                        @(x)isstruct(x));
+addRequired(   p,'Fits',                     @(x)isstruct(x));
+addRequired(   p,'A',                        @(x)isnumeric(x));
+addRequired(   p,'D',                        @(x)isnumeric(x));
+addRequired(   p,'L',                        @(x)isnumeric(x));
+addRequired(   p,'blate',                    @(x)isnumeric(x));
+addParameter(  p,'method',    'envelope',    @(x)ischar(x));
+addParameter(  p,'refqtls',   [0.50 0.50],   @(x)isnumeric(x));
+addParameter(  p,'theta',     0,             @(x)isnumeric(x));
+addParameter(  p,'isflat',    true,          @(x)islogical(x));
+addParameter(  p,'soln1',     '',            @(x)ischar(x));
+addParameter(  p,'soln2',     '',            @(x)ischar(x));
+
+parse(p,K,Fits,A,D,L,blat,varargin{:});
+
+method   = p.Results.method;
+refqtls  = p.Results.refqtls;
+theta    = p.Results.theta;
+isflat   = p.Results.isflat;
+soln1    = p.Resutls.soln1;
+soln2    = p.Resutls.soln2;
 %-------------------------------------------------------------------------------
 
 warning off

@@ -29,9 +29,10 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 
 %-------------------------------------------------------------------------------
 % input handling    
-p = inputParser;
-p.FunctionName = 'getdqdt';
-p.CaseSensitive = true;
+p                 = inputParser;
+p.FunctionName    = 'getdqdt';
+p.CaseSensitive   = true;
+
 addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x));
 addRequired(p, 'Q',                    @(x) isnumeric(x)                );
 addRequired(p, 'R',                    @(x) isnumeric(x)                );

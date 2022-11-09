@@ -19,25 +19,28 @@ function Fit = plfitb(x,varargin)
 % See also: plplotb, plfit
 
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p              = inputParser;
 p.FunctionName = 'bfra.plfitb';
-p.PartialMatching = true;
-p.addRequired('x',@(x)isnumeric(x));
-p.addParameter('xmin',nan,@(x)isnumeric(x));
-p.addParameter('range',1.01:0.01:25.01,@(x)isnumeric(x));
-p.addParameter('limit',[],@(x)isnumeric(x));
-p.addParameter('method','clauset',@(x)ischar(x));
-p.addParameter('bootfit',false,@(x)islogical(x));
-p.addParameter('nreps',1000,@(x)isnumeric(x));
-p.addParameter('plotfit',false,@(x)islogical(x));
-p.parseMagically('caller');
+% p.PartialMatching = true;
 
-plotfit  = p.Results.plotfit;
-bootfit  = p.Results.bootfit;
+addRequired(p,    'x',                          @(x)isnumeric(x)  );
+addParameter(p,   'xmin',     nan,              @(x)isnumeric(x)  );
+addParameter(p,   'range',    1.01:0.01:25.01,  @(x)isnumeric(x)  );
+addParameter(p,   'limit',    [],               @(x)isnumeric(x)  );
+addParameter(p,   'method',   'clauset',        @(x)ischar(x)     );
+addParameter(p,   'bootfit',  false,            @(x)islogical(x)  );
+addParameter(p,   'nreps',    1000,             @(x)isnumeric(x)  );
+addParameter(p,   'plotfit',  false,            @(x)islogical(x)  );
+
+parse(p,x,varargin{:});
+
+xmin     = p.Results.xmin;
 range    = p.Results.range;
 limit    = p.Results.limit;
-xmin     = p.Results.xmin;
+method   = p.Results.method;
+bootfit  = p.Results.bootfit;
 nreps    = p.Results.nreps;
+plotfit  = p.Results.plotfit;
                
 %-------------------------------------------------------------------------------
    x0    = x;

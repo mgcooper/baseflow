@@ -30,24 +30,39 @@ function [T,Q,R,Info] = findevents(t,q,r,varargin)
 %-------------------------------------------------------------------------------
 % input handling
 %-------------------------------------------------------------------------------
-p = MipInputParser;
+p                 = inputParser;
 p.FunctionName    = 'findevents';
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
-p.addRequired( 't',                    @(x) isnumeric(x) | isdatetime(x));
-p.addRequired( 'q',                    @(x) isnumeric(x) & numel(x)==numel(t));
-p.addRequired( 'r',                    @(x) isnumeric(x)                );
-p.addParameter('qmin',        0,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('nmin',        4,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('fmax',        2,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('rmax',        2,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('rmin',        0,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('cmax',        2,       @(x) isnumeric(x) & isscalar(x)  );
-p.addParameter('rmconvex',    false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('rmnochange',  true,    @(x) islogical(x) & isscalar(x)  );
-p.addParameter('rmrain',      false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('pickevents',  false,   @(x) islogical(x) & isscalar(x)  );
-p.addParameter('plotevents',  false,   @(x) islogical(x) & isscalar(x)  );
-p.parseMagically('caller');
+
+addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)  );
+addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
+addRequired(p, 'r',                  @(x) isnumeric(x)                  );
+addParameter(p,'qmin',        0,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
+addParameter(p,'cmax',        2,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
+addParameter(p,'pickevents',  false, @(x) islogical(x) & isscalar(x)  );
+addParameter(p,'plotevents',  false, @(x) islogical(x) & isscalar(x)  );
+
+parse(p,t,q,r,varargin{:});
+
+qmin        = p.Results.qmin;
+nmin        = p.Results.nmin;
+fmax        = p.Results.fmax;
+rmax        = p.Results.rmax;
+rmin        = p.Results.rmin;
+cmax        = p.Results.cmax;
+rmconvex    = p.Results.rmconvex;
+rmnochange  = p.Results.rmnochange;
+rmrain      = p.Results.rmrain;
+pickevents  = p.Results.pickevents;
+plotevents  = p.Results.plotevents;
+
 %-------------------------------------------------------------------------------
     
 % iF is the first non-nan index, to recover indices after removing nans

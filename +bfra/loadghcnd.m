@@ -2,15 +2,22 @@ function GHCN = loadghcnd(basinname,varargin)
 % LOADGHCND reads in a global hydroclimatology network database file 
 
 %-------------------------------------------------------------------------------
-p=MipInputParser;
-p.FunctionName='bfra.loadghcnd';
-p.PartialMatching=true;
-p.addRequired('basinname',@(x)ischar(x));
-p.addParameter('t1',NaT,@(x) isdatetime(x)|isnumeric(x));
-p.addParameter('t2',NaT,@(x) isdatetime(x)|isnumeric(x));
-p.addParameter('units',NaN,@(x) ischar(x));
-p.addParameter('gapfill',false,@(x) islogical(x));
-p.parseMagically('caller');
+p              = inputParser;
+p.FunctionName = 'bfra.loadghcnd';
+% p.PartialMatching=true;
+
+addRequired(p,    'basinname',         @(x) ischar(x)                   );
+addParameter(p,   't1',       NaT,     @(x) isdatetime(x)|isnumeric(x)  );
+addParameter(p,   't2',       NaT,     @(x) isdatetime(x)|isnumeric(x)  );
+addParameter(p,   'units',    NaN,     @(x) ischar(x)                   );
+addParameter(p,   'gapfill',  false,   @(x) islogical(x)                );
+
+parse(p,basinname,varargin{:});
+
+t1       = p.Results.t1;
+t2       = p.Results.t2;
+units    = p.Results.units;
+gapfill  = p.Results.gapfill;
 
 if isnumeric(t1) %#ok<*NODEF>
    t1 = datetime(t1,'ConvertFrom','datenum');

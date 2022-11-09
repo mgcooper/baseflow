@@ -4,11 +4,18 @@ function [Qtaustr,aQbstr] = QtauString(varargin)
 
 % input handling
 %-------------------------------------------------------------------------------
-p = MipInputParser;
-p.addOptional('ab',[],@(x)isnumeric(x));
-p.addOptional('tau0',[],@(x)isnumeric(x));
-p.addParameter('printvalues',false,@(x)islogical(x));
-p.parseMagically('caller');
+p              = inputParser;
+p.FunctionName = 'bfra.QtauString';
+
+addOptional('ab',             [],      @(x)isnumeric(x));
+addOptional('tau0',           [],      @(x)isnumeric(x));
+addParameter('printvalues',   false,   @(x)islogical(x));
+
+parse(p,varargin{:});
+
+ab          = p.Results.ab;
+tau0        = p.Results.tau0;
+printvalues = p.Results.printvalues;
 %-------------------------------------------------------------------------------
 
 if printvalues == true
