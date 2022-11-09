@@ -2,30 +2,10 @@ clean
 
 % this script runs the entire analysis for the Kuparuk
 
-% something changed with the new setopts, probably rmrain or maybe qmin, need to
-% confirm what those were previously in defaultopts and in the input parser, the
-% saved opts structs should confirm. once that's fixed, should be ready to
-% generate final results
-
-% ALSO, I confirmed that input parsing is working for getevetns and fitevents,
-% and I think for globafit, nearly certain the issue is going to be the
-% discrepancy b/w defaultopts and inputparser. The results for lter+coop look
-% great eitehr way with the new setup so should be good to go
-
-% MAKE SURE NOT TO OVERWRITE ANY SAVED DATA
-
-% NOW I AM GETTING THE RIGHT ANSWER again, 0.31 and 0.77 ... so checkout the
-% project branches and see what happens, if it's working, i think we can move
-% on from Troch ... key thing is that L is NOT INVOLVED in estimating phi, so
-% we don't even have to report it, b/c if someone did the calculation they
-% would find that drainage density is about 0.03 so L prob needs to be a factor
-% of 10 higher, which would produce bettter ksat estiamtes otherwise other than
-% clarifying a method to get Q0 I am not sure troch rpovides anything else
-
 % set the main options
 %----------------------
 savedata    = false;
-fitevents   = true;
+fitevents   = false;
 fitglobal   = true;
 plotfigs    = true;
 bootfit     = false;

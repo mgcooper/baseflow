@@ -2,46 +2,25 @@ clean
 
 % this script runs the entire analysis for the Kuparuk
 
-% something changed with the new setopts, probably rmrain or maybe qmin, need to
-% confirm what those were previously in defaultopts and in the input parser, the
-% saved opts structs should confirm. once that's fixed, should be ready to
-% generate final results
-
-% ALSO, I confirmed that input parsing is working for getevetns and fitevents,
-% and I think for globafit, nearly certain the issue is going to be the
-% discrepancy b/w defaultopts and inputparser. The results for lter+coop look
-% great eitehr way with the new setup so should be good to go
-
-% MAKE SURE NOT TO OVERWRITE ANY SAVED DATA
-
-% NOW I AM GETTING THE RIGHT ANSWER again, 0.31 and 0.77 ... so checkout the
-% project branches and see what happens, if it's working, i think we can move
-% on from Troch ... key thing is that L is NOT INVOLVED in estimating phi, so
-% we don't even have to report it, b/c if someone did the calculation they
-% would find that drainage density is about 0.03 so L prob needs to be a factor
-% of 10 higher, which would produce bettter ksat estiamtes otherwise other than
-% clarifying a method to get Q0 I am not sure troch rpovides anything else
-
 % set the main options
 %----------------------
 savedata    = false;
-fitevents   = true;
+fitevents   = false;
 fitglobal   = true;
 plotfigs    = true;
 bootfit     = false;
 nreps       = 1;
-sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1983,1,1);
 t2          = datetime(2020,12,31);
 testrain    = 'coop';
 
 % this is the filename that will be used to save the output
-fname    = 'data/Events.mat';
+fname       = 'data/Events.mat';
 
 % load the daily streamflow and meta data
 %-----------------------------------------
 load('dailyflow.mat','T','Q','R');
-load('annualflow.mat','Data');
+load('annualdata.mat','Data');
 
 % temporary option to use different rain
 %==========================================
@@ -49,23 +28,6 @@ if ~strcmp(testrain,'none')
    load(['data/ppt/ppt_' testrain '.mat'],'R')
 end
 %==========================================
-
-% load the active layer thickness data
-%--------------------------------------
-Calm = bfra.loadcalm(sitename,'archive');
-Calm = retime(Calm,'yearly','next'); Calm.Dc(end) =  42.571;
-
-% sychronize the CALM data with the annual flow data
-Data  = synchronize(Data,Calm,Data.Time,'fillwithmissing');
-years = Data.Time;
-Qcmd  = Data.Qcmd;
-            
-%  [T,Q,R,Info] = bfra.findevents(T,Q,R,opts.Events);
-%  
-%  for n = 1:numel(T)
-%     semilogy(T{n},Q{n},'-o'); datetick;
-%     pause;
-%  end
  
 % run the analysis
 %------------------
@@ -105,9 +67,6 @@ end
 % ---------------------------------------------------------------------
 
 if fitglobal == true
-
-%    GlobalFit = bfra.globalfit(K,Events,Fits,Meta,'boot',false, ...
-%                               'nreps',2000,'plotfit',plotfigs);
                
    opts.Global = bfra.setopts('globalfit','drainagearea',8.6545e9, ...
                'aquiferdepth',0.5,'streamlength',320000,'isflat',true,...
@@ -137,7 +96,7 @@ pQexp = GlobalFit.pQexp;
 
 % compute baseflow and aquifer thickenss
 %----------------------------------------
-[Qb,~,~,~,hb,ha] = bfra.baseflow(years,Qcmd,'pctl',pQexp,'show',false); % cm/d
+[Qb,~,~,~,hb,ha] = bfra.baseflow(Data(:,1),Data(:,2),'pctl',pQexp,'show',false); % cm/d
 [Db,Sb]  = bfra.aquiferthickness(bhat,tau,phi,Qb,true); % cm/yr
 Qb       = Qb.*365.25;  % convert from cm/d/yr to cm/yr/yr
 
@@ -160,189 +119,23 @@ end
 if plotfigs == true
 
    % make separate tables for the Grace period and Calm period
-   PlotData = addvars(Data,Qb,Sb,Db);
-   inanC    = isnan(PlotData.Dc);%  | isnan(Data.Q);
-   DataC    = PlotData(~inanC,:);
-   DataG    = PlotData(20:end,:);
+   Data     = [Data,Db,Qb,Sb];
+   inan     = isnan(Data(:,3));
+   DataC    = Data(~inan,:);
+   DataG    = Data(13:end,:);
 
    % compute trends in aquifer thickness
    f(3) = figure('Position',[6 241 512 384]);
-   trendplot(DataC.Time,DataC.Dc,'units','cm/yr','use',gca,'leg','CALM');
-   trendplot(DataC.Time,DataC.Db,'units','cm/yr','use',gca,'leg','BFRA');
+   trendplot(DataC(:,1),DataC(:,3),'units','cm/yr','use',gca,'leg','CALM');
+   trendplot(DataC(:,1),DataC(:,4),'units','cm/yr','use',gca,'leg','BFRA');
    ylabel('active layer anomaly (cm/yr)');
 
    f(4) = figure('Position',[600 241 512 384]); 
-   trendplot(DataG.Time,DataG.Dc,'units','cm/yr','use',gca,'leg','CALM');
-   trendplot(DataG.Time,DataG.Db,'units','cm/yr','use',gca,'leg','BFRA');
+   trendplot(DataG(:,1),DataG(:,3),'units','cm/yr','use',gca,'leg','CALM');
+   trendplot(DataG(:,1),DataG(:,4),'units','cm/yr','use',gca,'leg','BFRA');
    ylabel('active layer anomaly (cm/yr)');
 
 end
 
 GlobalFit.a
 
-autoArrangeFigures(3,2,2)
-
-% tileopenfigs('deletefigs',true);
-
-% figure(1); plot(1:10,1:10,'b');
-% figure(2); plot(1:10,1:10,'r');
-% figure(3); plot(1:10,1:10,'g');
-% figure(4); plot(1:10,1:10,'c');
-% 
-% tileopenfigs('deletefigs',true);
-
-% s1 = '1';
-% s2 = '2';
-% s3 = '3';
-% s4 = '4';
-% layout = {s1 s2; s3 s4};
-% fm = sl.plot.fig_merger(layout);
-% % fm = sl.plot.fig_merger({'1,1','2,2';'3,3','4,4'});
-% 
-% 
-% figure(1)
-% subplot(2,1,1)
-% plot(1:10,'r')
-% subplot(2,1,2)
-% plot(11:20,'g')
-% 
-% figure(2)
-% subplot(2,1,1)
-% plot(21:30,'b')
-% subplot(2,1,2)
-% plot(31:40,'k')
-% 
-% s1 = '1,2';    %(fig 1, id 1)
-% s2 = '2,1,1';  %(fig 2, row 1, cell 1) % OR '2,1'
-% s3 = '1,1';
-% s4 = '2,2';
-% layout = {s1 s2; s3 s4};
-% sl.plot.fig_merger(layout)
-% % See figure 3
-% 
-% %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% %% plot the point cloud
-% 
-% % see scripts/ for pub-quality figures
-% % ab       = bfra.fitab(q,dqdt,'mask',itau,'method','mean','order',1.3);
-% % pcloud   = bfra.pointcloudplot(q,dqdt,'mask',itau,'reflabels',true,'reflines', ...
-% %             {'early','bestfit' ,'upperenvelope','lowerenvelope','userfit'}, ...
-% %             'userab',[ab.a ab.b]);
-% % 
-% % 
-% % % BELOW HERE IS STUFF THAT ISN'T IN THE 'WORKFLOW'
-% % 
-% % 
-% % %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% % %  Figure 5: hyd cond.
-% % %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% 
-% 
-% 
-% 
-% 
-% 
-% % variable reported replicated
-% %  phi      0.046    0.046
-% %  tauhat   25       24.389
-% %  bhat     1.32     1.3211
-% %  N        0.36     0.3578
-% %  pQexp    26       26.523
-% % 
-% % I can replicate the paper if I use tauhat = 26.45 or higher
-% % 
-% % 
-% 
-% 
-% %       % fit tau, a, b
-% %       %---------------
-% %       [tau,q,dqdt] = bfra.eventtau(K,Events,Fits,'usefits',false);
-% %       TauFit = bfra.plfitb(tau,'plotfit',true,'bootfit',true,'nreps',2000);
-% % 
-% %       % add q/dqdt to TauFit
-% %       TauFit.q = q;
-% %       TauFit.dqdt = dqdt;
-% % 
-% %       % fit phi
-% %       %---------
-% %       phid(:,1)   = bfra.eventphi(K,Fits,A,D,L,1);
-% %       phid(:,2)   = bfra.eventphi(K,Fits,A,D,L,3/2);
-% %       phid        = vertcat(phid(:,1),phid(:,2));
-% %       phi         = bfra.fitdistphi(phid,'cdf','mu');
-% % 
-% %       % phid  = bfra.eventphi(K,Fits,A,D,L,TauFit.b);
-% %       % phi   = bfra.fitdistphi(phidist(:,3),'cdf');
-% % 
-% %       % fit a
-% %       %-------
-% %       bhat     = TauFit.b;
-% %       bhatL    = TauFit.b_L;
-% %       bhatH    = TauFit.b_H;
-% %       tau0     = TauFit.tau0;
-% %       tauhat   = TauFit.tau;
-% %       itau     = TauFit.taumask;
-% % 
-% %       [ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(               ...
-% %                                  q,dqdt,bhat,'taumask',itau,            ...
-% %                                  'method','median','bci',[bhatL bhatH]  ...
-% %                                  );
-% % 
-% %       % fit Q0 and Qhat
-% %       %-----------------
-% %       Q0    = (ahat*tau0)^(1/(1-bhat));   % m3/d
-% %       Qhat  = Q0*(bhat-2)/(bhat-3);
-% %       fdc   = fdcurve(Q(Q>0),'refpoints',[Q0 Qhat],'units','m$^3$ s$^{-1}$');
-% %       pQ0   = fdc.fref(1);
-% %       pQhat = fdc.fref(2);
-% % 
-% %       % baseflow and saturated layer thickness trends
-% %       %-----------------------------------------------
-% %       Qb    = bfra.baseflow(Data.Time,Data.Qcmd,'pctl',pQhat,'show',true); % cm/d
-% %       Db    = bfra.alttrend(tauhat,phi,N,Qb,[]); % cm posted annually
-% %       Sb    = Db.*phi;     % convert layer thickness to storage
-% %       Qb    = Qb.*365.25;  % convert from cm/d to cm/yr
-% %       
-% %       % add the data to the table
-% %       PlotData = addvars(Data,Qb,Sb,Db);
-% %       PlotData = synchronize(PlotData,Calm,Data.Time,'fillwithmissing');
-% %       
-% %       % package up the data and save it
-% %       TauFit.phi = phi;
-% %       TauFit.a = ahat;
-% %       TauFit.a_L = ahatLH(1);
-% %       TauFit.a_H = ahatLH(2);
-% %       TauFit.xbar = xbar;
-% %       TauFit.ybar = ybar;
-% %       TauFit.Q0 = Q0;
-% %       TauFit.Qhat = Qhat;
-% %       TauFit.pQhat = pQhat;
-% %    
-% 
-% % plot the point cloud
-% %-----------------------
-% %    
-% %    if plotfigs == true
-% %    
-% %       refpts   =  [ybar quantile(-dqdt,0.95)]; % late, early
-% % 
-% %       % the og version. blate=bhat, bestfit in legend (no b=1)
-% %       h        =  bfra.pointcloudplot(q,dqdt,'blate',bhat,'mask',itau,    ...
-% %                   'reflines',{'early','late','bestfit'},'reflabels',true, ...
-% %                   'refpoints',refpts,'addlegend',true);
-% %                   h.legend.AutoUpdate = 'off';
-% %                   scatter(xbar,ybar,60,'k','filled','s');
-% % 
-% %       % new version. blate=1, bhat in legend (no bestfit)
-% %       h        =  bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
-% %                   'reflines',{'early','late','userfit'},'reflabels',true, ...
-% %                   'refpoints',refpts,'userab',[ahat bhat],'addlegend',true);
-% %                   h.legend.AutoUpdate = 'off';
-% %                   scatter(xbar,ybar,60,'k','filled','s');
-% %    end
-% %    
-% %    if savedata == true
-% %       fname = ['data/ppt/Events_' casenames{n} '.mat'];
-% %       save(fname,'Events','Fits','K','TauFit','PhiFit','opts');
-% %    end
-% %    
-% %    clear phidist
