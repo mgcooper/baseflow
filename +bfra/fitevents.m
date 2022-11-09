@@ -96,12 +96,6 @@ for thisEvent = 1:numEvents
       
       % if no flow was returned, continue
       if tf == true; continue; end
-
-%       % otherwise fit the model 
-%          K  =  bfra.wrapFits( q,dqdt,derivmethod,fitmethod,fitorder, ...
-%                               gageID,eventDate,thisEvent,thisFit, ...
-%                               nFits,fitopts,K);
-                        
                         
       % otherwise fit the model (fit a/b)
          K  =  getFit(  q,dqdt,opts.derivmethod,opts.fitmethod,opts.fitorder, ...
@@ -126,16 +120,17 @@ end
    % done with fitting, process outputs
    close all
    
-   % save the data for this gage and this derivative method
-   K = struct2table(K);
-
-   if all(isnan(K.a))
-      K           =   [];
-   else
-      K.method    =   categorical(cellstr(K.method));
-      K.deriv     =   categorical(cellstr(K.deriv));
-      K.station   =   categorical(cellstr(K.station));
-   end   
+% % commented this out for octave compatibility
+%    % save the data for this gage and this derivative method
+%    K = struct2table(K);
+% 
+%    if all(isnan(K.a))
+%       K           =   [];
+%    else
+%       K.method    =   categorical(cellstr(K.method));
+%       K.deriv     =   categorical(cellstr(K.deriv));
+%       K.station   =   categorical(cellstr(K.station));
+%    end   
    
 %    % should convert Fits to timetable and add units
 %    Fits.Time = Events.Time;

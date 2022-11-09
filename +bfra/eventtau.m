@@ -7,7 +7,7 @@ function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
 p = MipInputParser;
 p.StructExpand = false;
 p.FunctionName = 'eventtau';
-p.addRequired('K',@(x)istable(x));
+p.addRequired('K',@(x)isstruct(x));
 p.addRequired('Events',@(x)isstruct(x));
 p.addRequired('Fits',@(x)isstruct(x));
 p.addParameter('usefits',false,@(x)islogical(x));
@@ -21,9 +21,12 @@ p.parseMagically('caller');
    dqfnc    = @(a,dqdt) -dqdt./a;   % must have derived this at some point
    Taufnc   = bfra.taufunc;
    Sfnc     = @(a,b,q) (q.^(2-b))./(a*(2-b));
-   numfits  = height(K);            % use K b/c some 'Events' don't get fit
+   numfits  = numel(K);            % use K b/c some 'Events' don't get fit
    
-   Ktags    = K.eventTag;
+   Ktags    = [K.eventTag];
+   a        = [K.a];
+   b        = [K.b];
+   
    if usefits == true
       Q     = Fits.q;
       dQdt  = Fits.dqdt;
@@ -43,17 +46,11 @@ p.parseMagically('caller');
    dq       = nan(size(Q));
    L        = nan(numfits,1);
    
-   % i need to know which a/b value is associated with events for which
-   % tau>taumin, which means I need 
-   tags     = nan(size(Q));
-   a        = nan(numfits,1);
-   b        = nan(numfits,1);
-   
    for m = 1:numfits
       tag      = Ktags(m);
       i        = Ktags == tag;   % should just be m
       ii       = Qtags == tag;   % Fits.eventTag == m;
-      tau(ii)  = Taufnc(K.a(i),K.b(i),Q(ii));
+      tau(ii)  = Taufnc(a(i),b(i),Q(ii));
       
 % return fit q/dqdt for point cloud plot but use event q for tau
       iii       = Fits.eventTag == tag;
@@ -62,8 +59,8 @@ p.parseMagically('caller');
       
       
       t(ii)    = 1:numel(Q(ii)); % should just be 1:sum(ii)
-      s(ii)    = abs(tau(ii)./(2-K.b(i)).*Q(ii));
-      dq(ii)   = dqfnc(K.a(i),dQdt(ii));
+      s(ii)    = abs(tau(ii)./(2-b(i)).*Q(ii));
+      dq(ii)   = dqfnc(a(i),dQdt(ii));
       L(m)     = sum(ii); % L is the length of each event
       
    end

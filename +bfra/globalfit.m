@@ -2,23 +2,23 @@ function GlobalFit = globalfit(K,Events,Fits,varargin)
 %GLOBALFIT takes the event-scale recession analysis parameters saved in
 %data table K and the event-scale data saved in Events and Fits and computes
 %'global' parameters tau, tau0, phi, bhat, ahat, Qexp, and Q0
-% 
+%
 % Syntax:
-% 
+%
 %  FIT = bfra.GLOBALFIT(K,Events,Fits);
 %  FIT = bfra.GLOBALFIT(K,Events,Fits,opts);
 %  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
 %  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
 %  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
 %  FIT = bfra.GLOBALFIT(___,)
-% 
+%
 % Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
 % Required inputs:
 %  K, Events, Fits - output of bfra.getevents and bfra.dqdt
 %  opts - struct containing fields area, D0, and L (see below)
 %  AnnualFlow - timetable or table of annual flow containing field Qcmd which
-%  is the average daily flow (units cm/day) posted annually. 
+%  is the average daily flow (units cm/day) posted annually.
 %  TODO: make the inputs more general, rather than these hard-coded structures
 %  and tables
 %
@@ -29,9 +29,9 @@ function GlobalFit = globalfit(K,Events,Fits,varargin)
 %-------------------------------------------------------------------------------
 p                 = inputParser;
 p.FunctionName    = 'bfra.globalfit';
-p.PartialMatching = true;
+% p.PartialMatching = true;
 p.StructExpand    = true;
-addRequired(p,    'K',                             @(x)istable(x)                );
+addRequired(p,    'K',                             @(x)isstruct(x)               );
 addRequired(p,    'Events',                        @(x)isstruct(x)               );
 addRequired(p,    'Fits',                          @(x)isstruct(x)               );
 addParameter(p,   'drainagearea',   nan,           @(x)isnumericscalar(x)        );
@@ -47,7 +47,7 @@ addParameter(p,   'phimethod',      'pointcloud',  @(x)ischar(x)                
 addParameter(p,   'refqtls',        [0.50 0.50],   @(x)isnumericvector(x)        );
 addParameter(p,   'earlyqtls',      [0.90 0.90],   @(x)isnumericvector(x)        );
 addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)isnumericvector(x)        );
-      
+
 
 parse(p,K,Events,Fits,varargin{:});
 
@@ -96,7 +96,7 @@ itau     = TauFit.taumask;
 
 % fit phi
 %---------
-switch phimethod 
+switch phimethod
    case 'distfit'
       phid = bfra.eventphi(K,Fits,drainagearea,aquiferdepth,streamlength,bhat,...
                            'refqtls',refqtls);
@@ -123,16 +123,16 @@ end
 % plot the pointcloud if requested
 %----------------------------------
 if plotfits == true
-   
+
    refpts = [ybar quantile(-dqdt,0.95)];
 
    h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
    'reflines',{'early','late','userfit'},'reflabels',true, ...
    'refpoints',refpts,'userab',[ahat bhat],'addlegend',true);
-   
+
    h.legend.AutoUpdate = 'off';
    scatter(xbar,ybar,60,'k','filled','s');
-   
+
 end
 
 
