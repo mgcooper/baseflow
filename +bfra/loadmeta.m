@@ -2,10 +2,12 @@ function Meta = loadmeta(basinname,varargin)
 % LOADMETA load metadata for basin indicated by basinname
 
 %------------------------------------------------------------------------------
+   validopts = @(x)any(validatestring(x,{'current','archive'}));
+   
    p                = inputParser;
    p.FunctionName   = 'bfra.loadmeta';
-   addRequired(p, 'basinname',         @(x)ischar(x) );
-   addOptional(p, 'version','current', @(x)ischar(x) );
+   addRequired(p, 'basinname',         @(x)ischar(x)  );
+   addOptional(p, 'version','current', validopts      );
    parse(p,basinname,varargin{:});
    version = p.Results.version;
 %------------------------------------------------------------------------------

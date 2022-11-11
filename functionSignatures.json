@@ -382,7 +382,9 @@
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
+
       ]
    },
    "bfra.loadghcnd":
