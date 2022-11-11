@@ -75,6 +75,7 @@ Q  = Events.Q;       % daily streamflow [m3 d-1]
 [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
 TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
 
+% [TestFit,testb] = bfra.gpfitb(GlobalFit.x,'xmin',GlobalFit.tau0,'bootfit',true);
 
 % parameters needed for next steps
 %---------------------------------
@@ -125,11 +126,9 @@ end
 %----------------------------------
 if plotfits == true
 
-   refpts = [ybar quantile(-dqdt,0.95)];
-
    h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
    'reflines',{'early','late','userfit'},'reflabels',true, ...
-   'refpoints',refpts,'userab',[ahat bhat],'addlegend',true);
+   'userab',[ahat bhat],'addlegend',true);
 
    h.legend.AutoUpdate = 'off';
    scatter(xbar,ybar,60,'k','filled','s');

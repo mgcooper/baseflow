@@ -10,9 +10,6 @@ fitglobal   = true;
 plotfigs    = true;
 bootfit     = false;
 nreps       = 1;
-t1          = datetime(1983,1,1);
-t2          = datetime(2020,12,31);
-testrain    = 'coop';
 
 % this is the filename that will be used to save the output
 fname       = 'data/Events.mat';
@@ -22,16 +19,8 @@ fname       = 'data/Events.mat';
 load('dailyflow.mat','T','Q','R');
 load('annualdata.mat','Data');
 
-% temporary option to use different rain
-%==========================================
-if ~strcmp(testrain,'none')
-   load(['data/ppt/ppt_' testrain '.mat'],'R')
-end
-%==========================================
- 
 % run the analysis
 %------------------
-   
 % either run the algorithm or just load the data
 if fitevents == true
 
@@ -39,10 +28,10 @@ if fitevents == true
    %----------
    opts.Events = bfra.setopts('events');
    opts.Fits   = bfra.setopts('fits','drainagearea',8.6545e9);
-   
+
    % get events
    %------------
-   [Events]    = bfra.getevents(T,Q,R,opts.Events); 
+   [Events]    = bfra.getevents(T,Q,R,opts.Events);
 
    % fit events
    %------------
@@ -55,11 +44,7 @@ if fitevents == true
 else
    % load the data
    %---------------
-   if ~strcmp(testrain,'none')
-      load(['data/ppt/Events_' testrain '.mat'],'Events','Fits','K','opts');
-   else
-      load(fname,'Events','Fits','K','opts');
-   end
+   load(fname,'Events','Fits','K','opts');
 end
 
 % ---------------------------------------------------------------------
@@ -67,13 +52,13 @@ end
 % ---------------------------------------------------------------------
 
 if fitglobal == true
-               
+
    opts.Global = bfra.setopts('globalfit','drainagearea',8.6545e9, ...
                'aquiferdepth',0.5,'streamlength',320000,'isflat',true,...
                'plotfits',true);
-            
+
    GlobalFit = bfra.globalfit(K,Events,Fits,opts.Global);
-   
+
    if savedata == true
       save(fname,'Events','Fits','K','GlobalFit','opts');
    end
@@ -87,7 +72,7 @@ end
 %  compute baseflow and aquifer thickness trends
 % -----------------------------------------------
 
-% parameters 
+% parameters
 %------------
 bhat  = GlobalFit.b;
 tau   = GlobalFit.tau;
@@ -112,7 +97,7 @@ GlobalFit.Sb = Sb;
 if savedata == true
    save(fname,'Events','Fits','K','GlobalFit','opts');
 end
-   
+
 
 % option to plot the alt trend
 %------------------------------
@@ -130,7 +115,7 @@ if plotfigs == true
    trendplot(DataC(:,1),DataC(:,4),'units','cm/yr','use',gca,'leg','BFRA');
    ylabel('active layer anomaly (cm/yr)');
 
-   f(4) = figure('Position',[600 241 512 384]); 
+   f(4) = figure('Position',[600 241 512 384]);
    trendplot(DataG(:,1),DataG(:,3),'units','cm/yr','use',gca,'leg','CALM');
    trendplot(DataG(:,1),DataG(:,4),'units','cm/yr','use',gca,'leg','BFRA');
    ylabel('active layer anomaly (cm/yr)');

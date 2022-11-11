@@ -4,6 +4,7 @@ pkg load statistics
 pkg load optim
 pkg load tablicious
 
+# check this for building docs: https://github.com/gnu-octave/pkg-octave-doc
 
 # if for some reason Setup.m is not working, try something like this:
 # addpath(pwd());

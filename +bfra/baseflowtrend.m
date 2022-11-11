@@ -1,38 +1,57 @@
-function [Qb,dQbdt,Q,dQadt,hbtrend,hatrend] = baseflow(t,Q,varargin)
-%BASEFLOW computes the expected value of baseflow and rate of change
-%posted on an annual basis
+function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
+%BASEFLOWTREND compute baseflow expected value and rate of change posted annually
 % 
 %  Inputs
 % 
-%     t = time, posted annually [years]
-%     Q = mean daily discharge, posted annually [cm/day]
+%     t: time [days], numeric or datetime vector
+%     Q: discharge [m3/d], posted daily, numeric vector
+%     A: basin area [m2], numeric scalar
+% 
+%  Outputs
+% 
+%     Qb: baseflow expected value [cm/d], posted annually, numeric vector
+%     dQbdt: baseflow expected value trend [cm/d], posted annually, numeric
+%     vector (the trend evaluated at each year in the input t timeseries)
+%     Q: discharge [cm/d], posted annually (input Q converted to units cm/d/y)
+%     dQadt: discharge trend [cm/d], posted annually (the trend in discharge
+%     evaluated at each year in the input t timeseries)
+%     hb: figure handle for the baseflow trendplot figure
+%     ha: figure handle for the annual flow trendplot figure
+% 
+%  See also aquiferthickness
 
 %-------------------------------------------------------------------------------
 p              = inputParser;
-p.FunctionName = 'bfra.baseflow';
+p.FunctionName = 'bfra.baseflowtrend';
 
 addRequired(   p,    't',                 @(x)isdatetime(x)|isnumeric(x)   );
-addRequired(   p,    'Q',                 @(x)isnumeric(x)                 );
+addRequired(   p,    'Q',                 @(x)isnumericvector(x)           );
+addRequired(   p,    'A',                 @(x)isnumericscalar(x)           );
 addParameter(  p,    'method',   'ols',   @(x)ischar(x)                    );
 addParameter(  p,    'pctl',     0.25,    @(x)isnumeric(x)                 );
 addParameter(  p,    'showfig',  false,   @(x)islogical(x)                 );
 
-parse(p,t,Q,varargin{:});
+parse(p,t,Q,A,varargin{:});
 
-if ~isdatetime(t); t = datetime(t,'convertfrom','datenum'); end
+method   = p.Results.method;
+pctl     = p.Results.pctl;
+showfig  = p.Results.showfig;
+
 %-------------------------------------------------------------------------------
 
-% flow comes in as cm/day, posted annually, regressed against t in
-% years, so the trend is in cm/day/year
+% convert the flow from m3/d posted daily to cm/d posted annually
+if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end
+t = transpose(year(mean(reshape(t,365,numel(t)/365))));
+Qa = transpose(mean(reshape(Q,365,numel(Q)/365),'omitnan')).*(100/A);
 
-% get the baseflow trend, adjusted as an anomaly
-hatrend  = trendplot(t,Q,'anom',false,'units','cm/d/y',             ...
+% regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually
+ha  = trendplot(t,Qa,'anom',false,'units','cm/d/y',             ...
             'title','mean flow','leg','mean flow regression',        ...
             'showfig',showfig,'method',method);
-hbtrend  = trendplot(t,Q,'anom',false,'units','cm/d/y','quan',      ...
+hb  = trendplot(t,Qa,'anom',false,'units','cm/d/y','quan',      ...
             pctl,'title','baseflow','leg','baseflow regression',    ...
             'showfig',showfig);
-dQadt    = hatrend.trend.YData(:);  % mean flow trend         
-dQbdt    = hbtrend.trend.YData(:);  % baseflow trend     
-Qb       = Q-(dQadt-dQbdt);         % baseflow timeseries, cm/day  
+dQadt    = ha.trend.YData(:);  % mean flow trend         
+dQbdt    = hb.trend.YData(:);  % baseflow trend     
+Qb       = Qa-(dQadt-dQbdt);         % baseflow timeseries, cm/day  
    

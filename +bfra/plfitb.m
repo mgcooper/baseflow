@@ -74,14 +74,14 @@ plotfit  = p.Results.plotfit;
    Fit.taumask = x0>xmin;
       
    if bootfit == true
-      Fit.b_L = Fit.b - 1.96*BootFit.b_sig;
-      Fit.b_H = Fit.b + 1.96*BootFit.b_sig;
-      Fit.alpha_L = Fit.alpha - 1.96*BootFit.alpha_sig;
-      Fit.alpha_H = Fit.alpha + 1.96*BootFit.alpha_sig;
-      Fit.tau0_L = Fit.tau0 - 1.96*BootFit.tau0_sig;
-      Fit.tau0_H = Fit.tau0 + 1.96*BootFit.tau0_sig;
-      Fit.tau_L = Fit.tau - 1.96*BootFit.tau_sig;
-      Fit.tau_H = Fit.tau + 1.96*BootFit.tau_sig;
+      Fit.b_L = Fit.b - BootFit.b_sig;
+      Fit.b_H = Fit.b + BootFit.b_sig;
+      Fit.alpha_L = Fit.alpha - BootFit.alpha_sig;
+      Fit.alpha_H = Fit.alpha + BootFit.alpha_sig;
+      Fit.tau0_L = Fit.tau0 - BootFit.tau0_sig;
+      Fit.tau0_H = Fit.tau0 + BootFit.tau0_sig;
+      Fit.tau_L = Fit.tau - BootFit.tau_sig;
+      Fit.tau_H = Fit.tau + BootFit.tau_sig;
       Fit.reps = BootFit.reps;
       BootFit = rmfield(BootFit,'reps');
       Fit.BootFit = BootFit;

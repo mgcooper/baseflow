@@ -4,17 +4,17 @@ function [Calm,Meta] = loadcalm_new(basinname)
 % since I think in terms of basins right now, not calm sites, this accepts
 % the basin name not the calm site name
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    p                = MipInputParser;
    p.FunctionName   = 'bfra.loadcalm';
    p.addRequired('basinname',@(x)ischar(x));
    p.parseMagically('caller');
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%-------------------------------------------------------------------------------
    
    MetaBasin   =  bfra.loadmeta(basinname);
 
    % load the calm data
-   pathdata    =  setpath('/interface/data/permafrost/');
+   pathdata    =  setpath('/interface/permafrost/matfiles/','data');
    filedata    =  [pathdata 'CALM_ALT.mat'];
    
    load(filedata,'Calm','Meta'); MetaCalm = Meta; clear Meta;

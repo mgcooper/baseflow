@@ -48,7 +48,7 @@ rmnochange  = p.Results.rmnochange;
 rmrain      = p.Results.rmrain;
 
 %-------------------------------------------------------------------------------
-% % other way to parse inputs:
+% % other way to parse inputs (not octave compatible):
 %    arguments
 %       t           datetime                         = 1
 %       q           double                           = 2

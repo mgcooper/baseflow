@@ -9,22 +9,52 @@ function opts = setopts(type,varargin)
 %     algorithm 'getevents', the event fitting algorithm 'fitdqdt', or the
 %     global fitting algorithm 'globalfit'
 %
-%  Optional name-value inputs
+%  Optional name-value inputs for type 'events'
 %
-%     opts        =  structure containing any of the following fields
+%     opts        :  structure containing any of the following fields
 %
-%     qmin        =  minimum flow value, below which values are set nan
-%     nmin        =  minimum event length
-%     fmax        =  maximum # of missing values gap-filled
-%     rmax        =  maximum run of sequential constant values
-%     rmin        =  minimum rainfall required to censor flow (mm/day?)
-%     cmax        =  maximum run of sequential convex dQ/dt values
-%     rmconvex    =  remove convex derivatives
-%     rmnochange  =  remove consecutive constant derivates
-%     rmrain      =  remove rainfall
-%     pickevents  =  option to manually pick events
-%     plotevents  =  option to plot picked events
+%     qmin        :  minimum flow value, below which values are set nan (m3/d)
+%     nmin        :  minimum event length
+%     fmax        :  maximum # of missing values gap-filled
+%     rmax        :  maximum runlength of sequential constant values
+%     rmin        :  maximum allowable rainfall in mm/d 
+%     cmax        :  maximum run of sequential convex dQ/dt values
+%     rmconvex    :  remove convex derivatives
+%     rmnochange  :  remove consecutive constant derivates
+%     rmrain      :  remove data on days with rainfall>rmin
+%     pickevents  :  option to manually pick events
+%     plotevents  :  option to plot picked events
 %
+%  Optional name-value inputs for type 'fits'
+% 
+%     derivmethod    : derivative (dQ/dt) method
+%     fitmethod      : -dQ/dt = aQb fitting method
+%     fitorder       : fitting order (value of exponent b)
+%     fitnmin        : minimum number of values required to fit -dQ/dt = aQb 
+%     pickfits       : pick fits manually?
+%     pickmethod     : method to fit picks manually
+%     plotfits       : plot the fits?
+%     savefitplots   : save plots of fits?
+%     etsparam       : min flow length parameter for ETS algorithm
+%     vtsparam       : min flow length parameter for VTS algorithm
+%     drainagearea   : drainage area in m2
+%     gageID         : station name or ID
+% 
+%  Optional name-value inputs for type 'globalfit'
+% 
+%     drainagearea   : drainage area [m2]
+%     aquiferdepth   : reference aquifer thickness [m]
+%     streamlength   : effective channel length [m]
+%     aquiferslope   : effective aquifer slope
+%     aquiferbreadth : distance from channel to divide
+%     isflat         : logical indicating true or false
+%     plotfits       : plot the various global fits?e
+%     bootfit        : logical indicating whether to bootstrap the uncertainites
+%     nreps          : number of reps for bootstrapping 
+%     phimethod      : method used to fit drainable porosity
+%     refqtls        : quantiles of Q and -dQ/dt for early/late reference lines
+%     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines
+%     lateqtls       : quantiles of Q and -dQ/dt for late reference lines
 %
 %  See also getfits, fitdqdt
 
@@ -43,30 +73,17 @@ switch type
    % event detection - input options for getevents
    case 'events'
 
-      addParameter(p,   'qmin',        0,          @(x) isnumericscalar(x)  );
+      addParameter(p,   'qmin',        1,          @(x) isnumericscalar(x)  );
       addParameter(p,   'nmin',        4,          @(x) isnumericscalar(x)  );
       addParameter(p,   'fmax',        1,          @(x) isnumericscalar(x)  );
       addParameter(p,   'rmax',        2,          @(x) isnumericscalar(x)  );
-      addParameter(p,   'rmin',        0,          @(x) isnumericscalar(x)  );
+      addParameter(p,   'rmin',        1,          @(x) isnumericscalar(x)  );
       addParameter(p,   'cmax',        2,          @(x) isnumericscalar(x)  );
       addParameter(p,   'rmconvex',    false,      @(x) islogicalscalar(x)  );
       addParameter(p,   'rmnochange',  true,       @(x) islogicalscalar(x)  );
       addParameter(p,   'rmrain',      true,       @(x) islogicalscalar(x)  );
       addParameter(p,   'pickevents',  false,      @(x) islogicalscalar(x)  );
       addParameter(p,   'plotevents',  false,      @(x) islogicalscalar(x)  );
-
-%       opts.qmin         = 0;        % minimum flow amount (m3/d)
-%       opts.nmin         = 4;        % minimum number of flow values
-%       opts.fmax         = 1;        % maximum fillable missing values
-%       opts.rmax         = 2;        % maximum allowable consecutive values
-%       opts.rmin         = 0;        % maximum allowable rainfall in mm
-%       opts.cmax         = 2;        % consecutive convex points
-%       opts.rmconvex     = false;    % remove convex derivatives?
-%       opts.rmnochange   = true;     % remove constant (no change) values?
-%       opts.rmrain       = true;     % remove data on days with recorded rain?
-%       opts.pickevents   = false;    % pick events manually?
-%       opts.plotevents   = false;    % plot the detected events?
-
 
    % event fits - input options for fitevents
    case 'fits'
@@ -83,21 +100,7 @@ switch type
       addParameter(p,   'vtsparam',    1.0,        @(x) isnumericscalar(x)    );
       addParameter(p,   'drainagearea',nan,        @(x) isnumericscalar(x)    );
       addParameter(p,   'gageID',      'none',     @(x) ischar(x)             );
-
-%       opts.derivmethod  = 'ETS';    % derivative (dQ/dt) method
-%       opts.fitmethod    = 'nls';    % fitting method
-%       opts.fitorder     = 'free';   % fitting order
-%       opts.fitnmin      = 4;        % min required values to fit ETS
-%       opts.pickfits     = false;    % pick fits manually?
-%       opts.pickmethod   = 'none';   % method to fit picks manually
-%       opts.plotfits     = false;    % plot the fits?
-%       opts.savefitplots = false;    % save plots of fits?
-%       opts.etsparam     = 0.2;      % min flow length parameter
-%       opts.vtsparam     = 1.0;      % min flow length parameter
-%       opts.drainagearea = nan;      % drainage area in m2
-%       opts.gageID       = 'none';   % station name or ID
-
-
+      
    % global fit - input to bfra.globalfit
    case 'globalfit'
 
@@ -115,19 +118,6 @@ switch type
       addParameter(p,   'earlyqtls',      [0.90 0.90],   @(x)isnumericvector(x)  );
       addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)isnumericvector(x)  );
 
-%       opts.drainagearea    = nan;         % drainage area in m2
-%       opts.aquiferdepth    = nan;         % reference aquifer thickness [m]
-%       opts.streamlength    = nan;         %
-%       opts.aquiferslope    = nan;         % aquifer slope
-%       opts.aquiferbreadth  = nan;         % distance from channel to divide
-%       opts.isflat          = true;        % logical indicating true or fals
-%       opts.plotfits        = false;       % plot the various global fits?e
-%       opts.bootfit         = false;
-%       opts.nreps           = 1000;
-%       opts.phimethod       = 'pointcloud';
-%       opts.refqtls         = [0.50 0.50];
-%       opts.earlyqtls       = [0.90 0.90];
-%       opts.lateqtls        = [0.50 0.50];
 end
 
 parse(p,type,varargin{:});

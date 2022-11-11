@@ -367,7 +367,7 @@ warning off
       if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
          
          msg            =  'Fitting failed using nlinfit at ab1';
-         causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
+         causeException =  MException('BFRA:fitab:fitting',msg);
          ME             = addCause(ME,causeException);
          
       end
@@ -396,7 +396,7 @@ warning off
          if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
             
             msg            =  'Fitting failed using fit at ab3';
-            causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
+            causeException =  MException('BFRA:fitab:fitting',msg);
             ME             =  addCause(ME,causeException);
             
          end
@@ -431,7 +431,7 @@ warning off
          if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
             
             msg            =  'Fitting failed using nlinfit at ab2';
-            causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
+            causeException =  MException('BFRA:fitab:fitting',msg);
             ME             =  addCause(ME,causeException);
             
          end
@@ -456,7 +456,7 @@ warning off
             if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
                
                msg            =  'Fitting failed using fit at ab4';
-               causeException =  MException('MATLAB:bfra.fitK:fitting',msg);
+               causeException =  MException('BFRA:fitab:fitting',msg);
                ME             =  addCause(ME,causeException);
                
             end
