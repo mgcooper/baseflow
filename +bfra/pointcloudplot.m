@@ -30,14 +30,14 @@ p.FunctionName = 'bfra.pointcloudplot';
 
 addRequired(p, 'q',                             @(x)isnumeric(x));
 addRequired(p, 'dqdt',                          @(x)isnumeric(x));
-addParameter(p,'mask',        false,            @(x)islogical(x));
+addParameter(p,'mask',        true(size(q)),    @(x)islogical(x));
 addParameter(p,'reflines',    {'bestfit'},      @(x)iscell(x));
 addParameter(p,'reflabels',   false,            @(x)islogical(x)&isscalar(x));
 addParameter(p,'blate',       1,                @(x)isnumeric(x));
 addParameter(p,'userab',      [1 1],            @(x)isnumeric(x));
 addParameter(p,'precision',   1,                @(x)isnumeric(x));
 addParameter(p,'timestep',    1,                @(x)isnumeric(x));
-addParameter(p,'addlegend',   true,             @(x)islogical(x));
+addParameter(p,'addlegend',   false,            @(x)islogical(x));
 addParameter(p,'usertext',    '',               @(x)ischar(x));
 addParameter(p,'rain',        nan,              @(x)isnumeric(x));
 addParameter(p,'ax',          'none',           @(x)isaxis(x)|ischar(x));
@@ -68,7 +68,7 @@ ax          = p.Results.ax;
    h0 = loglog(ax,q,-dqdt,'o'); formatPlotMarkers('markersize',6); hold on;
 
    % add circles around the t>tau0 values if requested
-   if ~isnan(mask)
+   if sum(mask) < numel(q)
       scatter(q(mask),-dqdt(mask),'r');
    end
 

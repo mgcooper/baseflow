@@ -25,9 +25,12 @@ function [Fit,h] = fitphidist(phi,varargin)
 p                 = inputParser;
 p.FunctionName    = 'fitphidist';
 
+validoutput       = @(x) any(validatestring(x,{'PD','mean','std','median'}));
+validplottype     = @(x) any(validatestring(x,{'cdf','pdf','probplot'}));
+
 addRequired(p,    'phi',                  @(x)isvector(x)            );
-addOptional(p,    'outputtype',  'PD',    @(x)ischar(x)              );
-addOptional(p,    'plottype',    'none',  @(x)ischar(x)              );
+addOptional(p,    'outputtype',  'PD',    validoutput                );
+addOptional(p,    'plottype',    'none',  validplottype              );
 
 parse(p,phi,varargin{:});
 outputtype = p.Results.outputtype;
