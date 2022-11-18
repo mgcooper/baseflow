@@ -1,4 +1,4 @@
-function [k,Q0,D] = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
+function [k,Q0,D,Dcheck] = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
 %AQUIFERPROPS computes aquifer properties hydraulic conductivity k, depth D, and
 %critical baseflow Q0
 % 
@@ -30,19 +30,20 @@ function [k,Q0,D] = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
 p = inputParser;
 p.FunctionName = 'bfra_aquiferprops';
 
-addRequired(p,'q',@(x)isnumeric(x));
-addRequired(p,'dqdt',@(x)isnumeric(x));
-addRequired(p,'alate',@(x)isnumeric(x));
-addRequired(p,'blate',@(x)isnumeric(x));
-addRequired(p,'phi',@(x)isnumeric(x));
-addRequired(p,'A',@(x)isnumeric(x));
-addRequired(p,'D',@(x)isnumeric(x));
-addRequired(p,'L',@(x)isnumeric(x));
-addRequired(p,'soln',@(x)ischar(x));
-addParameter(p,'earlyqtls',[0.90 0.90],@(x)isnumeric(x));
-addParameter(p,'lateqtls',[0.5 0.5],@(x)isnumeric(x));
-addParameter(p,'mask',nan,@(x)islogical(x));
-addParameter(p,'Dd',nan,@(x)isnumeric(x));
+addRequired(p, 'q',                          @(x)isnumeric(x));
+addRequired(p, 'dqdt',                       @(x)isnumeric(x));
+addRequired(p, 'alate',                      @(x)isnumeric(x));
+addRequired(p, 'blate',                      @(x)isnumeric(x));
+addRequired(p, 'phi',                        @(x)isnumeric(x));
+addRequired(p, 'A',                          @(x)isnumeric(x));
+addRequired(p, 'D',                          @(x)isnumeric(x));
+addRequired(p, 'L',                          @(x)isnumeric(x));
+addRequired(p, 'soln',                       @(x)ischar(x));
+addParameter(p,'earlyqtls',   [0.95 0.95],   @(x)isnumeric(x));
+addParameter(p,'lateqtls',    [0.5 0.5],     @(x)isnumeric(x));
+addParameter(p,'mask',        true(size(q)), @(x)islogical(x));
+addParameter(p,'Dd',          nan,           @(x)isnumeric(x));
+addParameter(p,'Q0',          nan,           @(x)isnumeric(x));
 
 parse(p,q,dqdt,alate,blate,phi,A,D,L,soln,varargin{:});
 
@@ -50,6 +51,7 @@ earlyqtls   = p.Results.earlyqtls;
 lateqtls    = p.Results.lateqtls;
 mask        = p.Results.mask;
 Dd          = p.Results.Dd;
+Q0          = p.Results.Q0;
 %-------------------------------------------------------------------------------
 
 % Note: This follows the method in Troch et al. 1993, which assumes D is unknown
@@ -134,6 +136,11 @@ if ~isnan(Dd)
    L = Dd/1000*A;           % 1/m * m^2 = m
 end
 
+% check if Q0 was provided, if so, save it
+if ~isnan(Q0)
+   Q0check = Q0;
+end
+
 % Step 7: compute the early- and late-time intercepts
 bearly = 3;
 aearly = bfra.pointcloudintercept(q,dqdt,bearly,'envelope','refqtls',earlyqtls);
@@ -203,7 +210,7 @@ end
 % Step 10: aquifer depth (m)
 D = sqrt(Q0/(3.448*k*L^2/A)); % sqrt(Q0/(3.448*k*Dd*L)) % if using Dd
 
-
+Dcheck = sqrt(Q0check/(3.448*k*L^2/A));
 %-------------------------------------------------------------------------------
 
 % these can be used to get D directly from alate. for RS05, this will return the
@@ -216,8 +223,6 @@ D = sqrt(Q0/(3.448*k*L^2/A)); % sqrt(Q0/(3.448*k*Dd*L)) % if using Dd
 % 
 % % RS06 non-linear sloped late time:
 % D = (2*k*L*sin(theta)/(n+1)*((n+1)^2/(alate*(n+0.01)*phi*A))^(n+1))^(1/n);
-
-
 
 
 
