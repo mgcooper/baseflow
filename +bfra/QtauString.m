@@ -7,9 +7,9 @@ function [Qtaustr,aQbstr] = QtauString(varargin)
 p              = inputParser;
 p.FunctionName = 'bfra.QtauString';
 
-addOptional('ab',             [],      @(x)isnumeric(x));
-addOptional('tau0',           [],      @(x)isnumeric(x));
-addParameter('printvalues',   false,   @(x)islogical(x));
+addOptional(p, 'ab',             [],      @(x)isnumeric(x));
+addOptional(p, 'tau0',           [],      @(x)isnumeric(x));
+addParameter(p,'printvalues',   false,   @(x)islogical(x));
 
 parse(p,varargin{:});
 
@@ -39,4 +39,17 @@ else
 end
 
 
-
+%    printvalues  = false;
+%    Q0 = nan;
+%    if nargin == 1
+%       ab  = varargin{1};
+%    elseif nargin == 2
+%       ab  = [varargin{1};varargin{2}];
+%    elseif nargin == 3
+%       ab  = [varargin{1};varargin{2}];
+%       Q0  = varargin{3};
+%    elseif nargin == 4
+%       ab  = [varargin{1};varargin{2}];
+%       Q0  = varargin{3};
+%       printvalues = varargin{4};
+%    end   

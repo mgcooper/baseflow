@@ -83,3 +83,30 @@ if plotFig
    
 end
 
+% % NOTE: with the tc value, we can compute the Q(t) like this:
+  % Qfunc = @(tc,b,Q0) (Q0.*(1+(exp(b-1)-1).*t./tc).^(1/(1-b)));
+
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% % notes from trying to figure out how to handle Q0:
+
+% % not sure what is best. If I do t-t(1), 
+    
+% % this assumes that t(1) = t0, so Q(t) = Q(t-t0)
+%     t = t-t(1);
+      
+% % this appends a zero ahead of t(1) if t doesn't already start at zero
+%     if t(1) ~= 0
+%         t   = [0;t(:)];
+%     end
+
+
+%     % append Q0 and t0 to the output
+%     dqdt0   = 
+%     q       = cat(3,q,Q0);
+%     t       = cat(1,0,t);
+    
+    
+%     flin    = @(a,Q0,t) Q0.*exp(-t.*a);
+%     out.Qlin    = fnlin(a,Q0,t);
+%     out.dQlin   = a.*Qnlin;
+
