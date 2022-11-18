@@ -166,6 +166,8 @@ if strcmp(z,'help')==1
 end
 end
 
+% mgc:
+L = nan;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialization
@@ -539,7 +541,7 @@ if plotflg==1
     if newfigflg==1, out.f = figure; end
 %    y=k/sum(k);
     % out.ab = olsfit(log(xxx),log(plf)); % mgc
-    out.ab = [ones(numel(xxx),1),log(xxx)]\log(plf); % mgc reduce dependency on olsfit
+    out.ab = [ones(numel(xxx),1),log(xxx')]\log(plf'); % mgc reduce dependency on olsfit
     out.h1 = loglog(xxx,ylf,'r'); hold on;
     %out.h1 = loglog(xxx,y,'r'); hold on;
     out.h2 = loglog(xxx,plf);

@@ -59,7 +59,14 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
    yhatci   = prctile(yyhat',conflevs)';
    yfitci   = prctile(yyfit',conflevs)';
 
-   ab0                = fliplr(ab0');
+   % test for slope significance
+   b_samp = abboot(:,1);      % slope is the first column (flipped in output)
+   % null hyp is that the mean is zero. h=1 if reject null = mean is not zero =
+   % slope is significant
+   [h, p] = ztest(b_samp,0,std(b_samp));
+   % figure; histogram(b_samp);
+   
+   ab0               = fliplr(ab0');
    stats.yhat        = yhat;
    stats.xfit        = sort(x(:,1));
    stats.yfit        = ab0(1)+ab0(2).*stats.xfit;
@@ -69,6 +76,8 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
    stats.ci_boot     = fliplr(abci);
    stats.yhatci_boot = fliplr(yhatci);
    stats.yfitci_boot = fliplr(yfitci);
+   stats.significant = h==1;
+   
 
 % mgc rsq statistic is not relevant to quantile regression, see method here
 % https://stats.stackexchange.com/questions/129200/r-squared-in-quantile-regression

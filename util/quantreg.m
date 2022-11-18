@@ -123,6 +123,32 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
    % use the bootstrap ab_boot
    ab = fliplr(ab'); 
    
+   
+
+
+
+% % this is copied out of ktaub to see how the CI's are computed in case I can
+% % adapt it to quantreg
+% Zup      = norminv(1-alpha/2,0,1);
+% Calpha   = Zup * sigma;
+% Nprime   = length(C3);
+% M1       = (Nprime - Calpha)/2;
+% M2       = (Nprime + Calpha)/2 + 1;
+% 
+% % 2-tail limits
+% CIlower  = interp1q((1:Nprime),C3,M1);
+% CIupper  = interp1q((1:Nprime),C3,M2);
+% 
+% 
+% % sigma is the standard error, alpha the significance, getting s is the hard
+% % part, but ztest is evaluating whehter s comes from a normal distribution with
+% % mean 0 and standard deviation sigma, so my guss is that s is the distribuiton
+% % of slopes, and if the mean value of the slopes is zero, then the trend is not
+% % signficanct
+% [h, sig] = ztest(s,0,sigma,alpha);
+
+
+
 % % not sure where this came from, must have been something related to
 % quantile regression i found or maybe this was something the og author had
 % in here commented out

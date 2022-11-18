@@ -34,12 +34,15 @@ function h = trendplot(t,y,varargin)
    p.addParameter('errorbounds', false,@(x)islogical(x)                 );
    p.addParameter('reference',   nan,  @(x)isnumeric(x)                 );
    p.addParameter('yerr',        nan,  @(x)isnumeric(x)                 );
+   p.addParameter('precision',   nan,  @(x)isnumeric(x)                 );
    p.parseMagically('caller');
    
    useax       = p.Results.useax;
    units       = p.Results.units;
    qtl         = p.Results.quantile; clear quantile
    alpha       = p.Results.alpha;
+   precision   = p.Results.precision;
+   yerr        = p.Results.yerr;
    varargs     = unmatched2varargin(p.Unmatched);
 %-------------------------------------------------------------------------------
 
@@ -56,7 +59,7 @@ function h = trendplot(t,y,varargin)
    h     = plotTrend(h,t,y,yfit,yerr,yci,errorbars,errorbounds,varargs);
 
    % draw the legend
-   h     = drawLegend(h,ab,legendtext,units,alpha,err,makeleg,legidx);
+   h     = drawLegend(h,ab,legendtext,units,alpha,err,makeleg,legidx,precision);
  
    %axis tight
    
@@ -64,7 +67,9 @@ function h = trendplot(t,y,varargin)
    
    h.ax = gca;
    h.ab = ab;
-   
+   h.err = err;
+   h.yfit = yfit;
+   h.yci = yci;
 end
 
 function [t,y,yerr] = prepInput(t,y,yerr,anomalies,reference)
@@ -166,7 +171,21 @@ function [ab,err,yfit,yci] = computeTrends(t,y,method,alpha,qtl)
       end
    end
    
-% % prior method, delete if above is considered best   
+% this plots a histogram of the bootstrapped slopes from quantreg
+% figure; histogram(S.ab_boot(:,2));
+% this plots the data, the fit, and the bootstrapped fit from quantreg
+% figure; plot(t,y,'o'); hold on;
+% plot(S.xfit,S.yfit);
+% plot(S.xfit,S.yhatci_boot(:,2))
+% plot(S.xfit,S.yhatci_boot(:,1))
+% 
+% print the bootstrapped slope plus or minus 1 stderr
+% [S.ab_boot(2)+S.se_boot(2) S.ab_boot(2)-S.se_boot(2)] 
+% [S.ab_boot(2)+1.96*S.se_boot(2) S.ab_boot(2)-1.96*S.se_boot(2)]
+
+
+% % this is an old note not sure
+% % prior method, delete if above is considered best
 %    if isregular(t,'months')
 %       nmonths  = numel(t);
 %       t        = years(t-t(1));
@@ -304,17 +323,22 @@ end
 
 %  DRAW LEGEND
 
-function h = drawLegend(h,ab,legtext,units,alpha,err,makeleg,legidx)
+function h = drawLegend(h,ab,legtext,units,alpha,err,makeleg,legidx,precision)
    
    % this is repeated here and in updateFigure
    legobj = findobj(gcf,'Type','Legend');
    
    % only draw a legend if trend units were provided
-%    if not(isempty(trendunits))
+   % if not(isempty(trendunits))
 
    %trendtext   = sprintf(['%.2f ' trendunits ],ab(2));
    %mytextbox(trendtext,50,90,'interpreter','tex','fontsize',10);
-   prec  = ceil(abs(log10(ab(2))))+1;
+   
+   if isnan(precision)
+      prec  = ceil(abs(log10(ab(2))))+1;
+   else
+      prec  = precision;
+   end
 
    % log10(ab(2)) = the number of zeros to right or left of decimal
    % ceil(log10(ab(2))) = ceil gets you to the digit e.g.:
