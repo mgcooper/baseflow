@@ -43,6 +43,7 @@ function opts = setopts(type,varargin)
 %  Optional name-value inputs for type 'globalfit'
 % 
 %     drainagearea   : drainage area [m2]
+%     drainagedens   : drainage density [km-1] = streamlenght/drainagearea
 %     aquiferdepth   : reference aquifer thickness [m]
 %     streamlength   : effective channel length [m]
 %     aquiferslope   : effective aquifer slope
@@ -105,6 +106,7 @@ switch type
    case 'globalfit'
 
       addParameter(p,   'drainagearea',   nan,           @(x)isnumericscalar(x)  );
+      addParameter(p,   'drainagedens',   0.8,           @(x)isnumericscalar(x)  );
       addParameter(p,   'aquiferdepth',   nan,           @(x)isnumericscalar(x)  );
       addParameter(p,   'streamlength',   nan,           @(x)isnumericscalar(x)  );
       addParameter(p,   'aquiferslope',   nan,           @(x)isnumericscalar(x)  );

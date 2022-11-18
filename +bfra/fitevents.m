@@ -47,6 +47,7 @@ fitopts  = struct(); % removed fitopts from parser, it may mess up autounpacking
 
    % initialize output structure and output arrays
    K              =  initK(10000);
+   Fits.T         =  T;
    Fits.t         =  nan(size(Q));        % fitted t
    Fits.q         =  nan(size(Q));        % fitted Q
    Fits.r         =  nan(size(Q));        % rain

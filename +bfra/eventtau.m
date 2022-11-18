@@ -1,18 +1,28 @@
 function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
-%EVENTTAU computes drainage timescale tau from the event-scale parameters
-%a,b, and flow Q using the structures K, Events, and Fits produced with
-%bfra.getevents and bfra.dqdt 
+%EVENTTAU compute drainage timescale tau from event-scale parameters a and b 
+% 
+%  Syntax
+% 
+%     tau = bfra.eventtau(K,Events,Fits) computes drainage timescale tau from
+%     event-scale parameters a,b, and flow Q using the structures K, Events, 
+%     and Fits produced with bfra.getevents and bfra.dqdt 
+% 
+% 
+%  See also eventphi
 
 %-------------------------------------------------------------------------------
-p = inputParser;
+p              = inputParser;
 p.StructExpand = false;
 p.FunctionName = 'eventtau';
-addRequired(p,'K',@(x)isstruct(x));
-addRequired(p,'Events',@(x)isstruct(x));
-addRequired(p,'Fits',@(x)isstruct(x));
-addParameter(p,'usefits',false,@(x)islogical(x));
-addParameter(p,'aggfunc','none',@(x)ischar(x));
+
+addRequired(p, 'K',                 @(x)isstruct(x)   );
+addRequired(p, 'Events',            @(x)isstruct(x)   );
+addRequired(p, 'Fits',              @(x)isstruct(x)   );
+addParameter(p,'usefits',  false,   @(x)islogical(x)  );
+addParameter(p,'aggfunc',  'none',  @(x)ischar(x)     );
+
 parse(p,K,Events,Fits,varargin{:});
+
 usefits = p.Results.usefits;
 aggfunc = p.Results.aggfunc;
 %-------------------------------------------------------------------------------

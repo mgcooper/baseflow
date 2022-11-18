@@ -9,10 +9,17 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
    
    p              = inputParser;
    p.FunctionName = 'bfra.loadcalm';
-   addRequired(p, 'basinname',         @(x)ischar(x));
-   addOptional(p, 'version','current', validopts);
+   
+   addRequired(p, 'basinname',            @(x) ischar(x)                   );
+   addOptional(p, 'version',  'current',  validopts                        );
+   addParameter(p,'t1',       NaT,        @(x) isdatetime(x)|isnumeric(x)  );
+   addParameter(p,'t2',       NaT,        @(x) isdatetime(x)|isnumeric(x)  );
+   
    parse(p,basinname,varargin{:});
-   version = p.Results.version;
+   
+   version  = p.Results.version;
+   t1       = p.Results.t1;
+   t2       = p.Results.t2;
 %------------------------------------------------------------------------------
 
    % get the meta data
@@ -30,6 +37,12 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
          [Calm,Meta] = loadcalmarchive(Meta);
    end
    
+   if ~isnat(t1)
+      ok    = isbetween(Calm.Time,t1,t2);
+      Calm  = Calm(ok,:);
+   end
+
+   
 function [Calm,MetaCalm] = loadcalmcurrent(MetaBasin)
 
    % load the calm data
@@ -37,7 +50,7 @@ function [Calm,MetaCalm] = loadcalmcurrent(MetaBasin)
    
    load(fname,'Calm','Meta'); MetaCalm = Meta; clear Meta;
    
-   if MetaBasin == "ALL_BASINS"
+   if ~istable(MetaBasin) && MetaBasin == "ALL_BASINS"
       return
    end
    
@@ -66,15 +79,19 @@ function [Calm,MetaCalm] = loadcalmcurrent(MetaBasin)
 
    end
    
+   % temp hack to check against the og list
+   sites = {'U11A','U11B','U11C','U12A','U12B','U13','U14','U32A','U32B'};
+   keep  = ismember(Calm.Properties.VariableNames,sites);
+   Calm  = Calm(:,keep);
+   
 
-function [Calm,Meta] = loadcalmarchive(MetaBasin)
+function [Calm,MetaBasin] = loadcalmarchive(MetaBasin)
    
    fname = setpath('interface/permafrost/alt/CALM/archive/CALM_ALT.mat','data');
 
    load(fname,'Calm','Tcalm');
    
-   if MetaBasin == "ALL_BASINS"
-      Meta = MetaBasin;
+   if ~istable(MetaBasin) && MetaBasin == "ALL_BASINS"
       return
    end
 

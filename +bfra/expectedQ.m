@@ -1,7 +1,7 @@
 function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
 %EXPECTEDQ general description of function
 % 
-% Syntax:
+% Syntax
 % 
 %  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau);
 %  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
@@ -54,6 +54,30 @@ else
    pQexp = nan;
    pQ0 = nan;
 end
+
+% % error propagation:
+% % need Qexp/Q0 L/H 
+% Qexp     = GlobalFit.Qexp;
+% sig_tau  = GlobalFit.BootFit.tau_sig;
+% sig_b    = GlobalFit.BootFit.b_sig;
+% sigQexp  = abs(Qexp/tauexp/(1-bhat)*sig_tau);
+% 
+% % double check the Qexp uncertainty
+% F        = @(X) (X(1)*X(2))^(1/(1-X(3))); % (a*tau)^(1/(1-b));
+% X        = [ahat tauexp bhat];
+% sigX     = [0 sig_tau sig_b];
+% amat     = repmat(GlobalFit.a,numel(GlobalFit.reps.b),1);
+% bmat     = GlobalFit.reps.b;
+% taumat   = GlobalFit.reps.tau;
+% Xmat     = [amat bmat taumat];
+% corrX    = corr(Xmat);
+% [sig,val] = propUncertCD(F,X,sigX,corrX);
+% 
+% 
+% syms asym tausym bsym
+% Fsym     = (asym*tausym).^(1/(1-bsym));
+% Xsym     = [asym tausym bsym];
+% [sig,val] = propUncertSym(Fsym,Xsym,X,sigX,corrX);
 
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 

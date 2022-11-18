@@ -31,10 +31,13 @@ validplottype     = @(x) any(validatestring(x,{'cdf','pdf','probplot'}));
 addRequired(p,    'phi',                  @(x)isvector(x)            );
 addOptional(p,    'outputtype',  'PD',    validoutput                );
 addOptional(p,    'plottype',    'none',  validplottype              );
+addOptional(p,    'showfit',     true,    @(x)islogical(x)           );
 
 parse(p,phi,varargin{:});
 outputtype = p.Results.outputtype;
 plottype = p.Results.plottype;
+showfit = p.Results.showfit;
+
 %-------------------------------------------------------------------------------
    
    % Force all inputs to be column vectors
@@ -46,9 +49,9 @@ plottype = p.Results.plottype;
    % Create the figure
    switch plottype
       case 'cdf'
-         h = cdfplotphi(phi,PD);
+         h = cdfplotphi(phi,PD,showfit);
       case 'probplot'
-         h = probplotphi(phi,PD);
+         h = probplotphi(phi,PD,showfit);
       case 'pdf'   
    end
    
@@ -68,18 +71,19 @@ plottype = p.Results.plottype;
    end
 end
 
-function h = cdfplotphi(phi,PD)
+function h = cdfplotphi(phi,PD,showfit)
    
    % Create the figure
-   h.figure = figure;
+   h.figure = figure('Visible',showfit);
    
    % Get the cdf
    [cdfY,cdfX] = ecdf(phi,'Function','cdf');  % compute empirical function
 %    h.data      = stairs(cdfX,cdfY,'LineWidth',1); hold on;
 
    c        = [0 0.447 0.741];
+   
    h.data   = plot(cdfX,cdfY,'o','MarkerFaceColor',c,       ...
-                  'MarkerEdgeColor','none'); hold on;
+                  'MarkerEdgeColor','none','Visible',showfit); hold on;
    
    % Create grid where function will be computed
    XLim     = get(gca,'XLim');
@@ -108,7 +112,7 @@ function h = cdfplotphi(phi,PD)
 
    % legend text and arrow text
    ltxt     = {'$\phi$',sprintf('Beta ($\\alpha=%.2f,\\beta=%.1f)$',PD.a,PD.b)};
-   arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',mu,round(pm,2));
+   arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',mu,round(pm,3));
 %  arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',PD.mean,PD.std);
    
    % add xlabel and legend
@@ -127,10 +131,12 @@ function h = cdfplotphi(phi,PD)
             'HeadStyle','plain','HeadLength',4,   ...
             'HeadWidth',2,'LineWidth',1,'Interpreter','latex');
          
-   h.ff = figformat;
-   h.legend = legend(ltxt,'Location','east','Interpreter','latex');
-   h.legend.Position(2) = 0.68*h.legend.Position(2);
-   h.legend.Position(1) = 0.85*h.legend.Position(1);
+   if showfit == true
+      h.ff = figformat;
+      h.legend = legend(ltxt,'Location','east','Interpreter','latex');
+      h.legend.Position(2) = 0.68*h.legend.Position(2);
+      h.legend.Position(1) = 0.85*h.legend.Position(1);
+   end
    
    h.ax  = gca;
    h.mu  = mu;

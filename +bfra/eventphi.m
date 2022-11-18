@@ -31,20 +31,22 @@ addRequired(   p,'D',                        @(x)isnumeric(x));
 addRequired(   p,'L',                        @(x)isnumeric(x));
 addRequired(   p,'blate',                    @(x)isnumeric(x));
 addParameter(  p,'method',    'envelope',    @(x)ischar(x));
-addParameter(  p,'refqtls',   [0.50 0.50],   @(x)isnumeric(x));
+addParameter(  p,'earlyqtls', [0.95 0.95],   @(x)isnumeric(x));
+addParameter(  p,'lateqtls',  [0.5 0.5],     @(x)isnumeric(x));
 addParameter(  p,'theta',     0,             @(x)isnumeric(x));
 addParameter(  p,'isflat',    true,          @(x)islogical(x));
 addParameter(  p,'soln1',     '',            @(x)ischar(x));
 addParameter(  p,'soln2',     '',            @(x)ischar(x));
 
-parse(p,K,Fits,A,D,L,blat,varargin{:});
+parse(p,K,Fits,A,D,L,blate,varargin{:});
 
-method   = p.Results.method;
-refqtls  = p.Results.refqtls;
-theta    = p.Results.theta;
-isflat   = p.Results.isflat;
-soln1    = p.Resutls.soln1;
-soln2    = p.Resutls.soln2;
+method      = p.Results.method;
+earlyqtls   = p.Results.earlyqtls;
+lateqtls    = p.Results.lateqtls;
+theta       = p.Results.theta;
+isflat      = p.Results.isflat;
+soln1       = p.Results.soln1;
+soln2       = p.Results.soln2;
 %-------------------------------------------------------------------------------
 
 warning off
@@ -54,16 +56,16 @@ b1          = 3;
 b2          = p.Results.blate; 
 q           = Fits.q;
 dqdt        = Fits.dqdt;
-tags        = Fits.eventTag;
-eventlist   = rmnan(unique(tags));
+fittags     = Fits.eventTag;
+eventlist   = rmnan(unique(fittags));
 numevents   = numel(eventlist);
 phi         = nan(numevents,1);
 a           = nan(numevents,1);
 
 for n = 1:numevents
    
-   event    = K.eventTag(n);
-   ifit     = Fits.eventTag == event;
+   eventtag = K(n).eventTag;
+   ifit     = fittags == eventtag;
    thisq    = q(ifit);
    thisdqdt = dqdt(ifit);
 
@@ -72,8 +74,8 @@ for n = 1:numevents
    end
       
    % put a line of slope 3 and 1/1.5/bhat through the point cloud
-   a1 = bfra.pointcloudintercept(thisq,thisdqdt,b1,'envelope','refqtls',[0.95 0.95]);
-   a2 = bfra.pointcloudintercept(thisq,thisdqdt,b2,'envelope','refqtls',refqtls);
+   a1 = bfra.pointcloudintercept(thisq,thisdqdt,b1,'envelope','refqtls',earlyqtls);
+   a2 = bfra.pointcloudintercept(thisq,thisdqdt,b2,'envelope','refqtls',lateqtls);
 
    % choose appropriate solutions
    if isempty(soln1) && isempty(soln2)

@@ -85,6 +85,9 @@ soln2    = p.Results.soln2;
 % the two soln options dictate the early-time expression for 'a'. the
 % late-time value is dictated by 'blate', but warn the user in case
 
+% NOTE: I don't think L is involved in any of the standard solutions. it appears
+% in PK62-BS04 but I think it cancels.
+
 %-------------------------------------------------------------------------------
 
 % parse the soln options
@@ -127,6 +130,7 @@ for m = 1:numsoln
          c1c2  = sqrt(1.133)*(pi*p+eta)/(D*A*sqrt(p));
          a1a2  = sqrt(a1*a2);
          
+         % conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2
          
       case 'RS05_RS05'     % Rupp and Selker, 2005 (early-time, b=3)
                            % Rupp and Selker, 2005 (late-time, b=f(n))
@@ -140,6 +144,8 @@ for m = 1:numsoln
          n3       = 1/(n+3);
          c1c2     = ((fR1*fR2^n2/(2^n*n1))^n3)/(D*A);
          a1a2     = (a1*a2^(n+2))^(1/(n+3));
+         
+         % conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2
          
          % phi = c1c2/a1a2;
          
@@ -176,11 +182,15 @@ for m = 1:numsoln
          
          % once phi and k are known, we can check D
          
+         % conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2
+         
       case 'PK62_BS03'        % Polubarinova-Kochina, 1962 (early-time)
                               % Boussinesq, 1903 (late-time)
          p     = 1/3;
          c1c2  = sqrt(1.133*p)*pi/(D*A);
          a1a2  = sqrt(a1*a2);
+         
+         % conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2
 
    end
 

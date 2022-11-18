@@ -27,34 +27,37 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 %  See also eventphi, fitphi, fitdistphi
 
 %-------------------------------------------------------------------------------
-p = inputParser;
-p.StructExpand = false;
+p                 = inputParser;
+p.StructExpand    = false;
 p.PartialMatching = true;
-p.FunctionName = 'bfra.cloudphi';
-addRequired(p,'q',@(x)isnumeric(x));
-addRequired(p,'dqdt',@(x)isnumeric(x));
-addRequired(p,'blate',@(x)isnumeric(x));
-addRequired(p,'A',@(x)isnumeric(x));
-addRequired(p,'D',@(x)isnumeric(x));
-addRequired(p,'L',@(x)isnumeric(x));
-addRequired(p,'method',@(x)ischar(x));
-addParameter(p,'refqtls',[0.5 0.5],@(x)isnumeric(x));
-addParameter(p,'mask',nan,@(x)islogical(x));
-addParameter(p,'theta',0,@(x)isnumeric(x));
-addParameter(p,'isflat',true,@(x)islogical(x));
-addParameter(p,'soln1','RS05',@(x)ischar(x));
-addParameter(p,'soln2','RS05',@(x)ischar(x));
-addParameter(p,'dispfit',false,@(x)islogical(x));
+p.FunctionName    = 'bfra.cloudphi';
+
+addRequired(p, 'q',                    @(x)isnumeric(x));
+addRequired(p, 'dqdt',                 @(x)isnumeric(x));
+addRequired(p, 'blate',                @(x)isnumeric(x));
+addRequired(p, 'A',                    @(x)isnumeric(x));
+addRequired(p, 'D',                    @(x)isnumeric(x));
+addRequired(p, 'L',                    @(x)isnumeric(x));
+addRequired(p, 'method',               @(x)ischar(x));
+addParameter(p,'earlyqtls',[0.95 0.95],@(x)isnumeric(x));
+addParameter(p,'lateqtls', [0.5 0.5],  @(x)isnumeric(x));
+addParameter(p,'mask',     nan,        @(x)islogical(x));
+addParameter(p,'theta',    0,          @(x)isnumeric(x));
+addParameter(p,'isflat',   true,       @(x)islogical(x));
+addParameter(p,'soln1',    'RS05',     @(x)ischar(x));
+addParameter(p,'soln2',    'RS05',     @(x)ischar(x));
+addParameter(p,'dispfit',  false,      @(x)islogical(x));
 
 parse(p,q,dqdt,blate,A,D,L,method,varargin{:});
 
-refqtls  = p.Results.refqtls;
-mask     = p.Results.mask;
-theta    = p.Results.theta;
-isflat   = p.Results.isflat;
-soln1    = p.Results.soln1;
-soln2    = p.Results.soln2;
-dispfit  = p.Results.dispfit;
+earlyqtls   = p.Results.earlyqtls;
+lateqtls    = p.Results.lateqtls;
+mask        = p.Results.mask;
+theta       = p.Results.theta;
+isflat      = p.Results.isflat;
+soln1       = p.Results.soln1;
+soln2       = p.Results.soln2;
+dispfit     = p.Results.dispfit;
 
 %-------------------------------------------------------------------------------
 
@@ -69,8 +72,8 @@ dispfit  = p.Results.dispfit;
 % b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)
 
 b2 = blate; 
-a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',[0.95 0.95]);
-a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',refqtls,'mask',mask);
+a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
+a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
 
 switch b2
    case 1
