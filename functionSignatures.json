@@ -28,7 +28,7 @@
          {"name":"Dd",        "kind": "namevalue", "type": ["scalar","double"]}
       ]
    },
-   "bfra.baseflow":
+   "bfra.baseflowtrend":
    {
       "inputs":
       [
@@ -533,6 +533,7 @@
          {"name":"printvalues",  "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
       ]
    },
+   "_comment": "event opts",
    "bfra.setopts":
    {
       "inputs":
