@@ -130,17 +130,18 @@ ax          = p.Results.ax;
    ab       = [a;b];
    
    % Below here only needed if plot is requested
-   
    if plotline == true   
+      
       xref     = linspace(xlims(1),xlims(2),100);
       yref     = axb(a,xref,b);
       
-      if strcmp(refline,'bestfit')
-         href  = loglog(xref,yref,'--','LineWidth',2,'Color',linecolor);
-      elseif strcmp(refline,'userfit')
-         href  = loglog(xref,yref,':','LineWidth',2,'Color',linecolor);
-      else
-         href  = loglog(xref,yref,'-','LineWidth',0.5,'Color',linecolor);
+      switch refline
+         case 'bestfit'
+            href = loglog(xref,yref,':','LineWidth',1,'Color',linecolor);
+         case 'userfit'
+            href = loglog(xref,yref,'-','LineWidth',1,'Color',linecolor);
+         otherwise
+            href = loglog(xref,yref,'-','LineWidth',0.5,'Color',linecolor);
       end
 
       % reset the x,ylims
@@ -175,16 +176,18 @@ function addlabels(a,b,refline)
 
    switch refline
       
-      case {'late','early','userfit','bestfit'}
+      %case {'latetime','earlytime','userfit','bestfit'}
+      case {'latetime','earlytime','userfit'}
          xa       = (ya/a)^(1/b);
          
-         % make the arrow span 1/10th of the total number of decades
-         xa       = [xa 10^(log10(xa)+ndecsx/10)];
-         %xa       = [xa xa+10^(ndecs/2)];
+         % make the arrow span 1/10th or so of the total number of decades
+         xa       = [xa 10^(log10(xa)+ndecsx/15)];
          
          ya       = [ya ya];
          
-         if b==1 || b==3
+         if refline == "userfit"
+            ta    = sprintf('$b=%.2f$ ($\\hat{b}$)',b);
+         elseif b==1 || b==3
             ta    = sprintf('$b=%.0f$',b);
          elseif b==3/2
             ta    = sprintf('$b=%.1f$',b);
@@ -205,15 +208,15 @@ function addlabels(a,b,refline)
          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
          ytxt     = 2*xtxt;
 
-%          rotatedLogLogText(xtxt,ytxt,'upper envelope',0.22,axpos);
-
-         % I think this works with subplot and 0.22 works with tiledlayout
-         rotatedLogLogText(xtxt,ytxt,'upper envelope',3.8,axpos);
+         rot      = 1.07; 
          
-         % I can't get the rotation right, there's something i don't
-         % understand about matlab figure coord's, so the rotation has to
-         % be guess and check, some values that tend ot work:
-         %rotatedLogLogText(xtxt,ytxt,'upper envelope',0.85,axpos);
+         % some values of rot that work for different types of plots
+         % 5.1    bfra_checkevent2 figure
+         % 0.22   not sure (note said 0.22 works with tiledlayout)
+         % 3.8    not sure (note said i think 3.8 works with subplot)
+         % 0.86   the standard point cloud plot (standard figure size)
+         
+         rotatedLogLogText(xtxt,ytxt,'upper envelope',rot,axpos,'FontSize',11);
          
       case 'lowerenvelope'
          % for now, add this after the fact
@@ -223,8 +226,5 @@ function addlabels(a,b,refline)
 %          ytxt     = 2*xtxt;
          
    end
-         
-%    % the version with a hat
-%    % ta     = sprintf('$b=%.2f$ ($\\hat{b}$)',h.bLate);
 
 end

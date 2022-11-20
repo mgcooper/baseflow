@@ -1,5 +1,4 @@
-
-function [sig_dndt,sig_lamda] = dndtuncertainty(T,K,GlobalFit,PhiFit,varargin)
+function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,GlobalFit,PhiFit,varargin)
 %DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate
 %
 %  Compute the combined uncertainty (with correlation) for:
@@ -20,9 +19,9 @@ function [sig_dndt,sig_lamda] = dndtuncertainty(T,K,GlobalFit,PhiFit,varargin)
 % parse inputs
 alpha = 0.05;
 testflag = false;
-if nargin == 5
+if nargin == 6
    alpha = varargin{1};
-elseif nargin == 6
+elseif nargin == 7
    alpha = varargin{1};
    testflag = varargin{2};
 end
@@ -36,7 +35,8 @@ Fdndt       = @(tau,phi,b,dqdt) tau./(phi.*(4-2.*b)).*dqdt;
 
 % regress baseflow in units cm/day/year to get uncertainty on dq/dt 
 % using fitlm on the baseflow timeseries:
-Qb          = GlobalFit.Qb./365.25;            % cm/yr -> cm/day
+% Qb          = GlobalFit.Qb./365.25;            % cm/yr -> cm/day
+Qb          = Qb./365.25;            % cm/yr -> cm/day
 mdl         = fitlm(T,Qb); % plot(mdl)
 dbfdt       = mdl.Coefficients.Estimate(2);   % cm/day/year
 std_dbfdt   = mdl.Coefficients.SE(2);         % standard error
@@ -106,7 +106,9 @@ V           = corr([tau,phi,Np1]).*u.*u';
 sig_lamda   = sqrt(J*V*J');
 % w/o correlated errors: sqrt(sum((J.*u).^2))
 
-%% Methods comparison
+%-------------------------------------------------------------------------------
+% Methods comparison
+%-------------------------------------------------------------------------------
 
 if testflag == true
 

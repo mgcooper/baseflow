@@ -60,16 +60,19 @@ ax          = p.Results.ax;
 %-------------------------------------------------------------------------------
    
    if ~isaxis(ax)
-      fig = figure('Position',[380 200 460 380]); ax = gca;
+      fig = figure('Position',[380 200 550 510]); ax = gca;
    else
       fig = gcf;
    end
    
-   h0 = loglog(ax,q,-dqdt,'o'); formatPlotMarkers('markersize',6); hold on;
+   h0 = loglog(ax,q,-dqdt,'o'); formatPlotMarkers('markersize',6); 
+   hold on; grid off;
 
    % add circles around the t>tau0 values if requested
    if sum(mask) < numel(q)
-      scatter(q(mask),-dqdt(mask),'r');
+      h1 = scatter(q(mask),-dqdt(mask),'r');
+   else
+      h1 = [];
    end
 
    % add some space around the data
@@ -79,12 +82,16 @@ ax          = p.Results.ax;
    yupplim  = max(ylims);
    
    xlim([xlims(1)*.9 xlims(2)*1.1]);
-   
-%    xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
+   % xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
 
-   grid off; 
+   % set xylabels
    xlabel(bfra.getstring('Q','units',true),'FontSize',14);
    ylabel(bfra.getstring('dQdt','units',true),'FontSize',14);
+   
+   % init containers
+   h  = gobjects(numel(reflines),1);
+   ab = nan(numel(reflines),2);
+   
 
    % add reflines
    for n = 1:numel(reflines)
@@ -97,10 +104,9 @@ ax          = p.Results.ax;
                               'refline','earlytime',        ...
                               'refslope',3,                 ...
                               'labels',reflabels,           ...
-                              'mask',mask                   ... % TEST
+                              'mask',mask                   ...
                               );
             
-            % might want to increase the line thickness
             h(n).LineWidth = 1;
             
          case 'late'
@@ -109,7 +115,7 @@ ax          = p.Results.ax;
                               'refline','latetime',         ...
                               'refslope',blate,             ...
                               'labels',reflabels,           ...
-                              'mask',mask                   ... % TEST
+                              'mask',mask                   ...
                               );
             
             h(n).LineWidth = 1;
@@ -121,8 +127,8 @@ ax          = p.Results.ax;
                               'labels',reflabels            ...
                               );
                                                 
-            % make the ylimits span the minimum dq/dt to the upper envelope at max Q
-            yupplim  = ab(n,1)*max(xlims)^ab(n,2);
+            % make ylimits span the min dq/dt to the upper envelope at max Q
+            yupplim = ab(n,1)*max(xlims)^ab(n,2);
             
          case 'lowerenvelope'
             [h(n),ab(n,:)] =  bfra.plotrefline(             ...
@@ -131,25 +137,25 @@ ax          = p.Results.ax;
                               'labels',reflabels            ...
                               );
                                                 
-            ylowlim  = min(0.8.*ab(n,1),0.8*min(ylims));
+            ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
             
          case 'bestfit'
-            [h(n),ab(n,:)] = bfra.plotrefline(q,-dqdt, 'refline','bestfit');
-            h(n).LineWidth = 2;     % 1
-            
-            % dummy plot to make space in legend
-            hdum = plot(0,0,'Color','none');
-            bestfit = true;
+            [h(n),ab(n,:)] = bfra.plotrefline(              ...
+                              q,-dqdt,                      ...
+                              'refline','bestfit',          ...
+                              'labels',false                ...
+                              );
+
+            h(n).LineWidth = 1;
             
          case 'userfit'
-            % i turned off 'labels' for userfit, that way it goes to the legend
-            % just like 'bestfit' and the arrows are reserved for reflines
+
             [h(n),ab(n,:)] =  bfra.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','userfit',          ...
                               'userab',userab,              ...
-                              'labels',false,               ...
-                              'mask',mask                   ... % TEST
+                              'labels',reflabels,           ...
+                              'mask',mask                   ...
                               );
       end
       
@@ -171,28 +177,32 @@ ax          = p.Results.ax;
       
       % check if both userfit and bestfit are requested
       fitcheck = {'bestfit','userfit'};
+      
       if all(ismember(fitcheck,reflines))
 
-         % put them both in the legend
-         ibf   = strcmp(reflines,fitcheck);
-         hleg  = h(ibf);
+         % ------------------------------------
+%          % put them both in the legend
+%          ibf   = ismember(reflines,fitcheck);
+%          hleg  = h(ibf);
+%          
+%          ibest = strcmp(reflines,'bestfit');
+%          iuser = strcmp(reflines,'userfit');
+%          tbest = [bfra.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
+%          tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
+%          
+%          % if user text provided, swap it out
+%          if ~isempty(usertext)
+%             tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
+%          end
+%          ltext = {tbest; tuser};
+         % ------------------------------------
          
-         ibest = strcmp(reflines,'bestfit');
-         iuser = strcmp(reflines,'userfit');
-         tbest = [bfra.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
-         tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
-         % if user text provided, swap it out
-         if ~isempty(usertext)
-            tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
-         end
-         ltext = {tbest; tuser};
-
-         % this would just put on in the legend
-         % % use bestfit for the legend
-         % ibf   = strcmp(reflines,'bestfit');
-         % hleg  = h(ibf);
-         % ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
-         % ltext = [ltext ' (NLS fit)'];
+         % only put bestfit in the legend
+         ibf   = strcmp(reflines,'bestfit');
+         hleg  = h(ibf);
+         ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
+        %ltext = [ltext ' (NLS fit)'];
+         ltext = [ltext ' (nonlinear least-squares)'];
          
       % check if either userfit or bestfit are requested
       elseif any(ismember(fitcheck,reflines))
@@ -223,6 +233,7 @@ ax          = p.Results.ax;
    % package the output
    out.fig        = fig;
    out.scatter    = h0;
+   out.mask       = h1;
    out.reflines   = h;
    out.ax         = gca;
    out.hrain      = hrain;

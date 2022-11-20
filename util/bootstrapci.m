@@ -36,6 +36,9 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
 % bootstrap function. bootr are the bootstrapped residuals.
    Fboot = @(bootr)fminsearch(@(ab)Fcost(yhat-x*ab+bootr),ab0,opts)';
 
+%       Ftest = @(bootr)fminsearch(@(ab)Fcost(yhat-x*ab+bootr),flipud(ab0),opts)';
+%       abtest = bootstrp(Nboot,Ftest,resid);
+      
 % ensemble of ab values (column vectors, a=(:,1), b=(:,2))
    abboot = bootstrp(Nboot,Fboot,resid);
    abse   = std(abboot);

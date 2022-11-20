@@ -1,7 +1,10 @@
-classdef MipInputParser < inputParser
+classdef magicParser < inputParser
     % Make argument parsing fun and magical and reduce typing.
     %
     % 2016 benjamin.heasly@gmail.com
+    %
+    % updated:
+    % 2022 mguycooper@gmail.com
     
     methods (Static)
         function isInList = itemIsInList(item, varargin)
@@ -15,7 +18,7 @@ classdef MipInputParser < inputParser
             end
             
             if ~isInList
-                error('MipInputParser:itemIsInList', ...
+                error('magicParser:itemIsInList', ...
                     'The value %s should be one of: %s', ...
                     evalc('disp(item)'), ...
                     evalc('disp(varargin)'));
@@ -23,12 +26,12 @@ classdef MipInputParser < inputParser
         end
         
         function validatorFunction = isAny(varargin)
-            validatorFunction = @(item) MipInputParser.itemIsInList(item, varargin{:});
+            validatorFunction = @(item) magicParser.itemIsInList(item, varargin{:});
         end
     end
     
     methods
-        function obj = MipInputParser()
+        function obj = magicParser()
             obj.KeepUnmatched = true;
             obj.CaseSensitive = true;
             obj.PartialMatching = false;

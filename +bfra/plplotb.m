@@ -85,7 +85,7 @@ ax          = p.Results.ax;
    end
    xlabel('$x$');
    ylabel(['$p(' varsym '\ge x)$'],'Interpreter','latex'); 
-   legend(ltxt1,ltxt2,'interpreter','latex','location','southeast')
+   h.legend = legend(ltxt1,ltxt2,'interpreter','latex','location','southeast');
    
    figformat('suppliedline',h.fit,'linelinewidth',3);
    

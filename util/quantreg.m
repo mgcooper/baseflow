@@ -1,4 +1,5 @@
 function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
+
 % mgc changes:
 %     replaced the output p with ab and ordered it as [int,slope]
 %     added prepareCurveData
