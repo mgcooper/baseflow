@@ -208,13 +208,15 @@ function addlabels(a,b,refline)
          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
          ytxt     = 2*xtxt;
 
-         rot      = 1.07; 
+         rot      = 0.98; 
          
          % some values of rot that work for different types of plots
-         % 5.1    bfra_checkevent2 figure
+         % 5.1    bfra_checkevent2 figure (I used 5.22 in the final fig)
          % 0.22   not sure (note said 0.22 works with tiledlayout)
          % 3.8    not sure (note said i think 3.8 works with subplot)
          % 0.86   the standard point cloud plot (standard figure size)
+         % 1.07   not sure but this was 
+         % 0.98   used this in the final point cloud plot
          
          rotatedLogLogText(xtxt,ytxt,'upper envelope',rot,axpos,'FontSize',11);
          

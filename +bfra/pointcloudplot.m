@@ -60,7 +60,8 @@ ax          = p.Results.ax;
 %-------------------------------------------------------------------------------
    
    if ~isaxis(ax)
-      fig = figure('Position',[380 200 550 510]); ax = gca;
+      %fig = figure('Position',[380 200 550 510]); ax = gca;
+      fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
    else
       fig = gcf;
    end

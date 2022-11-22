@@ -87,7 +87,7 @@ ax          = p.Results.ax;
    ylabel(['$p(' varsym '\ge x)$'],'Interpreter','latex'); 
    h.legend = legend(ltxt1,ltxt2,'interpreter','latex','location','southeast');
    
-   figformat('suppliedline',h.fit,'linelinewidth',3);
+   figformat('suppliedline',h.fit,'linelinewidth',3,'labelfontsize',14);
    
    if ~isnan(xminci)
       xminL = xminci(1);
@@ -116,7 +116,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b,bL,bH,yref)
    ta    = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',tau0,xminc);
 
    arrow([xa(1),ya(1)],[xa(2),ya(2)],'BaseAngle',90,'Length',8,'TipAngle',10)
-   text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
+   text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right','FontSize',14)
    
    % use these to put the text on the right side of the curve
    %    xa    = [xmin+xmin/2 xmin];
@@ -139,6 +139,6 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b,bL,bH,yref)
    ta    = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 
    arrow([xa(1),ya(1)],[xa(2),ya(2)],'BaseAngle',90,'Length',8,'TipAngle',10)
-   text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
+   text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right','FontSize',14)
 
 end

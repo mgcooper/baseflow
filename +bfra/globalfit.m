@@ -130,9 +130,6 @@ switch phimethod
       phi = bfra.fitphidist(phid,'mean','cdf',plotfits);
 end
 
-
-% PhiFit = bfra.phifitensemble(K,Fits,A,D,L,bhat,true);
-
 % fit k
 %---------
 [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,phi,A,D,L,'RS05', ...
