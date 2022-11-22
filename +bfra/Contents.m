@@ -7,7 +7,6 @@
 %   aquiferprops        - computes aquifer properties hydraulic conductivity k, depth D, and
 %   aquiferstorage      - computes aquifer storage given input parameters a,b and flow
 %   aquiferthickness    - compute the aquifer thickness from recession parameters
-%   baseflow            - computes the expected value of baseflow and rate of change
 %   basinname           - returns a string 'basinname' from the bfra basin database, which can
 %   cloudphi            - estimates drainable porosity phi from the point cloud using the
 %   conversions         - convert inputvalue from its value in terms of inputvarname to
@@ -31,7 +30,6 @@
 %   globalfit           - takes the event-scale recession analysis parameters saved in
 %   gpfitb              - returns [b,alpha,k]=gpfitb(x,xmin) where parmhat=gpfit(xhat)
 %   loadcalm            - loads calm ALT data for a basin in the Bounds struct
-%   loadcalm_new        - loads calm ALT data for a basin in the Bounds struct
 %   loadghcnd           - reads in a global hydroclimatology network database file
 %   loadmeta            - load metadata for basin indicated by basinname
 %   plfitb              - returns [b,alpha,k]=bfra.plfitb(x,varargin) where x is continuous data
@@ -47,4 +45,3 @@
 %   setopts             - set default bfra algorithm options for type 'events' or 'fits'
 %   specialfunctions    - libarary of special functions required for baseflow recession
 %   taufunc             - returns inline function for tau or the value of tau
-%   wrapFits            - estimates the recession coefficient (wrapper around bfra.fitab)
