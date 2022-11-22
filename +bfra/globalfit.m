@@ -130,12 +130,10 @@ switch phimethod
       phi = bfra.fitphidist(phid,'mean','cdf',plotfits);
 end
 
-% fit k
-%---------
-[k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,phi,A,D,L,'RS05', ...
-   'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);
-
-
+% % fit k
+% %---------
+% [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,phi,A,D,L,'RS05', ...
+%    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);
 % Q0    = Qexp*(3-b)/(2-b);
 
 % note on units: ahat is estimated from the point cloud. the dimensions of ahat
@@ -143,18 +141,17 @@ end
 % d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we get:
 % (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1
 
-% plot the pointcloud if requested
-%----------------------------------
-if plotfits == true
-
-   h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
-   'reflines',{'early','late','userfit'},'reflabels',true, ...
-   'userab',[ahat bhat],'addlegend',true);
-
-   h.legend.AutoUpdate = 'off';
-   scatter(xbar,ybar,60,'k','filled','s');
-
-end
+% % turned this off b/c phicloud makes one
+% % plot the pointcloud if requested
+% %----------------------------------
+% if plotfits == true
+% 
+%    h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
+%    'reflines',{'early','late','userfit'},'reflabels',true, ...
+%    'userab',[ahat bhat],'addlegend',true);
+%    h.legend.AutoUpdate = 'off';
+%    scatter(xbar,ybar,60,'k','filled','s');
+% end
 
 
 

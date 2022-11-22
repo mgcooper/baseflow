@@ -1,4 +1,4 @@
-function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,GlobalFit,PhiFit,varargin)
+function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)
 %DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate
 %
 %  Compute the combined uncertainty (with correlation) for:
@@ -19,9 +19,9 @@ function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,GlobalFit,PhiFit,varargin
 % parse inputs
 alpha = 0.05;
 testflag = false;
-if nargin == 6
+if nargin == 7
    alpha = varargin{1};
-elseif nargin == 7
+elseif nargin == 8
    alpha = varargin{1};
    testflag = varargin{2};
 end
@@ -44,8 +44,16 @@ CI_dbfdt    = mdl.coefCI;                     % 95% CI's
 CI_dbfdt    = CI_dbfdt(2,:);
 sig_dbfdt   = CI_dbfdt(2)-dbfdt;             % they're symetric so just take one
 
-
+% parameters
+A           = opts.drainagearea;     % basin area [m2]
+D           = opts.aquiferdepth;     % reference active layer thickness [m]
+L           = opts.streamlength;     % effective stream network length [m]
+lateqtls    = opts.lateqtls;
+earlyqtls   = opts.earlyqtls;
+bhat        = GlobalFit.b;
+PhiFit      = bfra.phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,false);
 % the sample populations of tau, phi, and Nstar
+
 b           = [K.b]';
 tau         = [K.tauH]';
 Np1         = 1./(4-2.*b);

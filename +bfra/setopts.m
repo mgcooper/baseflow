@@ -117,7 +117,7 @@ switch type
       addParameter(p,   'nreps',          1000,          @(x)isdoublescalar(x)   );
       addParameter(p,   'phimethod',      'pointcloud',  @(x)ischar(x)           );
       addParameter(p,   'refqtls',        [0.50 0.50],   @(x)isnumericvector(x)  );
-      addParameter(p,   'earlyqtls',      [0.90 0.90],   @(x)isnumericvector(x)  );
+      addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)isnumericvector(x)  );
       addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)isnumericvector(x)  );
 
 end

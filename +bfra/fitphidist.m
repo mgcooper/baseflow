@@ -34,9 +34,9 @@ addOptional(p,    'plottype',    'none',  validplottype              );
 addOptional(p,    'showfit',     true,    @(x)islogical(x)           );
 
 parse(p,phi,varargin{:});
-outputtype = p.Results.outputtype;
-plottype = p.Results.plottype;
-showfit = p.Results.showfit;
+outputtype  = p.Results.outputtype;
+plottype    = p.Results.plottype;
+showfit     = p.Results.showfit;
 
 %-------------------------------------------------------------------------------
    
@@ -110,28 +110,29 @@ function h = cdfplotphi(phi,PD,showfit)
    sig   = mean(sigreps);
    pm    = std(mureps)*1.96; % or: mean(sigreps)/sqrt(N)*1.96
 
-   % legend text and arrow text
-   ltxt     = {'$\phi$',sprintf('Beta ($\\alpha=%.2f,\\beta=%.1f)$',PD.a,PD.b)};
-   arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',mu,round(pm,3));
-%  arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',PD.mean,PD.std);
-   
-   % add xlabel and legend
-   %xlabel('$\phi$');
-   xlabel('$x$');
-   ylabel('$P(\phi\le x)$'); 
-   
-   % add an arrrow pointing to the expected value
-   xarrow   = [PD.mean 1.3*PD.mean];
-   yarrow   = [PD.cdf(PD.mean) PD.cdf(PD.mean)];
-   [X1,Y1]  = ds2nfu(xarrow(1),yarrow(1));
-   [X2,Y2]  = ds2nfu(xarrow(2),yarrow(2));
-   
-   annotation(gcf,'textarrow',[1.06*X2 1.025*X1],[Y2 Y1],                     ...
-            'String',{arrowtxt}, ...
-            'HeadStyle','plain','HeadLength',4,   ...
-            'HeadWidth',2,'LineWidth',1,'Interpreter','latex');
-         
    if showfit == true
+      % legend text and arrow text
+      ltxt     = {'$\phi$',sprintf('Beta ($\\alpha=%.2f,\\beta=%.1f)$',PD.a,PD.b)};
+      arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',mu,round(pm,3));
+   %  arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',PD.mean,PD.std);
+
+      % add xlabel and legend
+      %xlabel('$\phi$');
+      xlabel('$x$');
+      ylabel('$P(\phi\le x)$'); 
+
+      % add an arrrow pointing to the expected value
+      xarrow   = [PD.mean 1.3*PD.mean];
+      yarrow   = [PD.cdf(PD.mean) PD.cdf(PD.mean)];
+      [X1,Y1]  = ds2nfu(xarrow(1),yarrow(1));
+      [X2,Y2]  = ds2nfu(xarrow(2),yarrow(2));
+
+      annotation(gcf,'textarrow',[1.06*X2 1.025*X1],[Y2 Y1],                     ...
+               'String',{arrowtxt}, ...
+               'HeadStyle','plain','HeadLength',4,   ...
+               'HeadWidth',2,'LineWidth',1,'Interpreter','latex');
+         
+   
       h.ff = figformat;
       h.legend = legend(ltxt,'Location','east','Interpreter','latex');
       h.legend.Position(2) = 0.68*h.legend.Position(2);
