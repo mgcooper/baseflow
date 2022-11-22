@@ -1,4 +1,24 @@
 function [Bounds,Meta,Poly] = loadbounds(basinname,varargin)
+%LOADBOUNDS load boundary object for basin specified by basinname.
+% 
+%  Bounds = bfra.loadbounds(basinname) returns struct Bounds containing the
+%  spatial basin boundary information.
+% 
+%  [Bounds,Meta,Poly] = bfra.loadbounds(basinname) additionally returns table
+%  Meta containing the basin metadata information and geoshape Poly containing a
+%  computational geometry object representation of the basin boundary.
+% 
+%  [Bounds,Meta,Poly] = bfra.loadbounds(___,'projection',projtype) specifies
+%  whether to return the basin boundary in geographic or projected coordinates.
+%  Options are 'geo' and 'ease'. 'geo' is WGS 84. 'ease' is NSIDC EASE North
+%  projection.
+%  
+% 
+%  Merra = merraWaterBalance(___,) (placeholder for future options)
+%
+% Matt Cooper, 20-Feb-2022, mgcooper@github.com
+% 
+% See also loadgrace loadflow loadcalm
 
 %------------------------------------------------------------------------------
    validopts = @(x)any(validatestring(x,{'current','archive'}));
@@ -7,14 +27,14 @@ function [Bounds,Meta,Poly] = loadbounds(basinname,varargin)
    p                = inputParser;
    p.FunctionName   = 'bfra.loadbounds';
    p.addRequired('basinname',                @(x)ischar(x)  );
-   p.addParameter('projection',  'geo',      validproj      );
    p.addOptional( 'version',     'current',  validopts      );
+   p.addParameter('projection',  'geo',      validproj      );
    
    parse(p,basinname,varargin{:});
    
    basinname   = p.Results.basinname;
-   projection  = p.Results.projection;
    version     = p.Results.version;
+   projection  = p.Results.projection;
    
 %------------------------------------------------------------------------------
 

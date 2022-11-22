@@ -14,12 +14,14 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
    addOptional(p, 'version',  'current',  validopts                        );
    addParameter(p,'t1',       NaT,        @(x) isdatetime(x)|isnumeric(x)  );
    addParameter(p,'t2',       NaT,        @(x) isdatetime(x)|isnumeric(x)  );
+   addParameter(p,'aggfunc',  'none',     @(x) ischar(x)                   );
    
    parse(p,basinname,varargin{:});
    
    version  = p.Results.version;
    t1       = p.Results.t1;
    t2       = p.Results.t2;
+   aggfunc  = p.Results.aggfunc;
 %------------------------------------------------------------------------------
 
    % get the meta data
@@ -40,6 +42,13 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
    if ~isnat(t1)
       ok    = isbetween(Calm.Time,t1,t2);
       Calm  = Calm(ok,:);
+   end
+   
+   switch aggfunc
+      case 'avg'
+         Time  = Calm.Time;
+         Dc    = nanmean(table2array(Calm),2);
+         Calm  = array2timetable(Dc,'RowTimes',Time);
    end
 
    
