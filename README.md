@@ -41,10 +41,10 @@ To get started with baseflow recession analysis, clone this repo or download it 
 
 ## How do I cite this?
 
-A dedicated software citation is coming soon. If you find this software useful, please consider citing the following paper for which this software was developed (in revision, citation pending):
+If you find this software useful, please consider citing the following paper for which this software was developed (in revision):
 
-<!-- @ARTICLE{10.3389/fninf.2018.00087,
-AUTHOR={Cooper, Matthew G, Zhou, Tian, Bennett, Katrina E, Bolton, W Robert, Coon, Ethan T, Fleming, Sean W, Rowland, Joel C, and Schwenk, Jon},   
+@ARTICLE{10.3389/fninf.2018.00087,
+AUTHOR={Cooper, M G, Zhou, T, Bennett, K E, Bolton, W R, Coon, E T, Fleming, S W, Rowland, J C, and Schwenk, J},   
 TITLE={Detecting permafrost active layer thickness change from nonlinear baseflow recession},      
 JOURNAL={Water Resources Reearch},      
 VOLUME={XX},      
@@ -53,4 +53,7 @@ YEAR={2022},
 URL={https://www.frontiersin.org/article/10.3389/fninf.2018.00087},       
 DOI={10.3389/fninf.2018.00087},      
 ISSN={1662-5196},   
-} -->
+}
+
+See Citation.cff for a dedicated software release citation.
+
