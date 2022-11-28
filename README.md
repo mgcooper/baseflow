@@ -1,5 +1,7 @@
 # `baseflow` - a matlab package for baseflow recession analysis
 
+[![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633)
+
 Baseflow recession analysis refers to a set of methods in hydrologic science designed to infer watershed properties from streamflow measurements. Properties that cannot be observed, such as hydraulic conductivity, are inferred from something that can be observed, such as streamflow. The underlying theory is based on solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Its application here is meant for shallow unconfined riparian aquifers that discharge subsurface flow into adjacent stream channels.
 
 ## Dependencies
