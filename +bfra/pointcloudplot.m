@@ -37,7 +37,7 @@ addParameter(p,'blate',       1,                @(x)isnumeric(x));
 addParameter(p,'userab',      [1 1],            @(x)isnumeric(x));
 addParameter(p,'precision',   1,                @(x)isnumeric(x));
 addParameter(p,'timestep',    1,                @(x)isnumeric(x));
-addParameter(p,'addlegend',   false,            @(x)islogical(x));
+addParameter(p,'addlegend',   true,             @(x)islogical(x));
 addParameter(p,'usertext',    '',               @(x)ischar(x));
 addParameter(p,'rain',        nan,              @(x)isnumeric(x));
 addParameter(p,'ax',          'none',           @(x)isaxis(x)|ischar(x));
@@ -147,7 +147,7 @@ ax          = p.Results.ax;
                               'labels',false                ...
                               );
 
-            h(n).LineWidth = 1;
+            h(n).LineWidth = 2;
             
          case 'userfit'
 
@@ -226,7 +226,7 @@ ax          = p.Results.ax;
          ltext = {ltext,'rain'};
       end
       
-      l = legend(hleg,ltext,'location','nw','interpreter','latex');
+      l = legend(hleg,ltext,'location','nw','interpreter','latex','AutoUpdate','off');
    else
       l = nan;
    end
