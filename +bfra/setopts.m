@@ -59,9 +59,7 @@ function opts = setopts(type,varargin)
 %
 %  See also getfits, fitdqdt
 
-%-------------------------------------------------------------------------------
-% % set default bfra settings
-%-------------------------------------------------------------------------------
+%% set default bfra settings
 
 p                 = inputParser;
 p.FunctionName    = 'bfra.setopts';
