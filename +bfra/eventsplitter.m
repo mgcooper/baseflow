@@ -92,7 +92,8 @@ rmrain      = p.Results.rmrain;
    
    % remove the convex points if requested
    if rmconvex == true
-      ibad  = [ibad;icon];
+      %ibad  = [ibad;icon];
+      ibad  = [ibad;icon;icon2];
    end
     
    % exclude sequences of two or more of (dq/dt = 0) (see setconstantnan)
@@ -109,7 +110,6 @@ rmrain      = p.Results.rmrain;
       irain = unique([irain;irain+1;irain-1;irain+2;irain-2;irain+3;irain-3]);
       irain = irain(ismember(irain,icon2));
       ibad  = [ibad;irain];
-      
    end
    
    % take the unique indices and exclude 0 and >numel(q)
@@ -153,17 +153,29 @@ rmrain      = p.Results.rmrain;
         
     end
 
-    % return events that passed the nmin filter
-    if Nevents > 0
-        Info.imaxima    = imax;
-        Info.iminima    = imin;
-        Info.iconvex    = icon;
-        Info.icandidate = find(tfc);
-        Info.ikeep      = find(tfk);
-        Info.istart     = is;
-        Info.istop      = ie;
-    else
-        [T,Q,R,Info]    = seteventnan;
-    end
+   % return events that passed the nmin filter
+   if Nevents > 0
+      Info.imaxima    = imax;
+      Info.iminima    = imin;
+      Info.iconvex    = icon;
+      Info.icandidate = find(tfc);
+      Info.ikeep      = find(tfk);
+      Info.istart     = is;
+      Info.istop      = ie;
+   else
+      [T,Q,R,Info]    = bfra.seteventnan;
+   end
     
+%    % debug plot:
+%    figure; plot(t,q); hold on; plot(t,qsmooth,'g');
+%    scatter(t(ipos),q(ipos),'filled')
+%    scatter(t(imax),q(imax),'r','filled')
+%    scatter(t(imin),q(imin),'g','filled')
+%    scatter(t(icon),q(icon),'m','filled')
+%    scatter(t(icon2),q(icon2),'k','filled')
+%    scatter(t(ibad),q(ibad),80,'k')
+
 end
+
+
+

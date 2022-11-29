@@ -1,7 +1,7 @@
 function Meta = loadmeta(basinname,varargin)
 % LOADMETA load metadata for basin indicated by basinname
 
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
    validopts = @(x)any(validatestring(x,{'current','archive'}));
    
    p                = inputParser;
@@ -10,7 +10,7 @@ function Meta = loadmeta(basinname,varargin)
    addOptional(p, 'version','current', validopts      );
    parse(p,basinname,varargin{:});
    version = p.Results.version;
-%------------------------------------------------------------------------------
+%-------------------------------------------------------------------------------
    
    % load the meta data - use the one from 'Bounds'
    pathbounds  = [getenv('USERDATAPATH') 'interface/basins/matfiles/'];
@@ -23,6 +23,9 @@ function Meta = loadmeta(basinname,varargin)
    end
    load(filebounds,'Meta');
 
+   if strcmp(basinname,'ALL_BASINS')    % return all the basins
+      return
+   end
    % check for categorical station name
    if iscategorical(basinname); basinname = char(basinname); end
    

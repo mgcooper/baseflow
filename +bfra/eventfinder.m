@@ -57,7 +57,7 @@ rmrain      = p.Results.rmrain;
    for n = 1:length(iS)
 
       if L(n)<nmin                       % set nan if <nmin
-         [Tn,Qn,Rn,Infon]  = seteventnan;
+         [Tn,Qn,Rn,Infon]  = bfra.seteventnan;
       else
                    tn      = t(iS(n):iE(n));
                    qn      = q(iS(n):iE(n));
@@ -108,7 +108,7 @@ rmrain      = p.Results.rmrain;
 
     % if no events were returned, set events nan
     if isempty(fieldnames(Info))
-        [T,Q,R,Info] = seteventnan;
+        [T,Q,R,Info] = bfra.seteventnan;
     else
 
         % cycle through and remove empty events

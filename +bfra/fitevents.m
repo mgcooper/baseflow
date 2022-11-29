@@ -47,7 +47,8 @@ fitopts  = struct(); % removed fitopts from parser, it may mess up autounpacking
 
    % initialize output structure and output arrays
    K              =  initK(10000);
-   Fits.T         =  T;
+   Fits.T         =  T;                   % NOTE: these are event-times, not T
+   Fits.Q         =  Q;                   % detected event-Q
    Fits.t         =  nan(size(Q));        % fitted t
    Fits.q         =  nan(size(Q));        % fitted Q
    Fits.r         =  nan(size(Q));        % rain
@@ -60,6 +61,8 @@ fitopts  = struct(); % removed fitopts from parser, it may mess up autounpacking
 %-------------------------------------------------------------------------------
 % compute the recession constants
 %-------------------------------------------------------------------------------
+   
+debugflag = false;
    
 for thisEvent = 1:numEvents
 
@@ -83,7 +86,7 @@ for thisEvent = 1:numEvents
                                     'etsparam',opts.etsparam,           ...
                                     'plotfits',opts.plotfits,           ...
                                     'eventID',datestr(eventDate),       ...
-                                    'ax',ax                             );
+                                    'ax',ax,'flag',debugflag            );
 
    if opts.plotfits == true
       fname = ['dqdt_' opts.gageID];
@@ -154,12 +157,14 @@ function [q,dqdt,dt,tq,nFits,tf] = prepFit(qH,dH,dtH,tH,thisFit,nFits)
       q     = qH{thisFit};
       dqdt  = dH{thisFit};
       dt    = dtH{thisFit};
-      tq    = datenum(tH{thisFit});
+      %tq    = datenum(tH{thisFit});
+      tq    = tH{thisFit};
    else
       q     = qH;
       dqdt  = dH;
       dt    = dtH;
-      tq    = datenum(tH);
+      %tq    = datenum(tH);
+      tq    = tH;
    end
 
    % if no flow was returned, continue

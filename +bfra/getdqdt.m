@@ -45,6 +45,7 @@ addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
 addParameter(p,'gageID',      'none',  @(x) ischar(x)                   );
 addParameter(p,'eventID',     'none',  @(x) ischar(x)                   );
 addParameter(p,'ax',          'none',  @(x) isaxis(x) | ischar(x)       );
+addParameter(p,'flag',        false,   @(x) islogical(x)                );
 
 parse(p,T,Q,R,derivmethod,varargin{:});
 
@@ -55,8 +56,10 @@ fitmethod   = p.Results.fitmethod;
 plotfits    = p.Results.plotfits;
 gageID      = p.Results.gageID;
 eventID     = p.Results.eventID;
+ax          = p.Results.ax;
+flag        = p.Results.flag;
 
-if isdatetime(T); T = datenum(T); end
+% if isdatetime(T); T = datenum(T); end
 %-------------------------------------------------------------------------------
 
    warning off
@@ -72,14 +75,17 @@ if isdatetime(T); T = datenum(T); end
    
 % apply the chosen method to find dQ/dt for the entire event
    [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(T,Q,R,derivmethod,'etsparam',etsparam,...
-                           'vtsparam',vtsparam);
+                           'vtsparam',vtsparam,'flag',flag);
    
 % if we just want dQ/dt and q i.e. no fit, return from here
    if string(fitmethod) == "none"
       varargout{1} = nan; varargout{2} = nan;
       return;
    end
-   
+
+% % Nov 2022 - commented this out to see if it can be removed. I think we're
+% effectively fitting every event twice with this active
+
 % if pickmethod = "none", we don't need anything else so we could stop
 % here, but go ahead and run fitSelector, it will return Info
 

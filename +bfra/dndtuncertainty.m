@@ -27,6 +27,7 @@ elseif nargin == 8
 end
 
 % convert time in days to years
+if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
 T = transpose(year(mean(reshape(T,365,numel(T)/365))));
 
 % define the sensitivity coefficient and dn/dt trend functions

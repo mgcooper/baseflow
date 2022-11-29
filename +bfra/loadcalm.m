@@ -89,9 +89,11 @@ function [Calm,MetaCalm] = loadcalmcurrent(MetaBasin)
    end
    
    % temp hack to check against the og list
-   sites = {'U11A','U11B','U11C','U12A','U12B','U13','U14','U32A','U32B'};
-   keep  = ismember(Calm.Properties.VariableNames,sites);
-   Calm  = Calm(:,keep);
+   if strcmp(MetaBasin.name,'KUPARUK R NR DEADHORSE AK')
+      sites = {'U11A','U11B','U11C','U12A','U12B','U13','U14','U32A','U32B'};
+      keep  = ismember(Calm.Properties.VariableNames,sites);
+      Calm  = Calm(:,keep);
+   end
    
 
 function [Calm,MetaBasin] = loadcalmarchive(MetaBasin)

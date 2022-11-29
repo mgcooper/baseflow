@@ -316,6 +316,7 @@ function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
 warning off
 
 % initial estimates using log-log linear fit
+   ci          =  [nan nan; nan nan];
    ok          =  true;           
    ab0         =  [ones(size(x)) logx]\logy;
    ab0         =  [exp(ab0(1)), ab0(2)];
@@ -482,9 +483,11 @@ warning off
       if strcmp(fselect,'none') && rsq > 0
          
             fselect  =  'linear';
+      elseif rsq < 0
+      % NOTE: nov 2022, i think in some cases we can get here and rsq < 0 so I 
+      % added this option , previously there was no else, just end
+            fselect  =  'none';
       end
-   
-   
 
    switch fselect
 

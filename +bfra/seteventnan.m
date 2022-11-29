@@ -1,4 +1,3 @@
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 function  [T,Q,R,Info] = seteventnan()
     T               = [];
     Q               = [];
@@ -8,8 +7,9 @@ function  [T,Q,R,Info] = seteventnan()
     Info.iconvex    = [];
     Info.icandidate = [];
     Info.ikeep      = [];
-    Info.ifirst     = [];   % first non-nan index
     Info.istart     = [];
     Info.istop      = [];
     Info.runlengths = [];
+    Info.ifirst     = [];  % first non-nan index
+    Info.datalength = [];  % total number of values
 end

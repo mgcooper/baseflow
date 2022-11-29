@@ -26,9 +26,9 @@ function [Bounds,Meta,Poly] = loadbounds(basinname,varargin)
    
    p                = inputParser;
    p.FunctionName   = 'bfra.loadbounds';
-   p.addRequired('basinname',                @(x)ischar(x)  );
-   p.addOptional( 'version',     'current',  validopts      );
-   p.addParameter('projection',  'geo',      validproj      );
+   p.addRequired('basinname',                @(x)ischar(x)|iscell(x) );
+   p.addOptional( 'version',     'current',  validopts               );
+   p.addParameter('projection',  'geo',      validproj               );
    
    parse(p,basinname,varargin{:});
    

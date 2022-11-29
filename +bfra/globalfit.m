@@ -105,6 +105,8 @@ itau     = TauFit.taumask;
 [ahat,ahatLH,xbar,ybar] =  bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
                            'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
 
+% the alternative approach would find a
+                        
 % fit Q0 and Qhat
 %-----------------
 [Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauexp,q,dqdt,tau0,'qtls',Q,'mask',itau);

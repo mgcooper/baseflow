@@ -66,41 +66,49 @@ plotevents  = p.Results.plotevents;
 %-------------------------------------------------------------------------------
     
 % iF is the first non-nan index, to recover indices after removing nans
-   q(q<qmin)   = nan;                      % set values < qmin nan
-   q           = setconstantnan(q,rmax);   % set constant non-nan values nan
-   [t,q,r,iF]  = rmleadingnans(t,q,r);     % remove leading nans 
-   [t,q,r]     = rmtrailingnans(t,q,r);    % remove trailing nans
-   q           = fillnans(q,fmax);         % gap fill missing values
-   q           = smoothflow(q);            % apply a smoothing filter
-    
-    if isempty(q)||sum(~isnan(q))<nmin     % fast exit
-        [T,Q,R,Info] = seteventnan;        % note this returns [] not nan
-    else
-        
-        % call eventfinder either way, then update if pickfits == true
-        [T,Q,R,Info] = bfra.eventfinder(t,q,r,                          ...
-                                          'nmin',        nmin,          ...
-                                          'fmax',        fmax,          ...
-                                          'rmax',        rmax,          ...
-                                          'rmin',        rmin,          ...
-                                          'rmconvex',    rmconvex,      ...
-                                          'rmnochange',  rmnochange,    ...
-                                          'rmrain',      rmrain         );
-        
-        Info         = updateinfo(Info,iF);
+numdata     = numel(t);
+q(q<qmin)   = nan;                      % set values < qmin nan
+q           = setconstantnan(q,rmax);   % set constant non-nan values nan
+[t,q,r,iF]  = rmleadingnans(t,q,r);     % remove leading nans 
+[t,q,r]     = rmtrailingnans(t,q,r);    % remove trailing nans
+q           = fillnans(q,fmax);         % gap fill missing values
+q           = smoothflow(q);            % apply a smoothing filter
 
-        % NOTE: eventpicker doesn't update Info for events that are picked
-        % within an eventfinder event, but only Info.istart is used in the
-        % main algorithm so it is sufficient at this point
-        if pickevents == true
-           [T,Q,R,Info] =  bfra.eventpicker(t,q,r,nmin,Info);
-        elseif plotevents == true
-           Info.hEvents =  bfra.eventplotter(t,q,r,Info,'plotevents',plotevents);
-        end
-    end
+if isempty(q)||sum(~isnan(q))<nmin     % fast exit
+   
+   [T,Q,R,Info] = bfra.seteventnan;   % note this returns [] not nan
+   
+else
+   % call eventfinder either way, then update if pickfits == true
+   [T,Q,R,Info] = bfra.eventfinder(t,q,r,                          ...
+                                    'nmin',        nmin,          ...
+                                    'fmax',        fmax,          ...
+                                    'rmax',        rmax,          ...
+                                    'rmin',        rmin,          ...
+                                    'rmconvex',    rmconvex,      ...
+                                    'rmnochange',  rmnochange,    ...
+                                    'rmrain',      rmrain         );
+
+   Info = updateinfo(Info,iF,numdata);
+
+   % NOTE: eventpicker doesn't update Info for events that are picked
+   % within an eventfinder event, but only Info.istart is used in the
+   % main algorithm so it is sufficient at this point
+   if pickevents == true
+      [T,Q,R,Info] = bfra.eventpicker(t,q,r,nmin,Info);
+   elseif plotevents == true
+      Info.hEvents = bfra.eventplotter(t,q,r,Info,'plotevents',plotevents);
+   end
 end
 
-function Info = updateinfo(Info,ifirst)
+% This effectively eliminates the need for bfra.getevents, but requires
+% modifying the output of this function and dealing with the modifications to
+% inputs t,q,r, meaning Events.t, q,r would be added at the start not here. for
+% now, I am doing this outside of this function.
+% Events = bfra.flattenevents(T,Q,R,t,q,r,Info);
+
+
+function Info = updateinfo(Info,ifirst,numdata)
 
    fields = fieldnames(Info);
    
@@ -110,5 +118,5 @@ function Info = updateinfo(Info,ifirst)
    
    Info.runlengths   = Info.istop - Info.istart + 1;
    Info.ifirst       = ifirst;
+   Info.datalength   = numdata;
    
-end

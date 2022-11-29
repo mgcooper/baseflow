@@ -11,6 +11,11 @@ function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
 %     nmin        =  minimum event length
 % 
 %  See also: getevents, findevents, eventfinder, eventsplitter, eventplotter
+
+% TODO: compare subfunction eventPlotter here to bfra.eventplotter and to
+% versions in dev-bk. Cursory glance - eventPlotter includes option to plot
+% rain, but does not include 3rd subplot of d2q/dt in bfra.eventplotter
+
 %-------------------------------------------------------------------------------
 p              = inputParser;
 p.FunctionName = 'eventpicker';

@@ -26,6 +26,14 @@ function [Events] = getevents(T,Q,R,varargin)
 % 
 % See also findevents
 
+% NOTE: this function is only needed to enforce year-by-year analysis.
+% findevents can be used on a timeseries of any length, but it will return
+% events in cell arrays which can then be flattened and reshaped to match a
+% regular calendar by bfra.flattenevents, rather than reshaping first here.
+% HOWEVER, this function also calls bfra.getdqdt to get a first-order estimate
+% of dqdt for quick plotting of a point cloud fit, for example. But, this should
+% almost surely be eliminated, and the output of this function should be passed
+% to fitdqdt independently of fitevents to get a quick dq/dt .
 
 %------------------------------------------------------------------------------   
 %------------------------------------------------------------------------------
@@ -190,7 +198,14 @@ end
 %==========================================================================
 
 function [T,Q,R,numyears,timestep]  =  prepinput(T,Q,R)
-   
+% PREPINPUT prepare input data - remove leap inds, determine timestep, determine
+% number of years.
+
+% NOTE: this is only needed if we want to enforce year-by-year analysis.
+% findevents can be used on a timeseries of any length, and could then be
+% flattened and reshaped to match some other calendar, rather than doing it
+% first, as in getevents
+
    % convert T to datetime
    if ~isdatetime(T); T =  datetime(T,'ConvertFrom','datenum'); end
    
@@ -213,8 +228,14 @@ function [T,Q,R,numyears,timestep]  =  prepinput(T,Q,R)
       warning('removing leap inds');
       T(hasleap) = []; Q(hasleap) = []; R(hasleap) = [];
    end
+
+   % this is correct
+   numyears = numel(T)/365;
    
-   firstyear   = year(T(1));
-   lastyear    = year(T(end));
-   numyears    = lastyear-firstyear+1;
+% % both of these fail if water years are passed in   
+%    numyears = numel(unique(year(T)));
+   
+%    firstyear   = year(T(1));
+%    lastyear    = year(T(end));
+%    numyears    = lastyear-firstyear+1;
 end

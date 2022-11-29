@@ -26,16 +26,18 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
 
 % input parsing
 %-------------------------------------------------------------------------------
-p = inputParser;
+p              = inputParser;
 p.FunctionName = 'fitdqdt';
+
 addRequired(p,    'T',                 @(x)isnumeric(x)|isdatetime(x));
-addRequired(p,    'Q',                 @(x)isnumeric(x));
-addRequired(p,    'R',                 @(x)isnumeric(x));
-addRequired(p,    'method',            @(x)ischar(x));
-addParameter(p,   'etsparam'  ,0.2,    @(x)isnumeric(x));   % default=recommended 20%
-addParameter(p,   'vtsparam', 1,       @(x)isnumeric(x));     % vts min flow
-addParameter(p,   'fitab',    false,   @(x)islogical(x));
-addParameter(p,   'plotfit',  false,   @(x)islogical(x));
+addRequired(p,    'Q',                 @(x)isnumeric(x)  );
+addRequired(p,    'R',                 @(x)isnumeric(x)  );
+addRequired(p,    'method',            @(x)ischar(x)     );
+addParameter(p,   'etsparam'  ,0.2,    @(x)isnumeric(x)  );   % default=recommended 20%
+addParameter(p,   'vtsparam', 1,       @(x)isnumeric(x)  );     % vts min flow
+addParameter(p,   'fitab',    false,   @(x)islogical(x)  );
+addParameter(p,   'plotfit',  false,   @(x)islogical(x)  );
+addParameter(p,   'flag',     false,   @(x) islogical(x) );
 
 parse(p,T,Q,R,method,varargin{:});
 
@@ -43,6 +45,7 @@ etsparam = p.Results.etsparam;
 vtsparam = p.Results.vtsparam;
 fitab    = p.Results.fitab;
 plotfit  = p.Results.plotfit;
+flag     = p.Results.flag;
 %-------------------------------------------------------------------------------
 
 %-------------------------------------------------------------------------------
@@ -68,46 +71,21 @@ plotfit  = p.Results.plotfit;
    
    if strcmp(method,'VTS') % variable time step
       
-      % if the input flow is less than the dq limit, decrease the limit
-      if nanmean(Q) < vtsparam                   % could use nanmax
-         vtsparam = nanmin(Q(Q>0))*vtsparam;
-         while nanmean(Q) < vtsparam
-            vtsparam = 0.9*vtsparam;              % decrease by 10%
-         end
-      end
-      
-      for n = 2:length(T)
-         for m = 1:n-1 % go back i-1 steps until the limit criteria is met
-            
-            dq(n)   = Q(n) - Q(n-m);
-            % see notes at end on C criteria from Rupp and Selker
-            
-            % dq is zero or (+), or is (-) and meets the limit criteria
-            if dq(n) >= 0 || round(abs(dq(n)),1) > vtsparam
-               q(n)    = 1/(m+1) * sum(Q(n-m:n));
-               tq(n)   = 1/(m+1) * sum(T(n-m:n)); % new
-               rq(n)   = 1/(m+1) * sum(R(n-m:n)); % new
-               dt(n)   = T(n) - T(n-m);
-               dqdt(n) = dq(n)/dt(n);
-               break
-            else % dqdt is (-) and does not meet the limit criteria
-               dq(n)   = nan; % NOTE: this must be reset to nan
-               continue % continue until it meets the criteria
-            end
-         end
-      end
+      [q,dqdt,dt,tq,rq,dq] = bfra.fitvts(T,Q,R,'vtsparam',vtsparam);
       
    elseif strcmp(method,'ETS')
       
       % this assumes the event t,q are passed in
-      Fit     =   bfra.fitets(T,Q,R,'etsparam',etsparam,'fitab',fitab,'plotfit',plotfit);
-      q       =   Fit.T.q;
-      dq      =   Fit.T.dq;
-      dt      =   Fit.T.dt;
-      dqdt    =   Fit.T.dqdt;
-     %rq      =   Fit.T.rq;
-      tq      =   Fit.T.Time;
-      r       =   Fit.T.R;
+      [q,dqdt,dt,tq,rq,dq] = bfra.fitets(T,Q,R,'etsparam',etsparam);
+      
+%       Fit     =   bfra.fitets(T,Q,R,'etsparam',etsparam,'fitab',fitab,'plotfit',plotfit);
+%       q       =   Fit.T.q;
+%       dq      =   Fit.T.dq;
+%       dt      =   Fit.T.dt;
+%       dqdt    =   Fit.T.dqdt;
+%      %rq      =   Fit.T.rq;
+%       tq      =   Fit.T.Time;
+%       r       =   Fit.T.R;
       
       
       % Constant time step, 6 numerical derivatives (Thomas et al 2015)
