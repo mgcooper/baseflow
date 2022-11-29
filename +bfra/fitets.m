@@ -141,9 +141,11 @@ function [q,dqdt,dt,tq,rq,dq,r2] = fitdQdt(T,Q,R,etsparam)
    dqdt(inan) = NaN;
    
    % retime to the original timestep
-   q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);
-   dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
    dq    = dqdt.*dt; % need to check this, right now it isn't used anywhere
+   q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);
+   dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
+   dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+   tq    = T;
    
    % figure; plot(t,q); hold on; plot(tets,qets)
    

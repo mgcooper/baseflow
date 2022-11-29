@@ -78,6 +78,8 @@ flag     = p.Results.flag;
       % this assumes the event t,q are passed in
       [q,dqdt,dt,tq,rq,dq] = bfra.fitets(T,Q,R,'etsparam',etsparam);
       
+      r = R; % temp patch
+      
 %       Fit     =   bfra.fitets(T,Q,R,'etsparam',etsparam,'fitab',fitab,'plotfit',plotfit);
 %       q       =   Fit.T.q;
 %       dq      =   Fit.T.dq;
