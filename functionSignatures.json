@@ -58,7 +58,9 @@
          {"name":"D",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"L",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"method",    "kind": "required",  "type": ["char", "choices={'mean','median','envelope'}"],"default":"'median'","purpose":"Option"},
-         {"name":"refqtls",   "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"earlyqtls", "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"lateqtls",  "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"userab",    "kind": "namevalue", "type": ["vector","double"]},
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]},
          {"name":"theta",     "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"isflat",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
@@ -257,15 +259,12 @@
          {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
          {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
          {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
-         {"name":"fitnmin",      "kind": "namevalue", "type": ["scalar","double"],"default":"4"},
          {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
          {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"savefitplots", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"saveplots",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
-         {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
-         {"name":"drainagearea", "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"gageID",       "kind": "namevalue", "type": ["char"] }
+         {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"}
       ],
 
       "outputs":
@@ -584,15 +583,12 @@
                   {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
                   {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
                   {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
-                  {"name":"fitnmin",      "kind": "namevalue", "type": ["scalar","double"],"default":"4"},
                   {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
                   {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
                   {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-                  {"name":"savefitplots", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"saveplots",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
                   {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
-                  {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
-                  {"name":"drainagearea", "kind": "namevalue", "type": ["scalar","double"]},
-                  {"name":"gageID",       "kind": "namevalue", "type": ["char"] }
+                  {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"}
                ],
                [
                   {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
