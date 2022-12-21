@@ -28,7 +28,13 @@ end
 
 % convert time in days to years
 if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
+[~,T] = padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), ...
+   datenum(year(T(end)),12,31),1);
 T = transpose(year(mean(reshape(T,365,numel(T)/365))));
+
+if numel(T) ~= numel(Qb)
+   error('size T must match size Qb')
+end
 
 % define the sensitivity coefficient and dn/dt trend functions
 Flam        = @(tau,phi,b) tau./(phi.*(4-2.*b)); 
@@ -55,8 +61,9 @@ bhat        = GlobalFit.b;
 PhiFit      = bfra.phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,false);
 % the sample populations of tau, phi, and Nstar
 
-b           = [K.b]';
-tau         = [K.tauH]';
+[~,~,~,~,G] = bfra.eventtau(K,Fits,Fits,'usefits',true,'aggfunc','max');
+tau         = G.tau; 
+b           = K.b;
 Np1         = 1./(4-2.*b);
 phi1        = PhiFit.phidist(:,1);
 phi2        = PhiFit.phidist(:,2);
