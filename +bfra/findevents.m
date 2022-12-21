@@ -1,11 +1,11 @@
-function [T,Q,R,Info] = findevents(t,q,r,varargin)
-%FINDEVENTS returns flow Q and time T values of each individual recession event,
+function Events = findevents(T,Q,R,varargin)
+%FINDEVENTS returns flow q and time t values of each individual recession event,
 %and info about the applied filters 
 % 
 % Required inputs:
-%  t           =  time
-%  q           =  flow (m3/time)
-%  r           =  rain (mm/time)
+%  T           =  time
+%  Q           =  flow (m3/time)
+%  R           =  rain (mm/time)
 % 
 % Optional name-value inputs:
 %  opts        =  (optional) structure containing the following fields:
@@ -34,22 +34,22 @@ p                 = inputParser;
 p.FunctionName    = 'findevents';
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
 
-addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)  );
-addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
-addRequired(p, 'r',                  @(x) isnumeric(x)                  );
-addParameter(p,'qmin',        0,     @(x) isnumeric(x) & isscalar(x)  );
+addRequired(p, 'T',                  @(x) isnumeric(x) | isdatetime(x)  );
+addRequired(p, 'Q',                  @(x) isnumeric(x) & numel(x)==numel(T) );
+addRequired(p, 'R',                  @(x) isnumeric(x)                  );
+addParameter(p,'qmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
 addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
 addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
 addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
 addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'cmax',        2,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'cmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
 addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
 addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
 addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
 addParameter(p,'pickevents',  false, @(x) islogical(x) & isscalar(x)  );
 addParameter(p,'plotevents',  false, @(x) islogical(x) & isscalar(x)  );
 
-parse(p,t,q,r,varargin{:});
+parse(p,T,Q,R,varargin{:});
 
 qmin        = p.Results.qmin;
 nmin        = p.Results.nmin;
@@ -64,23 +64,27 @@ pickevents  = p.Results.pickevents;
 plotevents  = p.Results.plotevents;
 
 %-------------------------------------------------------------------------------
-    
-% iF is the first non-nan index, to recover indices after removing nans
-numdata     = numel(t);
-q(q<qmin)   = nan;                      % set values < qmin nan
-q           = setconstantnan(q,rmax);   % set constant non-nan values nan
-[t,q,r,iF]  = rmleadingnans(t,q,r);     % remove leading nans 
-[t,q,r]     = rmtrailingnans(t,q,r);    % remove trailing nans
-q           = fillnans(q,fmax);         % gap fill missing values
-q           = smoothflow(q);            % apply a smoothing filter
 
-if isempty(q)||sum(~isnan(q))<nmin     % fast exit
-   
-   [T,Q,R,Info] = bfra.seteventnan;   % note this returns [] not nan
+% save the original lists
+Events.T = T;
+Events.Q = Q;
+Events.R = R;
+
+% iF is the first non-nan index, to recover indices after removing nans
+numdata     = numel(T);
+Q(Q<qmin)   = nan;                      % set values < qmin nan
+Q           = setconstantnan(Q,rmax);   % set constant non-nan values nan
+[T,Q,R,iF]  = rmleadingnans(T,Q,R);     % remove leading nans 
+[T,Q,R]     = rmtrailingnans(T,Q,R);    % remove trailing nans
+Q           = fillnans(Q,fmax);         % gap fill missing values
+% Q         = smoothflow(Q);            % apply a smoothing filter
+
+if isempty(Q)||sum(~isnan(Q))<nmin     % fast exit
+   [t,q,r,Info] = bfra.seteventnan;   % note this returns [] not nan
    
 else
    % call eventfinder either way, then update if pickfits == true
-   [T,Q,R,Info] = bfra.eventfinder(t,q,r,                          ...
+   [t,q,r,Info] = bfra.eventfinder(T,Q,R,                          ...
                                     'nmin',        nmin,          ...
                                     'fmax',        fmax,          ...
                                     'rmax',        rmax,          ...
@@ -95,28 +99,25 @@ else
    % within an eventfinder event, but only Info.istart is used in the
    % main algorithm so it is sufficient at this point
    if pickevents == true
-      [T,Q,R,Info] = bfra.eventpicker(t,q,r,nmin,Info);
+      [t,q,r,Info] = bfra.eventpicker(T,Q,R,nmin,Info);
    elseif plotevents == true
-      Info.hEvents = bfra.eventplotter(t,q,r,Info,'plotevents',plotevents);
+      Info.hEvents = bfra.eventplotter(T,Q,R,Info,'plotevents',plotevents);
    end
 end
 
-% This effectively eliminates the need for bfra.getevents, but requires
-% modifying the output of this function and dealing with the modifications to
-% inputs t,q,r, meaning Events.t, q,r would be added at the start not here. for
-% now, I am doing this outside of this function.
-% Events = bfra.flattenevents(T,Q,R,t,q,r,Info);
+% This completes the elimination of bfra.getevents
+[Events.t,Events.q,Events.r,Events.tag] = bfra.flattenevents(t,q,r,Info);
 
 
 function Info = updateinfo(Info,ifirst,numdata)
 
-   fields = fieldnames(Info);
-   
-   for m = 1:numel(fields)
-      Info.(fields{m}) = Info.(fields{m}) + ifirst - 1;
-   end
-   
-   Info.runlengths   = Info.istop - Info.istart + 1;
-   Info.ifirst       = ifirst;
-   Info.datalength   = numdata;
+fields = fieldnames(Info);
+
+for m = 1:numel(fields)
+   Info.(fields{m}) = Info.(fields{m}) + ifirst - 1;
+end
+
+Info.runlengths   = Info.istop - Info.istart + 1;
+Info.ifirst       = ifirst;
+Info.datalength   = numdata;
    
