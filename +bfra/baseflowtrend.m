@@ -39,6 +39,9 @@ showfig  = p.Results.showfig;
 
 %-------------------------------------------------------------------------------
 
+[Q,t] = padtimeseries(Q,t,datenum(year(t(1)),1,1),datenum(year(t(end)),12,31),1);
+[Q,t] = rmleapinds(Q,t);
+
 % convert the flow from m3/d posted daily to cm/d posted annually
 if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end
 t = transpose(year(mean(reshape(t,365,numel(t)/365))));
