@@ -3,6 +3,10 @@ function [ab,yfit,xfit] = olsfit(x,y,varargin)
 
 % NOTE: output is YFIT then XFIT,
 
+if isdatetime(x)
+   x = datenum(x);
+end
+
 % option to fit log models
 if nargin == 2
    logopt = 'linear';
@@ -21,6 +25,12 @@ y  = y(:);  % only single linear regression is supported
 x(naninds)  = [];
 
 [x,y] = prepareCurveData(x,y);
+
+if all(isempty(x)) || all(isempty(y)) || all(isnan(x)) || all(isnan(y))
+   ab = [nan nan]; xfit = nan;   yfit = nan;
+   return
+end
+
 xfit = linspace(0.98*min(x),1.02.*max(x),100);
 
 switch logopt
