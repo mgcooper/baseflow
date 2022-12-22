@@ -1,4 +1,3 @@
-
 function PhiFit = phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)
 
 % phid  = bfra.eventphi(K,Fits,A,D,[],bhat);

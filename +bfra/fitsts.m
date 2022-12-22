@@ -59,5 +59,6 @@ switch method
 %       dt          = (T(2)-T(1)).*ones(size(T));
 %       tq          = T;
 
-   end
+end
+
    

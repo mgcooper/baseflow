@@ -44,6 +44,13 @@
    {
       "inputs":
       [
+         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.basinlist"]}
+      ]
+   },
+   "bfra.stationname":
+   {
+      "inputs":
+      [
          {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.stationlist"]}
       ]
    },
@@ -181,9 +188,9 @@
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",   "type":[["double","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",   "type":["double","vector"]},
-         {"name":"r",            "kind":"required",   "type":["double"]},
+         {"name":"T",            "kind":"required",   "type":[["double","vector"],["datetime","vector"]]},
+         {"name":"Q",            "kind":"required",   "type":["double","vector"]},
+         {"name":"R",            "kind":"required",   "type":["double"]},
          {"name":"qmin",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"nmin",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"fmax",         "kind":"namevalue",  "type":["double","scalar"]},
@@ -412,6 +419,17 @@
 
       ]
    },
+   "bfra.loadflow":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra_stationlist"]},
+         {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
+         {"name":"gapfill",   "kind": "namevalue",  "type":["logical"],"purpose":"Option"}
+      ]
+   },
    "bfra.loadghcnd":
    {
       "inputs":
@@ -427,7 +445,44 @@
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
+      ]
+   },
+   "bfra.loadprops":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
+      ]
+   },
+   "bfra.mapbasins":
+   {
+      "inputs":
+      [
+         {"name":"Basins",    "kind": "required",  "type": ["struct"]},
+         {"name":"Meta",      "kind": "namevalue", "type": ["table"]},
+         {"name":"varname",   "kind": "namevalue", "type":"choices=fieldnames(basins)"},
+         {"name":"cbartitle", "kind": "namevalue", "type": ["char"]},
+         {"name":"latlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"lonlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"facealpha", "kind": "namevalue", "type": ["numeric"]},
+         {"name":"proj",      "kind": "namevalue", "type": ["char","choices={'stereo','lambert'}"]},
+         {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
+      ]
+   },
+   "bfra.mapgages":
+   {
+      "inputs":
+      [
+         {"name":"lat",       "kind": "required",  "type": ["numeric"]},
+         {"name":"lon",       "kind": "required",  "type": ["numeric"]},
+         {"name":"cvar",      "kind": "namevalue", "type": ["numeric"]},
+         {"name":"cbartitle", "kind": "namevalue", "type": ["char"]},
+         {"name":"latlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"lonlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
       ]
    },
    "bfra.plfitb":
@@ -528,6 +583,16 @@
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]},
          {"name":"refqtls",   "kind": "namevalue", "type": ["vector","double"]},
          {"name":"bci",       "kind": "namevalue", "type": ["vector","double"]}
+      ]
+   },
+   "bfra.prepalttrend":
+   {
+      "inputs":
+      [
+         {"name":"q",         "kind": "required",  "type": ["vector","double"]},
+         {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
+         {"name":"weights",   "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"mask",      "kind": "namevalue", "type": ["logical"]}
       ]
    },
    "bfra.prepfits":

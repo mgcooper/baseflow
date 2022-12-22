@@ -90,15 +90,12 @@ switch type
       addParameter(p,   'derivmethod', 'ETS',      @(x) ischar(x)             );
       addParameter(p,   'fitmethod',   'nls',      @(x) ischar(x)             );
       addParameter(p,   'fitorder',    'free',     @(x) ischar(x)|isnumeric(x));
-      addParameter(p,   'fitnmin',     4,          @(x) isnumericscalar(x)    );
       addParameter(p,   'pickfits',    false,      @(x) islogicalscalar(x)    );
       addParameter(p,   'pickmethod',  'none',     @(x) ischar(x)             );
       addParameter(p,   'plotfits',    false,      @(x) islogicalscalar(x)    );
-      addParameter(p,   'savefitplots',false,      @(x) islogicalscalar(x)    );
+      addParameter(p,   'saveplots',   false,      @(x) islogicalscalar(x)    );
       addParameter(p,   'etsparam',    0.2,        @(x) isnumericscalar(x)    );
       addParameter(p,   'vtsparam',    1.0,        @(x) isnumericscalar(x)    );
-      addParameter(p,   'drainagearea',nan,        @(x) isnumericscalar(x)    );
-      addParameter(p,   'gageID',      'none',     @(x) ischar(x)             );
       
    % global fit - input to bfra.globalfit
    case 'globalfit'
