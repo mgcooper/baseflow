@@ -1,7 +1,7 @@
 function h = trendplot(t,y,varargin)
    
 %-------------------------------------------------------------------------------
-   p                 = MipInputParser;
+   p                 = magicParser;
    p.FunctionName    = 'trendplot';
    p.PartialMatching = true;
    
