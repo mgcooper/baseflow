@@ -2,7 +2,7 @@ function Setup()
 % SETUP install the toolbox, set paths etc.
 
 % temporarily turn off warnings about paths not already being on the path
-% warning off
+warning off
 
 % Get the path to this file, in case Setup is run from some other folder. More
 % robust than pwd(), but assumes the directory structure has not been modified.

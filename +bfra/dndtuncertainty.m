@@ -119,143 +119,145 @@ sig_lamda   = sqrt(J*V*J');
 %-------------------------------------------------------------------------------
 
 if testflag == true
-
-% Define symbols, setup matrices, etc.
-
-% FsigX is the standard uncertainty formula for four variables: tau, phi, b,
-% dq/dt. 
-
-% FsigX2 is for two variables: lambda and dq/dt, so it uses Flambda(X) within
-% the function to compute the value of lambda, but accepts the scalar values for
-% dq/dt (Fx2) and sig_dq/dt (sig_x2). It would be clearer to replace this with
-% the non-vector valued version, because this is just used to combine the lambda
-% uncertainty from worstcase with the linear regression dq/dt uncertainty.
-
-% Methods that use Fdndt require the same format that is used in the main
-% function, so it is not redefined here
-
-sympref('FloatingPointOutput',true);
-syms tausym phisym bsym Qsym
-
-% define vector valued functions
-FsigX    = @(X,Fx,sigX) Fx*sqrt((sigX(1)/X(1))^2+(sigX(2)/X(2))^2+ ...
-                        (sigX(3)/X(3))^2+(sigX(4)/X(4))^2);
-FsigX2   = @(X,Fx,Fx1,sig_x1,Fx2,sig_x2) Fx(X)*sqrt((sig_x1/Fx1(X))^2+ ...
-                        (sig_x2/Fx2)^2);
-FlamX    = @(X) X(1)./(X(2).*(4-2.*X(3)));            % lambda
-FdndtX   = @(X) X(1)./(X(2).*(4-2.*X(3))).*X(4);      % dn/dt
-Fsym     = tausym./(phisym.*(4-2.*bsym)).*Qsym;       % dn/dt
-% Flam     = tausym./(phisym.*(4-2.*bsym));             % lambda for f5
-Xsym     = [tausym phisym bsym Qsym];
-X        = [tauhat;phihat;bhat;dbfdt]; %[tau,phi,b];
-sigX     = [sig_tau;sig_phi;sig_b;sig_dbfdt];
-
-% setup jacobian and covariance matrices (need the sample populations)
-dqdtv    = dbfdt.*ones(size(tau)); % dq/dt vector
-J        = [dndt./tauhat, dndt./phihat, dndt./Nhat, dndt./dbfdt]; % jacobian
-u        = [sig_tau, sig_phi, sig_Np1, sig_dbfdt]; % note: sig_Np1 not sig_b
-V        = corr([tau,phi,Np1,dqdtv]); % covariance matrix 
-corrX    = corr([tau,phi,Np1,dqdtv]);
-
-% -----------------------------------------------------------------------------
-
-casenames = {'inline w/o correlation','PropError w/o correlation', ...
-   'propUncertSym w/o correlation','worstcase w/o correlation',...
-   'inline w/correlation','propUncertSym w/ correlation', ...
-   'propUncertCD w/ correlation','worstcase w/correlation',...
-   'error propagation'};
-   
-% WITHOUT CORRELATION
-% -------------------
-
-% METHOD 1: simple, uncorrelated errors (ends up close to PropError below)
-val(1)   = dndt;
-sig(1)   = FsigX(X,dndt,sigX); % also: sig = sqrt(sum((J.*u).^2))
-
-% METHOD 2: PropError without correlated errors
-out      = PropError(Fsym,Xsym,X',sigX');
-val(2)   = out{1,1};
-sig(2)   = out{1,3};
-% out = PropError(Flam,Xsym(1:3),X(1:3)',sigX(1:3)'); % lambda
-
-% METHOD 3: propUncert without correlated errors
-[sig(3),val(3)] = propUncertSym(Fsym,Xsym,X',sigX');
-
-% METHOD 4: 'worstcase' without correlated errors
-[~,~,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H
-sig_lam     = mean([H-M,M-L]);                     % lambda absolute uncertainty
-val(4)      = M*dbfdt;
-sig(4)      = FsigX2(X,FdndtX,FlamX,sig_lam,dbfdt,sig_dbfdt);
-
-% for reference, compare what worstcase and sig_lam above do to expicit versions:
-% [sig(8)  dndt*sqrt((sig_lam/Flambda(X))^2 + (sig_dbfdt/dbfdt)^2)]
-% [sig_lam lambda*sqrt((sig_lam/Flambda(X))^2)]
-
-% if the first two outputs of worstcase are returned, this shows what they mean:
-% [v1,v2,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H
-% [Flambda(v1) L]
-% [Flambda(v2) H]
-
-% WITH CORRELATION
-% ----------------
-
-% METHOD 5: correlated errors (need the jacobian)
-val(5)   = dndt;
-sig(5)   = sqrt(J*(V.*u.*u')*J');
-
-% METHOD 6: propUncert with correlated errors
-[sig(6),val(6)] = propUncertSym(Fsym,Xsym,X',sigX',corrX);
-
-% METHOD 7: propUncertCD with correlated errors (central difference approx) 
-[sig(7),val(7)] = propUncertCD(FdndtX,X,sigX,corrX);
-
-% METHOD 8: 'worstcase' with correlated errors
-[~,~,L,M,H] = worstcase(FdndtX,X,sigX);
-val(8)      = M;
-sig(8)      = mean([H-M,M-L]);      % absolute uncertainty
-            
-
-% METHOD 9: error_propagation (documentation isn't clear and code style is
-% unfamiliar so i am not certain if correlation is included)
-[val(9),sig(9)] = error_propagation(Fdndt,tauhat,phihat,bhat,dbfdt,sig_tau,...
-   sig_phi,sig_b,sig_dbfdt);
-
-
-% SEE THE RESULTS
-%----------------------
-
-% print the value returned by the main function:
-fprintf(['\nbfra:\nF(x) = %.2f ' char(177) ' %.3f (' num2str(1-alpha) ...
-   '%% CI) \n'],dndt,sig_dndt);
-
-for n = 1:numel(casenames)
-
-   fprintf(['\n' casenames{n} ':\n F(x) = %.2f ' char(177) ' %.3f (' ...
-      num2str(1-alpha) '%% CI) \n'],val(n),sig(n));
+   warning('method comparison not currently supported')
 end
 
-end
-
-% % this is the correlated errors case for lambda
-% J           = [dndt./tauhat, dndt./phihat, dndt./Nhat ];
-% u           = [sig_tau, sig_phi, sig_Np1];
-% V           = corr([tau,phi,Np1]);
-% sig_lam  = sqrt(J*(V.*u.*u')*J');         % this is the stdv of lambda
-% sigf2       = dndt*sqrt((sig_lam/lambda)^2 + (sig_dbfdt/dbfdt)^2) % 0.62 cm/yr
-
-% this was after propUncertSym, in case the varnanmes matter. at this point i
-% think i noticed the correlation doesn't change the uncertainty by much so i
-% probably jus twanted to also show it doesn't change the uncertainty on lambda
-% by much 
-% % this shows that the correlation also doesn't change sig_lambda
-% Fsym        = tausym./(phisym.*(4-2.*bsym)); 
-% Xsym        = [tausym phisym bsym];
-% X           = [tauhat phihat bhat]; %[tau,phi,b];
-% sigX        = [sig_tau sig_phi sig_b];
-% corrX       = corr([tau,phi,Np1]);
-% % sig_lambda  = PropError(Fsym,Xsym,X,sigX)
-% % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX)
-% % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX,corrX)
-
-
-
+% % Define symbols, setup matrices, etc.
+% 
+% % FsigX is the standard uncertainty formula for four variables: tau, phi, b,
+% % dq/dt. 
+% 
+% % FsigX2 is for two variables: lambda and dq/dt, so it uses Flambda(X) within
+% % the function to compute the value of lambda, but accepts the scalar values for
+% % dq/dt (Fx2) and sig_dq/dt (sig_x2). It would be clearer to replace this with
+% % the scalar valued version, because this is just used to combine the lambda
+% % uncertainty from worstcase with the linear regression dq/dt uncertainty.
+% 
+% % Methods that use Fdndt require the same format that is used in the main
+% % function, so it is not redefined here
+% 
+% sympref('FloatingPointOutput',true);
+% syms tausym phisym bsym Qsym
+% 
+% % define vector valued functions
+% FsigX    = @(X,Fx,sigX) Fx*sqrt((sigX(1)/X(1))^2+(sigX(2)/X(2))^2+ ...
+%                         (sigX(3)/X(3))^2+(sigX(4)/X(4))^2);
+% FsigX2   = @(X,Fx,Fx1,sig_x1,Fx2,sig_x2) Fx(X)*sqrt((sig_x1/Fx1(X))^2+ ...
+%                         (sig_x2/Fx2)^2);
+% FlamX    = @(X) X(1)./(X(2).*(4-2.*X(3)));            % lambda
+% FdndtX   = @(X) X(1)./(X(2).*(4-2.*X(3))).*X(4);      % dn/dt
+% Fsym     = tausym./(phisym.*(4-2.*bsym)).*Qsym;       % dn/dt
+% % Flam     = tausym./(phisym.*(4-2.*bsym));             % lambda for f5
+% Xsym     = [tausym phisym bsym Qsym];
+% X        = [tauhat;phihat;bhat;dbfdt]; %[tau,phi,b];
+% sigX     = [sig_tau;sig_phi;sig_b;sig_dbfdt];
+% 
+% % setup jacobian and covariance matrices (need the sample populations)
+% dqdtv    = dbfdt.*ones(size(tau)); % dq/dt vector
+% J        = [dndt./tauhat, dndt./phihat, dndt./Nhat, dndt./dbfdt]; % jacobian
+% u        = [sig_tau, sig_phi, sig_Np1, sig_dbfdt]; % note: sig_Np1 not sig_b
+% V        = corr([tau,phi,Np1,dqdtv]); % covariance matrix 
+% corrX    = corr([tau,phi,Np1,dqdtv]);
+% 
+% % -----------------------------------------------------------------------------
+% 
+% casenames = {'inline w/o correlation','PropError w/o correlation', ...
+%    'propUncertSym w/o correlation','worstcase w/o correlation',...
+%    'inline w/correlation','propUncertSym w/ correlation', ...
+%    'propUncertCD w/ correlation','worstcase w/correlation',...
+%    'error propagation'};
+%    
+% % WITHOUT CORRELATION
+% % -------------------
+% 
+% % METHOD 1: simple, uncorrelated errors (ends up close to PropError below)
+% val(1)   = dndt;
+% sig(1)   = FsigX(X,dndt,sigX); % also: sig = sqrt(sum((J.*u).^2))
+% 
+% % METHOD 2: PropError without correlated errors
+% out      = PropError(Fsym,Xsym,X',sigX');
+% val(2)   = out{1,1};
+% sig(2)   = out{1,3};
+% % out = PropError(Flam,Xsym(1:3),X(1:3)',sigX(1:3)'); % lambda
+% 
+% % METHOD 3: propUncert without correlated errors
+% [sig(3),val(3)] = propUncertSym(Fsym,Xsym,X',sigX');
+% 
+% % METHOD 4: 'worstcase' without correlated errors
+% [~,~,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H
+% sig_lam     = mean([H-M,M-L]);                     % lambda absolute uncertainty
+% val(4)      = M*dbfdt;
+% sig(4)      = FsigX2(X,FdndtX,FlamX,sig_lam,dbfdt,sig_dbfdt);
+% 
+% % for reference, compare what worstcase and sig_lam above do to expicit versions:
+% % [sig(8)  dndt*sqrt((sig_lam/Flambda(X))^2 + (sig_dbfdt/dbfdt)^2)]
+% % [sig_lam lambda*sqrt((sig_lam/Flambda(X))^2)]
+% 
+% % if the first two outputs of worstcase are returned, this shows what they mean:
+% % [v1,v2,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H
+% % [Flambda(v1) L]
+% % [Flambda(v2) H]
+% 
+% % WITH CORRELATION
+% % ----------------
+% 
+% % METHOD 5: correlated errors (need the jacobian)
+% val(5)   = dndt;
+% sig(5)   = sqrt(J*(V.*u.*u')*J');
+% 
+% % METHOD 6: propUncert with correlated errors
+% [sig(6),val(6)] = propUncertSym(Fsym,Xsym,X',sigX',corrX);
+% 
+% % METHOD 7: propUncertCD with correlated errors (central difference approx) 
+% [sig(7),val(7)] = propUncertCD(FdndtX,X,sigX,corrX);
+% 
+% % METHOD 8: 'worstcase' with correlated errors
+% [~,~,L,M,H] = worstcase(FdndtX,X,sigX);
+% val(8)      = M;
+% sig(8)      = mean([H-M,M-L]);      % absolute uncertainty
+%             
+% 
+% % METHOD 9: error_propagation (documentation isn't clear and code style is
+% % unfamiliar so i am not certain if correlation is included)
+% [val(9),sig(9)] = error_propagation(Fdndt,tauhat,phihat,bhat,dbfdt,sig_tau,...
+%    sig_phi,sig_b,sig_dbfdt);
+% 
+% 
+% % SEE THE RESULTS
+% %----------------------
+% 
+% % print the value returned by the main function:
+% fprintf(['\nbfra:\nF(x) = %.2f ' char(177) ' %.3f (' num2str(1-alpha) ...
+%    '%% CI) \n'],dndt,sig_dndt);
+% 
+% for n = 1:numel(casenames)
+% 
+%    fprintf(['\n' casenames{n} ':\n F(x) = %.2f ' char(177) ' %.3f (' ...
+%       num2str(1-alpha) '%% CI) \n'],val(n),sig(n));
+% end
+% 
+% end
+% 
+% % % this is the correlated errors case for lambda
+% % J           = [dndt./tauhat, dndt./phihat, dndt./Nhat ];
+% % u           = [sig_tau, sig_phi, sig_Np1];
+% % V           = corr([tau,phi,Np1]);
+% % sig_lam  = sqrt(J*(V.*u.*u')*J');         % this is the stdv of lambda
+% % sigf2       = dndt*sqrt((sig_lam/lambda)^2 + (sig_dbfdt/dbfdt)^2) % 0.62 cm/yr
+% 
+% % this was after propUncertSym, in case the varnanmes matter. at this point i
+% % think i noticed the correlation doesn't change the uncertainty by much so i
+% % probably jus twanted to also show it doesn't change the uncertainty on lambda
+% % by much 
+% % % this shows that the correlation also doesn't change sig_lambda
+% % Fsym        = tausym./(phisym.*(4-2.*bsym)); 
+% % Xsym        = [tausym phisym bsym];
+% % X           = [tauhat phihat bhat]; %[tau,phi,b];
+% % sigX        = [sig_tau sig_phi sig_b];
+% % corrX       = corr([tau,phi,Np1]);
+% % % sig_lambda  = PropError(Fsym,Xsym,X,sigX)
+% % % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX)
+% % % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX,corrX)
+% 
+% 
+% 
