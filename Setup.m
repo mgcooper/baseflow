@@ -1,9 +1,10 @@
-function Setup()
+function Setup(varargin)
 % SETUP install the toolbox, set paths etc.
 
 % temporarily turn off warnings about paths not already being on the path
-% warning off
+warning off
 
+%% add paths
 % Get the path to this file, in case Setup is run from some other folder. More
 % robust than pwd(), but assumes the directory structure has not been modified.
 thisfile = mfilename('fullpath');
@@ -27,7 +28,14 @@ rmpath(genpath([thispath filesep '.git*']));
 % savepath;
 % for now - let the user decide
 
-% warning on
+%% resolve dependencies
+
+% TODO
+
+%% final steps
+
+% turn warning back on
+warning on
 
 % display install message
 fprintf('\n * baseflow recession analysis activated *\n\n');

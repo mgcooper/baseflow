@@ -7,6 +7,11 @@ function [q,dqdt,dt,tq,rq,dq] = fitcts(T,Q,R,varargin)
 % forward or backward, I'll need to adjust findevents to return a
 % longer timeseries
 
+method = varargin{1};
+
+% prep for fitting
+T = T(:); Q = Q(:); R = R(:);
+
 % offset vectors to compute derivatives
 Qi      = Q;
 Qim1    = [nan; Qi(1:end-1)];       % i minus 1
@@ -61,3 +66,5 @@ switch method
       tq  = Tctr;
 end
 dqdt = dq./dt;
+
+rq = []; % TODO

@@ -1,5 +1,5 @@
 function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
-%getdqdt Numerical estimation of the time derivative of discharge dQ/dt
+%GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
 %using variable time stepping, exponential time stepping, or one of six
 %standard numerical derivatives given in Thomas et al. 2015, Table 2
 % 
@@ -43,6 +43,7 @@ addRequired(p, 'R',                    @(x) isnumeric(x)                );
 addRequired(p, 'derivmethod',          @(x) ischar(x)                   );
 addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
 addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'ctsmethod',   'B1',    @(x) ischar(x)                   );
 addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
 addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
 addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
@@ -54,6 +55,7 @@ parse(p,T,Q,R,derivmethod,varargin{:});
 
 vtsparam    = p.Results.vtsparam;
 etsparam    = p.Results.etsparam;
+ctsmethod   = p.Results.ctsmethod;
 pickmethod  = p.Results.pickmethod;
 fitmethod   = p.Results.fitmethod;
 plotfits    = p.Results.plotfits;
@@ -75,7 +77,7 @@ switch derivmethod
       
    case 'CTS'  % constant time step
       
-      [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,'method',ctsmethod);
+      [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
       
 end
    
@@ -116,7 +118,7 @@ function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 % dQdt = Picks.dQdt;
 % and so on. But, Picks does not include T, and maybe I wanted to distinguish
 % the og T,Q from the ets/vts fit t,q. 
-% EITHER WAY, after moving getdqdt calls to fitets/fitvts into this function
+% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function
 % abve, I confirmed that things work up to this point meaning I can still
 % select events in plotdqdt and they get sent here, but I think the way i deal
 % wtih retiming in ETS now throws off the istart/stop, so will need to figure

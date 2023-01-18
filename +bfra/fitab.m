@@ -29,9 +29,9 @@ p.StructExpand = false;
 
 addRequired(p, 'q',                          @(x)isnumeric(x)     );
 addRequired(p, 'dqdt',                       @(x)isnumeric(x)     );
-addRequired(p, 'method',                      validmethod          );
+addRequired(p, 'method',                     validmethod          );
 addParameter(p,'weights',  ones(size(q)),    @(x)isnumeric(x)     );
-addParameter(p,'order',    1,                @(x)isnumeric(x)     );
+addParameter(p,'order',    nan,              @(x)isnumeric(x)     );
 addParameter(p,'mask',     true(size(q)),    @(x)islogical(x)     );
 addParameter(p,'quantile', 0.05,             @(x)isnumeric(x)     );
 addParameter(p,'refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
@@ -62,12 +62,12 @@ fitopts  = p.Unmatched;
 
 %-------------------------------------------------------------------------------
 
-[x,y,logx,logy,weights,ok] = bfra.prepfits(q,dqdt, 'weights',weights,...
-   'mask',mask);
+[x,y,logx,logy,weights,ok] = bfra.prepfits( ...
+   q,dqdt,'weights',weights,'mask',mask);
 
 % weights will equal zero anywhere mask is false
 
-if ok == false;
+if ok == false
    Fit = nan; return;
 end
 
@@ -107,7 +107,7 @@ end
 
 
 % NOW THAT FITTING IS DONE, SELECT THE FINAL FIT
-[Fit,ok]   =  evalFit(ab,x,y,ci,ok);
+[Fit,ok] = evalFit(ab,x,y,ci,ok);
 
 if exist('fs','var')
    Fit.fselect = s;
@@ -147,28 +147,32 @@ function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,fitopts)
 % linear model fit in log-log, equivalent to forcing a line of slope 1 through
 % the mean x-y, with option to control the slope using input parameter 'order'
 
-%    % check fitopts
-%       if isfield(fitopts,'order')
-%          if isnumeric(fitopts.order); order = fitopts.order; end
-%       end
+% check fitopts
+if isfield(fitopts,'order')
+   if isnumeric(fitopts.order); order = fitopts.order; end
+end
 
 % apply the mask / weights
-logx        =  logx(weights>0);
-logy        =  logy(weights>0);
+logx = logx(weights>0);
+logy = logy(weights>0);
 
-logx        =  order.*logx;
-[~,~,ci]    =  ttest(-logx,-logy,'Alpha',1-alpha);
+% impose model order if provided
+if ~isnan(order)
+   logx = order.*logx;
+end
+
+[~,~,ci] = ttest(-logx,-logy,'Alpha',1-alpha);
 
 % note: mean(x-y) = mean(x)-mean(y)
-ab          =  [exp(-(mean(logx)-mean(logy))); order];
+ab = [exp(-(mean(logx)-mean(logy))); order];
 
 % transpose ci to be consistent with stats functions
-ci          =  [exp(ci(1)) exp(ci(2)); ab(2), ab(2)];
+ci = [exp(ci(1)) exp(ci(2)); ab(2), ab(2)];
 
 % generic failure check
-ok    =  true;
+ok = true;
 if any(~isreal(ab))
-   ok    =  false;
+   ok = false;
 end
 
 
