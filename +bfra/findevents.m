@@ -1,37 +1,46 @@
-function Events = findevents(T,Q,R,varargin)
-%FINDEVENTS returns flow q and time t values of each individual recession event,
-%and info about the applied filters 
+function Events = getevents(T,Q,R,varargin)
+%GETEVENTS get individual recession events from daily timeseries T, Q, and R.
+%Event discharge, timestamps, and diagnostic info about the events are returned
+%in output structure Events. Note: this function is a wrapper around eventfinder
+%to perform pre- and post-processing and organize all recession events into the
+%Events structure. 
 % 
-% Required inputs:
-%  T           =  time
-%  Q           =  flow (m3/time)
-%  R           =  rain (mm/time)
+%  Syntax
+%     Events = getevents(T,Q,R,varargin)
 % 
-% Optional name-value inputs:
-%  opts        =  (optional) structure containing the following fields:
-%  qmin        =  minimum flow value, below which values are set nan
-%  nmin        =  minimum event length
-%  fmax        =  maximum # of missing values gap-filled
-%  rmax        =  maximum run of sequential constant values
-%  rmin        =  minimum rainfall required to censor flow (mm/day?)
-%  cmax        =  maximum run of sequential convex dQ/dt values
-%  rmconvex    =  remove convex derivatives
-%  rmnochange  =  remove consecutive constant derivates
-%  rmrain      =  remove rainfall
-%  pickevents  =  option to manually pick events
-%  plotevents  =  option to plot picked events
+%  Required inputs:
+%     T = time, nx1 vector of datetimes
+%     Q = flow, nx1 vector of discharge (length/time) (assumed m3/day/day)
+%     R = rain, nx1 vector of rainfall (length/time) (assumed mm/day)
+% 
+%  Optional name-value inputs:
+%     opts        =  (optional) structure containing the following fields:
+%     qmin        =  minimum flow value, below which values are set nan
+%     nmin        =  minimum event length
+%     fmax        =  maximum # of missing values gap-filled
+%     rmax        =  maximum run of sequential constant values
+%     rmin        =  minimum rainfall required to censor flow (mm/day?)
+%     cmax        =  maximum run of sequential convex dQ/dt values
+%     rmconvex    =  remove convex derivatives
+%     rmnochange  =  remove consecutive constant derivates
+%     rmrain      =  remove rainfall
+%     pickevents  =  option to manually pick events
+%     plotevents  =  option to plot picked events
 % 
 % Tip: events are identified by their indices on the t,q,r arrays, so if
 % any filtering is applied prior to passing in the arrays, the data needs
 % to be used in subsequent functions or the indices won't be correct
 % 
-%  See also: getevents, eventsplitter, eventpicker, eventplotter
+%  See also: fitevents, eventfinder, eventsplitter, eventpicker, eventplotter
+% 
+%  Updates
+%  17 Jan: renamed old getevents to wrapevents and old findevents to getevents
 
 %-------------------------------------------------------------------------------
 % input handling
 %-------------------------------------------------------------------------------
 p                 = inputParser;
-p.FunctionName    = 'findevents';
+p.FunctionName    = 'getevents';
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
 
 addRequired(p, 'T',                  @(x) isnumeric(x) | isdatetime(x)  );
@@ -120,4 +129,3 @@ end
 Info.runlengths   = Info.istop - Info.istart + 1;
 Info.ifirst       = ifirst;
 Info.datalength   = numdata;
-   

@@ -1,14 +1,14 @@
-function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
-%GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
+function [q,dqdt,dt,tq,rq,varargout] = fitdqdt(T,Q,R,derivmethod,varargin)
+%fitdqdt Numerical estimation of the time derivative of discharge dQ/dt
 %using variable time stepping, exponential time stepping, or one of six
 %standard numerical derivatives given in Thomas et al. 2015, Table 2
 % 
 %  Syntax
-%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
-%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
-%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
-%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
-%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
+%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(T,Q,R,derivmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'fitwindow',fitwindow)
+%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'fitwindow',fitmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'pickmethod',pickmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'ax',axis_object)
 % 
 %  Required inputs
 %     T     =  time (days)
@@ -18,6 +18,10 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
 % 
 %  Optional name-value pairs
+%     etsparam =  scalar double, parameter that controls window size in ETS method
+%     vtsparam =  scalar double, parameter that controls window size in VTS method
+%     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
+%     plotfit  =  logical, scalar, indicates whether to plot the fit
 % 
 % 
 % 
@@ -30,7 +34,7 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %-------------------------------------------------------------------------------
 % input handling    
 p                 = inputParser;
-p.FunctionName    = 'getdqdt';
+p.FunctionName    = 'fitdqdt';
 p.CaseSensitive   = true;
 
 addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x));

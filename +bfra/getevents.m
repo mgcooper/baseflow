@@ -1,6 +1,10 @@
-function [Events] = getevents(T,Q,R,varargin)
-%GETEVENTS wrapper around bfra.findevents to get recession all recession events
-%for a mulit-year timeseries of T, Q, and R
+function [Events] = wrapevents(T,Q,R,varargin)
+%WRAPEVENTS wrapper around bfra.getevents to get recession all recession events
+%for a mulit-year timeseries of T, Q, and R on an annual basis rather than for
+%all dates in the raw timeseries. NOTE: deprecated, needs updating with new
+%Events=bfra.getevents(...) syntax. Previously bfra.getevents, before the need
+%for this was eliminated by adding call to flattenevents to bfra.findevents and
+%renaming bfra.findevents to bfra.getevents. 
 %
 % 
 % Required inputs:
@@ -39,7 +43,7 @@ function [Events] = getevents(T,Q,R,varargin)
 %------------------------------------------------------------------------------
 
 p              = inputParser;
-p.FunctionName = 'bfra.getevents';
+p.FunctionName = 'bfra.wrapevents';
 p.StructExpand = true;
 
 addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
@@ -132,6 +136,7 @@ for thisYear = 1:numyears      % events for this year at this gage
    thisYearFlow   = Qlist(:,thisYear);
    thisYearRain   = Rlist(:,thisYear);
 
+   % NEEDS TO BE UPDATED WITH NEW EVENTS = BFRA.GETEVENTS(...) SYNTAX
    % get events for this year
    [T,Q,R,Info]   = bfra.findevents(   thisYearTime,                 ...
                                        thisYearFlow,                 ...
