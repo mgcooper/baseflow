@@ -24,7 +24,7 @@ p.FunctionName = 'fitvts';
 addRequired(p, 'T',                 @(x)isnumeric(x)|isdatetime(x));
 addRequired(p, 'Q',                 @(x)isnumeric(x));
 addRequired(p, 'R',                 @(x)isnumeric(x));
-addParameter(p,'vtsparam', 86400,   @(x)isnumeric(x)); % default=1 m3/d
+addParameter(p,'vtsparam', 1,       @(x)isnumeric(x)); % default=1 m3/d
 addParameter(p,'plotfit',  false,   @(x)islogical(x));
 
 parse(p,T,Q,R,varargin{:});
@@ -36,16 +36,13 @@ plotfit  = p.Results.plotfit;
 % the C value should be chosen such that dt(i) = t(i)-t(i-j) <= t(i)/4
 % the limit value is limit = C*(Q(H+e)-Qi)) where H is stage height, e
 % is stage precision, and Qi is the estimated Q. To implement this, I
-% need e and the stage-discharge relation. In lieu, I use a minimum
-% discharge precision of 1 m3/s converted to m3/d
+% need e and the stage-discharge relation.
+
+% prep the time vector
+t = days(T-T(1)+(T(2)-T(1))); % keep og T
 
 % initialize the approximations for dq/dt and Q (and dq and dt)
-q       = nan(size(Q));
-dq      = nan(size(Q));
-dt      = nan(size(Q));
-dqdt    = nan(size(Q));
-tq      = nan(size(Q));
-rq      = nan(size(Q));
+[N,q,dqdt,dq,dt,tq,rq] = bfra.initfit(Q,'eventdqdt');
 
 % if the input flow is less than the dq limit, decrease the limit
 if mean(Q,'omitnan') < vtsparam                   % could use nanmax
@@ -55,23 +52,19 @@ if mean(Q,'omitnan') < vtsparam                   % could use nanmax
    end
 end
 
-% this note was in an older version, not sure if it is relevant: this makes t
-% go from 1:length(q). I commented it out in case we want datenums returned:
-% t = t-t(1)+1;
-
-for n = 2:length(T)
+for n = 2:N
    for m = 1:n-1 % go back i-1 steps until the limit criteria is met
       
-      dq(n)   = Q(n) - Q(n-m);
+      dq(n) = Q(n) - Q(n-m);
       % see notes at end on C criteria from Rupp and Selker
       
       % dq is zero or (+), or is (-) and meets the limit criteria
-      if dq(n) >= 0 || round(abs(dq(n)),1) > vtsparam
-         q(n)    = 1/(m+1) * sum(Q(n-m:n));
-         tq(n)   = 1/(m+1) * sum(T(n-m:n)); % new
-         rq(n)   = 1/(m+1) * sum(R(n-m:n)); % new
-         dt(n)   = T(n) - T(n-m);
-         dqdt(n) = dq(n)/dt(n);
+      if dq(n) >= 0 || round(abs(dq(n))) > vtsparam
+         q(n)     = 1/(m+1) * sum(Q(n-m:n));
+         tq(n)    = mean(T(n-m:n)); % 1/(m+1) * sum(t(n-m:n));
+         rq(n)    = 1/(m+1) * sum(R(n-m:n)); % rain
+         dt(n)    = t(n) - t(n-m);
+         dqdt(n)  = dq(n)/dt(n);
          break
       else % dqdt is (-) and does not meet the limit criteria
          dq(n)   = nan; % NOTE: this must be reset to nan
@@ -79,6 +72,13 @@ for n = 2:length(T)
       end
    end
 end
+
+% retime to the original timestep
+% tq    = T(1) + days(tq);
+% q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);
+% dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
+% dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+tq    = T;
 
 if plotfit == true
    

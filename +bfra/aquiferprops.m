@@ -251,12 +251,36 @@ Props.input = p.Results;
 % three expressions for D:
 %  1. from setting a0Q^b0 = aQ^b where a0 is early time a, b0 = 3, and a/b are  late time a/b. 
 %  2. from setting t=0 in the late-tie expression for q(t)
-%  3. from the code above
+%  3. from the notes above
 % 
-% k is present in all of them, ad phi is probably in 1 and 3, so I need to
+% k is present in all of them, and phi is probably in 1 and 3, so I need to
 % figure out if I can cancel somehow, i.e. find a third equation, and/or use the
 % graphical Q0 solution to get D in terms of k, then plug into the phi method
 % ... note that phi cancels when setting a1 = a2 so that may be the key
+% 
+% The three expressions are:
+% 1. D = ((c1/c2)^((n+2)/(n+3))*Q0/k)^(1/2)
+% 2. D = ( (Q0*(n+3)(n+1))/(4*Bn*L*k*Dd))^(1/2)
+% 3. D = ((fR2/(alate*phi))^(n+2) * ( k*L^2/(2^n*(n+1)*A^(n+3))))^(1/n);
+% 
+% In 1: c1 = fR1/L^2, c2 = fR2*(L^2/(N*A^(n+3)))^(1/(n+2)), N = see RS06 table
+% set a0Q^b0 = aQ^b, sub in c1,c2, and solve for D
+% In 2, I had to derive the form of Eq 8 Troch for RS05 late time: q = Q/(2*L)
+% q = Bn*k*D^2/((n+3)*(n+1)*B*(1+Bn^2/(2*(n+3))*k*D/(phi*B^2)*t)^((n+2)/(n+1)));
+% put a 2*L on top and you get Q. Sub in Dd you get:
+% Q = 2*L*Bn*k*D^2*2*Dd/((n+3)*(n+1)*(1+Bn^2/(2*(n+3))*k*D*4*Dd/phi*t)^((n+2)/(n+1)));
+% fR2 = (n+2)*(B_R2/(n+3))^(1/(n+2))
+% a = phi_2*4*k*D*L^2/((n+1)*phi*A^2)*((n+1)*A/(4*k*D^2*L^2))^((n+2)/(n+1)) 
+% phi_2 = (n+2)*Bn^2/(2*(n+3))*((n+3)/Bn)^((n+2)/(n+1))), Bn = beta((n+2)/(n+3),1/2)
+% set t=0:
+% Q0 = 2*L*Bn*k*D^2*2*Dd/((n+3)*(n+1)) = 4*Bn*L*k*Dd*D^2/((n+3)*(n+1))
+% from which we find:
+% D = (Q0*((n+3)*(n+1))/(4*Bn*L*k*Dd))^(1/2);
+% note that phi is eliminated in this version
+
+% NOTE: the key thing in all of these is correctly equating early and late time
+% so the math matches the graphical solution which is where we get Q0.
+
 
 % ------------------------------------------------------------------------------
 
@@ -316,9 +340,11 @@ Props.input = p.Results;
 % D is in the late-time unlike BS04 and I can use remote sensing or model data
 % to get reference D, ... but then i went ahead with it s o here goes:
 
-% -dQ/dt = a0*Q^b0, a0 = fR1/(k*phi*D^3*L^2)*Q^3
+% -dQ/dt = a0*Q^b0, a0 = fR1/(k*phi*D^3*L^2)*Q^3 = c1/(k*phi*D^3), c1 = fR1/L^2
 % -dQ/dt = a*Q^b, a = 4.804*k^(1/2)*L/(phi*A^(3/2))*Q^b
-% c1 = 
+% UPDATE, line above is BS04 I think, but from whiteboard, RS05 late tiem:
+% -dQ/dt = a*Q^b, a = fR2/phi*(k*L^2/(N*D^n*A^(n+3))^(1/(n+2)) =
+% c2/phi*(k/D^n)^(1/(n+2)), c2 = fR2*(L^2/(N*A^(n+3)))^(1/(n+2)), N = see RS06 table
 
 % to exactly track troch, on the white board right now, I would need to do the
 % hbar integration for RS05 and sub that into the q(t) to get a simpler

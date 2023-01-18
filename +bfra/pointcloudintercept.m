@@ -75,11 +75,17 @@ switch method
          ahat  = 0.99*ahat;
          P     = sum( (ahat.*q(mask).^bhat) > -dqdt(mask) ) / N;
       end
-   case 'cooper'
-%      xbar  = quantile(q,0.95,'Method','approximate');
-%      ybar  = quantile(-dqdt,0.95,'Method','approximate');
-      xbar  = quantile(q(~mask),qtls(1),'Method','approximate');
-      ybar  = quantile(-dqdt(~mask),qtls(2),'Method','approximate');
+   case 'cooper' % only works if b>1 and tau/tau0 are provided
+      
+      % if no tau>tau0 mask is provided, use the 95th pctl for a1
+      if all(mask)
+         xbar  = quantile(q,0.95,'Method','approximate');
+         ybar  = quantile(-dqdt,0.95,'Method','approximate');
+      else
+         % if a mask is provided, use the 50th pctl of tau<tau0
+         xbar  = quantile(q(~mask),qtls(1),'Method','approximate');
+         ybar  = quantile(-dqdt(~mask),qtls(2),'Method','approximate');
+      end
       a0    = ybar/xbar^3;
       ahat  = (1/tau)*(sqrt(a0*tau0)*(bhat-3)/(bhat-2))^(bhat-1);
       

@@ -1,28 +1,54 @@
-function f = plotalttrend(t,Db,sigDb,varargin)
+function h = plotalttrend(t,Db,sigDb,varargin)
 
-if nargin > 5
-   Dc = varargin{1};
-   sigDc = varargin{2};
-   Dg = varargin{3};
-   if nargin >6
-      ax = varargin{2};
-   else
-      ax = nan;
-   end
-   f = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax);
-elseif nargin > 3
-   Dc = varargin{1};
-   sigDc = varargin{2};
-   f = plotcalmperiod(t,Db,sigDb,Dc,sigDc);
+%------------------------------------------------------------------
+p        = magicParser;
+p.addRequired( 't'                                                );
+p.addRequired( 'Db'                                               );
+p.addRequired( 'sigDb'                                            );
+p.addOptional( 'Dc',       nan(size(Db)),    @(x) isnumeric(x)    );
+p.addOptional( 'sigDc',    nan(size(Db)),    @(x) isnumeric(x)    );
+p.addOptional( 'Dg',       nan(size(Db)),    @(x) isnumeric(x)    );
+p.addParameter('ax',       gca,              @(x) isaxis(x)       );
+p.addParameter('method',   'ols',            @(x)ischar(x)        );
+
+p.parseMagically('caller');
+%------------------------------------------------------------------
+
+if all(isnan(Dc)) && all(isnan(Dg))
+   h = plotflowperiod(t,Db,sigDb,ax,method);
+elseif all(isnan(Dg))
+   h = plotcalmperiod(t,Db,sigDb,Dc,sigDc,ax,method);
 else
-   f = plotflowperiod(t,Db,sigDb);
+   h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method);
 end
 
+% if nargin > 5
+%    Dc = varargin{1};
+%    sigDc = varargin{2};
+%    Dg = varargin{3};
+%    if nargin >6
+%       ax = varargin{2};
+%    else
+%       ax = nan;
+%    end
+%    h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax);
+% elseif nargin > 3
+%    Dc = varargin{1};
+%    sigDc = varargin{2};
+%    h = plotcalmperiod(t,Db,sigDb,Dc,sigDc);
+% else
+%    h = plotflowperiod(t,Db,sigDb);
+% end
+
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-function f = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax)
-             
+function h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method)
+
+if all(isempty(Dg))
+   h = nan;
+   return
+end
 
 ctxt  = 'CALM (measured)';
 btxt  = 'BFRA (theory: Eq. 21)';
@@ -40,12 +66,14 @@ else
    f  = gcf;
 end
    
-p1    = trendplot(t,Dc,'units','cm a$^{-1}$','leg',ctxt,'use',ax,   ...
-         'errorbounds',true,'errorbars',true,'yerr',sigDc,'reference',Dc);
-p2    = trendplot(t,Db,'units','cm a$^{-1}$','leg',btxt,'use',ax,   ...
-         'errorbounds',true,'errorbars',true,'yerr',sigDb,'reference',Db);
-p3    = trendplot(t,Dg,'units','cm a$^{-1}$','leg',gtxt,'use',ax,   ...
-         'errorbounds',true,'errorbars',true);
+p1 = trendplot(t,Dc,'units','cm a$^{-1}$','leg',ctxt,'use',ax,   ...
+   'errorbounds',true,'errorbars',true,'yerr',sigDc,'reference',Dc, ...
+   'method',method);
+p2 = trendplot(t,Db,'units','cm a$^{-1}$','leg',btxt,'use',ax,   ...
+   'errorbounds',true,'errorbars',true,'yerr',sigDb,'reference',Db, ...
+   'method',method);
+p3 = trendplot(t,Dg,'units','cm a$^{-1}$','leg',gtxt,'use',ax,   ...
+   'errorbounds',true,'errorbars',true,'method',method);
 
 set(ax,'XLim',[2001 2021],'YLim',[-80 80],'XTick',2002:3:2020);
 
@@ -73,8 +101,8 @@ str8  = ['2002:2020 ' strrep(str8,')','')];
 
 lobj  = [p1.plot p2.plot p3.plot p1.trend p2.trend p3.trend];
 ltxt  = {ctxt; btxt; strrep(gtxt,'\\','\'); str6; str7; str8};
-legend(lobj,ltxt,'numcolumns',2,'Interpreter','latex','location','northwest',...
-   'AutoUpdate','off');
+legend(lobj,ltxt,'numcolumns',2,'Interpreter','latex','location', ...
+   'northwest','AutoUpdate','off');
 
 p1.bounds.FaceAlpha = 0.15;
 p2.bounds.FaceAlpha = 0.15;
@@ -85,28 +113,39 @@ uistack(p1.trend,'top')
 uistack(p2.trend,'top')
 uistack(p3.trend,'top')
 
+h.figure = f;
+h.trendplot1 = p1;
+h.trendplot2 = p2;
+h.trendplot2 = p3;
+
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-function f = plotflowperiod(t,Db,sigDb)
+function h = plotflowperiod(t,Db,sigDb,ax,method)
 
-btxt  = 'BFRA (theory: Eq. 21)';
+if all(isempty(Db))
+   h = nan;
+   return
+end
+
+btxt = 'BFRA (theory: Eq. 21)';
 
 % this plots 1983-2020, no grace, no calm
 % f     = figure('Position',[156    45   856   580]);
-f  = figure('Units','centimeters','Position',[5 5 23 19*3/4]); ax = gca;
-p1    = trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca,   ...
-         'errorbounds',true,'errorbars',true,'yerr',sigDb); 
+f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
+p = trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
+   'errorbounds',true,'errorbars',true,'yerr',sigDb, ...
+         'method',method); 
 
 % set transparency of the bars
-set([p1.plot.Bar, p1.plot.Line], 'ColorType', 'truecoloralpha',   ...
-            'ColorData', [p1.plot.Line.ColorData(1:3); 255*0.5])
+set([p.plot.Bar, p.plot.Line], 'ColorType', 'truecoloralpha',   ...
+   'ColorData', [p.plot.Line.ColorData(1:3); 255*0.5])
 
-str   = p1.ax.Legend.String;
+str   = p.ax.Legend.String;
 str1  = strrep(str{1},[btxt ' ('],'');
 str1  = strrep(str1,'cm/yr)','cm a$^{-1}$');
 
-lobj  = [p1.plot p1.trend];
+lobj  = [p.plot p.trend];
 ltxt  = {btxt; str1};
 legend(lobj,ltxt,'location','north','AutoUpdate','off');
 
@@ -115,7 +154,10 @@ legend(lobj,ltxt,'location','north','AutoUpdate','off');
 % ax.TickLabelInterpreter
 ylabel('$ALT$ anomaly (cm)','Interpreter','latex');
 
-p1.trend.LineWidth = 2;
+p.trend.LineWidth = 2;
+
+h.figure = f;
+h.trendplot = p;
 
 % xlims = xlim; ylims = ylim; box off; grid on;
 % plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);
@@ -124,7 +166,12 @@ p1.trend.LineWidth = 2;
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
-function f = plotcalmperiod(t,Db,sigDb,Dc,sigDc)
+function h = plotcalmperiod(t,Db,sigDb,Dc,sigDc,ax,method)
+
+if all(isempty(Dc))
+   h = nan;
+   return
+end
 
 % load('defaultcolors','dc');
 % ltext = [num2ltext('1990-2020 trend','',abC.Dc(2),'cm a$^{-1}$',2), ...
@@ -137,11 +184,11 @@ btxt  = 'BFRA (theory: Eq. 21)';
 
 % this plots 1990-2020, no grace
 % f     = figure('Position',[156    45   856   580]);
-f  = figure('Units','centimeters','Position',[5 5 23 19*3/4]); ax = gca;
-p1    = trendplot(t,Dc,'units','cm/yr','leg',ctxt,'use',gca,   ...
-         'errorbounds',true,'errorbars',true,'yerr',sigDc);
-p2    = trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca,   ...
-         'errorbounds',true,'errorbars',true,'yerr',sigDb); 
+f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
+p1 = trendplot(t,Dc,'units','cm/yr','leg',ctxt,'use',gca, ...
+   'errorbounds',true,'errorbars',true,'yerr',sigDc,'method',method);
+p2 = trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
+   'errorbounds',true,'errorbars',true,'yerr',sigDb,'method',method); 
 
 % set transparency of the bars
 set([p1.plot.Bar, p1.plot.Line], 'ColorType', 'truecoloralpha',   ...
@@ -175,6 +222,10 @@ p2.trend.LineWidth = 2;
 
 axis tight
 set(gca,'XLim',[1990 2020],'XTick',1990:5:2020);
+
+h.figure = f;
+h.trendplot1 = p1;
+h.trendplot2 = p2;
 
 % xlims = xlim; ylims = ylim; box off; grid on;
 % plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);

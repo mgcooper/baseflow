@@ -57,15 +57,13 @@ b2          = p.Results.blate;
 q           = Fits.q;
 dqdt        = Fits.dqdt;
 fittags     = Fits.eventTag;
-eventlist   = rmnan(unique(fittags));
-numevents   = numel(eventlist);
+numevents   = numel(K.eventTag);
 phi         = nan(numevents,1);
 a           = nan(numevents,1);
 
 for n = 1:numevents
    
-   eventtag = K(n).eventTag;
-   ifit     = fittags == eventtag;
+   ifit     = fittags == K.eventTag(n);
    thisq    = q(ifit);
    thisdqdt = dqdt(ifit);
 

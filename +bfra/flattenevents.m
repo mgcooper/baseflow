@@ -1,4 +1,4 @@
-function Events = flattenevents(t,q,r,T,Q,R,Info)
+function [t,q,r,tags] = flattenevents(T,Q,R,Info)
 %FLATTENEVENTS flatten the cell arrays returned by findevents
 % 
 %  Inputs
@@ -6,27 +6,22 @@ function Events = flattenevents(t,q,r,T,Q,R,Info)
 %     t, q, r : cell arrays of events
 % 
 %  See also: getevents, findevents
-
-% save the original lists
-Events.T = T;
-Events.Q = Q;
-Events.R = R;
       
 % initialize output structure and output arrays
-numEvents   =  numel(Info.istart);
-numData     =  Info.datalength;
-Qsave       =  nan(numData,1);
-Rsave       =  nan(numData,1);
-% tsave       =  nan(numData,1);
-tsave       =  NaT(numData,1);
-tags        =  nan(numData,1);
-eventCount  =  0;                      % initialize event counter
+nEvents  = numel(Info.istart);
+nData    = Info.datalength;
+q        = nan(nData,1);
+r        = nan(nData,1);
+t        = NaT(nData,1,'Format','dd-MMM-uuuu HH:mm:ss');
+tags     = nan(nData,1);
 
-for thisEvent = 1:numEvents
+eventCount = 0;                      % initialize event counter
 
-   eventQ = q{thisEvent};
-   eventT = t{thisEvent};
-   eventR = r{thisEvent};
+for thisEvent = 1:nEvents
+
+   eventQ = Q{thisEvent};
+   eventT = T{thisEvent};
+   eventR = R{thisEvent};
 
    % if no flow was returned, continue
    if all(isnan(eventQ)); continue; else
@@ -38,16 +33,9 @@ for thisEvent = 1:numEvents
    ei = Info.istop(thisEvent);
 
    % collect all data for the point-cloud
-   Qsave(si:ei) = eventQ;
-   Rsave(si:ei) = eventR;
-%    tsave(si:ei) = datenum(eventT);
-   tsave(si:ei) = eventT;
-   tags( si:ei) = eventCount; 
+   q(si:ei) = eventQ;
+   r(si:ei) = eventR;
+   t(si:ei) = eventT;   % datenum(eventT);
+   tags(si:ei) = eventCount; 
 end
-
-% overwrite the cell arays with flattened arrays
-Events.t    = tsave;
-Events.q    = Qsave;
-Events.r    = Rsave;
-Events.tag  = tags;
 

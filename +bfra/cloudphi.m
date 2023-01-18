@@ -32,26 +32,28 @@ p.StructExpand    = false;
 p.PartialMatching = true;
 p.FunctionName    = 'bfra.cloudphi';
 
-addRequired(p, 'q',                    @(x)isnumeric(x));
-addRequired(p, 'dqdt',                 @(x)isnumeric(x));
-addRequired(p, 'blate',                @(x)isnumeric(x));
-addRequired(p, 'A',                    @(x)isnumeric(x));
-addRequired(p, 'D',                    @(x)isnumeric(x));
-addRequired(p, 'L',                    @(x)isnumeric(x));
-addRequired(p, 'method',               @(x)ischar(x));
-addParameter(p,'earlyqtls',[0.95 0.95],@(x)isnumeric(x));
-addParameter(p,'lateqtls', [0.5 0.5],  @(x)isnumeric(x));
-addParameter(p,'mask',     nan,        @(x)islogical(x));
-addParameter(p,'theta',    0,          @(x)isnumeric(x));
-addParameter(p,'isflat',   true,       @(x)islogical(x));
-addParameter(p,'soln1',    'RS05',     @(x)ischar(x));
-addParameter(p,'soln2',    'RS05',     @(x)ischar(x));
-addParameter(p,'dispfit',  false,      @(x)islogical(x));
+addRequired(p, 'q',                       @(x)isnumeric(x)  );
+addRequired(p, 'dqdt',                    @(x)isnumeric(x)  );
+addRequired(p, 'blate',                   @(x)isnumeric(x)  );
+addRequired(p, 'A',                       @(x)isnumeric(x)  );
+addRequired(p, 'D',                       @(x)isnumeric(x)  );
+addRequired(p, 'L',                       @(x)isnumeric(x)  );
+addRequired(p, 'method',                  @(x)ischar(x)     );
+addParameter(p,'earlyqtls',[0.95 0.95],   @(x)isnumeric(x)  );
+addParameter(p,'lateqtls', [0.5 0.5],     @(x)isnumeric(x)  );
+addParameter(p,'userab',   nan,           @(x)isnumeric(x)  );
+addParameter(p,'mask',     true(size(q)), @(x)islogical(x)  );
+addParameter(p,'theta',    0,             @(x)isnumeric(x)  );
+addParameter(p,'isflat',   true,          @(x)islogical(x)  );
+addParameter(p,'soln1',    'RS05',        @(x)ischar(x)     );
+addParameter(p,'soln2',    'RS05',        @(x)ischar(x)     );
+addParameter(p,'dispfit',  false,         @(x)islogical(x)  );
 
 parse(p,q,dqdt,blate,A,D,L,method,varargin{:});
 
 earlyqtls   = p.Results.earlyqtls;
 lateqtls    = p.Results.lateqtls;
+userab      = p.Results.userab;
 mask        = p.Results.mask;
 theta       = p.Results.theta;
 isflat      = p.Results.isflat;
@@ -71,9 +73,13 @@ dispfit     = p.Results.dispfit;
 % a2 = late-time a
 % b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)
 
-b2 = blate; 
-a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
-a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
+if isnan(userab)
+   b2 = blate; 
+   a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
+   a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
+else
+   
+end
 
 switch b2
    case 1

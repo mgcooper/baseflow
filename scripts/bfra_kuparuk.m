@@ -28,14 +28,14 @@ fname       = 'data/Events.mat';
 % load the daily streamflow and meta data
 %-----------------------------------------
 load('data/dailyflow.mat','T','Q','R');
-load('data/annualflow.mat','Data');
+load('data/annualdata.mat','Data');
 
 % load the active layer thickness data
 %--------------------------------------
-Calm  = bfra.loadcalm(sitename,'current','t1',t1,'t2',t2);
-Calm  = timetablereduce(Calm);
-Data  = synchronize(Data,Calm,Data.Time,'fillwithmissing');
-Data  = renamevars(Data,'mu','Dc');
+% Calm  = bfra.loadcalm(sitename,'current','t1',t1,'t2',t2);
+% Calm  = timetablereduce(Calm);
+% Data  = synchronize(Data,Calm,Data.Time,'fillwithmissing');
+% Data  = renamevars(Data,'mu','Dc');
 
 % run the analysis
 %------------------

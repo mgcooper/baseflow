@@ -35,8 +35,8 @@ if printvalues == true
    end
    
 else
-   
-   aQbstr   = '-d$Q$/d$t = aQ^b$';
-   Qtstr    = '$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';
+   % this is same as bfra.getstring
+   aQbstr = bfra.getstring('aQb');
+   Qtstr = bfra.getstring('Q(t)');
 end
 
