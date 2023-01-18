@@ -1,14 +1,14 @@
-function [q,dqdt,dt,tq,rq,varargout] = fitdqdt(T,Q,R,derivmethod,varargin)
-%fitdqdt Numerical estimation of the time derivative of discharge dQ/dt
+function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
+%getdqdt Numerical estimation of the time derivative of discharge dQ/dt
 %using variable time stepping, exponential time stepping, or one of six
 %standard numerical derivatives given in Thomas et al. 2015, Table 2
 % 
 %  Syntax
-%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(T,Q,R,derivmethod)
-%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'fitwindow',fitwindow)
-%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'fitwindow',fitmethod)
-%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'pickmethod',pickmethod)
-%     [q,dqdt,dt,tq,rq] = bfra.fitdqdt(_,'ax',axis_object)
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
 % 
 %  Required inputs
 %     T     =  time (days)
@@ -25,16 +25,16 @@ function [q,dqdt,dt,tq,rq,varargout] = fitdqdt(T,Q,R,derivmethod,varargin)
 % 
 % 
 % 
-%  See also fitdqdt
+%  See also getdqdt
 % 
 % Tip: this accepts pre-selected events, not raw timeseries. Use
-% bfra.findevents to pick Events, then bfra.fitdqdt to fit the events.
+% bfra.findevents to pick Events, then bfra.getdqdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
 %-------------------------------------------------------------------------------
 % input handling    
 p                 = inputParser;
-p.FunctionName    = 'fitdqdt';
+p.FunctionName    = 'getdqdt';
 p.CaseSensitive   = true;
 
 addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x));
@@ -116,7 +116,7 @@ function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 % dQdt = Picks.dQdt;
 % and so on. But, Picks does not include T, and maybe I wanted to distinguish
 % the og T,Q from the ets/vts fit t,q. 
-% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function
+% EITHER WAY, after moving getdqdt calls to fitets/fitvts into this function
 % abve, I confirmed that things work up to this point meaning I can still
 % select events in plotdqdt and they get sent here, but I think the way i deal
 % wtih retiming in ETS now throws off the istart/stop, so will need to figure
