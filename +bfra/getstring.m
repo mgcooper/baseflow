@@ -21,9 +21,9 @@ units = p.Results.units;
 %-------------------------------------------------------------------------------
 
 if units == true
-   str   = getStringWithUnits(requestedstring);
+   str = getStringWithUnits(requestedstring);
 else
-   str   = getStringWithoutUnits(requestedstring);
+   str = getStringWithoutUnits(requestedstring);
 end
 
 
@@ -51,7 +51,7 @@ switch requestedstring
          '\quad[\mathrm{m}^3\;\mathrm{d}^{-1}\;\mathrm{d}^{-1}]$'];
       
    case {'Q(t)','q(t)'}
-      str = ['Q = $[Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}'                ...
+      str = ['$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}'                ...
          '\quad[\mathrm{m}^3\;\mathrm{d}^{-1}]$'];
       
    case {'tau','Tau'}
@@ -76,10 +76,13 @@ switch requestedstring
       str = '$\mathrm{d}\eta/\mathrm{d}t$';
       
    case 'aQb'
-      str = '$-\mathrm{d}Q/\mathrm{d}t$ = aQ$^b$';
-      
+
+      str = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
+
    case {'Q(t)','q(t)'}
-      str = 'Q = $[Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';
+
+      str = '$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}$';
+      %str = '$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';
       
    case {'tau','Tau'}
       str = '$\tau$';

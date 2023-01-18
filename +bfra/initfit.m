@@ -1,4 +1,4 @@
-function [N,q,dqdt,dq,dt,tq,rq,r2] = initfit(q,fittype);
+function [N,q,dqdt,dq,dt,tq,rq,r2] = initfit(q,fittype)
 %INITFIT initialize arrays for common fitting routines
 
 

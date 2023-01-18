@@ -52,8 +52,9 @@ if plotFig
    
    % get formatted strings for the legend
    showAB  = false;
-   Qtstr   = bfra.QtString(a,b,Q0,showAB);
-   tcstr   = bfra.tcString(a,b,Q0,showAB);
+   Qtstr   = bfra.getstring('Q(t)');
+%    Qtstr   = bfra.QtString([a,b],Q0,showAB);
+%    tcstr   = bfra.tcString(a,b,Q0,showAB);
    
    % make a figure
    tileFigure();
@@ -61,24 +62,25 @@ if plotFig
    plot(t,Q);
    xlabel('$t \quad [T]$');
    ylabel('$Q(t) \quad [L/T]$');
-   legend(Qtstr)
+   legend(Qtstr,'Interpreter','latex');
    axis tight
-   hFig1 = figformat;
+
+   %hFig1 = figformat;
    
    
    nexttile
    plot(t./tc,Q./Q0); % hold on; plot(t./tc,Q./Q0);
-   xlabel('$t/t_c \quad [-]$'); ylabel('$Q/Q_0 \quad [-]$');
-   legend(tcstr)
+   xylabel('$t/t_c \quad [-]$','$Q/Q_0 \quad [-]$','Interpreter','latex');
+%    legend(tcstr)
    
    axis tight
    ylim([0 1])
    
-   hFig2 = figformat;
+   %hFig2 = figformat;
    
    % fix the axes if they got misaligned
-   hFig1.backgroundAxis.Position = hFig1.mainAxis.Position;
-   hFig2.backgroundAxis.Position = hFig2.mainAxis.Position;
+   %hFig1.backgroundAxis.Position = hFig1.mainAxis.Position;
+   %hFig2.backgroundAxis.Position = hFig2.mainAxis.Position;
    
    
 end

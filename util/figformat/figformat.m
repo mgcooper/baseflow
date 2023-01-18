@@ -5,7 +5,7 @@ function h = figformat(varargin)
 % new plots to the figure, they are hidden behind the data. 
    
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
-p                 = MipInputParser;
+p                 = magicParser;
 p.FunctionName    = 'figformat';
 p.CaseSensitive   = false;
 p.KeepUnmatched   = true;
