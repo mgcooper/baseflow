@@ -1,7 +1,31 @@
 function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
-%CONVERSIONS convert inputvalue from its value in terms of inputvarname to
-%its value in terms of outputvarname (use tab completion to get a list of
-%supported input and output varnames)
+%CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname
+% 
+% Syntax
+% 
+%     varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
+% 
+% Description
+% 
+%     outputvalue = conversions(inputvalue,inputvarname,outputvarname) converts
+%     inputvalue from its value in terms of inputvarname to its equivalent value
+%     in terms of outputvarname (use tab completion to get a list of supported
+%     input and output varnames)
+% 
+%     outputvalue = conversions(inputvalue,inputvarname,outputvarname,'isflat',false)
+%     uses the sloped-aquifer solution. Default behavior is true.
+% 
+% Example
+% 
+%     b = 1.5;
+%     n = bfra.conversions(b,'b','n')
+%        n = 0
+% 
+% 
+% See also bfra.getstring
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
 %-------------------------------------------------------------------------------
 p = inputParser;
 p.FunctionName = 'bfra.conversions';

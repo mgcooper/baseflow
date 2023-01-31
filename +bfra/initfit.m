@@ -1,5 +1,13 @@
 function [N,q,dqdt,dq,dt,tq,rq,r2] = initfit(q,fittype)
-%INITFIT initialize arrays for common fitting routines
+%INITFIT initialize arrays for common fitting routines in the bfra toolbox
+% 
+% Syntax
+% 
+%     [N,q,dqdt,dq,dt,tq,rq,r2] = initfit(q,fittype)
+% 
+% See also prepfits
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 
 switch fittype

@@ -1,9 +1,25 @@
 function [Fit,b,alpha,k] = gpfitb(x,varargin)
-%GPFITB returns [b,alpha,k]=gpfitb(x,xmin) where parmhat=gpfit(xhat)
-%and xhat is continuous data believed to follow an untruncated Pareto
-%distribution with some known xmin that has been subtracted from the
-%true x such that xhat=x-xmin. If xmin is not provided, we assume
-%xmin=0. 
+%GPFITB fit Generalized Pareto Distribution to recession parameter tau
+%
+% Syntax
+% 
+%     [Fit,b,alpha,k] = gpfitb(x,varargin)
+% 
+% Description
+% 
+%     [Fit,b,alpha,k] = gpfitb(x) returns Generalized Pareto Distribution fit
+%     to sample x. Fit contains GPD parameter parmhat where parmhat=gpfit(xhat)
+%     and xhat is continuous data believed to follow a GPD with some known xmin.
+%     This function assumes xmin has been subtracted from the true x such that
+%     xhat=x-xmin. If xmin is not provided, the function assumes xmin=0.
+% 
+%     [Fit,b,alpha,k] = gpfitb(x,'xmin',xmin) subtracts user-provided xmin from
+%     data in x. xmin is the threshold parameter.
+% 
+% See also plfitb
+% 
+% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
+
 %------------------------------------------------------------------------------
 p              = inputParser;
 p.FunctionName = 'bfra.gpfitb';

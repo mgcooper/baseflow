@@ -1,13 +1,23 @@
 function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
-%BASEFLOWTREND compute baseflow expected value and rate of change posted annually
+%BASEFLOWTREND compute baseflow expected value and rate of change
 % 
-%  Inputs
+% Syntax
+% 
+%     [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
+% 
+% Description
+% 
+%     [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A) computes annual values of
+%     baseflow Qb, the linear trend in annual baseflow dQbdt, annual streamflow
+%     anomalies Qa, and the linear trend in annual streamflow anomalies dQadt.
+% 
+% Required inputs
 % 
 %     t: time [days], numeric or datetime vector
 %     Q: discharge [m3/d], posted daily, numeric vector
 %     A: basin area [m2], numeric scalar
 % 
-%  Outputs
+% Outputs
 % 
 %     Qb: baseflow expected value [cm/d], posted annually, numeric vector
 %     dQbdt: baseflow expected value trend [cm/d], posted annually, numeric
@@ -18,7 +28,9 @@ function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
 %     hb: figure handle for the baseflow trendplot figure
 %     ha: figure handle for the annual flow trendplot figure
 % 
-%  See also aquiferthickness
+% See also aquiferthickness
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

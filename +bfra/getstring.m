@@ -1,12 +1,32 @@
 function str = getstring(requestedstring,varargin)
-%GETSTRING returns various latex-formatted strings
-%
-% INPUTS:
-% 'aQb'
-% 'Q'
-% 'dQ/dt [m3 d-1]
-%
-% see also bfra.aQbString
+%GETSTRING get latex-formatted string for equations in the bfra library
+% 
+% Syntax
+% 
+%     str = getstring(requestedstring,varargin)
+% 
+% Description
+% 
+%     str = getstring(requestedstring) returns latex-formatted string for
+%     requested string.
+% 
+%     str = getstring(requestedstring,'units',true) returns latex-formatted
+%     string for requested string with units. Default behavior is 'units',false.
+%  
+% Optional inputs
+% 
+%     'aQb', 'Q', 'dQ/dt'
+% 
+% Example
+% 
+%     str = bfra.getstring('Q','units',true)
+%     str =
+%           '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'
+% 
+% See also bfra.aQbString
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
 
 %-------------------------------------------------------------------------------
 p               = inputParser;

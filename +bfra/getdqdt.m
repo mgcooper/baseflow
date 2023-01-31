@@ -1,31 +1,39 @@
 function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
-%using variable time stepping, exponential time stepping, or one of six
-%standard numerical derivatives given in Thomas et al. 2015, Table 2
+%  
+% Syntax
 % 
-%  Syntax
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
 % 
-%  Required inputs
+% Description
+% 
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt using
+%     variable time stepping, exponential time stepping, or one of six standard
+%     numerical derivatives given in Thomas et al. 2015, Table 2. The method is
+%     passed in as the argument derivmethod with type char.
+% 
+% Required inputs
+% 
 %     T     =  time (days)
 %     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
 %     R     =  rainfall (L T^-1, assumed to be mm d-1)
 %     derivmethod = method to compute numerical derivative dQ/dt. Options are
 %     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
 % 
-%  Optional name-value pairs
+% Optional name-value inputs
+% 
 %     etsparam =  scalar double, parameter that controls window size in ETS method
 %     vtsparam =  scalar double, parameter that controls window size in VTS method
 %     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
 %     plotfit  =  logical, scalar, indicates whether to plot the fit
 % 
+% See also getdqdt
 % 
-% 
-%  See also getdqdt
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 % 
 % Tip: this accepts pre-selected events, not raw timeseries. Use
 % bfra.findevents to pick Events, then bfra.getdqdt to fit the events.

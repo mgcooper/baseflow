@@ -1,11 +1,24 @@
 function [t,q,r,tags] = flattenevents(T,Q,R,Info)
 %FLATTENEVENTS flatten the cell arrays returned by findevents
 % 
-%  Inputs
+% Syntax
+% 
+%     [t,q,r,tags] = flattenevents(T,Q,R,Info)
+% 
+% Description
+% 
+%     [t,q,r,tags] = flattenevents(T,Q,R,Info) returns lists of time, t,
+%     discharge, q, rainfall, r, and event-tags, tags from input cell arrays
+%     T,Q,R output from bfra.eventfinder
+% 
+% Required inputs
+% 
 %     T, Q, R : lists of time, streamflow, and rainfall 
 %     t, q, r : cell arrays of events
 % 
-%  See also: getevents, findevents
+% See also getevents, findevents
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
       
 % initialize output structure and output arrays
 nEvents  = numel(Info.istart);

@@ -1,20 +1,25 @@
 function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)
 %DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate
 %
-%  Compute the combined uncertainty (with correlation) for:
-%     dn/dt = lambda*dq/dt
-%  where dn/dt is the 'long term' (interannual) trend in groundwater layer
-%  thickness (n), q is the 'long term' trend in baseflow, and 
-%     lambda = tau/phi*1/(N+1) 
-%  is the linearized sensitivity coefficient with reference drainage timescale
-%  tau [days], drainable porosity [-], and exponent N [-], where N=3-2b for all
-%  known flat-aquifer and all known linearized sloped-aquifer solutions to the
-%  one-dimensional groundwater flow equation for a Boussinesq aquifer. The
-%  parameter b is from -dQ/dt = aQb.
+% Syntax
+% 
+%     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)
+% 
+% Description
+% 
+%     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts)
+%     Computes the combined uncertainty (with correlation) for: dn/dt =
+%     lambda*dq/dt where dn/dt is the 'long term' (interannual) trend in
+%     groundwater layer thickness (n), q is the 'long term' trend in baseflow,
+%     and lambda = tau/phi*1/(N+1) is the linearized sensitivity coefficient
+%     with reference drainage timescale tau [days], drainable porosity [-], and
+%     exponent N [-], where N=3-2b for all known flat-aquifer and all known
+%     linearized sloped-aquifer solutions to the one-dimensional groundwater
+%     flow equation for a Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
 %
-%
-%
-% See also 
+% See also alttrend, aquiferthickness
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % parse inputs
 alpha = 0.05;

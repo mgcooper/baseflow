@@ -1,16 +1,30 @@
 function [K,Fits] = fitevents(Events,varargin)
 %FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events
 % 
-% Inputs
+% Syntax
 % 
-%     Events:  output of bfra.getevents (flow comes in as m3 d-1 posted daily)
+%     [K,Fits] = fitevents(Events,varargin)
+% 
+% Description
+% 
+%     [K,Fits] = fitevents(Events) fits all recession events in Events (output
+%     of bfra.getevents) using default algorithm options.
+% 
+%     [K,Fits] = fitevents(Events,opts) uses user-supplied algorithm options in
+%     struct opts. See bfra.setopts for automated option setting.
+% 
+% Required inputs
+% 
+%     Events   output of bfra.getevents (flow comes in as m3 d-1 posted daily)
 % 
 % Outputs
 % 
-%     K:       table of fitted values e.g., a, b, tau, for each event
-%     Fits:    structure containing the fitted q/dqdt
+%     K  table of fitted values e.g., a, b, tau, for each event
+%     Fits  structure containing the fitted q/dqdt
 % 
-% See also: getdqdt, fitdqdt
+% See also getevents, getdqdt, fitdqdt
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p                 = inputParser;

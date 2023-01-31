@@ -1,7 +1,8 @@
 function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin) 
-%FITETS fits recession event using the exponential timestep method
+%FITETS fit recession event using the exponential timestep method
 %
 %  Syntax
+% 
 %     ETS = bfra.fitets(T,Q,R,derivmethod)
 %     ETS = bfra.fitets(_,'etsparam',fitwindow)
 %     ETS = bfra.fitets(_,'fitab',fitmethod)
@@ -9,17 +10,20 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
 %     ETS = bfra.fitets(_,'ax',axis_object)
 % 
 %  Required inputs
-%     T     =  time (days)
-%     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
-%     R     =  rainfall (L T^-1, assumed to be mm d-1)
 % 
-%  Optional name-value pairs
+%     T     time (days)
+%     Q     discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
+%     R     rainfall (L T^-1, assumed to be mm d-1)
 % 
-%     etsparam = scalar, double, parameter that controls window size
-%     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
-%     plotfit  =  logical, scalar, indicates whether to plot the fit
+%  Optional name-value inputs
+% 
+%     etsparam    scalar, double, parameter that controls window size
+%     fitab       logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
+%     plotfit     logical, scalar, indicates whether to plot the fit
 % 
 %  See also fitdqdt, fitvts
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % note: only pass in identified recession events (not timeseries of
 % flow) because this first fits the ENTIRE recession to estimate 'gamma'
@@ -91,7 +95,7 @@ while n+m(n)<=N
    r2(n) = 1-sum((Y-yfit).^2)/sum((Y-mean(Y)).^2); r2(r2<0) = 0;
 
    dqdt(n)  = dQdt(2);                 % eq. 9
-   q(n)     = nanmean(Y);
+   q(n)     = mean(Y,'omitnan');
    tq(n)    = mean(T(n:n+m(n)));
    rq(n)    = mean(R(n:n+m(n)));
    dt(n)    = t(n+m(n))-t(n);

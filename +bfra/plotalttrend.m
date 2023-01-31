@@ -1,7 +1,24 @@
 function h = plotalttrend(t,Db,sigDb,varargin)
+%PLOTALTTREND plot the active layer thickness trend
+% 
+% Syntax
+% 
+%     h = plotalttrend(t,Db,sigDb,varargin)
+% 
+% Description
+% 
+%     h = plotalttrend(t,Db,sigDb) plots annual values of active layer thickness
+%     from baseflow recession analysis Db with errorbars representing estimation
+%     uncertainty sigDb and the linear trendline. 
+% 
+%     h = plotalttrend(t,Db,sigDb,Dc,sigDc) also plots annual values of measured
+%     active layer thickness Dc and measurement uncertainty sigDc.
+% 
+% See also prepalttrend
 
-%------------------------------------------------------------------
-p        = magicParser;
+%-------------------------------------------------------------------------------
+p              = magicParser;
+p.FunctionName = 'bfra.plotalttrend';
 p.addRequired( 't'                                                );
 p.addRequired( 'Db'                                               );
 p.addRequired( 'sigDb'                                            );
@@ -12,7 +29,7 @@ p.addParameter('ax',       gca,              @(x) isaxis(x)       );
 p.addParameter('method',   'ols',            @(x)ischar(x)        );
 
 p.parseMagically('caller');
-%------------------------------------------------------------------
+%-------------------------------------------------------------------------------
 
 if all(isnan(Dc)) && all(isnan(Dg))
    h = plotflowperiod(t,Db,sigDb,ax,method);

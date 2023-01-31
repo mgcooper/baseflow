@@ -1,4 +1,10 @@
 function  [T,Q,R,Info] = seteventnan()
+%SETEVENTNAN set recessoin event nan in Events structure
+% 
+%  [T,Q,R,Info] = seteventnan()
+% 
+% See also
+
 T               = [];
 Q               = [];
 R               = [];

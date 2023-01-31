@@ -1,5 +1,5 @@
 function Meta = querymeta(Meta,varargin)
-%BFRA.QUERYMETA query metadata structure
+%QUERYMETA query bfra toolbox metadata structure
 % 
 % work in progress, may not be worth it
 % 

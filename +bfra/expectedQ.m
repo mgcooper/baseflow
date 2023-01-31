@@ -1,5 +1,5 @@
 function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
-%EXPECTEDQ general description of function
+%EXPECTEDQ compute the expected value of baseflow
 % 
 % Syntax
 % 
@@ -7,7 +7,9 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
 %  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
 %              Qexp/Q0 relative to the input Q
 % 
-% Author: Matt Cooper, DD-MMM-YYYY, https://github.com/mgcooper
+% See also 
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %------------------------------------------------------------------------------
 % input parsing

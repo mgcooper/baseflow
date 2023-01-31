@@ -1,4 +1,9 @@
 function [ddt,err] = printtrend(Data,varargin)
+%PRINTTREND print trends computed from columns in table Data to the screen
+% 
+%  [ddt,err] = printtrend(Data,varargin)
+% 
+% See also
 
 %-------------------------------------------------------------------------------
 p              = magicParser;

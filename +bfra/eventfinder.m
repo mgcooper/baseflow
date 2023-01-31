@@ -1,23 +1,36 @@
 function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
-%EVENTFINDER finds recession events on input hydrographs with time 't',
-%discharge 'q', and rain 'r'. Use optional inputs to set parameters that
-%determine how events are identified. 
+%EVENTFINDER find recession events on hydrograph timeseries t,q and rainfall r
 % 
-% Required inputs:
-%  t           =  time
-%  q           =  flow (m3/time)
-%  r           =  rain (mm/time)
+% Syntax
 % 
-% Optional name-value inputs:
-%  nmin        =  minimum event length
-%  fmax        =  maximum # of missing values gap-filled
-%  rmax        =  maximum run of sequential constant values
-%  rmin        =  minimum rainfall required to censor flow (mm/day?)
-%  rmconvex    =  remove convex derivatives
-%  rmnochange  =  remove consecutive constant derivates
-%  rmrain      =  remove rainfall
+%     [T,Q,R,Info] = eventfinder(t,q,r,varargin)
 % 
-%  See also: getevents, findevents, eventsplitter, eventpicker, eventplotter
+% Description
+% 
+%     [T,Q,R,Info] = eventfinder(t,q,r) Detects periods of declining flow on
+%     hydrographs defined by inputs time 't', discharge 'q', and rainfall 'r'.
+%     Use optional inputs to set parameters that determine how events are
+%     identified. 
+% 
+% Required inputs
+% 
+%     t           time
+%     q           flow (m3/time)
+%     r           rain (mm/time)
+% 
+% Optional name-value inputs
+% 
+%     nmin        minimum event length
+%     fmax        maximum # of missing values gap-filled
+%     rmax        maximum run of sequential constant values
+%     rmin        minimum rainfall required to censor flow (mm/day?)
+%     rmconvex    remove convex derivatives
+%     rmnochange  remove consecutive constant derivates
+%     rmrain      remove rainfall
+% 
+% See also getevents, eventsplitter, eventpicker, eventplotter
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

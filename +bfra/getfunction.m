@@ -1,8 +1,12 @@
 function Fnc = getfunction(funcname)
-%GETFUNCTION get anonymous function handle from the standard bfra function
-%library
+%GETFUNCTION get function handle from the bfra function library
+% 
+% Syntax
+% 
+%     Fnc = getfunction(funcname)
 %
-%  SYNTAX
+% Description
+% 
 %     Fnc = bfra.getfunction('SofabQ') returns anonymous function handle for
 %     storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)
 % 
@@ -11,7 +15,9 @@ function Fnc = getfunction(funcname)
 % 
 %     Use tab-completion to see full list of options
 %
-% see also bfra.getstring
+% See also bfra.getstring
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 switch funcname
    case 'SofabQ'

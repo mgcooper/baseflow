@@ -1,8 +1,7 @@
 function K = wrapfits( q,dqdt,deriv,method,order,station,eventdate,    ...
                         eventtag,fittag,fitcount,fitopts,K)
-%WRAPFITS estimates the recession coefficient (wrapper around bfra.fitab)
+%WRAPFITS estimate recession coefficients (wrapper around bfra.fitab)
 % 
-%-------------------------------------------------------------------------------
 %   Inputs:
 %               q       = discharge timeseries
 %               dqdt    = dQ/dt, t = time
@@ -22,6 +21,9 @@ function K = wrapfits( q,dqdt,deriv,method,order,station,eventdate,    ...
 %   
 %   Outputs:    K = table of computed values including a,b,tau,S, and
 %              confidence intervals
+% 
+% See also:
+
 %-------------------------------------------------------------------------------
 
 warning off

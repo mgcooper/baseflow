@@ -1,5 +1,5 @@
 function out = pointcloudplot(q,dqdt,varargin)
-%POINTCLOUDPLOT plots a 'point cloud' diagram to estimate aquifer parameters
+%POINTCLOUDPLOT plot a 'point cloud' diagram to estimate aquifer parameters
 %from recession flow data.
 %
 % Required inputs:

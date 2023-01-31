@@ -1,16 +1,26 @@
 function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
-%EVENTPICKER automated or user-guided recession event selection from input
-%hydrograph with time 't', discharge 'q', and rain 'r'. Use optional inputs to
-%set parameters that determine how events are identified and 
+%EVENTPICKER automated or user-guided recession event selection 
 % 
-%  Required inputs
+% Syntax
 % 
-%     t           =  time
-%     q           =  flow (m3/time)
-%     r           =  rain (mm/time)
-%     nmin        =  minimum event length
+%     [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
 % 
-%  See also: getevents, findevents, eventfinder, eventsplitter, eventplotter
+% Description
+% 
+%     [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info) selects recession events from
+%     input hydrograph with time 't', discharge 'q', and rain 'r'. Use optional
+%     inputs to set parameters that determine how events are identified and   
+% 
+% Required inputs
+% 
+%     t        time
+%     q        flow (m3/time)
+%     r        rain (mm/time)
+%     nmin     minimum event length
+% 
+% See also: getevents, findevents, eventfinder, eventsplitter, eventplotter
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % TODO: compare subfunction eventPlotter here to bfra.eventplotter and to
 % versions in dev-bk. Cursory glance - eventPlotter includes option to plot

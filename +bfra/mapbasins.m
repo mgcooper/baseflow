@@ -1,52 +1,83 @@
 function h = mapbasins(Basins,varargin)
-%MAPBASINS map a set of basin boundaries and color their faces by an attribute.
+%MAPBASINS map a set of basin boundaries and color their faces by an attribute
+% 
+% Syntax
+% 
+%     h = mapbasins(Basins,varargin)
+% 
+% Description
+% 
+%     h = mapbasins(Basins) creates a map-axes figure showing the basin outlines
+%     for all basins in struct Basins.
+% 
+%     h = mapbasins(___,'varname',varname) colors the faces of the basins using
+%     the value of variable varname. Basins must contain the data such that
+%     cdata = Basins.(varname) returns the data. 
 %
-% INPUTS
-%     basins    : structure of basin boundaries
-%     varname   : variable to map face color, must match a 'basins' fieldname
-%
-%     NOTE: use geo!
-%     NOTE: variable name of cvar
-
-% EXAMPLE
+% Required inputs
+% 
+%     Basins   structure of basin boundaries
+% 
+% Optional inputs
+% 
+%     varname  variable to map face color, must match a 'basins' fieldname
+% 
+% Example
+% 
 %     h  = bfra.mapbasins(basins,'varname','perm_mean','cbartitle',    ...
 %         'permafrost extent (%)','latlims',[65 80],'lonlims',[-168 -60]);
 %
-%
-%
+% See also mapgages, loadbounds
+% 
+% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
+
+%     NOTE: use geo!
+%     NOTE: variable name of cvar
+
 %-------------------------------------------------------------------------------
 p              = magicParser;
 p.FunctionName = 'mapbasins';
 p.StructExpand = false;
 
+defaultvar = 'perm_mean';
+defaulttxt = 'permafrost extent (%)';
+defaultlatlims = [40 84]; % [50 75]
+defaultlonlims = [-168 -40]; % [-168 -60]
+
 p.addRequired( 'Basins',                              @(x)isstruct(x)   );
 p.addParameter('Meta',        '',                     @(x)istable(x)    );
-p.addParameter('varname',     'perm_mean',            @(x)ischar(x)     );
-p.addParameter('cbartitle',   'permafrost extent (%)',@(x)ischar(x)     );
-p.addParameter('latlims',     [50 75],                @(x)isnumeric(x)  );
+p.addParameter('facemapping', false,                  @(x)islogical(x)  );
+p.addParameter('cvarname',    defaultvar,             @(x)ischar(x)     );
+p.addParameter('cbartxt',     defaulttxt,             @(x)ischar(x)     );
+p.addParameter('latlims',     defaultlatlims,         @(x)isnumeric(x)  );
+p.addParameter('lonlims',     defaultlonlims,         @(x)isnumeric(x)  );
 p.addParameter('proj',        'lambert',              @(x)ischar(x)     );
-p.addParameter('lonlims',     [-168 -60],             @(x)isnumeric(x)  );
 p.addParameter('facealpha',   0.35,                   @(x)isnumeric(x)  );
 p.addParameter('facelabels',  false,                  @(x)islogical(x)  );
 p.addParameter('ax',          gobjects,               @(x)isaxis(x)     );
 
 p.parseMagically('caller');
 
-cname    = varname;
-ctxt     = cbartitle;
-cvar     = [Basins.(cname)];
-
+if facemapping == true
+   cvar = [Basins.(cvarname)];
+end
 usegeoshow = false; % need to add option or eliminate
 
 % for lonlims, this owrks well for Alaska: [-170 -120]
 %-------------------------------------------------------------------------------
 
-if istable(Meta)
+if isstruct(Meta)
+   Meta = struct2table(Meta);
+end
+
+% ensure that Basins and Meta contain the same basins and order
+if ~isempty(Meta)
    Meta     = sortrows(Meta,'station');
    [~,idx]  = sort({Basins.Station});
    Basins   = Basins(idx(:));
    Basins   = Basins(ismember({Basins.Station},Meta.station));
 end
+
 
 % world borders has more detail than the ak state
 borders = loadworldborders({'United States','Canada'},'merge');
@@ -73,7 +104,7 @@ hold on;
 %setm(h.hworldmap,'MapLatLimit',[45 72])
 %setm(h.hworldmap,'MapLonLimit',[-168 -48])
 
-if ~isempty(cvar)
+if facemapping == true
    
    % remove nan ?
    
@@ -85,9 +116,9 @@ if ~isempty(cvar)
       cspec = buildCspec(cvar,cmin,cmax);
       
       if isfield(Basins,'Lat')
-         h.hbasins   = geoshow(Basins,'SymbolSpec',cspec);
+         h.basins = geoshow(Basins,'SymbolSpec',cspec);
       elseif isfield(Basins,'X')
-         h.hbasins   = mapshow(Basins,'SymbolSpec',cspec);
+         h.basins = mapshow(Basins,'SymbolSpec',cspec);
       end
       
    else
@@ -97,7 +128,7 @@ if ~isempty(cvar)
       for n = 1:numel(Basins)
          latn  = [Basins(n).Lat];
          lonn  = [Basins(n).Lon];
-         if isnan(cvar(n))
+         if isnan(cvar(n)) || cvar(n) == 0
             patchm(latn,lonn,'FaceVertexCData',[0.255 0.255 0.255],'FaceColor', ...
                'flat','FaceAlpha',0);
          else
@@ -109,7 +140,7 @@ if ~isempty(cvar)
       % see notes on the patch sorting at end, but TLDR: the patchobjs are
       % ordered opposite the structure meaning patchobjs(1) = Basins(end),
       % patchobjs(2) = Basins(end-1), and so on. The flipud and sorting takes
-      % care of all of the details. For testiing, it was easier to not sort
+      % care of all of the details. For testing, it was easier to not sort
       % Basins in the sortrows call below, but for labeling points, its needed.
       % Converting back to struct is only needed for consistency with other
       % parts of the code which assumes it is a struct.
@@ -126,13 +157,16 @@ if ~isempty(cvar)
       % right now, Basins are sorted from low to high cvar, so the index is
       % 1:numel(cvar), and the patchobjs are numel(cvar):-1:1, which means we
       % can use idx returned by sort on Basins.Area to reorder the patches
-      lineobjs    = findobj(ax.Children,'Type','Line');
-      patchobjs   = findobj(ax.Children,'Type','patch');
+      lineobjs = findobj(ax.Children,'Type','Line');
+      patchobjs = findobj(ax.Children,'Type','patch');
       
       if numel(patchobjs) ~= numel(Basins)
-         error('patch plotting failed')
+         % this occurs when the extent of the patches exceeds latlim/lonlim
+         warning(['number of patch objects does not match number of basins' newline...
+            'colorbar will not be accurate'])
+      else
+         ax.Children = [patchobjs(idx);lineobjs];
       end
-      ax.Children = [patchobjs(idx);lineobjs];
       
       % this is not needed if we use 'ascend' to sort Area, but in other cases,
       % flipping the patchobjs is needed when manipulating them.
@@ -155,18 +189,39 @@ if ~isempty(cvar)
    
    h.cbar = discrete_colorbar(cvar,'nvals',10,'location','east');
   
-%    h.cbar = colorbar('Location','east');
-   h.cbar.Position = [0.7 0.3 0.02 0.4];
+   % this worked for the alaska domain
+   % h.cbar.Position = [0.7 0.3 0.02 0.4];
+
+   % but in general, use this
+   h.cbar = colorbar('Location','east');
+   
    h.cbar.AxisLocation = 'in'; 
-   h.cbar.Label.String = ctxt;
-   h.cbar.Label.Interpreter = 'latex';
+   h.cbar.Label.String = cbartxt;
+   
+   % default text use tex, otherwise depends on whats passed in
+   if contains(p.UsingDefaults,'cbartxt')
+      %h.cbar.Label.Interpreter = 'tex'; 
+   else
+      h.cbar.Label.Interpreter = 'latex';
+   end
+
    % for vertical cbar, we use Label not title
    %set(get(h.cbar,'title'),'string',ctxt,           ...
    %   'VerticalAlignment','baseline','HorizontalAlignment','left');
    
 else
    
-   % plot the basins
+   % plot the basin outlines
+   [latn,lonn] = polyjoin({Basins.Lat},{Basins.Lon});
+   plotm(latn,lonn,'k','LineWidth',1);
+   
+%    for n = 1:numel(Basins)
+%       latn = [Basins(n).Lat];
+%       lonn = [Basins(n).Lon];
+% 
+%       % use patchm for consistency? or plotm for speed?
+%       plotm(latn,lonn,'k');
+%    end
    
 % % I used this to confirm that the sorting by area after 
 %    figure; plot([Basins(13).Lon],[Basins(13).Lat]); hold on;
@@ -175,14 +230,12 @@ else
 %       pause;
 %    end
    
-   
-   
 end
 
 if facelabels == true
    
    % add text labels
-   ltxt  = round([Basins.(cname)],2);
+   ltxt  = round([Basins.(cvarname)],2);
    xpos  = nan(numel(ltxt),1);
    ypos  = nan(numel(ltxt),1);
    
@@ -252,18 +305,23 @@ end
 
 
 % Make the colorbar transparent % https://stackoverflow.com/questions/37423603/setting-alpha-of-colorbar-in-matlab-r2015b
-drawnow;
-if facealpha<0.5
-   alphaVal = min(1.0,facealpha + 0.20);
-else
-   alphaVal = facealpha;
+if facemapping == true
+   drawnow;
+   if facealpha<0.5
+      alphaVal = min(1.0,facealpha + 0.20);
+   else
+      alphaVal = facealpha;
+   end
+   
+   cdata = h.cbar.Face.Texture.CData;
+   cdata(end,:) = uint8(alphaVal * cdata(end,:));
+   h.cbar.Face.Texture.ColorType = 'truecoloralpha';
+   h.cbar.Face.Texture.CData = cdata;
+   drawnow
 end
 
-cdata = h.cbar.Face.Texture.CData;
-cdata(end,:) = uint8(alphaVal * cdata(end,:));
-h.cbar.Face.Texture.ColorType = 'truecoloralpha';
-h.cbar.Face.Texture.CData = cdata;
-drawnow
+% once finished:
+tightmap
 
 % Make sure that the renderer doesn't revert your changes
 % h.cbar.Face.ColorBinding = 'discrete';

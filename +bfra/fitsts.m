@@ -1,4 +1,11 @@
 function [q,dqdt,dt,tq,rq,dq] = fitsts(T,Q,R,varargin)    
+%FITSTS fit recession events using splines. not implemented.
+% 
+% 
+% 
+% See also fitets, fitvts, fitcts
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 switch method
    

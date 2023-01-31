@@ -1,8 +1,17 @@
 function Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
-%AQUIFERPROPS computes aquifer properties hydraulic conductivity k, depth D, and
-%critical baseflow Q0
+%AQUIFERPROPS estimate aquifer properties
 % 
-% Required inputs:
+% Syntax
+% 
+%     Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
+% 
+% Description 
+% 
+%     Estimate aquifer properties hydraulic conductivity k, depth D, and
+%     critical baseflow Q0 
+% 
+% Required inputs
+% 
 %  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
 %  dqdt        =  discharge rate of change (L T^-2)
 %  alate       =  late-time a parameter in -dqdt = aq^b ()
@@ -13,7 +22,8 @@ function Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
 %  L           =  active stream length (L)
 %  soln        =  optional string indicating late-time theoretical solution
 % 
-% Optional name-value inputs:
+% Optional name-value inputs
+% 
 %  earlyqtls   =  reference quantiles that together define a pivot point
 %                 through which the straight line must pass (early time fit)
 %  lateqtls    =  reference quantiles that together define a pivot point
@@ -22,7 +32,9 @@ function Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
 %  Dd          =  drainage density. if provided, the relationship L=Dd*A will be
 %                 used to compute L instead of the input L value
 % 
-%  See also fitphi
+% See also fitphi
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 % input parsing

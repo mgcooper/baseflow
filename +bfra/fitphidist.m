@@ -1,23 +1,27 @@
 function [Fit,h] = fitphidist(phi,varargin)
-%FITPHIDIST fits a Beta distribution to a sample of drainable porosity (phi) values 
+%FITPHIDIST fit drainable porosity (phi) values with a Beta distribution
 % 
-% Syntax:
+% Syntax
 % 
-%  FIT = bfra.FITPHIDIST(phi);
-%  FIT = bfra.FITPHIDIST(___,plottype);
-%  FIT = bfra.FITPHIDIST(___,outputtype);
+%     FIT = bfra.FITPHIDIST(phi);
+%     FIT = bfra.FITPHIDIST(___,plottype);
+%     FIT = bfra.FITPHIDIST(___,outputtype);
 % 
-%  Fit = bfra.fitphidist(phi) returns probability distribution object 'Fit'
-%  which is a Beta Distribution fit to the input data in phi
+% Description
 % 
-%  Fit = bfra.fitphidist(phi,outputtype) returns a Beta Distribution fit to the
-%  input data in phi. 'outputtype' is 'PD', 'mean', 'median', or 'std', where
-%  default 'PD' is the Probability Distribution object.
+%     Fit = bfra.fitphidist(phi) returns probability distribution object 'Fit'
+%     which is a Beta Distribution fit to the input data in phi
 % 
-%  Fit = bfra.fitphidist(__,plottype) returns any of the prior options plus a
-%  figure showing the fit. plottype can be 'cdf' or 'pdf'. default is 'none'.
+%     Fit = bfra.fitphidist(phi,outputtype) returns a Beta Distribution fit to
+%     the input data in phi. 'outputtype' is 'PD', 'mean', 'median', or 'std',
+%     where default 'PD' is the Probability Distribution object.
 % 
-% Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
+%     Fit = bfra.fitphidist(__,plottype) returns any of the prior options plus a
+%     figure showing the fit. plottype can be 'cdf' or 'pdf'. default is 'none'.
+% 
+% See also eventphi, fitphi, fitphidist
+% 
+% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 % input parsing

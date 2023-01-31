@@ -1,15 +1,26 @@
 function [aQbstr,Qtstr] = aQbString(varargin)
-%AQBSTRING returns a formatted string for equation aQ^b
+%AQBSTRING return a formatted string for equation aQ^b
 %
-% INPUTS:
-% one input:      array [a,b]
-% two input:      scalars a,b
-% three inputs:   scalars a,b,Q0
-% OUTPUTS:
-% aQbstr:         formatted latex string for equation dQdt = aQb
-% Qtstr:          formatted latex string for equation Q(t) = f(a,b,Q0)
+% Syntax
+% 
+%     [aQbstr,Qtstr] = aQbString(varargin)
+% 
+% Optional inputs
+% 
+%     one input:      array [a,b]
+%     two input:      scalars a,b
+%     three inputs:   scalars a,b,Q0
+% 
+% Output
+% 
+%     aQbstr:         formatted latex string for equation dQdt = aQb
+%     Qtstr:          formatted latex string for equation Q(t) = f(a,b,Q0)
+% 
+% See also getstring
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-% TODO: merge this with bfra.strings
+% TODO: merge this with bfra.strings. See note below about $ after = sign.
 
 %-------------------------------------------------------------------------------
 % input handling

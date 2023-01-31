@@ -1,8 +1,28 @@
 function [Flow,Meta] = loadflow(basinname,varargin)
 %LOADFLOW load timeseries of streamflow and metadata for basin
 %
+% Syntax
+% 
+%     [Flow,Meta] = loadflow(basinname,varargin)
+% 
+% Description
+% 
+%     [Flow,Meta] = loadflow(basinname) returns table Flow containing discharge
+%     data for basin basinname and metadata about the site and catchment Meta.
 %
-% See also 
+%     [Flow,Meta] = loadflow(___,'t1',t1,'t2',t2) returns table Flow for
+%     the time period bounded by datetimes t1 and t2.
+%
+%     [Flow,Meta] = loadflow(___,'units',units) converts Flow from the standard
+%     units m3/s to user-specified units. Options are available using
+%     tab-completion.
+%
+%     [Flow,Meta] = loadflow(___,'gapfill',true) gap-fills missing data using an
+%     auto-regressive fit to annual data values.
+% 
+% See also loadcalm, loadbounds
+% 
+% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
 % parse inputs
 %------------------------------------------------------------------------------
@@ -21,10 +41,9 @@ p.parseMagically('caller');
 
 %p.addParameter('projection','geo',@(x)ischar(x));
 
-% NOTE: addvar is an option to add an unrelated input var, but
-% for now it means add a converted Q timeseries e.g. cm/yr
-% i commented out the part where addvar is checked so it is
-% defualt for now and I can adjust to addvar as above
+% NOTE: addvar is an option to add an unrelated input var, but for now it means
+% add a converted Q timeseries e.g. cm/yr i commented out the part where addvar
+% is checked so it is defualt for now and I can adjust to addvar as above
 
 if isnumeric(t1) %#ok<*NODEF>
    t1 = datetime(t1,'ConvertFrom','datenum');

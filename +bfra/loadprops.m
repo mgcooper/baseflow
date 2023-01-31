@@ -3,16 +3,17 @@ function [Dd,A,L,D] = loadprops(basinname,varargin)
 % 
 % Syntax
 % 
-%  Dd,A,L,D] = LOADPROPS(basinname) loads properties for basin with name
-%  basinname, Dd is drainage density in 1/km, A is area in m2, L is stream
-%  length in m, and D is aquifer thickness in meters
+%     [Dd,A,L,D] = loadprops(basinname,varargin)
 % 
-% Example
-%  
+% Description
+% 
+%     [Dd,A,L,D] = LOADPROPS(basinname) loads properties for basin with name
+%     basinname, Dd is drainage density in 1/km, A is area in m2, L is stream
+%     length in m, and D is aquifer thickness in meters
+% 
+% See also loadmeta, loadbounds
 % 
 % Matt Cooper, 03-Dec-2022, https://github.com/mgcooper
-% 
-% See also
 
 % parse inputs
 %------------------------------------------------------------------------------

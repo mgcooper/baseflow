@@ -1,7 +1,8 @@
 function [q,dqdt,dt,tq,rq,dq] = fitcts(T,Q,R,varargin) 
 %FITCTS fit q/dqdt using constant time step. not implemented.
 %
-
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % NOTE: to use any of these that involve more than 1 timestep
 % forward or backward, I'll need to adjust findevents to return a

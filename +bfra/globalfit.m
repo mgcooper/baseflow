@@ -1,30 +1,37 @@
 function GlobalFit = globalfit(K,Events,Fits,varargin)
-%GLOBALFIT takes the event-scale recession analysis parameters saved in
-%data table K and the event-scale data saved in Events and Fits and computes
-%'global' parameters tau, tau0, phi, bhat, ahat, Qexp, and Q0
+%GLOBALFIT fit global parameters using all individual event-scale recession data
+% 
+% Syntax
 %
-% Syntax:
+%     FIT = bfra.GLOBALFIT(K,Events,Fits);
+%     FIT = bfra.GLOBALFIT(K,Events,Fits,opts);
+%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
+%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
+%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
+%     FIT = bfra.GLOBALFIT(___,) 
+% 
+% Description
+% 
+%     FIT = bfra.GLOBALFIT(K,Events,Fits) uses the event-scale recession
+%     analysis parameters saved in data table K and the event-scale data saved
+%     in Events and Fits and computes 'global' parameters tau, tau0, phi, bhat,
+%     ahat, Qexp, and Q0.
 %
-%  FIT = bfra.GLOBALFIT(K,Events,Fits);
-%  FIT = bfra.GLOBALFIT(K,Events,Fits,opts);
-%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
-%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
-%  FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
-%  FIT = bfra.GLOBALFIT(___,)
-%
-% Author: Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
+% Required inputs
+% 
+%     K, Events, Fits are outputs of bfra.getevents and bfra.dqdt
+%     opts is a struct containing fields area, D0, and L (see below)
+%     AnnualFlow is a timetable or table of annual flow containing field Qcmd
+%     which is the average daily flow (units cm/day) posted annually. 
+% 
+% See also setopts, fitphi, eventphi, eventtau
+% 
+% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
+% 
+% TODO make the inputs more general, rather than these hard-coded structures
+% and tables
 
-% Required inputs:
-%  K, Events, Fits - output of bfra.getevents and bfra.dqdt
-%  opts - struct containing fields area, D0, and L (see below)
-%  AnnualFlow - timetable or table of annual flow containing field Qcmd which
-%  is the average daily flow (units cm/day) posted annually.
-%  TODO: make the inputs more general, rather than these hard-coded structures
-%  and tables
-%
-% See also setopts
-
-% NOTE: in the current setup, early/lateqtls are used for eventphi, refqtls for
+% NOTE in the current setup, early/lateqtls are used for eventphi, refqtls for
 % point cloud 
 
 %-------------------------------------------------------------------------------

@@ -1,11 +1,19 @@
 function [q,dqdt,t] = generateTestData(a,b,q0,t)
 %GENERATETESTDATA generate test data for baseflow recession analysis
 % 
-%  [q,dqdt,t] = bfra.generateTestData(a,b,Q0,t) generates timeseries of
-%  discharge Q, first derivative of discharge dQdt, and time t for parameter
-%  values a,b, and initial discharge Q0
+% Syntax
 % 
-% See also: bfra.Qnonlin
+%     [q,dqdt,t] = generateTestData(a,b,q0,t)
+% 
+% Description
+% 
+%     [q,dqdt,t] = bfra.generateTestData(a,b,Q0,t) generates timeseries of
+%     discharge Q, first derivative of discharge dQdt, and time t for parameter
+%     values a,b, and initial discharge Q0
+% 
+% See also bfra.Qnonlin
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % default Q0 and time
 switch nargin

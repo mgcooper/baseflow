@@ -1,10 +1,26 @@
 function [Calm,Meta] = loadcalm(basinname,varargin)
 %LOADCALM loads calm ALT data for a basin in the Bounds struct
-
-% since I think in terms of basins right now, not calm sites, this accepts
-% the basin name not the calm site name
+% 
+% Syntax
+% 
+%     [Calm,Meta] = loadcalm(basinname,varargin)
+% 
+% Description
+% 
+%     [Calm,Meta] = loadcalm(basinname) loads table Calm containing active layer
+%     thickness data for basin basinname from the Circumpolar Active Layer
+%     Monitoring program database, and metadata about the site Meta.
+% 
+%     [Calm,Meta] = loadcalm(__,'t1',t1,'t2',t2) returns table Calm for
+%     the time period bounded by datetimes t1 and t2.
+% 
+% See also loadbounds, loadflow
+% 
+% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
 % NOTE: does not support multiple basins, use loadcalm("All_Basins") and select
+% since I think in terms of basins right now, not calm sites, this accepts
+% the basin name not the calm site name
 
 %------------------------------------------------------------------------------
 validopts = @(x)any(validatestring(x,{'current','archive'}));

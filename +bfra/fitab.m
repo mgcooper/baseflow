@@ -1,22 +1,38 @@
 function [Fit,ok] = fitab(q,dqdt,method,varargin)
-%FITAB fits -dq/dt = aQ^b to estimate parameters a and b
+%FITAB fit event-scale recession equation -dq/dt = aQ^b
+% 
+% Syntax
+% 
+%     [Fit,ok] = fitab(q,dqdt,method,varargin)
+% 
+% Description
+% 
+%     [Fit,ok] = fitab(q,dqdt,method) fits event-scale recession equation
+%     -dq/dt = aQ^b to estimate parameters a and b using the specified fitting
+%     method. Valid methods are ordinary least squares (ols), non-linear least
+%     squares (nls), quantile regression (qtl), mean difference ('mean'), median
+%     difference ('median').
 %
-% Required inputs:
-%  q        =  vector double of discharge data (L T^-1)
-%  dqdt     =  vector double of discharge rate of change (L T^-2)
-%  method   =  char indicating the fitting method
+% Required inputs
+% 
+%     q        vector double of discharge data (L T^-1)
+%     dqdt     vector double of discharge rate of change (L T^-2)
+%     method   char indicating the fitting method
 %
-% Optional inputs:
-%  weights  =  vector double of weights for the fitting algorithm
-%  mask     =  vector logical mask to exclude values from fitting
-%  order    =  scalar, exponent in -dq/dt = aQ^b
-%  refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
-%  quantile =  scalar double, quantile used if 'method' == 'qtl' (quantile regression)
-%  Nboot    =  scalar double, bootstrap sample size for quantile regression
-%  plotfit  =  logical scalar indicating whether to make a plot or not
-%  fitopts  =  struct containing fitting options (not currently implemented)
+% Optional inputs
+% 
+%     weights  vector double of weights for the fitting algorithm
+%     mask     vector logical mask to exclude values from fitting
+%     order    scalar, exponent in -dq/dt = aQ^b
+%     refqtls  2x1 double, x/y quantiles used if 'method' == 'envelope'
+%     quantile scalar double, quantile used if 'method' == 'qtl' (quantile regression)
+%     Nboot    scalar double, bootstrap sample size for quantile regression
+%     plotfit  logical scalar indicating whether to make a plot or not
+%     fitopts  struct containing fitting options (not currently implemented)
 %
-% See also: prepfits
+% See also prepfits
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 methodlist     = {'nls','ols','mle','qtl','mean','median','envelope'};

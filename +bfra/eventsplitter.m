@@ -1,25 +1,37 @@
 function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
-%eventsplitter splits events into useable segments eg if an event is
-%interrupted by rainfall or convex dq/dt, the event is split into separate
-%segments.
+%eventsplitter split detected recession events into useable segments for fitting
 % 
-%  Required inputs
+% Syntax
 % 
-%     t        =  time
-%     q        =  flow (m3/time)
-%     r        =  rain (mm/time)
+%     [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
+% 
+% Description
+% 
+%     Split recession events detected by eventfinder into individual segments
+%     ready to fit with bfra.fitab or bfra.fitevents. For example, if an event
+%     is interrupted by rainfall or if rainfall is detected from convex dq/dt,
+%     the event can be split into separate segments thought to represent
+%     uninterrupted baseflow.
+% 
+% Required inputs
+% 
+%     t        time
+%     q        flow (m3/time)
+%     r        rain (mm/time)
 %
-%  Optional name-value inputs
+% Optional name-value inputs
 % 
-%     nmin        =  minimum event length
-%     fmax        =  maximum # of missing values gap-filled
-%     rmax        =  maximum run of sequential constant values
-%     rmin        =  minimum rainfall required to censor flow (mm/day?)
-%     rmconvex    =  remove convex derivatives
-%     rmnochange  =  remove consecutive constant derivates
-%     rmrain      =  remove rainfall
+%     nmin        minimum event length
+%     fmax        maximum # of missing values gap-filled
+%     rmax        maximum run of sequential constant values
+%     rmin        minimum rainfall required to censor flow (mm/day?)
+%     rmconvex    remove convex derivatives
+%     rmnochange  remove consecutive constant derivates
+%     rmrain      remove rainfall
 % 
-%  See also: getevents, findevents, eventfinder, eventpicker, eventplotter
+% See also getevents, eventfinder, eventpicker, eventplotter
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % parse inputs
 %-------------------------------------------------------------------------------

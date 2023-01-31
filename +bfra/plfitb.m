@@ -1,22 +1,35 @@
 function Fit = plfitb(x,varargin)
-%PLFITB returns [b,alpha,k]=bfra.plfitb(x,varargin) where x is continuous data
-%believed to follow an untruncated Pareto distribution with some unknown xmin
-%such that xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where
-%plfit is Aaron Clauset's function.
+%PLFITB fit an unbounded Pareto Distribution to recession parameter tau
+% 
+% Syntax
+% 
+%     Fit = plfitb(x,varargin)
+% 
+% Description
+% 
+%     Fit = plfitb(x,varargin) returns Fit containing the Pareto Distribution
+%     fit to input data x, where x is continuous data believed to follow an
+%     untruncated Pareto distribution with some unknown xmin such that
+%     xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where plfit
+%     is Aaron Clauset's function.
 %
-% Required inputs:
-%  x     = vector double of data believed to follow an untruncated Pareto distribution
+% Required inputs
+% 
+%     x        data believed to follow an untruncated Pareto distribution
 %
-% Optional inputs:
-%  xmin  = scalar double indicating the lower bound of the distribution
-%  range = the range of scaling parameters considered (see plfit.m)
-%  limit = scalar double that sets the upper bound of fitted exponent
-%  method = char indicating one of two algorithms (Clauset's or Hanel's)
-%  bootfit = logical indicating whether to bootstrap the uncertainties (slow)
-%  nreps = scalar double indicating how many replicates in the boot fit
-%  plotfit = logical indicating whether to call plplot
+% Optional inputs
+% 
+%     xmin     scalar double indicating the lower bound of the distribution
+%     range    the range of scaling parameters considered (see plfit.m)
+%     limit    scalar double that sets the upper bound of fitted exponent
+%     method   char indicating one of two algorithms (Clauset's or Hanel's)
+%     bootfit  logical indicating whether to bootstrap the uncertainties (slow)
+%     nreps    scalar double indicating how many replicates in the boot fit
+%     plotfit  logical indicating whether to call plplot
 %
-% See also: plplotb, plfit
+% See also plfit, plplotb, gpfitb
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

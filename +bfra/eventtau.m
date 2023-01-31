@@ -1,15 +1,26 @@
-% function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
 function [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)
 %EVENTTAU compute drainage timescale tau from event-scale parameters a and b 
 % 
-%  Syntax
+% Syntax
+% 
+%     [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)
+% 
+% Description
 % 
 %     tau = bfra.eventtau(K,Events,Fits) computes drainage timescale tau from
 %     event-scale parameters a,b, and flow Q using the structures K, Events, 
-%     and Fits produced with bfra.getevents and bfra.dqdt 
+%     and Fits produced with bfra.getevents and bfra.fitevents
 % 
+%     tau = bfra.eventtau(___,'aggfunc',aggfunc) aggregates the daily values
+%     to event-scale values using an aggregation function. Options are 'min',
+%     'max', 'mean', 'median'.
 % 
-%  See also eventphi
+% See also eventphi
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% old syntax:
+% function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

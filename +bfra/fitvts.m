@@ -1,21 +1,26 @@
 function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
-%FITVTS fits recession event using the variable timestep method
+%FITVTS fit recession event using the variable timestep method
 %
 %  Syntax
+% 
 %     VTS = bfra.fitvts(T,Q,R)
 %     VTS = bfra.fitvts(___,'vtsparam',vtsparam)
 %     VTS = bfra.fitvts(___,'plotfit',plotfit)
 %
-%  Required inputs
+% Required inputs
+% 
 %     T        : time (days)
 %     Q        : discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
 %     R        : rainfall (L T^-1, assumed to be mm d-1)
 %
-%  Optional name-value pairs
+% Optional name-value inputs
+% 
 %     vtsparam : scalar, double, parameter that controls window size
 %     plotfit  : logical, scalar, indicates whether to plot the fit
 %
-%  See also fitdqdt, fitets
+% See also fitdqdt, fitets
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

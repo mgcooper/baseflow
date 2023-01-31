@@ -1,24 +1,37 @@
 function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
-%FITPHI estimates drainable porosity phi using an early-time and
-%late-time solution. 
-% 
-% Required inputs:
-%  a1          =  early-time a in -dq/dt = aq^b
-%  a2          =  late-time a in -dq/dt = aq^b
-%  b2          =  late-time b
-%  A           =  basin area contributing to baseflow (L^2)
-%  D           =  saturated aquifer thickness (L)
-%  L           =  active stream length (L)
-% 
-% Optional inputs:
-%  theta       =  effective slope of basin contributing area
-%  isflat      =  logical flag indicating if horizontal or sloped aquifer
-%                 solution is applicable
-%  soln1       =  optional early-time theoretical solution
-%  soln2       =  optional late-time theoretical solution
-%  dispfit     =  logical flag indicating whether to plot the result
+%FITPHI estimates drainable porosity phi using an early- and late-time solution
 %
-%  See also eventphi, cloudphi, fitdistphi
+% Syntax
+% 
+%     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
+% 
+% Description
+% 
+%     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L) computes drainable porosity phi
+%     using the method of Troch, Troch, and Brutsaert, 1993 from early-time (a1)
+%     and late-time (a2,b2) recession parameters and aquifer properties area A,
+%     depth D, and channel length L. 
+% 
+% Required inputs
+% 
+%     a1    early-time a in -dq/dt = aq^b
+%     a2    late-time a in -dq/dt = aq^b
+%     b2    late-time b
+%     A     basin area contributing to baseflow (L^2)
+%     D     saturated aquifer thickness (L)
+%     L     active stream length (L)
+% 
+% Optional inputs
+% 
+%     theta    effective slope of basin contributing area
+%     isflat   logical flag indicating horizontal or sloped aquifer solution
+%     soln1    optional early-time theoretical solution
+%     soln2    optional late-time theoretical solution
+%     dispfit  logical flag indicating whether to plot the result
+%
+% See also eventphi, cloudphi, fitdistphi
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

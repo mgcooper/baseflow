@@ -1,5 +1,5 @@
 function varargout = prepalttrend(Calm,T,Q,Qb,Sb,Db,sigDb,varargin)
-%PREPALTTREND prep for fitting the ALT trend
+%PREPALTTREND prep data for fitting linear trend to active layer thickness data
 % 
 % Syntax
 % 

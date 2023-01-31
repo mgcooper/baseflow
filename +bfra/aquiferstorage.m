@@ -1,6 +1,20 @@
 function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
-% AQUIFERSTORAGE computes aquifer storage given input parameters a,b and flow
-% rates qmin/qmax.
+% AQUIFERSTORAGE estimate aquifer storage 
+% 
+% Syntax
+% 
+%     [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
+% 
+% Description 
+% 
+%     [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin) estimates minimum,
+%     maximum, and total change in storage S given input parameters a,b and flow
+%     rates qmin/qmax.
+% 
+% 
+% See also aquiferprops
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % input checks
 b    = round(b,2);

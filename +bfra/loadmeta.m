@@ -1,5 +1,17 @@
 function Meta = loadmeta(basinname,varargin)
 % LOADMETA load metadata for basin indicated by basinname
+% 
+% Syntax
+% 
+%     Meta = loadmeta(basinname,varargin)
+% 
+% Description
+% 
+%     Meta = loadmeta(basinname) loads metadata table for basinname.
+% 
+% See also loadflow, loadcalm, loadbounds
+% 
+% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 validopts = @(x)any(validatestring(x,{'current','archive'}));

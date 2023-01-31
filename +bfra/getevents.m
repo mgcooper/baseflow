@@ -1,40 +1,54 @@
 function Events = getevents(T,Q,R,varargin)
 %GETEVENTS get individual recession events from daily timeseries T, Q, and R.
-%Event discharge, timestamps, and diagnostic info about the events are returned
-%in output structure Events. Note: this function is a wrapper around eventfinder
-%to perform pre- and post-processing and organize all recession events into the
-%Events structure. 
 % 
-%  Syntax
+% Syntax
+% 
 %     Events = getevents(T,Q,R,varargin)
 % 
-%  Required inputs:
-%     T = time, nx1 vector of datetimes
-%     Q = flow, nx1 vector of discharge (length/time) (assumed m3/day/day)
-%     R = rain, nx1 vector of rainfall (length/time) (assumed mm/day)
+% Description
 % 
-%  Optional name-value inputs:
-%     opts        =  (optional) structure containing the following fields:
-%     qmin        =  minimum flow value, below which values are set nan
-%     nmin        =  minimum event length
-%     fmax        =  maximum # of missing values gap-filled
-%     rmax        =  maximum run of sequential constant values
-%     rmin        =  minimum rainfall required to censor flow (mm/day?)
-%     cmax        =  maximum run of sequential convex dQ/dt values
-%     rmconvex    =  remove convex derivatives
-%     rmnochange  =  remove consecutive constant derivates
-%     rmrain      =  remove rainfall
-%     pickevents  =  option to manually pick events
-%     plotevents  =  option to plot picked events
+%     Events = getevents(T,Q,R) Detects, processes, and organizes individual
+%     recession events from daily hydrograph timeseries T, Q, and rainfall R
+%     using default algorithm options. Event discharge, timestamps, and
+%     diagnostic info about the events are returned in output structure Events.
+%     Note: this function is a wrapper around eventfinder to perform pre- and
+%     post-processing and organize all recession events into the Events
+%     structure.
+%     
+%     Events = getevents(___,opts) uses user-defined options. See bfra.setopts
+%     for default options and optional values.
 % 
-% Tip: events are identified by their indices on the t,q,r arrays, so if
-% any filtering is applied prior to passing in the arrays, the data needs
-% to be used in subsequent functions or the indices won't be correct
+%     Tip: events are identified by their indices on the t,q,r arrays, so if
+%     any filtering is applied prior to passing in the arrays, the data needs
+%     to be used in subsequent functions or the indices won't be correct
 % 
-%  See also: fitevents, eventfinder, eventsplitter, eventpicker, eventplotter
+% Required inputs
 % 
-%  Updates
-%  17 Jan: renamed old getevents to wrapevents and old findevents to getevents
+%     T     time, nx1 vector of datetimes
+%     Q     flow, nx1 vector of discharge (length/time) (assumed m3/day/day)
+%     R     rain, nx1 vector of rainfall (length/time) (assumed mm/day)
+% 
+% Optional name-value inputs
+% 
+%     opts        (optional) structure containing the following fields:
+%     qmin        minimum flow value, below which values are set nan
+%     nmin        minimum event length
+%     fmax        maximum # of missing values gap-filled
+%     rmax        maximum run of sequential constant values
+%     rmin        minimum rainfall required to censor flow (mm/day?)
+%     cmax        maximum run of sequential convex dQ/dt values
+%     rmconvex    remove convex derivatives
+%     rmnochange  remove consecutive constant derivates
+%     rmrain      remove rainfall
+%     pickevents  option to manually pick events
+%     plotevents  option to plot picked events
+% 
+% See also fitevents, eventfinder, eventsplitter, eventpicker, eventplotter
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% Updates
+% 17 Jan: renamed old getevents to wrapevents and old findevents to getevents
 
 %-------------------------------------------------------------------------------
 % input handling

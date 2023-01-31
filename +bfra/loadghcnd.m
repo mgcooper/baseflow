@@ -1,5 +1,28 @@
 function GHCN = loadghcnd(basinname,varargin)
 % LOADGHCND reads in a global hydroclimatology network database file 
+% 
+% Syntax
+% 
+%     GHCN = loadghcnd(basinname,varargin)
+% 
+% Description
+% 
+%     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network data
+%     table for basin basinname. 
+% 
+%     GHCN = loadghcnd(___,'t1',t1,'t2',t2) returns Global Hydroclimatology
+%     Network data table for the time period bounded by datetimes t1 and t2. 
+% 
+%     GHCN = loadghcnd(___,'units',units) converts data in GHCN from the
+%     standard units mm/d to user-specified units. Options are available using
+%     tab-completion.
+% 
+%     GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an
+%     auto-regressive fit to annual data values.
+% 
+% See also loadflow, loadcalm, loadbounds
+% 
+% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 p              = inputParser;

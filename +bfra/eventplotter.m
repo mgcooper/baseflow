@@ -1,20 +1,34 @@
 function h = eventplotter(t,q,r,Info,varargin)
-%EVENTPLOTTER plots recession events detected by findevents, with options to
-%plot dq/dt as positive or negative values
+%EVENTPLOTTER plot recession events detected by eventfinder
 % 
-% Required inputs:
-%  t           =  time
-%  q           =  flow (m3/time)
-%  r           =  rain (mm/time)
-%  Info        =  Info structure returned by findevents.m
+% Syntax
 % 
-% Optional inputs:
+%     h = eventplotter(t,q,r,Info,varargin)
 % 
-% dqdt:         user-provided dqdt, default = centered finite diff
-% plotevents:   logical, name-value e.g. 'plotevents',true
-% plotneg:      logical, name-value
+% Description
 % 
-% %  See also: getevents, findevents, eventfinder, eventpicker, eventsplitter
+%     h = eventplotter(t,q,r,Info) Plots recession events identified by
+%     eventfinder on hydrograph t,q and rainfall r. Info is a structure returned
+%     by eventfinder that contains the indices of the start and end of each
+%     event as well as the local peaks, minimums, and runlength. An option to
+%     plot dq/dt as positive or negative values is available.
+% 
+% Required inputs
+% 
+%     t        time
+%     q        flow (m3/time)
+%     r        rain (mm/time)
+%     Info     Info structure returned by findevents.m
+% 
+% Optional name-value inputs
+% 
+%  dqdt: user-provided dqdt, default = centered finite diff
+%  plotevents: logical, name-value e.g. 'plotevents',true
+%  plotneg: logical, name-value
+% 
+% See also getevents, eventfinder, eventpicker, eventsplitter
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 %-------------------------------------------------------------------------------
 % input handling
