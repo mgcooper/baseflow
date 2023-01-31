@@ -366,11 +366,11 @@
          {"name":"labelplot", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.loadbounds":
+   "bfra.loadbasins":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "ordered","type": ["char","choices=bfra_stationlist"]},
+         {"name":"basinname", "kind": "ordered","type": ["char","choices=bfra.basinlist"]},
          {"name":"projection","kind": "namevalue","type": ["char","choices={'geo','ease'}"]}
       ]
    },
@@ -387,7 +387,7 @@
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra_stationlist"]},
+         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra.stationlist"]},
          {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
          {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
          {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
@@ -402,7 +402,7 @@
          {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["double","scalar"]]},
          {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["double","scalar"]]},
          {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
-         {"name":"gapfill",   "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
+         {"name":"gapfill",   "kind": "namevalue", "type": ["logical"],"purpose":"Option"}
       ]
    },
    "bfra.loadmeta":
@@ -427,11 +427,13 @@
       [
          {"name":"Basins",    "kind": "required",  "type": ["struct"]},
          {"name":"Meta",      "kind": "namevalue", "type": ["table"]},
-         {"name":"varname",   "kind": "namevalue", "type":"choices=fieldnames(basins)"},
-         {"name":"cbartitle", "kind": "namevalue", "type": ["char"]},
+         {"name":"facemapping","kind":"namevalue", "type": ["logical"],"purpose":"Option"},
+         {"name":"facelabels","kind": "namevalue", "type": ["logical"],"purpose":"Option"},
+         {"name":"facealpha", "kind": "namevalue", "type": ["numeric"]},
+         {"name":"cvarname",  "kind": "namevalue", "type": "choices=fieldnames(basins)"},
+         {"name":"cbartxt",   "kind": "namevalue", "type": ["char"]},
          {"name":"latlims",   "kind": "namevalue", "type": ["numeric"]},
          {"name":"lonlims",   "kind": "namevalue", "type": ["numeric"]},
-         {"name":"facealpha", "kind": "namevalue", "type": ["numeric"]},
          {"name":"proj",      "kind": "namevalue", "type": ["char","choices={'stereo','lambert'}"]},
          {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
       ]
@@ -446,6 +448,7 @@
          {"name":"cbartitle", "kind": "namevalue", "type": ["char"]},
          {"name":"latlims",   "kind": "namevalue", "type": ["numeric"]},
          {"name":"lonlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"proj",      "kind": "namevalue", "type": ["char","choices={'stereo','lambert'}"]},
          {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
       ]
    },

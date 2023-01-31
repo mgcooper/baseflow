@@ -7,26 +7,29 @@ warning off
 %% add paths
 % Get the path to this file, in case Setup is run from some other folder. More
 % robust than pwd(), but assumes the directory structure has not been modified.
-thisfile = mfilename('fullpath');
-thispath = fileparts(thisfile);
+thispath = fileparts(mfilename('fullpath'));
+
+% NOTE genpath ignores folders named private, folders that begin with the @
+% character (class folders), folders that begin with the + character (package
+% folders), folders named resources, or subfolders within any of these.
 
 % add paths containing source code
-% addpath(genpath([thispath filesep '+bfra']));
-% addpath(genpath([thispath filesep 'util']));
-
-% for octave compat, add all paths then remove +bfra
 addpath(genpath(thispath));
-rmpath(genpath([thispath filesep '+bfra']));
 
-% remove git paths
-rmpath(genpath([thispath filesep '.git*']));
+% remove namespace +bfra and git directories from path
+rmpath(genpath(fullfile(thispath,'+bfra')));
+rmpath(genpath(fullfile(thispath,'.git')));
 
 % remove paths containing example code
-% rmpath(genpath([thispath filesep 'examples']));
+% rmpath(genpath(fullfile(thispath,'examples')));
 
 % save the path??
 % savepath;
 % for now - let the user decide
+
+%% run Config, Startup, read .env, etc
+
+% TODO
 
 %% resolve dependencies
 
