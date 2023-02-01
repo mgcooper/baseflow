@@ -41,6 +41,9 @@ jobs:
           test-results-junit: test-results/results.xml
           code-coverage-cobertura: test-results/coverage.xml # mgc put them in one folder
           # code-coverage-cobertura: code-coverage/coverage.xml
+          # test-results-pdf: test-results/results.pdf # supported on macOS with R2020b and later
+          # output-detail: concise # none, terse, concise, detailed, or verbose, default is detailed for fails and concise otherwise
+          # logging-level: terse # same as above
 
       # As an alternative to run-tests, you can use run-command to execute a MATLAB script, function, or statement.
       #- name: Run all tests
