@@ -1,4 +1,4 @@
-
+function Publish()
 % script to publish bfra_gettingStarted.m as index.html on GitPages. 
 options = struct('format','html','outputDir','html/','useNewFigure',false);
 
@@ -7,11 +7,12 @@ publish('bfra_gettingStarted.m',options);
 publish('bfra_demo.m',options);
 publish('bfra_contents.m',options);
 
-% this will be used in github actions 
-% htmlDoc = publish('bfra_demo.m',options);
-% htmlDoc = publish('bfra_gettingStarted.m',options);
-% movefile(htmlDoc,'../docs/bfra_demo.html')
-% movefile(htmlDoc,'../docs/gettingStarted.html')
+% for github actions the landing page must be saved as index.html
+copyfile('html/bfra_gettingStarted.html','index.html');
+
+% not sure if other files can also be supported, if so:
+% copyfile('html/bfra_demo.html','bfra_demo.html');
+
 
 
 

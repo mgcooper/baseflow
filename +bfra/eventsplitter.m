@@ -33,21 +33,24 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if nmin is set to 0 (and maybe if it is set to 1) this method will fail
+% because runlength returns 1 for consecutive nan values, see isminlength.
+
 % parse inputs
 %-------------------------------------------------------------------------------
 p              = inputParser;
 p.FunctionName = 'eventsplitter';
 
-addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)  );
-addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
-addRequired(p, 'r',                  @(x) isnumeric(x)                  );
-addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
+addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)     );
+addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t));
+addRequired(p, 'r',                  @(x) isnumeric(x)                     );
+addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x) & x>2 );
+addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)       );
 
 parse(p,t,q,r,varargin{:});
 
@@ -133,39 +136,41 @@ ibad(ibad>numel(q))  = [];
 
 % Part 3: extract each valid recession event    
 
- % proceed from here
- tfc         = true(size(q));            % initialize candidates true
- tfk         = ones(size(q));            % initialize run lengths
- tfc(ibad)   = false;                    % set unuseable values false
- tfk(ibad)   = nan;                      % set unuseable values nan
- [tfk,is,ie] = isminlength(tfk,nmin);    % find events >= min length
- rl          = ie-is+1;                  % event (run) lengths
+% proceed from here
+tfc         = true(size(q));            % initialize candidates true
+tfk         = ones(size(q));            % initialize keeper run lengths
+tfc(ibad)   = false;                    % set unuseable values false
+tfk(ibad)   = nan;                      % set unuseable values nan
+[tfk,is,ie] = isminlength(tfk,nmin);    % find events >= min length
+rl          = ie-is+1;                  % event (run) lengths
 
- % pull out the events
- Nevents     = numel(is);
- T           = cell(Nevents,1);
- Q           = cell(Nevents,1);
- R           = cell(Nevents,1);
+% [test,istest,ietest] = isminlength(tfc,nmin);    % find events >= min length
 
- % apply min length filter and keep remaining events
- for n = 1:Nevents   
+% pull out the events
+Nevents     = numel(is);
+T           = cell(Nevents,1);
+Q           = cell(Nevents,1);
+R           = cell(Nevents,1);
 
-     % if event length < min length, ignore it
-     if rl(n)<nmin
-         Nevents = Nevents-1; 
-         continue; 
-     end 
-     qi  = q(is(n):ie(n)); 
-     if islineconvex(qi) || islinepositive(qi)
-         Nevents=Nevents-1;
-         continue; 
-     end
+% apply min length filter and keep remaining events
+for n = 1:Nevents   
 
-     T{n} = t(is(n):ie(n));
-     Q{n} = q(is(n):ie(n));
-     R{n} = r(is(n):ie(n));
+  % if event length < min length, ignore it
+  if rl(n)<nmin
+      Nevents = Nevents-1; 
+      continue; 
+  end 
+  qi  = q(is(n):ie(n)); 
+  if islineconvex(qi) || islinepositive(qi)
+      Nevents=Nevents-1;
+      continue; 
+  end
 
- end
+  T{n} = t(is(n):ie(n));
+  Q{n} = q(is(n):ie(n));
+  R{n} = r(is(n):ie(n));
+
+end
 
 % return events that passed the nmin filter
 if Nevents > 0

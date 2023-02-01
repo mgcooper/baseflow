@@ -1,4 +1,4 @@
-function Fit = plfitb(x,varargin)
+function varargout = plfitb(x,varargin)
 %PLFITB fit an unbounded Pareto Distribution to recession parameter tau
 % 
 % Syntax
@@ -120,6 +120,18 @@ if plotfit == true
    xci = [Fit.tau0_L Fit.tau0_H];
    figure; bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
    snapnow;
+end
+
+switch nargout
+   case 1
+      varargout{1} = Fit;
+   case 2
+      varargout{1} = 1+1/alpha;
+      varargout{2} = alpha;
+   case 3
+      varargout{1} = b;
+      varargout{2} = 1+1/alpha;
+      varargout{3} = xmin;
 end
 
 % NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should

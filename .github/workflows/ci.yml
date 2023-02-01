@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [ dev ]
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows you to run this workflow manually from the Actions tab (default branch only)
   workflow_dispatch:
 
 jobs:

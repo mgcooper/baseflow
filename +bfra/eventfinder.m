@@ -36,16 +36,16 @@ function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
 p              = inputParser;
 p.FunctionName = 'eventfinder';
 
-addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)  );
-addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t) );
-addRequired(p, 'r',                  @(x) isnumeric(x)                  );
-addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
+addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)     );
+addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t));
+addRequired(p, 'r',                  @(x) isnumeric(x)                     );
+addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x) & x>2 );
+addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)       );
 
 parse(p,t,q,r,varargin{:});
 
@@ -56,6 +56,16 @@ rmin        = p.Results.rmin;
 rmconvex    = p.Results.rmconvex;
 rmnochange  = p.Results.rmnochange;
 rmrain      = p.Results.rmrain;
+
+% allow input syntax eventfinder(t,q,[],...)
+if isempty(r)
+   r = zeros(size(t));
+end
+
+% convert to columns, in case this is not called from bfra.getevents
+t = t(:);
+q = q(:);
+r = r(:);
 
 %-------------------------------------------------------------------------------
    
