@@ -1,4 +1,6 @@
-name: MATLAB Setup and Run Tests on Github-Hosted Runner
+name: MATLAB Build and Test
+
+# note: paths are relative to top level, including actions/, matlab-actions/ etc.
 
 # Controls when the action will run. 
 on:
@@ -29,13 +31,16 @@ jobs:
         # release: r2020b
         # uses: matlab-actions/setup-matlab@v1.2.4
 
-      # # Runs a set of commands using the runners shell
-      # - name: Run tests and generate artifacts
-      #   uses: matlab-actions/run-tests@v1
-      #   with:
-      #     # source-folder: code
-      #     test-results-junit: test-results/results.xml
-      #     code-coverage-cobertura: code-coverage/coverage.xml
+      # Runs a set of commands using the runners shell
+      - name: Run tests and generate artifacts
+        uses: matlab-actions/run-tests@v1
+        with:
+          source-folder: +bfra
+          # select-by-tag: Unit
+          select-by-folder: +bfra/+test
+          test-results-junit: test-results/results.xml
+          code-coverage-cobertura: test-results/coverage.xml # mgc put them in one folder
+          # code-coverage-cobertura: code-coverage/coverage.xml
 
       # As an alternative to run-tests, you can use run-command to execute a MATLAB script, function, or statement.
       #- name: Run all tests
