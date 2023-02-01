@@ -33,9 +33,6 @@ fitting, event-ensemble probability-distribution fitting, and visualization.
 `baseflow` emphasizes the non-linear nature of lateral groundwater flow and
 the collective behavior of hillslope units that comprise hydrologic catchments.
 
-<!-- mgc example multiple citations: [@doe99; @smith2000; @smith2004] -->
-<!-- more info: https://pandoc.org/MANUAL.html#extension-citations -->
-
 `baseflow` was designed to be used by researchers in the hydrologic sciences
 but is also useful for students studying catchment hydrology. The `baseflow`
 software has been used in scientific publications [@cooper:2023] and forms
@@ -65,8 +62,10 @@ and refer to \autoref{eq:fourier} from text.
 [rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
 format.
 
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit. -->
+<!-- more info: https://pandoc.org/MANUAL.html#extension-citations -->
+
+<!-- If you want to cite a software repository URL (e.g. something on GitHub without a preferred -->
+<!-- citation) then you can do it with the example BibTeX entry below for @fidgit. --> -->
 
 <!-- For a quick reference, the following citation commands can be used:
 - `@author:2001`  ->  "Author et al. (2001)"
