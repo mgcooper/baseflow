@@ -1,1 +1,6 @@
-<!-- I copied the stuff in gen-pdf.yml from here: [draft-pdf-action](https://github.com/marketplace/actions/open-journals-pdf-generator). I think it will create the draft-pdf.yml file which is what actually generates the pdf, but I might need to add the stuff I want to gen-pdf.yml such as name=joss and path=../paper.md and then it gen's the pdf wihtout the content of draft-pdf.yml shown at the link above-->
+<!--
+Author: Matt Cooper (https://github.com/mgcooper)
+README.md (c) 2023, Matt Cooper
+Desc: description
+Created:  2023-02-01T02:46:55.907Z
+-->

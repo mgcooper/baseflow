@@ -1,4 +1,4 @@
-name: MATLAB Build and Test
+name: Tests
 
 # note: paths are relative to top level, including actions/, matlab-actions/ etc.
 
