@@ -21,11 +21,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out repository
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
       
       # Sets up MATLAB on the GitHub Actions runner
       - name: Setup MATLAB
         uses: matlab-actions/setup-matlab@v1
+        # release: r2020b
         # uses: matlab-actions/setup-matlab@v1.2.4
 
       # # Runs a set of commands using the runners shell
