@@ -52,8 +52,8 @@ end
 %------------------------------------------------------------------------------
 
 % load the flow data
-pathdata = [getenv('USERDATAPATH') 'interface/bfra/matfiles/'];
-filedata = [pathdata 'flow_prepped.mat'];
+pathdata = fullfile(getenv('USERDATAPATH'),'interface/bfra/matfiles/');
+filedata = fullfile(pathdata,'flow_prepped.mat');
 
 load(filedata,'Flow');
 
@@ -61,9 +61,9 @@ load(filedata,'Flow');
 if iscategorical(basinname); basinname = char(basinname); end
 
 % find the flow data (for exact match use ismember not contains)
-allnames    =  lower(Flow.Meta.name);
-istation    =  find(ismember(allnames,lower(basinname)));
-Meta        =  Flow.Meta(istation,:);
+allnames = lower(Flow.Meta.name);
+istation = find(ismember(allnames,lower(basinname)));
+Meta     = Flow.Meta(istation,:);
 
 %%%%%%%%%%%%%%%% new method that uses the raw .csv files
 %    sta         =  Meta.station{:};

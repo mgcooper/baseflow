@@ -2,7 +2,7 @@ function fdc = fdcurve(flow,varargin)
 %FDCURVE Flow duration curve
 
 %-------------------------------------------------------------------------------
-p              = MipInputParser;
+p              = magicParser;
 p.FunctionName = 'fdcurve';
 
 p.addRequired( 'flow',                    @(x)isnumeric(x)  );

@@ -1,5 +1,9 @@
 function Publish()
-% script to publish bfra_gettingStarted.m as index.html on GitPages. 
+%PUBLISH publish bfra_gettingStarted.m as index.html for GitPages
+
+% Note: I configured the repo to publish from docs/ and the default action is to
+% publish index.html using jekyll. For custom builds, use a .nojekyll file 
+
 options = struct('format','html','outputDir','html/','useNewFigure',false);
 
 publish('bfra_welcome.m',options);

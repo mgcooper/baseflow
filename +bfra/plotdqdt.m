@@ -31,7 +31,7 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 
 %-------------------------------------------------------------------------------  
 % input parser
-p               = MipInputParser;
+p               = magicParser;
 p.FunctionName  = 'plotdqdt';
 p.CaseSensitive = false;
 

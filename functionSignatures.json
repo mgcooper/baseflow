@@ -595,7 +595,7 @@
    {
       "inputs":
       [
-         {"name":"type", "kind": "required",  "type": ["char", "choices={'events','fits','globalfits'}"],"default":"'events'","purpose":"Option"},
+         {"name":"type", "kind": "required",  "type": ["char", "choices={'events','fits','globalfit'}"],"default":"'events'","purpose":"Option"},
          {"mutuallyExclusiveGroup":
             [
                [
@@ -624,6 +624,7 @@
                ],
                [
                   {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"drainagedens",    "kind": "namevalue", "type": ["scalar","double"]},
                   {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
                   {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
                   {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},

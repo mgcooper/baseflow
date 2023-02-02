@@ -36,6 +36,11 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 % if nmin is set to 0 (and maybe if it is set to 1) this method will fail
 % because runlength returns 1 for consecutive nan values, see isminlength.
 
+if nargin == 0
+   open bfra.eventsplitter;
+   return
+end
+
 % parse inputs
 %-------------------------------------------------------------------------------
 p              = inputParser;

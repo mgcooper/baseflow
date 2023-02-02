@@ -1,6 +1,6 @@
 function varargout = myccdf(data,varargin)
    
-   p = MipInputParser;
+   p = magicParser;
    p.addRequired('data',@(x)isnumeric(x));
    p.addParameter('makeplot',false,@(x)islogical(x));
    p.parseMagically('caller');
