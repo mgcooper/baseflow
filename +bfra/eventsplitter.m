@@ -72,12 +72,12 @@ debug       = false;
 %-------------------------------------------------------------------------------
 % % other way to parse inputs (not octave compatible):
 %    arguments
-%       t           datetime                         = 1
-%       q           double                           = 2
-%       r           double                           = 3
+%       t           datetime                         = NaT
+%       q           double                           = NaN
+%       r           double                           = zeros(size(q))
 %       opts.nmin   double {mustBePositive}          = 4
-%       opts.rmin   double {mustBePositive}          = 5
-%       opts.rmax   double {mustBePositive}          = 6
+%       opts.rmin   double {mustBePositive}          = 0
+%       opts.rmax   double {mustBePositive}          = 2
 %    end    
 %-------------------------------------------------------------------------------
 
