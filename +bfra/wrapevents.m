@@ -29,6 +29,12 @@ function [Events] = wrapevents(T,Q,R,varargin)
 % Note: flow comes in as m3/day/day
 % 
 % See also findevents
+% 
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 % NOTE: this function is only needed to enforce year-by-year analysis.
 % findevents can be used on a timeseries of any length, but it will return

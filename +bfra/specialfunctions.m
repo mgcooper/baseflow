@@ -1,6 +1,14 @@
 function varargout = specialfunctions(funcname,varargin)
-% SPECIALFUNCTIONS libarary of special functions required for baseflow recession
-% analysis. For example, the inverse incomplete beta function.
+% SPECIALFUNCTIONS libarary of special functions required for recession analysis
+% 
+%     fnc = specialfunctions(fR1) returns the inverse incomplete beta function
+%  
+% See also Qnonlin
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %    L2      = L.*L;
 %    phiA2   = phi.*A.^2;

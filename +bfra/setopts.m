@@ -1,9 +1,9 @@
-function opts = setopts(type,varargin)
-%SETOPTS sets default or custom bfra algorithm options for type 'events' or 'fits'
+function opts = setopts(funcname,varargin)
+%SETOPTS set algorithm options for functions getevents, fitevents, and globalfit
 %
 %  Required inputs
 %
-%     type        = 'events', 'fits', or 'globalfit'
+%     funcname    : 'getevents', 'fitevents', or 'globalfit'
 %
 %     indicates whether to send back the default options for the event detection
 %     algorithm 'getevents', the event fitting algorithm 'fitdqdt', or the
@@ -63,14 +63,14 @@ function opts = setopts(type,varargin)
 
 p                 = inputParser;
 p.FunctionName    = 'bfra.setopts';
-% p.PartialMatching = true;
-p.addRequired('type',@(x)ischar(x));
-parse(p,type);
 
-switch type
+p.addRequired('funcname',@(x)ischar(x));
+parse(p,funcname);
+
+switch funcname
 
    % event detection - input options for getevents
-   case 'events'
+   case 'getevents'
 
       addParameter(p,   'qmin',        1,          @(x) isnumericscalar(x)  );
       addParameter(p,   'nmin',        4,          @(x) isnumericscalar(x)  );
@@ -85,7 +85,7 @@ switch type
       addParameter(p,   'plotevents',  false,      @(x) islogicalscalar(x)  );
 
    % event fits - input options for fitevents
-   case 'fits'
+   case 'fitevents'
 
       addParameter(p,   'derivmethod', 'ETS',      @(x) ischar(x)             );
       addParameter(p,   'fitmethod',   'nls',      @(x) ischar(x)             );
@@ -117,8 +117,8 @@ switch type
 
 end
 
-parse(p,type,varargin{:});
+parse(p,funcname,varargin{:});
 
 opts = p.Results;
-opts = rmfield(opts,'type');
+opts = rmfield(opts,'funcname');
 

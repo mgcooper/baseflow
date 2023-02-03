@@ -22,7 +22,12 @@ function K = wrapfits( q,dqdt,deriv,method,order,station,eventdate,    ...
 %   Outputs:    K = table of computed values including a,b,tau,S, and
 %              confidence intervals
 % 
-% See also:
+% See also
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
 

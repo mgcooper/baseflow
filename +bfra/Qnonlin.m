@@ -1,5 +1,16 @@
 function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
 %QNONLIN plots the theoretical discharge predicted by a/b values
+% 
+% 
+% 
+% 
+% See also taufunc, getfunction, QtauString, QtString
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 
 % the loop is ugly but it's the easiest way to allow any size a,b,Q0.
 % if I wanted to restrict two of the three a,b,Q0 to be scalar and let
