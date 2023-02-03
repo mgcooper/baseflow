@@ -31,6 +31,9 @@ function varargout = plfitb(x,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %-------------------------------------------------------------------------------
 p              = inputParser;
 p.FunctionName = 'bfra.plfitb';
@@ -62,7 +65,7 @@ x     = x(x>0);
 if isnan(xmin)
    switch method
       case 'clauset'
-         [alpha,xmin,L,D] = plfit(x,'range',range,'limit',limit);
+         [alpha,xmin,L,D] = plfit(x,'range',range,'limit',limit,'plotdiag');
          if bootfit == true
             BootFit = plbootfit(x,range,limit,nreps);
          end

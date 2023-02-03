@@ -33,13 +33,11 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % if nmin is set to 0 (and maybe if it is set to 1) this method will fail
 % because runlength returns 1 for consecutive nan values, see isminlength.
-
-if nargin == 0
-   open bfra.eventsplitter;
-   return
-end
 
 % parse inputs
 %-------------------------------------------------------------------------------

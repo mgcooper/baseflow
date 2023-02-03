@@ -16,6 +16,9 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % input checks
 b    = round(b,2);
 a    = a(:);

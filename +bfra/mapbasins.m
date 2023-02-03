@@ -31,6 +31,9 @@ function h = mapbasins(Basins,varargin)
 % 
 % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %     NOTE: use geo!
 %     NOTE: variable name of cvar
 

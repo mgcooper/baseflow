@@ -47,6 +47,9 @@ function Events = getevents(T,Q,R,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % Updates
 % 17 Jan: renamed old getevents to wrapevents and old findevents to getevents
 

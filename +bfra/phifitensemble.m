@@ -18,6 +18,9 @@ function PhiFit = phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % phid  = bfra.eventphi(K,Fits,A,D,[],bhat);
 % phi   = bfra.fitphidist(phid,'mean','cdf');
 phidist(:,1) = bfra.eventphi(K,Fits,A,D,L,1,'lateqtls',lateqtls,'earlyqtls',earlyqtls);

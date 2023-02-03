@@ -16,5 +16,8 @@ function basins = basinlist
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 load basinlist basins
 basins = transpose(['ALL_BASINS', basins]);

@@ -15,6 +15,9 @@ function [Dd,A,L,D] = loadprops(basinname,varargin)
 % 
 % Matt Cooper, 03-Dec-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % parse inputs
 %------------------------------------------------------------------------------
 validopts = @(x)any(validatestring(x,{'current','archive'}));

@@ -19,6 +19,10 @@ function [t,q,r,tags] = flattenevents(T,Q,R,Info)
 % See also getevents, findevents
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
       
 % initialize output structure and output arrays
 nEvents  = numel(Info.istart);

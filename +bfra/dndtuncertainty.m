@@ -21,6 +21,9 @@ function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varar
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % parse inputs
 alpha = 0.05;
 testflag = false;

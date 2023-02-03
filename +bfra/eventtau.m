@@ -19,6 +19,9 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % old syntax:
 % function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
 
@@ -46,9 +49,15 @@ dqfnc    = @(a,dqdt) -dqdt./a;   % must have derived this at some point
 Taufnc   = bfra.taufunc;
 Sfnc     = @(a,b,q) (q.^(2-b))./(a*(2-b));
 
-Ktags    = K.eventTag;
-a        = K.a;
-b        = K.b;
+if isscalar(K)
+   Ktags    = K.eventTag;
+   a        = K.a;
+   b        = K.b;
+else
+   Ktags    = [K.eventTag];
+   a        = [K.a];
+   b        = [K.b];
+end
 
 numfits  = numel(a);            % use K b/c some 'Events' don't get fit
 

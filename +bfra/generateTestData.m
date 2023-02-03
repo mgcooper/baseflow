@@ -15,6 +15,9 @@ function [q,dqdt,t] = generateTestData(a,b,q0,t)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % default Q0 and time
 switch nargin
    case 0

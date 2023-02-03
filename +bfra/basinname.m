@@ -22,6 +22,10 @@ function basin = basinname(typenamehere)
 % See also bfra.loadcalm bfra.loadflow bfra.loadgrace bfra.stationlist
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % 
 % Todo: 'ALL_BASINS' should return all of the basin names, see bfra.stationlist
 % which appends 'ALL_BASINS' to the stationlist for use with loaddata functions

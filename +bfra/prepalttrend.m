@@ -11,6 +11,10 @@ function varargout = prepalttrend(Calm,T,Q,Qb,Sb,Db,sigDb,varargin)
 %  
 % 
 % Matt Cooper, 03-Dec-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % 
 % See also
 

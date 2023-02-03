@@ -20,6 +20,9 @@ function [Fit,b,alpha,k] = gpfitb(x,varargin)
 % 
 % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %------------------------------------------------------------------------------
 p              = inputParser;
 p.FunctionName = 'bfra.gpfitb';

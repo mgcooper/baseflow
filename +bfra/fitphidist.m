@@ -23,6 +23,9 @@ function [Fit,h] = fitphidist(phi,varargin)
 % 
 % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %-------------------------------------------------------------------------------
 % input parsing
 %-------------------------------------------------------------------------------

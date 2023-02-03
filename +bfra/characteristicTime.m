@@ -18,6 +18,9 @@ function [tc,tfunc] = characteristicTime(a,b,Q0)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % this is set up to return the function handle if no arguments are
 % passed in, or return a value for tc if a,b,Q0 are passed in
 if nargin == 0

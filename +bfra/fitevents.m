@@ -26,6 +26,9 @@ function [K,Fits] = fitevents(Events,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %-------------------------------------------------------------------------------
 p                 = inputParser;
 p.FunctionName    = 'fitevents';

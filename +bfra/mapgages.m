@@ -19,6 +19,9 @@ function h = mapgages(lat,lon,varargin)
 % 
 % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %     NOTE: use geo!
 
 % not sure if this function is deprecated by mapbasins, but I added the

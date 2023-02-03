@@ -33,6 +33,9 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %-------------------------------------------------------------------------------
 p              = inputParser;
 p.StructExpand = false;

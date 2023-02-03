@@ -18,6 +18,9 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
 % 
 % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % NOTE: does not support multiple basins, use loadcalm("All_Basins") and select
 % since I think in terms of basins right now, not calm sites, this accepts
 % the basin name not the calm site name

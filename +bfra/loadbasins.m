@@ -25,6 +25,9 @@ function [Basins,Meta,Poly] = loadbasins(basinname,varargin)
 % 
 % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % TODO: accept stationname. see loadcalm, it worked as soon as i added support
 % for stationname to bfra.loadmeta meaning it relies entirely on the basinname
 % returend by loadmeta, whereas this does not, because the Calm database has an

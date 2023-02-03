@@ -4,6 +4,9 @@ function [q,dqdt,dt,tq,rq,dq] = fitcts(T,Q,R,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % NOTE: to use any of these that involve more than 1 timestep
 % forward or backward, I'll need to adjust findevents to return a
 % longer timeseries

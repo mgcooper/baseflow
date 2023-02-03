@@ -19,6 +19,9 @@ function Fnc = getfunction(funcname)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 switch funcname
    case 'SofabQ'
       Fnc = @(a,b,Q) (1./(a.*(2-b))).*Q.^(2-b);

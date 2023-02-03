@@ -36,6 +36,9 @@ function Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 %-------------------------------------------------------------------------------
 % input parsing
 %-------------------------------------------------------------------------------
@@ -378,7 +381,6 @@ Props.input = p.Results;
 
 
 % ------------------------------------------------------------------------------
-
 
 
 

@@ -25,6 +25,9 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % note: only pass in identified recession events (not timeseries of
 % flow) because this first fits the ENTIRE recession to estimate 'gamma'
 % which is just a in the linear model -dq/dt = aQ. Then gamma is used to

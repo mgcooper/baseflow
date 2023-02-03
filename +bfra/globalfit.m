@@ -27,6 +27,10 @@ function GlobalFit = globalfit(K,Events,Fits,varargin)
 % See also setopts, fitphi, eventphi, eventtau
 % 
 % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % 
 % TODO make the inputs more general, rather than these hard-coded structures
 % and tables
@@ -95,6 +99,7 @@ Q  = Events.Q;       % daily streamflow [m3 d-1]
 %---------------
 [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
 TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
+% TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps,'limit',20);
 
 % [TestFit,testb] = bfra.gpfitb(GlobalFit.x,'xmin',GlobalFit.tau0,'bootfit',true);
 

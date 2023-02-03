@@ -9,6 +9,9 @@ function [N,q,dqdt,dq,dt,tq,rq,r2] = initfit(q,fittype)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 
 switch fittype
    

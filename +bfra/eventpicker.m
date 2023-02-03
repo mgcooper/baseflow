@@ -22,6 +22,9 @@ function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % TODO: compare subfunction eventPlotter here to bfra.eventplotter and to
 % versions in dev-bk. Cursory glance - eventPlotter includes option to plot
 % rain, but does not include 3rd subplot of d2q/dt in bfra.eventplotter

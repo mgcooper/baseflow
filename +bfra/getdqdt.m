@@ -34,6 +34,10 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 % See also getdqdt
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % 
 % Tip: this accepts pre-selected events, not raw timeseries. Use
 % bfra.findevents to pick Events, then bfra.getdqdt to fit the events.

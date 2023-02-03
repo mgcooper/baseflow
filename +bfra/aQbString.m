@@ -20,11 +20,13 @@ function [aQbstr,Qtstr] = aQbString(varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % TODO: merge this with bfra.strings. See note below about $ after = sign.
 
-%-------------------------------------------------------------------------------
-% input handling
-%-------------------------------------------------------------------------------
+
+%% parse inputs
 p = inputParser;
 p.FunctionName = 'bfra.aQbString';
 addOptional(p,'ab',[],@(x)isnumeric(x));
@@ -34,8 +36,8 @@ parse(p,varargin{:});
 ab = p.Results.ab;
 Q0 = p.Results.Q0;
 printvalues = p.Results.printvalues;
-%-------------------------------------------------------------------------------
 
+%% main function
 if printvalues == true
    
    aexp    = floor(log10(ab(1)));
