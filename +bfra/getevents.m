@@ -1,4 +1,4 @@
-function [Events] = getevents(T,Q,R,varargin)
+function [Events,AllInfo] = getevents(T,Q,R,varargin)
 %GETEVENTS wrapper around bfra.findevents to get recession all recession events
 %for a mulit-year timeseries of T, Q, and R
 %
@@ -164,6 +164,16 @@ if isempty(R); R = zeros(size(Q)); end
          tsave(  si:ei,thisYear)    =   datenum(eventT);
          tags(   si:ei,thisYear)    =   eventCount; 
          % eventCount tags events with index in K struct
+         
+         % patch 
+         fields = fieldnames(Info);
+         if thisEvent == 1
+            AllInfo = Info;
+         else
+            for n = 1:numel(fields)
+               AllInfo.(fields{n}) = unique(cat(1,AllInfo.(fields{n}),Info.(fields{n})));
+            end
+         end
          
       end
       
