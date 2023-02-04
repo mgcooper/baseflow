@@ -32,6 +32,8 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 %-------------------------------------------------------------------------------
 p                 = inputParser;
 p.FunctionName    = 'fitevents';
+p.StructExpand    = true;
+p.PartialMatching = true;
 
 addRequired(p, 'Events',               @(x) isstruct(x)                 );
 addParameter(p,'derivmethod', 'ETS',   @(x) ischar(x)                   );
@@ -42,7 +44,7 @@ addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
 addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
 addParameter(p,'saveplots',   false,   @(x) islogical(x) & isscalar(x)  );
 addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
-addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'vtsparam',    1.0,     @(x) isnumeric(x) & isscalar(x)  );
 
 
 parse(p,Events,varargin{:});

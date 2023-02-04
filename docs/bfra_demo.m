@@ -61,7 +61,10 @@ opts.Global = bfra.setopts('globalfit','drainagearea',A,'streamlength',L, ...
 %%
 % Load the example data and run the event detection algorithm
 % load dailyflow.mat
-Events = bfra.getevents(T,Q,R,opts.Events);
+[Events,Info] = bfra.getevents(T,Q,R,opts.Events);
+
+% plot the detected events
+bfra.eventplotter(T,Q,R,Info,'plotevents',true)
 
 %% 
 % The output structure Events contains arrays that are the same size as the

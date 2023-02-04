@@ -1,4 +1,4 @@
-function Events = getevents(T,Q,R,varargin)
+function [Events,Info] = getevents(T,Q,R,varargin)
 %GETEVENTS get individual recession events from daily timeseries T, Q, and R.
 % 
 % Syntax
@@ -17,6 +17,11 @@ function Events = getevents(T,Q,R,varargin)
 %     
 %     Events = getevents(___,opts) uses user-defined options. See bfra.setopts
 %     for default options and optional values.
+% 
+%     [Events,Info] = getevents(___) also returns struct Info which contains the
+%     indices of the identified local maxima, minima, convex points, candidate
+%     recession values, kept recession values, and the start and stop index of
+%     each kept event. Use this information with bfra.eventplotter.
 % 
 %     Tip: events are identified by their indices on the t,q,r arrays, so if
 %     any filtering is applied prior to passing in the arrays, the data needs
@@ -58,22 +63,24 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 %-------------------------------------------------------------------------------
 p                 = inputParser;
 p.FunctionName    = 'getevents';
+p.StructExpand    = true;
+p.PartialMatching = false;
 p.CaseSensitive   = true;              % true because T,Q,R are sent back
 
-addRequired(p, 'T',                  @(x) isnumeric(x) | isdatetime(x)  );
-addRequired(p, 'Q',                  @(x) isnumeric(x) & numel(x)==numel(T) );
-addRequired(p, 'R',                  @(x) isnumeric(x)                  );
-addParameter(p,'qmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'cmax',        2,     @(x) isnumeric(x) & isscalar(x)    );
-addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)    );
-addParameter(p,'pickevents',  false, @(x) islogical(x) & isscalar(x)  );
-addParameter(p,'plotevents',  false, @(x) islogical(x) & isscalar(x)  );
+addRequired(p, 'T',                  @(x) isnumeric(x) | isdatetime(x)     );
+addRequired(p, 'Q',                  @(x) isnumeric(x) & numel(x)==numel(T));
+addRequired(p, 'R',                  @(x) isnumeric(x)                     );
+addParameter(p,'qmin',        1,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'cmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
+addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'pickevents',  false, @(x) islogical(x) & isscalar(x)       );
+addParameter(p,'plotevents',  false, @(x) islogical(x) & isscalar(x)       );
 
 parse(p,T,Q,R,varargin{:});
 

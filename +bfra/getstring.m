@@ -63,6 +63,11 @@ switch requestedstring
       str = [ '$-\mathrm{d}Q/\mathrm{d}t \quad[\mathrm{m}^3\;' ...
          '\mathrm{d}^{-1}\;\mathrm{d}^{-1}]$'];
       
+   case {'d2Qdt','d2Qdt2','dq2/dt','dq2/dt2'}
+
+      str = [ '$-\mathrm{d}^2Q/\mathrm{d}t^2 \quad[\mathrm{m}^3\;' ...
+         '\mathrm{d}^{-1}\;\mathrm{d}^{-2}]$'];
+
    case {'dndt','dn/dt'}
       
       str = [ '$\mathrm{d}\eta/\mathrm{d}t \quad[\mathrm{cm}\;' ...
@@ -94,6 +99,10 @@ switch requestedstring
       
       str = '$-\mathrm{d}Q/\mathrm{d}t$';
       
+   case {'d2Qdt','d2Qdt2','dq2/dt','dq2/dt2'}
+      
+      str = '$-\mathrm{d}^2Q/\mathrm{d}t^2$';
+
    case {'dndt','dn/dt'}
       
       str = '$\mathrm{d}\eta/\mathrm{d}t$';

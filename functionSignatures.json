@@ -242,7 +242,7 @@
 
       "outputs":
       [
-         {"name":"K",         "type": ["table"] },
+         {"name":"K",         "type": ["struct"] },
          {"name":"Fits",      "type": ["struct"] }
       ]
    },
@@ -315,6 +315,12 @@
          {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ],
+
+      "outputs":
+      [
+         {"name":"Events",       "type": ["struct"] },
+         {"name":"Info",         "type": ["struct"] }
       ]
    },
    "bfra.getfunction":
@@ -336,10 +342,11 @@
    {
       "inputs":
       [
-         {"name":"K",               "kind": "required",  "type": ["table"]},
+         {"name":"K",               "kind": "required",  "type": ["struct"]},
          {"name":"Events",          "kind": "required",  "type": ["struct"]},
          {"name":"Fits",            "kind": "required",  "type": ["struct"]},
          {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
+         {"name":"drainagedens",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},

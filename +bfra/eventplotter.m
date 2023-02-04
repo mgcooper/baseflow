@@ -1,33 +1,33 @@
 function h = eventplotter(t,q,r,Info,varargin)
 %EVENTPLOTTER plot recession events detected by eventfinder
-% 
+%
 % Syntax
-% 
+%
 %     h = eventplotter(t,q,r,Info,varargin)
-% 
+%
 % Description
-% 
+%
 %     h = eventplotter(t,q,r,Info) Plots recession events identified by
 %     eventfinder on hydrograph t,q and rainfall r. Info is a structure returned
 %     by eventfinder that contains the indices of the start and end of each
 %     event as well as the local peaks, minimums, and runlength. An option to
 %     plot dq/dt as positive or negative values is available.
-% 
+%
 % Required inputs
-% 
+%
 %     t        time
 %     q        flow (m3/time)
 %     r        rain (mm/time)
 %     Info     Info structure returned by findevents.m
-% 
+%
 % Optional name-value inputs
-% 
+%
 %  dqdt: user-provided dqdt, default = centered finite diff
 %  plotevents: logical, name-value e.g. 'plotevents',true
 %  plotneg: logical, name-value
-% 
+%
 % See also getevents, eventfinder, eventpicker, eventsplitter
-% 
+%
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
@@ -38,113 +38,264 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 p              = inputParser;
 p.FunctionName = 'eventplotter';
 
+N = numel(Info.istart);
+
 addRequired(p, 't',                    @(x) isnumeric(x) | isdatetime(x)      );
 addRequired(p, 'q',                    @(x) isnumeric(x) & numel(x)==numel(t) );
 addRequired(p, 'r',                    @(x) isnumeric(x)                      );
 addRequired(p, 'Info',                 @(x) isstruct(x)                       );
+addOptional(p, 'eventTags',   1:N,     @(x) isnumericvector(x)                );
 addParameter(p,'plotneg',     false,   @(x) islogical(x) & isscalar(x)        );
 addParameter(p,'plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
 addParameter(p,'dqdt',   derivative(q),@(x) isnumeric(x) & numel(x)==numel(t) );
 
 parse(p,t,q,r,Info,varargin{:});
 
+eventTags   = p.Results.eventTags;
 plotneg     = p.Results.plotneg;
 plotevents  = p.Results.plotevents;
 dqdt        = p.Results.dqdt;
 
-%-------------------------------------------------------------------------------
-
 % short circuits
 if plotevents == false; h = []; return; end
 if isempty(Info.istart); disp('no valid events'); h = []; return; end
-%-------------------------------------------------------------------------------
-    
-ikeep   = Info.ikeep;
-imax    = Info.imaxima;
-imin    = Info.iminima;
-icon    = Info.iconvex;
 
-h.Info  = Info;
+% otherwise, prep the data to plot
 
-d2qdt   = derivative(dqdt);
-posidx  = dqdt>=0;
-negidx  = dqdt<0;
-sz      = 20;
+sz = 20; % this controls the size of the scatter symbols
 
-if plotneg == true
-  dqdt    = -dqdt;
-  d2qdt   = -d2qdt;
+% compute the second derivative and the increasing/decreasing values. do this
+% here so the indices are relative to the same T,Q vectors as the Info indices
+d2qdt = derivative(dqdt);
+Info.ipositive = find(dqdt>=0);
+Info.inegative = find(dqdt<0);
+
+% get the data for the requested events identified by their event tags
+if numel(eventTags) == N
+   idx = 1:numel(t); % all events were requested
+else
+   % create an index for the period of requested events padded by a week 
+   idx = Info.istart(min(eventTags)):1:Info.istop(max(eventTags));
+
+   % this pads the indices by one week (or any other amount)
+   idx = [idx(1)-10:1:idx(1)-1 idx idx(end)+1:1:idx(end)+10];
+
+   % this uses all indices in the year(s) of this event(s)
+   % idx = find(ismember(year(t),unique(year(t(idx)))));
 end
 
-% new  - add 50th percentil
-q50     =   quantile(q,0.5);
+fields = fieldnames(Info);
+for n = 1:numel(fields)
+   thisfield = Info.(fields{n});
+   keep = ismember(thisfield,idx);
+   Info.(fields{n}) = thisfield(keep);
+end
+
+% convert the first and second derivatives to positive values
+if plotneg == true
+   dqdt = -dqdt;
+   d2qdt = -d2qdt;
+end
+
+% fields to plot
+plotfields = {'ipositive','inegative','imaxima','iminima','iconvex','ikeep'};
+
+% turned this off so h is a gobjects array
+% h.Info = Info;
 
 % make the figure
-h.f     =   macfig; 
-%     h.t1    =   tiledlayout(3,1); 
-%     h.ax1   =   nexttile;
-h.t1    =   subtight(3,1,1,'style','fitted'); 
-h.ax1   =   gca;
-h.s1a   =   scatter(t(posidx),q(posidx),sz,'filled'); hold on;
-h.s1b   =   scatter(t(negidx),q(negidx),sz,'filled'); datetick; 
-h.s1c   =   scatter(t(imax),q(imax),sz*2,'filled');
-h.s1d   =   scatter(t(imin),q(imin),sz*2,'filled');
-h.s1e   =   scatter(t(icon),q(icon),sz,'filled');
-h.s1f   =   scatter(t(ikeep),q(ikeep),sz*2.5,'filled');
+h.f = figure('Position',[1,1,1152,616]);
 
-h.s1g   =   hline(q50,':');
+% plot the panels
+for m = 1:3
 
-% plot the events identified by bfra.findevents, just to be sure
-%     for i = 1:length(T)
-%         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);
-%     end
+   h.subplot(m) = subtight(3,1,m,'style','fitted');
+   h.ax(m) = gca; hold on;
 
-h.l1    =   legend('increasing','decreasing','maxima','minima',     ...
-              'convex','keep','keep (check)');
-          ylabel('Q'); 
-%figformat;
+   for n = 1:numel(plotfields)
+      
+      thisfield = plotfields{n};
+      ifield = Info.(thisfield);
+   
+      % increase the plot symbol size depending on the field
+      switch thisfield
+         case {'imaxima','iminima'}
+            ssize = 2*sz;
+         case 'ikeep'
+            ssize = 2.5*sz;
+         otherwise
+            ssize = sz;
+      end
 
+      switch m
+         case 1 % Q
+            h1.(thisfield) = scatter(h.ax(m),t(ifield),q(ifield),ssize,'filled');
+         case 2 % dQ/dt
+            h2.(thisfield) = scatter(h.ax(m),t(ifield),dqdt(ifield),ssize,'filled');
+         case 3 % d2Q/dt2
+            h3.(thisfield) = scatter(h.ax(m),t(ifield),d2qdt(ifield),ssize,'filled');
+      end
+      
+   end
 
-h.t2    =   subtight(3,1,2,'style','fitted'); 
-h.ax2   =   gca;
-h.s2a   =   scatter(t(posidx),dqdt(posidx),sz,'filled'); hold on;
-h.s2b   =   scatter(t(negidx),dqdt(negidx),sz,'filled');
-h.s2c   =   scatter(t(imax),dqdt(imax),sz*2,'filled');
-h.s2d   =   scatter(t(imin),dqdt(imin),sz*2,'filled');
-h.s2e   =   scatter(t(icon),dqdt(icon),sz,'filled');
-h.s2f   =   scatter(t(ikeep),dqdt(ikeep),sz*2.5,'filled');
-h.hl2   =   hline(0,'k-'); h.hl2.LineWidth = 1; 
-h.l2    =   legend('increasing','decreasing','maxima','minima',     ...
-              'convex','keep','AutoUpdate','off');
-
-if plotneg == true
-  ylabel('-dQ/dt'); 
-else
-  ylabel('dQ/dt'); 
+   legend('increasing','decreasing','maxima','minima','convex','keep', ...
+      'AutoUpdate','off','Orientation','horizontal','Location','ne');
 end
-datetick;
-%figformat;
 
-%     h.ax3   =   nexttile; 
-h.t3    =   subtight(3,1,3,'style','fitted'); 
-h.ax3   =   gca;
-h.s3a   =   scatter(t(posidx),d2qdt(posidx),sz,'filled'); hold on;
-h.s3b   =   scatter(t(negidx),d2qdt(negidx),sz,'filled');
-h.s3c   =   scatter(t(imax),d2qdt(imax),sz*2,'filled');
-h.s3d   =   scatter(t(imin),d2qdt(imin),sz*2,'filled');
-h.s3e   =   scatter(t(icon),d2qdt(icon),sz,'filled');
-h.s3f   =   scatter(t(ikeep),d2qdt(ikeep),sz*2.5,'filled');
-h.hl3   =   hline(0,'k-'); h.hl3.LineWidth = 1;     
-h.l3    =   legend('increasing','decreasing','maxima','minima',     ...
-              'convex','keep','AutoUpdate','off');
+% add labels
+ylabel(h.ax(1),bfra.getstring('Q','units',true));
+ylabel(h.ax(2),bfra.getstring('dQdt','units',true));
+ylabel(h.ax(3),bfra.getstring('d2Qdt2','units',true));
 
-if plotneg == true
-  ylabel('$-\mathrm{d}^2Q/\mathrm{d}t^2$','Interpreter','latex'); 
-else
-  ylabel('$\mathrm{d}^2Q/\mathrm{d}t^2$','Interpreter','latex'); 
-end
-datetick
+% add a line at zero
+h2.zeroline = plot(h.ax(2),xlim(h.ax(2)),[0 0],'k-','LineWidth',1);
+h3.zeroline = plot(h.ax(3),xlim(h.ax(3)),[0 0],'k-','LineWidth',1);
 
-h.l1.Location   = 'best';
-h.l2.Location   = 'best';
-h.l3.Location   = 'best';
+h.h1 = h1;
+h.h2 = h2;
+h.h3 = h3;
+
+
+% % h.l1.Location   = 'best';
+% % h.l2.Location   = 'best';
+% % h.l3.Location   = 'best';
+% 
+% 
+% % plot the 50th percentile as a reference line
+% % q50 = quantile(q,0.5);
+% % h1.refline = hline(h.ax(1),q50,':'); % add the 50th quantile line
+% 
+% 
+% % plot the events identified by bfra.findevents, just to be sure
+% %     for i = 1:length(T)
+% %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);
+% %     end
+% % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep','keep (check)');
+% 
+% h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep');
+% ylabel(bfra.getstring('Q','units',true));
+% 
+% %-----------------------
+% % SECOND PANEL - dq/dt
+% %-----------------------
+% h.t2 = subtight(3,1,2,'style','fitted');
+% h.ax2 = gca;
+% 
+% for n = 1:numel(plotfields)
+%    
+%    thisfield = plotfields{n};
+%    ifield = Info.(thisfield);
+% 
+%    % increase the plot symbol size depending on the field
+%    switch thisfield
+%       case {'imaxima','iminima'}
+%          ssize = 2*sz;
+%       case 'ikeep'
+%          ssize = 2.5*sz;
+%       otherwise
+%          ssize = sz;
+%    end
+%    h.(thisfield) = scatter(t(ifield),dqdt(ifield),ssize,'filled');
+% end
+% 
+% % add a line at zero
+% h.hl2 = hline(0,'k-'); h.hl2.LineWidth = 1;
+% h.l2 = legend('increasing','decreasing','maxima','minima','convex','keep', ...
+%    'AutoUpdate','off');
+% 
+% if plotneg == true
+%    ylabel(bfra.getstring('dQ/dt','units',true));
+% else
+%    ylabel(strrep(bfra.getstring('dQ/dt','units',true),'-\','\'));
+% end
+% datetick;
+% 
+% %-----------------------
+% % THIRD PANEL - d2q/dt
+% %-----------------------
+% h.t3 = subtight(3,1,3,'style','fitted');
+% h.ax3 = gca;
+% 
+% for n = 1:numel(plotfields)
+%    
+%    thisfield = plotfields{n};
+%    ifield = Info.(thisfield);
+% 
+%    % increase the plot symbol size depending on the field
+%    switch thisfield
+%       case {'imaxima','iminima'}
+%          ssize = 2*sz;
+%       case 'ikeep'
+%          ssize = 2.5*sz;
+%       otherwise
+%          ssize = sz;
+%    end
+%    h.(thisfield) = scatter(t(ifield),dqdt(ifield),ssize,'filled');
+% end
+% 
+% h.l1.Location   = 'best';
+% h.l2.Location   = 'best';
+% h.l3.Location   = 'best';
+% 
+% 
+% % % make the figure
+% % ikeep = Info.ikeep;
+% % imax = Info.imaxima;
+% % imin = Info.iminima;
+% % icon = Info.iconvex;
+% % ipos = Info.ipositive;
+% % ineg = Info.inegative;
+% % 
+% % h.f = figure('Position',[1,1,1152,616]);
+% % h.t1 = subtight(3,1,1,'style','fitted');
+% % h.ax1 = gca; hold on;
+% % h.ipos = scatter(t(ipos),q(ipos),sz,'filled');
+% % h.ineg = scatter(t(ineg),q(ineg),sz,'filled'); datetick;
+% % h.s1c = scatter(t(imax),q(imax),sz*2,'filled');
+% % h.s1d = scatter(t(imin),q(imin),sz*2,'filled');
+% % h.s1e = scatter(t(icon),q(icon),sz,'filled');
+% % h.s1f = scatter(t(ikeep),q(ikeep),sz*2.5,'filled');
+% % 
+% % % prior behavior, this would have gone after the make figure
+% % % h.t1 = tiledlayout(3,1);
+% % % h.ax1 = nexttile;
+% % 
+% % h.t2    =   subtight(3,1,2,'style','fitted');
+% % h.ax2   =   gca;
+% % h.s2a   =   scatter(t(ipos),dqdt(ipos),sz,'filled'); hold on;
+% % h.s2b   =   scatter(t(ineg),dqdt(ineg),sz,'filled');
+% % h.s2c   =   scatter(t(imax),dqdt(imax),sz*2,'filled');
+% % h.s2d   =   scatter(t(imin),dqdt(imin),sz*2,'filled');
+% % h.s2e   =   scatter(t(icon),dqdt(icon),sz,'filled');
+% % h.s2f   =   scatter(t(ikeep),dqdt(ikeep),sz*2.5,'filled');
+% % h.hl2   =   hline(0,'k-'); h.hl2.LineWidth = 1;
+% % h.l2    =   legend('increasing','decreasing','maxima','minima',     ...
+% %    'convex','keep','AutoUpdate','off');
+% % 
+% % if plotneg == true
+% %    ylabel('-dQ/dt');
+% % else
+% %    ylabel('dQ/dt');
+% % end
+% % datetick;
+% % %figformat;
+% % 
+% % %     h.ax3   =   nexttile;
+% % h.t3    =   subtight(3,1,3,'style','fitted');
+% % h.ax3   =   gca;
+% % h.s3a   =   scatter(t(ipos),d2qdt(ipos),sz,'filled'); hold on;
+% % h.s3b   =   scatter(t(ineg),d2qdt(ineg),sz,'filled');
+% % h.s3c   =   scatter(t(imax),d2qdt(imax),sz*2,'filled');
+% % h.s3d   =   scatter(t(imin),d2qdt(imin),sz*2,'filled');
+% % h.s3e   =   scatter(t(icon),d2qdt(icon),sz,'filled');
+% % h.s3f   =   scatter(t(ikeep),d2qdt(ikeep),sz*2.5,'filled');
+% % h.hl3   =   hline(0,'k-'); h.hl3.LineWidth = 1;
+% % h.l3    =   legend('increasing','decreasing','maxima','minima',     ...
+% %    'convex','keep','AutoUpdate','off');
+% % 
+% % if plotneg == true
+% %    ylabel('$-\mathrm{d}^2Q/\mathrm{d}t^2$','Interpreter','latex');
+% % else
+% %    ylabel('$\mathrm{d}^2Q/\mathrm{d}t^2$','Interpreter','latex');
+% % end
+% % datetick

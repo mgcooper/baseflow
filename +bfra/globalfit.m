@@ -31,7 +31,7 @@ function GlobalFit = globalfit(K,Events,Fits,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% 
+
 % TODO make the inputs more general, rather than these hard-coded structures
 % and tables
 
@@ -44,25 +44,25 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 p                 = inputParser;
 p.FunctionName    = 'bfra.globalfit';
 p.StructExpand    = true;
-% p.PartialMatching = true;
+p.PartialMatching = false;
 
-addRequired(p,    'K',                             @(x)isstruct(x)               );
-addRequired(p,    'Events',                        @(x)isstruct(x)               );
-addRequired(p,    'Fits',                          @(x)isstruct(x)               );
-addParameter(p,   'drainagearea',   nan,           @(x)isnumericscalar(x)        );
-addParameter(p,   'drainagedens',   nan,           @(x)isnumericscalar(x)        );
-addParameter(p,   'aquiferdepth',   nan,           @(x)isnumericscalar(x)        );
-addParameter(p,   'streamlength',   nan,           @(x)isnumericscalar(x)        );
-addParameter(p,   'aquiferslope',   nan,           @(x)isnumericscalar(x)        );
-addParameter(p,   'aquiferbreadth', nan,           @(x)isnumericscalar(x)        );
-addParameter(p,   'isflat',         true,          @(x)islogicalscalar(x)        );
-addParameter(p,   'plotfits',       false,         @(x)islogicalscalar(x)        );
-addParameter(p,   'bootfit',        false,         @(x)islogicalscalar(x)        );
-addParameter(p,   'nreps',          1000,          @(x)isdoublescalar(x)         );
-addParameter(p,   'phimethod',      'pointcloud',  @(x)ischar(x)                 );
-addParameter(p,   'refqtls',        [0.50 0.50],   @(x)isnumericvector(x)        );
-addParameter(p,   'earlyqtls',      [0.90 0.90],   @(x)isnumericvector(x)        );
-addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)isnumericvector(x)        );
+addRequired( p,   'K',                             @(x)isstruct(x)            );
+addRequired( p,   'Events',                        @(x)isstruct(x)            );
+addRequired( p,   'Fits',                          @(x)isstruct(x)            );
+addParameter(p,   'drainagearea',   nan,           @(x)isnumericscalar(x)     );
+addParameter(p,   'drainagedens',   0.8,           @(x)isnumericscalar(x)     );
+addParameter(p,   'aquiferdepth',   nan,           @(x)isnumericscalar(x)     );
+addParameter(p,   'streamlength',   nan,           @(x)isnumericscalar(x)     );
+addParameter(p,   'aquiferslope',   nan,           @(x)isnumericscalar(x)     );
+addParameter(p,   'aquiferbreadth', nan,           @(x)isnumericscalar(x)     );
+addParameter(p,   'isflat',         true,          @(x)islogicalscalar(x)     );
+addParameter(p,   'plotfits',       false,         @(x)islogicalscalar(x)     );
+addParameter(p,   'bootfit',        false,         @(x)islogicalscalar(x)     );
+addParameter(p,   'nreps',          1000,          @(x)isdoublescalar(x)      );
+addParameter(p,   'phimethod',      'pointcloud',  @(x)ischar(x)              );
+addParameter(p,   'refqtls',        [0.50 0.50],   @(x)isnumericvector(x)     );
+addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)isnumericvector(x)     );
+addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)isnumericvector(x)     );
 
 
 parse(p,K,Events,Fits,varargin{:});
@@ -114,8 +114,8 @@ itau     = TauFit.taumask;
 
 % fit a
 % -------
-[ahat,ahatLH,xbar,ybar] =  bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
-                           'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
+[ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
+   'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
 
 % the alternative approach would find a
                         

@@ -8,7 +8,7 @@ function [taufunc,tau] = taufunc(a,b,Q)
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
+% if nargin == 0; open(mfilename('fullpath')); return; end
 
 % first get tau function
 taufunc = @(a,b,Q) 1./a.*Q.^(1-b);
