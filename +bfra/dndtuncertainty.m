@@ -1,20 +1,28 @@
 function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)
 %DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate
 %
-%  Compute the combined uncertainty (with correlation) for:
-%     dn/dt = lambda*dq/dt
-%  where dn/dt is the 'long term' (interannual) trend in groundwater layer
-%  thickness (n), q is the 'long term' trend in baseflow, and 
-%     lambda = tau/phi*1/(N+1) 
-%  is the linearized sensitivity coefficient with reference drainage timescale
-%  tau [days], drainable porosity [-], and exponent N [-], where N=3-2b for all
-%  known flat-aquifer and all known linearized sloped-aquifer solutions to the
-%  one-dimensional groundwater flow equation for a Boussinesq aquifer. The
-%  parameter b is from -dQ/dt = aQb.
+% Syntax
+% 
+%     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)
+% 
+% Description
+% 
+%     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts)
+%     Computes the combined uncertainty (with correlation) for: dn/dt =
+%     lambda*dq/dt where dn/dt is the 'long term' (interannual) trend in
+%     groundwater layer thickness (n), q is the 'long term' trend in baseflow,
+%     and lambda = tau/phi*1/(N+1) is the linearized sensitivity coefficient
+%     with reference drainage timescale tau [days], drainable porosity [-], and
+%     exponent N [-], where N=3-2b for all known flat-aquifer and all known
+%     linearized sloped-aquifer solutions to the one-dimensional groundwater
+%     flow equation for a Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
 %
-%
-%
-% See also 
+% See also alttrend, aquiferthickness
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 % parse inputs
 alpha = 0.05;
@@ -27,7 +35,14 @@ elseif nargin == 8
 end
 
 % convert time in days to years
+if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
+[~,T] = padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), ...
+   datenum(year(T(end)),12,31),1);
 T = transpose(year(mean(reshape(T,365,numel(T)/365))));
+
+if numel(T) ~= numel(Qb)
+   error('size T must match size Qb')
+end
 
 % define the sensitivity coefficient and dn/dt trend functions
 Flam        = @(tau,phi,b) tau./(phi.*(4-2.*b)); 
@@ -54,8 +69,9 @@ bhat        = GlobalFit.b;
 PhiFit      = bfra.phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,false);
 % the sample populations of tau, phi, and Nstar
 
+[~,~,~,~,G] = bfra.eventtau(K,Fits,Fits,'usefits',true,'aggfunc','max');
 b           = [K.b]';
-tau         = [K.tauH]';
+tau         = G.tau; % [K.tauH]';
 Np1         = 1./(4-2.*b);
 phi1        = PhiFit.phidist(:,1);
 phi2        = PhiFit.phidist(:,2);
@@ -258,6 +274,3 @@ end
 % % % sig_lambda  = PropError(Fsym,Xsym,X,sigX)
 % % % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX)
 % % % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX,corrX)
-% 
-% 
-% 

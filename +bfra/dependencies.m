@@ -17,7 +17,7 @@ function [funclist,prodlist] = dependencies(funcname)
 
 % use this to test a particular function
 if nargin == 0
-   funcname = 'demo_bfra.mlx';
+   funcname = 'bfra_demo.mlx';
    % funcname = 'bfra_gettingStarted.m';
    % funcname = 'bfra.fitab';
    % funcname = 'bfra_kuparuk.m';
