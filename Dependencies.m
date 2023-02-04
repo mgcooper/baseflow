@@ -1,59 +1,47 @@
-function Depends = Dependencies(funcname)
-% DEPENDENCIES generate a list of function and product dependencies for function
-% 
-%  Input
-%     funcname = char of any function name
-% 
-%  Output
-%     Depends = table with column of all functions that input funcname depends
-%     on, the functions that each of those depends on, and the products that
-%     each of those depends on
-% 
+clean
 
-% use this to generate a list of all functions in the package, then cycle over
-% all of them and find the dependencies
-% funcpath = fileparts(which('bfra.fitab'));
-% funclist = getlist(funcpath,'.m');
+% this script should resolve any errors due to missing function dependencies.
+% all required functions should be included in the toolbox, but this can be used
+% to check in case any errors come up. It also returns a list of the required
+% products. The list will include the symbolic math toolbox and signal
+% processing toolbox, but they are not actually required, its a bug in the
+% built-in function. 
 
-% use this to test a particular function
-if nargin == 0
-   % funcname = 'demo_bfra.mlx';
-   % funcname = 'bfra_gettingStarted.m';
-   % funcname = 'bfra.fitab';
-   funcname = 'bfra_kuparuk.m';
+%% get all unique dependencies
+funcname = 'demo_bfra.mlx';
+[functionDependencies,productDependencies] = bfra.dependencies(funcname);
+functionDependencies = table2cell(unique(functionDependencies));
+
+%% remove functions in the toolbox
+
+% also remove the 'cupid' toolbox and the 'ExtractNameVal' functions which get
+% picked up as dependent but are not.
+skip = {'Cupid','+bfra','bfra/util','ExtractNameVal','magicParser','setpath',funcname};
+keep = true(numel(functionDependencies),1);
+for n = 1:numel(functionDependencies)
+   keep(n) = ~contains(functionDependencies{n},skip);
+end
+functionDependencies = functionDependencies(keep);
+
+%% cycle through the dependent functions and copy them to util/
+
+% NOTE: this is for private use, it won't work if you don't have the functions
+% on your local computer. Please contact me at matt.cooper@pnnl.gov if you have
+% any trouble running this toolbox or if any function dependencies are missing
+% from the toolbox. Alternatively, look for the missing functions in
+% https://github.com/mgcooper/matfunclib (I suggest the dev branch). Thank you. 
+
+% TODO: add method to clone from https://github.com/mgcooper/matfunclib
+
+for n = 1:numel(functionDependencies)
+   [~,fname,ext] = fileparts(functionDependencies{n});
+   copyfile(functionDependencies{n},['util/',fname,ext]);
 end
 
-funcpath = fileparts(which(funcname));
-[funclist,~] = matlab.codetools.requiredFilesAndProducts(funcname);
-funclist = transpose(funclist);
-
-Depends = cell(numel(funclist),3);
-
-for n = 1:numel(funclist)
-   
-   % this is needed if getlist is used
-   % thisfunc = [funcpath filesep funclist(n).name];
-   
-   thisfunc = funclist{n};
-   [fl,pl] = matlab.codetools.requiredFilesAndProducts(thisfunc);
-   fl = transpose(fl);
-   
-   Depends{n,1} = thisfunc;
-   Depends{n,2} = fl;
-   Depends{n,3} = {pl(:).Name}';
-  
-end
-
-Depends = cell2table(Depends,'VariableNames',...
-   {'function_name','function_dependencies','product_dependencies'});
+% any functions listed in dependentFunctions may be required for some fringe
+% behavior in the toolbox but the core functionality should 
 
 
-
-
-
-
-
-
-
-
-
+%%
+% if the commented-out loop in Dependencies.m is used, this is required
+% dependentFunctions = unique(vertcat(allDependencies.function_dependencies{:}));

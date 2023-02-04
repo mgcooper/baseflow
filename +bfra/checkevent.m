@@ -58,7 +58,7 @@ end
 %-------------------------------------------------------------------------------
 
 warning off
-load('defaultcolors.mat','dc'); col = dc; clear dc;
+col = defaultcolors;
 col(3,:) = []; % i find yellow and red to be a terrible combination
 
 % this allows a column vector of tags instead of a reshaped matrix

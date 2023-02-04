@@ -71,7 +71,7 @@ ctxt  = 'CALM (measured)';
 btxt  = 'BFRA (theory: Eq. 21)';
 gtxt  = 'GRACE $\\eta=S_G/\\phi$';
 
-load('defaultcolors','dc');
+dc = defaultcolors;
 
 % p1 plot needs 'reference',Dc where Dc is 1990-2020
 % p1 plot needs 'reference',Db where Db is 1990-2020
