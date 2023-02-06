@@ -1,24 +1,40 @@
 function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
-%FITPHI estimates drainable porosity phi using an early-time and
-%late-time solution. 
-% 
-% Required inputs:
-%  a1          =  early-time a in -dq/dt = aq^b
-%  a2          =  late-time a in -dq/dt = aq^b
-%  b2          =  late-time b
-%  A           =  basin area contributing to baseflow (L^2)
-%  D           =  saturated aquifer thickness (L)
-%  L           =  active stream length (L)
-% 
-% Optional inputs:
-%  theta       =  effective slope of basin contributing area
-%  isflat      =  logical flag indicating if horizontal or sloped aquifer
-%                 solution is applicable
-%  soln1       =  optional early-time theoretical solution
-%  soln2       =  optional late-time theoretical solution
-%  dispfit     =  logical flag indicating whether to plot the result
+%FITPHI estimates drainable porosity phi using an early- and late-time solution
 %
-%  See also eventphi, cloudphi, fitdistphi
+% Syntax
+% 
+%     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
+% 
+% Description
+% 
+%     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L) computes drainable porosity phi
+%     using the method of Troch, Troch, and Brutsaert, 1993 from early-time (a1)
+%     and late-time (a2,b2) recession parameters and aquifer properties area A,
+%     depth D, and channel length L. 
+% 
+% Required inputs
+% 
+%     a1    early-time a in -dq/dt = aq^b
+%     a2    late-time a in -dq/dt = aq^b
+%     b2    late-time b
+%     A     basin area contributing to baseflow (L^2)
+%     D     saturated aquifer thickness (L)
+%     L     active stream length (L)
+% 
+% Optional inputs
+% 
+%     theta    effective slope of basin contributing area
+%     isflat   logical flag indicating horizontal or sloped aquifer solution
+%     soln1    optional early-time theoretical solution
+%     soln2    optional late-time theoretical solution
+%     dispfit  logical flag indicating whether to plot the result
+%
+% See also eventphi, cloudphi, fitdistphi
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
 p              = inputParser;
@@ -206,116 +222,113 @@ for m = 1:numsoln
    end
 end
 
-end
 
 function [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);
    
-   % option to get all solutions
-   if strcmp(soln1,'all') && strcmp(soln2,'all')
-      [soln,desc] = allcombos();
-      return;
-   end
-   
-   % early time
-   switch soln1
-      case 'Polubarinova-Kochina, 1962'
-         soln1 = 'PK62';
-      case 'Rupp and Selker, 2005'
-         soln1 = 'RS05';
-      case 'Brutsaert, 1994'
-         soln1 = 'BR94';
-   end
+% option to get all solutions
+if strcmp(soln1,'all') && strcmp(soln2,'all')
+   [soln,desc] = allcombos();
+   return;
+end
 
-   % late time
-   switch soln2
-      case 'Boussinesq, 1904 b=3/2'
-         soln2 = 'BS04';
-      case 'Rupp and Selker, 2005 b=f(n)'
-         soln2 = 'RS05';
-      case 'Boussinesq, 1903 b=1'
-         soln2 = 'BS03';
-      case 'Rupp and Selker, 2006 b=1'
-         soln2 = 'RS06b1';
-      case 'Rupp and Selker, 2006 b=f(n)'
-         soln2 = 'RS06';
-   end
-   
-   
-   % not sure if we want this
-   if b2 < 1
+% early time
+switch soln1
+   case 'Polubarinova-Kochina, 1962'
+      soln1 = 'PK62';
+   case 'Rupp and Selker, 2005'
+      soln1 = 'RS05';
+   case 'Brutsaert, 1994'
+      soln1 = 'BR94';
+end
+
+% late time
+switch soln2
+   case 'Boussinesq, 1904 b=3/2'
+      soln2 = 'BS04';
+   case 'Rupp and Selker, 2005 b=f(n)'
+      soln2 = 'RS05';
+   case 'Boussinesq, 1903 b=1'
+      soln2 = 'BS03';
+   case 'Rupp and Selker, 2006 b=1'
+      soln2 = 'RS06b1';
+   case 'Rupp and Selker, 2006 b=f(n)'
+      soln2 = 'RS06';
+end
+
+
+% not sure if we want this
+if b2 < 1
+   b2 = 1;
+end
+
+if isflat == true
+
+   % late-time RS05 is valid for 1.5 <= b < 2, but the solution appears
+   % valid for 1<b<2, except that 1<b<1.5 corresponds to an inverted
+   % water table
+   % if strcmp(soln2,'RS05') && (b2 < 3/2 || b2>=2)
+   if strcmp(soln2,'RS05') && (b2 <= 1 || b2>=2)
+      warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
+      soln2  = 'BS03';
+
+   % late-time B04 has b = 3/2
+   elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
+      warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
+      b2 = 3/2;
+
+   % late-time B03 has b = 1
+   elseif strcmp(soln2,'BS03') && (b2 ~= 1)
+      warning('Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1')
       b2 = 1;
    end
-   
-   if isflat == true
 
-      % late-time RS05 is valid for 1.5 <= b < 2, but the solution appears
-      % valid for 1<b<2, except that 1<b<1.5 corresponds to an inverted
-      % water table
-      % if strcmp(soln2,'RS05') && (b2 < 3/2 || b2>=2)
-      if strcmp(soln2,'RS05') && (b2 <= 1 || b2>=2)
-         warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
-         soln2  = 'BS03';
-         
-      % late-time B04 has b = 3/2
-      elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
-         warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
-         b2 = 3/2;
-         
-      % late-time B03 has b = 1
-      elseif strcmp(soln2,'BS03') && (b2 ~= 1)
-         warning('Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1')
-         b2 = 1;
-      end
-      
-   else
+else
 
-      if strcmp(soln1,'RS05') && (b2 < 3/2 || b2>=2)
-         warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
-         soln2  = 'B03';
-         
-      elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
-         warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
-         b2 = 3/2;
-         
-      elseif strcmp(soln2,'BS03') && (b2 ~= 1)
-         warning('Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1')
-         b2 = 1;
-      end
-      
+   if strcmp(soln1,'RS05') && (b2 < 3/2 || b2>=2)
+      warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
+      soln2  = 'B03';
+
+   elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
+      warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
+      b2 = 3/2;
+
+   elseif strcmp(soln2,'BS03') && (b2 ~= 1)
+      warning('Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1')
+      b2 = 1;
    end
 
-   % concatenate the early-time and late-time solution
-   soln  = strcat(soln1,['_' soln2]);
-   
-   switch soln
-      case 'PK62_BS04'
-         desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: BS04, flat + constant k(z) + nonlinear'};
-      case 'PK62_BS03'
-         desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: BS03, flat + constant k(z) + linearized'};
-      case 'PK62_RS05'
-         desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
-      case 'RS05_RS05'
-         desc = {'early: RS05, flat + k(z)=(Z/D)^n + nonlinear';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
-      case 'BR94_BR94'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BR94, sloped + constant k(z) + linearized'};         
-      case 'BR94_RS06'      
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'};
-      case 'BR94_RS06b1'      
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS06b1, sloped + constant k(z) + nonlinear'};
-      case 'BR94_BS04'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BS04, flat + constant k(z) + nonlinear'};
-      case 'BR94_BS03'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BS03, flat + constant k(z) + linearized'};
-      case 'BR94_RS05'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
-   end
-   
-   soln = cellstr(soln);
+end
+
+% concatenate the early-time and late-time solution
+soln  = strcat(soln1,['_' soln2]);
+
+switch soln
+   case 'PK62_BS04'
+      desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: BS04, flat + constant k(z) + nonlinear'};
+   case 'PK62_BS03'
+      desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: BS03, flat + constant k(z) + linearized'};
+   case 'PK62_RS05'
+      desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
+   case 'RS05_RS05'
+      desc = {'early: RS05, flat + k(z)=(Z/D)^n + nonlinear';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
+   case 'BR94_BR94'
+      desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BR94, sloped + constant k(z) + linearized'};         
+   case 'BR94_RS06'      
+      desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'};
+   case 'BR94_RS06b1'      
+      desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS06b1, sloped + constant k(z) + nonlinear'};
+   case 'BR94_BS04'
+      desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BS04, flat + constant k(z) + nonlinear'};
+   case 'BR94_BS03'
+      desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BS03, flat + constant k(z) + linearized'};
+   case 'BR94_RS05'
+      desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
+end
+
+soln = cellstr(soln);
   
    
-   
-end
-   
+
 function [combos,descriptions] = allcombos()
    % in summary, all possible combos:
 earlysolns  = {'PK62','PK62','PK62','RS05','BR94','BR94','BR94','BR94','BR94','BR94'};
@@ -380,8 +393,6 @@ end
 %       end
 %    end
 % end
-end
-   
    
    
    

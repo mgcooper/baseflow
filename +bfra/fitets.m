@@ -1,7 +1,8 @@
-function ETS = fitets(T,Q,R,varargin)
-%FITETS fits recession event using the exponential timestep method
+function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin) 
+%FITETS fit recession event using the exponential timestep method
 %
 %  Syntax
+% 
 %     ETS = bfra.fitets(T,Q,R,derivmethod)
 %     ETS = bfra.fitets(_,'etsparam',fitwindow)
 %     ETS = bfra.fitets(_,'fitab',fitmethod)
@@ -9,19 +10,23 @@ function ETS = fitets(T,Q,R,varargin)
 %     ETS = bfra.fitets(_,'ax',axis_object)
 % 
 %  Required inputs
-%     T     =  time (days)
-%     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
-%     R     =  rainfall (L T^-1, assumed to be mm d-1)
-%     derivmethod = method to compute numerical derivative dQ/dt. Options are
-%     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
 % 
-%  Optional name-value pairs
+%     T     time (days)
+%     Q     discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
+%     R     rainfall (L T^-1, assumed to be mm d-1)
 % 
-%     etsparam = scalar, double, parameter that controls window size
-%     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
-%     plotfit  =  logical, scalar, indicates whether to plot the fit
+%  Optional name-value inputs
 % 
-%  See also fitdqdt
+%     etsparam    scalar, double, parameter that controls window size
+%     fitab       logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
+%     plotfit     logical, scalar, indicates whether to plot the fit
+% 
+%  See also fitdqdt, fitvts
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 % note: only pass in identified recession events (not timeseries of
 % flow) because this first fits the ENTIRE recession to estimate 'gamma'
@@ -31,6 +36,9 @@ function ETS = fitets(T,Q,R,varargin)
 % and finds the local linear slope (in linear space, not log-log) which
 % is an estimate of dq/dt and the average q within the window and those
 % two values are used to compute -dq/dt = aQ^b.
+
+% OLD function call:
+% function ETS = fitets(T,Q,R,varargin)
 
 %-------------------------------------------------------------------------------
 p              = inputParser;
@@ -49,237 +57,238 @@ etsparam = p.Results.etsparam;
 fitab    = p.Results.fitab;
 plotfit  = p.Results.plotfit;
 %-------------------------------------------------------------------------------
+warning off
+% Fit exponential function on the entire recession event
+T.Format = 'dd-MMM-uuuu hh:mm';
+t        = days(T-T(1)+(T(2)-T(1))); % keep og T
+[xe,ye]  = prepareCurveData(t, Q./max(Q));
 
-   % first we call the fitting algorithm
-   [q,dqdt,dt,tq,rq,rsq] = fitdQdt(T,Q,R,etsparam);
-   
-   % then we interpolate to the original timestep. See notes at bottom.
-   ETS = retimeETS(T,Q,R,q,dqdt,dt,tq,rq,rsq);
-   
-   % then we fit a/b if requested. note, ETS comes back as a struct with
-   % the ETS timetable from retimeETS as a field
-   ETS = fitETSab(ETS,fitab);
-   
-   plotSmoothing(T,Q,plotfit);
-   
+% fit gamma (a in the linear model -dq/dt = aQ)
+b0       = [mean(ye) 0.2 0];
+opts     = statset('Display','off');
+fnc      = @(b,x)b(1)*exp(-b(2)*x)+b(3);
+try
+   abc = nlinfit(xe,ye,fnc,b0,opts);
 end
 
-%-------------------------------------------------------------------------------
-%  PLOT SMOOTHING
-%-------------------------------------------------------------------------------
-
-function plotSmoothing(T,Q,plotfit)
-   
-   if plotfit
-      % might be worth trying to smooth/gapfill the data here
-      Q0    = Q;
-      Q     = fillmissing(Q,'spline');
-      Q     = smoothdata(Q,'sgolay');
-      dQ0   = movingslope(Q0,21,3,T(2)-T(1));
-      dQ    = movingslope(Q,21,3,T(2)-T(1));
-
-      figure; 
-      subplot(1,2,1); scatter(T,Q0); hold on; plot(T,Q)
-      subplot(1,2,2); loglog(Q0,-dQ0); hold on; loglog(Q,-dQ);
-   end
-   
+if ~exist('abc','var')
+   abc = tryexpfit(xe,ye);
 end
 
-%-------------------------------------------------------------------------------
-%  FIT DQDT
-%-------------------------------------------------------------------------------
+gamma = abc(2); % gamma = b, also a in dq/dt = aQ
+nmax  = etsparam*max(t);
+m     = 1+ceil(nmax.*exp(-1./(gamma.*t))); % Eq. 7
 
+[N,q,dqdt,~,dt,tq,rq,r2] = bfra.initfit(t,'eventdqdt');
 
-function [q,dqdt,dt,tq,rq,rsq] = fitdQdt(T,Q,R,etsparam)
-   
-   if isdatetime(T)
-      dtog  = T(2)-T(1);
-      T     = datenum(T);
-   end
-   
-   % Fit exponential function on the entire recession event
-         T0    = T;
-         t     = T-T(1)+(T(2)-T(1)); % keep og T
-   [xexp,yexp] = prepareCurveData(t, Q./max(Q));
-   
-   % fit gamma
-   b0      = [mean(yexp) 0.2 0];
-   opts    = statset('Display','off');
-   fnc     = @(b,x)b(1)*exp(-b(2)*x)+b(3);
-   try
-      abc = nlinfit(xexp,yexp,fnc,b0,opts);
-   end
-   
-   if ~exist('abc','var')
-      abc = tryexpfit(xexp,yexp);
-   end
-   
-   gamma    = abc(2);    % gamma = b
-   % plot(xexp,yexp,'o',xexp,fnc(abc,xexp),'-');
-   
-   nmax     = etsparam*length(t);
-   m        = 1+ceil(nmax.*exp(-1./(gamma.*t))); % Eq. 7
-   
-   % the # of individual q/dqdt estimates will be less than the q/dqdt
-   % values since the step size is increased by the amount m(end)
-   N        = length(t)-m(end);   % new # of events
-   dqdt     = zeros(1,N);
-   q        = zeros(1,N);
-   dt       = zeros(1,N);
-   tq       = zeros(1,N);
-   rq       = zeros(1,N);
-   rsq      = zeros(1,N);
-   
-   
-   % move over the recession in windows of length m and fit dQ/dt
-   for n = 1:N
-      x       = t(n:n+m(n));
-      X       = [ones(length(x),1) x];
-      Y       = Q(n:n+m(n));
-      dQdt    = X\Y;                               % eq. 8
-      yfit    = X*dQdt;
-      rsq(n)  = 1-sum((Y-yfit).^2)/sum((Y-mean(Y)).^2); rsq(rsq<0) = 0;
-      
-            dqdt(n)     = dQdt(2);                 % eq. 9
-      dqdt(dqdt>0)      = NaN;
-      dqdt(isnan(rsq))  = NaN;
-      dqdt(rsq<=0)      = NaN;
-               q(n)     = nanmean(Y);
-               tq(n)    = mean(T0(n:n+m(n)));      
-               rq(n)    = mean(R(n:n+m(n)));       
-               dt(n)    = t(n+m(n))-t(n);
-               
-   end
-   
-   % figure; plot(t,q); hold on; plot(tets,qets)
-   
+% isempty(q) occurs when gamma is very small and m blows up.
+% if all(isempty(q)) || numel(q)<4
+if any(1./(gamma.*t)-log(etsparam./(max(t)-1)) < 0) || numel(q)<4
+   return
 end
 
-%-------------------------------------------------------------------------------
-%  RETIME ETS
-%-------------------------------------------------------------------------------
+% move over the recession in windows of length m and fit dQ/dt
+n = 1;
+while n+m(n)<=N
+   x     = t(n:n+m(n));
+   X     = [ones(length(x),1) x];
+   Y     = Q(n:n+m(n));
+   dQdt  = X\Y;                               % eq. 8
+   yfit  = X*dQdt;
+   r2(n) = 1-sum((Y-yfit).^2)/sum((Y-mean(Y)).^2); r2(r2<0) = 0;
 
-
-function ETS = retimeETS(T,Q,R,q,dqdt,dt,tq,rq,rsq)
-   
-   % note: dt = m+1
-   
-   if all(isnan(q))
-      return;
-   end
-   
-   if ~isdatetime(T)
-      T     = datetime(T,'ConvertFrom','datenum');
-   end
-   
-   q     = q(:);dqdt=dqdt(:);dt=dt(:);tq=tq(:);rq=rq(:);rsq=rsq(:);
-   Time  = datetime(tq,'ConvertFrom','datenum');
-   ETS   = timetable(q,dqdt,dt,rq,rsq,'RowTimes',Time);
-   dq    = ETS.dqdt.*ETS.dt;                       % add dq
-   ETS   = addvars(ETS,dq);
-   
-   % this is needed to get the rain right, will need to revisit for sub-daily
-   if T(2)-T(1) == days(1)
-      ETS = retime(ETS,'daily','linear');             % retime to daily
-   end
-   
-   % add the original T,Q,R on each day tq
-   iq    = ismember(T,ETS.Time);
-   R     = R(iq);
-   T     = T(iq);
-   Q     = Q(iq);
-   
-   ETS   = addvars(ETS,T,Q,R);
-
+   dqdt(n)  = dQdt(2);                 % eq. 9
+   q(n)     = mean(Y,'omitnan');
+   tq(n)    = mean(T(n:n+m(n)));
+   rq(n)    = mean(R(n:n+m(n)));
+   dt(n)    = t(n+m(n))-t(n);
+   n        = n+1;
 end
 
-%-------------------------------------------------------------------------------
-%  FIT AB
-%-------------------------------------------------------------------------------
+inan = dqdt>0 | isnan(r2) | r2<=0;
+dqdt(inan) = NaN;
 
+% retime to the original timestep
+dq    = dqdt.*dt; % need to check this, right now it isn't used anywhere
+q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);
+dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
+dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+tq    = T;
 
-function ETS = fitETSab(T,fitabOrNot)
-   
-   % Fit the power law for a and b estimation (Roques et al., 2017)
-   a = nan;
-   b = nan;
-   
-   q  = T.q;
-   dq = T.dqdt;
-   rsq= T.rsq;
-   
-   if numel(q)>4 % only fit if there are > 4 values
-      
-      if fitabOrNot == true
-         [fitets,~]  = LinRegFitW(log(q),log(-dq),rsq);
-            pets     = coeffvalues(fitets);
-            b     = pets(1);
-            a     = exp(pets(2));
-      end
-      
-      ETS.T    = T;
-      ETS.a    = a;
-      ETS.b    = b;
-      ETS.ets  = true;     % I don't recall what these next two are for
-      ETS.cts  = false;
-      
-   else % don't fit
-      ETS = ets_setnan(T);
-   end
-   
-   
-end
+% figure; plot(t,q); hold on; plot(tets,qets)
 
-%-------------------------------------------------------------------------------
-%  LINREGFITW
-%-------------------------------------------------------------------------------
+% ------------
+% gamma checks
+% ------------
+% figure; plot(xexp,yexp,'o',xexp,fnc(abc,xexp),'-');
+% this inequality must be >= 0
+% 1./(gamma.*t) - log(etsparam./(max(t)-1)) 
+% if gamma is between about -0.2 and 0 it blows up
+% gtest = -2:0.0001:-0.2;
+% figure; semilogy(gtest,exp(-1./(gtest.*1)));
+% ------------
 
+%------------------------------------------------------------------
+% older method that truncated the fit based on parameter m. turns out in some
+% cases this truncates too early for example say q has length 12 and m(9) = 2
+% but m(12) = 3, then on iteration 9, n+m(n) = 11, but N=length(q)-max(m) = 9
+% so the loop would end at 9 when it should go to 10.
+% the # of individual q/dqdt estimates will be less than the q/dqdt
+% values since the step size is increased by the amount m(end)
+%N     = length(t)-m(end);   % new # of events
 
-function [fitted, gof] = LinRegFitW(x, y, weights)
-   
-   [  xData, ...
-      yData, ...
-      weights ]   = prepareCurveData( x, y, weights );
-   
-   % Set up fittype and options.
-   ft             = fittype(     'poly1'                         );
-   fopts          = fitoptions(  'Method', 'LinearLeastSquares'  );
-   fopts.Weights  = weights;
-   [fitted,gof]   = fit( xData, yData, ft, fopts );   % Fit model to data.
-   
-end
+% i think this would work if we use for 1:N where N is numel(t)-max(m) 
+% tqq   = hours(tq-tq(1)+(tq(2)-tq(1)))./24; % keep og T
+% q     = interp1(tq,q,t,'linear');
+% dqdt  = interp1(tq,dqdt,t,'linear');
 
-%-------------------------------------------------------------------------------
-%  SET ETSNAN
-%-------------------------------------------------------------------------------
-
-
-function out = ets_setnan(ETS)
-   out.T    = ETS;
-   out.a    = nan;
-   out.b    = nan;
-   out.ets  = nan;
-   out.cts  = nan;
-end
 
 %-------------------------------------------------------------------------------
 %  TRY EXPFIT
 %-------------------------------------------------------------------------------
-
-
 function abc = tryexpfit(xexp,yexp)
    
-   % Set up fittype and options.
-   ftexp   = fittype(   'a*exp(-b*x)+c' ,                   ...
-                        'independent'   , 'x',              ...
-                        'dependent'     , 'y'               );
+% Set up fittype and options.
+ftexp   = fittype(   'a*exp(-b*x)+c' ,                   ...
+                     'independent'   , 'x',              ...
+                     'dependent'     , 'y'               );
+
+optsexp = fitoptions(   'Method'    , 'NonlinearLeastSquares',  ...
+                        'Display'   , 'Off',                    ...
+                        'StartPoint', [1e-6 1e-6 1e-6]          );
+
+% Fit model to data.
+fitexp  = fit( xexp, yexp, ftexp, optsexp );
+abc     = coeffvalues(fitexp);
    
-   optsexp = fitoptions(   'Method'    , 'NonlinearLeastSquares',  ...
-                           'Display'   , 'Off',                    ...
-                           'StartPoint', [1e-6 1e-6 1e-6]          );
-   
-   % Fit model to data.
-   fitexp  = fit( xexp, yexp, ftexp, optsexp );
-   abc     = coeffvalues(fitexp);
-   
-end
+
+% %-------------------------------------------------------------------------------
+% %  PLOT SMOOTHING
+% %-------------------------------------------------------------------------------
+% 
+% function plotSmoothing(T,Q,plotfit)
+%    
+%    if plotfit
+%       % might be worth trying to smooth/gapfill the data here
+%       Q0    = Q;
+%       Q     = fillmissing(Q,'spline');
+%       Q     = smoothdata(Q,'sgolay');
+%       dQ0   = movingslope(Q0,21,3,T(2)-T(1));
+%       dQ    = movingslope(Q,21,3,T(2)-T(1));
+% 
+%       figure; 
+%       subplot(1,2,1); scatter(T,Q0); hold on; plot(T,Q)
+%       subplot(1,2,2); loglog(Q0,-dQ0); hold on; loglog(Q,-dQ);
+%    end
+% 
+% %-------------------------------------------------------------------------------
+% %  RETIME ETS
+% %-------------------------------------------------------------------------------
+% 
+% 
+% function ETS = retimeETS(T,Q,R,q,dqdt,dt,tq,rq,rsq)
+%    
+%    % note: dt = m+1
+%    
+% % nov 27, commented this out when added small gamma check in main
+% %    if all(isnan(q))
+% %       return
+% %    end
+%    
+% %    if ~isdatetime(T)
+% %       T  = datetime(T,'ConvertFrom','datenum');
+% %    end
+%    
+% %    q     = q(:);dqdt=dqdt(:);dt=dt(:);tq=tq(:);rq=rq(:);rsq=rsq(:);
+% %    Time  = datetime(tq,'ConvertFrom','datenum');         % ETS time
+% 
+%    dq    = dqdt.*dt;
+%    ETS   = timetable(q,dqdt,dq,dt,rq,rsq,'RowTimes',tq);
+%    
+%    % might need to add something like this to deal with small gamma all nan
+%    if all(isnan(q))
+%       ETS   = retime(ETS,T,'fillwithmissing');
+%       ETS   = addvars(ETS,T,Q,R);
+%       return
+%    end
+% 
+%    % this is needed to get the rain right, will need to revisit for sub-daily
+%    if T(2)-T(1) == days(1)
+%       ETS = retime(ETS,'daily','linear');             % retime to daily
+%       ETS = retime(ETS,T,'fillwithmissing');
+%    end
+%    
+%    if height(ETS) ~= sum(ismember(T,ETS.Time))
+%       pause;
+%    end
+% 
+% % % with the second retime above, I may not need to do this
+% %    % add the original T,Q,R on each day tq
+% %    iq    = ismember(T,ETS.Time);
+% %    R     = R(iq);
+% %    T     = T(iq);
+% %    Q     = Q(iq);
+%    
+%    ETS   = addvars(ETS,T,Q,R);
+% 
+% %-------------------------------------------------------------------------------
+% %  FIT AB
+% %-------------------------------------------------------------------------------
+% function ETS = fitETSab(T,fitabOrNot)
+%    
+%    % Fit the power law for a and b estimation (Roques et al., 2017)
+%    a = nan;
+%    b = nan;
+%    
+%    q  = T.q;
+%    dq = T.dqdt;
+%    rsq= T.rsq;
+%    
+%    if numel(q)>4 % only fit if there are > 4 values
+%       
+%       if fitabOrNot == true
+%          [fitets,~]  = LinRegFitW(log(q),log(-dq),rsq);
+%             pets     = coeffvalues(fitets);
+%             b     = pets(1);
+%             a     = exp(pets(2));
+%       end
+%       
+%       ETS.T    = T;
+%       ETS.a    = a;
+%       ETS.b    = b;
+%       ETS.ets  = true;     % I don't recall what these next two are for
+%       ETS.cts  = false;
+%       
+%    else % don't fit
+%       ETS = ets_setnan(T);
+%    end
+% 
+% %-------------------------------------------------------------------------------
+% %  LINREGFITW
+% %-------------------------------------------------------------------------------
+% 
+% 
+% function [fitted, gof] = LinRegFitW(x, y, weights)
+%    
+%    [  xData, ...
+%       yData, ...
+%       weights ]   = prepareCurveData( x, y, weights );
+%    
+%    % Set up fittype and options.
+%    ft             = fittype(     'poly1'                         );
+%    fopts          = fitoptions(  'Method', 'LinearLeastSquares'  );
+%    fopts.Weights  = weights;
+%    [fitted,gof]   = fit( xData, yData, ft, fopts );   % Fit model to data.
+%    
+% %-------------------------------------------------------------------------------
+% %  SET ETSNAN
+% %-------------------------------------------------------------------------------
+% 
+% 
+% function out = ets_setnan(ETS)
+%    out.T    = ETS;
+%    out.a    = nan;
+%    out.b    = nan;
+%    out.ets  = nan;
+%    out.cts  = nan;
+% 

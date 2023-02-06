@@ -10,4 +10,4 @@ pkg load tablicious
 # addpath(pwd());
 # rmpath([pwd() filesep "+bfra"]);
 # rmpath([pwd() filesep "demos"]);
-# rmpath([pwd() filesep "git*"]);
+# rmpath([pwd() filesep ".git"]);

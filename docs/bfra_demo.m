@@ -1,27 +1,70 @@
 %% Baseflow Recession Analysis Toolbox Examples
 % 
-% These examples provide an introduction to the toolbox. The |demos| folder
-% contains additional scripts with examples.
-%
-%% Description
-% In this example, we apply baseflow recession analysis to daily streamflow data
-% measured in the Kuparuk River Basin on the North Slope of Alaska.
-%
+% These examples provide an introduction to the toolbox. The purpose of these
+% examples is to demonstrate typical use-cases for each function in the bfra
+% toolbox, with an emphasis on toolbox breadth. Deeper understanding of
+% individual toolbox functions is communicated in the function documention and
+% extended example docs in the |demos| folder.
 
+
+clean
+
+%% Introduction
+% In this example, we use baseflow recession analysis to investigate daily
+% streamflow data measured in the Kuparuk River Basin on the North Slope of
+% Alaska. We will use observations of daily streamflow provided by the 
+% United States Geological Survey, recorded at streamflow gage 1596000. 
+% The data can be downloaded from
+% https://waterdata.usgs.gov/monitoring-location/15896000 and are included as a
+% sample dataset with this toolbox.
+
+%%% Preparing data for analysis
+% The minimum required information includes the timeseries of daily streamflow
+% and the drainage area of the upstream river basin. Values for drainage
+% density, stream channel length, basin slope, and soil (or aquifer) thickness
+% are also used by the toolbox.
+
+% Set the sitename
+%%
+sitename = bfra.basinname('KUPARUK R NR DEADHORSE AK');
+
+% Set the basin area and geomorphological parameters
+%%
+Dd = 0.8;            % drainage density 
+A = 8.6545e9;        % basin area [m2]
+L = A*Dd/1000;       % active stream length
+
+% Load test data into the workspace
+%% load streamflow data for the test basin
+load('data/dailyflow.mat','T','Q','R');
+
+T = datetime(T,'ConvertFrom','datenum');
 %%% Detect recession events from a timeseries of daily streamflow
 % Set the algorithm options
 
 %%
+% The toolbox supports three main tasks: event detection, event curve-fitting,
+% and event distribution fitting. The |setopts| function provides users with an
+% interface to set the options that control the algorithms used to implement
+% these tasks. Default values are set automatically.
+
+% In addition to the basin drainage area, drainage density, and stream channel
+% length, we will set the 'isflat' parameter true to indicate that slope is not
+% included in the underlying theoretical solutions to the groundwater flow
+% equation, and we will ask to plot the fitted results by setting 'plotfits'
+% true.
 opts.Events = bfra.setopts('events');
-opts.Fits   = bfra.setopts('fits','drainagearea',8.6545e9);
-opts.Global = bfra.setopts('globalfit','drainagearea',8.6545e9, ...
-               'aquiferdepth',0.5,'streamlength',320000,'isflat',true,...
-               'plotfits',true);
+opts.Fits   = bfra.setopts('fits');
+opts.Global = bfra.setopts('globalfit','drainagearea',A,'streamlength',L, ...
+   'drainagedens',Dd,'isflat',true,'plotfits',true);
 
 %%
 % Load the example data and run the event detection algorithm
-load dailyflow.mat
-Events = bfra.getevents(T,Q,R,opts.Events);
+% load dailyflow.mat
+[Events,Info] = bfra.getevents(T,Q,R,opts.Events);
+
+% plot the detected events
+bfra.eventplotter(T,Q,R,Info,'plotevents',true)
 
 %% 
 % The output structure Events contains arrays that are the same size as the
@@ -39,7 +82,7 @@ getfits = false;
 if getfits == true
    [K,Fits] = bfra.fitevents(Events,opts.Fits);
 else
-   load Events
+   load('data/Events.mat','K','Fits');
 end
 
 %% 

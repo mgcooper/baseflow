@@ -1,5 +1,5 @@
 function out = pointcloudplot(q,dqdt,varargin)
-%POINTCLOUDPLOT plots a 'point cloud' diagram to estimate aquifer parameters
+%POINTCLOUDPLOT plot a 'point cloud' diagram to estimate aquifer parameters
 %from recession flow data.
 %
 % Required inputs:
@@ -37,7 +37,7 @@ addParameter(p,'blate',       1,                @(x)isnumeric(x));
 addParameter(p,'userab',      [1 1],            @(x)isnumeric(x));
 addParameter(p,'precision',   1,                @(x)isnumeric(x));
 addParameter(p,'timestep',    1,                @(x)isnumeric(x));
-addParameter(p,'addlegend',   false,            @(x)islogical(x));
+addParameter(p,'addlegend',   true,             @(x)islogical(x));
 addParameter(p,'usertext',    '',               @(x)ischar(x));
 addParameter(p,'rain',        nan,              @(x)isnumeric(x));
 addParameter(p,'ax',          'none',           @(x)isaxis(x)|ischar(x));
@@ -59,129 +59,129 @@ ax          = p.Results.ax;
 % Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
 %-------------------------------------------------------------------------------
    
-   if ~isaxis(ax)
-      %fig = figure('Position',[380 200 550 510]); ax = gca;
-      fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
-   else
-      fig = gcf;
+if ~isaxis(ax)
+   %fig = figure('Position',[380 200 550 510]); ax = gca;
+   fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
+else
+   fig = gcf;
+end
+
+h0 = loglog(ax,q,-dqdt,'o'); formatPlotMarkers('markersize',6); 
+hold on; grid off;
+
+% add circles around the t>tau0 values if requested
+if sum(mask) < numel(q)
+   h1 = scatter(q(mask),-dqdt(mask),'r');
+else
+   h1 = [];
+end
+
+% add some space around the data
+xlims    = xlim;
+ylims    = ylim;
+ylowlim  = min(ylims);
+yupplim  = max(ylims);
+
+xlim([xlims(1)*.9 xlims(2)*1.1]);
+% xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
+
+% set xylabels
+xlabel(bfra.getstring('Q','units',true),'FontSize',14);
+ylabel(bfra.getstring('dQdt','units',true),'FontSize',14);
+
+% init containers
+h  = gobjects(numel(reflines),1);
+ab = nan(numel(reflines),2);
+
+
+% add reflines
+for n = 1:numel(reflines)
+
+   switch reflines{n}
+
+      case 'early'
+         [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+                           q,-dqdt,                      ...
+                           'refline','earlytime',        ...
+                           'refslope',3,                 ...
+                           'labels',reflabels,           ...
+                           'mask',mask                   ...
+                           );
+
+         h(n).LineWidth = 1;
+
+      case 'late'
+         [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+                           q,-dqdt,                      ...
+                           'refline','latetime',         ...
+                           'refslope',blate,             ...
+                           'labels',reflabels,           ...
+                           'mask',mask                   ...
+                           );
+
+         h(n).LineWidth = 1;
+
+      case 'upperenvelope'
+         [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+                           q,-dqdt,                      ...
+                           'refline','upperenvelope',    ...
+                           'labels',reflabels            ...
+                           );
+
+         % make ylimits span the min dq/dt to the upper envelope at max Q
+         yupplim = ab(n,1)*max(xlims)^ab(n,2);
+
+      case 'lowerenvelope'
+         [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+                           q,-dqdt,                      ...
+                           'refline','lowerenvelope',    ...
+                           'labels',reflabels            ...
+                           );
+
+         ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
+
+      case 'bestfit'
+         [h(n),ab(n,:)] = bfra.plotrefline(              ...
+                           q,-dqdt,                      ...
+                           'refline','bestfit',          ...
+                           'labels',false                ...
+                           );
+
+         h(n).LineWidth = 2;
+
+      case 'userfit'
+
+         [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+                           q,-dqdt,                      ...
+                           'refline','userfit',          ...
+                           'userab',userab,              ...
+                           'labels',reflabels,           ...
+                           'mask',mask                   ...
+                           );
    end
-   
-   h0 = loglog(ax,q,-dqdt,'o'); formatPlotMarkers('markersize',6); 
-   hold on; grid off;
 
-   % add circles around the t>tau0 values if requested
-   if sum(mask) < numel(q)
-      h1 = scatter(q(mask),-dqdt(mask),'r');
-   else
-      h1 = [];
-   end
+   out.ab.(reflines{n}) = ab(n,:);
 
-   % add some space around the data
-   xlims    = xlim;
-   ylims    = ylim;
-   ylowlim  = min(ylims);
-   yupplim  = max(ylims);
-   
-   xlim([xlims(1)*.9 xlims(2)*1.1]);
-   % xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
+end
 
-   % set xylabels
-   xlabel(bfra.getstring('Q','units',true),'FontSize',14);
-   ylabel(bfra.getstring('dQdt','units',true),'FontSize',14);
-   
-   % init containers
-   h  = gobjects(numel(reflines),1);
-   ab = nan(numel(reflines),2);
-   
+set(gca,'YLim',[ylowlim yupplim]);
 
-   % add reflines
-   for n = 1:numel(reflines)
-      
-      switch reflines{n}
-         
-         case 'early'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
-                              q,-dqdt,                      ...
-                              'refline','earlytime',        ...
-                              'refslope',3,                 ...
-                              'labels',reflabels,           ...
-                              'mask',mask                   ...
-                              );
-            
-            h(n).LineWidth = 1;
-            
-         case 'late'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
-                              q,-dqdt,                      ...
-                              'refline','latetime',         ...
-                              'refslope',blate,             ...
-                              'labels',reflabels,           ...
-                              'mask',mask                   ...
-                              );
-            
-            h(n).LineWidth = 1;
-            
-         case 'upperenvelope'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
-                              q,-dqdt,                      ...
-                              'refline','upperenvelope',    ...
-                              'labels',reflabels            ...
-                              );
-                                                
-            % make ylimits span the min dq/dt to the upper envelope at max Q
-            yupplim = ab(n,1)*max(xlims)^ab(n,2);
-            
-         case 'lowerenvelope'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
-                              q,-dqdt,                      ...
-                              'refline','lowerenvelope',    ...
-                              'labels',reflabels            ...
-                              );
-                                                
-            ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
-            
-         case 'bestfit'
-            [h(n),ab(n,:)] = bfra.plotrefline(              ...
-                              q,-dqdt,                      ...
-                              'refline','bestfit',          ...
-                              'labels',false                ...
-                              );
+% plot rain if provided
+if all(~isnan(rain))
+   hrain = plotrain(ax,h0,rain,q,-dqdt);
+else
+   hrain = nan;
+end
 
-            h(n).LineWidth = 1;
-            
-         case 'userfit'
+% leaving this out for now   
+if addlegend == true
 
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
-                              q,-dqdt,                      ...
-                              'refline','userfit',          ...
-                              'userab',userab,              ...
-                              'labels',reflabels,           ...
-                              'mask',mask                   ...
-                              );
-      end
-      
-      out.ab.(reflines{n}) = ab(n,:);
-      
-   end
-   
-   set(gca,'YLim',[ylowlim yupplim]);
-   
-   % plot rain if provided
-   if all(~isnan(rain))
-      hrain = plotrain(ax,h0,rain,q,-dqdt);
-   else
-      hrain = nan;
-   end
-   
-   % leaving this out for now   
-   if addlegend == true
-      
-      % check if both userfit and bestfit are requested
-      fitcheck = {'bestfit','userfit'};
-      
-      if all(ismember(fitcheck,reflines))
+   % check if both userfit and bestfit are requested
+   fitcheck = {'bestfit','userfit'};
 
-         % ------------------------------------
+   if all(ismember(fitcheck,reflines))
+
+      % ------------------------------------
 %          % put them both in the legend
 %          ibf   = ismember(reflines,fitcheck);
 %          hleg  = h(ibf);
@@ -196,59 +196,59 @@ ax          = p.Results.ax;
 %             tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
 %          end
 %          ltext = {tbest; tuser};
-         % ------------------------------------
-         
-         % only put bestfit in the legend
-         ibf   = strcmp(reflines,'bestfit');
-         hleg  = h(ibf);
-         ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
-        %ltext = [ltext ' (NLS fit)'];
-         ltext = [ltext ' (nonlinear least-squares)'];
-         
-      % check if either userfit or bestfit are requested
-      elseif any(ismember(fitcheck,reflines))
-         
-         % use whichever one was requested
-         ibf   = ismember(reflines,fitcheck);
-         hleg  = h(ibf);
-         ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
-         
-         if ~any(ismember(reflines,'userfit'))
-            ltext = [ltext ' (NLS fit)'];
-         elseif ~any(ismember(reflines,'bestfit'))
-            ltext = [ltext ' (MLE fit)'];
-         end
-         
+      % ------------------------------------
+
+      % only put bestfit in the legend
+      ibf   = strcmp(reflines,'bestfit');
+      hleg  = h(ibf);
+      ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
+     %ltext = [ltext ' (NLS fit)'];
+      ltext = [ltext ' (nonlinear least-squares)'];
+
+   % check if either userfit or bestfit are requested
+   elseif any(ismember(fitcheck,reflines))
+
+      % use whichever one was requested
+      ibf   = ismember(reflines,fitcheck);
+      hleg  = h(ibf);
+      ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
+
+      if ~any(ismember(reflines,'userfit'))
+         ltext = [ltext ' (NLS fit)'];
+      elseif ~any(ismember(reflines,'bestfit'))
+         ltext = [ltext ' (MLE fit)'];
       end
-      
-      if isobject(hrain)
-         hleg  = [hleg hrain];
-         ltext = {ltext,'rain'};
-      end
-      
-      l = legend(hleg,ltext,'location','nw','interpreter','latex');
-   else
-      l = nan;
+
    end
-   
-   % package the output
-   out.fig        = fig;
-   out.scatter    = h0;
-   out.mask       = h1;
-   out.reflines   = h;
-   out.ax         = gca;
-   out.hrain      = hrain;
+
+   if isobject(hrain)
+      hleg  = [hleg hrain];
+      ltext = {ltext,'rain'};
+   end
+
+   l = legend(hleg,ltext,'location','nw','interpreter','latex','AutoUpdate','off');
+else
+   l = nan;
+end
+
+% package the output
+out.fig        = fig;
+out.scatter    = h0;
+out.mask       = h1;
+out.reflines   = h;
+out.ax         = gca;
+out.hrain      = hrain;
 %    out.hcloud    = h0;
 %    out.hb1       = h1;
 %    out.hb3       = h2;
 %    out.hupper    = h3;
-   out.legend     = l;
-   
-   % 
+out.legend     = l;
+
+% 
 %    out.ab         = ab;
 
-   snapnow;
-end
+snapnow;
+
 
 function hrain = plotrain(ax,h,rain,x,y)
    
@@ -258,25 +258,23 @@ function hrain = plotrain(ax,h,rain,x,y)
    % x and y are q -dqdt
    
 % add rain. scale the circles such that 1 mm of rain equals the size of
-   % the plotted circles 
-   if sum(rain)==0
-      hrain = nan;
-   else
-      
-   % scatter is producing pixelated symbols so I use plot instead
-     %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
-     %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
-     
-     % this mimics the way scatter scales the circles
-      sz    = h.MarkerSize + sqrt(pi.*(rain(rain>0)).^2);
-      x     = x(rain>0);
-      y     = y(rain>0);
-      
-      hold on;
-      for n = 1:numel(sz)
-         hrain(n) = plot(ax,x(n),y(n),'o','MarkerSize',sz(n), ...
-                     'MarkerFaceColor','none','Color','m','LineWidth',1);
-      end
+% the plotted circles 
+if sum(rain)==0
+   hrain = nan;
+else
+
+% scatter is producing pixelated symbols so I use plot instead
+  %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
+  %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
+
+  % this mimics the way scatter scales the circles
+   sz    = h.MarkerSize + sqrt(pi.*(rain(rain>0)).^2);
+   x     = x(rain>0);
+   y     = y(rain>0);
+
+   hold on;
+   for n = 1:numel(sz)
+      hrain(n) = plot(ax,x(n),y(n),'o','MarkerSize',sz(n), ...
+                  'MarkerFaceColor','none','Color','m','LineWidth',1);
    end
-   
 end

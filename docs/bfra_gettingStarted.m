@@ -41,20 +41,17 @@
 %  doc bfra
 % 
 %% Features
-% The toolbox supports five main features:
+% The toolbox supports four main features:
 % 
-% # Recession (baseflow) event detection
-% # Recession (baseflow) event curve-fitting
-% # Recession (baseflow) parameter distribution-fitting
-% # Aquifer-property estimation from event-scale curve-fitting parameters
-% # Aquifer-property estimation from population-scale distribution-fitting
-% parameters
+% # Baseflow recession event detection
+% # Baseflow recession event curve-fitting (parameter estimation on an event-basis) 
+% # Baseflow recession event distribution-fitting (parameter estimation for a sample population of events)
+% # Aquifer property estimation using event-scale recession parameters and population-scale parameters
 % 
 % Functions that support event detection:
 % 
-% * |getevents| Detect recession events on a multi-year timeseries of streamflow data, returned as an array
-% * |findevents| Identify recession events from a multi-year timeseries of streamflow data, returned as a cell array (called by |getevents|) 
-% * |eventfinder| Automatically detect recession events using objective parameters and filters to detect change points, convert detected recession events into segments (called by |findevents|)
+% * |getevents| Detect recession events on timeseries of daily streamflow data, and package them as arrays in a struct container
+% * |eventfinder| The algorithm called by |getevents| to automatically detect recession events
 % * |eventpicker| Pick events manually, rather than automatically using |eventfinder|
 % * |eventplotter| Plot recession events detected by |eventfinder| or |eventpicker|
 % 

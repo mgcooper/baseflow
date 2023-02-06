@@ -2,13 +2,15 @@ function fdc = fdcurve(flow,varargin)
 %FDCURVE Flow duration curve
 
 %-------------------------------------------------------------------------------
-p = magicParser;
-p.FunctionName='fdcurve';
-p.addRequired('flow',@(x)isnumeric(x));
-p.addParameter('axscale','semilogy',@(x)ischar(x));
-p.addParameter('units','',@(x)ischar(x));
-p.addParameter('refpoints',nan,@(x)isnumeric(x));
-p.addParameter('plotcurve',true,@(x)islogical(x));
+p              = magicParser;
+p.FunctionName = 'fdcurve';
+
+p.addRequired( 'flow',                    @(x)isnumeric(x)  );
+p.addParameter('axscale',     'semilogy', @(x)ischar(x)     );
+p.addParameter('units',       '',         @(x)ischar(x)     );
+p.addParameter('refpoints',   nan,        @(x)isnumeric(x)  );
+p.addParameter('plotcurve',   true,       @(x)islogical(x)  );
+
 p.parseMagically('caller');
 %-------------------------------------------------------------------------------
    
@@ -18,8 +20,8 @@ x     = sort(flow,'descend');
 f     = 1-M./(N+1);
 
 % if requested, compute reference point values
-xref = nan(numel(refpoints,1));
-fref = nan(numel(refpoints,1));
+xref  = nan(numel(refpoints,1));
+fref  = nan(numel(refpoints,1));
 if ~isnan(refpoints)
    for n = 1:numel(refpoints)
       iref     = find(x>=refpoints(n),1,'last');
@@ -62,9 +64,10 @@ if plotcurve == true
    % otherwise if the figure is resized, matlab will make new ticks
    set(gca,'XTickMode','manual','YTickMode','manual');
 
-   figformat('suppliedline',h.fdc,'linelinewidth',3); 
+   % commented out for compatibility
+   % figformat('suppliedline',h.fdc,'linelinewidth',3);
 
-   fdc.h    = h;
+   fdc.h = h;
 end
 
 % package output
@@ -72,7 +75,7 @@ fdc.f    = f;
 fdc.x    = x;
 fdc.xref = xref;
 fdc.fref = fref;
-   
+
 %    % this would also work, adapted from num2ltext
 %    ax.XAxis.TickLabels = cellstr(num2str(ax.XAxis.TickValues','$%g\\%%$'))
    
@@ -80,6 +83,8 @@ fdc.fref = fref;
 %    ax.XAxis.TickLabelInterpreter = 'latex';
 %    xtickformat 'percentage'
 %    % but they disappear when latex is set
+
+
 
 % function [F,x] = ecdfpot(x,xmin,alpha,sigma)
 %    
@@ -102,5 +107,4 @@ fdc.fref = fref;
 %    gamma = b-1; % might be 1-b;
 %    beta  = tau0;
 %    F     = N/n.*(1+gamma.*(x-x0)/beta)^(-1/gamm);
-%    
-% end
+

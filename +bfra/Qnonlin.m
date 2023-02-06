@@ -1,5 +1,16 @@
 function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
 %QNONLIN plots the theoretical discharge predicted by a/b values
+% 
+% 
+% 
+% 
+% See also taufunc, getfunction, QtauString, QtString
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 
 % the loop is ugly but it's the easiest way to allow any size a,b,Q0.
 % if I wanted to restrict two of the three a,b,Q0 to be scalar and let
@@ -52,8 +63,9 @@ if plotFig
    
    % get formatted strings for the legend
    showAB  = false;
-   Qtstr   = bfra.QtString(a,b,Q0,showAB);
-   tcstr   = bfra.tcString(a,b,Q0,showAB);
+   Qtstr   = bfra.getstring('Q(t)');
+%    Qtstr   = bfra.QtString([a,b],Q0,showAB);
+%    tcstr   = bfra.tcString(a,b,Q0,showAB);
    
    % make a figure
    tileFigure();
@@ -61,26 +73,22 @@ if plotFig
    plot(t,Q);
    xlabel('$t \quad [T]$');
    ylabel('$Q(t) \quad [L/T]$');
-   legend(Qtstr)
+   legend(Qtstr,'Interpreter','latex');
    axis tight
-   hFig1 = figformat;
    
    
    nexttile
    plot(t./tc,Q./Q0); % hold on; plot(t./tc,Q./Q0);
-   xlabel('$t/t_c \quad [-]$'); ylabel('$Q/Q_0 \quad [-]$');
-   legend(tcstr)
+   xlabel('$t/t_c \quad [-]$','Interpreter','latex');
+   ylabel('$Q/Q_0 \quad [-]$','Interpreter','latex');
+   % legend(tcstr)
    
    axis tight
    ylim([0 1])
    
-   hFig2 = figformat;
-   
    % fix the axes if they got misaligned
-   hFig1.backgroundAxis.Position = hFig1.mainAxis.Position;
-   hFig2.backgroundAxis.Position = hFig2.mainAxis.Position;
-   
-   
+   %hFig1.backgroundAxis.Position = hFig1.mainAxis.Position;
+   %hFig2.backgroundAxis.Position = hFig2.mainAxis.Position;
 end
 
 % % NOTE: with the tc value, we can compute the Q(t) like this:

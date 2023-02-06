@@ -1,5 +1,15 @@
 {
    "_schemaVersion": "1.0.0",
+   "Setup":
+   {
+      "inputs":
+      [
+         {"name":"option", "kind":"ordered",
+          "type": ["char", 
+          "choices={'install','uninstall','dependencies','addpath','rmpath'}"],
+          "default":"'install'","purpose":"Option"}
+      ]
+   },
    "bfra.aQbString":
    {
       "inputs":
@@ -44,6 +54,13 @@
    {
       "inputs":
       [
+         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.basinlist"]}
+      ]
+   },
+   "bfra.stationname":
+   {
+      "inputs":
+      [
          {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.stationlist"]}
       ]
    },
@@ -58,7 +75,9 @@
          {"name":"D",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"L",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"method",    "kind": "required",  "type": ["char", "choices={'mean','median','envelope'}"],"default":"'median'","purpose":"Option"},
-         {"name":"refqtls",   "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"earlyqtls", "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"lateqtls",  "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"userab",    "kind": "namevalue", "type": ["vector","double"]},
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]},
          {"name":"theta",     "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"isflat",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
@@ -192,20 +211,6 @@
          {"name":"fitopts",   "kind": "namevalue", "type": "struct"}
       ]
    },
-   "bfra.fitdqdt":
-   {
-      "inputs":
-      [
-         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["vector"]]},
-         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
-         {"name":"R",         "kind":"required",   "type":["vector","double"]},
-         {"name":"method",    "kind":"required",   "type":["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"default":"'ETS'"},
-         {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"vtsparam",  "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
    "bfra.fitets":
    {
       "inputs":
@@ -216,6 +221,39 @@
          {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
          {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "bfra.fitvts":
+   {
+      "inputs":
+      [
+         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["double","vector"]]},
+         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
+         {"name":"R",         "kind":"required",   "type":["vector","double"]},
+         {"name":"vtsparam",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "bfra.fitevents":
+   {
+      "inputs":
+      [
+         {"name":"Events",       "kind": "required",  "type": ["struct"]},
+         {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
+         {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
+         {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
+         {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
+         {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"saveplots",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
+         {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"}
+      ],
+
+      "outputs":
+      [
+         {"name":"K",         "type": ["struct"] },
+         {"name":"Fits",      "type": ["struct"] }
       ]
    },
    "bfra.fitphi":
@@ -244,7 +282,7 @@
          {"name":"plottype",   "kind": "ordered",   "type": ["char", "choices={'pdf','cdf','probplot','none'}"],"default":"'none'","purpose":"Option"}
       ]
    },
-   "bfra.getdqdt":
+   "bfra.fitdqdt":
    {
       "inputs":
       [
@@ -255,10 +293,8 @@
          {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
          {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
          {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
-         {"name":"fitwindow",    "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
          {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
          {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option", "default":"'false'" },
-         {"name":"gageID",       "kind": "namevalue", "type": ["char"] },
          {"name":"eventID",      "kind": "namevalue", "type": ["char"] },
          {"name":"ax",           "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]}
       ],
@@ -271,12 +307,12 @@
          {"name":"rq",        "type": ["double"] }
       ]
    },
-   "bfra.getevents":
+      "bfra.getevents":
    {
       "inputs":
       [
          {"name":"T",            "kind":"required",   "type":[["double","vector"],["datetime","vector"]]},
-         {"name":"Q",            "kind":"required",   "type":["double","vector"]}, 
+         {"name":"Q",            "kind":"required",   "type":["double","vector"]},
          {"name":"R",            "kind":"required",   "type":["double"]},
          {"name":"qmin",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"nmin",         "kind":"namevalue",  "type":["double","scalar"]},
@@ -284,56 +320,24 @@
          {"name":"rmax",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"rmin",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"cmax",         "kind":"namevalue",  "type":["double","scalar"]},
-         {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.findevents":
-   {
-      "inputs":
-      [
-         {"name":"t",            "kind":"required",   "type":[["double","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",   "type":["double","vector"]},
-         {"name":"r",            "kind":"required",   "type":["double"]},
-         {"name":"qmin",         "kind":"namevalue",  "type":["double","scalar"]},
-         {"name":"nmin",         "kind":"namevalue",  "type":["double","scalar"]},
-         {"name":"fmax",         "kind":"namevalue",  "type":["double","scalar"]},
-         {"name":"rmax",         "kind":"namevalue",  "type":["double","scalar"]},
-         {"name":"rmin",         "kind":"namevalue",  "type":["double","scalar"]},
-         {"name":"cmax",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
-      ]
-   },
-   "bfra.fitevents":
-   {
-      "inputs":
-      [
-         {"name":"Events",       "kind": "required",  "type": ["struct"]},
-         {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
-         {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
-         {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
-         {"name":"fitnmin",      "kind": "namevalue", "type": ["scalar","double"],"default":"4"},
-         {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
-         {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"savefitplots", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
-         {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
-         {"name":"drainagearea", "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"gageID",       "kind": "namevalue", "type": ["char"] }
       ],
 
       "outputs":
       [
-         {"name":"K",         "type": ["table"] },
-         {"name":"Fits",      "type": ["struct"] }
+         {"name":"Events",       "type": ["struct"] },
+         {"name":"Info",         "type": ["struct"] }
+      ]
+   },
+   "bfra.getfunction":
+   {
+      "inputs":
+      [
+      {"name":"requestedfnc",    "kind":"required",   "type":[["scalar"],["char","choices={'SofabQ','tauofabQ','tauofabQ0','Qofabtau','aofa0','boftautau0','expectedQ','expectedTau','expectedTime'}"]]}
       ]
    },
    "bfra.getstring":
@@ -348,10 +352,11 @@
    {
       "inputs":
       [
-         {"name":"K",               "kind": "required",  "type": ["table"]},
+         {"name":"K",               "kind": "required",  "type": ["struct"]},
          {"name":"Events",          "kind": "required",  "type": ["struct"]},
          {"name":"Fits",            "kind": "required",  "type": ["struct"]},
          {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
+         {"name":"drainagedens",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},
@@ -378,6 +383,14 @@
          {"name":"labelplot", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
+   "bfra.loadbasins":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "ordered","type": ["char","choices=bfra.basinlist"]},
+         {"name":"projection","kind": "namevalue","type": ["char","choices={'geo','ease'}"]}
+      ]
+   },
    "bfra.loadcalm":
    {
       "inputs":
@@ -385,6 +398,17 @@
          {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
          {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
 
+      ]
+   },
+   "bfra.loadflow":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra.stationlist"]},
+         {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
+         {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
+         {"name":"gapfill",   "kind": "namevalue",  "type":["logical"],"purpose":"Option"}
       ]
    },
    "bfra.loadghcnd":
@@ -395,14 +419,54 @@
          {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["double","scalar"]]},
          {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["double","scalar"]]},
          {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
-         {"name":"gapfill",   "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
+         {"name":"gapfill",   "kind": "namevalue", "type": ["logical"],"purpose":"Option"}
       ]
    },
    "bfra.loadmeta":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]}
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
+      ]
+   },
+   "bfra.loadprops":
+   {
+      "inputs":
+      [
+         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
+      ]
+   },
+   "bfra.mapbasins":
+   {
+      "inputs":
+      [
+         {"name":"Basins",    "kind": "required",  "type": ["struct"]},
+         {"name":"Meta",      "kind": "namevalue", "type": ["table"]},
+         {"name":"facemapping","kind":"namevalue", "type": ["logical"],"purpose":"Option"},
+         {"name":"facelabels","kind": "namevalue", "type": ["logical"],"purpose":"Option"},
+         {"name":"facealpha", "kind": "namevalue", "type": ["numeric"]},
+         {"name":"cvarname",  "kind": "namevalue", "type": "choices=fieldnames(basins)"},
+         {"name":"cbartxt",   "kind": "namevalue", "type": ["char"]},
+         {"name":"latlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"lonlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"proj",      "kind": "namevalue", "type": ["char","choices={'stereo','lambert'}"]},
+         {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
+      ]
+   },
+   "bfra.mapgages":
+   {
+      "inputs":
+      [
+         {"name":"lat",       "kind": "required",  "type": ["numeric"]},
+         {"name":"lon",       "kind": "required",  "type": ["numeric"]},
+         {"name":"cvar",      "kind": "namevalue", "type": ["numeric"]},
+         {"name":"cbartitle", "kind": "namevalue", "type": ["char"]},
+         {"name":"latlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"lonlims",   "kind": "namevalue", "type": ["numeric"]},
+         {"name":"proj",      "kind": "namevalue", "type": ["char","choices={'stereo','lambert'}"]},
+         {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
       ]
    },
    "bfra.plfitb":
@@ -499,10 +563,20 @@
          {"name":"q",         "kind": "required",  "type": ["vector","double"]},
          {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
          {"name":"bhat",      "kind": "required",  "type": ["scalar","double"]},
-         {"name":"method",    "kind": "required",  "type": ["char", "choices={'mean','median','envelope'}"],"default":"'median'","purpose":"Option"},
+         {"name":"method",    "kind": "required",  "type": ["char", "choices={'mean','median','envelope','brutsaert','cooper'}"],"default":"'median'","purpose":"Option"},
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]},
          {"name":"refqtls",   "kind": "namevalue", "type": ["vector","double"]},
          {"name":"bci",       "kind": "namevalue", "type": ["vector","double"]}
+      ]
+   },
+   "bfra.prepalttrend":
+   {
+      "inputs":
+      [
+         {"name":"q",         "kind": "required",  "type": ["vector","double"]},
+         {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
+         {"name":"weights",   "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"mask",      "kind": "namevalue", "type": ["logical"]}
       ]
    },
    "bfra.prepfits":
@@ -538,20 +612,51 @@
    {
       "inputs":
       [
-         {"name":"type",            "kind": "required",  "type": ["char", "choices={'fits','events','globalfits'}"],"default":"'events'","purpose":"Option"},
-         {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"aquiferbreadth",  "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"isflat",          "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"plotfits",        "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"bootfit",         "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"nreps",           "kind": "namevalue", "type": ["double","scalar"]},
-         {"name":"phimethod",       "kind": "namevalue", "type": ["char", "choices={'pointcloud','distfit'}"], "default":"'pointcloud'", "purpose":"Option" },
-         {"name":"refqtls",         "kind": "namevalue", "type": ["vector","double"]},
-         {"name":"earlyqtls",       "kind": "namevalue", "type": ["vector","double"]},
-         {"name":"lateqtls",        "kind": "namevalue", "type": ["vector","double"]}
+         {"name":"type", "kind": "required",  "type": ["char", "choices={'events','fits','globalfit'}"],"default":"'events'","purpose":"Option"},
+         {"mutuallyExclusiveGroup":
+            [
+               [
+                  {"name":"qmin",         "kind":"namevalue",  "type":["double","scalar"]},
+                  {"name":"nmin",         "kind":"namevalue",  "type":["double","scalar"]},
+                  {"name":"fmax",         "kind":"namevalue",  "type":["double","scalar"]},
+                  {"name":"rmax",         "kind":"namevalue",  "type":["double","scalar"]},
+                  {"name":"rmin",         "kind":"namevalue",  "type":["double","scalar"]},
+                  {"name":"cmax",         "kind":"namevalue",  "type":["double","scalar"]},
+                  {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+                  {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+                  {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+                  {"name":"pickevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+                  {"name":"plotevents",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+               ],
+               [
+                  {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
+                  {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
+                  {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
+                  {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"pickmethod",   "kind": "namevalue", "type": ["char", "choices={'auto','none','manual'}"], "default":"'none'", "purpose":"Option" },
+                  {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"saveplots",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
+                  {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"}
+               ],
+               [
+                  {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"drainagedens",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"aquiferbreadth",  "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"isflat",          "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"plotfits",        "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"bootfit",         "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+                  {"name":"nreps",           "kind": "namevalue", "type": ["double","scalar"]},
+                  {"name":"phimethod",       "kind": "namevalue", "type": ["char", "choices={'pointcloud','distfit'}"], "default":"'pointcloud'", "purpose":"Option" },
+                  {"name":"refqtls",         "kind": "namevalue", "type": ["vector","double"]},
+                  {"name":"earlyqtls",       "kind": "namevalue", "type": ["vector","double"]},
+                  {"name":"lateqtls",        "kind": "namevalue", "type": ["vector","double"]}
+               ]
+            ]
+         }
       ]
    }
 }

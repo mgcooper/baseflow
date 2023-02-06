@@ -1,22 +1,38 @@
-function Fit = plfitb(x,varargin)
-%PLFITB returns [b,alpha,k]=bfra.plfitb(x,varargin) where x is continuous data
-%believed to follow an untruncated Pareto distribution with some unknown xmin
-%such that xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where
-%plfit is Aaron Clauset's function.
+function varargout = plfitb(x,varargin)
+%PLFITB fit an unbounded Pareto Distribution to recession parameter tau
+% 
+% Syntax
+% 
+%     Fit = plfitb(x,varargin)
+% 
+% Description
+% 
+%     Fit = plfitb(x,varargin) returns Fit containing the Pareto Distribution
+%     fit to input data x, where x is continuous data believed to follow an
+%     untruncated Pareto distribution with some unknown xmin such that
+%     xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where plfit
+%     is Aaron Clauset's function.
 %
-% Required inputs:
-%  x     = vector double of data believed to follow an untruncated Pareto distribution
+% Required inputs
+% 
+%     x        data believed to follow an untruncated Pareto distribution
 %
-% Optional inputs:
-%  xmin  = scalar double indicating the lower bound of the distribution
-%  range = the range of scaling parameters considered (see plfit.m)
-%  limit = scalar double that sets the upper bound of fitted exponent
-%  method = char indicating one of two algorithms (Clauset's or Hanel's)
-%  bootfit = logical indicating whether to bootstrap the uncertainties (slow)
-%  nreps = scalar double indicating how many replicates in the boot fit
-%  plotfit = logical indicating whether to call plplot
+% Optional inputs
+% 
+%     xmin     scalar double indicating the lower bound of the distribution
+%     range    the range of scaling parameters considered (see plfit.m)
+%     limit    scalar double that sets the upper bound of fitted exponent
+%     method   char indicating one of two algorithms (Clauset's or Hanel's)
+%     bootfit  logical indicating whether to bootstrap the uncertainties (slow)
+%     nreps    scalar double indicating how many replicates in the boot fit
+%     plotfit  logical indicating whether to call plplot
 %
-% See also: plplotb, plfit
+% See also plfit, plplotb, gpfitb
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
 p              = inputParser;
@@ -41,8 +57,8 @@ method   = p.Results.method;
 bootfit  = p.Results.bootfit;
 nreps    = p.Results.nreps;
 plotfit  = p.Results.plotfit;
-%-------------------------------------------------------------------------------
 
+%-------------------------------------------------------------------------------
 x0    = x;
 [x,~] = prepareCurveData(x,x);
 x     = x(x>0);
@@ -54,8 +70,8 @@ if isnan(xmin)
             BootFit = plbootfit(x,range,limit,nreps);
          end
       case 'hanel'
-         [~,xmin] = plfit(x,'range',range,'limit',limit);
-         [alpha,xmin,L,D] = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
+         [~,xmin]          = plfit(x,'range',range,'limit',limit);
+         [alpha,xmin,L,D]  = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
             range(1),'alpha_max',range(end));
          % if I had some max value to consider, I could pass 'rangemax'
    end
@@ -109,11 +125,22 @@ if plotfit == true
    snapnow;
 end
 
+switch nargout
+   case 1
+      varargout{1} = Fit;
+   case 2
+      varargout{1} = 1+1/alpha;
+      varargout{2} = alpha;
+   case 3
+      varargout{1} = b;
+      varargout{2} = 1+1/alpha;
+      varargout{3} = xmin;
+end
+
 % NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should
 % be about 0.01-0.02. This is indeed the case for the data I have tested
 % from the Kuparuk (the error was about 0.03, but alpha was about 3.12). See
 % Figure 10 in Clauset et al. 2009.
-
 
 % bootstrap confidence intervals
 function Fit = plbootfit(x,range,limit,nreps)
@@ -140,17 +167,17 @@ Fit.reps = reps;
 % replaced this with ntail
 % Fit.numtau  = numel(x(x>Fit.tau0_avg));
 
-%    % As a rough check on the sampling distribution of the parameter
-%    % estimators, we can look at histograms of the bootstrap replicates.
-%    figure; subplot(1,3,1);
-%    histogram(reps.b);
-%    title('Bootstrap estimates of $b$');
-%    subplot(1,3,2);
-%    histogram(reps.tau0);
-%    title('Bootstrap estimates of $\tau_0$');
-%    subplot(1,3,3);
-%    histogram(reps.alpha);
-%    title('Bootstrap estimates of $\alpha$');
+% As a rough check on the sampling distribution of the parameter
+% estimators, we can look at histograms of the bootstrap replicates.
+% figure; subplot(1,3,1);
+% histogram(reps.b);
+% title('Bootstrap estimates of $b$');
+% subplot(1,3,2);
+% histogram(reps.tau0);
+% title('Bootstrap estimates of $\tau_0$');
+% subplot(1,3,3);
+% histogram(reps.alpha);
+% title('Bootstrap estimates of $\alpha$');
 
 %    % it is incorrect to apply the standard formula so don't use this
 %    for n = 1:numel(vars)

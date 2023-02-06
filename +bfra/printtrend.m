@@ -1,4 +1,9 @@
 function [ddt,err] = printtrend(Data,varargin)
+%PRINTTREND print trends computed from columns in table Data to the screen
+% 
+%  [ddt,err] = printtrend(Data,varargin)
+% 
+% See also
 
 %-------------------------------------------------------------------------------
 p              = magicParser;
@@ -21,33 +26,33 @@ alpha = p.Results.alpha;
 qtl   = p.Results.quantile;
 
 %-------------------------------------------------------------------------------
-   % create a regular time in years, works for both months and years
-      
-   t        = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
-   dat      = Data.(var);                    % cm/yr -> cm/day
-   dt       = numel(t);
-   switch method
-      case 'ols'
-         mdl      = fitlm(t,dat); 
-         ddt      = mdl.Coefficients.Estimate(2);  % cm/day/year
-         CI       = coefCI(mdl,alpha);
-         err      = CI(2,2)-ddt;
-      case 'qtl'
-         [ab,S]   = quantreg(t,dat,qtl,1,1000,alpha);
-         ddt      = ab(2);
-         CI       = S.ci_boot';
-         err      = CI(2,2)-ddt;
-   end
-   % adjust the trend and error units using the conversion factor
-   ddt      = cf*ddt;
-   d        = ddt*dt;
-   err      = cf*err;
-   derr     = err*dt;
-   errstr   = num2str(round(100*(1-alpha)));
-   str      = ['\nd' var '/dt = %.3f ' char(177) ' %.3f (' errstr '%% CI) '];
-   str      = [str ', d' var ' = %.3f ' char(177) ' %.3f \n\n'];
-   fprintf(str,ddt,err,d,derr);
-   
+% create a regular time in years, works for both months and years
+
+t        = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
+dat      = Data.(var);                    % cm/yr -> cm/day
+dt       = numel(t);
+switch method
+   case 'ols'
+      mdl      = fitlm(t,dat); 
+      ddt      = mdl.Coefficients.Estimate(2);  % cm/day/year
+      CI       = coefCI(mdl,alpha);
+      err      = CI(2,2)-ddt;
+   case 'qtl'
+      [ab,S]   = quantreg(t,dat,qtl,1,1000,alpha);
+      ddt      = ab(2);
+      CI       = S.ci_boot';
+      err      = CI(2,2)-ddt;
+end
+% adjust the trend and error units using the conversion factor
+ddt      = cf*ddt;
+d        = ddt*dt;
+err      = cf*err;
+derr     = err*dt;
+errstr   = num2str(round(100*(1-alpha)));
+str      = ['\nd' var '/dt = %.3f ' char(177) ' %.3f (' errstr '%% CI) '];
+str      = [str ', d' var ' = %.3f ' char(177) ' %.3f \n\n'];
+fprintf(str,ddt,err,d,derr);
+
 %    if alpha == 0.05 || alpha == 0.95
 %       metric   = 'CI';
 %       err      = coefCI(mdl,alpha)*cf;

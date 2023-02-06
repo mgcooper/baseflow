@@ -1,5 +1,5 @@
 function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
-%EXPECTEDQ general description of function
+%EXPECTEDQ compute the expected value of baseflow
 % 
 % Syntax
 % 
@@ -7,7 +7,12 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
 %  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
 %              Qexp/Q0 relative to the input Q
 % 
-% Author: Matt Cooper, DD-MMM-YYYY, https://github.com/mgcooper
+% See also 
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %------------------------------------------------------------------------------
 % input parsing
@@ -83,6 +88,11 @@ end
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % %  below here various ways of computing Q0/Qexp
 
+% Note: if ahat is computed using the point cloud and 
+% Qexp = (ahat*tau)^(1/(1-bhat)), then
+% Q0 = Qexp(3-bhat)/(2-bhat) != ahat*tau0^(1/(1-bhat))
+% BUT, Q0 isn't used anywhere else in the algorithm
+% 
 % [Q0 Qexp] % 9.1069e+05   3.6818e+05
 % 
 % plot([Q0 Q0],ylim,'Color','r')

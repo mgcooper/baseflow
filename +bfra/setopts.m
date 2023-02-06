@@ -1,9 +1,9 @@
-function opts = setopts(type,varargin)
-%SETOPTS sets default or custom bfra algorithm options for type 'events' or 'fits'
+function opts = setopts(funcname,varargin)
+%SETOPTS set algorithm options for functions getevents, fitevents, and globalfit
 %
 %  Required inputs
 %
-%     type        = 'events', 'fits', or 'globalfit'
+%     funcname    : 'getevents', 'fitevents', or 'globalfit'
 %
 %     indicates whether to send back the default options for the event detection
 %     algorithm 'getevents', the event fitting algorithm 'fitdqdt', or the
@@ -58,21 +58,24 @@ function opts = setopts(type,varargin)
 %     lateqtls       : quantiles of Q and -dQ/dt for late reference lines
 %
 %  See also getfits, fitdqdt
+%
+%  Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
-%-------------------------------------------------------------------------------
-% % set default bfra settings
-%-------------------------------------------------------------------------------
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+%% set default bfra settings
 
 p                 = inputParser;
 p.FunctionName    = 'bfra.setopts';
-% p.PartialMatching = true;
-p.addRequired('type',@(x)ischar(x));
-parse(p,type);
 
-switch type
+p.addRequired('funcname',@(x)ischar(x));
+parse(p,funcname);
+
+switch funcname
 
    % event detection - input options for getevents
-   case 'events'
+   case 'getevents'
 
       addParameter(p,   'qmin',        1,          @(x) isnumericscalar(x)  );
       addParameter(p,   'nmin',        4,          @(x) isnumericscalar(x)  );
@@ -87,20 +90,17 @@ switch type
       addParameter(p,   'plotevents',  false,      @(x) islogicalscalar(x)  );
 
    % event fits - input options for fitevents
-   case 'fits'
+   case 'fitevents'
 
       addParameter(p,   'derivmethod', 'ETS',      @(x) ischar(x)             );
       addParameter(p,   'fitmethod',   'nls',      @(x) ischar(x)             );
       addParameter(p,   'fitorder',    'free',     @(x) ischar(x)|isnumeric(x));
-      addParameter(p,   'fitnmin',     4,          @(x) isnumericscalar(x)    );
       addParameter(p,   'pickfits',    false,      @(x) islogicalscalar(x)    );
       addParameter(p,   'pickmethod',  'none',     @(x) ischar(x)             );
       addParameter(p,   'plotfits',    false,      @(x) islogicalscalar(x)    );
-      addParameter(p,   'savefitplots',false,      @(x) islogicalscalar(x)    );
+      addParameter(p,   'saveplots',   false,      @(x) islogicalscalar(x)    );
       addParameter(p,   'etsparam',    0.2,        @(x) isnumericscalar(x)    );
       addParameter(p,   'vtsparam',    1.0,        @(x) isnumericscalar(x)    );
-      addParameter(p,   'drainagearea',nan,        @(x) isnumericscalar(x)    );
-      addParameter(p,   'gageID',      'none',     @(x) ischar(x)             );
       
    % global fit - input to bfra.globalfit
    case 'globalfit'
@@ -122,8 +122,8 @@ switch type
 
 end
 
-parse(p,type,varargin{:});
+parse(p,funcname,varargin{:});
 
 opts = p.Results;
-opts = rmfield(opts,'type');
+opts = rmfield(opts,'funcname');
 

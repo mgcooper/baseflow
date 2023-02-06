@@ -1,30 +1,46 @@
 function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
-%using variable time stepping, exponential time stepping, or one of six
-%standard numerical derivatives given in Thomas et al. 2015, Table 2
+%  
+% Syntax
 % 
-%  Syntax
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
 % 
-%  Required inputs
+% Description
+% 
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt using
+%     variable time stepping, exponential time stepping, or one of six standard
+%     numerical derivatives given in Thomas et al. 2015, Table 2. The method is
+%     passed in as the argument derivmethod with type char.
+% 
+% Required inputs
+% 
 %     T     =  time (days)
 %     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
 %     R     =  rainfall (L T^-1, assumed to be mm d-1)
 %     derivmethod = method to compute numerical derivative dQ/dt. Options are
 %     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
 % 
-%  Optional name-value pairs
+% Optional name-value inputs
 % 
+%     etsparam =  scalar double, parameter that controls window size in ETS method
+%     vtsparam =  scalar double, parameter that controls window size in VTS method
+%     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
+%     plotfit  =  logical, scalar, indicates whether to plot the fit
 % 
+% See also getdqdt
 % 
-%  See also fitdqdt
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % 
 % Tip: this accepts pre-selected events, not raw timeseries. Use
-% bfra.findevents to pick Events, then bfra.fitdqdt to fit the events.
+% bfra.findevents to pick Events, then bfra.getdqdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
 %-------------------------------------------------------------------------------
@@ -39,118 +55,116 @@ addRequired(p, 'R',                    @(x) isnumeric(x)                );
 addRequired(p, 'derivmethod',          @(x) ischar(x)                   );
 addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
 addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
+addParameter(p,'ctsmethod',   'B1',    @(x) ischar(x)                   );
 addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
 addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
 addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
-addParameter(p,'gageID',      'none',  @(x) ischar(x)                   );
 addParameter(p,'eventID',     'none',  @(x) ischar(x)                   );
 addParameter(p,'ax',          'none',  @(x) isaxis(x) | ischar(x)       );
+addParameter(p,'flag',        false,   @(x) islogical(x)                );
 
 parse(p,T,Q,R,derivmethod,varargin{:});
 
 vtsparam    = p.Results.vtsparam;
 etsparam    = p.Results.etsparam;
+ctsmethod   = p.Results.ctsmethod;
 pickmethod  = p.Results.pickmethod;
 fitmethod   = p.Results.fitmethod;
 plotfits    = p.Results.plotfits;
-gageID      = p.Results.gageID;
 eventID     = p.Results.eventID;
+ax          = p.Results.ax;
+flag        = p.Results.flag;
 
-if isdatetime(T); T = datenum(T); end
 %-------------------------------------------------------------------------------
 
-   warning off
+switch derivmethod
+   
+   case 'VTS'  % variable time step
+      
+      [q,dqdt,dt,tq,rq] = bfra.fitvts(T,Q,R,'vtsparam',vtsparam);
+      
+   case 'ETS'  % exponential timestep
+      
+      [q,dqdt,dt,tq,rq] = bfra.fitets(T,Q,R,'etsparam',etsparam);
+      
+   case 'CTS'  % constant time step
+      
+      [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
+      
+end
+   
+   
+% this is the case where dQ/dt and q are returned without fitting a/b
+if fitmethod == "none" || pickmethod == "none"
+   
+   varargout{1} = nan; 
+   varargout{2} = nan;
+   return
 
-% process input
-   [Q,T,R,exitFlag] = prepInput(Q,T,R);
-   
-% return to the main program if exitFlag is true
-   if exitFlag == true
-      q=nan(size(Q)); dt=q; dqdt=q; tq=q; rq=q;
-      return;
-   end
-   
-% apply the chosen method to find dQ/dt for the entire event
-   [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(T,Q,R,derivmethod,'etsparam',etsparam,...
-                           'vtsparam',vtsparam);
-   
-% if we just want dQ/dt and q i.e. no fit, return from here
-   if string(fitmethod) == "none"
-      varargout{1} = nan; varargout{2} = nan;
-      return;
-   end
-   
-% if pickmethod = "none", we don't need anything else so we could stop
-% here, but go ahead and run fitSelector, it will return Info
+else
 
-   [q,dqdt,dt,tq,rq,hFits,~,~,Info] =  fitSelector(q,dqdt,dt,tq,r,      ...
-                                       fitmethod,pickmethod,plotfits,   ...
-                                       eventID,gageID);
-      varargout{1}   = Info;
-      varargout{2}   = hFits;
+% if pickmethod = "none", we don't need anything else so we could stop here, but
+% fitSelector will repackage the event as a cell array which is consistent with
+% the case where pickmethod ~= "none" which are the options to subdivide events
+% into segments, for example early-time and late-time. It also returns Info
+% which is needed to parse sub-event picks.
+
+   [hFits,Picks] = bfra.plotdqdt(q,dqdt, 'fitmethod',fitmethod,'pickmethod',...
+      pickmethod,'plotfits',plotfits,'eventID',eventID,'rain',rq);
+
+   [q,dqdt,dt,tq,rq,Info] = packagefits(Picks,q,dqdt,dt,tq,R);
+
+   varargout{1}   = Info;
+   varargout{2}   = hFits;
 
 end
 
 % ------------------------------------------------------------------------------
-% FITSELECTOR
+% PACKAGEFITS
 % ------------------------------------------------------------------------------
-function [Q,dQdT,dT,T,R,hFits,Picks,Fits,Info] = fitSelector(q,dqdt,dt, ...
-                                                   tq,rq,fitmethod,     ...
-                                                   pickmethod,plotfits, ...
-                                                   eventID,gageID)
+function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 
-% this is basically just a wrapper around bfra.plotdqdt
-   
-% select periods within an event (e.g., early-time, late-time) to send
-% back to the main algorithm for fitting dq/dt = aQb
-   [hFits,Picks,Fits]   = bfra.plotdqdt(q,dqdt, 'fitmethod',fitmethod,  ...
-                                                'pickmethod',pickmethod,...
-                                                'plotfits',plotfits,    ...
-                                                'eventID',eventID,      ...
-                                                'rain',rq);
-   
+% this unpacks the Picks structure and repackages the T,Q,dQdt for each picked
+% fit as individual cell arrays. I am not sure why I don't just do:
+% Q = Picks.Q;
+% dQdt = Picks.dQdt;
+% and so on. But, Picks does not include T, and maybe I wanted to distinguish
+% the og T,Q from the ets/vts fit t,q. 
+% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function
+% abve, I confirmed that things work up to this point meaning I can still
+% select events in plotdqdt and they get sent here, but I think the way i deal
+% wtih retiming in ETS now throws off the istart/stop, so will need to figure
+% out if it's being done correctly if I use manual or auto picking. 
+
+
 % if no events are found, return nan
-   if ~iscell(Picks.Q) && isnan(Picks.Q)
-      T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; return
-   end
- 
- 
-   numPicks = numel(Picks.Q);
-   T     = cell(numPicks,1);
-   Q     = cell(numPicks,1);
-   R     = cell(numPicks,1);
-   dT    = cell(numPicks,1);
-   dQdT  = cell(numPicks,1);
-   
-
-   for m = 1:numPicks
-      
-      istart  = Picks.istart(m);
-      istop   = Picks.istop(m);
-      
-      % previously these were put into Fits structure but I
-      Q{m}     = q(istart:istop);
-      dQdT{m}  = dqdt(istart:istop);
-      dT{m}    = dt(istart:istop);
-      T{m}     = tq(istart:istop);
-      R        = rq(istart:istop);
-      
-      Info.istart(m)      = istart;
-      Info.istop(m)       = istop;
-      Info.runlengths(m)  = Picks.runlengths(m);
-   end
+if ~iscell(Picks.Q) && isnan(Picks.Q)
+   T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; return
 end
 
-% ------------------------------------------------------------------------------
-% PREPINPUT
-% ------------------------------------------------------------------------------
 
-function [Q,T,R,exitFlag] = prepInput(Q,T,R)
+numPicks = numel(Picks.Q);
+T     = cell(numPicks,1);
+Q     = cell(numPicks,1);
+R     = cell(numPicks,1);
+dT    = cell(numPicks,1);
+dQdT  = cell(numPicks,1);
 
-   % convert to columns
-   Q = Q(:); T = T(:); R = R(:);
-   
-   % if the input is all nan and/or zero, return the outputs as nan
-   exitFlag=false; if sum(isnan(Q))+sum(Q==0)>=length(Q);exitFlag=true; end
-   
+
+for m = 1:numPicks
+
+   istart  = Picks.istart(m);
+   istop   = Picks.istop(m);
+
+   % previously these were put into Fits structure but I
+   Q{m}     = q(istart:istop);
+   dQdT{m}  = dqdt(istart:istop);
+   dT{m}    = dt(istart:istop);
+   T{m}     = tq(istart:istop);
+   R        = rq(istart:istop);
+
+   Info.istart(m)      = istart;
+   Info.istop(m)       = istop;
+   Info.runlengths(m)  = Picks.runlengths(m);
 end
+

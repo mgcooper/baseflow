@@ -1,30 +1,48 @@
 function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
-%CLOUDPHI estimates drainable porosity phi from the point cloud using the
-%method of Troch, Troch, and Brutsaert, 1993.
+%CLOUDPHI estimate drainable porosity phi from the point cloud
 % 
-% Required inputs:
-%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
-%  dqdt        =  discharge rate of change (L T^-2)
-%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
-%  A           =  basin area contributing to baseflow (L^2)
-%  D           =  saturated aquifer thickness (L)
-%  L           =  active stream length (L)
-%  method      =  method for fitting straight line to point cloud. options are
-%                 'median','mean','envelope'.
+% Syntax
 % 
-% Optional name-value inputs:
-%  refqtls     =  reference quantiles that together define a pivot point
+%     [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
+% 
+% Description
+% 
+%     [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method) computes drainable porosity
+%     from discharge q, first derivative dqdt, aquifer properties area A, depth
+%     D, and channel length L, and late-time b-value blate for the event-scale
+%     recession equation -dq/dt = aQ^b, using the method of Troch, Troch, and
+%     Brutsaert, 1993.
+% 
+% Required inputs
+% 
+%     q           discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%     dqdt        discharge rate of change (L T^-2)
+%     blate       late-time b parameter in -dqdt = aq^b (dimensionless)
+%     A           basin area contributing to baseflow (L^2)
+%     D           saturated aquifer thickness (L)
+%     L           active stream length (L)
+%     method      method for fitting straight line to point cloud. Valid
+%                 options include 'median','mean','envelope'.
+% 
+% Optional name-value inputs
+% 
+%     refqtls     reference quantiles that together define a pivot point
 %                 through which the straight line must pass. use with method
 %                 'envelope'.
-%  mask        =  logical mask to exclude data
-%  theta       =  effective slope of basin contributing area
-%  isflat      =  logical flag indicating if horizontal or sloped aquifer
+%     mask        logical mask to exclude data
+%     theta       effective slope of basin contributing area
+%     isflat      logical flag indicating if horizontal or sloped aquifer
 %                 solution is applicable
-%  soln1       =  optional early-time theoretical solution
-%  soln2       =  optional late-time theoretical solution
-%  dispfit     =  logical flag indicating whether to plot the result
+%     soln1       optional early-time theoretical solution
+%     soln2       optional late-time theoretical solution
+%     dispfit     logical flag indicating whether to plot the result
 % 
-%  See also eventphi, fitphi, fitdistphi
+% See also eventphi, fitphi, fitdistphi
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
 p                 = inputParser;
@@ -32,26 +50,28 @@ p.StructExpand    = false;
 p.PartialMatching = true;
 p.FunctionName    = 'bfra.cloudphi';
 
-addRequired(p, 'q',                    @(x)isnumeric(x));
-addRequired(p, 'dqdt',                 @(x)isnumeric(x));
-addRequired(p, 'blate',                @(x)isnumeric(x));
-addRequired(p, 'A',                    @(x)isnumeric(x));
-addRequired(p, 'D',                    @(x)isnumeric(x));
-addRequired(p, 'L',                    @(x)isnumeric(x));
-addRequired(p, 'method',               @(x)ischar(x));
-addParameter(p,'earlyqtls',[0.95 0.95],@(x)isnumeric(x));
-addParameter(p,'lateqtls', [0.5 0.5],  @(x)isnumeric(x));
-addParameter(p,'mask',     nan,        @(x)islogical(x));
-addParameter(p,'theta',    0,          @(x)isnumeric(x));
-addParameter(p,'isflat',   true,       @(x)islogical(x));
-addParameter(p,'soln1',    'RS05',     @(x)ischar(x));
-addParameter(p,'soln2',    'RS05',     @(x)ischar(x));
-addParameter(p,'dispfit',  false,      @(x)islogical(x));
+addRequired(p, 'q',                       @(x)isnumeric(x)  );
+addRequired(p, 'dqdt',                    @(x)isnumeric(x)  );
+addRequired(p, 'blate',                   @(x)isnumeric(x)  );
+addRequired(p, 'A',                       @(x)isnumeric(x)  );
+addRequired(p, 'D',                       @(x)isnumeric(x)  );
+addRequired(p, 'L',                       @(x)isnumeric(x)  );
+addRequired(p, 'method',                  @(x)ischar(x)     );
+addParameter(p,'earlyqtls',[0.95 0.95],   @(x)isnumeric(x)  );
+addParameter(p,'lateqtls', [0.5 0.5],     @(x)isnumeric(x)  );
+addParameter(p,'userab',   nan,           @(x)isnumeric(x)  );
+addParameter(p,'mask',     true(size(q)), @(x)islogical(x)  );
+addParameter(p,'theta',    0,             @(x)isnumeric(x)  );
+addParameter(p,'isflat',   true,          @(x)islogical(x)  );
+addParameter(p,'soln1',    'RS05',        @(x)ischar(x)     );
+addParameter(p,'soln2',    'RS05',        @(x)ischar(x)     );
+addParameter(p,'dispfit',  false,         @(x)islogical(x)  );
 
 parse(p,q,dqdt,blate,A,D,L,method,varargin{:});
 
 earlyqtls   = p.Results.earlyqtls;
 lateqtls    = p.Results.lateqtls;
+userab      = p.Results.userab;
 mask        = p.Results.mask;
 theta       = p.Results.theta;
 isflat      = p.Results.isflat;
@@ -71,9 +91,13 @@ dispfit     = p.Results.dispfit;
 % a2 = late-time a
 % b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)
 
-b2 = blate; 
-a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
-a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
+if isnan(userab)
+   b2 = blate; 
+   a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
+   a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
+else
+   
+end
 
 switch b2
    case 1
@@ -90,7 +114,7 @@ a = a2;
 
 % make a dummy handle for the legend and print the value of phi
 bfra.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
-            {'early','userfit'},'userab',[a2 blate],'reflabels',true);
-hdum  = plot(0,0,'Color','none','HandleVisibility','off');
-txt   = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
+   {'early','userfit'},'userab',[a2 blate],'reflabels',true);
+hdum = plot(0,0,'Color','none','HandleVisibility','off');
+txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
 legend(hdum,txt,'Interpreter','latex','Location','nw','box','off');
