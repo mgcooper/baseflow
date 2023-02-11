@@ -1,28 +1,38 @@
 function out = pointcloudplot(q,dqdt,varargin)
-%POINTCLOUDPLOT plot a 'point cloud' diagram to estimate aquifer parameters
-%from recession flow data.
+%POINTCLOUDPLOT plot a point-cloud diagram to estimate aquifer parameters
 %
-% Required inputs:
-%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
-%  dqdt        =  discharge rate of change (L T^-2)
+% Syntax
+% 
+%     out = pointcloudplot(q,dqdt,varargin) 
+% 
+% Required inputs
+% 
+%     q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%     dqdt        =  discharge rate of change (L T^-2)
 %
-% Optional name-value pairs
-%  mask        =  vector logical mask to exclude values from fitting
-%  reflines    =  cell array of chars indicating what type of reflines to plot
-%  reflabels   =  logical indicating whether to add labels
-%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
-%  userab      =  2x1 double indicating a user-defined intercept,slope pair
-%  precision   =  scalar double indicating the precision in the x data, used to
-%                 compute the 'lower envelope'
-%  timestep    =  scalar double indicating the timestep of the x data, used to
-%                 compute the 'lower envelope'
-%  addlegend   =  logical indicating whether to add a legend or not
-%  usertext    =  char that gets added to the legend if refline 'userfit' (to
-%                 indicate what is being plotted, maybe a custom user model)
-%  rain        =  vector double of rainfall (mm/time)
-%  ax          =  graphic axis to plot into
+% Optional name-value inputs
+% 
+%     mask        =  vector logical mask to exclude values from fitting
+%     reflines    =  cell array of chars indicating what type of reflines to plot
+%     reflabels   =  logical indicating whether to add labels
+%     blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
+%     userab      =  2x1 double indicating a user-defined intercept,slope pair
+%     precision   =  scalar double indicating the precision in the x data, used to
+%                    compute the 'lower envelope'
+%     timestep    =  scalar double indicating the timestep of the x data, used to
+%                    compute the 'lower envelope'
+%     addlegend   =  logical indicating whether to add a legend or not
+%     usertext    =  char that gets added to the legend if refline 'userfit' (to
+%                    indicate what is being plotted, maybe a custom user model)
+%     rain        =  vector double of rainfall (mm/time)
+%     ax          =  graphic axis to plot into
 % 
 % See also fitab, plotdqdt
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
 p              = inputParser;
@@ -202,8 +212,8 @@ if addlegend == true
       ibf   = strcmp(reflines,'bestfit');
       hleg  = h(ibf);
       ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
-     %ltext = [ltext ' (NLS fit)'];
-      ltext = [ltext ' (nonlinear least-squares)'];
+      ltext = [ltext ' (' upper(usertext) ' fit)']; 
+      %ltext = [ltext ' (nonlinear least-squares)'];
 
    % check if either userfit or bestfit are requested
    elseif any(ismember(fitcheck,reflines))
@@ -213,7 +223,9 @@ if addlegend == true
       hleg  = h(ibf);
       ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
 
-      if ~any(ismember(reflines,'userfit'))
+      if ~isempty(usertext)
+         ltext = [ltext ' (' upper(usertext) ' fit)'];
+      elseif ~any(ismember(reflines,'userfit'))
          ltext = [ltext ' (NLS fit)'];
       elseif ~any(ismember(reflines,'bestfit'))
          ltext = [ltext ' (MLE fit)'];

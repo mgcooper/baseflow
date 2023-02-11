@@ -45,67 +45,67 @@ parse(p,t,q,r,nmin,Info);
 %-------------------------------------------------------------------------------
 
 % compute the first derivative
-qdot        = derivative(q);
+qdot = derivative(q);
 
 % pick the events
-Events      = eventSelector(t,q,r,qdot,Info);
+Events = eventSelector(t,q,r,qdot,Info);
+numEvents = numel(Events.inputTime);
 
 % apply quality control filters to the picked events
-numEvents   = numel(Events.T);
-Q           = cell(numEvents,1);
-T           = cell(numEvents,1);
-R           = cell(numEvents,1);
-Qdot        = cell(numEvents,1);
+Q = cell(numEvents,1);
+T = cell(numEvents,1);
+R = cell(numEvents,1);
+Qdot = cell(numEvents,1);
 
 % Note: this pulls T,Q,Q2 out of Events. Could change to send back Events
 for n = 1:numEvents
 
-qPick       = Events.Q{n};
-tPick       = Events.T{n};
-rPick       = Events.R{n};
-qdotPick    = Events.Qdot{n};
-
-rl  = Events.runlengths(n);
-
-% if the event is shorter than the min event criteria, skip it
-if rl<nmin; numEvents = numEvents-1; continue; end
-
-% islineconvex might be too restrictive, but without it, ETS call to
-% exponential fit sometimes fails, and nonlinear fitting will fail
-if islineconvex(qPick) || islineconvex(-diff(qPick))
-   numEvents=numEvents-1;
-   continue;
-end
-
-% otherwise, keep the pick
-Q{n}    = qPick;
-T{n}    = tPick;
-R{n}    = rPick;
-Qdot{n} = qdotPick;
+   qPick = Events.Q{n};
+   tPick = Events.T{n};
+   rPick = Events.R{n};
+   qdotPick = Events.Qdot{n};
+   
+   rl = Events.runlengths(n);
+   
+   % if the event is shorter than the min event criteria, skip it
+   if rl<nmin; numEvents = numEvents-1; continue; end
+   
+   % islineconvex might be too restrictive, but without it, ETS call to
+   % exponential fit sometimes fails, and nonlinear fitting will fail
+   if islineconvex(qPick) || islineconvex(-diff(qPick))
+      numEvents=numEvents-1;
+      continue;
+   end
+   
+   % otherwise, keep the pick
+   Q{n} = qPick;
+   T{n} = tPick;
+   R{n} = rPick;
+   Qdot{n} = qdotPick;
 
 end
 
 % remove empty events
 inan = false(size(T));
 for n = 1:numel(T)
-if isempty(T{n})
-   inan(n) = true;
-end
+   if isempty(T{n})
+      inan(n) = true;
+   end
 end
 
-T       = T(~inan);
-Q       = Q(~inan);
-R       = R(~inan);
-Qdot    = Qdot(~inan);
+T = T(~inan);
+Q = Q(~inan);
+R = R(~inan);
+Qdot = Qdot(~inan);
 
 % replace the start/stop/runlengths with the picked ones
-Info.istart     = Events.istart;
-Info.istop      = Events.istop;
+Info.istart = Events.istart;
+Info.istop = Events.istop;
 Info.runlengths = Events.runlengths;
-Info.hEvents    = Events.h;
+Info.hEvents = Events.h;
 
-Info.istart     = Info.istart(~inan);
-Info.istop      = Info.istop(~inan);
+Info.istart = Info.istart(~inan);
+Info.istop = Info.istop(~inan);
 Info.runlengths = Info.runlengths(~inan);
 
 % close all
@@ -114,14 +114,15 @@ Info.runlengths = Info.runlengths(~inan);
 function Events = eventSelector(t,q,r,qdot,Info)
 
 % convert t to datenum for easier arithmetic
-t           = datenum(t);
+t = datenum(t);
 
 % pick the points
-h           = eventPlotter(t,q,r,qdot,Info);  % plot the timeseries
-pickedPts   = ginputc();
-startPts    = pickedPts(1:2:end);
-endPts      = pickedPts(2:2:end);
-numPicks    = numel(startPts);
+h = eventPlotter(t,q,r,qdot,Info);  % plot the timeseries
+
+pickedPts = ginputc();
+startPts = pickedPts(1:2:end);
+endPts = pickedPts(2:2:end);
+numPicks = numel(startPts);
 
 % initialize output
 istart      = nan(size(startPts));
@@ -133,25 +134,25 @@ R           = cell(size(startPts));
 Qdot        = cell(size(startPts));
 
 for n = 1:numPicks
-difStart    = abs(t-startPts(n));
-difStop     = abs(t-endPts(n));
-istart(n)   = findmin(difStart,1,'first');
-istop(n)    = findmin(difStop,1,'first');
-
-t_n         = t(istart(n):istop(n));
-q_n         = q(istart(n):istop(n));
-r_n         = r(istart(n):istop(n));
-qdot_n      = qdot(istart(n):istop(n));
-t_n         = t_n(qdot_n~=0);
-q_n         = q_n(qdot_n~=0);
-r_n         = r_n(qdot_n~=0);
-qdot_n      = qdot_n(qdot_n~=0);
-
-T{n}        = t_n;
-Q{n}        = q_n;
-R{n}        = r_n;
-Qdot{n}     = qdot_n;
-rlength(n)  = numel(q_n);
+   difStart    = abs(t-startPts(n));
+   difStop     = abs(t-endPts(n));
+   istart(n)   = findmin(difStart,1,'first');
+   istop(n)    = findmin(difStop,1,'first');
+   
+   t_n         = t(istart(n):istop(n));
+   q_n         = q(istart(n):istop(n));
+   r_n         = r(istart(n):istop(n));
+   qdot_n      = qdot(istart(n):istop(n));
+   t_n         = t_n(qdot_n~=0);
+   q_n         = q_n(qdot_n~=0);
+   r_n         = r_n(qdot_n~=0);
+   qdot_n      = qdot_n(qdot_n~=0);
+   
+   T{n}        = t_n;
+   Q{n}        = q_n;
+   R{n}        = r_n;
+   Qdot{n}     = qdot_n;
+   rlength(n)  = numel(q_n);
 end
 
 Events.T            = T;

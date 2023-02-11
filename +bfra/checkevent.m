@@ -89,8 +89,8 @@ if isnan(order); fixb = false; else, fixb = true; end
 % make the figure
 %-------------------------------------------------------------------------------
 
-% h.f = figure('Position',[150 80 800 550]);
-h.f = gcf;
+h.f = figure('Position',[150 80 800 550]);
+% h.f = gcf;
 
 % plot the entire year and the event  (panel 1)
 %h.t1  = tiledlayout(3,2,'TileSpacing','none','Padding','none');
@@ -184,7 +184,7 @@ if all(isnan(eventq))
 else
    h2 = bfra.pointcloudplot(eventq,eventdqdt,'ax',h.t4,'reflines', ...
       {'lowerenvelope','upperenvelope','early','late','bestfit'}, ...
-      'reflabels',true,'rain',eventr,'addlegend',true);
+      'reflabels',false,'rain',eventr,'addlegend',true);
    % h2  = bfra_plotdQdt(eventq,eventdqdt,'ax',ax,'rain',eventr); hold on;
    
    h.pcloud = h2;

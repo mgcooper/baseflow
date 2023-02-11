@@ -17,7 +17,7 @@ function varargout = plfitb(x,varargin)
 % 
 %     x        data believed to follow an untruncated Pareto distribution
 %
-% Optional inputs
+% Optional name-value inputs
 % 
 %     xmin     scalar double indicating the lower bound of the distribution
 %     range    the range of scaling parameters considered (see plfit.m)

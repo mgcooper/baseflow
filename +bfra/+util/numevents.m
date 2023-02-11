@@ -1,3 +1,3 @@
 function N = numevents(Events)
 
-N = numel(unique(Events.tag(~isnan(Events.tag))));
+N = numel(unique(Events.eventTags(~isnan(Events.eventTags))));

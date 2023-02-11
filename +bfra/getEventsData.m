@@ -9,14 +9,13 @@ function Data = getEventsData(Events,eventTag)
 % 
 % See also
 
-
-
 % this allows a column vector of tags instead of a reshaped matrix
-if all(size(Events.Q)==size(Events.T)) && all(size(Events.Q) == size(Events.tag))
-   row = find(Events.tag==eventTag);
+if all(size(Events.eventFlow)==size(Events.eventTime)) && ...
+      all(size(Events.eventFlow) == size(Events.eventTags))
+   row = find(Events.eventTags==eventTag);
    col = 1;
 else
-   [row,col] = find(Events.tag==eventTag);
+   [row,col] = find(Events.eventTags==eventTag);
 end
 
 fields = fieldnames(Events);

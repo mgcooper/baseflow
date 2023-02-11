@@ -1,27 +1,38 @@
 function [href,ab] = plotrefline(x,y,varargin)
-%PLOTREFLINE adds a reference line to a point cloud plot
+%PLOTREFLINE add a reference line to a point cloud plot
 %
-% Required inputs:
-%  x  = vector of type double (nominally discharge q)
-%  y  = vector of type double (nominally discharge rate of change -dq/dt)
+% Syntax
+% 
+%     [href,ab] = plotrefline(x,y,varargin)
+% 
+% Required inputs
+% 
+%     x  = vector of type double (nominally discharge q)
+%     y  = vector of type double (nominally discharge rate of change -dq/dt)
 %
-% Optional inputs:
-%  mask     =  vector logical mask to exclude values from fitting
-%  refline  =  char indicating what type of refline to plot
-%  refslope =  scalar double indicating a user-defined slope
-%  userab   =  2x1 double indicating a user-defined intercept,slope pair
-%  labels   =  logical indicating whether to add labels
-%  refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
-%  plotline =  logical indicating whether to add the line plot (for some cases
-%              this function can be used to return the a/b values only)
-%  linecolor = rgb triplet indicating the line color
-%  precision = scalar double indicating the precision in the x data, used to
-%              compute the 'lower envelope'
-%  timestep  = scalar double indicating the timestep of the x data, used to
-%              compute the 'lower envelope'
-%  ax       =  graphic axis to plot into
+% Optional name-value inputs
+% 
+%     mask     =  vector logical mask to exclude values from fitting
+%     refline  =  char indicating what type of refline to plot
+%     refslope =  scalar double indicating a user-defined slope
+%     userab   =  2x1 double indicating a user-defined intercept,slope pair
+%     labels   =  logical indicating whether to add labels
+%     refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
+%     plotline =  logical indicating whether to add the line plot (for some cases
+%                 this function can be used to return the a/b values only)
+%     linecolor = rgb triplet indicating the line color
+%     precision = scalar double indicating the precision in the x data, used to
+%                 compute the 'lower envelope'
+%     timestep  = scalar double indicating the timestep of the x data, used to
+%                 compute the 'lower envelope'
+%     ax       =  graphic axis to plot into
 %
 % See also fitab, pointcloudintercept, pointcloudplot
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 % NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
 %-------------------------------------------------------------------------------
@@ -41,7 +52,7 @@ addParameter(p,'plotline',    true,          @(x)islogical(x));
 addParameter(p,'linecolor',   [0 0 0],       @(x)isnumeric(x));
 addParameter(p,'precision',   1,             @(x)isnumeric(x)); % default = 1 m3/s
 addParameter(p,'timestep',    1,             @(x)isnumeric(x)); % default = 1 day
-addParameter(p,'ax',          nan,           @(x)isaxis(x));
+addParameter(p,'ax',          gobjects(0),   @(x)isaxis(x));
 
 parse(p,x,y,varargin{:});
 
@@ -67,12 +78,12 @@ axb = @(a,x,b) a.*x.^b;
 
 % keep track of the original axis limits
 if plotline == true
-   if isnan(ax)
-      ax    = gca;
+   if isempty(ax)
+      ax = gca;
    end
    hold on;
-   xlims    = get(ax,'XLim');
-   ylims    = get(ax,'YLim');
+   xlims = get(ax,'XLim');
+   ylims = get(ax,'YLim');
 end
 
 switch refline
@@ -108,21 +119,9 @@ switch refline
       a = F.ab(1);
       b = F.ab(2);
    otherwise
-      % user must provide a refslope and optionally refpoints or refqtls. if
-      % the latter are not provided, use the best linear fit. NOTE: this
-      % should probably be removed but keep for now.
-      if isnan(refpoints)
-         if isnan(refqtls)
-            refqtls = [0.5 0.5];
-         else
-            % deal with refpoints. they aren't really supported anymore
-         end
-         F = bfra.fitab(x(mask),-y(mask),'envelope','refqtls',refqtls,'order',refslope);
-      else
-         F = bfra.fitab(x(mask),-y(mask),'mean','order',refslope);
-      end
-      a = F.ab(1);
-      b = F.ab(2);
+      % use upper envelope
+      b = 1;               % slope = 1
+      a = 2/timestep;      % for daily, intercept = 2
 end
 
 % send back the ab

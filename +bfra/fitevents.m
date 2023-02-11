@@ -62,23 +62,23 @@ fitopts     = struct(); % removed fitopts from parser, it may mess up autounpack
 %-------------------------------------------------------------------------------
 
 % pull out the events
-T           =  Events.t;               % time [days]
-Q           =  Events.q;               % daily discharge [m3 d-1] 
-R           =  Events.r;               % daily rainfall [mm d-1]
-eventTags   =  Events.tag;
-numEvents   =  max(Events.tag);
+T           =  Events.eventTime;       % time [days]
+Q           =  Events.eventFlow;       % daily discharge [m3 d-1] 
+R           =  Events.eventRain;       % daily rainfall [mm d-1]
+eventTags   =  Events.eventTags;
+numEvents   =  max(eventTags);
 ax          =  'none';
 
 % initialize output structure and output arrays
-Fits.T         =  T;                   % NOTE: these are event-times, not T
-Fits.Q         =  Q;                   % detected event-Q
+Fits.eventTime =  Events.eventTime;    % event-times
+Fits.eventFlow =  Events.eventFlow;    % detected event-Q
 Fits.t         =  NaT(size(Q));        % fitted t
 Fits.q         =  nan(size(Q));        % fitted Q
 Fits.r         =  nan(size(Q));        % rain
 Fits.dt        =  nan(size(Q));        % fitted dt
 Fits.dqdt      =  nan(size(Q));        % fitted dQdt
-Fits.eventTag  =  nan(size(Q));        % 1:numEvents
-Fits.fitTag    =  nan(size(Q));        % 1:numFits
+Fits.eventTags =  nan(size(Q));        % 1:numEvents
+Fits.fitTags   =  nan(size(Q));        % 1:numFits
 nFits          =  0;
 
 if pickmethod == "none"
@@ -201,8 +201,8 @@ if ok == true
    Fits.dqdt(     fitIdx)  =  dqdt;
    Fits.dt(       fitIdx)  =  dt;
    Fits.t(        fitIdx)  =  tq;
-   Fits.eventTag( fitIdx)  =  eventtag;
-   Fits.fitTag(   fitIdx)  =  fittag;
+   Fits.eventTags(fitIdx)  =  eventtag;
+   Fits.fitTags(  fitIdx)  =  fittag;
    
    % at this point, with new ets retiming, we need to remove nan to have
    % eventTag and fitTag only span the rows with valid data, but as-is, we
@@ -254,15 +254,3 @@ K.fitTag    = nan(N,1);
 % K.deriv     = nan(N,1);
 % K.station   = nan(N,1);
 % K.date      = nan(N,1);
-
-
-
-% % just here for reference
-
-%          K = savefit(  Fit,q,dqdt,opts.derivmethod,opts.fitmethod,opts.fitorder, ...
-%                         opts.gageID,eventDate,thisEvent,thisFit, ...
-%                         nFits,fitopts,K);      
-
-%       % post-process and save the fit
-%         [Fits,K,nFits] = saveFit(   K,Fits,nFits,thisFit,thisEvent,     ...
-%                                     T,A,q,dqdt,dt,tq);

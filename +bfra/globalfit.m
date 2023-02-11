@@ -93,7 +93,7 @@ end
 %-------------------------------------------------------------------------------
 
 % take values out of the data structures that are needed
-Q  = Events.Q;       % daily streamflow [m3 d-1]
+Q = Events.inputFlow;       % daily streamflow [m3 d-1]
 
 % fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 %---------------

@@ -1,21 +1,23 @@
 function h = plplotb(x,xmin,alpha,varargin)
-%PLPLOTB plots the power law fit to the P(tau) pareto distribution
+%PLPLOTB plot the power law fit to the P(tau) pareto distribution
 %
-% Required inputs:
-%  x     = vector double of data that follows an untruncated Pareto distribution 
-%  xmin  = scalar double indicating the lower bound of the distribution
-%  alpha = scalar double indicating the exponent of the distribution
+% Required inputs
+% 
+%     x     = vector double of data believed to follow a Pareto distribution 
+%     xmin  = scalar double indicating the lower bound of the distribution
+%     alpha = scalar double indicating the exponent of the distribution
 %
-% Optional inputs:
-%  alphaci  = 2x1 double of lower and upper confidence intervals for alpha
-%  xminci   = 2x1 double of lower and upper confidence intervals for xmin
-%  varsym   = char in latex format representing the data symbol, used for plot
-%  trimline = logical scalar indicating whether to 'trim' the fitted line
-%              similar to 'axis tight' option (b/c power law data is often
-%              covering many orders of magnitude)
-%  labelplot = logical scalar indicating whether to add a label showing the
-%              value of xmin and the expected value of x
-%  ax       =  graphic axis to plot into
+% Optional inputs
+% 
+%     alphaci  = 2x1 double of lower and upper confidence intervals for alpha
+%     xminci   = 2x1 double of lower and upper confidence intervals for xmin
+%     varsym   = char in latex format representing the data symbol, used for plot
+%     trimline = logical scalar indicating whether to 'trim' the fitted line
+%                 similar to 'axis tight' option (b/c power law data is often
+%                 covering many orders of magnitude)
+%     labelplot = logical scalar indicating whether to add a label showing the
+%                 value of xmin and the expected value of x
+%     ax       =  graphic axis to plot into
 % 
 % See also: plfit, plfitb, gpfitb, eventtau 
 % 

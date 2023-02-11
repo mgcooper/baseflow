@@ -1,6 +1,8 @@
 function [ddt,err] = printtrend(Data,varargin)
 %PRINTTREND print trends computed from columns in table Data to the screen
 % 
+%  Syntax
+% 
 %  [ddt,err] = printtrend(Data,varargin)
 % 
 % See also

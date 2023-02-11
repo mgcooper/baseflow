@@ -101,22 +101,22 @@ opts.pickevents   = pickevents;
 [T,Q,R,numyears]  = prepinput(T,Q,R);
 
 % save the T,Q arrays in 'events'
-Events.T    =  T;
-Events.Q    =  Q;
-Events.R    =  R;
+Events.inputT =  T;
+Events.inputQ =  Q;
+Events.inputR =  R;
 
 % reshape the input lists to arrays (use of 'list' is a misnomer below)
 numsteps = size(Q,1)/numyears;      % number of timesteps per year
 
 if mod(numyears,1) == 0
-   Qlist       =  reshape(Q,numsteps,numyears);    % flow, each year
-   Rlist       =  reshape(R,numsteps,numyears);    % rain, each year
-   Tlist       =  reshape(T,numsteps,numyears);    % calendar, each year
+   Qlist = reshape(Q,numsteps,numyears);    % flow, each year
+   Rlist = reshape(R,numsteps,numyears);    % rain, each year
+   Tlist = reshape(T,numsteps,numyears);    % calendar, each year
 else
    % assume data is already in a list
-   Qlist       =  Q;
-   Rlist       =  R;
-   Tlist       =  T;
+   Qlist = Q;
+   Rlist = R;
+   Tlist = T;
 end
 
 % initialize output structure and output arrays
@@ -138,29 +138,26 @@ for thisYear = 1:numyears      % events for this year at this gage
       continue;
    end
 
-   thisYearTime   = Tlist(:,thisYear);
-   thisYearFlow   = Qlist(:,thisYear);
-   thisYearRain   = Rlist(:,thisYear);
+   thisYearTime = Tlist(:,thisYear);
+   thisYearFlow = Qlist(:,thisYear);
+   thisYearRain = Rlist(:,thisYear);
 
    % NEEDS TO BE UPDATED WITH NEW EVENTS = BFRA.GETEVENTS(...) SYNTAX
    % get events for this year
-   [T,Q,R,Info]   = bfra.findevents(   thisYearTime,                 ...
-                                       thisYearFlow,                 ...
-                                       thisYearRain,                 ...
-                                       opts                          );
+   [T,Q,R,Info] = bfra.findevents(thisYearTime,thisYearFlow,thisYearRain,opts);
 
    % for each event, compute q,dqdt with each derivative
    numEvents = numel(Info.istart);
 
    for thisEvent = 1:numEvents
 
-      eventQ      = Q{thisEvent};
-      eventT      = T{thisEvent};
-      eventR      = R{thisEvent};
+      eventQ = Q{thisEvent};
+      eventT = T{thisEvent};
+      eventR = R{thisEvent};
 
       % get approximated flow and dq/dt without any fitting of a/b
-      [qQ,dQ]     = bfra.getdqdt(eventT,eventQ,eventR,'B1','pickmethod',...
-                        'none','fitmethod','none'); 
+      [qQ,dQ] = bfra.getdqdt(eventT,eventQ,eventR,'B1','pickmethod','none', ...
+         'fitmethod','none'); 
       % if fitmethod == "none", only the dQdt is returned, for the case
       % where I don't wan't to fit events, so this function returns
       % everything needed to fit the distribution of qQ and dQ, i think
@@ -172,16 +169,16 @@ for thisYear = 1:numyears      % events for this year at this gage
 
 
       % get the start/end index on the year calendar
-      si  = Info.istart(thisEvent);
-      ei  = Info.istop(thisEvent);
+      si = Info.istart(thisEvent);
+      ei = Info.istop(thisEvent);
 
       % collect all data for the point-cloud
-      Qsave(  si:ei,thisYear)    =   eventQ;
-      Rsave(  si:ei,thisYear)    =   eventR;
-      dQsave( si:ei,thisYear)    =   dQ;
-      qQsave( si:ei,thisYear)    =   qQ;
-      tsave(  si:ei,thisYear)    =   datenum(eventT);
-      tags(   si:ei,thisYear)    =   eventCount; 
+      Qsave(  si:ei,thisYear) = eventQ;
+      Rsave(  si:ei,thisYear) = eventR;
+      dQsave( si:ei,thisYear) = dQ;
+      qQsave( si:ei,thisYear) = qQ;
+      tsave(  si:ei,thisYear) = datenum(eventT);
+      tags(   si:ei,thisYear) = eventCount; 
       % eventCount tags events with index in K struct
 
    end
@@ -192,13 +189,13 @@ for thisYear = 1:numyears      % events for this year at this gage
    end
 end
 
-[ndays,numyears]   =   size(Qsave);
-Events.t       =   reshape(tsave, ndays*numyears, 1);
-Events.q       =   reshape(Qsave, ndays*numyears, 1);
-Events.r       =   reshape(Rsave, ndays*numyears, 1);
-Events.dqdt    =   reshape(dQsave,ndays*numyears, 1);
-Events.qq      =   reshape(qQsave,ndays*numyears, 1);
-Events.tag     =   reshape(tags,  ndays*numyears, 1);
+[ndays,numyears] = size(Qsave);
+Events.eventT = reshape(tsave, ndays*numyears, 1);
+Events.eventQ = reshape(Qsave, ndays*numyears, 1);
+Events.eventR = reshape(Rsave, ndays*numyears, 1);
+Events.eventdqdt = reshape(dQsave,ndays*numyears, 1);
+Events.eventqq = reshape(qQsave,ndays*numyears, 1);
+Events.eventTags = reshape(tags,  ndays*numyears, 1);
 
 % % should convert to timetable and add units
 % units = ["m3 d-1","mm d-1","days","m3 d-1","mm d-1","m3 d-2","m3 d-1","-"];

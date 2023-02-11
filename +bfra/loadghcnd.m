@@ -101,7 +101,7 @@ ileap = month(GHCN.Time) == 2 & day(GHCN.Time) == 29;
 GHCN(ileap,:) = [];
 
 % % first i made Rain with the new method, then saved it as keep:
-% figure; myscatter(GHCN.PRCP,keep.PRCP./10); addOnetoOne;
+% figure; scatter(GHCN.PRCP,keep.PRCP./10,'filled'); addOnetoOne;
 
 if gapfill == true
    numyears =  height(GHCN)/365;

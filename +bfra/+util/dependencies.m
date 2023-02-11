@@ -1,4 +1,4 @@
-function [funclist,prodlist] = dependencies(funcname,option)
+function report = dependencies(funcname,option)
 % DEPENDENCIES generate a list of function and product dependencies for function
 % 
 %  Input
@@ -19,7 +19,7 @@ function [funclist,prodlist] = dependencies(funcname,option)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 % valid options
-validopts = ["all","missing","installed"];
+validopts = ["all","missing","installed","resolve","report","check"];
 for n = 1:numel(validopts)
    opts.(validopts(n)) = option == validopts(n);
 end
@@ -32,6 +32,12 @@ end
    % funcname = 'bfra_kuparuk.m';
 % end
 
+% this loads the saved dependencies.mat file and checks against util/
+if opts.check == true
+   report = dependencycheck();
+   return;
+end
+
 funcpath = fileparts(which(funcname));
 [funclist,prodlist] = matlab.codetools.requiredFilesAndProducts(funcname);
 funclist = transpose(funclist);
@@ -39,45 +45,95 @@ prodlist = transpose(prodlist);
 
 if opts.all == true
    % return a table of all dependencies
-   funclist = cell2table(funclist,'VariableNames',{'function_dependencies'});
+   report = cell2table(funclist,'VariableNames',{'function_dependencies'});
+elseif opts.report == true
+   report = getdependencyreport(funclist,prodlist,funcname);
 elseif opts.missing == true
-   funclist = getmissingdependencies(funclist,funcname);
+   report = getmissingdependencies(funclist,funcname);
 elseif opts.installed == true
-   funclist = getinstalleddependencies(funclist);
+   report = getinstalleddependencies(funclist);
+elseif opts.resolve == true
+   report = resolvedependencies(funclist,funcname);
 end
 
 
-function funclist = getmissingdependencies(funclist,funcname)
+function report = getdependencyreport(funclist,prodlist,funcname)
 
-% remove functions in the toolbox first, leave the ones in util/ so they can be
-% compared here if needed for debugging. 
-
-% Also remove the 'cupid' toolbox and 'ExtractNameVal' functions that get
-% picked up as dependent but are not. What remains after this is functions that
-% are either in util/ or need to be moved there.
+% get a list of dependencies that are not toolbox functions, i.e. those that
+% need to be included in util/
+% report = funclist;
 skip = {'+bfra',funcname,'ExtractNameVal','Cupid'};
 keep = true(numel(funclist),1);
 for n = 1:numel(funclist)
    keep(n) = ~contains(funclist{n},skip);
 end
-funclist = funclist(keep);
+report.function_dependencies = funclist(keep);
+report.product_dependencies = prodlist;
+% report = report(keep);
 
-% now remove ones that are already in util. what remains are missing.
-skip = {'bfra/util'};
-keep = true(numel(funclist),1);
-for n = 1:numel(funclist)
-   keep(n) = ~contains(funclist{n},skip);
-end
-funclist = funclist(keep);
 
-if isempty(funclist)
-   funclist = 'all dependencies are installed';
+function report = dependencycheck
+load(fullfile(bfra.util.getinstallationpath,'+bfra','+util','dependencies.mat'),'report')
+deps = report.function_dependencies;
+deps = deps(~isfile(fullfile(bfra.util.getinstallationpath,'util',deps)));
+deps = deps(~isfolder(strrep(fullfile(bfra.util.getinstallationpath,'util',deps),'.m','')));
+% convert to table and return
+if isempty(deps)
+   report.missing_dependencies = 'all dependencies are installed';
 else
-   funclist = cell2table(funclist,'VariableNames',{'function_dependencies'});
+   report.missing_dependencies = deps;
+end
+
+
+function report = getmissingdependencies(funclist,funcname)
+
+% remove functions in the toolbox first, leave the ones in util/ so they can be
+% compared here if needed for debugging. 
+missing = funclist;
+% Also remove the 'cupid' toolbox and 'ExtractNameVal' functions that get
+% picked up as dependent but are not. What remains after this is functions that
+% are either in util/ or need to be moved there.
+skip = {'+bfra',funcname,'ExtractNameVal','Cupid'};
+keep = true(numel(missing),1);
+for n = 1:numel(missing)
+   keep(n) = ~contains(missing{n},skip);
+end
+missing = missing(keep);
+
+% now remove ones that are in util.
+skip = {'bfra/util'};
+keep = true(numel(missing),1);
+for n = 1:numel(missing)
+   keep(n) = ~contains(missing{n},skip);
+end
+missing = missing(keep);
+
+% % since I use addpath(...,'-end'), the dependency check finds functions in my
+% main function folder not the ones in bfra/util. 
+% % now check if funclist contains paths to versions elsewhere that are in util .
+% % what remains are missing. 
+keep = true(numel(missing),1);
+for n = 1:numel(missing)
+   [~,funcname] = fileparts(missing{n});
+   allfuncs = which(funcname,'-all');
+   if any(contains(allfuncs,fullfile('bfra','util',funcname)))
+      keep(n) = false;
+   end
+end
+missing = missing(keep);
+
+% convert to table and return
+report.function_dependencies = funclist;
+if isempty(missing)
+   report.missing_dependencies = 'all dependencies are installed';
+else
+   report.missing_dependencies = missing;
 end
 
 %% internal use 
  
+function report = resolvedependencies(funclist,funcname)
+
 % cycle through the dependent functions and copy them to util/
 
 % NOTE: this is for private use, it won't work if you don't have the functions
@@ -88,10 +144,18 @@ end
 
 % TODO: add method to clone from https://github.com/mgcooper/matfunclib
 
-% for n = 1:numel(functionDependencies)
-%    [~,fname,ext] = fileparts(functionDependencies{n});
-%    copyfile(functionDependencies{n},['util/',fname,ext]);
-% end
+report = getmissingdependencies(funclist,funcname);
+
+if ischar(report.missing_dependencies) && ...
+      strcmp(report.missing_dependencies,'all dependencies are installed')
+   return
+else
+   for n = 1:numel(report.missing_dependencies)
+      [~,fname,ext] = fileparts(report.missing_dependencies{n});
+      destpath = fullfile(bfra.util.getinstallationpath,'util',[fname,ext]);
+      copyfile(report.missing_dependencies{n},destpath);
+   end
+end
 
 % any functions listed in dependentFunctions may be required for some fringe
 % behavior in the toolbox but the core functionality should 

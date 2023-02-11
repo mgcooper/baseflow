@@ -1,8 +1,7 @@
 function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
-%PLOTDQDT Plots the log-log q vs dq/dt with options to select the
-%portion of data to fit and then fits the data
+%PLOTDQDT Plot the log-log q vs dq/dt point-cloud 
 % 
-%  Syntax
+% Syntax
 % 
 %     [hFits,Picks,Fits] = bfra.plotdqdt(q,dqdt)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'fitmethod',fitmethod)
@@ -10,12 +9,12 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'weights',weights)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)
 % 
-%  Required inputs
+% Required inputs
 % 
 %     q     =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
 %     dqdt  =  discharge rate of change (L T^-2)
 % 
-%  Optional name-value pairs:
+% Optional name-value inputs
 % 
 % 
 %  See also getdqdt, fitdqdt
@@ -469,7 +468,7 @@ function pickFig = eventPlotter(q,dqdt)
 
 pickFig = figure;
 
-myscatter(q,dqdt);
+scatter(q,dqdt,36,[0,0.447,0.741],'filled');
    
 
 

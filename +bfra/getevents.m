@@ -98,10 +98,10 @@ plotevents  = p.Results.plotevents;
 
 %-------------------------------------------------------------------------------
 
-% save the original lists
-Events.T = T;
-Events.Q = Q;
-Events.R = R;
+% save the input data
+Events.inputTime = T;
+Events.inputFlow = Q;
+Events.inputRain = R;
 
 % iF is the first non-nan index, to recover indices after removing nans
 numdata     = numel(T);
@@ -139,7 +139,11 @@ else
 end
 
 % This completes the elimination of bfra.getevents
-[Events.t,Events.q,Events.r,Events.tag] = bfra.flattenevents(t,q,r,Info);
+[ ...
+   Events.eventTime, ...
+   Events.eventFlow, ...
+   Events.eventRain, ...
+   Events.eventTags] = bfra.flattenevents(t,q,r,Info);
 
 
 function Info = updateinfo(Info,ifirst,numdata)

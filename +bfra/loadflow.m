@@ -184,8 +184,8 @@ Q        = Data.Q;
 Time     = Data.Time;
 
 %    % i used this to confirm the new data matches the old data:
-%    idx      = isbetween(data.Time,Flow.Time(1),Flow.Time(end));
-%    figure; myscatter(Flow.Q,data.Q(idx)); addOnetoOne;
+%    idx = isbetween(data.Time,Flow.Time(1),Flow.Time(end));
+%    figure; scatter(Flow.Q,data.Q(idx),'filled'); addOnetoOne;
 
 %    % but this also reveals that i rmeoved leap inds so feb 28-mar 1
 %    dQ/dt is incorrect if any end up used in the analysis

@@ -1,19 +1,26 @@
 function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
 %POINTCLOUDINTERCEPT estimate parameter 'a' from the point cloud intercept
 % 
-% Required inputs:
+% Required inputs
+% 
 %  q        =  vector double of discharge data (L T^-1)
 %  dqdt     =  vector double of discharge rate of change (L T^-2)
 %  bhat     =  late-time b parameter in -dqdt = aq^b (dimensionless)
 %  method   =  char indicating the fitting method
 % 
-% Optional inputs:
+% Optional name-value inputs
+% 
 %  mask     =  logical mask to exclude data
 %  refqtls  =  reference quantiles that together define a pivot point through
 %              which the straight line must pass. use with method 'envelope'.
 % 
 % 
-% See also: bfra.fitab
+% See also: fitab
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 % input parsing
 %-------------------------------------------------------------------------------
@@ -129,7 +136,7 @@ switch nargout
       varargout{3} = xbar;
       varargout{4} = ybar;
 end
-      
+
 % % one = ahat
 % % two = ahat, [aL aH]
 % % three = ahat, xbar, ybar

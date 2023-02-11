@@ -69,11 +69,14 @@ opts     = statset('Display','off');
 fnc      = @(b,x)b(1)*exp(-b(2)*x)+b(3);
 try
    abc = nlinfit(xe,ye,fnc,b0,opts);
+catch ME
+   try
+      abc = tryexpfit(xe,ye);
+   catch ME
+      rethrow(ME)
+   end
 end
-
-if ~exist('abc','var')
-   abc = tryexpfit(xe,ye);
-end
+   
 
 gamma = abc(2); % gamma = b, also a in dq/dt = aQ
 nmax  = etsparam*max(t);
@@ -147,19 +150,23 @@ tq    = T;
 %  TRY EXPFIT
 %-------------------------------------------------------------------------------
 function abc = tryexpfit(xexp,yexp)
-   
-% Set up fittype and options.
-ftexp   = fittype(   'a*exp(-b*x)+c' ,                   ...
-                     'independent'   , 'x',              ...
-                     'dependent'     , 'y'               );
 
-optsexp = fitoptions(   'Method'    , 'NonlinearLeastSquares',  ...
-                        'Display'   , 'Off',                    ...
-                        'StartPoint', [1e-6 1e-6 1e-6]          );
+% Set up fittype and options.
+ftexp = fittype( ...
+   'a*exp(-b*x)+c' , ...
+   'independent','x', ...
+   'dependent','y' ...
+   );
+
+optsexp = fitoptions( ...
+   'Method','NonlinearLeastSquares', ...
+   'Display','Off',...
+   'StartPoint',[1e-6 1e-6 1e-6] ...
+   );
 
 % Fit model to data.
-fitexp  = fit( xexp, yexp, ftexp, optsexp );
-abc     = coeffvalues(fitexp);
+fitexp = fit( xexp, yexp, ftexp, optsexp );
+abc = coeffvalues(fitexp);
    
 
 % %-------------------------------------------------------------------------------

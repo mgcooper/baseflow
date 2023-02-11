@@ -38,8 +38,8 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
-methodlist     = {'nls','ols','mle','qtl','mean','median','envelope'};
-validmethod    = @(x)any(validatestring(x,methodlist));
+methodslist = {'nls','ols','mle','qtl','mean','median','envelope'};
+validmethod = @(x)any(validatestring(x,methodslist));
 
 p              = inputParser;
 p.FunctionName = 'bfra.fitab';
@@ -81,8 +81,7 @@ fitopts  = p.Unmatched;
 
 %-------------------------------------------------------------------------------
 
-[x,y,logx,logy,weights,ok] = bfra.prepfits( ...
-   q,dqdt,'weights',weights,'mask',mask);
+[x,y,logx,logy,weights,ok] = bfra.prepfits(q,dqdt,'weights',weights,'mask',mask);
 
 % weights will equal zero anywhere mask is false
 
@@ -108,20 +107,20 @@ end
 switch method
    
    case 'ols'
-      [ab,ci,ok]  = fitOLS(logx,logy,weights,alpha);
+      [ab,ci,ok] = fitOLS(logx,logy,weights,alpha);
    case 'qtl'
-      [ab,ci,ok]  = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,fitopts);
+      [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,fitopts);
    case 'mle'
       error('mle fitting not currently supported');
-      % [ab,ci,ok]  = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
+      % [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
    case 'nls'
       [ab,ci,ok,s]= fitNLS(x,y,logx,logy,weights,alpha,fitopts);
    case 'mean'
-      [ab,ci,ok]  = fitLIN(logx,logy,weights,alpha,order,fitopts);
+      [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,fitopts);
    case 'median'
-      [ab,ci,ok]  = fitMED(logx,logy,weights,order,fitopts);
+      [ab,ci,ok] = fitMED(logx,logy,weights,order,fitopts);
    case 'envelope'
-      [ab,ci,ok]  = fitENV(logx,logy,weights,order,refqtls);
+      [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls);
 end
 
 
@@ -133,7 +132,8 @@ if exist('fs','var')
 end
 
 if plotfit == true
-   Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
+   Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'}, ...
+      'userab',ab,'mask',mask,'usertext',method);
 end
 
 %-------------------------------------------------------------------------------

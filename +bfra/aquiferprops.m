@@ -43,7 +43,7 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % input parsing
 %-------------------------------------------------------------------------------
 p = inputParser;
-p.FunctionName = 'bfra_aquiferprops';
+p.FunctionName = 'bfra.aquiferprops';
 
 addRequired(p, 'q',                          @(x)isnumeric(x));
 addRequired(p, 'dqdt',                       @(x)isnumeric(x));

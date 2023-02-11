@@ -1,13 +1,19 @@
 function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
 %PREPFITS preps q and -dq/dt for event-scale fitting
 %
-% Required inputs:
-%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
-%  dqdt        =  discharge rate of change (L T^-2)
+% Syntax
+% 
+%  [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
+% 
+% Required inputs
+% 
+%     q        =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+%     dqdt     =  discharge rate of change (L T^-2)
 %
-% Optional inputs:
-%  weights  =  nx1 double of weights for the fitting algorithm
-%  mask     =  nx1 logical mask to exclude values from fitting
+% Optional name-value inputs
+% 
+%     weights  =  nx1 double of weights for the fitting algorithm
+%     mask     =  nx1 logical mask to exclude values from fitting
 %
 %  note: dqdt comes in as its actual value i.e. negative
 %

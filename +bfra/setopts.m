@@ -9,7 +9,7 @@ function opts = setopts(funcname,varargin)
 %     algorithm 'getevents', the event fitting algorithm 'fitdqdt', or the
 %     global fitting algorithm 'globalfit'
 %
-%  Optional name-value inputs for type 'events'
+%  Optional name-value inputs for type 'getevents'
 %
 %     opts        :  structure containing any of the following fields
 %
@@ -25,7 +25,7 @@ function opts = setopts(funcname,varargin)
 %     pickevents  :  option to manually pick events
 %     plotevents  :  option to plot picked events
 %
-%  Optional name-value inputs for type 'fits'
+%  Optional name-value inputs for type 'fitevents'
 % 
 %     derivmethod    : derivative (dQ/dt) method
 %     fitmethod      : -dQ/dt = aQb fitting method
