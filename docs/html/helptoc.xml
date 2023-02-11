@@ -2,7 +2,7 @@
 
 <toc version="2.0">
 <!-- First tocitem specifies top level in Help browser Contents pane -->
-    <tocitem target="bfra_welcome.html">Baseflow Recession Analysis Toolbox
+   <tocitem target="bfra_welcome.html">Baseflow Recession Analysis Toolbox
         <!-- Nest tocitems to create hierarchical entries in  Contents-->
         <!-- To include icons, use the following syntax for tocitems: -->
         <!-- <tocitem target="foo.html" image="HelpIcon.NAME"> -->
@@ -12,18 +12,45 @@
         <!-- DEMOS, RELEASE_NOTES --> 
         <!-- Icon images used for these entries are also stored in -->
         <!-- matlabroot/toolbox/matlab/icons -->
-        <!-- A Getting Started Guide usually comes first -->
-      <tocitem target="bfra_gettingStarted.html" image="HelpIcon.GETTING_STARTED">Getting Started with the Baseflow Recession Analysis Toolbox
+  
+      <!-- A Getting Started Guide usually comes first -->
+      <tocitem target="bfra_gettingStarted.html" 
+               image="HelpIcon.GETTING_STARTED">
+                  Getting Started with the Baseflow Recession Analysis Toolbox
       </tocitem>
-        <!-- User Guide comes next -->
-      <tocitem target="bfra_demo.html" image="HelpIcon.USER_GUIDE">Baseflow Recession Analysis User Guide
+           
+      <!-- User Guide comes next -->
+      <tocitem target="bfra_demo.html" 
+               image="HelpIcon.USER_GUIDE">
+                  Baseflow Recession Analysis User Guide
       </tocitem>
-        <!-- Function reference next -->
-        <!-- First item is page describing function categories, if any -->
-      <tocitem target="bfra_contents.html" image="HelpIcon.FUNCTION">Function Reference
+           
+      <!-- Function reference next -->
+      <!-- First item is page describing function categories, if any -->
+
+      <!-- mgc I commented out bfra_contents to use m2html function_index -->
+      <!-- <tocitem target="bfra_contents.html" -->
+      <tocitem target="m2html/function_index.html" 
+               image="HelpIcon.FUNCTION">
+                  Function Reference
+
+         <!-- Function docs -->
+         <!-- mgc I commented this out b/c m2html function_index has a clickable list -->
+         <!-- mgc but for reference, to generate a unique page for groups, I would define -->
+         <!-- mgc another toc level for the groups, see the template  -->
+         <!-- <tocitem target="m2html/+bfra/alttrend.html">alttrend</tocitem> -->
+
       </tocitem>
-        <!-- Optional List of Examples, with hyperlinks to examples in other files -->
-        <tocitem target="bfra_examples.html" image="HelpIcon.HelpIcon.EXAMPLES">Baseflow Recession Analysis Examples
-        </tocitem>
-    </tocitem>
+
+      <!-- Optional List of Examples, with hyperlinks to examples in other files -->
+      <!-- <tocitem target="bfra_examples.html" 
+               image="HelpIcon.HelpIcon.EXAMPLES">
+                  Baseflow Recession Analysis Examples
+      </tocitem> -->
+
+         <!-- Website -->
+      <tocitem target="https://github.com/mgcooper/baseflow"> 
+            baseflow on GitHub
+      </tocitem>
+   </tocitem> <!-- end of Welcome Page (first tocitem) -->
 </toc>

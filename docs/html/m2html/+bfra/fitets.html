@@ -1,0 +1,375 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fitets</title>
+  <meta name="keywords" content="fitets">
+  <meta name="description" content="FITETS fit recession event using the exponential timestep method">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitets.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>fitets
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>FITETS fit recession event using the exponential timestep method</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">FITETS fit recession event using the exponential timestep method
+
+  Syntax
+ 
+     ETS = bfra.fitets(T,Q,R,derivmethod)
+     ETS = bfra.fitets(_,'etsparam',fitwindow)
+     ETS = bfra.fitets(_,'fitab',fitmethod)
+     ETS = bfra.fitets(_,'plotfit',pickmethod)
+     ETS = bfra.fitets(_,'ax',axis_object)
+ 
+  Required inputs
+ 
+     T     time (days)
+     Q     discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
+     R     rainfall (L T^-1, assumed to be mm d-1)
+ 
+  Optional name-value inputs
+ 
+     etsparam    scalar, double, parameter that controls window size
+     fitab       logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
+     plotfit     logical, scalar, indicates whether to plot the fit
+ 
+  See also fitdqdt, <a href="fitvts.html" class="code" title="function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)">fitvts</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="fitab.html" class="code" title="function [Fit,ok] = fitab(q,dqdt,method,varargin)">fitab</a>	FITAB fit event-scale recession equation -dq/dt = aQ^b</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function abc = tryexpfit(xexp,yexp)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin) </a>
+0002 <span class="comment">%FITETS fit recession event using the exponential timestep method</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     ETS = bfra.fitets(T,Q,R,derivmethod)</span>
+0007 <span class="comment">%     ETS = bfra.fitets(_,'etsparam',fitwindow)</span>
+0008 <span class="comment">%     ETS = bfra.fitets(_,'fitab',fitmethod)</span>
+0009 <span class="comment">%     ETS = bfra.fitets(_,'plotfit',pickmethod)</span>
+0010 <span class="comment">%     ETS = bfra.fitets(_,'ax',axis_object)</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%  Required inputs</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%     T     time (days)</span>
+0015 <span class="comment">%     Q     discharge (L T^-1, assumed to be m d-1 or m^3 d-1)</span>
+0016 <span class="comment">%     R     rainfall (L T^-1, assumed to be mm d-1)</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%  Optional name-value inputs</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%     etsparam    scalar, double, parameter that controls window size</span>
+0021 <span class="comment">%     fitab       logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb</span>
+0022 <span class="comment">%     plotfit     logical, scalar, indicates whether to plot the fit</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%  See also fitdqdt, fitvts</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0027 
+0028 <span class="comment">% if called with no input, open this file</span>
+0029 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0030 
+0031 <span class="comment">% note: only pass in identified recession events (not timeseries of</span>
+0032 <span class="comment">% flow) because this first fits the ENTIRE recession to estimate 'gamma'</span>
+0033 <span class="comment">% which is just a in the linear model -dq/dt = aQ. Then gamma is used to</span>
+0034 <span class="comment">% compute 'm', which is the window size, which changes (gets larger) as</span>
+0035 <span class="comment">% time proceeds. Then it moves over the flow data in windows of size m</span>
+0036 <span class="comment">% and finds the local linear slope (in linear space, not log-log) which</span>
+0037 <span class="comment">% is an estimate of dq/dt and the average q within the window and those</span>
+0038 <span class="comment">% two values are used to compute -dq/dt = aQ^b.</span>
+0039 
+0040 <span class="comment">% OLD function call:</span>
+0041 <span class="comment">% function ETS = fitets(T,Q,R,varargin)</span>
+0042 
+0043 <span class="comment">%-------------------------------------------------------------------------------</span>
+0044 p              = inputParser;
+0045 p.FunctionName = <span class="string">'fitets'</span>;
+0046 
+0047 addRequired(p, <span class="string">'T'</span>,                 @(x)isnumeric(x)|isdatetime(x));
+0048 addRequired(p, <span class="string">'Q'</span>,                 @(x)isnumeric(x));
+0049 addRequired(p, <span class="string">'R'</span>,                 @(x)isnumeric(x));
+0050 addParameter(p,<span class="string">'etsparam'</span>, 0.2,     @(x)isnumeric(x)); <span class="comment">% default=recommended 20%</span>
+0051 addParameter(p,<span class="string">'fitab'</span>,    false,   @(x)islogical(x));
+0052 addParameter(p,<span class="string">'plotfit'</span>,  false,   @(x)islogical(x));
+0053 
+0054 parse(p,T,Q,R,varargin{:});
+0055 
+0056 etsparam = p.Results.etsparam;
+0057 <a href="fitab.html" class="code" title="function [Fit,ok] = fitab(q,dqdt,method,varargin)">fitab</a>    = p.Results.fitab;
+0058 plotfit  = p.Results.plotfit;
+0059 <span class="comment">%-------------------------------------------------------------------------------</span>
+0060 warning off
+0061 <span class="comment">% Fit exponential function on the entire recession event</span>
+0062 T.Format = <span class="string">'dd-MMM-uuuu hh:mm'</span>;
+0063 t        = days(T-T(1)+(T(2)-T(1))); <span class="comment">% keep og T</span>
+0064 [xe,ye]  = prepareCurveData(t, Q./max(Q));
+0065 
+0066 <span class="comment">% fit gamma (a in the linear model -dq/dt = aQ)</span>
+0067 b0       = [mean(ye) 0.2 0];
+0068 opts     = statset(<span class="string">'Display'</span>,<span class="string">'off'</span>);
+0069 fnc      = @(b,x)b(1)*exp(-b(2)*x)+b(3);
+0070 <span class="keyword">try</span>
+0071    abc = nlinfit(xe,ye,fnc,b0,opts);
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="keyword">if</span> ~exist(<span class="string">'abc'</span>,<span class="string">'var'</span>)
+0075    abc = <a href="#_sub1" class="code" title="subfunction abc = tryexpfit(xexp,yexp)">tryexpfit</a>(xe,ye);
+0076 <span class="keyword">end</span>
+0077 
+0078 gamma = abc(2); <span class="comment">% gamma = b, also a in dq/dt = aQ</span>
+0079 nmax  = etsparam*max(t);
+0080 m     = 1+ceil(nmax.*exp(-1./(gamma.*t))); <span class="comment">% Eq. 7</span>
+0081 
+0082 [N,q,dqdt,~,dt,tq,rq,r2] = bfra.initfit(t,<span class="string">'eventdqdt'</span>);
+0083 
+0084 <span class="comment">% isempty(q) occurs when gamma is very small and m blows up.</span>
+0085 <span class="comment">% if all(isempty(q)) || numel(q)&lt;4</span>
+0086 <span class="keyword">if</span> any(1./(gamma.*t)-log(etsparam./(max(t)-1)) &lt; 0) || numel(q)&lt;4
+0087    <span class="keyword">return</span>
+0088 <span class="keyword">end</span>
+0089 
+0090 <span class="comment">% move over the recession in windows of length m and fit dQ/dt</span>
+0091 n = 1;
+0092 <span class="keyword">while</span> n+m(n)&lt;=N
+0093    x     = t(n:n+m(n));
+0094    X     = [ones(length(x),1) x];
+0095    Y     = Q(n:n+m(n));
+0096    dQdt  = X\Y;                               <span class="comment">% eq. 8</span>
+0097    yfit  = X*dQdt;
+0098    r2(n) = 1-sum((Y-yfit).^2)/sum((Y-mean(Y)).^2); r2(r2&lt;0) = 0;
+0099 
+0100    dqdt(n)  = dQdt(2);                 <span class="comment">% eq. 9</span>
+0101    q(n)     = mean(Y,<span class="string">'omitnan'</span>);
+0102    tq(n)    = mean(T(n:n+m(n)));
+0103    rq(n)    = mean(R(n:n+m(n)));
+0104    dt(n)    = t(n+m(n))-t(n);
+0105    n        = n+1;
+0106 <span class="keyword">end</span>
+0107 
+0108 inan = dqdt&gt;0 | isnan(r2) | r2&lt;=0;
+0109 dqdt(inan) = NaN;
+0110 
+0111 <span class="comment">% retime to the original timestep</span>
+0112 dq    = dqdt.*dt; <span class="comment">% need to check this, right now it isn't used anywhere</span>
+0113 q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);
+0114 dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
+0115 dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+0116 tq    = T;
+0117 
+0118 <span class="comment">% figure; plot(t,q); hold on; plot(tets,qets)</span>
+0119 
+0120 <span class="comment">% ------------</span>
+0121 <span class="comment">% gamma checks</span>
+0122 <span class="comment">% ------------</span>
+0123 <span class="comment">% figure; plot(xexp,yexp,'o',xexp,fnc(abc,xexp),'-');</span>
+0124 <span class="comment">% this inequality must be &gt;= 0</span>
+0125 <span class="comment">% 1./(gamma.*t) - log(etsparam./(max(t)-1))</span>
+0126 <span class="comment">% if gamma is between about -0.2 and 0 it blows up</span>
+0127 <span class="comment">% gtest = -2:0.0001:-0.2;</span>
+0128 <span class="comment">% figure; semilogy(gtest,exp(-1./(gtest.*1)));</span>
+0129 <span class="comment">% ------------</span>
+0130 
+0131 <span class="comment">%------------------------------------------------------------------</span>
+0132 <span class="comment">% older method that truncated the fit based on parameter m. turns out in some</span>
+0133 <span class="comment">% cases this truncates too early for example say q has length 12 and m(9) = 2</span>
+0134 <span class="comment">% but m(12) = 3, then on iteration 9, n+m(n) = 11, but N=length(q)-max(m) = 9</span>
+0135 <span class="comment">% so the loop would end at 9 when it should go to 10.</span>
+0136 <span class="comment">% the # of individual q/dqdt estimates will be less than the q/dqdt</span>
+0137 <span class="comment">% values since the step size is increased by the amount m(end)</span>
+0138 <span class="comment">%N     = length(t)-m(end);   % new # of events</span>
+0139 
+0140 <span class="comment">% i think this would work if we use for 1:N where N is numel(t)-max(m)</span>
+0141 <span class="comment">% tqq   = hours(tq-tq(1)+(tq(2)-tq(1)))./24; % keep og T</span>
+0142 <span class="comment">% q     = interp1(tq,q,t,'linear');</span>
+0143 <span class="comment">% dqdt  = interp1(tq,dqdt,t,'linear');</span>
+0144 
+0145 
+0146 <span class="comment">%-------------------------------------------------------------------------------</span>
+0147 <span class="comment">%  TRY EXPFIT</span>
+0148 <span class="comment">%-------------------------------------------------------------------------------</span>
+0149 <a name="_sub1" href="#_subfunctions" class="code">function abc = tryexpfit(xexp,yexp)</a>
+0150    
+0151 <span class="comment">% Set up fittype and options.</span>
+0152 ftexp   = fittype(   <span class="string">'a*exp(-b*x)+c'</span> ,                   <span class="keyword">...</span>
+0153                      <span class="string">'independent'</span>   , <span class="string">'x'</span>,              <span class="keyword">...</span>
+0154                      <span class="string">'dependent'</span>     , <span class="string">'y'</span>               );
+0155 
+0156 optsexp = fitoptions(   <span class="string">'Method'</span>    , <span class="string">'NonlinearLeastSquares'</span>,  <span class="keyword">...</span>
+0157                         <span class="string">'Display'</span>   , <span class="string">'Off'</span>,                    <span class="keyword">...</span>
+0158                         <span class="string">'StartPoint'</span>, [1e-6 1e-6 1e-6]          );
+0159 
+0160 <span class="comment">% Fit model to data.</span>
+0161 fitexp  = fit( xexp, yexp, ftexp, optsexp );
+0162 abc     = coeffvalues(fitexp);
+0163    
+0164 
+0165 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0166 <span class="comment">% %  PLOT SMOOTHING</span>
+0167 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0168 <span class="comment">%</span>
+0169 <span class="comment">% function plotSmoothing(T,Q,plotfit)</span>
+0170 <span class="comment">%</span>
+0171 <span class="comment">%    if plotfit</span>
+0172 <span class="comment">%       % might be worth trying to smooth/gapfill the data here</span>
+0173 <span class="comment">%       Q0    = Q;</span>
+0174 <span class="comment">%       Q     = fillmissing(Q,'spline');</span>
+0175 <span class="comment">%       Q     = smoothdata(Q,'sgolay');</span>
+0176 <span class="comment">%       dQ0   = movingslope(Q0,21,3,T(2)-T(1));</span>
+0177 <span class="comment">%       dQ    = movingslope(Q,21,3,T(2)-T(1));</span>
+0178 <span class="comment">%</span>
+0179 <span class="comment">%       figure;</span>
+0180 <span class="comment">%       subplot(1,2,1); scatter(T,Q0); hold on; plot(T,Q)</span>
+0181 <span class="comment">%       subplot(1,2,2); loglog(Q0,-dQ0); hold on; loglog(Q,-dQ);</span>
+0182 <span class="comment">%    end</span>
+0183 <span class="comment">%</span>
+0184 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0185 <span class="comment">% %  RETIME ETS</span>
+0186 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0187 <span class="comment">%</span>
+0188 <span class="comment">%</span>
+0189 <span class="comment">% function ETS = retimeETS(T,Q,R,q,dqdt,dt,tq,rq,rsq)</span>
+0190 <span class="comment">%</span>
+0191 <span class="comment">%    % note: dt = m+1</span>
+0192 <span class="comment">%</span>
+0193 <span class="comment">% % nov 27, commented this out when added small gamma check in main</span>
+0194 <span class="comment">% %    if all(isnan(q))</span>
+0195 <span class="comment">% %       return</span>
+0196 <span class="comment">% %    end</span>
+0197 <span class="comment">%</span>
+0198 <span class="comment">% %    if ~isdatetime(T)</span>
+0199 <span class="comment">% %       T  = datetime(T,'ConvertFrom','datenum');</span>
+0200 <span class="comment">% %    end</span>
+0201 <span class="comment">%</span>
+0202 <span class="comment">% %    q     = q(:);dqdt=dqdt(:);dt=dt(:);tq=tq(:);rq=rq(:);rsq=rsq(:);</span>
+0203 <span class="comment">% %    Time  = datetime(tq,'ConvertFrom','datenum');         % ETS time</span>
+0204 <span class="comment">%</span>
+0205 <span class="comment">%    dq    = dqdt.*dt;</span>
+0206 <span class="comment">%    ETS   = timetable(q,dqdt,dq,dt,rq,rsq,'RowTimes',tq);</span>
+0207 <span class="comment">%</span>
+0208 <span class="comment">%    % might need to add something like this to deal with small gamma all nan</span>
+0209 <span class="comment">%    if all(isnan(q))</span>
+0210 <span class="comment">%       ETS   = retime(ETS,T,'fillwithmissing');</span>
+0211 <span class="comment">%       ETS   = addvars(ETS,T,Q,R);</span>
+0212 <span class="comment">%       return</span>
+0213 <span class="comment">%    end</span>
+0214 <span class="comment">%</span>
+0215 <span class="comment">%    % this is needed to get the rain right, will need to revisit for sub-daily</span>
+0216 <span class="comment">%    if T(2)-T(1) == days(1)</span>
+0217 <span class="comment">%       ETS = retime(ETS,'daily','linear');             % retime to daily</span>
+0218 <span class="comment">%       ETS = retime(ETS,T,'fillwithmissing');</span>
+0219 <span class="comment">%    end</span>
+0220 <span class="comment">%</span>
+0221 <span class="comment">%    if height(ETS) ~= sum(ismember(T,ETS.Time))</span>
+0222 <span class="comment">%       pause;</span>
+0223 <span class="comment">%    end</span>
+0224 <span class="comment">%</span>
+0225 <span class="comment">% % % with the second retime above, I may not need to do this</span>
+0226 <span class="comment">% %    % add the original T,Q,R on each day tq</span>
+0227 <span class="comment">% %    iq    = ismember(T,ETS.Time);</span>
+0228 <span class="comment">% %    R     = R(iq);</span>
+0229 <span class="comment">% %    T     = T(iq);</span>
+0230 <span class="comment">% %    Q     = Q(iq);</span>
+0231 <span class="comment">%</span>
+0232 <span class="comment">%    ETS   = addvars(ETS,T,Q,R);</span>
+0233 <span class="comment">%</span>
+0234 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0235 <span class="comment">% %  FIT AB</span>
+0236 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0237 <span class="comment">% function ETS = fitETSab(T,fitabOrNot)</span>
+0238 <span class="comment">%</span>
+0239 <span class="comment">%    % Fit the power law for a and b estimation (Roques et al., 2017)</span>
+0240 <span class="comment">%    a = nan;</span>
+0241 <span class="comment">%    b = nan;</span>
+0242 <span class="comment">%</span>
+0243 <span class="comment">%    q  = T.q;</span>
+0244 <span class="comment">%    dq = T.dqdt;</span>
+0245 <span class="comment">%    rsq= T.rsq;</span>
+0246 <span class="comment">%</span>
+0247 <span class="comment">%    if numel(q)&gt;4 % only fit if there are &gt; 4 values</span>
+0248 <span class="comment">%</span>
+0249 <span class="comment">%       if fitabOrNot == true</span>
+0250 <span class="comment">%          [fitets,~]  = LinRegFitW(log(q),log(-dq),rsq);</span>
+0251 <span class="comment">%             pets     = coeffvalues(fitets);</span>
+0252 <span class="comment">%             b     = pets(1);</span>
+0253 <span class="comment">%             a     = exp(pets(2));</span>
+0254 <span class="comment">%       end</span>
+0255 <span class="comment">%</span>
+0256 <span class="comment">%       ETS.T    = T;</span>
+0257 <span class="comment">%       ETS.a    = a;</span>
+0258 <span class="comment">%       ETS.b    = b;</span>
+0259 <span class="comment">%       ETS.ets  = true;     % I don't recall what these next two are for</span>
+0260 <span class="comment">%       ETS.cts  = false;</span>
+0261 <span class="comment">%</span>
+0262 <span class="comment">%    else % don't fit</span>
+0263 <span class="comment">%       ETS = ets_setnan(T);</span>
+0264 <span class="comment">%    end</span>
+0265 <span class="comment">%</span>
+0266 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0267 <span class="comment">% %  LINREGFITW</span>
+0268 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0269 <span class="comment">%</span>
+0270 <span class="comment">%</span>
+0271 <span class="comment">% function [fitted, gof] = LinRegFitW(x, y, weights)</span>
+0272 <span class="comment">%</span>
+0273 <span class="comment">%    [  xData, ...</span>
+0274 <span class="comment">%       yData, ...</span>
+0275 <span class="comment">%       weights ]   = prepareCurveData( x, y, weights );</span>
+0276 <span class="comment">%</span>
+0277 <span class="comment">%    % Set up fittype and options.</span>
+0278 <span class="comment">%    ft             = fittype(     'poly1'                         );</span>
+0279 <span class="comment">%    fopts          = fitoptions(  'Method', 'LinearLeastSquares'  );</span>
+0280 <span class="comment">%    fopts.Weights  = weights;</span>
+0281 <span class="comment">%    [fitted,gof]   = fit( xData, yData, ft, fopts );   % Fit model to data.</span>
+0282 <span class="comment">%</span>
+0283 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0284 <span class="comment">% %  SET ETSNAN</span>
+0285 <span class="comment">% %-------------------------------------------------------------------------------</span>
+0286 <span class="comment">%</span>
+0287 <span class="comment">%</span>
+0288 <span class="comment">% function out = ets_setnan(ETS)</span>
+0289 <span class="comment">%    out.T    = ETS;</span>
+0290 <span class="comment">%    out.a    = nan;</span>
+0291 <span class="comment">%    out.b    = nan;</span>
+0292 <span class="comment">%    out.ets  = nan;</span>
+0293 <span class="comment">%    out.cts  = nan;</span>
+0294 <span class="comment">%</span></pre></div>
+</body>
+</html>

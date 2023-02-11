@@ -30,12 +30,12 @@ For more options, see [Configuration](#configuration).
 
 Toolbox functions are located in the `+bfra` namespace package folder. To get started using the toolbox, in your Matlab environment:
 
-- Type `help +bfra` at the command line then press enter to list the package contents. Also see `Contents.m`.
-- Type `doc +bfra` to see the package contents in the help browser.
 - Type `doc bfra` to see the extended documentation in the help browser.
+- Type `help +bfra` at the command line then press enter to list the package contents.
+- Type `doc +bfra` to see the package contents in the help browser.
 - See the example notebook `demos/demo_bfra.mlx`.
 
-For more information and examples, see the [documentation](https://mgcooper.github.io/baseflow/).
+For an introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).
 
 <!-- ## More details
 
@@ -45,7 +45,7 @@ The theory makes various strong assumptions, including that the aquifer extent i
 
 If you find a bug, have a question, or want to contribute, feel free to open an [issue](https://github.com/mgcooper/baseflow/issues) or start a [discussion](https://github.com/mgcooper/baseflow/discussions).
 
-Consider the [Style Guide](testbed/StyleGuide.md) before submitting.
+<!-- Consider the [Style Guide](testbed/StyleGuide.md) before submitting. -->
 
 ## How do I cite this?
 
@@ -83,14 +83,10 @@ The convenience function `Setup.m` includes options to manage repeated use of th
   - Toolbox paths are added to the search path (not persistent between sessions).
   - Default toolbox preferences are added to a new user preferences group `baseflow` (persistent between sessions).
   - Dependencies are checked using `bfra.util.dependencies` to determine if the required files are on the search path.
-- Note that `Setup` does not modify `userpath` unless requested (see `'savepath'` option below) and never modifies the root-level `pathdef.m` file.
+- Note that `Setup` does not modify `userpath`, does not call `savepath`, and never modifies the root-level `pathdef.m` file. It only calls `addpath` and `rmpath` to put the toolbox on the user search path.
 - In subsequent sessions, toolbox paths can be managed like so:
-  - `Setup('addpath')` adds the toolbox to the search path for the current session.
-    - tip: `Setup` with no arguments is equivalent to `Setup('addpath')` and is the quickest way to add the toolbox to your search path.
+  - `Setup('addpath')` or simply `Setup` with no arguments adds the toolbox to the search path for the current session.
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
-  - `Setup('savepath')` saves the toolbox paths to a local `pathdef.m` file.
-    - tip: run the built-in Matlab function `savepath` directly without any arguments after the initial installation to add the toolbox to your `userpath`, which will persist between sessions.
-  - `Setup('delpath')` deletes the local `pathdef.m` file in the toolbox directory if one exists.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
 Running `Setup('install')` should only be necessary once. Note that all dependencies are included in this toolbox, and are added to the search path during installation. If for some reason the dependencies are not found on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using:

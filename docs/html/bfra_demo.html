@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Baseflow Recession Analysis Toolbox Examples</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-11-08"><meta name="DC.source" content="bfra_demo.m"><style type="text/css">
+      --><title>Baseflow Recession Analysis Toolbox Examples</title><meta name="generator" content="MATLAB 9.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-02-10"><meta name="DC.source" content="bfra_demo.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,132 +67,369 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Baseflow Recession Analysis Toolbox Examples</h1><!--introduction--><p>These examples provide an introduction to the toolbox. The <tt>demos</tt> folder contains additional scripts with examples.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Detect recession events from a timeseries of daily streamflow</a></li><li><a href="#6">Fit individual recession events</a></li><li><a href="#9">Global fit</a></li><li><a href="#13">Estimate parameter <img src="bfra_demo_eq00372779220383834832.png" alt="$\bf\hat{a}$" style="width:6px;height:8px;"> at the population-scale using the point-cloud intercept method</a></li></ul></div><h2 id="1">Description</h2><p>In this example, we apply baseflow recession analysis to daily streamflow data measured in the Kuparuk River Basin on the North Slope of Alaska.</p><h2 id="2">Detect recession events from a timeseries of daily streamflow</h2><p>Set the algorithm options</p><pre class="codeinput">opts.Events = bfra.setopts(<span class="string">'events'</span>);
-opts.Fits   = bfra.setopts(<span class="string">'fits'</span>,<span class="string">'drainagearea'</span>,8.6545e9);
-opts.Global = bfra.setopts(<span class="string">'globalfit'</span>,<span class="string">'drainagearea'</span>,8.6545e9, <span class="keyword">...</span>
-               <span class="string">'aquiferdepth'</span>,0.5,<span class="string">'streamlength'</span>,320000,<span class="string">'isflat'</span>,true,<span class="keyword">...</span>
-               <span class="string">'plotfits'</span>,true);
-</pre><p>Load the example data and run the event detection algorithm</p><pre class="codeinput">load <span class="string">dailyflow.mat</span>
-Events = bfra.getevents(T,Q,R,opts.Events);
-</pre><p>The output structure Events contains arrays that are the same size as the input time <tt>T</tt>, streamflow <tt>Q</tt>, and rainfall <tt>R</tt> arrays, but all non-recession flows are set nan.</p><h2 id="6">Fit individual recession events</h2><p>We pass the Events structure to <tt>fitevents</tt> which cycles over each individual recession event and fits a curve to estimate the parameters. Because curve-fitting all events is time-consuming, we can load pre-computed fits instead of computing them.</p><pre class="codeinput">getfits = false;
-
-<span class="keyword">if</span> getfits == true
-   [K,Fits] = bfra.fitevents(Events,opts.Fits);
-<span class="keyword">else</span>
-   load <span class="string">Events</span>
-<span class="keyword">end</span>
-</pre><p>The output structure <tt>Fits</tt> is similar to the input <tt>Events</tt>, except that the streamflow data has been fit using an exponential timestep to reduce the impact of measurement noise on the measured data. In addition, the rate of change of streamflow, <img src="bfra_demo_eq10258104965003722459.png" alt="$\frac{dQ}{dt}$" style="width:11px;height:15px;">, is included as an element of <tt>Fits</tt>.</p><p>The output table <tt>K</tt> contains the parameters of the fit to each individual recession event. These parameters form the basis for subsequent analysis.</p><h2 id="9">Global fit</h2><p>Once the individual events have been fit, we conduct inference testing on the sample population.</p><p>First we transform the observed streamflow data into a timescale parameter tau using the fitted parameters in <tt>K</tt></p><pre class="codeinput">[tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,<span class="string">'usefits'</span>,false);
-</pre><p>Then we pass that into a custom Pareto distribution fitting routine to estimate the population-sample-scale value of the parameters a and b:</p><pre class="codeinput">TauFit = bfra.plfitb(tau,<span class="string">'plot'</span>,true,<span class="string">'boot'</span>,false);
-</pre><img vspace="5" hspace="5" src="bfra_demo_01.png" alt=""> <p>The <tt>TauFit</tt> structure contains information about the Pareto Distribution fit including the minimum bound, <img src="bfra_demo_eq13107604524651516306.png" alt="$\tau_0$" style="width:9px;height:7px;">, the expected value, <img src="bfra_demo_eq14593889327204786447.png" alt="$\tau$" style="width:6px;height:5px;">, and the parameter estimate $\hat{b}. Extract these parameters for the next steps.</p><pre class="codeinput">bhat     = TauFit.b;
-bhatL    = TauFit.b_L;
-bhatH    = TauFit.b_H;
-tau0     = TauFit.tau0;
-tauhat   = TauFit.tau;
-itau     = TauFit.taumask;
-</pre><h2 id="13">Estimate parameter <img src="bfra_demo_eq00372779220383834832.png" alt="$\bf\hat{a}$" style="width:6px;height:8px;"> at the population-scale using the point-cloud intercept method</h2><p><img src="bfra_demo_eq10907152725633504988.png" alt="$\hat{a}$" style="width:6px;height:8px;"> is the intercept of the line with slope <img src="bfra_demo_eq04683343664734912066.png" alt="$\hat{b}$" style="width:5px;height:11px;"> that passes through the median value of streamflow <img src="bfra_demo_eq12795926589847895066.png" alt="$Q$" style="width:8px;height:10px;">. After fitting <img src="bfra_demo_eq10907152725633504988.png" alt="$\hat{a}$" style="width:6px;height:8px;">, display the fit using <tt>pointcloudplot</tt>. Add three 'reflines': one for 'early-time' which fits a line of slope <img src="bfra_demo_eq13798286984081834180.png" alt="$b=3$" style="width:25px;height:8px;"> to the 95th percentile of the point cloud, one for 'late-time', which fits a line of slope <tt>blate</tt> to the median of the point cloud, and one 'userfit' which fits a line of <tt>userab = [intercept slope]</tt> to the median of the point cloud.</p><pre class="codeinput">[ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,<span class="string">'envelope'</span>,<span class="string">'mask'</span>,itau);
-
-h = bfra.pointcloudplot(q,dqdt,<span class="string">'mask'</span>,itau,    <span class="keyword">...</span>
-<span class="string">'reflines'</span>,{<span class="string">'early'</span>,<span class="string">'late'</span>,<span class="string">'userfit'</span>},<span class="string">'blate'</span>,1, <span class="keyword">...</span>
-<span class="string">'userab'</span>,[ahat bhat],<span class="string">'addlegend'</span>,true,<span class="string">'reflabels'</span>,true);
-</pre><img vspace="5" hspace="5" src="bfra_demo_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+  </style></head><body><div class="content"><h1>Baseflow Recession Analysis Toolbox Examples</h1><!--introduction--><p>These examples provide an introduction to the toolbox. The purpose of these examples is to demonstrate a typical use-case for each function in the bfra toolbox, with an emphasis on toolbox breadth. To explore the toolbox functions in more detail, see the function documentation and extended example docs in the <tt>demos</tt> folder.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Introduction</a></li><li><a href="#2">Preparing data for analysis</a></li><li><a href="#6">Detecting recession events from timeseries of daily streamflow</a></li><li><a href="#16">Examining events in detail</a></li></ul></div><h2 id="1">Introduction</h2><p>In this example, we use baseflow recession analysis to investigate daily streamflow data measured in the Kuparuk River Basin on the North Slope of Alaska. We will use observations of daily streamflow provided by the United States Geological Survey, recorded at streamflow gage 1596000. The data can be downloaded from <a href="https://waterdata.usgs.gov/monitoring-location/15896000">https://waterdata.usgs.gov/monitoring-location/15896000</a> and are included as a sample dataset with this toolbox.</p><h2 id="2">Preparing data for analysis</h2><p>The minimum required information includes the timeseries of daily streamflow and the drainage area of the upstream river basin. Values for drainage density, stream channel length, basin slope, and soil (or aquifer) thickness are also used by the toolbox.</p><p>Set the sitename.</p><pre class="codeinput">sitename = bfra.basinname(<span class="string">'KUPARUK R NR DEADHORSE AK'</span>);
+</pre><p>Set the basin area and geomorphological parameters.</p><pre class="codeinput">Dd = 0.8;            <span class="comment">% drainage density</span>
+A = 8.6545e9;        <span class="comment">% basin area [m2]</span>
+L = A*Dd/1000;       <span class="comment">% active stream length</span>
+</pre><p>Load streamflow data for the test basin into the workspace. In the sample dataset, the variable <tt>T</tt> is <i>time</i>, <tt>Q</tt> is <i>discharge</i>, and <tt>R</tt> is <i>rainfall</i>.</p><pre class="codeinput">load(<span class="string">'data/dailyflow.mat'</span>,<span class="string">'T'</span>,<span class="string">'Q'</span>,<span class="string">'R'</span>);
+</pre><h2 id="6">Detecting recession events from timeseries of daily streamflow</h2><p>The toolbox supports three main tasks: event detection, event curve-fitting, and event distribution fitting. The <tt>setopts</tt> function provides users with an interface to set options that control the algorithms used to implement these tasks. Default values are set automatically.</p><p>In addition to the basin drainage area, drainage density, and stream channel length, we will set the 'isflat' parameter true, which indicates that slope is not included in the underlying theoretical solutions to the groundwater flow equation, and we will ask to plot the fitted results by setting the <tt>plotfits</tt> parameter <tt>true</tt>.</p><p>Set the algorithm options.</p><pre class="codeinput">opts.Events = bfra.setopts(<span class="string">'getevents'</span>);
+opts.Fits   = bfra.setopts(<span class="string">'fitevents'</span>);
+opts.Global = bfra.setopts(<span class="string">'globalfit'</span>,<span class="string">'drainagearea'</span>,A,<span class="string">'streamlength'</span>,L, <span class="keyword">...</span>
+   <span class="string">'drainagedens'</span>,Dd,<span class="string">'isflat'</span>,true,<span class="string">'plotfits'</span>,true);
+</pre><p>To demonstrate the event detection algorithm, subset one year of data.</p><pre class="codeinput">T = T(1:365);
+Q = Q(1:365);
+R = R(1:365);
+</pre><p><tt>getevents</tt> is the entry-point function for detecting recession events. It calls <tt>eventfinder</tt> and <tt>eventsplitter</tt> to detect events and return quality-controlled events suitable for fitting.</p><pre class="codeinput">[Events,Info] = bfra.getevents(T,Q,R,opts.Events);
+</pre><p>Plot the detected events</p><pre class="codeinput">[h,f] = bfra.eventplotter(T,Q,R,Info,<span class="string">'plotevents'</span>,true); axis <span class="string">tight</span>
+</pre><pre class="codeoutput error">Error using bfra.eventplotter
+Too many output arguments.
+Error in bfra_demo (line 72)
+[h,f] = bfra.eventplotter(T,Q,R,Info,'plotevents',true); axis tight</pre><p>Set the y-axis to log-scale and trim the xlimits to see the data more clearly</p><pre class="codeinput">set(h.ax(1),<span class="string">'YScale'</span>,<span class="string">'log'</span>);
+set(h.ax,<span class="string">'XLim'</span>,[datetime(1983,6,1),datetime(1983,11,1)])
+</pre><p><img vspace="5" hspace="5" src="event_example.png" alt=""> </p><p>Three events can be seen in the figure. We can also learn this using the utility function <tt>numevents</tt></p><pre class="codeinput">bfra.util.numevents(Events)
+</pre><p>Fit the events.</p><pre class="codeinput">[K,Fits] = bfra.fitevents(Events,opts.Fits);
+</pre><h2 id="16">Examining events in detail</h2><p>Examine the third event in more detail. The fit results returned in <tt>K</tt> include parameters that represent solutions to the event-scale recession flow equation -dq/dt = aQb. Print that to the screen using a latex-formatted character array.</p><pre class="codeinput">bfra.aQbString([K.a(3) K.b(3)],<span class="string">'printvalues'</span>,true);
+</pre><p><img src="bfra_demo_eq07400395931195731838.png" alt="$-dQ/dt = 1e^{-1}Q^{1.05}$" style="width:96px;height:12px;"></p><pre class="codeinput"><span class="comment">% % Plot the event</span>
+<span class="comment">% hEvent = bfra.checkevent(T,Q,Fits.q,Fits.dqdt,R,Fits.eventTags,3);</span>
+<span class="comment">%</span>
+<span class="comment">% % Pull out the event data</span>
+<span class="comment">% eventData = bfra.getEventsData(Events,3);</span>
+<span class="comment">% fitData = bfra.getFitsData(Fits,3);</span>
+<span class="comment">%</span>
+<span class="comment">% % Compare the fit using non-linear least squares to ordinary least squares</span>
+<span class="comment">% Fit_nls = bfra.fitab(fitData.q,fitData.dqdt,'nls','plotfit',true);</span>
+<span class="comment">% Fit_ols = bfra.fitab(fitData.q,fitData.dqdt,'ols','plotfit',true);</span>
+<span class="comment">%</span>
+<span class="comment">% % The non-linear least squares fit returns an exponent that is lower than the</span>
+<span class="comment">% % linear least-squares fit</span>
+<span class="comment">% Fit_nls.b</span>
+<span class="comment">% Fit_ols.b</span>
+<span class="comment">%</span>
+<span class="comment">% % Set the y-axis to linear scale to why the large values may be influencing the</span>
+<span class="comment">% % non-linear fitting result</span>
+<span class="comment">% Fit_nls.h.ax.YScale = 'linear';</span>
+<span class="comment">%</span>
+<span class="comment">% % Set the y-axis back to log scale</span>
+<span class="comment">% Fit_nls.h.ax.YScale = 'log';</span>
+<span class="comment">%</span>
+<span class="comment">% % Add a reference line with slope b = 3 representing the theoretical early-time</span>
+<span class="comment">% % solution to the Boussinesq equation for aquifer discharge</span>
+<span class="comment">% bfra.plotrefline(fitData.q,-fitData.dqdt,'ax',Fit_nls.h.ax,'refline','earlytime');</span>
+<span class="comment">%</span>
+<span class="comment">% %% Estimate aquifer properties</span>
+<span class="comment">%</span>
+<span class="comment">% b_early = 3;</span>
+<span class="comment">% b_late = Fit_ols.b;</span>
+<span class="comment">% a_early = bfra.pointcloudintercept(fitData.q,fitData.dqdt,b_early,'envelope');</span>
+<span class="comment">% a_late = bfra.pointcloudintercept(fitData.q,fitData.dqdt,b_late,'envelope');</span>
+<span class="comment">%</span>
+<span class="comment">% % Estimate the aquifer property drainable porosity. Assume the saturated aquifer</span>
+<span class="comment">% % thickness is 0.5 meters.</span>
+<span class="comment">% drainablePorosity = bfra.fitphi(a_early,a_late,b_late,A,0.5,L);</span>
+<span class="comment">%</span>
+<span class="comment">% % The value 0.001 is similar to values reported in the literature.</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % Run the event detection algorithm using the test data.</span>
+<span class="comment">% [Events,Info] = bfra.getevents(T,Q,R,opts.Events);</span>
+<span class="comment">%</span>
+<span class="comment">% % plot the detected events</span>
+<span class="comment">% bfra.eventplotter(T,Q,R,Info,'plotevents',true);</span>
+<span class="comment">%</span>
+<span class="comment">% % The figure shows increasing flows, decreasing flows, the detected local</span>
+<span class="comment">% % maxima, local minima, convex flows, and detected recession flows that we will</span>
+<span class="comment">% % 'keep' for further analysis.</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % The output structure Events contains arrays that are the same size as the</span>
+<span class="comment">% % input time |T|, streamflow |Q|, and rainfall |R| arrays, but all non-recession</span>
+<span class="comment">% % flows are set nan.</span>
+<span class="comment">% %</span>
+<span class="comment">% %% Fit individual recession events</span>
+<span class="comment">% % We pass the Events structure to |fitevents| which cycles over each individual</span>
+<span class="comment">% % recession event and fits a curve to estimate the parameters. Because</span>
+<span class="comment">% % curve-fitting all events is time-consuming, we can load pre-computed fits</span>
+<span class="comment">% % instead of computing them.</span>
+<span class="comment">%</span>
+<span class="comment">% [K,Fits] = bfra.fitevents(Events,opts.Fits);</span>
+<span class="comment">%</span>
+<span class="comment">% % load('data/Events.mat','K','Fits');</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % The output structure |Fits| is similar to the input |Events|, except that the</span>
+<span class="comment">% % streamflow data has been fit using an exponential timestep to reduce the</span>
+<span class="comment">% % impact of measurement noise on the measured data. In addition, the rate of</span>
+<span class="comment">% % change of streamflow, $\frac{dQ}{dt}$, is included as an element of |Fits|.</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % The output table |K| contains the parameters of the fit to each individual</span>
+<span class="comment">% % recession event. These parameters form the basis for subsequent analysis.</span>
+<span class="comment">% %</span>
+<span class="comment">% %% Global fit</span>
+<span class="comment">% % Once the individual events have been fit, we conduct inference testing on the</span>
+<span class="comment">% % sample population.</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % First we transform the observed streamflow data into a timescale parameter tau</span>
+<span class="comment">% % using the fitted parameters in |K|</span>
+<span class="comment">%</span>
+<span class="comment">% [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % Then we pass that into a custom Pareto distribution fitting routine to</span>
+<span class="comment">% % estimate the population-sample-scale value of the parameters a and b:</span>
+<span class="comment">% TauFit = bfra.plfitb(tau,'plot',true,'boot',false);</span>
+<span class="comment">%</span>
+<span class="comment">% %%</span>
+<span class="comment">% % The |TauFit| structure contains information about the Pareto Distribution fit</span>
+<span class="comment">% % including the minimum bound, $\tau_0$, the expected value, $\tau$, and the</span>
+<span class="comment">% % parameter estimate $\hat{b}. Extract these parameters for the next steps.</span>
+<span class="comment">% %</span>
+<span class="comment">%</span>
+<span class="comment">% bhat     = TauFit.b;</span>
+<span class="comment">% bhatL    = TauFit.b_L;</span>
+<span class="comment">% bhatH    = TauFit.b_H;</span>
+<span class="comment">% tau0     = TauFit.tau0;</span>
+<span class="comment">% tauhat   = TauFit.tau;</span>
+<span class="comment">% itau     = TauFit.taumask;</span>
+<span class="comment">%</span>
+<span class="comment">% %%% Estimate parameter $\bf\hat{a}$ at the population-scale using the point-cloud intercept method</span>
+<span class="comment">% % $\hat{a}$ is the intercept of the line with slope $\hat{b}$ that passes</span>
+<span class="comment">% % through the median value of streamflow $Q$. After fitting $\hat{a}$, display</span>
+<span class="comment">% % the fit using |pointcloudplot|. Add three 'reflines': one for 'early-time'</span>
+<span class="comment">% % which fits a line of slope $b=3$ to the 95th percentile of the point cloud,</span>
+<span class="comment">% % one for 'late-time', which fits a line of slope |blate| to the median of the</span>
+<span class="comment">% % point cloud, and one 'userfit' which fits a line of |userab = [intercept</span>
+<span class="comment">% % slope]| to the median of the point cloud.</span>
+<span class="comment">%</span>
+<span class="comment">% [ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope','mask',itau);</span>
+<span class="comment">%</span>
+<span class="comment">% h = bfra.pointcloudplot(q,dqdt,'mask',itau,    ...</span>
+<span class="comment">% 'reflines',{'early','late','userfit'},'blate',1, ...</span>
+<span class="comment">% 'userab',[ahat bhat],'addlegend',true,'reflabels',true);</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Baseflow Recession Analysis Toolbox Examples
 % 
-% These examples provide an introduction to the toolbox. The |demos| folder
-% contains additional scripts with examples.
-%
-%% Description
-% In this example, we apply baseflow recession analysis to daily streamflow data
-% measured in the Kuparuk River Basin on the North Slope of Alaska.
-%
+% These examples provide an introduction to the toolbox. The purpose of these
+% examples is to demonstrate a typical use-case for each function in the bfra
+% toolbox, with an emphasis on toolbox breadth. To explore the toolbox functions
+% in more detail, see the function documentation and extended example docs in
+% the |demos| folder. 
 
-%%% Detect recession events from a timeseries of daily streamflow
-% Set the algorithm options
+%%% Introduction
+% In this example, we use baseflow recession analysis to investigate daily
+% streamflow data measured in the Kuparuk River Basin on the North Slope of
+% Alaska. We will use observations of daily streamflow provided by the 
+% United States Geological Survey, recorded at streamflow gage 1596000. 
+% The data can be downloaded from
+% https://waterdata.usgs.gov/monitoring-location/15896000 and are included as a
+% sample dataset with this toolbox.
+
+%%% Preparing data for analysis
+% The minimum required information includes the timeseries of daily streamflow
+% and the drainage area of the upstream river basin. Values for drainage
+% density, stream channel length, basin slope, and soil (or aquifer) thickness
+% are also used by the toolbox.
+%%
+% Set the sitename.
+sitename = bfra.basinname('KUPARUK R NR DEADHORSE AK');
+%%
+% Set the basin area and geomorphological parameters.
+Dd = 0.8;            % drainage density 
+A = 8.6545e9;        % basin area [m2]
+L = A*Dd/1000;       % active stream length
+%%
+% Load streamflow data for the test basin into the workspace. In the sample
+% dataset, the variable |T| is _time_, |Q| is _discharge_, and |R| is
+% _rainfall_.
+load('data/dailyflow.mat','T','Q','R');
+
+%%% Detecting recession events from timeseries of daily streamflow
+% The toolbox supports three main tasks: event detection, event curve-fitting,
+% and event distribution fitting. The |setopts| function provides users with an
+% interface to set options that control the algorithms used to implement
+% these tasks. Default values are set automatically.
 
 %%
-opts.Events = bfra.setopts('events');
-opts.Fits   = bfra.setopts('fits','drainagearea',8.6545e9);
-opts.Global = bfra.setopts('globalfit','drainagearea',8.6545e9, ...
-               'aquiferdepth',0.5,'streamlength',320000,'isflat',true,...
-               'plotfits',true);
+% In addition to the basin drainage area, drainage density, and stream channel
+% length, we will set the 'isflat' parameter true, which indicates that slope is
+% not included in the underlying theoretical solutions to the groundwater flow
+% equation, and we will ask to plot the fitted results by setting the |plotfits|
+% parameter |true|.
 
 %%
-% Load the example data and run the event detection algorithm
-load dailyflow.mat
-Events = bfra.getevents(T,Q,R,opts.Events);
+% Set the algorithm options.
+opts.Events = bfra.setopts('getevents');
+opts.Fits   = bfra.setopts('fitevents');
+opts.Global = bfra.setopts('globalfit','drainagearea',A,'streamlength',L, ...
+   'drainagedens',Dd,'isflat',true,'plotfits',true);
 
 %% 
-% The output structure Events contains arrays that are the same size as the
-% input time |T|, streamflow |Q|, and rainfall |R| arrays, but all non-recession
-% flows are set nan. 
-% 
-%% Fit individual recession events
-% We pass the Events structure to |fitevents| which cycles over each individual
-% recession event and fits a curve to estimate the parameters. Because
-% curve-fitting all events is time-consuming, we can load pre-computed fits
-% instead of computing them. 
-
-getfits = false;
-
-if getfits == true
-   [K,Fits] = bfra.fitevents(Events,opts.Fits);
-else
-   load Events
-end
-
-%% 
-% The output structure |Fits| is similar to the input |Events|, except that the
-% streamflow data has been fit using an exponential timestep to reduce the
-% impact of measurement noise on the measured data. In addition, the rate of
-% change of streamflow, $\frac{dQ}{dt}$, is included as an element of |Fits|.
+% To demonstrate the event detection algorithm, subset one year of data.
+T = T(1:365);
+Q = Q(1:365);
+R = R(1:365);
 
 %%
-% The output table |K| contains the parameters of the fit to each individual
-% recession event. These parameters form the basis for subsequent analysis.
+% |getevents| is the entry-point function for detecting recession events. It
+% calls |eventfinder| and |eventsplitter| to detect events and return
+% quality-controlled events suitable for fitting.
+[Events,Info] = bfra.getevents(T,Q,R,opts.Events);
+
+%%
+% Plot the detected events
 % 
-%% Global fit
-% Once the individual events have been fit, we conduct inference testing on the
-% sample population. 
+[h,f] = bfra.eventplotter(T,Q,R,Info,'plotevents',true); axis tight
 
-
-%% 
-% First we transform the observed streamflow data into a timescale parameter tau
-% using the fitted parameters in |K|
-
-[tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
-
-%% 
-% Then we pass that into a custom Pareto distribution fitting routine to
-% estimate the population-sample-scale value of the parameters a and b:
-TauFit = bfra.plfitb(tau,'plot',true,'boot',false);
-
-%% 
-% The |TauFit| structure contains information about the Pareto Distribution fit
-% including the minimum bound, $\tau_0$, the expected value, $\tau$, and the
-% parameter estimate $\hat{b}. Extract these parameters for the next steps.
+%%
+% Set the y-axis to log-scale and trim the xlimits to see the data more clearly
+set(h.ax(1),'YScale','log');
+set(h.ax,'XLim',[datetime(1983,6,1),datetime(1983,11,1)])
+%%
+% 
+% <<event_example.png>>
 % 
 
-bhat     = TauFit.b;
-bhatL    = TauFit.b_L;
-bhatH    = TauFit.b_H;
-tau0     = TauFit.tau0;
-tauhat   = TauFit.tau;
-itau     = TauFit.taumask;
+%%
+% Three events can be seen in the figure. We can also learn this using the
+% utility function |numevents|
+bfra.util.numevents(Events)
 
-%%% Estimate parameter $\bf\hat{a}$ at the population-scale using the point-cloud intercept method
-% $\hat{a}$ is the intercept of the line with slope $\hat{b}$ that passes
-% through the median value of streamflow $Q$. After fitting $\hat{a}$, display
-% the fit using |pointcloudplot|. Add three 'reflines': one for 'early-time'
-% which fits a line of slope $b=3$ to the 95th percentile of the point cloud,
-% one for 'late-time', which fits a line of slope |blate| to the median of the
-% point cloud, and one 'userfit' which fits a line of |userab = [intercept
-% slope]| to the median of the point cloud.
+%%
+% Fit the events.
+[K,Fits] = bfra.fitevents(Events,opts.Fits);
 
-[ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope','mask',itau);
+%% Examining events in detail 
+% Examine the third event in more detail.
+% The fit results returned in |K| include parameters that represent solutions to
+% the event-scale recession flow equation -dq/dt = aQb. Print that to the screen
+% using a latex-formatted character array.
+%%
+bfra.aQbString([K.a(3) K.b(3)],'printvalues',true);
+%%
+% $-dQ/dt = 1e^{-1}Q^{1.05}$
 
-h = bfra.pointcloudplot(q,dqdt,'mask',itau,    ...
-'reflines',{'early','late','userfit'},'blate',1, ...
-'userab',[ahat bhat],'addlegend',true,'reflabels',true);
+% % Plot the event
+% hEvent = bfra.checkevent(T,Q,Fits.q,Fits.dqdt,R,Fits.eventTags,3);
+% 
+% % Pull out the event data
+% eventData = bfra.getEventsData(Events,3);
+% fitData = bfra.getFitsData(Fits,3);
+% 
+% % Compare the fit using non-linear least squares to ordinary least squares
+% Fit_nls = bfra.fitab(fitData.q,fitData.dqdt,'nls','plotfit',true);
+% Fit_ols = bfra.fitab(fitData.q,fitData.dqdt,'ols','plotfit',true);
+% 
+% % The non-linear least squares fit returns an exponent that is lower than the
+% % linear least-squares fit
+% Fit_nls.b
+% Fit_ols.b
+% 
+% % Set the y-axis to linear scale to why the large values may be influencing the
+% % non-linear fitting result
+% Fit_nls.h.ax.YScale = 'linear';
+% 
+% % Set the y-axis back to log scale
+% Fit_nls.h.ax.YScale = 'log';
+% 
+% % Add a reference line with slope b = 3 representing the theoretical early-time
+% % solution to the Boussinesq equation for aquifer discharge
+% bfra.plotrefline(fitData.q,-fitData.dqdt,'ax',Fit_nls.h.ax,'refline','earlytime');
+% 
+% %% Estimate aquifer properties
+% 
+% b_early = 3;
+% b_late = Fit_ols.b;
+% a_early = bfra.pointcloudintercept(fitData.q,fitData.dqdt,b_early,'envelope');
+% a_late = bfra.pointcloudintercept(fitData.q,fitData.dqdt,b_late,'envelope');
+% 
+% % Estimate the aquifer property drainable porosity. Assume the saturated aquifer
+% % thickness is 0.5 meters.
+% drainablePorosity = bfra.fitphi(a_early,a_late,b_late,A,0.5,L);
+% 
+% % The value 0.001 is similar to values reported in the literature.
+% 
+% %%
+% % Run the event detection algorithm using the test data.
+% [Events,Info] = bfra.getevents(T,Q,R,opts.Events);
+% 
+% % plot the detected events
+% bfra.eventplotter(T,Q,R,Info,'plotevents',true);
+% 
+% % The figure shows increasing flows, decreasing flows, the detected local
+% % maxima, local minima, convex flows, and detected recession flows that we will
+% % 'keep' for further analysis.
+% 
+% %% 
+% % The output structure Events contains arrays that are the same size as the
+% % input time |T|, streamflow |Q|, and rainfall |R| arrays, but all non-recession
+% % flows are set nan. 
+% % 
+% %% Fit individual recession events
+% % We pass the Events structure to |fitevents| which cycles over each individual
+% % recession event and fits a curve to estimate the parameters. Because
+% % curve-fitting all events is time-consuming, we can load pre-computed fits
+% % instead of computing them. 
+% 
+% [K,Fits] = bfra.fitevents(Events,opts.Fits);
+% 
+% % load('data/Events.mat','K','Fits');
+% 
+% %% 
+% % The output structure |Fits| is similar to the input |Events|, except that the
+% % streamflow data has been fit using an exponential timestep to reduce the
+% % impact of measurement noise on the measured data. In addition, the rate of
+% % change of streamflow, $\frac{dQ}{dt}$, is included as an element of |Fits|.
+% 
+% %%
+% % The output table |K| contains the parameters of the fit to each individual
+% % recession event. These parameters form the basis for subsequent analysis.
+% % 
+% %% Global fit
+% % Once the individual events have been fit, we conduct inference testing on the
+% % sample population. 
+% 
+% 
+% %% 
+% % First we transform the observed streamflow data into a timescale parameter tau
+% % using the fitted parameters in |K|
+% 
+% [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
+% 
+% %% 
+% % Then we pass that into a custom Pareto distribution fitting routine to
+% % estimate the population-sample-scale value of the parameters a and b:
+% TauFit = bfra.plfitb(tau,'plot',true,'boot',false);
+% 
+% %% 
+% % The |TauFit| structure contains information about the Pareto Distribution fit
+% % including the minimum bound, $\tau_0$, the expected value, $\tau$, and the
+% % parameter estimate $\hat{b}. Extract these parameters for the next steps.
+% % 
+% 
+% bhat     = TauFit.b;
+% bhatL    = TauFit.b_L;
+% bhatH    = TauFit.b_H;
+% tau0     = TauFit.tau0;
+% tauhat   = TauFit.tau;
+% itau     = TauFit.taumask;
+% 
+% %%% Estimate parameter $\bf\hat{a}$ at the population-scale using the point-cloud intercept method
+% % $\hat{a}$ is the intercept of the line with slope $\hat{b}$ that passes
+% % through the median value of streamflow $Q$. After fitting $\hat{a}$, display
+% % the fit using |pointcloudplot|. Add three 'reflines': one for 'early-time'
+% % which fits a line of slope $b=3$ to the 95th percentile of the point cloud,
+% % one for 'late-time', which fits a line of slope |blate| to the median of the
+% % point cloud, and one 'userfit' which fits a line of |userab = [intercept
+% % slope]| to the median of the point cloud.
+% 
+% [ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope','mask',itau);
+% 
+% h = bfra.pointcloudplot(q,dqdt,'mask',itau,    ...
+% 'reflines',{'early','late','userfit'},'blate',1, ...
+% 'userab',[ahat bhat],'addlegend',true,'reflabels',true);
 
 ##### SOURCE END #####
 --></body></html>

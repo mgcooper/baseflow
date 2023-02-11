@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Getting Started with the Baseflow Recession Analysis Toolbox</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-11-08"><meta name="DC.source" content="bfra_gettingStarted.m"><style type="text/css">
+      --><title>Getting Started with the Baseflow Recession Analysis Toolbox</title><meta name="generator" content="MATLAB 9.9"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-02-10"><meta name="DC.source" content="bfra_gettingStarted.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,10 +67,10 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Getting Started with the Baseflow Recession Analysis Toolbox</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Download</a></li><li><a href="#3">Authors &amp; Sources</a></li><li><a href="#4">System Requirements</a></li><li><a href="#5">Accessing Help</a></li><li><a href="#6">Features</a></li><li><a href="#7">Installation</a></li></ul></div><h2 id="1">Description</h2><p>Baseflow recession analysis refers to a set of methods in hydrologic science designed to infer aquifer properties that cannot be observed, such as hydraulic conductivity, from something that can be observed, such as streamflow. This toolbox provides easy-to-use functions to conduct baseflow recession analysis using measured values of streamflow recorded on a daily timestep. Its application here is meant for shallow (depth &lt;&lt; breadth) unconfined riparian aquifers that discharge subsurface flow into adjacent stream channels.</p><h2 id="2">Download</h2><p>Clone or fork the repository from <a href="https://github.com/mgcooper/baseflow">https://github.com/mgcooper/baseflow</a></p><h2 id="3">Authors &amp; Sources</h2><p>The code was written by Matt Cooper (<a href="mailto:matt.cooper@pnnl.gov">matt.cooper@pnnl.gov</a>) with some code borrowed from Clement Roques' exponential time step matlab code (available on request from Clement). The underlying theory is based on idealized solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Details can be found in the following papers:</p><div><ul><li>Brutsaert W and Nieber J L 1977 Regionalized drought flow hydrographs from a mature glaciated plateau Water Resour. Res. 13 637&#8211;43.</li><li>Brutsaert W and Lopez J P 1998 Basin-scale geohydrologic drought flow features of riparian aquifers in the Southern Great Plains Water Resour. Res. 34 233&#8211;40.</li><li>Rupp D E and Selker J S 2006 On the use of the Boussinesq equation for interpreting recession hydrographs from sloping aquifers Water Resour. Res. 42 W12421.</li></ul></div><h2 id="4">System Requirements</h2><p>This toolbox depends on the following Mathworks products:</p><div><ul><li>Statistics and Machine Learning Toolbox&#8482; <a href="https://www.mathworks.com/products/statistics.html">https://www.mathworks.com/products/statistics.html</a></li><li>Curve Fitting Toolbox&#8482; <a href="https://www.mathworks.com/products/curvefitting.html">https://www.mathworks.com/products/curvefitting.html</a></li></ul></div><h2 id="5">Accessing Help</h2><p>Need help? Just type</p><pre>doc bfra</pre><h2 id="6">Features</h2><p>The toolbox supports five main features:</p><div><ol><li>Recession (baseflow) event detection</li><li>Recession (baseflow) event curve-fitting</li><li>Recession (baseflow) parameter distribution-fitting</li><li>Aquifer-property estimation from event-scale curve-fitting parameters</li><li>Aquifer-property estimation from population-scale distribution-fitting parameters</li></ol></div><p>Functions that support event detection:</p><div><ul><li><tt>getevents</tt> Detect recession events on a multi-year timeseries of streamflow data, returned as an array</li><li><tt>findevents</tt> Identify recession events from a multi-year timeseries of streamflow data, returned as a cell array (called by <tt>getevents</tt>)</li><li><tt>eventfinder</tt> Automatically detect recession events using objective parameters and filters to detect change points, convert detected recession events into segments (called by <tt>findevents</tt>)</li><li><tt>eventpicker</tt> Pick events manually, rather than automatically using <tt>eventfinder</tt></li><li><tt>eventplotter</tt> Plot recession events detected by <tt>eventfinder</tt> or <tt>eventpicker</tt></li></ul></div><p>Functions that support event fitting:</p><div><ul><li><tt>fitevents</tt> Curve-fit all events using the <tt>Events</tt> output of <tt>getevents</tt></li><li><tt>getdqdt</tt> Estimate the rate of change of discharge dQ/dt prior to curve fitting using one of several numerical differentiation options</li><li><tt>fitdqdt</tt> Estimate the rate of change of discharge dQ/dt prior to curve fitting using one of several numerical differentiation options</li><li><tt>fitets</tt> Apply the exponential time step method to estimate the numerical derivative dQ/dt)</li></ul></div><p>Functions that support distribution fitting:</p><div><ul><li><tt>plfitb</tt> Fit Pareto distribution to timescale parameter tau</li><li><tt>fitphidist</tt> Fit Beta distribution to drainable porosity</li></ul></div><p>Functions that support event-scale aquifer-property estimation:</p><div><ul><li><tt>fitab</tt> Estimate recession parameters <i>a</i> and <i>b</i> from individual recession events</li><li><tt>eventphi</tt> Estimate drainable porosity from individual recession events</li><li><tt>fitphi</tt> Estimate drainable porosity from individual recession events (called by <tt>eventphi</tt>)</li><li><tt>eventtau</tt> Estimate timescale parameter from individual recession events</li><li><tt>eventtau</tt> Estimate timescale parameter from individual recession events</li><li><tt>aquiferstorage</tt> Estimate aquifer storage from individual recession events</li></ul></div><p>Functions that support population-scale aquifer-property estimation:</p><div><ul><li><tt>aquiferprops</tt> Estimate aquifer depth, aquifer hydraulic conductivity, and aquifer drainable porosity using the point cloud method</li><li><tt>aquiferthickness</tt> Estimate aquifer thickness from individual recession events</li><li><tt>cloudphi</tt> Estimate aquifer drainable porosity using the point cloud method</li></ul></div><p>All user accessible functions in this toolbox are defined inside the '+bfra' package. This avoids naming conflicts with built-in matlab functions or any other namespace collision due to user-defined functions. Functions inside bfra.internal are not meant to be called directly.</p><pre>+bfra/  - The package, with all user accessible functions
+  </style></head><body><div class="content"><h1>Getting Started with the Baseflow Recession Analysis Toolbox</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Description</a></li><li><a href="#2">Download</a></li><li><a href="#3">Installation</a></li><li><a href="#4">System Requirements</a></li><li><a href="#5">Accessing Help</a></li><li><a href="#6">Features</a></li><li><a href="#7">Authors &amp; Sources</a></li><li><a href="#8">Acknowledgements</a></li></ul></div><h2 id="1">Description</h2><p>Baseflow recession analysis refers to a set of methods in hydrologic science designed to infer aquifer properties that cannot be observed, such as hydraulic conductivity, from something that can be observed, such as streamflow. This toolbox provides easy-to-use functions to conduct baseflow recession analysis using measured values of streamflow recorded on a daily timestep. Its application here is meant for shallow (depth &lt;&lt; breadth) unconfined riparian aquifers that discharge subsurface flow into adjacent stream channels.</p><h2 id="2">Download</h2><p>Clone or fork the repository from <a href="https://github.com/mgcooper/baseflow">https://github.com/mgcooper/baseflow</a></p><h2 id="3">Installation</h2><p>Place all files and folders in their own folder (e.g. baseflow) and then add that folder to your Matlab search path. Alternatively, run the included <tt>Setup.m</tt> installation function:  <tt>Setup('install')</tt> or just <tt>Setup</tt> will add all toolbox paths to the search  path.</p><h2 id="4">System Requirements</h2><p>This toolbox depends on the following Mathworks products:</p><div><ul><li>Statistics and Machine Learning Toolbox&#8482; <a href="https://www.mathworks.com/products/statistics.html">https://www.mathworks.com/products/statistics.html</a></li><li>Curve Fitting Toolbox&#8482; <a href="https://www.mathworks.com/products/curvefitting.html">https://www.mathworks.com/products/curvefitting.html</a></li></ul></div><h2 id="5">Accessing Help</h2><p>Need help? Just type</p><pre>doc bfra</pre><h2 id="6">Features</h2><p>The toolbox supports four main features:</p><div><ol><li>Baseflow recession event detection</li><li>Baseflow recession event curve-fitting (parameter estimation for individual recession events)</li><li>Baseflow recession event distribution-fitting (parameter estimation for a sample population of events)</li><li>Aquifer property estimation using event-scale recession parameters and sample population-scale parameters</li></ol></div><p>Functions that support event detection:</p><div><ul><li><tt>getevents</tt> Detect recession events from timeseries of daily streamflow data</li><li><tt>eventfinder</tt> The algorithm called by <tt>getevents</tt> to detect recession events</li><li><tt>eventpicker</tt> Pick events manually, rather than automatically using <tt>eventfinder</tt></li><li><tt>eventplotter</tt> Plot recession events detected by <tt>eventfinder</tt> or <tt>eventpicker</tt></li><li><tt>eventsplitter</tt> Split detected recession events into useable segments for fitting</li></ul></div><p>Functions that support event fitting:</p><div><ul><li><tt>fitevents</tt> Curve-fit all events using the <tt>Events</tt> structure output by <tt>getevents</tt></li><li><tt>getdqdt</tt> Estimate the rate of change of discharge <i>dQ/dt</i> prior to curve fitting using one of several numerical differentiation options</li><li><tt>fitdqdt</tt> Estimate the rate of change of discharge <i>dQ/dt</i> prior to curve fitting using one of several numerical differentiation options</li><li><tt>fitets</tt> Apply the exponential time step method to estimate the numerical derivative <i>dQ/dt</i></li><li><tt>fitcts</tt> Apply the constant time step method to estimate the numerical derivative <i>dQ/dt</i></li><li><tt>fitvts</tt> Apply the variable time step method to estimate the numerical derivative <i>dQ/dt</i></li></ul></div><p>Functions that support distribution fitting:</p><div><ul><li><tt>plfitb</tt> Fit Pareto distribution to timescale parameter tau</li><li><tt>fitphidist</tt> Fit Beta distribution to drainable porosity</li></ul></div><p>Functions that support event-scale aquifer-property estimation:</p><div><ul><li><tt>fitab</tt> Estimate recession parameters <i>a</i> and <i>b</i> from individual recession events</li><li><tt>eventphi</tt> Estimate drainable porosity from individual recession events</li><li><tt>fitphi</tt> Estimate drainable porosity from individual recession events (called by <tt>eventphi</tt>)</li><li><tt>eventtau</tt> Estimate timescale parameter from individual recession events</li><li><tt>aquiferstorage</tt> Estimate aquifer storage from individual recession events</li></ul></div><p>Functions that support population-scale aquifer-property estimation:</p><div><ul><li><tt>aquiferprops</tt> Estimate aquifer depth, aquifer hydraulic conductivity, and aquifer drainable porosity using the point cloud method</li><li><tt>aquiferthickness</tt> Estimate aquifer thickness from individual recession events</li><li><tt>cloudphi</tt> Estimate aquifer drainable porosity using the point cloud method</li><li><tt>pointcloudintercept</tt> Estimate aquifer parameter <i>a</i> from the point cloud intercept</li></ul></div><p>% Functions used for visualization</p><div><ul><li><tt>pointcloudplot</tt> Plot a point-cloud diagram to estimate aquifer parameters</li><li><tt>plotdqdt</tt> (deprecated) Plot the log-log q vs -dq/dt point-cloud with options to select recession segments for fitting</li><li><tt>plotrefline</tt> Add a reference line to a point cloud plot</li><li><tt>plplotb</tt> Plot the power law fit to the P(tau) Pareto distribution</li><li><tt>checkevent</tt> Plot detected recession event and fitted values</li></ul></div><p>Functions that simplify routine tasks:</p><div><ul><li><tt>characteristicTime</tt> Compute the characteristic e-folding time for aquifer discharge</li><li><tt>conversions</tt> Convert common variables to their equivalent value in terms of another variable</li><li><tt>getfunction</tt> Get an anonymous function from the toolbox function library</li><li><tt>getstring</tt> Get a latex-formatted string for common variables used for plot labels</li><li><tt>setopts</tt> Set algorithm options for functions getevents, fitevents, and globalfit</li><li><tt>specialfunctions</tt> Libarary of special functions required for recession analysis</li></ul></div><p>All user accessible functions in this toolbox are defined inside the '+bfra' package. This avoids naming conflicts with built-in matlab functions or any other namespace collision due to user-defined functions. Functions inside bfra.internal are not meant to be called directly.</p><pre>+bfra/  - The package, with all user accessible functions
 docs/ - Documentation
 demos/ - Example scripts
-utils/ - Utility functions required for the package</pre><h2 id="7">Installation</h2><p>Place all files and folders in their own folder (e.g. baseflow) and then add that folder to your Matlab search path. Alternatively, run the included <tt>Setup.m</tt> installation script.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
+utils/ - Utility functions required for the package</pre><h2 id="7">Authors &amp; Sources</h2><p>The code was written by Matt Cooper (<a href="mailto:matt.cooper@pnnl.gov">matt.cooper@pnnl.gov</a>). The exponential time step method implementation was inspired by Clement Roques' exponential time step matlab code (available on request from Clement).  The underlying theory is based on idealized solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Details can be found in the following papers:</p><div><ul><li>Brutsaert W and Nieber J L 1977 Regionalized drought flow hydrographs from a mature glaciated plateau Water Resour. Res. 13 637&#8211;43.</li><li>Brutsaert W and Lopez J P 1998 Basin-scale geohydrologic drought flow features of riparian aquifers in the Southern Great Plains Water Resour. Res. 34 233&#8211;40.</li><li>Rupp D E and Selker J S 2006 On the use of the Boussinesq equation for interpreting recession hydrographs from sloping aquifers Water Resour. Res. 42 W12421.</li></ul></div><h2 id="8">Acknowledgements</h2><p>The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project funded this work through the United States Department of Energy, Office of Science, Biological and Environmental Research (BER) Regional and Global Model Analysis (RGMA) program. Awarded under contract grant # 89233218CNA000001 to Triad National Security, LLC (&#8220;Triad&#8221;).</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2020b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Getting Started with the Baseflow Recession Analysis Toolbox
 % 
@@ -87,21 +87,13 @@ utils/ - Utility functions required for the package</pre><h2 id="7">Installation
 %% Download 
 % Clone or fork the repository from <https://github.com/mgcooper/baseflow>
 %
-%% Authors & Sources
-% The code was written by Matt Cooper (matt.cooper@pnnl.gov) with some code
-% borrowed from Clement Roques' exponential time step matlab code (available on
-% request from Clement). The underlying theory is based on idealized solutions
-% to the one-dimensional (lateral) groundwater flow equation ("Boussinesq
-% equation"). Details can be found in the following papers: 
+%% Installation
 % 
-% *  Brutsaert W and Nieber J L 1977 Regionalized drought flow hydrographs from
-% a mature glaciated plateau Water Resour. Res. 13 637–43.
-% *  Brutsaert W and Lopez J P 1998 Basin-scale geohydrologic drought flow
-% features of riparian aquifers in the Southern Great Plains Water Resour. Res.
-% 34 233–40.
-% *  Rupp D E and Selker J S 2006 On the use of the Boussinesq equation for
-% interpreting recession hydrographs from sloping aquifers Water Resour. Res. 42
-% W12421.
+% Place all files and folders in their own folder (e.g. baseflow) and then add
+% that folder to your Matlab search path.
+% Alternatively, run the included |Setup.m| installation function:
+%  |Setup('install')| or just |Setup| will add all toolbox paths to the search
+%  path.
 % 
 %% System Requirements 
 % This toolbox depends on the following Mathworks products:  
@@ -115,29 +107,29 @@ utils/ - Utility functions required for the package</pre><h2 id="7">Installation
 %  doc bfra
 % 
 %% Features
-% The toolbox supports five main features:
+% The toolbox supports four main features:
 % 
-% # Recession (baseflow) event detection
-% # Recession (baseflow) event curve-fitting
-% # Recession (baseflow) parameter distribution-fitting
-% # Aquifer-property estimation from event-scale curve-fitting parameters
-% # Aquifer-property estimation from population-scale distribution-fitting
-% parameters
+% # Baseflow recession event detection
+% # Baseflow recession event curve-fitting (parameter estimation for individual recession events) 
+% # Baseflow recession event distribution-fitting (parameter estimation for a sample population of events)
+% # Aquifer property estimation using event-scale recession parameters and sample population-scale parameters
 % 
 % Functions that support event detection:
 % 
-% * |getevents| Detect recession events on a multi-year timeseries of streamflow data, returned as an array
-% * |findevents| Identify recession events from a multi-year timeseries of streamflow data, returned as a cell array (called by |getevents|) 
-% * |eventfinder| Automatically detect recession events using objective parameters and filters to detect change points, convert detected recession events into segments (called by |findevents|)
+% * |getevents| Detect recession events from timeseries of daily streamflow data
+% * |eventfinder| The algorithm called by |getevents| to detect recession events
 % * |eventpicker| Pick events manually, rather than automatically using |eventfinder|
 % * |eventplotter| Plot recession events detected by |eventfinder| or |eventpicker|
+% * |eventsplitter| Split detected recession events into useable segments for fitting
 % 
 % Functions that support event fitting:
 % 
-% * |fitevents| Curve-fit all events using the |Events| output of |getevents| 
-% * |getdqdt| Estimate the rate of change of discharge dQ/dt prior to curve fitting using one of several numerical differentiation options
-% * |fitdqdt| Estimate the rate of change of discharge dQ/dt prior to curve fitting using one of several numerical differentiation options
-% * |fitets| Apply the exponential time step method to estimate the numerical derivative dQ/dt)
+% * |fitevents| Curve-fit all events using the |Events| structure output by |getevents| 
+% * |getdqdt| Estimate the rate of change of discharge _dQ/dt_ prior to curve fitting using one of several numerical differentiation options
+% * |fitdqdt| Estimate the rate of change of discharge _dQ/dt_ prior to curve fitting using one of several numerical differentiation options
+% * |fitets| Apply the exponential time step method to estimate the numerical derivative _dQ/dt_
+% * |fitcts| Apply the constant time step method to estimate the numerical derivative _dQ/dt_
+% * |fitvts| Apply the variable time step method to estimate the numerical derivative _dQ/dt_
 %
 % Functions that support distribution fitting:
 % 
@@ -150,7 +142,6 @@ utils/ - Utility functions required for the package</pre><h2 id="7">Installation
 % * |eventphi| Estimate drainable porosity from individual recession events
 % * |fitphi| Estimate drainable porosity from individual recession events (called by |eventphi|)
 % * |eventtau| Estimate timescale parameter from individual recession events
-% * |eventtau| Estimate timescale parameter from individual recession events
 % * |aquiferstorage| Estimate aquifer storage from individual recession events
 % 
 % Functions that support population-scale aquifer-property estimation:
@@ -158,6 +149,24 @@ utils/ - Utility functions required for the package</pre><h2 id="7">Installation
 % * |aquiferprops| Estimate aquifer depth, aquifer hydraulic conductivity, and aquifer drainable porosity using the point cloud method
 % * |aquiferthickness| Estimate aquifer thickness from individual recession events
 % * |cloudphi| Estimate aquifer drainable porosity using the point cloud method
+% * |pointcloudintercept| Estimate aquifer parameter _a_ from the point cloud intercept
+% 
+% % Functions used for visualization
+% 
+% * |pointcloudplot| Plot a point-cloud diagram to estimate aquifer parameters
+% * |plotdqdt| (deprecated) Plot the log-log q vs -dq/dt point-cloud with options to select recession segments for fitting
+% * |plotrefline| Add a reference line to a point cloud plot
+% * |plplotb| Plot the power law fit to the P(tau) Pareto distribution
+% * |checkevent| Plot detected recession event and fitted values
+% 
+% Functions that simplify routine tasks:
+% 
+% * |characteristicTime| Compute the characteristic e-folding time for aquifer discharge
+% * |conversions| Convert common variables to their equivalent value in terms of another variable
+% * |getfunction| Get an anonymous function from the toolbox function library
+% * |getstring| Get a latex-formatted string for common variables used for plot labels
+% * |setopts| Set algorithm options for functions getevents, fitevents, and globalfit
+% * |specialfunctions| Libarary of special functions required for recession analysis
 % 
 % All user accessible functions in this toolbox are defined inside the '+bfra'
 % package. This avoids naming conflicts with built-in matlab functions or any
@@ -169,11 +178,29 @@ utils/ - Utility functions required for the package</pre><h2 id="7">Installation
 %  demos/ - Example scripts
 %  utils/ - Utility functions required for the package
 %
-%% Installation
+%% Authors & Sources
+% The code was written by Matt Cooper (matt.cooper@pnnl.gov). The exponential
+% time step method implementation was inspired by Clement Roques' exponential
+% time step matlab code (available on request from Clement).  The underlying
+% theory is based on idealized solutions to the one-dimensional (lateral)
+% groundwater flow equation ("Boussinesq equation"). Details can be found in the
+% following papers:
 % 
-% Place all files and folders in their own folder (e.g. baseflow) and then add
-% that folder to your Matlab search path.
-% Alternatively, run the included |Setup.m| installation script.
-%
+% *  Brutsaert W and Nieber J L 1977 Regionalized drought flow hydrographs from
+% a mature glaciated plateau Water Resour. Res. 13 637–43.
+% *  Brutsaert W and Lopez J P 1998 Basin-scale geohydrologic drought flow
+% features of riparian aquifers in the Southern Great Plains Water Resour. Res.
+% 34 233–40.
+% *  Rupp D E and Selker J S 2006 On the use of the Boussinesq equation for
+% interpreting recession hydrographs from sloping aquifers Water Resour. Res. 42
+% W12421.
+% 
+%% Acknowledgements
+% The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE)
+% project funded this work through the United States Department of Energy,
+% Office of Science, Biological and Environmental Research (BER) Regional and
+% Global Model Analysis (RGMA) program. Awarded under contract grant #
+% 89233218CNA000001 to Triad National Security, LLC (“Triad”).
+
 ##### SOURCE END #####
 --></body></html>

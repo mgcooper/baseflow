@@ -1,0 +1,487 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fitphi</title>
+  <meta name="keywords" content="fitphi">
+  <meta name="description" content="FITPHI estimates drainable porosity phi using an early- and late-time solution">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitphi.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>fitphi
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>FITPHI estimates drainable porosity phi using an early- and late-time solution</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">FITPHI estimates drainable porosity phi using an early- and late-time solution
+
+ Syntax
+ 
+     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
+ 
+ Description
+ 
+     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L) computes drainable porosity phi
+     using the method of Troch, Troch, and Brutsaert, 1993 from early-time (a1)
+     and late-time (a2,b2) recession parameters and aquifer properties area A,
+     depth D, and channel length L. 
+ 
+ Required inputs
+ 
+     a1    early-time a in -dq/dt = aq^b
+     a2    late-time a in -dq/dt = aq^b
+     b2    late-time b
+     A     basin area contributing to baseflow (L^2)
+     D     saturated aquifer thickness (L)
+     L     active stream length (L)
+ 
+ Optional inputs
+ 
+     theta    effective slope of basin contributing area
+     isflat   logical flag indicating horizontal or sloped aquifer solution
+     soln1    optional early-time theoretical solution
+     soln2    optional late-time theoretical solution
+     dispfit  logical flag indicating whether to plot the result
+
+ See also <a href="eventphi.html" class="code" title="function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)">eventphi</a>, <a href="cloudphi.html" class="code" title="function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)">cloudphi</a>, fitdistphi
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);</a></li>
+<li><a href="#_sub2" class="code">function [combos,descriptions] = allcombos()</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)</a>
+0002 <span class="comment">%FITPHI estimates drainable porosity phi using an early- and late-time solution</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L) computes drainable porosity phi</span>
+0011 <span class="comment">%     using the method of Troch, Troch, and Brutsaert, 1993 from early-time (a1)</span>
+0012 <span class="comment">%     and late-time (a2,b2) recession parameters and aquifer properties area A,</span>
+0013 <span class="comment">%     depth D, and channel length L.</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% Required inputs</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">%     a1    early-time a in -dq/dt = aq^b</span>
+0018 <span class="comment">%     a2    late-time a in -dq/dt = aq^b</span>
+0019 <span class="comment">%     b2    late-time b</span>
+0020 <span class="comment">%     A     basin area contributing to baseflow (L^2)</span>
+0021 <span class="comment">%     D     saturated aquifer thickness (L)</span>
+0022 <span class="comment">%     L     active stream length (L)</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% Optional inputs</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%     theta    effective slope of basin contributing area</span>
+0027 <span class="comment">%     isflat   logical flag indicating horizontal or sloped aquifer solution</span>
+0028 <span class="comment">%     soln1    optional early-time theoretical solution</span>
+0029 <span class="comment">%     soln2    optional late-time theoretical solution</span>
+0030 <span class="comment">%     dispfit  logical flag indicating whether to plot the result</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% See also eventphi, cloudphi, fitdistphi</span>
+0033 <span class="comment">%</span>
+0034 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0035 
+0036 <span class="comment">% if called with no input, open this file</span>
+0037 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0038 
+0039 <span class="comment">%-------------------------------------------------------------------------------</span>
+0040 p              = inputParser;
+0041 p.StructExpand = false;
+0042 p.FunctionName = <span class="string">'fitphi'</span>;
+0043 
+0044 addRequired(p, <span class="string">'a1'</span>,                @(x)isnumeric(x)  );
+0045 addRequired(p, <span class="string">'a2'</span>,                @(x)isnumeric(x)  );
+0046 addRequired(p, <span class="string">'b2'</span>,                @(x)isnumeric(x)  );
+0047 addRequired(p, <span class="string">'A'</span>,                 @(x)isnumeric(x)  );
+0048 addRequired(p, <span class="string">'D'</span>,                 @(x)isnumeric(x)  );
+0049 addRequired(p, <span class="string">'L'</span>,                 @(x)isnumeric(x)  );
+0050 addParameter(p,<span class="string">'theta'</span>,    0,       @(x)isnumeric(x)  );
+0051 addParameter(p,<span class="string">'isflat'</span>,   true,    @(x)islogical(x)  );
+0052 addParameter(p,<span class="string">'dispfit'</span>,  false,   @(x)islogical(x)  );
+0053 addParameter(p,<span class="string">'soln1'</span>,    <span class="string">'RS05'</span>,  @(x)ischar(x)     );
+0054 addParameter(p,<span class="string">'soln2'</span>,    <span class="string">'RS05'</span>,  @(x)ischar(x)     );
+0055 
+0056 parse(p,a1,a2,b2,A,D,L,varargin{:});
+0057 
+0058 theta    = p.Results.theta;
+0059 isflat   = p.Results.isflat;
+0060 dispfit  = p.Results.dispfit;
+0061 soln1    = p.Results.soln1;
+0062 soln2    = p.Results.soln2;
+0063 <span class="comment">%-------------------------------------------------------------------------------</span>
+0064 <span class="comment">% b1  = early-time b (not needed for any solutions but assumed)</span>
+0065 <span class="comment">% b2  = late-time b</span>
+0066 <span class="comment">% a1  = early-time a</span>
+0067 <span class="comment">% a2  = late-time a</span>
+0068 
+0069 <span class="comment">% options for early-time solution:</span>
+0070 <span class="comment">%  Polubarinova-Kochina, 1962 (nonlinear, flat, constant k(z), b=3)</span>
+0071 <span class="comment">%  Rupp and Selker, 2005      (nonlinear, flat, k(z)=(Z/D)^n, b=3)</span>
+0072 <span class="comment">%  Brutsaert, 1994            (linearized, sloped, constant k(z), b=3)</span>
+0073 
+0074 <span class="comment">% options for late-time solution:</span>
+0075 <span class="comment">%  Boussinesq, 1903           (linearized, flat, constant k(z), b=1)</span>
+0076 <span class="comment">%  Boussinesq, 1904           (nonlinear, flat, constant k(z), b=3/2)</span>
+0077 <span class="comment">%  Rupp and Selker, 2005      (nonlinear, flat, k(z)=(Z/D)^n, b=(2n+3)/(n+2)</span>
+0078 <span class="comment">%  Rupp and Selker, 2006      (nonlinear, sloped, b=(2n+1)/(n+1)</span>
+0079 <span class="comment">%  Rupp and Selker, 2006 b=1  (nonlinear, sloped, b=1)</span>
+0080 <span class="comment">%  Brutsaert, 1994            (linearized, sloped, constant k(z), b=1)</span>
+0081 
+0082 <span class="comment">% * denotes ones that are implemented</span>
+0083 <span class="comment">% so we have these early/late options for flat</span>
+0084 <span class="comment">% *PK62 / BS04   constant k(z) + nonlinear early and late</span>
+0085 <span class="comment">% *PK62 / BS03   constant k(z) + nonlinear early, constant k(z) + linear late</span>
+0086 <span class="comment">% *RS05 / RS05   k(z)=(Z/D)^n + nonlinear early and late</span>
+0087 <span class="comment">% PK62 / RS05   constant k(z) + nonlinear early, k(z)=(Z/D)^n + nonlinear late</span>
+0088 
+0089 <span class="comment">% and these early/late options for sloped:</span>
+0090 <span class="comment">% *BR94 / BR94   constant k(z) + linearized early and late</span>
+0091 <span class="comment">% *BR94 / RS06   constant k(z) + linearized early, k(z)~Z^n + nonlinear late</span>
+0092 <span class="comment">% *BR94 / RS06b1 constant k(z) + linearized early, k(z)~Z^n + nonlinear late</span>
+0093 
+0094 <span class="comment">% and these options for sloped early, flat late:</span>
+0095 <span class="comment">% BR94 / BS04   constant k(z) + linearized early; constant k(z) + nonlinear late</span>
+0096 <span class="comment">% BR94 / BS03   constant k(z) + linearized early; constant k(z) + linearized late</span>
+0097 <span class="comment">% BR94 / RS05   constant k(z) + linearized early; k(z)~Z^n + nonlinear late</span>
+0098 
+0099 <span class="comment">% see subroutine allsolutions to build all possible combos</span>
+0100 
+0101 <span class="comment">% the two soln options dictate the early-time expression for 'a'. the</span>
+0102 <span class="comment">% late-time value is dictated by 'blate', but warn the user in case</span>
+0103 
+0104 <span class="comment">% NOTE: I don't think L is involved in any of the standard solutions. it appears</span>
+0105 <span class="comment">% in PK62-BS04 but I think it cancels.</span>
+0106 
+0107 <span class="comment">%-------------------------------------------------------------------------------</span>
+0108 
+0109 <span class="comment">% parse the soln options</span>
+0110    [solns,desc,b2]  = <a href="#_sub1" class="code" title="subfunction [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);">parsesolutions</a>(soln1,soln2,b2,isflat);
+0111 
+0112 <span class="comment">% solve for phi given the requested solutions</span>
+0113    numsoln  = numel(solns);
+0114    phi      = nan(numsoln,1);
+0115 
+0116 <span class="keyword">for</span> m = 1:numsoln
+0117 
+0118    soln = solns{m};
+0119    
+0120    <span class="keyword">switch</span> soln
+0121    
+0122       <span class="comment">% NOTE: this is probably not a valid choice, because B94 is for</span>
+0123       <span class="comment">% homogeneous soils whereas RS06 is heterogeneous.</span>
+0124       <span class="keyword">case</span> <span class="string">'BR94_RS06'</span>        <span class="comment">% Brutsaert 1994, early-time, b=3</span>
+0125          n     = bfra.conversions(b2,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,false);
+0126         
+0127          
+0128          <span class="comment">% a1 = 1.133/(k*phi*D^3*L^2*cos(theta))</span>
+0129          n1    = n+1;
+0130          n2    = n+1/100;
+0131          n3    = 1/(n+2);
+0132          n4    = 1/(n+1);
+0133          n5    = n+3;
+0134          c1c2  = (n1^2/(n2*A)*(2.266*tand(theta)/(n1*L*D^n5))^n4)^n3;
+0135          a1a2  = (a1^n4*a2)^n3;
+0136          
+0137          
+0138       <span class="keyword">case</span> <span class="string">'BR94_RS06b1'</span>
+0139 
+0140          c1c2  = sqrt(200*tand(theta)*1.133/(L*A*D^3));
+0141          a1a2  = sqrt(a1*a2);
+0142          
+0143       <span class="keyword">case</span> <span class="string">'BR94_BR94'</span>
+0144          eta   = A*tand(theta)/(2*L*D);
+0145          p     = 1/3;
+0146          c1c2  = sqrt(1.133)*(pi*p+eta)/(D*A*sqrt(p));
+0147          a1a2  = sqrt(a1*a2);
+0148          
+0149          <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0150          
+0151       <span class="keyword">case</span> <span class="string">'RS05_RS05'</span>     <span class="comment">% Rupp and Selker, 2005 (early-time, b=3)</span>
+0152                            <span class="comment">% Rupp and Selker, 2005 (late-time, b=f(n))</span>
+0153          
+0154          n        = bfra.conversions(b2,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,true);         
+0155          fR1      = bfra.specialfunctions(<span class="string">'fR1'</span>,n);
+0156          fR2      = bfra.specialfunctions(<span class="string">'fR2'</span>,n);
+0157          
+0158          n1       = n+1;
+0159          n2       = n+2;
+0160          n3       = 1/(n+3);
+0161          c1c2     = ((fR1*fR2^n2/(2^n*n1))^n3)/(D*A);
+0162          a1a2     = (a1*a2^(n+2))^(1/(n+3));
+0163          
+0164          <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0165          
+0166          <span class="comment">% phi = c1c2/a1a2;</span>
+0167          
+0168 <span class="comment">% % this is in aquiferprops. probably better to use that, but should combine.</span>
+0169 <span class="comment">% trouble is that it all deepends what is known a priori (phi, D, or K)</span>
+0170 <span class="comment">%          % once phi is known, this can be used to compute kD in units m/d</span>
+0171 <span class="comment">%          % (should be around 100 m/d at most):</span>
+0172 <span class="comment">%          k1       = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time</span>
+0173 <span class="comment">%          k2       = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time</span>
+0174 <span class="comment">%</span>
+0175 <span class="comment">%          % this method is based on the same method used to estimate phi, by</span>
+0176 <span class="comment">%          % equating early- and late-time and isolating k, but assumes D is known</span>
+0177 <span class="comment">%</span>
+0178 <span class="comment">%          % this c1/c2 are as defined in my derivation in overleaf.</span>
+0179 <span class="comment">%          c1    = fR1/(D^3*L^2);</span>
+0180 <span class="comment">%          c2    = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));</span>
+0181 <span class="comment">%          k     = ((c1/c2)*(a2/a1))^((n+2)/(n+3));</span>
+0182          
+0183       <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>        <span class="comment">% Polubarinova-Kochina, 1962 (early-time, b=3)</span>
+0184                               <span class="comment">% Boussinesq, 1904 (late-time, b=1.5)</span>
+0185                               <span class="comment">% see Troch et al. 1993</span>
+0186 
+0187          c1c2  = (1.133^(1/3))/D * (4.804^(2/3))/A;
+0188          a1a2  = a1^(1/3)*a2^(2/3);
+0189          
+0190          <span class="comment">% phi = c1c2/a1a2;</span>
+0191 
+0192          <span class="comment">% multiply by *100/86400 to go from m/d to cm/s</span>
+0193          k1    = 1.133/(D^3*L^2*a1*c1c2/a1a2);   <span class="comment">% early</span>
+0194          k2    = ((a2*A^(3/2)*c1c2/a1a2)/(4.804*L))^2;
+0195          
+0196          <span class="comment">% compute Q0</span>
+0197          Q0    = 3.448*k1*D^2*L^2/A; <span class="comment">% or: 3.448*k1*D^2*Dd*L if Dd is used</span>
+0198          
+0199          <span class="comment">% once phi and k are known, we can check D</span>
+0200          
+0201          <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0202          
+0203       <span class="keyword">case</span> <span class="string">'PK62_BS03'</span>        <span class="comment">% Polubarinova-Kochina, 1962 (early-time)</span>
+0204                               <span class="comment">% Boussinesq, 1903 (late-time)</span>
+0205          p     = 1/3;
+0206          c1c2  = sqrt(1.133*p)*pi/(D*A);
+0207          a1a2  = sqrt(a1*a2);
+0208          
+0209          <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0210 
+0211    <span class="keyword">end</span>
+0212 
+0213    <span class="comment">% no square roots are taken, but this must hold to restrict phi to 0-1</span>
+0214    <span class="keyword">if</span> c1c2 &gt; a1a2
+0215       warning(<span class="string">'phi=%.2f'</span>,c1c2/a1a2)
+0216    <span class="keyword">end</span>
+0217    
+0218    phi(m) = c1c2/a1a2;
+0219    
+0220    <span class="keyword">if</span> dispfit == true
+0221       fprintf([soln <span class="string">', phi = %.3f\n'</span>],phi(m))
+0222    <span class="keyword">end</span>
+0223 <span class="keyword">end</span>
+0224 
+0225 
+0226 <a name="_sub1" href="#_subfunctions" class="code">function [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);</a>
+0227    
+0228 <span class="comment">% option to get all solutions</span>
+0229 <span class="keyword">if</span> strcmp(soln1,<span class="string">'all'</span>) &amp;&amp; strcmp(soln2,<span class="string">'all'</span>)
+0230    [soln,desc] = <a href="#_sub2" class="code" title="subfunction [combos,descriptions] = allcombos()">allcombos</a>();
+0231    <span class="keyword">return</span>;
+0232 <span class="keyword">end</span>
+0233 
+0234 <span class="comment">% early time</span>
+0235 <span class="keyword">switch</span> soln1
+0236    <span class="keyword">case</span> <span class="string">'Polubarinova-Kochina, 1962'</span>
+0237       soln1 = <span class="string">'PK62'</span>;
+0238    <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2005'</span>
+0239       soln1 = <span class="string">'RS05'</span>;
+0240    <span class="keyword">case</span> <span class="string">'Brutsaert, 1994'</span>
+0241       soln1 = <span class="string">'BR94'</span>;
+0242 <span class="keyword">end</span>
+0243 
+0244 <span class="comment">% late time</span>
+0245 <span class="keyword">switch</span> soln2
+0246    <span class="keyword">case</span> <span class="string">'Boussinesq, 1904 b=3/2'</span>
+0247       soln2 = <span class="string">'BS04'</span>;
+0248    <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2005 b=f(n)'</span>
+0249       soln2 = <span class="string">'RS05'</span>;
+0250    <span class="keyword">case</span> <span class="string">'Boussinesq, 1903 b=1'</span>
+0251       soln2 = <span class="string">'BS03'</span>;
+0252    <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2006 b=1'</span>
+0253       soln2 = <span class="string">'RS06b1'</span>;
+0254    <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2006 b=f(n)'</span>
+0255       soln2 = <span class="string">'RS06'</span>;
+0256 <span class="keyword">end</span>
+0257 
+0258 
+0259 <span class="comment">% not sure if we want this</span>
+0260 <span class="keyword">if</span> b2 &lt; 1
+0261    b2 = 1;
+0262 <span class="keyword">end</span>
+0263 
+0264 <span class="keyword">if</span> isflat == true
+0265 
+0266    <span class="comment">% late-time RS05 is valid for 1.5 &lt;= b &lt; 2, but the solution appears</span>
+0267    <span class="comment">% valid for 1&lt;b&lt;2, except that 1&lt;b&lt;1.5 corresponds to an inverted</span>
+0268    <span class="comment">% water table</span>
+0269    <span class="comment">% if strcmp(soln2,'RS05') &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)</span>
+0270    <span class="keyword">if</span> strcmp(soln2,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt;= 1 || b2&gt;=2)
+0271       warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
+0272       soln2  = <span class="string">'BS03'</span>;
+0273 
+0274    <span class="comment">% late-time B04 has b = 3/2</span>
+0275    <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
+0276       warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
+0277       b2 = 3/2;
+0278 
+0279    <span class="comment">% late-time B03 has b = 1</span>
+0280    <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
+0281       warning(<span class="string">'Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1'</span>)
+0282       b2 = 1;
+0283    <span class="keyword">end</span>
+0284 
+0285 <span class="keyword">else</span>
+0286 
+0287    <span class="keyword">if</span> strcmp(soln1,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)
+0288       warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
+0289       soln2  = <span class="string">'B03'</span>;
+0290 
+0291    <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
+0292       warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
+0293       b2 = 3/2;
+0294 
+0295    <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
+0296       warning(<span class="string">'Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1'</span>)
+0297       b2 = 1;
+0298    <span class="keyword">end</span>
+0299 
+0300 <span class="keyword">end</span>
+0301 
+0302 <span class="comment">% concatenate the early-time and late-time solution</span>
+0303 soln  = strcat(soln1,[<span class="string">'_'</span> soln2]);
+0304 
+0305 <span class="keyword">switch</span> soln
+0306    <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>
+0307       desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: BS04, flat + constant k(z) + nonlinear'</span>};
+0308    <span class="keyword">case</span> <span class="string">'PK62_BS03'</span>
+0309       desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: BS03, flat + constant k(z) + linearized'</span>};
+0310    <span class="keyword">case</span> <span class="string">'PK62_RS05'</span>
+0311       desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
+0312    <span class="keyword">case</span> <span class="string">'RS05_RS05'</span>
+0313       desc = {<span class="string">'early: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
+0314    <span class="keyword">case</span> <span class="string">'BR94_BR94'</span>
+0315       desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BR94, sloped + constant k(z) + linearized'</span>};         
+0316    <span class="keyword">case</span> <span class="string">'BR94_RS06'</span>      
+0317       desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'</span>};
+0318    <span class="keyword">case</span> <span class="string">'BR94_RS06b1'</span>      
+0319       desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS06b1, sloped + constant k(z) + nonlinear'</span>};
+0320    <span class="keyword">case</span> <span class="string">'BR94_BS04'</span>
+0321       desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BS04, flat + constant k(z) + nonlinear'</span>};
+0322    <span class="keyword">case</span> <span class="string">'BR94_BS03'</span>
+0323       desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BS03, flat + constant k(z) + linearized'</span>};
+0324    <span class="keyword">case</span> <span class="string">'BR94_RS05'</span>
+0325       desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
+0326 <span class="keyword">end</span>
+0327 
+0328 soln = cellstr(soln);
+0329   
+0330    
+0331 
+0332 <a name="_sub2" href="#_subfunctions" class="code">function [combos,descriptions] = allcombos()</a>
+0333    <span class="comment">% in summary, all possible combos:</span>
+0334 earlysolns  = {<span class="string">'PK62'</span>,<span class="string">'PK62'</span>,<span class="string">'PK62'</span>,<span class="string">'RS05'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>};
+0335 latesolns   = {<span class="string">'BS04'</span>,<span class="string">'BS03'</span>,<span class="string">'RS05'</span>,<span class="string">'RS05'</span>,<span class="string">'BR94'</span>,<span class="string">'RS06'</span>,<span class="string">'RS06b1'</span>,<span class="string">'BS04'</span>,<span class="string">'BS03'</span>,<span class="string">'RS05'</span>};
+0336 descriptions= {<span class="string">'flat + constant k(z) + nonlinear early, flat + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
+0337                <span class="string">'flat + constant k(z) + nonlinear early, flat + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
+0338                <span class="string">'flat + constant k(z) + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late'</span>,<span class="keyword">...</span>
+0339                <span class="string">'flat + k(z)=(Z/D)^n + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late'</span>, <span class="keyword">...</span>
+0340                <span class="string">'sloped + constant k(z) + linearized early, sloped + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
+0341                <span class="string">'sloped + constant k(z) + linearized early, sloped + k(z)=(Z/D)^n + nonlinear late'</span>, <span class="keyword">...</span>
+0342                <span class="string">'sloped + constant k(z) + linearized early, sloped + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
+0343                <span class="string">'sloped + constant k(z) + linearized early, flat + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
+0344                <span class="string">'sloped + constant k(z) + linearized early, flat + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
+0345                <span class="string">'sloped + constant k(z) + linearized early, flat + k(z)=(Z/D)^n + nonlinear late'</span>};
+0346             
+0347 combos = cell(10,1); 
+0348 <span class="keyword">for</span> n = 1:numel(earlysolns)
+0349    combos{n} = [earlysolns{n} <span class="string">'_'</span> latesolns{n}];
+0350 <span class="keyword">end</span>
+0351 
+0352 <span class="comment">% note that at early time, the solutions do not depend on k(z) (b=3 for all</span>
+0353 <span class="comment">% solutions used here), so it would seem appropriate to use a constant k(z)</span>
+0354 <span class="comment">% solution for early time and non-constant at late time. Also, as flow</span>
+0355 <span class="comment">% progresses, the influence of slope diminishes, and the effective</span>
+0356 <span class="comment">% catchment may very well be the lowest-slope, effectively flat areas, so</span>
+0357 <span class="comment">% it would also seem appropriate to use sloped solution for early time and</span>
+0358 <span class="comment">% flat for late. HOWEVER, I have not verified the validity of all possible</span>
+0359 <span class="comment">% combinations and there are surely mathematical incompatibilities.</span>
+0360 
+0361 <span class="comment">% % THIS IS A BETTER WAY BUT NOT IMPLEMENTED</span>
+0362 <span class="comment">% % define:</span>
+0363 <span class="comment">% % flat         = 0, sloped       = 1</span>
+0364 <span class="comment">% % constant kz  = 0, non-constnat = 1,</span>
+0365 <span class="comment">% % linearized   = 0, nonlinear    = 1</span>
+0366 <span class="comment">% % we have:</span>
+0367 <span class="comment">% modelstruct = [   0,0,1,0,0,1;</span>
+0368 <span class="comment">%                   0,0,1,0,0,0;</span>
+0369 <span class="comment">%                   0,0,1,0,1,1;</span>
+0370 <span class="comment">%                   0,1,1,0,1,1;</span>
+0371 <span class="comment">%                   1,0,1,1,0,0;</span>
+0372 <span class="comment">%                   1,0,1,1,1,1;</span>
+0373 <span class="comment">%                   1,0,1,1,0,1;</span>
+0374 <span class="comment">%                   1,0,1,0,0,1;</span>
+0375 <span class="comment">%                   1,0,1,0,0,0;</span>
+0376 <span class="comment">%                   1,0,1,0,1,1    ];</span>
+0377 <span class="comment">% % could use this to build the 'descriptions'</span>
+0378 <span class="comment">% modopts     = {'flat','sloped';'k(z)=c','k(z)=(Z/D)^n';'linearized','nonlinear'};</span>
+0379 
+0380 <span class="comment">% can't use this becaue we don't want all combos</span>
+0381 <span class="comment">% slope          = {'flat','sloped'};</span>
+0382 <span class="comment">% conductivity   = {'k(z)=c','k(z)=(Z/D)^n'};</span>
+0383 <span class="comment">% solutiontype   = {'linearized','nonlinear'};</span>
+0384 <span class="comment">% ensemble       = ensembleList(slope,conductivity,solutiontype);</span>
+0385 
+0386 <span class="comment">% % started to build this</span>
+0387 <span class="comment">% for n = 1:size(modopts,1)*2</span>
+0388 <span class="comment">%    for m = 1:size(modelopts,2)</span>
+0389 <span class="comment">%       switch m</span>
+0390 <span class="comment">%          case 0</span>
+0391 <span class="comment">%             modopt = 'flat ';</span>
+0392 <span class="comment">%          case 1</span>
+0393 <span class="comment">%       end</span>
+0394 <span class="comment">%    end</span>
+0395 <span class="comment">% end</span>
+0396    
+0397    
+0398</pre></div>
+</body>
+</html>

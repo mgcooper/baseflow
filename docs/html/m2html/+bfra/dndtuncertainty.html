@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dndtuncertainty</title>
+  <meta name="keywords" content="dndtuncertainty">
+  <meta name="description" content="DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; dndtuncertainty.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>dndtuncertainty
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate
+
+ Syntax
+ 
+     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)
+ 
+ Description
+ 
+     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts)
+     Computes the combined uncertainty (with correlation) for: dn/dt =
+     lambda*dq/dt where dn/dt is the 'long term' (interannual) trend in
+     groundwater layer thickness (n), q is the 'long term' trend in baseflow,
+     and lambda = tau/phi*1/(N+1) is the linearized sensitivity coefficient
+     with reference drainage timescale tau [days], drainable porosity [-], and
+     exponent N [-], where N=3-2b for all known flat-aquifer and all known
+     linearized sloped-aquifer solutions to the one-dimensional groundwater
+     flow equation for a Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
+
+ See also <a href="alttrend.html" class="code" title="function [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt)">alttrend</a>, <a href="aquiferthickness.html" class="code" title="function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)">aquiferthickness</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)</a>
+0002 <span class="comment">%DNDTUNCERTAINTY compute combined uncertainty of the dn/dt trend estimate</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts)</span>
+0011 <span class="comment">%     Computes the combined uncertainty (with correlation) for: dn/dt =</span>
+0012 <span class="comment">%     lambda*dq/dt where dn/dt is the 'long term' (interannual) trend in</span>
+0013 <span class="comment">%     groundwater layer thickness (n), q is the 'long term' trend in baseflow,</span>
+0014 <span class="comment">%     and lambda = tau/phi*1/(N+1) is the linearized sensitivity coefficient</span>
+0015 <span class="comment">%     with reference drainage timescale tau [days], drainable porosity [-], and</span>
+0016 <span class="comment">%     exponent N [-], where N=3-2b for all known flat-aquifer and all known</span>
+0017 <span class="comment">%     linearized sloped-aquifer solutions to the one-dimensional groundwater</span>
+0018 <span class="comment">%     flow equation for a Boussinesq aquifer, and parameter b from -dQ/dt = aQb.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% See also alttrend, aquiferthickness</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0023 
+0024 <span class="comment">% if called with no input, open this file</span>
+0025 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0026 
+0027 <span class="comment">% parse inputs</span>
+0028 alpha = 0.05;
+0029 testflag = false;
+0030 <span class="keyword">if</span> nargin == 7
+0031    alpha = varargin{1};
+0032 <span class="keyword">elseif</span> nargin == 8
+0033    alpha = varargin{1};
+0034    testflag = varargin{2};
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">% convert time in days to years</span>
+0038 <span class="keyword">if</span> ~isdatetime(T); T = datetime(T,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
+0039 [~,T] = padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), <span class="keyword">...</span>
+0040    datenum(year(T(end)),12,31),1);
+0041 T = transpose(year(mean(reshape(T,365,numel(T)/365))));
+0042 
+0043 <span class="keyword">if</span> numel(T) ~= numel(Qb)
+0044    error(<span class="string">'size T must match size Qb'</span>)
+0045 <span class="keyword">end</span>
+0046 
+0047 <span class="comment">% define the sensitivity coefficient and dn/dt trend functions</span>
+0048 Flam        = @(tau,phi,b) tau./(phi.*(4-2.*b)); 
+0049 Fdndt       = @(tau,phi,b,dqdt) tau./(phi.*(4-2.*b)).*dqdt;
+0050 
+0051 <span class="comment">% regress baseflow in units cm/day/year to get uncertainty on dq/dt</span>
+0052 <span class="comment">% using fitlm on the baseflow timeseries:</span>
+0053 <span class="comment">% Qb          = GlobalFit.Qb./365.25;            % cm/yr -&gt; cm/day</span>
+0054 Qb          = Qb./365.25;            <span class="comment">% cm/yr -&gt; cm/day</span>
+0055 mdl         = fitlm(T,Qb); <span class="comment">% plot(mdl)</span>
+0056 dbfdt       = mdl.Coefficients.Estimate(2);   <span class="comment">% cm/day/year</span>
+0057 std_dbfdt   = mdl.Coefficients.SE(2);         <span class="comment">% standard error</span>
+0058 CI_dbfdt    = mdl.coefCI;                     <span class="comment">% 95% CI's</span>
+0059 CI_dbfdt    = CI_dbfdt(2,:);
+0060 sig_dbfdt   = CI_dbfdt(2)-dbfdt;             <span class="comment">% they're symetric so just take one</span>
+0061 
+0062 <span class="comment">% parameters</span>
+0063 A           = opts.drainagearea;     <span class="comment">% basin area [m2]</span>
+0064 D           = opts.aquiferdepth;     <span class="comment">% reference active layer thickness [m]</span>
+0065 L           = opts.streamlength;     <span class="comment">% effective stream network length [m]</span>
+0066 lateqtls    = opts.lateqtls;
+0067 earlyqtls   = opts.earlyqtls;
+0068 bhat        = GlobalFit.b;
+0069 PhiFit      = bfra.phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,false);
+0070 <span class="comment">% the sample populations of tau, phi, and Nstar</span>
+0071 
+0072 [~,~,~,~,G] = bfra.eventtau(K,Fits,Fits,<span class="string">'usefits'</span>,true,<span class="string">'aggfunc'</span>,<span class="string">'max'</span>);
+0073 tau         = G.tau; <span class="comment">% [K.tauH]';</span>
+0074 b           = [K.b]';
+0075 Np1         = 1./(4-2.*b);
+0076 phi1        = PhiFit.phidist(:,1);
+0077 phi2        = PhiFit.phidist(:,2);
+0078 phi         = (phi1+phi2)./2;
+0079 
+0080 <span class="comment">% correlation between b and phi, using the two phi dist's b=1 and b=3/2:</span>
+0081 rho_phi12   = nancorr(phi1,phi2);
+0082 rho_phib1   = nancorr(Np1,phi1);
+0083 rho_phib2   = nancorr(Np1,phi2);
+0084 cov_phib1   = cov(Np1,phi1,<span class="string">'omitrows'</span>);
+0085 cov_phib2   = cov(Np1,phi2,<span class="string">'omitrows'</span>);
+0086 
+0087 <span class="comment">% define the uncertainties (standard errors)</span>
+0088 <span class="comment">% if we averaged phi1 and phi2, then the combined uncertainty would be:</span>
+0089 sig_phi1    = PhiFit.pm(1);
+0090 sig_phi2    = PhiFit.pm(2);
+0091 sig_phi12   = rho_phi12*sig_phi1*sig_phi2;
+0092 sig_phi     = sqrt((0.5*sig_phi1)^2+(0.5*sig_phi2)^2+2*0.5*0.5*sig_phi12);
+0093 sig_tau     = mean([GlobalFit.tau_H-GlobalFit.tau,GlobalFit.tau-GlobalFit.tau_L]);
+0094 sig_b       = mean([GlobalFit.b_H-GlobalFit.b,GlobalFit.b-GlobalFit.b_L]);
+0095 sig_Np1     = 2*sig_b;           <span class="comment">% uncertainty on 1/(4-2*b) OR 1/(1-2*b) is 2*sig(b)</span>
+0096 <span class="comment">% the 0.5 on sig_phi1/2 is from the averaging procedure which divides by 2</span>
+0097 
+0098 <span class="keyword">if</span> alpha == 0.32
+0099    sig_phi     = sig_phi/2;
+0100    sig_tau     = sig_tau/2;
+0101    sig_b       = sig_b/2;
+0102    sig_Np1     = sig_Np1/2;         <span class="comment">% uncertainty on 1/(N+1) = 2*sig(b)</span>
+0103 <span class="keyword">end</span>
+0104 
+0105 
+0106 <span class="comment">% mean values of parameters</span>
+0107 tauhat      = GlobalFit.tau;                       <span class="comment">% days</span>
+0108 phihat      = PhiFit.mu(4);                        <span class="comment">% -</span>
+0109 bhat        = GlobalFit.b;                         <span class="comment">% -</span>
+0110 Nhat        = 1/(4-2*bhat);                        <span class="comment">% -</span>
+0111 
+0112 <span class="comment">% compute the sensitivity coefficient and dn/dt</span>
+0113 lambda      = Flam(tauhat,phihat,bhat);
+0114 dndt        = Fdndt(tauhat,phihat,bhat,dbfdt);      <span class="comment">% cm/yr</span>
+0115 
+0116 <span class="comment">% compute the jacobian</span>
+0117 dqdtv       = dbfdt.*ones(size(tau));
+0118 J           = [dndt./tauhat, -dndt./phihat, dndt./Nhat, dndt./dbfdt];
+0119 
+0120 <span class="comment">% constrtuct the covariance matrix and compute the combined uncertainty</span>
+0121 u           = [sig_tau, sig_phi, sig_Np1, sig_dbfdt];
+0122 V           = corr([tau,phi,Np1,dqdtv]).*u.*u';
+0123 sig_dndt    = sqrt(J*V*J');
+0124 <span class="comment">% w/o correlated errors: sqrt(sum((J.*u).^2))</span>
+0125 
+0126 <span class="comment">% compute the uncertainty on lambda (repeat above steps)</span>
+0127 J           = [lambda./tauhat, -lambda./phihat, lambda./Nhat];
+0128 u           = [sig_tau, sig_phi, sig_Np1];
+0129 V           = corr([tau,phi,Np1]).*u.*u';
+0130 sig_lamda   = sqrt(J*V*J');
+0131 <span class="comment">% w/o correlated errors: sqrt(sum((J.*u).^2))</span>
+0132 
+0133 <span class="comment">%-------------------------------------------------------------------------------</span>
+0134 <span class="comment">% Methods comparison</span>
+0135 <span class="comment">%-------------------------------------------------------------------------------</span>
+0136 
+0137 <span class="keyword">if</span> testflag == true
+0138    warning(<span class="string">'method comparison not currently supported'</span>)
+0139 <span class="keyword">end</span>
+0140 
+0141 <span class="comment">% % Define symbols, setup matrices, etc.</span>
+0142 <span class="comment">%</span>
+0143 <span class="comment">% % FsigX is the standard uncertainty formula for four variables: tau, phi, b,</span>
+0144 <span class="comment">% % dq/dt.</span>
+0145 <span class="comment">%</span>
+0146 <span class="comment">% % FsigX2 is for two variables: lambda and dq/dt, so it uses Flambda(X) within</span>
+0147 <span class="comment">% % the function to compute the value of lambda, but accepts the scalar values for</span>
+0148 <span class="comment">% % dq/dt (Fx2) and sig_dq/dt (sig_x2). It would be clearer to replace this with</span>
+0149 <span class="comment">% % the scalar valued version, because this is just used to combine the lambda</span>
+0150 <span class="comment">% % uncertainty from worstcase with the linear regression dq/dt uncertainty.</span>
+0151 <span class="comment">%</span>
+0152 <span class="comment">% % Methods that use Fdndt require the same format that is used in the main</span>
+0153 <span class="comment">% % function, so it is not redefined here</span>
+0154 <span class="comment">%</span>
+0155 <span class="comment">% sympref('FloatingPointOutput',true);</span>
+0156 <span class="comment">% syms tausym phisym bsym Qsym</span>
+0157 <span class="comment">%</span>
+0158 <span class="comment">% % define vector valued functions</span>
+0159 <span class="comment">% FsigX    = @(X,Fx,sigX) Fx*sqrt((sigX(1)/X(1))^2+(sigX(2)/X(2))^2+ ...</span>
+0160 <span class="comment">%                         (sigX(3)/X(3))^2+(sigX(4)/X(4))^2);</span>
+0161 <span class="comment">% FsigX2   = @(X,Fx,Fx1,sig_x1,Fx2,sig_x2) Fx(X)*sqrt((sig_x1/Fx1(X))^2+ ...</span>
+0162 <span class="comment">%                         (sig_x2/Fx2)^2);</span>
+0163 <span class="comment">% FlamX    = @(X) X(1)./(X(2).*(4-2.*X(3)));            % lambda</span>
+0164 <span class="comment">% FdndtX   = @(X) X(1)./(X(2).*(4-2.*X(3))).*X(4);      % dn/dt</span>
+0165 <span class="comment">% Fsym     = tausym./(phisym.*(4-2.*bsym)).*Qsym;       % dn/dt</span>
+0166 <span class="comment">% % Flam     = tausym./(phisym.*(4-2.*bsym));             % lambda for f5</span>
+0167 <span class="comment">% Xsym     = [tausym phisym bsym Qsym];</span>
+0168 <span class="comment">% X        = [tauhat;phihat;bhat;dbfdt]; %[tau,phi,b];</span>
+0169 <span class="comment">% sigX     = [sig_tau;sig_phi;sig_b;sig_dbfdt];</span>
+0170 <span class="comment">%</span>
+0171 <span class="comment">% % setup jacobian and covariance matrices (need the sample populations)</span>
+0172 <span class="comment">% dqdtv    = dbfdt.*ones(size(tau)); % dq/dt vector</span>
+0173 <span class="comment">% J        = [dndt./tauhat, dndt./phihat, dndt./Nhat, dndt./dbfdt]; % jacobian</span>
+0174 <span class="comment">% u        = [sig_tau, sig_phi, sig_Np1, sig_dbfdt]; % note: sig_Np1 not sig_b</span>
+0175 <span class="comment">% V        = corr([tau,phi,Np1,dqdtv]); % covariance matrix</span>
+0176 <span class="comment">% corrX    = corr([tau,phi,Np1,dqdtv]);</span>
+0177 <span class="comment">%</span>
+0178 <span class="comment">% % -----------------------------------------------------------------------------</span>
+0179 <span class="comment">%</span>
+0180 <span class="comment">% casenames = {'inline w/o correlation','PropError w/o correlation', ...</span>
+0181 <span class="comment">%    'propUncertSym w/o correlation','worstcase w/o correlation',...</span>
+0182 <span class="comment">%    'inline w/correlation','propUncertSym w/ correlation', ...</span>
+0183 <span class="comment">%    'propUncertCD w/ correlation','worstcase w/correlation',...</span>
+0184 <span class="comment">%    'error propagation'};</span>
+0185 <span class="comment">%</span>
+0186 <span class="comment">% % WITHOUT CORRELATION</span>
+0187 <span class="comment">% % -------------------</span>
+0188 <span class="comment">%</span>
+0189 <span class="comment">% % METHOD 1: simple, uncorrelated errors (ends up close to PropError below)</span>
+0190 <span class="comment">% val(1)   = dndt;</span>
+0191 <span class="comment">% sig(1)   = FsigX(X,dndt,sigX); % also: sig = sqrt(sum((J.*u).^2))</span>
+0192 <span class="comment">%</span>
+0193 <span class="comment">% % METHOD 2: PropError without correlated errors</span>
+0194 <span class="comment">% out      = PropError(Fsym,Xsym,X',sigX');</span>
+0195 <span class="comment">% val(2)   = out{1,1};</span>
+0196 <span class="comment">% sig(2)   = out{1,3};</span>
+0197 <span class="comment">% % out = PropError(Flam,Xsym(1:3),X(1:3)',sigX(1:3)'); % lambda</span>
+0198 <span class="comment">%</span>
+0199 <span class="comment">% % METHOD 3: propUncert without correlated errors</span>
+0200 <span class="comment">% [sig(3),val(3)] = propUncertSym(Fsym,Xsym,X',sigX');</span>
+0201 <span class="comment">%</span>
+0202 <span class="comment">% % METHOD 4: 'worstcase' without correlated errors</span>
+0203 <span class="comment">% [~,~,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H</span>
+0204 <span class="comment">% sig_lam     = mean([H-M,M-L]);                     % lambda absolute uncertainty</span>
+0205 <span class="comment">% val(4)      = M*dbfdt;</span>
+0206 <span class="comment">% sig(4)      = FsigX2(X,FdndtX,FlamX,sig_lam,dbfdt,sig_dbfdt);</span>
+0207 <span class="comment">%</span>
+0208 <span class="comment">% % for reference, compare what worstcase and sig_lam above do to expicit versions:</span>
+0209 <span class="comment">% % [sig(8)  dndt*sqrt((sig_lam/Flambda(X))^2 + (sig_dbfdt/dbfdt)^2)]</span>
+0210 <span class="comment">% % [sig_lam lambda*sqrt((sig_lam/Flambda(X))^2)]</span>
+0211 <span class="comment">%</span>
+0212 <span class="comment">% % if the first two outputs of worstcase are returned, this shows what they mean:</span>
+0213 <span class="comment">% % [v1,v2,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H</span>
+0214 <span class="comment">% % [Flambda(v1) L]</span>
+0215 <span class="comment">% % [Flambda(v2) H]</span>
+0216 <span class="comment">%</span>
+0217 <span class="comment">% % WITH CORRELATION</span>
+0218 <span class="comment">% % ----------------</span>
+0219 <span class="comment">%</span>
+0220 <span class="comment">% % METHOD 5: correlated errors (need the jacobian)</span>
+0221 <span class="comment">% val(5)   = dndt;</span>
+0222 <span class="comment">% sig(5)   = sqrt(J*(V.*u.*u')*J');</span>
+0223 <span class="comment">%</span>
+0224 <span class="comment">% % METHOD 6: propUncert with correlated errors</span>
+0225 <span class="comment">% [sig(6),val(6)] = propUncertSym(Fsym,Xsym,X',sigX',corrX);</span>
+0226 <span class="comment">%</span>
+0227 <span class="comment">% % METHOD 7: propUncertCD with correlated errors (central difference approx)</span>
+0228 <span class="comment">% [sig(7),val(7)] = propUncertCD(FdndtX,X,sigX,corrX);</span>
+0229 <span class="comment">%</span>
+0230 <span class="comment">% % METHOD 8: 'worstcase' with correlated errors</span>
+0231 <span class="comment">% [~,~,L,M,H] = worstcase(FdndtX,X,sigX);</span>
+0232 <span class="comment">% val(8)      = M;</span>
+0233 <span class="comment">% sig(8)      = mean([H-M,M-L]);      % absolute uncertainty</span>
+0234 <span class="comment">%</span>
+0235 <span class="comment">%</span>
+0236 <span class="comment">% % METHOD 9: error_propagation (documentation isn't clear and code style is</span>
+0237 <span class="comment">% % unfamiliar so i am not certain if correlation is included)</span>
+0238 <span class="comment">% [val(9),sig(9)] = error_propagation(Fdndt,tauhat,phihat,bhat,dbfdt,sig_tau,...</span>
+0239 <span class="comment">%    sig_phi,sig_b,sig_dbfdt);</span>
+0240 <span class="comment">%</span>
+0241 <span class="comment">%</span>
+0242 <span class="comment">% % SEE THE RESULTS</span>
+0243 <span class="comment">% %----------------------</span>
+0244 <span class="comment">%</span>
+0245 <span class="comment">% % print the value returned by the main function:</span>
+0246 <span class="comment">% fprintf(['\nbfra:\nF(x) = %.2f ' char(177) ' %.3f (' num2str(1-alpha) ...</span>
+0247 <span class="comment">%    '%% CI) \n'],dndt,sig_dndt);</span>
+0248 <span class="comment">%</span>
+0249 <span class="comment">% for n = 1:numel(casenames)</span>
+0250 <span class="comment">%</span>
+0251 <span class="comment">%    fprintf(['\n' casenames{n} ':\n F(x) = %.2f ' char(177) ' %.3f (' ...</span>
+0252 <span class="comment">%       num2str(1-alpha) '%% CI) \n'],val(n),sig(n));</span>
+0253 <span class="comment">% end</span>
+0254 <span class="comment">%</span>
+0255 <span class="comment">% end</span>
+0256 <span class="comment">%</span>
+0257 <span class="comment">% % % this is the correlated errors case for lambda</span>
+0258 <span class="comment">% % J           = [dndt./tauhat, dndt./phihat, dndt./Nhat ];</span>
+0259 <span class="comment">% % u           = [sig_tau, sig_phi, sig_Np1];</span>
+0260 <span class="comment">% % V           = corr([tau,phi,Np1]);</span>
+0261 <span class="comment">% % sig_lam  = sqrt(J*(V.*u.*u')*J');         % this is the stdv of lambda</span>
+0262 <span class="comment">% % sigf2       = dndt*sqrt((sig_lam/lambda)^2 + (sig_dbfdt/dbfdt)^2) % 0.62 cm/yr</span>
+0263 <span class="comment">%</span>
+0264 <span class="comment">% % this was after propUncertSym, in case the varnanmes matter. at this point i</span>
+0265 <span class="comment">% % think i noticed the correlation doesn't change the uncertainty by much so i</span>
+0266 <span class="comment">% % probably jus twanted to also show it doesn't change the uncertainty on lambda</span>
+0267 <span class="comment">% % by much</span>
+0268 <span class="comment">% % % this shows that the correlation also doesn't change sig_lambda</span>
+0269 <span class="comment">% % Fsym        = tausym./(phisym.*(4-2.*bsym));</span>
+0270 <span class="comment">% % Xsym        = [tausym phisym bsym];</span>
+0271 <span class="comment">% % X           = [tauhat phihat bhat]; %[tau,phi,b];</span>
+0272 <span class="comment">% % sigX        = [sig_tau sig_phi sig_b];</span>
+0273 <span class="comment">% % corrX       = corr([tau,phi,Np1]);</span>
+0274 <span class="comment">% % % sig_lambda  = PropError(Fsym,Xsym,X,sigX)</span>
+0275 <span class="comment">% % % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX)</span>
+0276 <span class="comment">% % % sig_lambda  = propUncertSym(Fsym,Xsym,X,sigX,corrX)</span></pre></div>
+</body>
+</html>

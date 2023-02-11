@@ -1,0 +1,414 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plotalttrend</title>
+  <meta name="keywords" content="plotalttrend">
+  <meta name="description" content="PLOTALTTREND plot the active layer thickness trend">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; plotalttrend.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>plotalttrend
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PLOTALTTREND plot the active layer thickness trend</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function h = plotalttrend(t,Db,sigDb,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PLOTALTTREND plot the active layer thickness trend
+ 
+ Syntax
+ 
+     h = plotalttrend(t,Db,sigDb,varargin)
+ 
+ Description
+ 
+     h = plotalttrend(t,Db,sigDb) plots annual values of active layer thickness
+     from baseflow recession analysis Db with errorbars representing estimation
+     uncertainty sigDb and the linear trendline. 
+ 
+     h = plotalttrend(t,Db,sigDb,Dc,sigDc) also plots annual values of measured
+     active layer thickness Dc and measurement uncertainty sigDc.
+ 
+ See also <a href="prepalttrend.html" class="code" title="function varargout = prepalttrend(Calm,T,Q,Qb,Sb,Db,sigDb,varargin)">prepalttrend</a></pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method)</a></li>
+<li><a href="#_sub2" class="code">function h = plotflowperiod(t,Db,sigDb,ax,method)</a></li>
+<li><a href="#_sub3" class="code">function h = plotcalmperiod(t,Db,sigDb,Dc,sigDc,ax,method)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function h = plotalttrend(t,Db,sigDb,varargin)</a>
+0002 <span class="comment">%PLOTALTTREND plot the active layer thickness trend</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     h = plotalttrend(t,Db,sigDb,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     h = plotalttrend(t,Db,sigDb) plots annual values of active layer thickness</span>
+0011 <span class="comment">%     from baseflow recession analysis Db with errorbars representing estimation</span>
+0012 <span class="comment">%     uncertainty sigDb and the linear trendline.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%     h = plotalttrend(t,Db,sigDb,Dc,sigDc) also plots annual values of measured</span>
+0015 <span class="comment">%     active layer thickness Dc and measurement uncertainty sigDc.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% See also prepalttrend</span>
+0018 
+0019 <span class="comment">% if called with no input, open this file</span>
+0020 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0021 
+0022 <span class="comment">%-------------------------------------------------------------------------------</span>
+0023 p              = magicParser;
+0024 p.FunctionName = <span class="string">'bfra.plotalttrend'</span>;
+0025 p.addRequired( <span class="string">'t'</span>                                                );
+0026 p.addRequired( <span class="string">'Db'</span>                                               );
+0027 p.addRequired( <span class="string">'sigDb'</span>                                            );
+0028 p.addOptional( <span class="string">'Dc'</span>,       nan(size(Db)),    @(x) isnumeric(x)    );
+0029 p.addOptional( <span class="string">'sigDc'</span>,    nan(size(Db)),    @(x) isnumeric(x)    );
+0030 p.addOptional( <span class="string">'Dg'</span>,       nan(size(Db)),    @(x) isnumeric(x)    );
+0031 p.addParameter(<span class="string">'ax'</span>,       gca,              @(x) isaxis(x)       );
+0032 p.addParameter(<span class="string">'method'</span>,   <span class="string">'ols'</span>,            @(x)ischar(x)        );
+0033 
+0034 p.parseMagically(<span class="string">'caller'</span>);
+0035 <span class="comment">%-------------------------------------------------------------------------------</span>
+0036 
+0037 <span class="keyword">if</span> all(isnan(Dc)) &amp;&amp; all(isnan(Dg))
+0038    h = <a href="#_sub2" class="code" title="subfunction h = plotflowperiod(t,Db,sigDb,ax,method)">plotflowperiod</a>(t,Db,sigDb,ax,method);
+0039 <span class="keyword">elseif</span> all(isnan(Dg))
+0040    h = <a href="#_sub3" class="code" title="subfunction h = plotcalmperiod(t,Db,sigDb,Dc,sigDc,ax,method)">plotcalmperiod</a>(t,Db,sigDb,Dc,sigDc,ax,method);
+0041 <span class="keyword">else</span>
+0042    h = <a href="#_sub1" class="code" title="subfunction h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method)">plotgraceperiod</a>(t,Db,sigDb,Dc,sigDc,Dg,ax,method);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="comment">% if nargin &gt; 5</span>
+0046 <span class="comment">%    Dc = varargin{1};</span>
+0047 <span class="comment">%    sigDc = varargin{2};</span>
+0048 <span class="comment">%    Dg = varargin{3};</span>
+0049 <span class="comment">%    if nargin &gt;6</span>
+0050 <span class="comment">%       ax = varargin{2};</span>
+0051 <span class="comment">%    else</span>
+0052 <span class="comment">%       ax = nan;</span>
+0053 <span class="comment">%    end</span>
+0054 <span class="comment">%    h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax);</span>
+0055 <span class="comment">% elseif nargin &gt; 3</span>
+0056 <span class="comment">%    Dc = varargin{1};</span>
+0057 <span class="comment">%    sigDc = varargin{2};</span>
+0058 <span class="comment">%    h = plotcalmperiod(t,Db,sigDb,Dc,sigDc);</span>
+0059 <span class="comment">% else</span>
+0060 <span class="comment">%    h = plotflowperiod(t,Db,sigDb);</span>
+0061 <span class="comment">% end</span>
+0062 
+0063 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0064 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0065 
+0066 <a name="_sub1" href="#_subfunctions" class="code">function h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method)</a>
+0067 
+0068 <span class="keyword">if</span> all(isempty(Dg))
+0069    h = nan;
+0070    <span class="keyword">return</span>
+0071 <span class="keyword">end</span>
+0072 
+0073 ctxt  = <span class="string">'CALM (measured)'</span>;
+0074 btxt  = <span class="string">'BFRA (theory: Eq. 21)'</span>;
+0075 gtxt  = <span class="string">'GRACE $\\eta=S_G/\\phi$'</span>;
+0076 
+0077 dc = defaultcolors;
+0078 
+0079 <span class="comment">% p1 plot needs 'reference',Dc where Dc is 1990-2020</span>
+0080 <span class="comment">% p1 plot needs 'reference',Db where Db is 1990-2020</span>
+0081 
+0082 <span class="keyword">if</span> ~isa(ax,<span class="string">'matlab.graphics.axis.Axes'</span>)
+0083    <span class="comment">%f  = figure('Position',[289 149 668 476]); ax = gca;</span>
+0084    f  = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[5 5 23 19*3/4]); ax = gca;
+0085 <span class="keyword">else</span>
+0086    f  = gcf;
+0087 <span class="keyword">end</span>
+0088    
+0089 p1 = trendplot(t,Dc,<span class="string">'units'</span>,<span class="string">'cm a$^{-1}$'</span>,<span class="string">'leg'</span>,ctxt,<span class="string">'use'</span>,ax,   <span class="keyword">...</span>
+0090    <span class="string">'errorbounds'</span>,true,<span class="string">'errorbars'</span>,true,<span class="string">'yerr'</span>,sigDc,<span class="string">'reference'</span>,Dc, <span class="keyword">...</span>
+0091    <span class="string">'method'</span>,method);
+0092 p2 = trendplot(t,Db,<span class="string">'units'</span>,<span class="string">'cm a$^{-1}$'</span>,<span class="string">'leg'</span>,btxt,<span class="string">'use'</span>,ax,   <span class="keyword">...</span>
+0093    <span class="string">'errorbounds'</span>,true,<span class="string">'errorbars'</span>,true,<span class="string">'yerr'</span>,sigDb,<span class="string">'reference'</span>,Db, <span class="keyword">...</span>
+0094    <span class="string">'method'</span>,method);
+0095 p3 = trendplot(t,Dg,<span class="string">'units'</span>,<span class="string">'cm a$^{-1}$'</span>,<span class="string">'leg'</span>,gtxt,<span class="string">'use'</span>,ax,   <span class="keyword">...</span>
+0096    <span class="string">'errorbounds'</span>,true,<span class="string">'errorbars'</span>,true,<span class="string">'method'</span>,method);
+0097 
+0098 set(ax,<span class="string">'XLim'</span>,[2001 2021],<span class="string">'YLim'</span>,[-80 80],<span class="string">'XTick'</span>,2002:3:2020);
+0099 
+0100 p3.trend.Color          = dc(5,:);
+0101 p3.bounds.FaceColor     = dc(5,:);
+0102 p3.plot.MarkerFaceColor = dc(5,:);
+0103 p3.plot.Color           = dc(5,:);
+0104 
+0105 p1.trend.LineWidth = 3;
+0106 p2.trend.LineWidth = 3;
+0107 p3.trend.LineWidth = 3;
+0108 
+0109 ylabel(<span class="string">'$ALT$ anomaly (cm)'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0110 
+0111 grid off
+0112 <span class="comment">% ff = figformat('suppliedfigure',f,'xgrid','off','ygrid','off');</span>
+0113 
+0114 str   = p1.ax.Legend.String;
+0115 str6  = strrep(str{1},<span class="string">'CALM (measured) ('</span>,<span class="string">''</span>);
+0116 str6  = [<span class="string">'2002:2020 '</span> strrep(str6,<span class="string">')'</span>,<span class="string">''</span>)];
+0117 str7  = strrep(str{2},[btxt <span class="string">' ('</span>],<span class="string">''</span>);
+0118 str7  = [<span class="string">'2002:2020 '</span> strrep(str7,<span class="string">')'</span>,<span class="string">''</span>)];
+0119 str8  = strrep(str{3},[sprintf(gtxt) <span class="string">' ('</span>],<span class="string">''</span>);
+0120 str8  = [<span class="string">'2002:2020 '</span> strrep(str8,<span class="string">')'</span>,<span class="string">''</span>)];
+0121 
+0122 lobj  = [p1.plot p2.plot p3.plot p1.trend p2.trend p3.trend];
+0123 ltxt  = {ctxt; btxt; strrep(gtxt,<span class="string">'\\'</span>,<span class="string">'\'</span>); str6; str7; str8};
+0124 legend(lobj,ltxt,<span class="string">'numcolumns'</span>,2,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>, <span class="keyword">...</span>
+0125    <span class="string">'northwest'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0126 
+0127 p1.bounds.FaceAlpha = 0.15;
+0128 p2.bounds.FaceAlpha = 0.15;
+0129 p3.bounds.FaceAlpha = 0.05;
+0130 
+0131 
+0132 uistack(p1.trend,<span class="string">'top'</span>)
+0133 uistack(p2.trend,<span class="string">'top'</span>)
+0134 uistack(p3.trend,<span class="string">'top'</span>)
+0135 
+0136 h.figure = f;
+0137 h.trendplot1 = p1;
+0138 h.trendplot2 = p2;
+0139 h.trendplot2 = p3;
+0140 
+0141 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0142 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0143 
+0144 <a name="_sub2" href="#_subfunctions" class="code">function h = plotflowperiod(t,Db,sigDb,ax,method)</a>
+0145 
+0146 <span class="keyword">if</span> all(isempty(Db))
+0147    h = nan;
+0148    <span class="keyword">return</span>
+0149 <span class="keyword">end</span>
+0150 
+0151 btxt = <span class="string">'BFRA (theory: Eq. 21)'</span>;
+0152 
+0153 <span class="comment">% this plots 1983-2020, no grace, no calm</span>
+0154 <span class="comment">% f     = figure('Position',[156    45   856   580]);</span>
+0155 f = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[5 5 23 19*3/4]);
+0156 p = trendplot(t,Db,<span class="string">'units'</span>,<span class="string">'cm/yr'</span>,<span class="string">'leg'</span>,btxt,<span class="string">'use'</span>,gca, <span class="keyword">...</span>
+0157    <span class="string">'errorbounds'</span>,true,<span class="string">'errorbars'</span>,true,<span class="string">'yerr'</span>,sigDb, <span class="keyword">...</span>
+0158          <span class="string">'method'</span>,method); 
+0159 
+0160 <span class="comment">% set transparency of the bars</span>
+0161 set([p.plot.Bar, p.plot.Line], <span class="string">'ColorType'</span>, <span class="string">'truecoloralpha'</span>,   <span class="keyword">...</span>
+0162    <span class="string">'ColorData'</span>, [p.plot.Line.ColorData(1:3); 255*0.5])
+0163 
+0164 str   = p.ax.Legend.String;
+0165 str1  = strrep(str{1},[btxt <span class="string">' ('</span>],<span class="string">''</span>);
+0166 str1  = strrep(str1,<span class="string">'cm/yr)'</span>,<span class="string">'cm a$^{-1}$'</span>);
+0167 
+0168 lobj  = [p.plot p.trend];
+0169 ltxt  = {btxt; str1};
+0170 legend(lobj,ltxt,<span class="string">'location'</span>,<span class="string">'north'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0171 
+0172 <span class="comment">% if I want to set the tick font to latext</span>
+0173 <span class="comment">% ax    = gca;</span>
+0174 <span class="comment">% ax.TickLabelInterpreter</span>
+0175 ylabel(<span class="string">'$ALT$ anomaly (cm)'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0176 
+0177 p.trend.LineWidth = 2;
+0178 
+0179 h.figure = f;
+0180 h.trendplot = p;
+0181 
+0182 <span class="comment">% xlims = xlim; ylims = ylim; box off; grid on;</span>
+0183 <span class="comment">% plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);</span>
+0184 <span class="comment">% plot([xlims(1) xlims(2)],[ylims(2) ylims(2)],'k','LineWidth',1);</span>
+0185 
+0186 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0187 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0188 
+0189 <a name="_sub3" href="#_subfunctions" class="code">function h = plotcalmperiod(t,Db,sigDb,Dc,sigDc,ax,method)</a>
+0190 
+0191 <span class="keyword">if</span> all(isempty(Dc))
+0192    h = nan;
+0193    <span class="keyword">return</span>
+0194 <span class="keyword">end</span>
+0195 
+0196 <span class="comment">% load('defaultcolors','dc');</span>
+0197 <span class="comment">% ltext = [num2ltext('1990-2020 trend','',abC.Dc(2),'cm a$^{-1}$',2), ...</span>
+0198 <span class="comment">%          num2ltext('2002-2020 trend','',abG.Dc(2),'cm a$^{-1}$',2)];</span>
+0199 
+0200 ctxt  = <span class="string">'CALM (measured)'</span>;
+0201 btxt  = <span class="string">'BFRA (theory: Eq. 21)'</span>;
+0202 <span class="comment">% btxt  = 'BFRA $\\eta=\\tau/[\\phi(N+1)]\\bar{Q}$';</span>
+0203 
+0204 
+0205 <span class="comment">% this plots 1990-2020, no grace</span>
+0206 <span class="comment">% f     = figure('Position',[156    45   856   580]);</span>
+0207 f = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[5 5 23 19*3/4]);
+0208 p1 = trendplot(t,Dc,<span class="string">'units'</span>,<span class="string">'cm/yr'</span>,<span class="string">'leg'</span>,ctxt,<span class="string">'use'</span>,gca, <span class="keyword">...</span>
+0209    <span class="string">'errorbounds'</span>,true,<span class="string">'errorbars'</span>,true,<span class="string">'yerr'</span>,sigDc,<span class="string">'method'</span>,method);
+0210 p2 = trendplot(t,Db,<span class="string">'units'</span>,<span class="string">'cm/yr'</span>,<span class="string">'leg'</span>,btxt,<span class="string">'use'</span>,gca, <span class="keyword">...</span>
+0211    <span class="string">'errorbounds'</span>,true,<span class="string">'errorbars'</span>,true,<span class="string">'yerr'</span>,sigDb,<span class="string">'method'</span>,method); 
+0212 
+0213 <span class="comment">% set transparency of the bars</span>
+0214 set([p1.plot.Bar, p1.plot.Line], <span class="string">'ColorType'</span>, <span class="string">'truecoloralpha'</span>,   <span class="keyword">...</span>
+0215             <span class="string">'ColorData'</span>, [p1.plot.Line.ColorData(1:3); 255*0.5])
+0216 set([p2.plot.Bar, p2.plot.Line], <span class="string">'ColorType'</span>, <span class="string">'truecoloralpha'</span>,   <span class="keyword">...</span>
+0217             <span class="string">'ColorData'</span>, [p2.plot.Line.ColorData(1:3); 255*0.5])
+0218 
+0219 <span class="comment">% % set transparance of marker faces</span>
+0220 <span class="comment">% set(p1.plot.MarkerHandle, 'FaceColorType', 'truecoloralpha',   ...</span>
+0221 <span class="comment">%             'FaceColorData', [p1.plot.Line.ColorData(1:3); 255*0.75])</span>
+0222 <span class="comment">% set(p2.plot.MarkerHandle, 'FaceColorType', 'truecoloralpha',   ...</span>
+0223 <span class="comment">%             'FaceColorData', [p2.plot.Line.ColorData(1:3); 255*0.75])</span>
+0224 
+0225 str   = p1.ax.Legend.String;
+0226 str1  = strrep(str{1},<span class="string">'CALM (measured) ('</span>,<span class="string">''</span>);
+0227 str1  = strrep(str1,<span class="string">'cm/yr)'</span>,<span class="string">'cm a$^{-1}$'</span>);
+0228 str2  = strrep(str{2},[btxt <span class="string">' ('</span>],<span class="string">''</span>);
+0229 str2  = strrep(str2,<span class="string">'cm/yr)'</span>,<span class="string">'cm a$^{-1}$'</span>);
+0230 
+0231 lobj  = [p1.plot p2.plot p1.trend p2.trend];
+0232 ltxt  = {ctxt; btxt; str1; str2};
+0233 legend(lobj,ltxt,<span class="string">'location'</span>,<span class="string">'north'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0234 
+0235 <span class="comment">% if I want to set the tick font to latext</span>
+0236 <span class="comment">% ax    = gca;</span>
+0237 <span class="comment">% ax.TickLabelInterpreter</span>
+0238 ylabel(<span class="string">'$ALT$ anomaly (cm)'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0239 
+0240 p1.trend.LineWidth = 2;
+0241 p2.trend.LineWidth = 2;
+0242 
+0243 axis tight
+0244 set(gca,<span class="string">'XLim'</span>,[1990 2020],<span class="string">'XTick'</span>,1990:5:2020);
+0245 
+0246 h.figure = f;
+0247 h.trendplot1 = p1;
+0248 h.trendplot2 = p2;
+0249 
+0250 <span class="comment">% xlims = xlim; ylims = ylim; box off; grid on;</span>
+0251 <span class="comment">% plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);</span>
+0252 <span class="comment">% plot([xlims(1) xlims(2)],[ylims(2) ylims(2)],'k','LineWidth',1);</span>
+0253 
+0254 <span class="comment">% ff = figformat('legendlocation','north');</span>
+0255 <span class="comment">% ff.backgroundAxis.XLim = [1989 2021];</span>
+0256 <span class="comment">% ff.backgroundAxis.YLim = [-29 29];</span>
+0257 <span class="comment">% ylabel(ff.mainAxis,'$ALT$ anomaly (cm)');</span>
+0258 
+0259 <span class="comment">% plot(x1,D1-mean(D1),'k','LineWidth',0.75,'HandleVisibility','off')</span>
+0260 <span class="comment">% plot(x1,D2-mean(D2),'k','LineWidth',0.75,'HandleVisibility','off')</span>
+0261 <span class="comment">% plot(x1,D1-mean(D1),'Color',dc(1,:),'LineWidth',0.75,'HandleVisibility','off')</span>
+0262 <span class="comment">% plot(x1,D2-mean(D2),'Color',dc(2,:),'LineWidth',0.75,'HandleVisibility','off')</span>
+0263 
+0264 
+0265 
+0266 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0267 
+0268 <span class="comment">% % this is the version that puts the grace period on the same figure. it almost</span>
+0269 <span class="comment">% % surely will not work out of the box, and I don't think we want it anyway</span>
+0270 <span class="comment">%</span>
+0271 <span class="comment">% function plotbothperiods(t,D1,D2,sigD1,sigD2,D4,sigDg)</span>
+0272 <span class="comment">%</span>
+0273 <span class="comment">% ctxt  = 'CALM (measured)';</span>
+0274 <span class="comment">% btxt  = 'BFRA (theory: Eq. 23)';</span>
+0275 <span class="comment">% gtxt  = 'GRACE $\\eta=S_G/\\phi$';</span>
+0276 <span class="comment">%</span>
+0277 <span class="comment">%</span>
+0278 <span class="comment">% f     = figure('Position',[156    45   856   580]);</span>
+0279 <span class="comment">% p1    = trendplot(t1,D1,'units','cm/yr','leg',ctxt,'use',gca,   ...</span>
+0280 <span class="comment">%          'errorbounds',false,'errorbars',true,'yerr',sigD1);</span>
+0281 <span class="comment">% p2    = trendplot(t1,D2,'units','cm/yr','leg',btxt,'use',gca,   ...</span>
+0282 <span class="comment">%          'errorbounds',false,'errorbars',true,'yerr',sigD2);</span>
+0283 <span class="comment">% p3    = trendplot(t2,D3,'units','cm/yr','leg',ctxt,'use',gca,   ...</span>
+0284 <span class="comment">%          'errorbounds',true,'errorbars',true,'yerr',sigD3,'reference',D1);</span>
+0285 <span class="comment">% p4    = trendplot(t2,D4,'units','cm/yr','leg',btxt,'use',gca,   ...</span>
+0286 <span class="comment">%          'errorbounds',true,'errorbars',true,'yerr',sigD4,'reference',D2);</span>
+0287 <span class="comment">% p5    = trendplot(t2,D5,'units','cm a$^{-1}$','leg',gtxt,'use',gca,   ...</span>
+0288 <span class="comment">%          'errorbounds',true,'errorbars',true);</span>
+0289 <span class="comment">%</span>
+0290 <span class="comment">% p3.bounds.FaceColor     = p1.plot.Color;</span>
+0291 <span class="comment">% p3.plot.Color           = p1.plot.Color;</span>
+0292 <span class="comment">% p3.plot.MarkerFaceColor = p1.plot.MarkerFaceColor;</span>
+0293 <span class="comment">% p3.trend.Color          = p1.trend.Color;</span>
+0294 <span class="comment">% p3.trend.LineStyle      = '--';</span>
+0295 <span class="comment">% p3.trend.LineWidth      = 2;</span>
+0296 <span class="comment">%</span>
+0297 <span class="comment">% p4.bounds.FaceColor     = p2.plot.Color;</span>
+0298 <span class="comment">% p4.plot.Color           = p2.plot.Color;</span>
+0299 <span class="comment">% p4.plot.MarkerFaceColor = p2.plot.MarkerFaceColor;</span>
+0300 <span class="comment">% p4.trend.Color          = p2.trend.Color;</span>
+0301 <span class="comment">% p4.trend.LineStyle      = '--';</span>
+0302 <span class="comment">% p4.trend.LineWidth      = 2;</span>
+0303 <span class="comment">%</span>
+0304 <span class="comment">% str   = p1.ax.Legend.String;</span>
+0305 <span class="comment">% str1  = strrep(str{1},'CALM (measured) (','');</span>
+0306 <span class="comment">% str1  = ['1990:2020 ' strrep(str1,'cm/yr)','cm/yr')];</span>
+0307 <span class="comment">% str2  = strrep(str{2},[btxt ' ('],'');</span>
+0308 <span class="comment">% str2  = ['1990:2020 ' strrep(str2,'cm/yr)','cm/yr')];</span>
+0309 <span class="comment">% str3  = strrep(str{3},'CALM (measured) (','');</span>
+0310 <span class="comment">% str3  = ['2002:2020 ' strrep(str3,'cm/yr)','cm/yr')];</span>
+0311 <span class="comment">% str4  = strrep(str{4},[btxt ' ('],'');</span>
+0312 <span class="comment">% str4  = ['2002:2020 ' strrep(str4,'cm/yr)','cm/yr')];</span>
+0313 <span class="comment">% str5  = strrep(str{5},[sprintf(gtxt) ' ('],'');</span>
+0314 <span class="comment">% str5  = ['2002:2020 ' strrep(str5,'cm/yr)','cm/yr')];</span>
+0315 <span class="comment">%</span>
+0316 <span class="comment">% lobj  = [p1.plot p2.plot p5.plot p5.trend p1.trend p2.trend p3.trend p4.trend];</span>
+0317 <span class="comment">% ltxt  = {ctxt; btxt; strrep(gtxt,'\\','\'); str5; str1; str2; str3; str4};</span>
+0318 <span class="comment">% legend(lobj,ltxt,'numcolumns',2,'Interpreter','latex','location','northwest');</span>
+0319 <span class="comment">%</span>
+0320 <span class="comment">% p3.bounds.FaceAlpha = 0.2;</span>
+0321 <span class="comment">% p3.bounds.FaceAlpha = 0.2;</span>
+0322 <span class="comment">%</span>
+0323 <span class="comment">% set([p1.plot.Bar, p1.plot.Line], 'ColorType', 'truecoloralpha',   ...</span>
+0324 <span class="comment">%          'ColorData', [p1.plot.Line.ColorData(1:3); 255*0.5])</span>
+0325 <span class="comment">% set([p2.plot.Bar, p2.plot.Line], 'ColorType', 'truecoloralpha',   ...</span>
+0326 <span class="comment">%          'ColorData', [p2.plot.Line.ColorData(1:3); 255*0.5])</span>
+0327 <span class="comment">%</span>
+0328 <span class="comment">% p1.trend.LineWidth = 1;</span>
+0329 <span class="comment">% p2.trend.LineWidth = 1;</span>
+0330 <span class="comment">% p3.trend.LineWidth = 3;</span>
+0331 <span class="comment">% p4.trend.LineWidth = 3;</span>
+0332 <span class="comment">% p5.trend.LineWidth = 3;</span>
+0333 <span class="comment">% p5.plot.MarkerSize = 8;</span>
+0334 <span class="comment">%</span>
+0335 <span class="comment">% uistack(p3.trend,'top')</span>
+0336 <span class="comment">% uistack(p2.trend,'top')</span>
+0337 <span class="comment">%</span>
+0338 <span class="comment">% set(gca,'YLim',[-80 65]);</span>
+0339 <span class="comment">% ylabel('$ALT$ anomaly (cm)','Interpreter','latex');</span>
+0340 <span class="comment">%</span>
+0341 <span class="comment">% grid off</span></pre></div>
+</body>
+</html>

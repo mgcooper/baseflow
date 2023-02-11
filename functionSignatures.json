@@ -127,9 +127,9 @@
    {
       "inputs":
       [
-         {"name":"t",            "kind":"required",  "type":[["double","vector"],["datetime","vector"]]},
-         {"name":"q",            "kind":"required",  "type":["double","vector"]},
-         {"name":"r",            "kind":"required",  "type":["double"]},
+         {"name":"T",            "kind":"required",  "type":[["double","vector"],["datetime","vector"]]},
+         {"name":"Q",            "kind":"required",  "type":["double","vector"]},
+         {"name":"R",            "kind":"required",  "type":["double"]},
          {"name":"Info",         "kind":"required",  "type":["struct"]},
          {"name":"plotneg",      "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotevents",   "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"},
@@ -612,7 +612,7 @@
    {
       "inputs":
       [
-         {"name":"type", "kind": "required",  "type": ["char", "choices={'events','fits','globalfit'}"],"default":"'events'","purpose":"Option"},
+         {"name":"type", "kind": "required",  "type": ["char", "choices={'getevents','fitevents','globalfit'}"],"default":"'events'","purpose":"Option"},
          {"mutuallyExclusiveGroup":
             [
                [

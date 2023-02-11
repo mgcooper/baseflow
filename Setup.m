@@ -21,13 +21,11 @@ function varargout = Setup(varargin)
 %  msg = Setup('rmpath') removes all toolbox paths from the search path. Does
 %  not modify any pathdef.m files or userpath.
 % 
-% See also bfra.dependencies
+% See also bfra.util.dependencies
 
 % NOTE genpath ignores folders named private, folders that begin with the @
 % character (class folders), folders that begin with the + character (package
 % folders), folders named resources, or subfolders within any of these.
-
-% TODO: change msg.() to msg.entrypoint = <>
 
 % ------------
 % parse inputs
@@ -47,23 +45,10 @@ if nargin < 1
 
    option = 'addpath'; 
 
-   % % this would force install, but that's going overboard
-   % if ispref('baseflow')
-   %    % default behavior adds toolbox paths to the search path
-   %    option = 'addpath'; 
-   % else
-   %    % unless the toolbox isn't installed
-   %    option = 'install';
-   % end
-
 elseif nargin == 1
 
    option = validatestring(varargin{:},validopts,mfilename,'option',1);
 
-   % % optionParser style would support more than one option per call
-   % for n = 1:numel(validopts)
-   %    opts.(validopts(n)) = option == validopts(n);
-   % end
 end
 
 % if 'install' is requested but the toolbox is installed, ask the user
@@ -140,9 +125,6 @@ if strcmp(option,'install')
 
    % check dependencies
    msg = checkdependencies(msg);
-   
-   % save the path
-   % msg = savetoolboxpaths(msg); % let the user call 'savepath' instead
 
    % update the prefs
    if ispref('baseflow','installed')
@@ -166,9 +148,6 @@ elseif strcmp(option,'uninstall')
 
    % remove toolbox preferences
    msg = rmtoolboxprefs(msg);
-
-   % delete toolbox pathdef file (only looks in this directory)
-   % msg = deltoolboxpaths(msg); % don't mess with savepath
 
    % display a message that uninstall does not delete the toolbox directories
    fprintf(' * baseflow toolbox uninstalled *\n');
@@ -207,51 +186,6 @@ elseif strcmp (option,'rmpath')
 
    % remove toolbox paths from userpath
    msg = rmtoolboxpaths(msg);
-
-elseif strcmp (option,'savepath')
-
-   % removed support for savepath and delpath - too easy to mess up the
-   % userpath and/or pathdef file.
-
-%    % init the msg
-%    msg.savepath = true;
-% 
-%    % display message
-%    fprintf('\n * saving baseflow toolbox paths to local pathdef.m file ... *\n');
-%    fprintf(' * use matlab built-in ''savepath'' to add toolbox paths to your userpath *\n\n ');
-% 
-%    % save the current userpath
-%    if ispref('baseflow')
-%       setpref('baseflow','userpath',userpath)
-%    else
-%       addpref('baseflow','userpath',userpath)
-%    end
-% 
-%    % add toolbox paths
-%    msg = addtoolboxpaths(msg);
-% 
-%    % save toolbox paths to local pathdef.m file
-%    msg = savetoolboxpaths(msg);
-
-elseif strcmp (option,'delpath')
-
-%    % init the msg
-%    msg.delpath = true;
-% 
-%    % display message
-%    fprintf('\n * deleting local pathdef.m file ... *\n');
-% 
-%    % remove toolbox paths from userpath and delete toolbox local pathdef.m file
-%    msg = deltoolboxpaths(msg);
-% 
-%    % reset the userpath 
-%    if ispref('baseflow','userpath')
-%       if strcmp(getpref('baseflow','userpath'),userpath)
-%          userpath(getpref('baseflow','userpath'))
-%       end
-%    else
-%       userpath('reset');
-%    end
 
 end
 
@@ -330,7 +264,7 @@ if ispref('baseflow')
 end
 addpref('baseflow','version',bfra.version)
 % prefs = {'installed','install_directory','pathdef_filename','dependencies_checked'};
-prefs = {'installed','install_directory','dependencies_checked'};
+prefs = {'installed','install_directory','dependencies_checked','Curve_Fitting_Toolbox','Statistics_Toolbox'};
 for n = 1:numel(prefs)
    if ~ispref('baseflow',prefs{n})
       addpref('baseflow',prefs{n},false)
@@ -381,14 +315,15 @@ else
 end
 
 % get all unique dependencies
-funcname = fullfile(thispath,'docs','bfra_demo.m'); %'bfra_demo.mlx';
-[funclist,prodlist] = bfra.util.dependencies(funcname,'missing');
+funcname = fullfile(thispath,'docs','bfra_demo.m');
+report = bfra.util.dependencies(funcname,'check');
+% report = bfra.util.dependencies('docs/bfra_demo.m','check');
+msg.function_dependencies = report.function_dependencies;
+msg.missing_dependencies = report.missing_dependencies;
+msg.product_dependencies = report.product_dependencies;
 
-msg.functionDependencies = funclist;
-msg.productDependencies = prodlist;
-
-if ischar(msg.functionDependencies) && ...
-      strcmp(msg.functionDependencies,'all dependencies are installed')
+if ischar(msg.missing_dependencies) && ...
+      strcmp(msg.missing_dependencies,'all dependencies are installed')
    if isfield(msg,'install') && msg.install == true
       fprintf(' * dependencies satisfied *\n');
    else
@@ -397,7 +332,7 @@ if ischar(msg.functionDependencies) && ...
    setpref('baseflow','dependencies_checked',true)
 else
    fprintf(' * baseflow toolbox dependencies not satisfied ... *\n');
-   fprintf(' * see msg.functionDependencies for a list of required dependencies not found on the search path *\n');
+   fprintf(' * see msg.missing_dependencies for a list of required dependencies not found on the search path *\n');
    fprintf(' * to resolve, try downloading them from https://github.com/mgcooper/matfunclib *\n');
    fprintf(' * or raise an issue at https://github.com/mgcooper/baseflow *\n');
    setpref('baseflow','dependencies_checked',false)
@@ -405,108 +340,32 @@ end
 
 msg.dependencies = true;
 
+% add installed toolboxes to prefs
+required_toolboxes = {'Curve_Fitting_Toolbox','Statistics_Toolbox'};
+for n = 1:numel(required_toolboxes)
+   check = bfra.util.getFeatureName(required_toolboxes{n});
+   if ispref('baseflow',required_toolboxes{n})
+      setpref('baseflow',required_toolboxes{n},check{3});
+   else
+      addpref('baseflow',required_toolboxes{n},check{3});
+   end
+end
 
-% function msg = savetoolboxpaths(varargin)
-% %SAVETOOLBOXPATHS
-% narginchk(0,1); if nargin==1; msg = varargin{1}; end
-% % save the current userpath
-% if ispref('baseflow')
-%    setpref('baseflow','userpath',userpath)
-% else
-%    addpref('baseflow','userpath',userpath)
+% % for users - if the required_toolboxes check fails, it is possible that on
+% your machine the second output of bfra.util.getFeatureName is different than
+% the two defined above. In that case, run the loop below and raise an issue on
+% github or submit a pull request using the fork,clone,branch workflow.
+
+% v = ver % Get all your version info into one variable.
+% for k = 1 : length(ver)
+% 	thisToolboxName = v(k).Name;
+% 	fprintf('Checking on %s..\n', thisToolboxName);
+% 	toolboxInfo = bfra.util.getFeatureName(thisToolboxName);
+% 	fprintf('    "%s" is "%s"\n', toolboxInfo{1}, toolboxInfo{2});
+% 	if toolboxInfo{3} == 1
+% 		fprintf('        You currently have a license to use %s.\n', toolboxInfo{1});
+% 	else
+% 		fprintf('        You do not currently have a license to use %s.\n', toolboxInfo{1});
+% 	end
 % end
-% pathfile = fullfile(fileparts(mfilename('fullpath')),'pathdef.m');
-% savepath(pathfile);
-% msg.savepath = true;
-% setpref('baseflow','installed',true)
-% setpref('baseflow','pathdef_filename',pathfile)
-% msg.savepath = true;
-
-
-% function msg = deltoolboxpaths(varargin)
-% %DELTOOLBOXPATHS
-% narginchk(0,1); if nargin==1; msg = varargin{1}; end
-% if isfile(fullfile(fileparts(mfilename('fullpath')),'pathdef.m'))
-%    delete(fullfile(fileparts(mfilename('fullpath')),'pathdef.m'));
-%    if isfield(msg,'uninstall') && msg.uninstall == true
-%       fprintf(' * local pathdef.m file deleted *\n'); % intermediate
-%    else
-%       fprintf(' * local pathdef.m file deleted *\n\n'); % exit point
-%    end
-% else
-%    if isfield(msg,'uninstall') && msg.uninstall == true
-%       fprintf(' * no local pathdef.m file found *\n'); % intermediate
-%    else
-%       fprintf(' * no local pathdef.m file found *\n\n'); % exit point
-%    end
-% end
-% setpref('baseflow','pathdef_filename',false);
-% % setpref('baseflow','installed',false) - let 'uninstall' and 'rmpath' do this
-% % reset the userpath
-% if ispref('baseflow','userpath') 
-%    if isempty(userpath)
-%       userpath(getpref('baseflow','userpath'))
-%    else
-%       % the userpath has been reset, ambiguous what to do
-%    end
-% else
-%    userpath('reset') % ambiguous if this is the right choice
-% end
-% msg.delpath = true;
-
-
-% run Config, Startup, read .env, etc
-
-% TODO
-
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
-%  not implemented
-
-% Store the default options as prefs on this machine.
-% The user can change these with bfra.setopts.
-
-% This would store the opts in 'opts' which could be saved as a .mat file.
-% opts = bfra.setopts;
-
-% % Alternatively, modify bfra.setopts to add the options as custom prefs:
-% addpref('baseflow','version','1.0.0');
-
-
-
-% % kept this for  now for refrences, but with new setup, helper functions
-% should just do what they advertise and logical checks should be performed
-% ahead of time to determien what helper functions to call
-
-% % if this is the first time Setup is being run, check dependencies
-% if ~ispref('baseflow','installed') % || opts.dependencies == true
-% 
-%    % add the pref
-%    if ~ispref('baseflow','installed')
-%       addpref('baseflow','installed',true)
-%    else
-%       setpref('baseflow','installed',true)
-%    end
-% 
-%    % default to not satisfied
-%    if ~ispref('baseflow','dependencies_checked')
-%       addpref('baseflow','dependencies_checked',false)
-%    end
-% 
-%    % display install message
-%    fprintf('\n * checking dependencies ... *\n\n');
-%    
-%    % get all unique dependencies
-%    funcname = fullfile(thispath,'docs','bfra_demo.m'); %'bfra_demo.mlx';
-%    [funclist,prodlist] = bfra.util.dependencies(funcname,'missing');
-%    
-%    msg.functionDependencies = funclist;
-%    msg.productDependencies = prodlist;
-%    
-%    if msg.functionDependencies == "all dependencies are installed"
-%       fprintf(' * dependencies satisfied ... *\n\n');
-%       setpref('baseflow','dependencies_checked',true)
-%    end
-% 
-% end
-
 

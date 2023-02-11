@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of eventphi</title>
+  <meta name="keywords" content="eventphi">
+  <meta name="description" content="EVENTPHI estimate drainable porosity phi from individual recession events">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventphi.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>eventphi
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>EVENTPHI estimate drainable porosity phi from individual recession events</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">EVENTPHI estimate drainable porosity phi from individual recession events
+ 
+ Syntax
+ 
+     [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)
+ 
+ Description
+ 
+     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute drainable
+     porosity from early-time and late-time recession parameters and aquifer
+     properties area A, depth D, and channel lenght L.
+ 
+ Required inputs
+ 
+     K        table of a, b, tau, values for each event (output of fitevents) 
+     Fits     structure containing the fitted q/dqdt timeseries (output of bfra.dqdt)
+     A        basin area contributing to baseflow (L^2)
+     D        saturated aquifer thickness (L)
+     L        active stream length (L)
+     blate    late-time b parameter in -dqdt = aq^b (dimensionless)
+ 
+ Optional name-value inputs
+ 
+     theta    effective slope of basin contributing area
+     isflat   logical flag indicating horizontal or sloped aquifer solution
+     soln1    optional early-time theoretical solution
+     soln2    optional late-time theoretical solution
+ 
+ See also <a href="cloudphi.html" class="code" title="function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)">cloudphi</a>, <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, fitdistphi
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)</a>
+0002 <span class="comment">%EVENTPHI estimate drainable porosity phi from individual recession events</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute drainable</span>
+0011 <span class="comment">%     porosity from early-time and late-time recession parameters and aquifer</span>
+0012 <span class="comment">%     properties area A, depth D, and channel lenght L.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Required inputs</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%     K        table of a, b, tau, values for each event (output of fitevents)</span>
+0017 <span class="comment">%     Fits     structure containing the fitted q/dqdt timeseries (output of bfra.dqdt)</span>
+0018 <span class="comment">%     A        basin area contributing to baseflow (L^2)</span>
+0019 <span class="comment">%     D        saturated aquifer thickness (L)</span>
+0020 <span class="comment">%     L        active stream length (L)</span>
+0021 <span class="comment">%     blate    late-time b parameter in -dqdt = aq^b (dimensionless)</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Optional name-value inputs</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">%     theta    effective slope of basin contributing area</span>
+0026 <span class="comment">%     isflat   logical flag indicating horizontal or sloped aquifer solution</span>
+0027 <span class="comment">%     soln1    optional early-time theoretical solution</span>
+0028 <span class="comment">%     soln2    optional late-time theoretical solution</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% See also cloudphi, fitphi, fitdistphi</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0033 
+0034 <span class="comment">% if called with no input, open this file</span>
+0035 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0036 
+0037 <span class="comment">%-------------------------------------------------------------------------------</span>
+0038 p              = inputParser;
+0039 p.StructExpand = false;
+0040 p.FunctionName = <span class="string">'eventphi'</span>;
+0041 
+0042 addRequired(   p,<span class="string">'K'</span>,                        @(x)isstruct(x));
+0043 addRequired(   p,<span class="string">'Fits'</span>,                     @(x)isstruct(x));
+0044 addRequired(   p,<span class="string">'A'</span>,                        @(x)isnumeric(x));
+0045 addRequired(   p,<span class="string">'D'</span>,                        @(x)isnumeric(x));
+0046 addRequired(   p,<span class="string">'L'</span>,                        @(x)isnumeric(x));
+0047 addRequired(   p,<span class="string">'blate'</span>,                    @(x)isnumeric(x));
+0048 addParameter(  p,<span class="string">'method'</span>,    <span class="string">'envelope'</span>,    @(x)ischar(x));
+0049 addParameter(  p,<span class="string">'earlyqtls'</span>, [0.95 0.95],   @(x)isnumeric(x));
+0050 addParameter(  p,<span class="string">'lateqtls'</span>,  [0.5 0.5],     @(x)isnumeric(x));
+0051 addParameter(  p,<span class="string">'theta'</span>,     0,             @(x)isnumeric(x));
+0052 addParameter(  p,<span class="string">'isflat'</span>,    true,          @(x)islogical(x));
+0053 addParameter(  p,<span class="string">'soln1'</span>,     <span class="string">''</span>,            @(x)ischar(x));
+0054 addParameter(  p,<span class="string">'soln2'</span>,     <span class="string">''</span>,            @(x)ischar(x));
+0055 
+0056 parse(p,K,Fits,A,D,L,blate,varargin{:});
+0057 
+0058 method      = p.Results.method;
+0059 earlyqtls   = p.Results.earlyqtls;
+0060 lateqtls    = p.Results.lateqtls;
+0061 theta       = p.Results.theta;
+0062 isflat      = p.Results.isflat;
+0063 soln1       = p.Results.soln1;
+0064 soln2       = p.Results.soln2;
+0065 <span class="comment">%-------------------------------------------------------------------------------</span>
+0066 
+0067 warning off
+0068 
+0069 <span class="comment">% take out the data and init the output</span>
+0070 b1          = 3;
+0071 b2          = p.Results.blate; 
+0072 q           = Fits.q;
+0073 dqdt        = Fits.dqdt;
+0074 fittags     = Fits.eventTags;
+0075 numevents   = numel(K.eventTag);
+0076 phi         = nan(numevents,1);
+0077 a           = nan(numevents,1);
+0078 
+0079 <span class="keyword">for</span> n = 1:numevents
+0080    
+0081    ifit     = fittags == K.eventTag(n);
+0082    thisq    = q(ifit);
+0083    thisdqdt = dqdt(ifit);
+0084 
+0085    <span class="keyword">if</span> isempty(thisq) || isempty(thisdqdt)
+0086       <span class="keyword">continue</span>;
+0087    <span class="keyword">end</span>
+0088       
+0089    <span class="comment">% put a line of slope 3 and 1/1.5/bhat through the point cloud</span>
+0090    a1 = bfra.pointcloudintercept(thisq,thisdqdt,b1,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
+0091    a2 = bfra.pointcloudintercept(thisq,thisdqdt,b2,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,lateqtls);
+0092 
+0093    <span class="comment">% choose appropriate solutions</span>
+0094    <span class="keyword">if</span> isempty(soln1) &amp;&amp; isempty(soln2)
+0095 
+0096       <span class="keyword">if</span> blate==1
+0097          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,          <span class="keyword">...</span>
+0098                                        <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS03'</span>);
+0099       <span class="keyword">elseif</span> blate==3/2
+0100          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,          <span class="keyword">...</span>
+0101                                        <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS04'</span>);
+0102       <span class="keyword">elseif</span> blate&gt;1 &amp;&amp; blate&lt;2
+0103          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,          <span class="keyword">...</span>
+0104                                        <span class="string">'soln1'</span>,<span class="string">'RS05'</span>,<span class="string">'soln2'</span>,<span class="string">'RS05'</span>);
+0105       <span class="keyword">else</span>
+0106          <span class="comment">% phi remains nan</span>
+0107       <span class="keyword">end</span>
+0108 
+0109    <span class="comment">% user-specified solutions</span>
+0110    <span class="keyword">else</span>
+0111       phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,             <span class="keyword">...</span>
+0112                                        <span class="string">'soln1'</span>,soln1,<span class="string">'soln2'</span>,soln2);
+0113    <span class="keyword">end</span>
+0114 
+0115    a(n) = a2;
+0116 <span class="keyword">end</span>
+0117 
+0118 warning on</pre></div>
+</body>
+</html>

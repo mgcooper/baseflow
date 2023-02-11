@@ -1,64 +1,89 @@
-function makedocs()
+function makedocs(varargin)
 %MAKEDOCS publish bfra_gettingStarted.m as index.html for GitPages
 
 % Note: the repo is configured to publish from docs/ and the default action
-% publishes index.html using jekyll. For custom builds, use a .nojekyll file 
+% publishes index.html using jekyll. For custom builds, use a .nojekyll file
 
-activate m2html
-
-testrun = false;
+% two options: publish example docs or function docs
+opts = optionParser({'examples','functions'},varargin(:));
 
 thispath = fileparts(mfilename('fullpath'));
 
-% next two are for m2html. note, m2html uses relative paths.
-ignored = {'.git','.github','testbed'};
-mfilepath = fullfile('+bfra');
-% mfilepath = fullfile(fileparts(thispath),'+bfra');
-
+testrun = false;
 if testrun == true
-   htmlpath = fullfile(fileparts(thispath),'testbed/docs/html');
-   m2htmlpath = fullfile(fileparts(thispath),'testbed/docs/m2html');
+   docspath = fullfile(thispath,'testbed');
 else
-   htmlpath = fullfile(thispath,'html');
-   m2htmlpath = fullfile(thispath,'m2html');
+   docspath = fullfile(thispath,'docs');
 end
 
-% matlab pulish opts
+% nest m2html stuff in html/ to easily distinguish it from matlab publish stuff
+htmlpath = fullfile(docspath,'html');
+m2htmlpath = fullfile(htmlpath,'m2html');
+
+% matlab publish opts
 mpubopts = struct( ...
    'format','html', ...
    'outputDir',htmlpath, ...
    'useNewFigure',false ...
    );
 
-% % publish the standard docs using matlab's publish
-% publish(fullfile(thispath,'bfra_welcome.m'),mpubopts);
-% publish(fullfile(thispath,'bfra_gettingStarted.m'),mpubopts);
-% % publish(fullfile(thispath,'bfra_demo.m'),mpubopts);
-% publish(fullfile(thispath,'bfra_contents.m'),mpubopts);
-% 
-% % for github actions the landing page must be saved as index.html
-% copyfile(fullfile(htmlpath,'bfra_gettingStarted.html'),fullfile(thispath,'index.html'));
+%% publish the example documentation using publish
 
-% not sure if other files can also be supported, if so:
-% copyfile('html/bfra_demo.html','bfra_demo.html');
+if opts.examples == true
+   
+   % publish the standard docs using matlab's publish
+   publish(fullfile(docspath,'bfra_welcome.m'),mpubopts);
+   publish(fullfile(docspath,'bfra_gettingStarted.m'),mpubopts);
+   % publish(fullfile(docspath,'bfra_demo.m'),mpubopts);
+   publish(fullfile(docspath,'bfra_contents.m'),mpubopts);
 
+   % for github actions the landing page must be saved as index.html
+   copyfile(fullfile(htmlpath,'bfra_gettingStarted.html'),fullfile(docspath,'index.html'));
+
+   % not sure if other files can also be supported, if so:
+   % copyfile('html/bfra_demo.html','bfra_demo.html');
+end
 
 %% publish the function documentation using m2html
 
-m2html( ...
-   'mfiles',mfilepath, ...             % source dir where the files live
-   'htmldir',m2htmlpath, ...           % dest dir where the html files go
-   'recursive','off', ...              % recurse through the source dir
-   'source','on', ...                  % include source code or not
-   'download','off', ...               % include link to download each file
-   'syntaxHighlighting','on', ...      % source code syntax hightlight
-   'globalHypertextLinks','off', ...   % hyperlinks among other matlab folders
-   'graph','on', ...                   % graphviz dependency graph
-   'indexFile','function_index', ...   % basename of the HTML index file
-   'template','blue', ...              % other template
-   'ignored',ignored, ...              % dirs to ignore
-   'verbose','on' ...
-   );
+if opts.functions == true
+   
+   % activate m2html
+   activate m2html_rochefort
+
+   % note that m2html uses relative paths. generate a list of dirs to ignore.
+   alldirs = dir([thispath filesep]); alldirs = alldirs([alldirs.isdir]);
+   alldirs(strncmp({alldirs.name}, '.', 1) & strlength({alldirs.name})<3) = [];
+   ignored = {alldirs(~ismember({alldirs.name},'+bfra')).name};
+
+   % folder containing code to generate documentation
+   mfilepath = fullfile('+bfra');
+
+   if ~isfolder(m2htmlpath)
+      mkdir(m2htmlpath)
+   end
+
+   m2html( ...
+      'mfiles',mfilepath, ...             % source dir where the files live
+      'htmldir',m2htmlpath, ...           % dest dir where the html files go
+      'recursive','off', ...              % recurse through the source dir
+      'source','on', ...                  % include source code or not
+      'download','off', ...               % include link to download each file
+      'syntaxHighlighting','on', ...      % source code syntax hightlight
+      'globalHypertextLinks','off', ...   % hyperlinks among other matlab folders
+      'graph','on', ...                   % graphviz dependency graph
+      'indexFile','function_index', ...   % basename of the HTML index file
+      'template','blue2_bfra', ...        % other template
+      'ignored',ignored, ...              % dirs to ignore
+      'verbose','on' ...
+      );
+
+   % build a doc search database
+   builddocsearchdb(htmlpath)
+end
+
+
+%%% notes
 
 % % this is how m2html installs its own docs:
 % m2html( ...
@@ -69,7 +94,8 @@ m2html( ...
 %    'graph','on' ...
 %    );
 
-
+%%% placing makedocs in the docs/ folder
+% 
 % I was going to try to replace all occurrences of '../+bfra' with
 % 'm2html/+bfra' to avoid having makedocs in the top-level directory because
 % m2html accepts relative paths only, but it's too complicated so just make
@@ -83,8 +109,20 @@ m2html( ...
 % 
 % replace all occurrences of '../+bfra' with 'm2html/+bfra'
 
+%%% template notes
+% 
+% in the template folders, master.tpl controls the landing page, mdir.tpl
+% controls the page when you click on a folder from the landing page, mfile.tpl
+% controls the page for the mfiles,
 
-% build a doc search database
-% builddocsearchdb(fullfile(thispath,'html'))
+%%% resources
 
+% m2docgen looks promising - it calls builddocsearchdb
+
+% http://comisef.wikidot.com/tutorial:ml-tt1
+% https://www.mathworks.com/matlabcentral/answers/58438-which-tool-are-you-using-to-create-the-documentation-of-your-matlab-codes
+% https://www.mathworks.com/matlabcentral/fileexchange/96289-m2docgen?s_tid=FX_rc1_behav
+% https://www.mathworks.com/matlabcentral/fileexchange/9032-makehtmldoc
+% https://www.mathworks.com/matlabcentral/fileexchange/25925-using-doxygen-with-matlab
+% https://pypi.org/project/sphinxcontrib-matlabdomain/
 

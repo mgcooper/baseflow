@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getfunction</title>
+  <meta name="keywords" content="getfunction">
+  <meta name="description" content="GETFUNCTION get function handle from the bfra function library">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; getfunction.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>getfunction
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>GETFUNCTION get function handle from the bfra function library</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function Fnc = getfunction(funcname) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">GETFUNCTION get function handle from the bfra function library
+ 
+ Syntax
+ 
+     Fnc = getfunction(funcname)
+
+ Description
+ 
+     Fnc = bfra.getfunction('SofabQ') returns anonymous function handle for
+     storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)
+ 
+     Fnc = bfra.getfunction('expectedQ') returns anonymous function handle for
+     expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)
+ 
+     Use tab-completion to see full list of options
+
+ See also bfra.<a href="getstring.html" class="code" title="function str = getstring(requestedstring,varargin)">getstring</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Fnc = getfunction(funcname)</a>
+0002 <span class="comment">%GETFUNCTION get function handle from the bfra function library</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     Fnc = getfunction(funcname)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     Fnc = bfra.getfunction('SofabQ') returns anonymous function handle for</span>
+0011 <span class="comment">%     storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%     Fnc = bfra.getfunction('expectedQ') returns anonymous function handle for</span>
+0014 <span class="comment">%     expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%     Use tab-completion to see full list of options</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% See also bfra.getstring</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0021 
+0022 <span class="comment">% if called with no input, open this file</span>
+0023 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0024 
+0025 <span class="keyword">switch</span> funcname
+0026    <span class="keyword">case</span> <span class="string">'SofabQ'</span>
+0027       Fnc = @(a,b,Q) (1./(a.*(2-b))).*Q.^(2-b);
+0028    <span class="keyword">case</span> <span class="string">'tauofabQ'</span>
+0029       Fnc = @(a,b,Q) (1./a).*Q.^(1-b);
+0030    <span class="keyword">case</span> <span class="string">'tauofabQ0'</span>
+0031       Fnc = @(a,b,Q0) (1./a).*Q0.^(1-b);
+0032    <span class="keyword">case</span> <span class="string">'Qofabtau'</span>
+0033       Fnc = @(a,b,tau) (a.*tau).^(1./(1-b));
+0034    <span class="keyword">case</span> <span class="string">'expectedQ'</span>
+0035       Fnc = @(Q0,b) Q0.*(2-b)./(3-b);  <span class="comment">% expected value of Q</span>
+0036    <span class="keyword">case</span> <span class="string">'expectedTau'</span>
+0037       Fnc = @(tau0,b) tau0.*(2-b)./(3-2.*b);  <span class="comment">% expected value of tau</span>
+0038    <span class="keyword">case</span> <span class="string">'expectedTime'</span>
+0039       Fnc = @(tau0,b) tau0./(3-2.*b);  <span class="comment">% expected duration of baseflow</span>
+0040    <span class="keyword">case</span> <span class="string">'boftautau0'</span>
+0041       Fnc = @(tau,tau0) (2*(tau-tau0)+tau)/(2*(tau-tau0)+tau0);
+0042    <span class="keyword">case</span> <span class="string">'aofa0'</span>
+0043       Fnc = @(a0,b,tau,tau0) (1/tau)*(sqrt(a0*tau0)*(b-3)/(b-2))^(b-1);
+0044 <span class="keyword">end</span>
+0045</pre></div>
+</body>
+</html>

@@ -34,8 +34,8 @@ load('data/dailyflow.mat','T','Q','R');
 %% Preparing data for analysis
 
 % there are two 
-opts.Events = bfra.setopts('events');
-opts.Fits   = bfra.setopts('fits','drainagearea',A);
+opts.Events = bfra.setopts('getevents');
+opts.Fits   = bfra.setopts('fitevents','drainagearea',A);
 
 %% Setting user-defined parameters
 

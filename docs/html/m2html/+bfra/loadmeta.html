@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of loadmeta</title>
+  <meta name="keywords" content="loadmeta">
+  <meta name="description" content="LOADMETA load metadata for basin indicated by basinname">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; loadmeta.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>loadmeta
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>LOADMETA load metadata for basin indicated by basinname</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function Meta = loadmeta(basinname,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment"> LOADMETA load metadata for basin indicated by basinname
+ 
+ Syntax
+ 
+     Meta = loadmeta(basinname,varargin)
+ 
+ Description
+ 
+     Meta = loadmeta(basinname) loads metadata table for basinname.
+ 
+ See also <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, <a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>, loadbounds
+
+ Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li>
+<li><a href="version.html" class="code" title="function varargout = version()">version</a>	VERSION return the version number for the bfra toolbox</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Meta = loadmeta(basinname,varargin)</a>
+0002 <span class="comment">% LOADMETA load metadata for basin indicated by basinname</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     Meta = loadmeta(basinname,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     Meta = loadmeta(basinname) loads metadata table for basinname.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% See also loadflow, loadcalm, loadbounds</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</span>
+0015 
+0016 <span class="comment">% if called with no input, open this file</span>
+0017 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0018 
+0019 <span class="comment">%-------------------------------------------------------------------------------</span>
+0020 validopts = @(x)any(validatestring(x,{<span class="string">'current'</span>,<span class="string">'archive'</span>}));
+0021 
+0022 p                = inputParser;
+0023 p.FunctionName   = <span class="string">'bfra.loadmeta'</span>;
+0024 addRequired(p, <span class="string">'basinname'</span>,         @(x)ischar(x)  );
+0025 addOptional(p, <span class="string">'version'</span>,<span class="string">'current'</span>, validopts      );
+0026 parse(p,<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
+0027 <a href="version.html" class="code" title="function varargout = version()">version</a> = p.Results.version;
+0028 <span class="comment">%-------------------------------------------------------------------------------</span>
+0029 
+0030 <span class="comment">% load the meta data - use the one from 'Bounds'</span>
+0031 pathbounds  = [getenv(<span class="string">'USERDATAPATH'</span>) <span class="string">'interface/basins/matfiles/'</span>];
+0032 
+0033 <span class="keyword">switch</span> <a href="version.html" class="code" title="function varargout = version()">version</a>
+0034    <span class="keyword">case</span> <span class="string">'current'</span>
+0035       filebounds  = [pathbounds <span class="string">'basin_boundaries.mat'</span>];
+0036    <span class="keyword">case</span> <span class="string">'archive'</span>
+0037       filebounds  = [pathbounds <span class="string">'basin_boundaries_tmp.mat'</span>];
+0038 <span class="keyword">end</span>
+0039 load(filebounds,<span class="string">'Meta'</span>);
+0040 
+0041 <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'ALL_BASINS'</span>)    <span class="comment">% return all the basins</span>
+0042    <span class="keyword">return</span>
+0043 <span class="keyword">end</span>
+0044 <span class="comment">% check for categorical station name</span>
+0045 <span class="keyword">if</span> iscategorical(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <span class="keyword">end</span>
+0046 
+0047 <span class="comment">% find the flow data</span>
+0048 allnames = lower(Meta.name);
+0049 istation = ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>));
+0050 <span class="keyword">if</span> sum(istation) == 0
+0051    <span class="comment">% try station names</span>
+0052    allnames = lower(Meta.station);
+0053    istation = ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>));
+0054 <span class="keyword">end</span>
+0055 Meta = Meta(istation,:);
+0056 
+0057 
+0058 
+0059 
+0060 
+0061 
+0062 
+0063</pre></div>
+</body>
+</html>

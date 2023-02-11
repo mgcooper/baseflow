@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of alttrend</title>
+  <meta name="keywords" content="alttrend">
+  <meta name="description" content="ALTTREND compute the linear trend in active layer (aquifer) thickness">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; alttrend.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>alttrend
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>ALTTREND compute the linear trend in active layer (aquifer) thickness</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">ALTTREND compute the linear trend in active layer (aquifer) thickness
+ 
+ Syntax
+ 
+     [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt)
+ 
+ Description
+ 
+     [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt) computes the linear trend
+     in saturated aquifer thickness using aquifer properties and the linear
+     trend in streamflow. Tau, phi, and N are aquifer properties identified as
+     baseflow recession parameters and Qb is baseflow. Output D is the
+     interannual value of saturated aquifer thickness, dDdt is the trendline,
+     dDadt is the trendline fitted to anomalies, and C is the sensitivity
+     coefficient.
+ 
+ Required inputs
+ 
+     tau = drainage timescale, scalar [time in days]
+     phi = drainable porosity, scalar [volume/volume]
+     N = 3-2*b, b = exponent in -dQ/dt = aQ^b, scalar [unitless]
+     Qb = baseflow timeseries, posted annually [cm/day] (could be any
+     length scale unit per day)
+     dQbdt (optional) = baseflow rate of change timeseries [cm/day/year] (could
+     be any length scale per day per any timescale)
+ 
+ See also <a href="baseflowtrend.html" class="code" title="function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)">baseflowtrend</a>, <a href="aquiferthickness.html" class="code" title="function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)">aquiferthickness</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt)</a>
+0002 <span class="comment">%ALTTREND compute the linear trend in active layer (aquifer) thickness</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     [D,dDdt,dDadt,C] = alttrend(tau,phi,N,Qb,dQbdt) computes the linear trend</span>
+0011 <span class="comment">%     in saturated aquifer thickness using aquifer properties and the linear</span>
+0012 <span class="comment">%     trend in streamflow. Tau, phi, and N are aquifer properties identified as</span>
+0013 <span class="comment">%     baseflow recession parameters and Qb is baseflow. Output D is the</span>
+0014 <span class="comment">%     interannual value of saturated aquifer thickness, dDdt is the trendline,</span>
+0015 <span class="comment">%     dDadt is the trendline fitted to anomalies, and C is the sensitivity</span>
+0016 <span class="comment">%     coefficient.</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Required inputs</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%     tau = drainage timescale, scalar [time in days]</span>
+0021 <span class="comment">%     phi = drainable porosity, scalar [volume/volume]</span>
+0022 <span class="comment">%     N = 3-2*b, b = exponent in -dQ/dt = aQ^b, scalar [unitless]</span>
+0023 <span class="comment">%     Qb = baseflow timeseries, posted annually [cm/day] (could be any</span>
+0024 <span class="comment">%     length scale unit per day)</span>
+0025 <span class="comment">%     dQbdt (optional) = baseflow rate of change timeseries [cm/day/year] (could</span>
+0026 <span class="comment">%     be any length scale per day per any timescale)</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% See also baseflowtrend, aquiferthickness</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0031 
+0032 <span class="comment">% if called with no input, open this file</span>
+0033 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0034 
+0035 <span class="comment">% compute the sensitivity coefficient from the fitted values</span>
+0036 C = tau/phi/(N+1); <span class="comment">% lambda in the paper [days]</span>
+0037 
+0038 <span class="comment">% compute the timeseries of ALT and the trend</span>
+0039 D        = Qb.*C;              <span class="comment">% alt timeseries, posted annually [cm]</span>
+0040 dDdt     = dQbdt.*C;           <span class="comment">% alt trend, posted annually [cm/yr]</span>
+0041 dDadt    = anomaly(dQbdt.*C);  <span class="comment">% alt trend anomaly(dDdt)</span></pre></div>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of loadghcnd</title>
+  <meta name="keywords" content="loadghcnd">
+  <meta name="description" content="LOADGHCND reads in a global hydroclimatology network database file">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; loadghcnd.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>loadghcnd
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>LOADGHCND reads in a global hydroclimatology network database file</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function GHCN = loadghcnd(basinname,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment"> LOADGHCND reads in a global hydroclimatology network database file 
+ 
+ Syntax
+ 
+     GHCN = loadghcnd(basinname,varargin)
+ 
+ Description
+ 
+     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network data
+     table for basin basinname. 
+ 
+     GHCN = loadghcnd(___,'t1',t1,'t2',t2) returns Global Hydroclimatology
+     Network data table for the time period bounded by datetimes t1 and t2. 
+ 
+     GHCN = loadghcnd(___,'units',units) converts data in GHCN from the
+     standard units mm/d to user-specified units. Options are available using
+     tab-completion.
+ 
+     GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an
+     auto-regressive fit to annual data values.
+ 
+ See also <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, <a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>, loadbounds
+
+ Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function GHCN = loadghcnd(basinname,varargin)</a>
+0002 <span class="comment">% LOADGHCND reads in a global hydroclimatology network database file</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     GHCN = loadghcnd(basinname,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network data</span>
+0011 <span class="comment">%     table for basin basinname.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%     GHCN = loadghcnd(___,'t1',t1,'t2',t2) returns Global Hydroclimatology</span>
+0014 <span class="comment">%     Network data table for the time period bounded by datetimes t1 and t2.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%     GHCN = loadghcnd(___,'units',units) converts data in GHCN from the</span>
+0017 <span class="comment">%     standard units mm/d to user-specified units. Options are available using</span>
+0018 <span class="comment">%     tab-completion.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%     GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an</span>
+0021 <span class="comment">%     auto-regressive fit to annual data values.</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% See also loadflow, loadcalm, loadbounds</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</span>
+0026 
+0027 <span class="comment">% if called with no input, open this file</span>
+0028 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0029 
+0030 <span class="comment">%-------------------------------------------------------------------------------</span>
+0031 p              = inputParser;
+0032 p.FunctionName = <span class="string">'bfra.loadghcnd'</span>;
+0033 <span class="comment">% p.PartialMatching=true;</span>
+0034 
+0035 addRequired(p,    <span class="string">'basinname'</span>,         @(x) ischar(x)                   );
+0036 addParameter(p,   <span class="string">'t1'</span>,       NaT,     @(x) isdatetime(x)|isnumeric(x)  );
+0037 addParameter(p,   <span class="string">'t2'</span>,       NaT,     @(x) isdatetime(x)|isnumeric(x)  );
+0038 addParameter(p,   <span class="string">'units'</span>,    NaN,     @(x) ischar(x)                   );
+0039 addParameter(p,   <span class="string">'gapfill'</span>,  false,   @(x) islogical(x)                );
+0040 
+0041 parse(p,<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
+0042 
+0043 t1       = p.Results.t1;
+0044 t2       = p.Results.t2;
+0045 units    = p.Results.units;
+0046 gapfill  = p.Results.gapfill;
+0047 
+0048 <span class="keyword">if</span> isnumeric(t1) <span class="comment">%#ok&lt;*NODEF&gt;</span>
+0049    t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0050    t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0051 <span class="keyword">end</span>
+0052 <span class="comment">%-------------------------------------------------------------------------------</span>
+0053 
+0054 <span class="comment">% to get this to a full fledged function, i could use lat,lon + radius</span>
+0055 <span class="comment">% and query the ghcdn metadata to find stations</span>
+0056 
+0057 <span class="comment">% check for categorical station name</span>
+0058 <span class="keyword">if</span> iscategorical(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <span class="keyword">end</span>
+0059 
+0060 <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'KUPARUK R NR DEADHORSE AK'</span>) == false
+0061    error(<span class="string">'only functional for Kuparuk at present'</span>)
+0062 <span class="keyword">end</span>
+0063 
+0064 <span class="comment">% this replaces the commented stuff above</span>
+0065 GHCN = readGHCND(<span class="string">'station'</span>,<span class="string">'USC00505136'</span>);
+0066 GHCN = retime(GHCN,<span class="string">'daily'</span>,<span class="string">'fillwithmissing'</span>);
+0067 
+0068 <span class="comment">% % old method:</span>
+0069 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0070 <span class="comment">%    % load the rain data</span>
+0071 <span class="comment">%    pathrain    = '/Users/coop558/mydata/interface/weather/matfiles/';</span>
+0072 <span class="comment">%    filerain    =  [pathrain 'kuparukMetDataGHCND'];</span>
+0073 <span class="comment">%    load(filerain,'data');</span>
+0074 <span class="comment">%</span>
+0075 <span class="comment">%    % for now this will only work with Kupariuk</span>
+0076 <span class="comment">%    Rain        = data.KUPARUK; clear data;</span>
+0077 <span class="comment">%    Rain        = renamevars(Rain,'PRCP_mm_','rain');</span>
+0078 <span class="comment">%    rmvars      = {'PRCP_measurement_flag','PRCP_quality_flag','PRCP_source_flag'};</span>
+0079 <span class="comment">%    Rain        = removevars(Rain,rmvars);</span>
+0080 <span class="comment">%    Rain        = retime(Rain,'daily','fillwithmissing');</span>
+0081 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0082 
+0083 <span class="comment">% trim the data to the requested time period</span>
+0084 <span class="keyword">if</span> isnat(t1)
+0085    si = find(~isnan(GHCN.PRCP),1,<span class="string">'first'</span>);
+0086    ei = find(~isnan(GHCN.PRCP),1,<span class="string">'last'</span>);
+0087    iok = si:ei;
+0088 <span class="keyword">else</span>
+0089    iok = isbetween(GHCN.Time,t1,t2);
+0090 <span class="keyword">end</span>
+0091 <span class="comment">% the t1/t2 method might remove the need for padding/trimming</span>
+0092 GHCN = GHCN(iok,:);
+0093 
+0094 <span class="comment">% the iok thing means we don't need to trimtimetable, but still need to pad</span>
+0095 <span class="keyword">if</span> GHCN.Time(1)&gt;t1 || GHCN.Time(end)&lt;t2
+0096    Time = t1:caldays(1):t2;
+0097    GHCN = retime(GHCN,Time,<span class="string">'fillwithmissing'</span>);
+0098 <span class="keyword">end</span>
+0099 
+0100 ileap = month(GHCN.Time) == 2 &amp; day(GHCN.Time) == 29;
+0101 GHCN(ileap,:) = [];
+0102 
+0103 <span class="comment">% % first i made Rain with the new method, then saved it as keep:</span>
+0104 <span class="comment">% figure; myscatter(GHCN.PRCP,keep.PRCP./10); addOnetoOne;</span>
+0105 
+0106 <span class="keyword">if</span> gapfill == true
+0107    numyears =  height(GHCN)/365;
+0108    prcp     =  transpose(reshape(GHCN.PRCP,365,numyears));
+0109    <span class="keyword">try</span> 
+0110       prcp  =  fillgaps(prcp);
+0111    <span class="keyword">catch</span> ME
+0112       <span class="comment">% check for signal processing toolbox checkout error</span>
+0113       <span class="keyword">if</span> strcmp(ME.identifier,<span class="string">'MATLAB:license:checkouterror'</span>)
+0114 
+0115          <span class="comment">% set nan to zero. it probably isn't justified to use any gap</span>
+0116          <span class="comment">% filling method without nearby station or model data,</span>
+0117          <span class="comment">% inclduing the ar gapfilling above, but for now, set zero</span>
+0118          prcp(isnan(prcp)) = 0;
+0119          <span class="comment">% rain = fillmissing(rain);</span>
+0120       <span class="keyword">end</span>
+0121    <span class="keyword">end</span>
+0122 
+0123    prcp        =  reshape(transpose(prcp),numyears*365,1);
+0124    notOK       =  prcp&lt;0;
+0125    prcp(notOK) =  0;
+0126    GHCN.PRCP   = prcp;
+0127 <span class="keyword">end</span>
+0128 
+0129 <span class="comment">% rain comes in as mm/day</span>
+0130 <span class="comment">%    GHCN.PRCP   = GHCN.PRCP./10.*ddperyy;</span>
+0131 
+0132 <span class="keyword">if</span> notnan(units)
+0133 <span class="comment">%       aream2   =  Meta.darea.*1e6;</span>
+0134    vars  = {<span class="string">'PRCP'</span>,<span class="string">'SNOW'</span>,<span class="string">'SNWD'</span>};
+0135    <span class="keyword">for</span> n = 1:numel(vars)
+0136 
+0137       <span class="keyword">switch</span> units
+0138          <span class="keyword">case</span> <span class="string">'mm/d'</span>
+0139             <span class="comment">% do nothing</span>
+0140          <span class="keyword">case</span> <span class="string">'cm/d'</span>
+0141             GHCN.(vars{n}) = GHCN.(vars{n})./10;
+0142          <span class="keyword">case</span> <span class="string">'m/d'</span>
+0143             GHCN.(vars{n}) = GHCN.(vars{n})./1000;
+0144          <span class="keyword">case</span> <span class="string">'mm/y'</span>
+0145             GHCN.(vars{n}) = GHCN.(vars{n}).*365.25;
+0146          <span class="keyword">case</span> <span class="string">'cm/y'</span>
+0147             GHCN.(vars{n}) = GHCN.(vars{n})./10.*365.25;
+0148          <span class="keyword">case</span> <span class="string">'m/y'</span>
+0149             GHCN.(vars{n}) = GHCN.(vars{n})./1000.*365.25;
+0150          <span class="keyword">case</span> <span class="string">'m3/d'</span>
+0151 
+0152          <span class="keyword">case</span> <span class="string">'m3/y'</span>
+0153 
+0154          <span class="keyword">case</span> <span class="string">'km3/y'</span>
+0155       <span class="keyword">end</span>
+0156    <span class="keyword">end</span>
+0157 
+0158    units = {units};
+0159 
+0160    <span class="keyword">for</span> n = 1:numel(vars)
+0161       idx = find(strcmp(GHCN.Properties.VariableNames,vars{n}));
+0162       GHCN.Properties.VariableUnits(idx) = units;
+0163    <span class="keyword">end</span>
+0164 
+0165 <span class="keyword">else</span>
+0166    units = {<span class="string">'mm/d'</span>};
+0167 <span class="keyword">end</span>
+0168 
+0169 <span class="comment">% % readGHCND sets the units so only reset if converted</span>
+0170 <span class="comment">%    % flow is in m3/s, so set that here</span>
+0171 <span class="comment">%    for n = 1:numel(vars)</span>
+0172 <span class="comment">%       idx = find(strcmp(GHCN.Properties.VariableNames,vars{n}));</span>
+0173 <span class="comment">%       GHCN.Properties.VariableUnits(idx) = units;</span>
+0174 <span class="comment">%    end</span>
+0175 
+0176 <span class="comment">% % to check pre-post gap fill</span>
+0177 <span class="comment">%  figure; plot(GHCN.Time,GHCN.PRCP); hold on; plot(GHCN.Time,GHCN./10.*365.25,':');</span>
+0178 
+0179 <span class="comment">% % these were in read_flow script to check but don't work anymore</span>
+0180 <span class="comment">% % these check post retime, pre synch</span>
+0181 <span class="comment">% [RainM.PRCP(1) mean(GHCN.PRCP(1:28))] % feb is first month</span>
+0182 <span class="comment">% [RainM.PRCP(end) mean(GHCN.PRCP(end-30:end))]</span>
+0183 
+0184 <span class="comment">% check again</span>
+0185 <span class="comment">% [RainA.PRCP(1) mean(RainM.PRCP(1:12))]</span>
+0186 <span class="comment">% [RainA.PRCP(end) mean(RainM.PRCP(end-11:end))]</span>
+0187 
+0188 
+0189 
+0190 
+0191 
+0192</pre></div>
+</body>
+</html>

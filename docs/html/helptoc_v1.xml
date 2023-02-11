@@ -13,14 +13,15 @@
         <!-- Icon images used for these entries are also stored in -->
         <!-- matlabroot/toolbox/matlab/icons -->
         <!-- A Getting Started Guide usually comes first -->
-        <tocitem target="bfra_gettingStarted.html">
-           Getting Started with the Baseflow Recession Analysis Toolbox
-        </tocitem>
-        <!-- User Guide comes next -->
-        <tocitem target="bfra_demo.html">
-           Baseflow Recession Analysis User Guide
-        </tocitem>
-        <!-- function reference comes next -->
-       <tocitem target="bfra_contents.html">Baseflow Recession Analysis Contents
-    </tocitem>
+      <tocitem target="bfra_gettingStarted.html">
+               Getting Started with the Baseflow Recession Analysis Toolbox
+      </tocitem>
+           <!-- User Guide comes next -->
+      <tocitem target="bfra_demo.html">
+               Baseflow Recession Analysis User Guide
+      </tocitem>
+           <!-- function reference comes next -->
+      <tocitem target="bfra_contents.html">
+               Baseflow Recession Analysis Contents
+   </tocitem>
 </toc>
