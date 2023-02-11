@@ -1,6 +1,6 @@
 # `baseflow`
 
-A matlab toolbox for characterizing aquifer properties from streamflow measurements using baseflow recession analysis. Developed at the Pacific Northwest National Laboratory to study changes in soil water storage in Arctic and Subarctic watersheds due to thawing permafrost. Supported by the Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project.
+A matlab toolbox for characterizing aquifer properties from streamflow measurements using baseflow recession analysis. Developed at the Pacific Northwest National Laboratory to study changes in soil water storage in Arctic and Subarctic watersheds. Supported by the Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project.
 
 [![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mgcooper/baseflow?include_prereleases) [![MATLAB](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml) [![GitHub license](https://img.shields.io/github/license/mgcooper/baseflow)](https://github.com/mgcooper/baseflow/blob/main/LICENSE)
 
@@ -49,7 +49,7 @@ If you find a bug, have a question, or want to contribute, feel free to open an 
 
 ## How do I cite this?
 
-If you find this software useful, please consider citing the software release in `Citation.cff` or the following paper for which the `baseflow` software was developed:
+If you find this software useful, please consider citing the software release in `Citation.cff` and/or the following paper for which the software was developed:
 
     @ARTICLE{10.1029/2022WR033154,
     AUTHOR={Cooper, Matthew G, Zhou, Tian, Bennett, Katrina E, Bolton, W Robert, Coon, Ethan T, Fleming, Sean W, Rowland, Joel C, and Schwenk, Jon},
