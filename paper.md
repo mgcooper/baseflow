@@ -19,9 +19,14 @@ authors:
   - name: Tian Zhou
     orcid: 0000-0003-1582-4005
     affiliation: 1
+  - name: Joel C. Rowland
+    orcid: 0000-0001-6308-8976
+    affiliation: 2
 affiliations:
  - name: Atmospheric Science and Global Change, Pacific Northwest National Laboratory, Richland, WA, USA
    index: 1
+ - name: Los Alamos National Laboratory, Division of Earth and Environmental Sciences, Los Alamos, NM, USA
+   index: 2
 date: DD February YYYY
 bibliography: paper.bib
 ---
@@ -34,11 +39,16 @@ bibliography: paper.bib
 
 Baseflow refers to streamflow that originates from groundwater rather than rainfall, surface flow, managed reservoir release, or any source other than groundwater [@hall_1968_WRR]. Baseflow can be thought of as the water flowing in a river many days or weeks after other water sources such as rainfall or snowmelt have ceased. In that sense, baseflow is a critical water resource because it sets a lower bound on water availability during dry seasons, especially in systems that lack surface water storage [@cooper_2018_WRR]. Typically, baseflow is not directly observed, but rather must be inferred from measured values of streamflow. Inferring the presence or amount of baseflow involves signal processing, curve-fitting, and parameter estimation, which calls for specialized algorithms [@dralle_2017_HESS]. In addition to the basic determination of baseflow amount in a given river, the shape of the baseflow recession curve can be used to infer physical properties of aquifers, which are the geological structures that store and release groundwater to rivers [@brutsaert_1998_WRR; @troch_2013_WRR].
 
-![Example of baseflow recession analysis and the core functionality of the `baseflow` toolbox. \label{fig:figure01}](figure01_joss.png)
-<!-- Figure sizes can be customized by adding an optional second parameter: -->
-<!-- ![Caption for example figure.](figure.png){ width=20% } -->
+\bigskip
+\begin{figure}[!tbh]
+\centering
+\includegraphics{docs/figure_1.png}
+\caption{Example of baseflow recession analysis and the core functionality of `baseflow`.}
+\end{figure}
 
-The API for `baseflow` was designed to provide a user-friendly interface to common operations such as baseflow recession event detection, event-scale parameter fitting, event-ensemble probability-distribution fitting, and visualization \autoref{fig:figure01}. `baseflow` emphasizes the non-linear nature of streamflow, which may arise from rate-dependent or spatial nonlinearity in underlying hydraulic properties [@rupp_2006_WRR], or from the nonlinear collective behavior of hillslope aquifer units that comprise hydrologic catchments [@harman_2009_WRR]. `baseflow` was designed to be used by researchers in the hydrologic sciences [@cooper_2023_WRR] and forms the basis of an ongoing investigation of changing groundwater storage capacity in Arctic and Subarctic catchments due to the gradual thawing of permafrost.
+<!-- ![Example of baseflow recession analysis and the core functionality of `baseflow`.\label{fig:figure_1}](./docs/figure_1.png) -->
+
+The API for `baseflow` was designed to provide a user-friendly interface to common operations such as baseflow recession event detection, event-scale parameter fitting, event-ensemble probability-distribution fitting, and visualization \autoref{fig:figure_1}. `baseflow` emphasizes the non-linear nature of streamflow, which may arise from rate-dependent or spatial nonlinearity in underlying hydraulic properties [@rupp_2006_WRR], or from the nonlinear collective behavior of hillslope aquifer units that comprise hydrologic catchments [@harman_2009_WRR]. `baseflow` was designed to be used by researchers in the hydrologic sciences [@cooper_2023_WRR] and forms the basis of an ongoing investigation of changing groundwater storage capacity in Arctic and Subarctic catchments due to the gradual thawing of permafrost.
 
 # State of the field
 
@@ -49,7 +59,7 @@ Publicly available software packages for objective and repeatable baseflow reces
 -\dfrac{\mathrm{d}Q}{\mathrm{d}t}=aQ^b
 \end{equation}
 
-where $Q$ is streamflow, $t$ is time, and recession parameters $a$ and $b$ determine the shape of the recession curve \autoref{fig:figure01}.
+where $Q$ is streamflow, $t$ is time, and recession parameters $a$ and $b$ determine the shape of the recession curve \autoref{fig:figure_1}.
 
 Two software packages for baseflow recession analysis are available within the MATLAB ecosystem. `HYDRORECESSION` [@arciniega-esparza_2017_C&G; @arciniega-esparza_2018_] is a MATLAB toolbox organized around a graphical user interface (GUI) that provides methods to detect recession events and fit \autoref{eq:aQb}. Relative to `HYDRORECESSION`, the `baseflow` toolbox offers more features for aquifer property estimation in addition to the estimation of $a$ and $b$, including saturated aquifer thickness, saturated hydraulic conductivity, drainable porosity, and the characteristic drainage timescale. `HYDRORECESSION` and `baseflow` both provide methods libaries for fitting alternative forms of \autoref{eq:aQb} based on various solutions to the one-dimensional lateral groundwater flow equation. `baseflow`  would benefit from incorporating two of the four forms given in `HYDRORECESSION` which are not currently supported. In addition, basic data exploration with `baseflow` would benefit from the GUI provided by `HYDRORECESSION`.
 
