@@ -44,6 +44,7 @@ Baseflow refers to streamflow that originates from groundwater rather than rainf
 \centering
 \includegraphics{docs/figure_1.png}
 \caption{Example of baseflow recession analysis and the core functionality of `baseflow`.}
+\label{fig:figure_1}
 \end{figure}
 
 <!-- ![Example of baseflow recession analysis and the core functionality of `baseflow`.\label{fig:figure_1}](./docs/figure_1.png) -->
