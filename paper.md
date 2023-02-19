@@ -75,3 +75,23 @@ Development of the `baseflow` toolbox was motivated by the need to automate Pare
 The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project funded this work through the United States Department of Energy, Office of Science, Biological and Environmental Research (BER) Regional and Global Model Analysis (RGMA) program. Awarded under contract grant #  89233218CNA000001 to Triad National Security, LLC (“Triad”). We acknowledge contributions from Clement Roques for the exponential time step method implemented in `baseflow` and Aaron Clauset for `plfit`.
 
 # References
+
+<!-- these are here for convenience -->
+<!-- @arciniega-esparza_2017_C&G
+@arciniega-esparza_2018_
+@brutsaert_1977_WRR
+@brutsaert_1998_WRR
+@clauset_2009_SR
+@cooper_2023_WRR
+@cooper_2018_WRR
+@dralle_2017_HESS
+@gnann_2021_EM&S
+@hall_1968_WRR
+@harman_2009_WRR
+@jachens_2020_HESS
+@kirchner_2009_WRR
+@matlab_2020_
+@roques_2017_AiWR
+@rupp_2005_WRR
+@rupp_2006_WRR
+@troch_2013_WRR -->
