@@ -16,30 +16,38 @@
       <!-- A Getting Started Guide usually comes first -->
       <tocitem target="bfra_gettingStarted.html" 
                image="HelpIcon.GETTING_STARTED">
-                  Getting Started with the Baseflow Recession Analysis Toolbox
-      </tocitem>
-           
-      <!-- User Guide comes next -->
-      <tocitem target="bfra_demo.html" 
-               image="HelpIcon.USER_GUIDE">
-                  Baseflow Recession Analysis User Guide
+                  Getting Started
       </tocitem>
            
       <!-- Function reference next -->
       <!-- First item is page describing function categories, if any -->
-
       <!-- mgc I commented out bfra_contents to use m2html function_index -->
       <!-- <tocitem target="bfra_contents.html" -->
       <tocitem target="m2html/function_index.html" 
                image="HelpIcon.FUNCTION">
-                  Function Reference
+                  Function Index
 
          <!-- Function docs -->
          <!-- mgc I commented this out b/c m2html function_index has a clickable list -->
-         <!-- mgc but for reference, to generate a unique page for groups, I would define -->
-         <!-- mgc another toc level for the groups, see the template  -->
+         <!-- but for reference, to generate a unique page for groups, I would define -->
+         <!-- another toc level for the groups, see the template  -->
          <!-- <tocitem target="m2html/+bfra/alttrend.html">alttrend</tocitem> -->
-
+      </tocitem>
+      
+      <!-- User Guide (mgc: changed to Examples) comes next -->
+      <tocitem target="bfra_examples_contents.html" image="HelpIcon.USER_GUIDE">
+                  Examples
+         <tocitem target="bfra_example_1.html">Estimate recession constants: Point cloud</tocitem>
+         <tocitem target="bfra_example_2.html">Estimate recession constants: Pareto Distribution method</tocitem>
+         <tocitem target="bfra_kuparuk.html">Estimate saturated aquifer thickness trends using baseflow recession analysis</tocitem>
+      </tocitem>
+      
+      
+      <!-- Tutorials (Theoretical basis) -->
+      <tocitem target="bfra_theory_contents.html" image="HelpIcon.EXAMPLES">
+                  Theoretical Basis
+         <tocitem target="bfra_linear_theory.html">Linear Reservoir Model</tocitem>
+         <tocitem target="bfra_nonlinear_theory.html">Nonlinear Reservoir Model</tocitem>
       </tocitem>
 
       <!-- Optional List of Examples, with hyperlinks to examples in other files -->

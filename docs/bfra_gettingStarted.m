@@ -35,10 +35,14 @@
 %% Features
 % The toolbox supports four main features:
 % 
-% # Baseflow recession event detection
-% # Baseflow recession event curve-fitting (parameter estimation for individual recession events) 
-% # Baseflow recession event distribution-fitting (parameter estimation for a sample population of events)
-% # Aquifer property estimation using event-scale recession parameters and sample population-scale parameters
+% # Baseflow recession event-detection
+% # Baseflow recession curve-fitting (parameter estimation for individual recession events) 
+% # Baseflow recession distribution-fitting (parameter estimation for a sample population of recession events)
+% # Aquifer property estimation
+% 
+% Note that aquifer properties can be estimated using event-scale recession
+% parameters and sample population-scale parameters, depending on data
+% availability and the intended application.
 % 
 % Functions that support event detection:
 % 
@@ -77,7 +81,7 @@
 % * |cloudphi| Estimate aquifer drainable porosity using the point cloud method
 % * |pointcloudintercept| Estimate aquifer parameter _a_ from the point cloud intercept
 % 
-% % Functions used for visualization
+% Functions used for visualization
 % 
 % * |pointcloudplot| Plot a point-cloud diagram to estimate aquifer parameters
 % * |plotdqdt| (deprecated) Plot the log-log q vs -dq/dt point-cloud with options to select recession segments for fitting
@@ -95,14 +99,19 @@
 % * |specialfunctions| Libarary of special functions required for recession analysis
 % 
 % All user accessible functions in this toolbox are defined inside the '+bfra'
-% package. This avoids naming conflicts with built-in matlab functions or any
-% other namespace collision due to user-defined functions. Functions inside
-% bfra.internal are not meant to be called directly. 
+% namespace package. This avoids naming conflicts with built-in matlab functions
+% or any other namespace collision due to user-defined functions. Functions
+% inside +bfra/+private are available only to functions and scripts in the +bfra
+% folder and are not meant to be called directly. Functions inside the
+% +bfra/+test folder are unit tests and are not meant to be called by the user.
+% Functions inside the +bfra/+util folder are also not meant to be called by the
+% user. 
 %  
-%  +bfra/  - The package, with all user accessible functions
+%  +bfra/ - The package, with all user accessible functions
+%  data/ - Example datasets
+%  demos/ - Example live scripts
 %  docs/ - Documentation
-%  demos/ - Example scripts
-%  utils/ - Utility functions required for the package
+%  util/ - Third-party utility functions used by package functions
 %
 %% Authors & Sources
 % The code was written by Matt Cooper (matt.cooper@pnnl.gov). The exponential

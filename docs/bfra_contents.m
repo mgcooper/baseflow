@@ -1,9 +1,22 @@
-%% BFRA Contents
+%% Baseflow Toolbox Contents
 %  
-% This page lists the contents of the Baseflow Recession Analysis Toolbox. For
-% help getting started with BFRA, see <bfra_gettingStarted.html BFRA Getting Started>.
+% This page lists the contents of the Baseflow Recession Analysis Toolbox. 
 % 
-% *Files*
+%% *Getting Started*
+% 
+% See <bfra_gettingStarted.html Getting Started> for help setting up the toolbox.
+% 
+%% *User Guide*
+% 
+% See the <bfra_demo.html Examples> for an introduction to using the toolbox.
+% 
+%% *Tutorials*
+% 
+% See the <bfra_theory_contents.html Tutorials> for an introduction to the underlying theoretical basis of the baseflow toolbox.
+% 
+%% *Functions*
+% 
+% A list of toolbox functions is included below. For extended documentation, see the <m2html/function_index.html Function Index>.
 % 
 % * |alttrend|           - compute the linear trend in active layer (aquifer) thickness
 % * |aQbString|          - return a formatted string for equation aQ^b
