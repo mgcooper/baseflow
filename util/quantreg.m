@@ -1,12 +1,5 @@
 function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
-
-% mgc changes:
-%     replaced the output p with ab and ordered it as [int,slope]
-%     added prepareCurveData
-%     added alpha
-%     ended up adding too many other things
-%
-% Quantile Regression
+%QUANTREG Quantile Regression
 %
 % USAGE: [p,stats]=quantreg(x,y,tau[,order,nboot]);
 %
@@ -50,6 +43,12 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
 %   sold and this copyright notice is reproduced on each copy made.  This
 %   routine is provided as is without any express or implied warranties
 %   whatsoever.
+
+% % mgc changes:
+%     replaced the output p with ab and ordered it as [int,slope]
+%     added prepareCurveData
+%     added alpha
+%     ended up adding too many other things
    
    % mgc added these
    [x,y] = prepareCurveData(x,y); 

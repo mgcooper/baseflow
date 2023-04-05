@@ -3,6 +3,6 @@ function varnames = gettablevarnames(T)
 % 
 %  varnames = gettablevarnames(T)
 % 
-% See also: gettableunits
+% See also gettableunits
 
 varnames = T.Properties.VariableNames;

@@ -1,16 +1,15 @@
 function ab = tsregr(x,y)
-
-% mgc changed output from [b0,b1] to ab
-% mgc added ,'omitnan' to all calls to median
-
 % TSREGR Theil-Sen estimator.
 %    [B0, B1] = TSREGR(X,Y) calculates straight line coefficients
 %       Y = B0 + B1*X
 %    for N data points {X,Y} using the Theil-Sen estimator.
-
+%
 % Joe Henning - Fall 2011
 
-% mgc added this
+% mgc changed output from [b0,b1] to ab
+% mgc added ,'omitnan' to all calls to median
+% mgc convert to column on input
+
 x = x(:); y = y(:);
 if isdatetime(x); x = datenum(x); end
 % note: would be better to convert to duration using years, months, etc.
