@@ -73,7 +73,7 @@ SE = sig./sqrt(N);            % the sample has N dof
 PM = tc.*SE;                  % CI half-width (error margin)
 
 % samples with N=1 will have SE=0, t_c=nan, CI=nan. this sets SE nan
-SE = setnan(SE,[],isnan(tc));
+SE = bfra.util.setnan(SE,[],isnan(tc));
 
 % for very small N (like 2-3), the stderr is meaningless, so replace
 % with twice the std error for 95%, and 1*stderr for 68%

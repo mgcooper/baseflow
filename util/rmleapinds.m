@@ -24,7 +24,7 @@ end
 
 if nargin == 1
    if istimetable(data)
-      data  = renametimetabletimevar(data);
+      data.Properties.DimensionNames{1} = 'Time';
       dates = data.Time;
    else
       dates = data; % assume we are removing feb29 from a calendar

@@ -1,23 +1,33 @@
 function [data_out,dates_out] = padtimeseries(data,dates,padstart,padend,dt)
-%PADTIMESERIES pads timeseries data with nan from padstart to beginning of
-%data and from end of data to padend
-%   Inputs:     data        =   timeseries of monotonically increasing data
-%               dates       =   vector of datenums corresponding to data
-%               padstart    =   date you want to start the padding
-%               padend      =   date you want to end the padding
-
-%   Outputs:    data_out    =   padded data
-%               dates_out   =   padded dates 
+%PADTIMESERIES pad nan from padstart to first date and from last date to padend
+% 
+% [data_out,dates_out] = padtimeseries(data,dates,padstart,padend,dt) appends
+% (pads) nan values from date PADSTART to the first date in DATES and from the
+% last date in DATES to PADEND. DATA and DATES must be the same size.
+% 
+% Inputs
+% 
+% data        =   timeseries of data
+% dates       =   vector of datenums for each value in data
+% padstart    =   date to start the padding
+% padend      =   date to end the padding
+% 
+% Outputs
+% 
+% data_out    =   padded data
+% dates_out   =   padded dates 
+% 
+% See also padtimetable
 
 % get the size of the data
-[m,n] = size(data);
+[~,n] = size(data);
 
 wasdatetime = isdatetime(dates);
 if wasdatetime == true
    dates = datenum(dates);
 end
 
-% make sure the padstart/padend are dates
+% convert padstart/padend to datenums
 padstart = datenum(padstart);
 padend   = datenum(padend);
 dates    = datenum(dates);

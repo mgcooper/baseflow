@@ -15,8 +15,7 @@ p.addParameter('keeptime', true, @(x)islogical(x));
 p.parseMagically('caller');
 alpha = p.Results.alpha; 
 %-------------------------------------------------------------------------------
-
-Data = renametimetabletimevar(Data);
+Data.Properties.DimensionNames{1} = 'Time';
 Time = Data.Time;
 
 % if the table has one column this returns the same data but renames the column
@@ -25,7 +24,8 @@ Time = Data.Time;
 % whcih may have only one column so data reduction is not meaningful but the
 % table headers need to be consistent for other parts of the code
 if width(Data) == 1 && keeptime == true
-   NewData = settablevarnames(Data,{'mu'});
+   NewData = Data;
+   NewData.Properties.VariableNames = {'mu'};
    SE = nan(height(Data),1);
    CI = nan(height(Data),1);
    PM = nan(height(Data),1);
@@ -35,7 +35,7 @@ if width(Data) == 1 && keeptime == true
 end
 
 % compute mean, stderr, ci, etc
-[SE,CI,PM,mu,sigma] = stderr(table2array(Data),'alpha',alpha); 
+[SE,CI,PM,mu,sigma] = bfra.util.stderr(table2array(Data),'alpha',alpha); 
 CIL = CI(:,1); CIH = CI(:,2);
 
 if isscalar(mu)

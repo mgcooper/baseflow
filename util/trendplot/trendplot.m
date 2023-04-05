@@ -76,15 +76,15 @@ function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)
 
 % create a regular time in years, works for both months and years
 if isdatetime(tt)
-   y0 = year(tt(1));           % the first year (double)
-   t0 = datetime(y0,1,1);     % start of the first year (datetime)
+   y0 = year(tt(1)); % the first year (double)
+   t0 = datetime(y0,1,1); % start of the first year (datetime)
    tt = years( tt-tt(1)) + ( y0 + years( tt(1) - t0 ) );
 end
 % see old method that checked for months at end
 
 % convert to anomalies if requested
 if anomalies == true
-   if notnan(reference)
+   if ~isnan(reference)
       y = y-mean(reference,1,'omitnan');
    else
       y = y-mean(y,1,'omitnan');
@@ -130,12 +130,12 @@ for n = 1:ncols
 
             % not sure we want the setnan
             yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
-            yfit = setnan(yfit,[],inans);
+            yfit = bfra.util.setnan(yfit,[],inans);
 
          case 'ols'
 
             if isnan(alpha)
-               abfit(n,:) = olsfit(t,y(:,n));
+               abfit(n,:) = bfra.util.olsfit(t,y(:,n));
             else
 
                lmmdl = fitlm(t,y(:,n));
@@ -148,7 +148,7 @@ for n = 1:ncols
                % [B,CI] = regress(y(:,n),[ones(size(t)) t],alpha);
                % CB(:,1)= CI(1,1)+CI(2,1)*t;
                % CB(:,2)= CI(1,2)+CI(2,2)*t;
-               % CB = anomaly(CB);          % convert to anomalies?
+               % CB = bfra.util.anomaly(CB); % convert to anomalies?
 
             end
       end
@@ -163,7 +163,7 @@ for n = 1:ncols
       end
 
       yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
-      yfit = setnan(yfit,[],inans);
+      yfit = bfra.util.setnan(yfit,[],inans);
    end
 end
 
@@ -190,8 +190,7 @@ end
 %    end
 
 
-%  MAKE THE FIGURE
-
+% MAKE THE FIGURE
 function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
 
 % if an axis was provided, use it, otherwise make a new figure
@@ -278,8 +277,7 @@ legidx = thislineidx;
 % formatPlotMarkers;
 
 
-%  PLOT TRENDS
-
+% PLOT TRENDS
 function h = plotTrend(h,t,y,yfit,yerr,yci,errorbars,errorbounds,varargs)
 
 % see formaterrorbar script, might use instead of formatplotmarkers or
@@ -301,18 +299,18 @@ if errorbars == true
 
    % formatPlotMarkers handles edgecolor, facecolor, and marker size
    h.plot = errorbar(h.ax,t,y,yerr, ...
-      'Marker',           'o',      ...
-      'LineWidth',        1.5,      ...
-      'LineStyle',        '-',      ...
+      'Marker','o', ...
+      'LineWidth', 1.5, ...
+      'LineStyle', '-', ...
       'MarkerEdgeColor', [.5 .5 .5] );
 
-else  % trendlines
+else % trendlines
    h.plot = plot(h.ax,t,y,'-o','LineWidth',2,varargs{:});
 end
 
 h.trend = plot(h.ax,t,yfit,'-','Color',h.plot.Color,  ...
    'LineWidth',1,'HandleVisibility','off');
-formatPlotMarkers;
+bfra.util.formatPlotMarkers;
 
 
 %  DRAW LEGEND

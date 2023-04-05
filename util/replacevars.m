@@ -18,38 +18,37 @@ function T = replacevars(T,VarNames,NewVars,varargin)
 % 
 % See also addvars, removevars
 
-%------------------------------------------------------------------------------
-% input parsing
-%------------------------------------------------------------------------------
-p                 = inputParser;
-p.FunctionName    = mfilename;
-p.CaseSensitive   = false;
-p.KeepUnmatched   = true;
 
-validVarNames  = @(x)all(ismember(x,gettablevarnames(T)));
+%% input parsing
+p = inputParser;
+p.FunctionName = mfilename;
+p.CaseSensitive = false;
+p.KeepUnmatched = true;
 
-addRequired(p, 'T',                       @(x)istablelike(x)   );
-addRequired(p, 'VarNames',                validVarNames        );
-addRequired(p, 'NewVars'                                       );
-addParameter(p,'NewVarNames',  VarNames,  @(x)ischarlike(x)    );
+validVarNames = @(x)all(ismember(x,T.Properties.VariableNames));
+
+addRequired(p, 'T', @(x)istablelike(x));
+addRequired(p, 'VarNames', validVarNames);
+addRequired(p, 'NewVars');
+addParameter(p,'NewVarNames', VarNames, @(x)ischarlike(x));
 
 parse(p,T,VarNames,NewVars,varargin{:});
 
-NewVarNames = p.Results.NewVarNames;
+%% function code
 
-% https://www.mathworks.com/help/matlab/matlab_prog/parse-function-inputs.html
-%------------------------------------------------------------------------------
-
-
+% Remove the vars 
 T = removevars(T,VarNames);
-V = gettablevarnames(T);
-V = [V NewVarNames];
 
+% Create the new VariableNames property list before adding the new vars
+V = [T.Properties.VariableNames p.Results.NewVarNames];
+
+% Recursively add columns for the case of 2-d data
 for n = 1:size(NewVars,2)
    T = addvars(T,NewVars(:,n));
 end
 
-T = settablevarnames(T,V);
+% Assign the new VariableNames property list 
+T.Properties.VariableNames = V;
 
 
 
