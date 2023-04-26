@@ -62,7 +62,6 @@ if plotevents == false; h = []; return; end
 if isempty(Info.istart); disp('no valid events'); h = []; return; end
 
 % otherwise, prep the data to plot
-import bfra.util.subtight
 
 % allow empty R i.e. input syntax eventplotter(T,Q,[],...)
 if isempty(R)
@@ -119,7 +118,7 @@ f = figure('Units','inches','Position',[1,1,8.5,5],'Visible','on');
 for m = 1:3
 
 %    nexttile;
-   h.subplot(m) = subtight(3,1,m,'style','fitted');
+   h.subplot(m) = bfra.util.subtight(3,1,m,'style','fitted');
    h.ax(m) = gca; hold on;
 
    for n = 1:numel(plotfields)

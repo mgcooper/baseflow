@@ -100,6 +100,7 @@ end
 % (kuparuk flow is missing the last two months (Nov/Dec 2020))
 
 if ~isnan(units)
+   cms2cmd = @(x) x.*86400;
    aream2 = Meta.darea.*1e6;
    switch units
       case 'mm/d'

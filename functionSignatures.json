@@ -702,16 +702,11 @@
   {
    "inputs":
       [
-      {"name":"fillspacing",  "kind":"namevalue",
-                              "type":["numeric","scalar","double"]},
-      {"name":"sparsefill",   "kind":"namevalue",
-                              "type":["logical"]},
-      {"name":"markersize",   "kind":"namevalue",
-                              "type":["numeric","scalar","double"]},
-      {"name":"suppliedaxes", "kind":"namevalue",
-                              "type":["matlab.graphics.axis.Axes"]},
-      {"name":"suppliedline", "kind":"namevalue", 
-                              "type":["matlab.graphics.chart.primitive.Line"]}
+      {"name":"fillspacing",  "kind":"namevalue", "type":["numeric","scalar","double"]},
+      {"name":"sparsefill",   "kind":"namevalue", "type":["logical"]},
+      {"name":"markersize",   "kind":"namevalue", "type":["numeric","scalar","double"]},
+      {"name":"suppliedaxes", "kind":"namevalue", "type":["matlab.graphics.axis.Axes"]},
+      {"name":"suppliedline", "kind":"namevalue", "type":["matlab.graphics.chart.primitive.Line"]}
       ]
   },
    "bfra.util.prepalttrend":

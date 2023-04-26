@@ -5,16 +5,19 @@ function fdc = fdcurve(flow,varargin)
 %
 % See also
 
-%-------------------------------------------------------------------------------
+% --------------- if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+% --------------- parse inputs
 p = bfra.deps.magicParser;
 p.FunctionName = 'bfra.fdcurve';
-p.addRequired( 'flow',                    @(x)isnumeric(x)  );
-p.addParameter('axscale',     'semilogy', @(x)ischar(x)     );
-p.addParameter('units',       '',         @(x)ischar(x)     );
-p.addParameter('refpoints',   nan,        @(x)isnumeric(x)  );
-p.addParameter('plotcurve',   true,       @(x)islogical(x)  );
+p.addRequired( 'flow', @(x)isnumeric(x)  );
+p.addParameter('axscale', 'semilogy', @(x)ischar(x) );
+p.addParameter('units', '', @(x)ischar(x) );
+p.addParameter('refpoints', nan, @(x)isnumeric(x) );
+p.addParameter('plotcurve', true, @(x)islogical(x) );
 p.parseMagically('caller');
-%-------------------------------------------------------------------------------
+%------------------------------
 
 N = length(flow);
 M = 1:N;

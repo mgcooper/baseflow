@@ -22,7 +22,7 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 
 %-------------- parse inputs
-[Dc,sigDc,Dg,ax,method] = parseinputs(t,Db,sigDb,varargin{:});
+[Dc,sigDc,Dg,ax,method] = parseinputs(Db,mfilename,varargin{:});
 
 
 %-------------- call the subfunction
@@ -35,18 +35,34 @@ else
 end
 
 % --------------- parse inputs
-function [Dc,sigDc,Dg,ax,method] = parseinputs(t,Db,sigDb,varargin);
+function [Dc,Dg,sigDc,ax,method] = parseinputs(Db,funcname,varargin);
 
-p = createParser( ...
-   mfilename, ...
-   'OptionalArguments',    {'Dc','sigDc','Dg'}, ...
-   'OptionalDefaults',     {nan(size(Db)), nan(size(Db)), nan(size(Db))}, ...
-   'OptionalValidations',  {@(x)isnumeric(x), @(x)isnumeric(x), @(x)isnumeric(x)}, ...
-   'ParameterArguments',   {'ax', 'method'}, ...
-   'ParameterDefaults',    {gca, 'ols'}, ...
-   'ParameterValidations', {@(x) bfra.validation.isaxis(x), @(x) ischar(x)} ...
-   );
-p.parseMagically('caller');
+p = inputParser;
+p.FunctionName = funcname;
+p.addOptional('Dc', nan(size(Db)), @(x)isnumeric(x));
+p.addOptional('sigDc', nan(size(Db)), @(x)isnumeric(x));
+p.addOptional('Dg', nan(size(Db)), @(x)isnumeric(x));
+p.addParameter('method', 'ols', @(x) ischar(x));
+p.addParameter('ax', gca, @(x) bfra.validation.isaxis(x));
+p.parse(varargin{:});
+
+Dc = p.Results.Dc;
+Dg = p.Results.Dg;
+sigDc = p.Results.sigDc;
+method = p.Results.method;
+ax = p.Results.ax;
+
+% % experimental demonstration of createParser syntax
+% p = createParser( ...
+%    mfilename, ...
+%    'OptionalArguments',    {'Dc','sigDc','Dg'}, ...
+%    'OptionalDefaults',     {nan(size(Db)), nan(size(Db)), nan(size(Db))}, ...
+%    'OptionalValidations',  {@(x)isnumeric(x), @(x)isnumeric(x), @(x)isnumeric(x)}, ...
+%    'ParameterArguments',   {'ax', 'method'}, ...
+%    'ParameterDefaults',    {gca, 'ols'}, ...
+%    'ParameterValidations', {@(x) bfra.validation.isaxis(x), @(x) ischar(x)} ...
+%    );
+% p.parseMagically('caller');
 
 
 % --------------- plot grace period

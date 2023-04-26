@@ -38,8 +38,8 @@ while true
          newlines{n} = '';
 
          % if the line wasn't blank, or was a tab, insert it after the blank
-         if notempty(checkline) && notequal(checkline,sprintf('\t')) && ...
-               notequal(checkline,'   ')
+         if ~all(isempty(checkline)) && ~isequal(checkline,sprintf('\t')) && ...
+               ~isequal(checkline,'   ')
             n = n+1;
             newlines{n} = checkline;
          end

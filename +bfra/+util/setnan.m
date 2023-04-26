@@ -30,7 +30,7 @@ wastimetable = istimetable(Data);   % was a timetable
 if nargin == 1
    DataOut = nan(size(Data));
    if wastable || wastimetable
-      DataOut = replacevars(Data,Data.Properties.VariableNames,DataOut);
+      DataOut = bfra.util.replacevars(Data,Data.Properties.VariableNames,DataOut);
       return
    end
 end

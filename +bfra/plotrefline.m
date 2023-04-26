@@ -216,7 +216,7 @@ switch refline
       % 1.07   not sure but this was
       % 0.98   used this in the final point cloud plot
 
-      rotatedLogLogText(xtxt,ytxt,'upper envelope',rtxt,axpos,'FontSize',11);
+      bfra.util.rotatedLogLogText(xtxt,ytxt,'upper envelope',rtxt,axpos,'FontSize',11);
 
    case 'lowerenvelope'
       % for now, add this after the fact
