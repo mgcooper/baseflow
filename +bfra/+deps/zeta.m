@@ -23,7 +23,7 @@ function [f] = zeta(z)
 zz=2.^z;
 k = zz./(zz-2);
 
-f=k.*deta(z,1);
+f=k.*bfra.deps.deta(z,1);
 
 p=find(z==1);
 if ~isempty(p)
@@ -34,9 +34,9 @@ return
 
 %a demo of this function is
 
-ezplot zeta
-grid on
-
-figure(2)
-ezmesh('abs(zeta(x+i*y))',[0 1 .5 30])
-view(75, 4)
+% ezplot zeta
+% grid on
+% 
+% figure(2)
+% ezmesh('abs(zeta(x+i*y))',[0 1 .5 30])
+% view(75, 4)

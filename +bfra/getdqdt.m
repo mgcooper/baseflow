@@ -60,8 +60,6 @@ addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
 addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
 addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
 addParameter(p,'eventID',     'none',  @(x) ischar(x)                   );
-addParameter(p,'ax',          'none',  @(x) isaxis(x) | ischar(x)       );
-addParameter(p,'flag',        false,   @(x) islogical(x)                );
 
 parse(p,T,Q,R,derivmethod,varargin{:});
 
@@ -72,8 +70,6 @@ pickmethod  = p.Results.pickmethod;
 fitmethod   = p.Results.fitmethod;
 plotfits    = p.Results.plotfits;
 eventID     = p.Results.eventID;
-ax          = p.Results.ax;
-flag        = p.Results.flag;
 
 %-------------------------------------------------------------------------------
 

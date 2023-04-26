@@ -27,11 +27,10 @@ function [Flow,Meta] = loadflow(basinname,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% parse inputs
-%------------------------------------------------------------------------------
-p                 =  magicParser;
-p.FunctionName    =  'bfra.loadflow';
-p.PartialMatching =  true;
+%% parse inputs
+p = bfra.deps.magicParser; %#ok<*NODEF>
+p.FunctionName = 'bfra.loadflow';
+p.PartialMatching = true;
 
 p.addRequired( 'basinname',            @(x) ischar(x));
 p.addParameter('t1',       NaT,        @(x) isdatetime(x)|isnumeric(x));
@@ -48,7 +47,7 @@ p.parseMagically('caller');
 % add a converted Q timeseries e.g. cm/yr i commented out the part where addvar
 % is checked so it is defualt for now and I can adjust to addvar as above
 
-if isnumeric(t1) %#ok<*NODEF>
+if isnumeric(t1)
    t1 = datetime(t1,'ConvertFrom','datenum');
    t2 = datetime(t2,'ConvertFrom','datenum');
 end
@@ -66,42 +65,42 @@ if iscategorical(basinname); basinname = char(basinname); end
 % find the flow data (for exact match use ismember not contains)
 allnames = lower(Flow.Meta.name);
 istation = find(ismember(allnames,lower(basinname)));
-Meta     = Flow.Meta(istation,:);
+Meta = Flow.Meta(istation,:);
 
 %%%%%%%%%%%%%%%% new method that uses the raw .csv files
-%    sta         =  Meta.station{:};
-%    [Q,Time]    =  readflow(sta);
+% sta = Meta.station{:};
+% [Q,Time] = readflow(sta);
 %%%%%%%%%%%%%%%% new method that uses the raw .csv files
 
 %%%%%%%%%%%%%%%% old method that used the database
-Q           =  Flow.Q(:,istation);
-Time        =  Flow.T;
+Q = Flow.Q(:,istation);
+Time = Flow.T;
 %%%%%%%%%%%%%%%% old method that used the database
 
 if isnat(t1)
-   si       =  find(~isnan(Q),1,'first');
-   ei       =  find(~isnan(Q),1,'last');
-   iok      =  si:ei;
+   si = find(~isnan(Q),1,'first');
+   ei = find(~isnan(Q),1,'last');
+   ok = si:ei;
 else
-   iok      =  isbetween(Time,t1,t2);
+   ok = isbetween(Time,t1,t2);
 end
 % the t1/t2 method might remove the need for padding/trimming
 
-Q           =  Q(iok);
-Time        =  Time(iok);
-Flow        =  timetable(Time,Q);
+Q = Q(ok);
+Time = Time(ok);
+Flow = timetable(Time,Q);
 
 % experimental - gap fill. should prob add this to a timetable function
 if gapfill == true
-   numyears    =  height(Flow)/365;
-   Q           =  transpose(reshape(Flow.Q,365,numyears));
-   Q           =  reshape(transpose(fillgaps(Q)),numyears*365,1);
-   Q(Q<0)      =  0; Flow.Q = Q;
+   numyears = height(Flow)/365;
+   Q = transpose(reshape(Flow.Q,365,numyears));
+   Q = reshape(transpose(fillgaps(Q)),numyears*365,1);
+   Q(Q<0) = 0; Flow.Q = Q;
 end
 % (kuparuk flow is missing the last two months (Nov/Dec 2020))
 
-if notnan(units)
-   aream2   =  Meta.darea.*1e6;
+if ~isnan(units)
+   aream2 = Meta.darea.*1e6;
    switch units
       case 'mm/d'
          Flow.Q = cms2cmd(Flow.Q)./aream2.*1000;
@@ -125,8 +124,8 @@ if notnan(units)
    
    % keep the original m3/s
    %if addvar == true
-   Qm3s  = Q;
-   Flow  = addvars(Flow,Qm3s);
+   Qm3s = Q;
+   Flow = addvars(Flow,Qm3s);
    units = {units,'m3/s'};
    %end
    
@@ -144,44 +143,44 @@ filename = [sta '.csv'];
 
 % check the rhbn database:
 pathdata = '/Users/coop558/mydata/interface/recession/rhbn/data/';
-dirs     = {'rhbn99','rhbnN','rhbnU'};
-for n = 1:numel(dirs)
-   list     = getlist([pathdata dirs{n} '/'],'*.csv');
-   allfiles = {list.name};
-   fileidx  = find(ismember(allfiles,filename));
-   if ~isempty(fileidx)
-      break;
+datadirs = {'rhbn99','rhbnN','rhbnU'};
+for n = 1:numel(datadirs)
+   filelist = getlist([pathdata datadirs{n} '/'],'*.csv');
+   allfiles = {filelist.name};
+   fileindx = find(ismember(allfiles,filename));
+   if ~isempty(fileindx)
+      break
    end
 end
 
 % if not found, check the usgs database:
-if isempty(fileidx)
+if isempty(fileindx)
    
    pathdata = '/Users/coop558/mydata/interface/recession/gagesII/data/';
-   dirs     = {'ref','other','nonref'};
-   for n = 1:numel(dirs)
-      list     = getlist([pathdata dirs{n} '/'],'*.csv');
-      allfiles = {list.name};
-      fileidx  = find(ismember(allfiles,filename));
-      if ~isempty(fileidx)
+   datadirs = {'ref','other','nonref'};
+   for n = 1:numel(datadirs)
+      filelist = getlist([pathdata datadirs{n} '/'],'*.csv');
+      allfiles = {filelist.name};
+      fileindx = find(ismember(allfiles,filename));
+      if ~isempty(fileindx)
          break;
       end
    end
    
 end
 
-if isempty(fileidx)
+if isempty(fileindx)
    error('file not found')
 end
 
-Data     = readtable([pathdata dirs{n} '/' filename]);
-Time     = datetime(Data.Year,Data.Month,Data.Day);
-Q        = Data.Value;
-Data     = timetable(Time,Q);
-Data     = retime(Data,'daily','fillwithmissing');
-Data     = rmleapinds(Data);
-Q        = Data.Q;
-Time     = Data.Time;
+Data  = readtable([pathdata datadirs{n} '/' filename]);
+Time  = datetime(Data.Year,Data.Month,Data.Day);
+Q     = Data.Value;
+Data  = timetable(Time,Q);
+Data  = retime(Data,'daily','fillwithmissing');
+Data  = bfra.util.rmleapinds(Data);
+Q     = Data.Q;
+Time  = Data.Time;
 
 %    % i used this to confirm the new data matches the old data:
 %    idx = isbetween(data.Time,Flow.Time(1),Flow.Time(end));

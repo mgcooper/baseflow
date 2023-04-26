@@ -121,12 +121,12 @@ This function is called by:
 0039 p              = inputParser;
 0040 p.FunctionName = <span class="string">'bfra.baseflowtrend'</span>;
 0041 
-0042 addRequired(   p,    <span class="string">'t'</span>,                 @(x)isdatetime(x)|isnumeric(x)   );
-0043 addRequired(   p,    <span class="string">'Q'</span>,                 @(x)isnumericvector(x)           );
-0044 addRequired(   p,    <span class="string">'A'</span>,                 @(x)isnumericscalar(x)           );
-0045 addParameter(  p,    <span class="string">'method'</span>,   <span class="string">'ols'</span>,   @(x)ischar(x)                    );
-0046 addParameter(  p,    <span class="string">'pctl'</span>,     0.25,    @(x)isnumeric(x)                 );
-0047 addParameter(  p,    <span class="string">'showfig'</span>,  false,   @(x)islogical(x)                 );
+0042 addRequired(   p,    <span class="string">'t'</span>,                 @(x)bfra.validation.isdatelike(x));
+0043 addRequired(   p,    <span class="string">'Q'</span>,                 @(x)bfra.validation.isnumericvector(x));
+0044 addRequired(   p,    <span class="string">'A'</span>,                 @(x)bfra.validation.isnumericscalar(x));
+0045 addParameter(  p,    <span class="string">'method'</span>,   <span class="string">'ols'</span>,   @(x)bfra.validation.ischarlike(x));
+0046 addParameter(  p,    <span class="string">'pctl'</span>,     0.25,    @(x)bfra.validation.isnumericscalar(x));
+0047 addParameter(  p,    <span class="string">'showfig'</span>,  false,   @(x)bfra.validation.islogicalscalar(x));
 0048 
 0049 parse(p,t,Q,A,varargin{:});
 0050 
@@ -136,24 +136,25 @@ This function is called by:
 0054 
 0055 <span class="comment">%-------------------------------------------------------------------------------</span>
 0056 
-0057 [Q,t] = padtimeseries(Q,t,datenum(year(t(1)),1,1),datenum(year(t(end)),12,31),1);
-0058 [Q,t] = rmleapinds(Q,t);
-0059 
-0060 <span class="comment">% convert the flow from m3/d posted daily to cm/d posted annually</span>
-0061 <span class="keyword">if</span> ~isdatetime(t); t = datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
-0062 t = transpose(year(mean(reshape(t,365,numel(t)/365))));
-0063 Qa = transpose(mean(reshape(Q,365,numel(Q)/365),<span class="string">'omitnan'</span>)).*(100/A);
-0064 
-0065 <span class="comment">% regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually</span>
-0066 ha  = trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>,             <span class="keyword">...</span>
-0067             <span class="string">'title'</span>,<span class="string">'mean flow'</span>,<span class="string">'leg'</span>,<span class="string">'mean flow regression'</span>,        <span class="keyword">...</span>
-0068             <span class="string">'showfig'</span>,showfig,<span class="string">'method'</span>,method);
-0069 hb  = trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>,<span class="string">'quan'</span>,      <span class="keyword">...</span>
-0070             pctl,<span class="string">'title'</span>,<span class="string">'baseflow'</span>,<span class="string">'leg'</span>,<span class="string">'baseflow regression'</span>,    <span class="keyword">...</span>
-0071             <span class="string">'showfig'</span>,showfig,<span class="string">'alpha'</span>,0.05);
-0072 dQadt    = ha.trend.YData(:);  <span class="comment">% mean flow trend</span>
-0073 dQbdt    = hb.trend.YData(:);  <span class="comment">% baseflow trend</span>
-0074 Qb       = Qa-(dQadt-dQbdt);         <span class="comment">% baseflow timeseries, cm/day</span>
-0075</pre></div>
+0057 [Q,t] = bfra.util.padtimeseries(Q,t,datenum(year(t(1)),1,1), <span class="keyword">...</span>
+0058    datenum(year(t(end)),12,31),1);
+0059 [Q,t] = bfra.util.rmleapinds(Q,t);
+0060 
+0061 <span class="comment">% convert the flow from m3/d posted daily to cm/d posted annually</span>
+0062 <span class="keyword">if</span> ~isdatetime(t); t = datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
+0063 t = transpose(year(mean(reshape(t,365,numel(t)/365))));
+0064 Qa = transpose(mean(reshape(Q,365,numel(Q)/365),<span class="string">'omitnan'</span>)).*(100/A);
+0065 
+0066 <span class="comment">% regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually</span>
+0067 ha = bfra.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>, <span class="keyword">...</span>
+0068    <span class="string">'title'</span>,<span class="string">'mean flow'</span>,<span class="string">'leg'</span>,<span class="string">'mean flow regression'</span>,<span class="string">'showfig'</span>, <span class="keyword">...</span>
+0069    showfig,<span class="string">'method'</span>,method);
+0070 hb = bfra.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>,<span class="string">'quan'</span>, <span class="keyword">...</span>
+0071    pctl,<span class="string">'title'</span>,<span class="string">'baseflow'</span>,<span class="string">'leg'</span>,<span class="string">'baseflow regression'</span>,<span class="keyword">...</span>
+0072    <span class="string">'showfig'</span>,showfig,<span class="string">'alpha'</span>,0.05);
+0073 dQadt = ha.trend.YData(:);  <span class="comment">% mean flow trend</span>
+0074 dQbdt = hb.trend.YData(:);  <span class="comment">% baseflow trend</span>
+0075 Qb = Qa-(dQadt-dQbdt);         <span class="comment">% baseflow timeseries, cm/day</span>
+0076</pre></div>
 </body>
 </html>

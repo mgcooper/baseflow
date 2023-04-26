@@ -121,8 +121,8 @@ This function is called by:
 0037 <span class="comment">%     NOTE: use geo!</span>
 0038 <span class="comment">%     NOTE: variable name of cvar</span>
 0039 
-0040 <span class="comment">%-------------------------------------------------------------------------------</span>
-0041 p              = magicParser;
+0040 <span class="comment">% --------------- parse inputs</span>
+0041 p = bfra.deps.magicParser;
 0042 p.FunctionName = <span class="string">'mapbasins'</span>;
 0043 p.StructExpand = false;
 0044 
@@ -131,17 +131,17 @@ This function is called by:
 0047 defaultlatlims = [40 84]; <span class="comment">% [50 75]</span>
 0048 defaultlonlims = [-168 -40]; <span class="comment">% [-168 -60]</span>
 0049 
-0050 p.addRequired( <span class="string">'Basins'</span>,                              @(x)isstruct(x)   );
-0051 p.addParameter(<span class="string">'Meta'</span>,        <span class="string">''</span>,                     @(x)istable(x)    );
-0052 p.addParameter(<span class="string">'facemapping'</span>, false,                  @(x)islogical(x)  );
-0053 p.addParameter(<span class="string">'cvarname'</span>,    defaultvar,             @(x)ischar(x)     );
-0054 p.addParameter(<span class="string">'cbartxt'</span>,     defaulttxt,             @(x)ischar(x)     );
-0055 p.addParameter(<span class="string">'latlims'</span>,     defaultlatlims,         @(x)isnumeric(x)  );
-0056 p.addParameter(<span class="string">'lonlims'</span>,     defaultlonlims,         @(x)isnumeric(x)  );
-0057 p.addParameter(<span class="string">'proj'</span>,        <span class="string">'lambert'</span>,              @(x)ischar(x)     );
-0058 p.addParameter(<span class="string">'facealpha'</span>,   0.35,                   @(x)isnumeric(x)  );
-0059 p.addParameter(<span class="string">'facelabels'</span>,  false,                  @(x)islogical(x)  );
-0060 p.addParameter(<span class="string">'ax'</span>,          gobjects,               @(x)isaxis(x)     );
+0050 p.addRequired( <span class="string">'Basins'</span>,                     @(x)isstruct(x)   );
+0051 p.addParameter(<span class="string">'Meta'</span>,        <span class="string">''</span>,            @(x)istable(x)    );
+0052 p.addParameter(<span class="string">'facemapping'</span>, false,         @(x)islogical(x)  );
+0053 p.addParameter(<span class="string">'cvarname'</span>,    defaultvar,    @(x)ischar(x)     );
+0054 p.addParameter(<span class="string">'cbartxt'</span>,     defaulttxt,    @(x)ischar(x)     );
+0055 p.addParameter(<span class="string">'latlims'</span>,     defaultlatlims,@(x)isnumeric(x)  );
+0056 p.addParameter(<span class="string">'lonlims'</span>,     defaultlonlims,@(x)isnumeric(x)  );
+0057 p.addParameter(<span class="string">'proj'</span>,        <span class="string">'lambert'</span>,     @(x)ischar(x)     );
+0058 p.addParameter(<span class="string">'facealpha'</span>,   0.35,          @(x)isnumeric(x)  );
+0059 p.addParameter(<span class="string">'facelabels'</span>,  false,         @(x)islogical(x)  );
+0060 p.addParameter(<span class="string">'ax'</span>,          gobjects,      @(x)bfra.validation.isaxis(x));
 0061 
 0062 p.parseMagically(<span class="string">'caller'</span>);
 0063 
@@ -261,7 +261,7 @@ This function is called by:
 0177    <span class="keyword">end</span>
 0178    
 0179    <span class="comment">% make the colorbar</span>
-0180    caxis([cmin cmax])
+0180    clim([cmin cmax])
 0181    
 0182    <span class="comment">%------------------------------------------------------</span>
 0183    <span class="comment">% horizontal, south</span>

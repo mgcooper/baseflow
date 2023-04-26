@@ -16,24 +16,16 @@ function h = plotalttrend(t,Db,sigDb,varargin)
 % 
 % See also prepalttrend
 
-% if called with no input, open this file
+
+%-------------- if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p = magicParser;
-p.FunctionName = 'bfra.util.plotalttrend';
-p.addRequired( 't'                                                );
-p.addRequired( 'Db'                                               );
-p.addRequired( 'sigDb'                                            );
-p.addOptional( 'Dc',       nan(size(Db)),    @(x) isnumeric(x)    );
-p.addOptional( 'sigDc',    nan(size(Db)),    @(x) isnumeric(x)    );
-p.addOptional( 'Dg',       nan(size(Db)),    @(x) isnumeric(x)    );
-p.addParameter('ax',       gca,              @(x) isaxis(x)       );
-p.addParameter('method',   'ols',            @(x)ischar(x)        );
 
-p.parseMagically('caller');
-%-------------------------------------------------------------------------------
+%-------------- parse inputs
+[Dc,sigDc,Dg,ax,method] = parseinputs(t,Db,sigDb,varargin{:});
 
+
+%-------------- call the subfunction
 if all(isnan(Dc)) && all(isnan(Dg))
    h = plotflowperiod(t,Db,sigDb,ax,method);
 elseif all(isnan(Dg))
@@ -42,27 +34,22 @@ else
    h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method);
 end
 
-% if nargin > 5
-%    Dc = varargin{1};
-%    sigDc = varargin{2};
-%    Dg = varargin{3};
-%    if nargin >6
-%       ax = varargin{2};
-%    else
-%       ax = nan;
-%    end
-%    h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax);
-% elseif nargin > 3
-%    Dc = varargin{1};
-%    sigDc = varargin{2};
-%    h = plotcalmperiod(t,Db,sigDb,Dc,sigDc);
-% else
-%    h = plotflowperiod(t,Db,sigDb);
-% end
+% --------------- parse inputs
+function [Dc,sigDc,Dg,ax,method] = parseinputs(t,Db,sigDb,varargin);
 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+p = createParser( ...
+   mfilename, ...
+   'OptionalArguments',    {'Dc','sigDc','Dg'}, ...
+   'OptionalDefaults',     {nan(size(Db)), nan(size(Db)), nan(size(Db))}, ...
+   'OptionalValidations',  {@(x)isnumeric(x), @(x)isnumeric(x), @(x)isnumeric(x)}, ...
+   'ParameterArguments',   {'ax', 'method'}, ...
+   'ParameterDefaults',    {gca, 'ols'}, ...
+   'ParameterValidations', {@(x) bfra.validation.isaxis(x), @(x) ischar(x)} ...
+   );
+p.parseMagically('caller');
 
+
+% --------------- plot grace period
 function h = plotgraceperiod(t,Db,sigDb,Dc,sigDc,Dg,ax,method)
 
 if all(isempty(Dg))
@@ -136,9 +123,8 @@ h.bfra.trendplot1 = p1;
 h.bfra.trendplot2 = p2;
 h.bfra.trendplot2 = p3;
 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 
+% --------------- plot streamflow period
 function h = plotflowperiod(t,Db,sigDb,ax,method)
 
 if all(isempty(Db))
@@ -180,9 +166,7 @@ h.bfra.trendplot = p;
 % plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);
 % plot([xlims(1) xlims(2)],[ylims(2) ylims(2)],'k','LineWidth',1);
 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-
+% --------------- plot calm period
 function h = plotcalmperiod(t,Db,sigDb,Dc,sigDc,ax,method)
 
 if all(isempty(Dc))
@@ -256,82 +240,3 @@ h.bfra.trendplot2 = p2;
 % plot(x1,D2-mean(D2),'k','LineWidth',0.75,'HandleVisibility','off')
 % plot(x1,D1-mean(D1),'Color',dc(1,:),'LineWidth',0.75,'HandleVisibility','off')
 % plot(x1,D2-mean(D2),'Color',dc(2,:),'LineWidth',0.75,'HandleVisibility','off')
-
-
-
-% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
-
-% % this is the version that puts the grace period on the same figure. it almost
-% % surely will not work out of the box, and I don't think we want it anyway
-% 
-% function plotbothperiods(t,D1,D2,sigD1,sigD2,D4,sigDg)
-% 
-% ctxt  = 'CALM (measured)';
-% btxt  = 'BFRA (theory: Eq. 23)';
-% gtxt  = 'GRACE $\\eta=S_G/\\phi$';
-% 
-% 
-% f     = figure('Position',[156    45   856   580]);
-% p1    = bfra.trendplot(t1,D1,'units','cm/yr','leg',ctxt,'use',gca,   ...
-%          'errorbounds',false,'errorbars',true,'yerr',sigD1);
-% p2    = bfra.trendplot(t1,D2,'units','cm/yr','leg',btxt,'use',gca,   ...
-%          'errorbounds',false,'errorbars',true,'yerr',sigD2); 
-% p3    = bfra.trendplot(t2,D3,'units','cm/yr','leg',ctxt,'use',gca,   ...
-%          'errorbounds',true,'errorbars',true,'yerr',sigD3,'reference',D1);
-% p4    = bfra.trendplot(t2,D4,'units','cm/yr','leg',btxt,'use',gca,   ...
-%          'errorbounds',true,'errorbars',true,'yerr',sigD4,'reference',D2);
-% p5    = bfra.trendplot(t2,D5,'units','cm a$^{-1}$','leg',gtxt,'use',gca,   ...
-%          'errorbounds',true,'errorbars',true);
-%       
-% p3.bounds.FaceColor     = p1.plot.Color;
-% p3.plot.Color           = p1.plot.Color;
-% p3.plot.MarkerFaceColor = p1.plot.MarkerFaceColor;
-% p3.trend.Color          = p1.trend.Color;
-% p3.trend.LineStyle      = '--';
-% p3.trend.LineWidth      = 2;
-% 
-% p4.bounds.FaceColor     = p2.plot.Color;
-% p4.plot.Color           = p2.plot.Color;
-% p4.plot.MarkerFaceColor = p2.plot.MarkerFaceColor;
-% p4.trend.Color          = p2.trend.Color;
-% p4.trend.LineStyle      = '--';
-% p4.trend.LineWidth      = 2;
-% 
-% str   = p1.ax.Legend.String;
-% str1  = strrep(str{1},'CALM (measured) (','');
-% str1  = ['1990:2020 ' strrep(str1,'cm/yr)','cm/yr')];
-% str2  = strrep(str{2},[btxt ' ('],'');
-% str2  = ['1990:2020 ' strrep(str2,'cm/yr)','cm/yr')];
-% str3  = strrep(str{3},'CALM (measured) (','');
-% str3  = ['2002:2020 ' strrep(str3,'cm/yr)','cm/yr')];
-% str4  = strrep(str{4},[btxt ' ('],'');
-% str4  = ['2002:2020 ' strrep(str4,'cm/yr)','cm/yr')];
-% str5  = strrep(str{5},[sprintf(gtxt) ' ('],'');
-% str5  = ['2002:2020 ' strrep(str5,'cm/yr)','cm/yr')];
-% 
-% lobj  = [p1.plot p2.plot p5.plot p5.trend p1.trend p2.trend p3.trend p4.trend];
-% ltxt  = {ctxt; btxt; strrep(gtxt,'\\','\'); str5; str1; str2; str3; str4};
-% legend(lobj,ltxt,'numcolumns',2,'Interpreter','latex','location','northwest');
-%    
-% p3.bounds.FaceAlpha = 0.2;
-% p3.bounds.FaceAlpha = 0.2;
-% 
-% set([p1.plot.Bar, p1.plot.Line], 'ColorType', 'truecoloralpha',   ...
-%          'ColorData', [p1.plot.Line.ColorData(1:3); 255*0.5])
-% set([p2.plot.Bar, p2.plot.Line], 'ColorType', 'truecoloralpha',   ...
-%          'ColorData', [p2.plot.Line.ColorData(1:3); 255*0.5])
-% 
-% p1.trend.LineWidth = 1;
-% p2.trend.LineWidth = 1;
-% p3.trend.LineWidth = 3;
-% p4.trend.LineWidth = 3;
-% p5.trend.LineWidth = 3;
-% p5.plot.MarkerSize = 8;
-% 
-% uistack(p3.trend,'top')
-% uistack(p2.trend,'top')
-% 
-% set(gca,'YLim',[-80 65]);
-% ylabel('$ALT$ anomaly (cm)','Interpreter','latex');
-% 
-% grid off

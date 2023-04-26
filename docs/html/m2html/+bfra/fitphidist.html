@@ -28,25 +28,25 @@
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">FITPHIDIST fit drainable porosity (phi) values with a Beta distribution
- 
+
  Syntax
- 
+
      FIT = bfra.FITPHIDIST(phi);
      FIT = bfra.FITPHIDIST(___,plottype);
      FIT = bfra.FITPHIDIST(___,outputtype);
- 
+
  Description
- 
+
      Fit = bfra.fitphidist(phi) returns probability distribution object 'Fit'
      which is a Beta Distribution fit to the input data in phi
- 
+
      Fit = bfra.fitphidist(phi,outputtype) returns a Beta Distribution fit to
      the input data in phi. 'outputtype' is 'PD', 'mean', 'median', or 'std',
      where default 'PD' is the Probability Distribution object.
- 
+
      Fit = bfra.fitphidist(__,plottype) returns any of the prior options plus a
      figure showing the fit. plottype can be 'cdf' or 'pdf'. default is 'none'.
- 
+
  See also <a href="eventphi.html" class="code" title="function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)">eventphi</a>, <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, <a href="fitphidist.html" class="code" title="function [Fit,h] = fitphidist(phi,varargin)">fitphidist</a>
 
  Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</pre></div>
@@ -107,7 +107,7 @@ This function is called by:
 0030 <span class="comment">% input parsing</span>
 0031 <span class="comment">%-------------------------------------------------------------------------------</span>
 0032 p                 = inputParser;
-0033 p.FunctionName    = <span class="string">'fitphidist'</span>;
+0033 p.FunctionName    = <span class="string">'bfra.fitphidist'</span>;
 0034 
 0035 validoutput       = @(x) any(validatestring(x,{<span class="string">'PD'</span>,<span class="string">'mean'</span>,<span class="string">'std'</span>,<span class="string">'median'</span>}));
 0036 validplottype     = @(x) any(validatestring(x,{<span class="string">'cdf'</span>,<span class="string">'pdf'</span>,<span class="string">'probplot'</span>}));
@@ -123,7 +123,7 @@ This function is called by:
 0046 showfit     = p.Results.showfit;
 0047 
 0048 <span class="comment">%-------------------------------------------------------------------------------</span>
-0049    
+0049 
 0050 <span class="comment">% Force all inputs to be column vectors</span>
 0051 phi = phi(:);
 0052 
@@ -136,7 +136,7 @@ This function is called by:
 0059       h = <a href="#_sub1" class="code" title="subfunction h = cdfplotphi(phi,PD,showfit)">cdfplotphi</a>(phi,PD,showfit);
 0060    <span class="keyword">case</span> <span class="string">'probplot'</span>
 0061       h = <a href="#_sub2" class="code" title="subfunction h = probplotphi(phi,PD)">probplotphi</a>(phi,PD,showfit);
-0062    <span class="keyword">case</span> <span class="string">'pdf'</span>   
+0062    <span class="keyword">case</span> <span class="string">'pdf'</span>
 0063 <span class="keyword">end</span>
 0064 
 0065 <span class="comment">% package output</span>
@@ -156,100 +156,104 @@ This function is called by:
 0079 
 0080 
 0081 <a name="_sub1" href="#_subfunctions" class="code">function h = cdfplotphi(phi,PD,showfit)</a>
-0082    
+0082 
 0083 <span class="comment">% Create the figure</span>
 0084 h.figure = figure(<span class="string">'Visible'</span>,showfit);
 0085 
 0086 <span class="comment">% Get the cdf</span>
 0087 [cdfY,cdfX] = ecdf(phi,<span class="string">'Function'</span>,<span class="string">'cdf'</span>);  <span class="comment">% compute empirical function</span>
-0088 <span class="comment">%    h.data      = stairs(cdfX,cdfY,'LineWidth',1); hold on;</span>
+0088 <span class="comment">% h.data = stairs(cdfX,cdfY,'LineWidth',1); hold on;</span>
 0089 
-0090 c        = [0 0.447 0.741];
+0090 c = [0 0.447 0.741];
 0091 
-0092 h.data   = plot(cdfX,cdfY,<span class="string">'o'</span>,<span class="string">'MarkerFaceColor'</span>,c,       <span class="keyword">...</span>
-0093                <span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>,<span class="string">'Visible'</span>,showfit); hold on;
+0092 h.data = plot(cdfX,cdfY,<span class="string">'o'</span>,<span class="string">'MarkerFaceColor'</span>,c,<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>, <span class="keyword">...</span>
+0093    <span class="string">'Visible'</span>,showfit); hold on;
 0094 
 0095 <span class="comment">% Create grid where function will be computed</span>
-0096 XLim     = get(gca,<span class="string">'XLim'</span>);
-0097 XLim     = XLim + [-1 1] * 0.01 * diff(XLim);
-0098 XGrid    = linspace(XLim(1),XLim(2),100);
+0096 XLims = get(gca,<span class="string">'XLim'</span>);
+0097 XLims = XLims + [-1 1] * 0.01 * diff(XLims);
+0098 XGrid = linspace(XLims(1),XLims(2),100);
 0099 
 0100 <span class="comment">% plot the cdf</span>
-0101 phifit   = cdf(PD,XGrid);
-0102 h.fit    = plot(XGrid,phifit,<span class="string">'k'</span>);
+0101 phifit = cdf(PD,XGrid);
+0102 h.fit = plot(XGrid,phifit,<span class="string">'k'</span>);
 0103 
 0104 set(gca,<span class="string">'XLim'</span>,[0 max(phi)])
 0105 
 0106 <span class="comment">% bootstrap standard error / CI's</span>
-0107 booterr  = true;
-0108 N        = 1000;
+0107 booterr = true;
+0108 N = 1000;
 0109 <span class="keyword">if</span> booterr == true
-0110    reps     = bootstrp(N,@betafit,phi);
-0111    mureps   = reps(:,1)./(sum(reps,2));
-0112    sigreps  = sqrt(prod(reps,2)./((sum(reps,2)+1).*(sum(reps,2)).^2));
+0110    reps = bootstrp(N,@betafit,phi);
+0111    mureps = reps(:,1)./(sum(reps,2));
+0112    sigreps = sqrt(prod(reps,2)./((sum(reps,2)+1).*(sum(reps,2)).^2));
 0113 <span class="keyword">end</span>
 0114 
 0115 <span class="comment">% this slightly overestimates the error, whihc is fine (conservative)</span>
-0116 mu    = mean(mureps);
-0117 sig   = mean(sigreps);
-0118 pm    = std(mureps)*1.96; <span class="comment">% or: mean(sigreps)/sqrt(N)*1.96</span>
+0116 mu = mean(mureps);
+0117 sg = mean(sigreps);
+0118 pm = std(mureps)*1.96; <span class="comment">% or: mean(sigreps)/sqrt(N)*1.96</span>
 0119 
 0120 <span class="keyword">if</span> showfit == true
 0121    <span class="comment">% legend text and arrow text</span>
-0122    ltxt     = {<span class="string">'$\phi$'</span>,sprintf(<span class="string">'Beta ($\\alpha=%.2f,\\beta=%.1f)$'</span>,PD.a,PD.b)};
+0122    ltxt = {<span class="string">'$\phi$'</span>,sprintf(<span class="string">'Beta ($\\alpha=%.2f,\\beta=%.1f)$'</span>,PD.a,PD.b)};
 0123    arrowtxt = sprintf(<span class="string">'$\\langle\\phi\\rangle=%.3f\\pm%.3f$'</span>,mu,round(pm,3));
-0124 <span class="comment">%  arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',PD.mean,PD.std);</span>
+0124    <span class="comment">%  arrowtxt = sprintf('$\\langle\\phi\\rangle=%.3f\\pm%.3f$',PD.mean,PD.std);</span>
 0125 
 0126    <span class="comment">% add xlabel and legend</span>
 0127    <span class="comment">%xlabel('$\phi$');</span>
 0128    xlabel(<span class="string">'$x$'</span>);
-0129    ylabel(<span class="string">'$P(\phi\le x)$'</span>); 
+0129    ylabel(<span class="string">'$P(\phi\le x)$'</span>);
 0130 
-0131    <span class="comment">% add an arrrow pointing to the expected value</span>
-0132    xarrow   = [PD.mean 1.3*PD.mean];
-0133    yarrow   = [PD.cdf(PD.mean) PD.cdf(PD.mean)];
-0134    [X1,Y1]  = ds2nfu(xarrow(1),yarrow(1));
-0135    [X2,Y2]  = ds2nfu(xarrow(2),yarrow(2));
+0131    xarrow = [PD.mean 1.3*PD.mean];
+0132    yarrow = [PD.cdf(PD.mean) PD.cdf(PD.mean)];
+0133    bfra.deps.arrow([xarrow(1),yarrow(1)],[xarrow(2),yarrow(2)], <span class="keyword">...</span>
+0134       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0135    text(0.95*xarrow(1),yarrow(1),arrowtxt,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
 0136 
-0137    annotation(gcf,<span class="string">'textarrow'</span>,[1.06*X2 1.025*X1],[Y2 Y1],                     <span class="keyword">...</span>
-0138             <span class="string">'String'</span>,{arrowtxt}, <span class="keyword">...</span>
-0139             <span class="string">'HeadStyle'</span>,<span class="string">'plain'</span>,<span class="string">'HeadLength'</span>,4,   <span class="keyword">...</span>
-0140             <span class="string">'HeadWidth'</span>,2,<span class="string">'LineWidth'</span>,1,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
-0141 
-0142 
-0143    h.ff = figformat;
-0144    h.legend = legend(ltxt,<span class="string">'Location'</span>,<span class="string">'east'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
-0145    h.legend.Position(2) = 0.68*h.legend.Position(2);
-0146    h.legend.Position(1) = 0.85*h.legend.Position(1);
-0147 <span class="keyword">end</span>
+0137    <span class="comment">% % commented this out to remove dependence on ds2nfu, replaced w/ arrow method</span>
+0138    <span class="comment">%    % add an arrrow pointing to the expected value</span>
+0139    <span class="comment">%    xarrow = [PD.mean 1.3*PD.mean];</span>
+0140    <span class="comment">%    yarrow = [PD.cdf(PD.mean) PD.cdf(PD.mean)];</span>
+0141    <span class="comment">%    [X1,Y1] = ds2nfu(xarrow(1),yarrow(1));</span>
+0142    <span class="comment">%    [X2,Y2] = ds2nfu(xarrow(2),yarrow(2));</span>
+0143    <span class="comment">%</span>
+0144    <span class="comment">%    annotation(gcf,'textarrow',[1.06*X2 1.025*X1],[Y2 Y1], ...</span>
+0145    <span class="comment">%             'String',{arrowtxt}, ...</span>
+0146    <span class="comment">%             'HeadStyle','plain','HeadLength',4,   ...</span>
+0147    <span class="comment">%             'HeadWidth',2,'LineWidth',1,'Interpreter','latex');</span>
 0148 
-0149 h.ax  = gca;
-0150 h.mu  = mu;
-0151 h.pm  = pm;
-0152 
+0149    h.legend = legend(ltxt,<span class="string">'Location'</span>,<span class="string">'east'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0150    h.legend.Position(2) = 0.68*h.legend.Position(2);
+0151    h.legend.Position(1) = 0.85*h.legend.Position(1);
+0152 <span class="keyword">end</span>
 0153 
-0154 <a name="_sub2" href="#_subfunctions" class="code">function h = probplotphi(phi,PD)</a>
-0155    
-0156 <span class="comment">% Create the figure</span>
-0157 h.figure = figure;
+0154 h.ax = gca;
+0155 h.mu = mu;
+0156 h.pm = pm;
+0157 
 0158 
-0159 <span class="comment">% plot the data, suppressing the normal plot with 'noref'</span>
-0160 h.data      = probplot(<span class="string">'normal'</span>,phi,[],[],<span class="string">'noref'</span>); hold on;
-0161 
-0162 <span class="comment">% add the fit</span>
-0163 h.fit       = probplot(gca,PD);
-0164 
-0165 <span class="comment">% format the symbols</span>
-0166 <span class="comment">%c  = [0.33 0 0.67];</span>
-0167 c  = [0 0.447 0.741];
-0168 set(h.data,<span class="string">'MarkerFaceColor'</span>,c,<span class="string">'Marker'</span>,<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,6,<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
-0169 set(h.fit,<span class="string">'Color'</span>,<span class="string">'k'</span>,<span class="string">'LineStyle'</span>,<span class="string">'-'</span>, <span class="string">'LineWidth'</span>,2);
-0170 
-0171 ylabel(<span class="string">'$P(\phi\le x)$'</span>); 
-0172 <span class="comment">%    ylabel('Probability')</span>
-0173 title(<span class="string">''</span>)
-0174 set(gca,<span class="string">'XLim'</span>,[0 0.2])
+0159 <a name="_sub2" href="#_subfunctions" class="code">function h = probplotphi(phi,PD)</a>
+0160 
+0161 <span class="comment">% Create the figure</span>
+0162 h.figure = figure;
+0163 
+0164 <span class="comment">% plot the data, suppressing the normal plot with 'noref'</span>
+0165 h.data = probplot(<span class="string">'normal'</span>,phi,[],[],<span class="string">'noref'</span>); hold on;
+0166 
+0167 <span class="comment">% add the fit</span>
+0168 h.fit = probplot(gca,PD);
+0169 
+0170 <span class="comment">% format the symbols</span>
+0171 <span class="comment">%c = [0.33 0 0.67];</span>
+0172 c  = [0 0.447 0.741];
+0173 set(h.data,<span class="string">'MarkerFaceColor'</span>,c,<span class="string">'Marker'</span>,<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,6,<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
+0174 set(h.fit,<span class="string">'Color'</span>,<span class="string">'k'</span>,<span class="string">'LineStyle'</span>,<span class="string">'-'</span>, <span class="string">'LineWidth'</span>,2);
 0175 
-0176 h.ax  = gca;</pre></div>
+0176 ylabel(<span class="string">'$P(\phi\le x)$'</span>);
+0177 title(<span class="string">''</span>)
+0178 set(gca,<span class="string">'XLim'</span>,[0 0.2])
+0179 
+0180 h.ax = gca;</pre></div>
 </body>
 </html>

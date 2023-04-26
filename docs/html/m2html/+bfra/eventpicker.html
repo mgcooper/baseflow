@@ -122,7 +122,7 @@ This function is called by:
 0045 <span class="comment">%-------------------------------------------------------------------------------</span>
 0046 
 0047 <span class="comment">% compute the first derivative</span>
-0048 qdot = derivative(q);
+0048 qdot = bfra.deps.derivative(q);
 0049 
 0050 <span class="comment">% pick the events</span>
 0051 Events = <a href="#_sub1" class="code" title="subfunction Events = eventSelector(t,q,r,qdot,Info)">eventSelector</a>(t,q,r,qdot,Info);
@@ -149,9 +149,9 @@ This function is called by:
 0072    
 0073    <span class="comment">% islineconvex might be too restrictive, but without it, ETS call to</span>
 0074    <span class="comment">% exponential fit sometimes fails, and nonlinear fitting will fail</span>
-0075    <span class="keyword">if</span> islineconvex(qPick) || islineconvex(-diff(qPick))
+0075    <span class="keyword">if</span> bfra.util.islineconvex(qPick) || bfra.util.islineconvex(-diff(qPick))
 0076       numEvents=numEvents-1;
-0077       <span class="keyword">continue</span>;
+0077       <span class="keyword">continue</span>
 0078    <span class="keyword">end</span>
 0079    
 0080    <span class="comment">% otherwise, keep the pick</span>
@@ -196,50 +196,50 @@ This function is called by:
 0119 <span class="comment">% pick the points</span>
 0120 h = <a href="#_sub2" class="code" title="subfunction h = eventPlotter(t,q,r,dqdt,Info)">eventPlotter</a>(t,q,r,qdot,Info);  <span class="comment">% plot the timeseries</span>
 0121 
-0122 pickedPts = ginputc();
+0122 pickedPts = bfra.deps.ginputc();
 0123 startPts = pickedPts(1:2:end);
 0124 endPts = pickedPts(2:2:end);
 0125 numPicks = numel(startPts);
 0126 
 0127 <span class="comment">% initialize output</span>
-0128 istart      = nan(size(startPts));
-0129 istop       = nan(size(startPts));
-0130 rlength     = nan(size(startPts));
-0131 T           = cell(size(startPts));
-0132 Q           = cell(size(startPts));
-0133 R           = cell(size(startPts));
-0134 Qdot        = cell(size(startPts));
+0128 istart = nan(size(startPts));
+0129 istop  = nan(size(startPts));
+0130 rlengs = nan(size(startPts));
+0131 T = cell(size(startPts));
+0132 Q = cell(size(startPts));
+0133 R = cell(size(startPts));
+0134 Qdot = cell(size(startPts));
 0135 
 0136 <span class="keyword">for</span> n = 1:numPicks
-0137    difStart    = abs(t-startPts(n));
-0138    difStop     = abs(t-endPts(n));
-0139    istart(n)   = findmin(difStart,1,<span class="string">'first'</span>);
-0140    istop(n)    = findmin(difStop,1,<span class="string">'first'</span>);
+0137    difStart = abs(t-startPts(n));
+0138    difStop  = abs(t-endPts(n));
+0139    istart(n) = bfra.util.findmin(difStart,1,<span class="string">'first'</span>);
+0140    istop(n)  = bfra.util.findmin(difStop,1,<span class="string">'first'</span>);
 0141    
-0142    t_n         = t(istart(n):istop(n));
-0143    q_n         = q(istart(n):istop(n));
-0144    r_n         = r(istart(n):istop(n));
-0145    qdot_n      = qdot(istart(n):istop(n));
-0146    t_n         = t_n(qdot_n~=0);
-0147    q_n         = q_n(qdot_n~=0);
-0148    r_n         = r_n(qdot_n~=0);
-0149    qdot_n      = qdot_n(qdot_n~=0);
+0142    t_n = t(istart(n):istop(n));
+0143    q_n = q(istart(n):istop(n));
+0144    r_n = r(istart(n):istop(n));
+0145    d_n = qdot(istart(n):istop(n));
+0146    t_n = t_n(d_n~=0);
+0147    q_n = q_n(d_n~=0);
+0148    r_n = r_n(d_n~=0);
+0149    d_n = d_n(d_n~=0);
 0150    
-0151    T{n}        = t_n;
-0152    Q{n}        = q_n;
-0153    R{n}        = r_n;
-0154    Qdot{n}     = qdot_n;
-0155    rlength(n)  = numel(q_n);
+0151    T{n} = t_n;
+0152    Q{n} = q_n;
+0153    R{n} = r_n;
+0154    Qdot{n} = d_n;
+0155    rlengs(n) = numel(q_n);
 0156 <span class="keyword">end</span>
 0157 
-0158 Events.T            = T;
-0159 Events.Q            = Q;
-0160 Events.R            = R;
-0161 Events.Qdot         = Qdot;
-0162 Events.nEvents      = numPicks;
-0163 Events.istart       = istart + Info.ifirst - 1;
-0164 Events.istop        = istop + Info.ifirst - 1;
-0165 Events.runlengths   = rlength;
+0158 Events.T = T;
+0159 Events.Q = Q;
+0160 Events.R = R;
+0161 Events.Qdot = Qdot;
+0162 Events.nEvents = numPicks;
+0163 Events.istart = istart + Info.ifirst - 1;
+0164 Events.istop = istop + Info.ifirst - 1;
+0165 Events.runlengths = rlengs;
 0166 
 0167 <span class="comment">% some of the information in Info is relevant to the entire timeseries:</span>
 0168 <span class="comment">% imaxima</span>
@@ -260,7 +260,7 @@ This function is called by:
 0183 <span class="comment">% runlengths</span>
 0184 
 0185 <span class="comment">% add the picked events to the plot</span>
-0186 Events  = <a href="#_sub3" class="code" title="subfunction Events = updateEventPlot(Events,h)">updateEventPlot</a>(Events,h);
+0186 Events = <a href="#_sub3" class="code" title="subfunction Events = updateEventPlot(Events,h)">updateEventPlot</a>(Events,h);
 0187 
 0188 
 0189 <a name="_sub2" href="#_subfunctions" class="code">function h = eventPlotter(t,q,r,dqdt,Info)</a>
@@ -271,109 +271,110 @@ This function is called by:
 0194    disp(<span class="string">'no valid events'</span>)
 0195 <span class="keyword">end</span>
 0196 
-0197 h.Info  = Info;
-0198 ifirst  = Info.ifirst(1);
-0199 ikeep   = Info.ikeep   - ifirst + 1;
-0200 imax    = Info.imaxima - ifirst + 1;
-0201 imin    = Info.iminima - ifirst + 1;
-0202 icon    = Info.iconvex - ifirst + 1;
+0197 h.Info = Info;
+0198 ifirst = Info.ifirst(1);
+0199 ikeep = Info.ikeep   - ifirst + 1;
+0200 imax = Info.imaxima - ifirst + 1;
+0201 imin = Info.iminima - ifirst + 1;
+0202 icon = Info.iconvex - ifirst + 1;
 0203 
-0204 posidx  = dqdt&gt;=0;
-0205 negidx  = dqdt&lt;0;
-0206 sz      = 20;
+0204 posidx = dqdt&gt;=0;
+0205 negidx = dqdt&lt;0;
+0206 sz = 20;
 0207 
-0208 <span class="comment">% new  - add 50th percentil</span>
-0209 q50     =   quantile(q,0.5);
+0208 <span class="comment">% new - add 50th percentil</span>
+0209 q50 = quantile(q,0.5);
 0210 
 0211 <span class="comment">% make the figure</span>
-0212 h.f     =   figure(<span class="string">'Position'</span>,[1 1 1152 720]);
-0213 h.t1    =   subtight(2,1,1,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
-0214 h.ax1   =   gca;
-0215 h.s1a   =   scatter(t(posidx),q(posidx),sz,<span class="string">'filled'</span>); hold on;
-0216 h.s1b   =   scatter(t(negidx),q(negidx),sz,<span class="string">'filled'</span>); datetick;
-0217 h.s1c   =   scatter(t(imax),q(imax),sz*2,<span class="string">'filled'</span>);
-0218 h.s1d   =   scatter(t(imin),q(imin),sz*2,<span class="string">'filled'</span>);
-0219 h.s1e   =   scatter(t(icon),q(icon),sz,<span class="string">'filled'</span>);
-0220 h.s1f   =   scatter(t(ikeep),q(ikeep),sz*2.5,<span class="string">'filled'</span>);
+0212 h.fig = figure(<span class="string">'Position'</span>,[1 1 1152 720]);
+0213 h.sp1 = bfra.util.subtight(2,1,1,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0214 h.ax1 = gca;
+0215 h.s1a = scatter(t(posidx),q(posidx),sz,<span class="string">'filled'</span>); hold on;
+0216 h.s1b = scatter(t(negidx),q(negidx),sz,<span class="string">'filled'</span>); datetick;
+0217 h.s1c = scatter(t(imax),q(imax),sz*2,<span class="string">'filled'</span>);
+0218 h.s1d = scatter(t(imin),q(imin),sz*2,<span class="string">'filled'</span>);
+0219 h.s1e = scatter(t(icon),q(icon),sz,<span class="string">'filled'</span>);
+0220 h.s1f = scatter(t(ikeep),q(ikeep),sz*2.5,<span class="string">'filled'</span>);
 0221 
-0222 h.s1g    =  hline(q50,<span class="string">':'</span>);
+0222 h.s1g = bfra.deps.hline(q50,<span class="string">':'</span>);
 0223 
-0224 dates    =  datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0224 dates = datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
 0225 
 0226 title(year(dates(1)))
 0227 set(gca,<span class="string">'YScale'</span>,<span class="string">'log'</span>);
 0228 
-0229 h.l1 = legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>,<span class="string">'keep'</span>,<span class="string">'keep (check)'</span>);
-0230 
-0231 ylabel(<span class="string">'Q'</span>);
-0232 
-0233 <span class="comment">% add rain</span>
-0234 <span class="keyword">if</span> sum(r)&gt;0
-0235    ax       = gca;
-0236    yyaxis right
-0237    h.h1rain = bar(t,r,0.2,    <span class="string">'FaceColor'</span>,   [0.85 0.325 0.098],     <span class="keyword">...</span>
-0238                               <span class="string">'FaceAlpha'</span>,   0.5,                    <span class="keyword">...</span>
-0239                               <span class="string">'EdgeColor'</span>,   <span class="string">'none'</span>);
-0240 
-0241    ylabel(<span class="string">'rain (mm)'</span>,<span class="string">'Color'</span>,[0.85 0.325 0.098]);
-0242    set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
-0243    datetick; axis(ax,<span class="string">'ij'</span>);
-0244 <span class="keyword">end</span>
-0245 
+0229 h.l1 = legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>, <span class="keyword">...</span>
+0230    <span class="string">'keep'</span>,<span class="string">'keep (check)'</span>);
+0231 
+0232 ylabel(<span class="string">'Q'</span>);
+0233 
+0234 <span class="comment">% add rain</span>
+0235 <span class="keyword">if</span> sum(r)&gt;0
+0236    ax = gca;
+0237    yyaxis right
+0238    h.h1rain = bar(t,r,0.2,    <span class="string">'FaceColor'</span>,   [0.85 0.325 0.098],     <span class="keyword">...</span>
+0239                               <span class="string">'FaceAlpha'</span>,   0.5,                    <span class="keyword">...</span>
+0240                               <span class="string">'EdgeColor'</span>,   <span class="string">'none'</span>);
+0241 
+0242    ylabel(<span class="string">'rain (mm)'</span>,<span class="string">'Color'</span>,[0.85 0.325 0.098]);
+0243    set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
+0244    datetick; axis(ax,<span class="string">'ij'</span>);
+0245 <span class="keyword">end</span>
 0246 
-0247 <span class="comment">% plot -dq/dt in log</span>
-0248 dqdt     =  -dqdt;
-0249 
-0250 h.t2     =   subtight(2,1,2,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
-0251 h.ax2    =   gca;
-0252 h.s2a    =   scatter(t(posidx),dqdt(posidx),sz,<span class="string">'filled'</span>); hold on;
-0253 h.s2b    =   scatter(t(negidx),dqdt(negidx),sz,<span class="string">'filled'</span>);
-0254 h.s2c    =   scatter(t(imax),dqdt(imax),sz*2,<span class="string">'filled'</span>);
-0255 h.s2d    =   scatter(t(imin),dqdt(imin),sz*2,<span class="string">'filled'</span>);
-0256 h.s2e    =   scatter(t(icon),dqdt(icon),sz,<span class="string">'filled'</span>);
-0257 h.s2f    =   scatter(t(ikeep),dqdt(ikeep),sz*2.5,<span class="string">'filled'</span>);
-0258 h.hl2    =   hline(0,<span class="string">'k-'</span>); h.hl2.LineWidth = 1;
-0259 h.l2     =   legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,     <span class="keyword">...</span>
-0260                <span class="string">'convex'</span>,<span class="string">'keep'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
-0261 ylabel(<span class="string">'dQ/dt'</span>);
-0262 datetick
-0263 set(gca,<span class="string">'YScale'</span>,<span class="string">'log'</span>);
-0264 
-0265 h.l1.Location = <span class="string">'best'</span>;
-0266 h.l2.Location = <span class="string">'best'</span>;
-0267 
-0268    <span class="comment">% add rain</span>
-0269 <span class="keyword">if</span> sum(r)&gt;0
-0270    ax       = gca;
-0271    yyaxis right
-0272    h.h2rain = bar(t,r,0.2,    <span class="string">'FaceColor'</span>,   [0.85 0.325 0.098],     <span class="keyword">...</span>
-0273                               <span class="string">'FaceAlpha'</span>,   0.5,                    <span class="keyword">...</span>
-0274                               <span class="string">'EdgeColor'</span>,   <span class="string">'none'</span>);
-0275 
-0276    ylabel(<span class="string">'rain (mm)'</span>,<span class="string">'Color'</span>,[0.85 0.325 0.098]);
-0277    set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
-0278    datetick; axis(ax,<span class="string">'ij'</span>);
-0279 <span class="keyword">end</span>
-0280 
+0247 
+0248 <span class="comment">% plot -dq/dt in log</span>
+0249 dqdt = -dqdt;
+0250 
+0251 h.sp2 = bfra.util.subtight(2,1,2,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0252 h.ax2 = gca;
+0253 h.s2a = scatter(t(posidx),dqdt(posidx),sz,<span class="string">'filled'</span>); hold on;
+0254 h.s2b = scatter(t(negidx),dqdt(negidx),sz,<span class="string">'filled'</span>);
+0255 h.s2c = scatter(t(imax),dqdt(imax),sz*2,<span class="string">'filled'</span>);
+0256 h.s2d = scatter(t(imin),dqdt(imin),sz*2,<span class="string">'filled'</span>);
+0257 h.s2e = scatter(t(icon),dqdt(icon),sz,<span class="string">'filled'</span>);
+0258 h.s2f = scatter(t(ikeep),dqdt(ikeep),sz*2.5,<span class="string">'filled'</span>);
+0259 h.hl2 = bfra.deps.hline(0,<span class="string">'k-'</span>); h.hl2.LineWidth = 1;
+0260 h.l2 = legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>, <span class="keyword">...</span>
+0261    <span class="string">'keep'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0262 ylabel(<span class="string">'dQ/dt'</span>);
+0263 datetick
+0264 set(gca,<span class="string">'YScale'</span>,<span class="string">'log'</span>);
+0265 
+0266 h.l1.Location = <span class="string">'best'</span>;
+0267 h.l2.Location = <span class="string">'best'</span>;
+0268 
+0269    <span class="comment">% add rain</span>
+0270 <span class="keyword">if</span> sum(r)&gt;0
+0271    ax = gca;
+0272    yyaxis right
+0273    h.h2rain = bar(t,r,0.2,    <span class="string">'FaceColor'</span>,   [0.85 0.325 0.098],     <span class="keyword">...</span>
+0274                               <span class="string">'FaceAlpha'</span>,   0.5,                    <span class="keyword">...</span>
+0275                               <span class="string">'EdgeColor'</span>,   <span class="string">'none'</span>);
+0276 
+0277    ylabel(<span class="string">'rain (mm)'</span>,<span class="string">'Color'</span>,[0.85 0.325 0.098]);
+0278    set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
+0279    datetick; axis(ax,<span class="string">'ij'</span>);
+0280 <span class="keyword">end</span>
 0281 
-0282 <a name="_sub3" href="#_subfunctions" class="code">function Events = updateEventPlot(Events,h)</a>
-0283    
-0284 <span class="comment">% add the picked events to the plot</span>
-0285 <span class="keyword">for</span> n = 1:Events.nEvents
-0286 
-0287    scatter(h.ax1,Events.T{n},Events.Q{n},60,<span class="string">'m'</span>);
-0288    scatter(h.ax2,Events.T{n},Events.Qdot{n},60,<span class="string">'m'</span>);
-0289    text(h.ax1,min(Events.T{n}),max(Events.Q{n}),[<span class="string">'Event '</span> num2str(n)]);
-0290 
-0291    <span class="keyword">if</span> n == 1
-0292       h.l1.String{end}   = <span class="string">'picked'</span>;
-0293       h.l2.String{end+1} = <span class="string">'picked'</span>;
-0294    <span class="keyword">else</span>
-0295       h.l1.AutoUpdate    = <span class="string">'off'</span>;
-0296       h.l2.AutoUpdate    = <span class="string">'off'</span>;
-0297    <span class="keyword">end</span>
-0298 <span class="keyword">end</span>
-0299 
-0300 Events.h = h;</pre></div>
+0282 
+0283 <a name="_sub3" href="#_subfunctions" class="code">function Events = updateEventPlot(Events,h)</a>
+0284    
+0285 <span class="comment">% add the picked events to the plot</span>
+0286 <span class="keyword">for</span> n = 1:Events.nEvents
+0287 
+0288    scatter(h.ax1,Events.T{n},Events.Q{n},60,<span class="string">'m'</span>);
+0289    scatter(h.ax2,Events.T{n},Events.Qdot{n},60,<span class="string">'m'</span>);
+0290    text(h.ax1,min(Events.T{n}),max(Events.Q{n}),[<span class="string">'Event '</span> num2str(n)]);
+0291 
+0292    <span class="keyword">if</span> n == 1
+0293       h.l1.String{end} = <span class="string">'picked'</span>;
+0294       h.l2.String{end+1} = <span class="string">'picked'</span>;
+0295    <span class="keyword">else</span>
+0296       h.l1.AutoUpdate = <span class="string">'off'</span>;
+0297       h.l2.AutoUpdate = <span class="string">'off'</span>;
+0298    <span class="keyword">end</span>
+0299 <span class="keyword">end</span>
+0300 
+0301 Events.h = h;</pre></div>
 </body>
 </html>

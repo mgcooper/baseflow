@@ -1,6 +1,6 @@
 function varargout = ccdf(data,varargin)
 
-p = magicParser;
+p = bfra.deps.magicParser;
 p.addRequired('data',@(x)isnumeric(x));
 p.addParameter('makeplot',false,@(x)islogical(x));
 p.parseMagically('caller');

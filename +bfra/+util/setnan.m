@@ -5,7 +5,7 @@ function [ DataOut ] = setnan(Data,varargin)
 % table parts using replacevars like in the new set all nan section
 
 %----------------------------------------------------------------------
-p              = magicParser;
+p = bfra.deps.magicParser;
 p.FunctionName = mfilename;
 
 p.addRequired( 'Data'                                 );

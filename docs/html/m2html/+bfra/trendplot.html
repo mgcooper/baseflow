@@ -1,0 +1,449 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of trendplot</title>
+  <meta name="keywords" content="trendplot">
+  <meta name="description" content="TRENDPLOT plot a timeseries and linear trendline fit">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; trendplot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>trendplot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>TRENDPLOT plot a timeseries and linear trendline fit</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function h = trendplot(t,y,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">TRENDPLOT plot a timeseries and linear trendline fit
+ 
+ h = trendplot(t,y) plots time T and data Y and fits a trendline
+ 
+ 
+ Copyright Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+ 
+ See also <a href="printtrend.html" class="code" title="function [ddt,err] = printtrend(Data,varargin)">printtrend</a></pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)</a></li>
+<li><a href="#_sub2" class="code">function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)</a></li>
+<li><a href="#_sub3" class="code">function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)</a></li>
+<li><a href="#_sub4" class="code">function h = plotTrend(h,t,y,yfit,yerr,yci,errorbars,errorbounds,varargs)</a></li>
+<li><a href="#_sub5" class="code">function h = drawLegend(h,ab,legtext,units,alpha,err,makeleg,legidx,precision)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function h = trendplot(t,y,varargin)</a>
+0002 <span class="comment">%TRENDPLOT plot a timeseries and linear trendline fit</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% h = trendplot(t,y) plots time T and data Y and fits a trendline</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Copyright Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% See also printtrend</span>
+0010 
+0011 <span class="comment">%-------------------------------------------------------------------------------</span>
+0012 p = bfra.deps.magicParser;
+0013 p.FunctionName = mfilename;
+0014 p.PartialMatching = true;
+0015 
+0016 dpos = [321 241 512 384]; <span class="comment">% default figure size</span>
+0017 
+0018 p.addRequired(<span class="string">'t'</span>,                  @(x)isnumeric(x) || isdatetime(x));
+0019 p.addRequired(<span class="string">'y'</span>,                  @(x)isnumeric(x)                 );
+0020 p.addParameter(<span class="string">'units'</span>,       <span class="string">''</span>,   @(x)ischar(x)                    );
+0021 p.addParameter(<span class="string">'ylabeltext'</span>,  <span class="string">''</span>,   @(x)ischar(x)                    );
+0022 p.addParameter(<span class="string">'xlabeltext'</span>,  <span class="string">''</span>,   @(x)ischar(x)                    );
+0023 p.addParameter(<span class="string">'titletext'</span>,   <span class="string">''</span>,   @(x)ischar(x)                    );
+0024 p.addParameter(<span class="string">'legendtext'</span>,  <span class="string">''</span>,   @(x)ischar(x)                    );
+0025 p.addParameter(<span class="string">'method'</span>,      <span class="string">'ols'</span>,@(x)ischar(x)                    );
+0026 p.addParameter(<span class="string">'alpha'</span>,       0.05, @(x)isnumeric(x)                 );
+0027 p.addParameter(<span class="string">'anomalies'</span>,   true, @(x)islogical(x)                 );
+0028 p.addParameter(<span class="string">'quantile'</span>,    nan,  @(x)isnumeric(x)                 );
+0029 p.addParameter(<span class="string">'figpos'</span>,      dpos, @(x)isnumeric(x)                 );
+0030 p.addParameter(<span class="string">'useax'</span>,       nan,  @(x)bfra.validation.isaxis(x)    );
+0031 p.addParameter(<span class="string">'showfig'</span>,     true, @(x)islogical(x)                 );
+0032 p.addParameter(<span class="string">'errorbars'</span>,   false,@(x)islogical(x)                 );
+0033 p.addParameter(<span class="string">'errorbounds'</span>, false,@(x)islogical(x)                 );
+0034 p.addParameter(<span class="string">'reference'</span>,   nan,  @(x)isnumeric(x)                 );
+0035 p.addParameter(<span class="string">'yerr'</span>,        nan,  @(x)isnumeric(x)                 );
+0036 p.addParameter(<span class="string">'precision'</span>,   nan,  @(x)isnumeric(x)                 );
+0037 p.parseMagically(<span class="string">'caller'</span>);
+0038 
+0039 useax = p.Results.useax;
+0040 units = p.Results.units;
+0041 qntls = p.Results.quantile; clear quantile
+0042 alpha = p.Results.alpha;
+0043 preci = p.Results.precision;
+0044 yerrs = p.Results.yerr;
+0045 vargs = namedargs2cell(p.Unmatched);
+0046 <span class="comment">%-------------------------------------------------------------------------------</span>
+0047 
+0048 <span class="comment">% convert to anomalies etc.</span>
+0049 [t,y,yerrs] = <a href="#_sub1" class="code" title="subfunction [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)">prepInput</a>(t,y,yerrs,anomalies,reference);
+0050 
+0051 <span class="comment">% compute trends</span>
+0052 [ab,err,yfit,yci] = <a href="#_sub2" class="code" title="subfunction [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)">computeTrends</a>(t,y,method,alpha,qntls);
+0053 
+0054 <span class="comment">% update the figure or make a new one</span>
+0055 [h,makeleg,legidx] = <a href="#_sub3" class="code" title="subfunction [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)">updateFigure</a>(useax,showfig,figpos,errorbounds);
+0056 
+0057 <span class="comment">% draw the plot</span>
+0058 h = <a href="#_sub4" class="code" title="subfunction h = plotTrend(h,t,y,yfit,yerr,yci,errorbars,errorbounds,varargs)">plotTrend</a>(h,t,y,yfit,yerrs,yci,errorbars,errorbounds,vargs);
+0059 
+0060 <span class="comment">% draw the legend</span>
+0061 h = <a href="#_sub5" class="code" title="subfunction h = drawLegend(h,ab,legtext,units,alpha,err,makeleg,legidx,precision)">drawLegend</a>(h,ab,legendtext,units,alpha,err,makeleg,legidx,preci);
+0062 
+0063 <span class="comment">%axis tight</span>
+0064 
+0065 ylabel(ylabeltext); xlabel(xlabeltext); title(titletext);
+0066 
+0067 h.ax = gca;
+0068 h.ab = ab;
+0069 h.err = err;
+0070 h.yfit = yfit;
+0071 h.yci = yci;
+0072 
+0073 <a name="_sub1" href="#_subfunctions" class="code">function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)</a>
+0074 
+0075 <span class="comment">% create a regular time in years, works for both months and years</span>
+0076 <span class="keyword">if</span> isdatetime(tt)
+0077    y0 = year(tt(1)); <span class="comment">% the first year (double)</span>
+0078    t0 = datetime(y0,1,1); <span class="comment">% start of the first year (datetime)</span>
+0079    tt = years( tt-tt(1)) + ( y0 + years( tt(1) - t0 ) );
+0080 <span class="keyword">end</span>
+0081 <span class="comment">% see old method that checked for months at end</span>
+0082 
+0083 <span class="comment">% convert to anomalies if requested</span>
+0084 <span class="keyword">if</span> anomalies == true
+0085    <span class="keyword">if</span> ~isnan(reference)
+0086       y = y-mean(reference,1,<span class="string">'omitnan'</span>);
+0087    <span class="keyword">else</span>
+0088       y = y-mean(y,1,<span class="string">'omitnan'</span>);
+0089    <span class="keyword">end</span>
+0090 <span class="keyword">end</span>
+0091 
+0092 <span class="comment">% if yerr is a scalar, make it a vector of size equal to y</span>
+0093 <span class="keyword">if</span> isscalar(yerr)
+0094    yerr = yerr.*ones(size(y));
+0095 <span class="keyword">end</span>
+0096 
+0097 <span class="comment">% COMPUTE TRENDS</span>
+0098 <a name="_sub2" href="#_subfunctions" class="code">function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)</a>
+0099 
+0100 inans = isnan(y);
+0101 ncols = size(y,2);
+0102 abfit = nan(ncols,2);
+0103 error = nan(ncols,1);
+0104 confi = nan;
+0105 yconf = nan(size(y,1),2); <span class="comment">% confidence bounds for trendline</span>
+0106 
+0107 <span class="comment">% note, conf int's not symmetric for quantile regression, so I use the</span>
+0108 <span class="comment">% mean of the lower and upper for now</span>
+0109 
+0110 <span class="comment">% compute trends</span>
+0111 <span class="keyword">for</span> n = 1:ncols
+0112    <span class="keyword">if</span> isnan(qtl)
+0113       <span class="keyword">switch</span> method
+0114          <span class="keyword">case</span> <span class="string">'ts'</span>
+0115             <span class="comment">% need to eventually merge tsregr and ktaub, the latter</span>
+0116             <span class="comment">% doesn't return the intercept and the former doesn't return</span>
+0117             <span class="comment">% conf levels or much other detail.</span>
+0118 
+0119             <span class="comment">% only get conf levels if requested</span>
+0120             <span class="keyword">if</span> isnan(alpha)
+0121                abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
+0122             <span class="keyword">else</span>
+0123                abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
+0124                outab = bfra.deps.ktaub([t,y(:,n)], alpha, false);
+0125                confi = [outab.CIlower, outab.CIupper];
+0126                error(n) = mean([abfit(n,2)-confi(1),confi(2)-abfit(n,2)]);
+0127             <span class="keyword">end</span>
+0128 
+0129             <span class="comment">% not sure we want the setnan</span>
+0130             yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
+0131             yfit = bfra.util.setnan(yfit,[],inans);
+0132 
+0133          <span class="keyword">case</span> <span class="string">'ols'</span>
+0134 
+0135             <span class="keyword">if</span> isnan(alpha)
+0136                abfit(n,:) = bfra.util.olsfit(t,y(:,n));
+0137             <span class="keyword">else</span>
+0138 
+0139                lmmdl = fitlm(t,y(:,n));
+0140                coeff = lmmdl.Coefficients.Estimate;     <span class="comment">% Coefficients</span>
+0141                confi = coefCI(lmmdl,alpha);             <span class="comment">% coefficent CIs</span>
+0142                abfit(n,:) = coeff;
+0143                error(n) = confi(2,2)-abfit(n,2);           <span class="comment">% symmetric for ols</span>
+0144                [yfit,yconf] = predict(lmmdl,t,<span class="string">'alpha'</span>,alpha); <span class="comment">% fitted line and CIs</span>
+0145 
+0146                <span class="comment">% [B,CI] = regress(y(:,n),[ones(size(t)) t],alpha);</span>
+0147                <span class="comment">% CB(:,1)= CI(1,1)+CI(2,1)*t;</span>
+0148                <span class="comment">% CB(:,2)= CI(1,2)+CI(2,2)*t;</span>
+0149                <span class="comment">% CB = bfra.util.anomaly(CB); % convert to anomalies?</span>
+0150 
+0151             <span class="keyword">end</span>
+0152       <span class="keyword">end</span>
+0153    <span class="keyword">else</span>
+0154       <span class="comment">% only get conf levels if requested</span>
+0155       <span class="keyword">if</span> isnan(alpha)
+0156          abfit(n,:) = bfra.deps.quantreg(t,y(:,n),qtl);
+0157       <span class="keyword">else</span>
+0158          [abfit(n,:),S] = bfra.deps.quantreg(t,y(:,n),qtl,1,1000,alpha);
+0159          confi = S.ci_boot';
+0160          error(n) = mean([abfit(n,2)-confi(2,1),confi(2,2)-abfit(n,2)]);
+0161       <span class="keyword">end</span>
+0162 
+0163       yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
+0164       yfit = bfra.util.setnan(yfit,[],inans);
+0165    <span class="keyword">end</span>
+0166 <span class="keyword">end</span>
+0167 
+0168 <span class="comment">% this plots a histogram of the bootstrapped slopes from quantreg</span>
+0169 <span class="comment">% figure; histogram(S.ab_boot(:,2));</span>
+0170 <span class="comment">% this plots the data, the fit, and the bootstrapped fit from quantreg</span>
+0171 <span class="comment">% figure; plot(t,y,'o'); hold on;</span>
+0172 <span class="comment">% plot(S.xfit,S.yfit);</span>
+0173 <span class="comment">% plot(S.xfit,S.yhatci_boot(:,2))</span>
+0174 <span class="comment">% plot(S.xfit,S.yhatci_boot(:,1))</span>
+0175 <span class="comment">%</span>
+0176 <span class="comment">% print the bootstrapped slope plus or minus 1 stderr</span>
+0177 <span class="comment">% [S.ab_boot(2)+S.se_boot(2) S.ab_boot(2)-S.se_boot(2)]</span>
+0178 <span class="comment">% [S.ab_boot(2)+1.96*S.se_boot(2) S.ab_boot(2)-1.96*S.se_boot(2)]</span>
+0179 
+0180 
+0181 <span class="comment">% % this is an old note not sure</span>
+0182 <span class="comment">% % prior method, delete if above is considered best</span>
+0183 <span class="comment">%    if isregular(t,'months')</span>
+0184 <span class="comment">%       nmonths = numel(t);</span>
+0185 <span class="comment">%       t = years(t-t(1));</span>
+0186 <span class="comment">%    elseif isdatetime(t)</span>
+0187 <span class="comment">%       t = year(t);</span>
+0188 <span class="comment">%    end</span>
+0189 
+0190 
+0191 <span class="comment">% MAKE THE FIGURE</span>
+0192 <a name="_sub3" href="#_subfunctions" class="code">function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)</a>
+0193 
+0194 <span class="comment">% if an axis was provided, use it, otherwise make a new figure</span>
+0195 <span class="keyword">if</span> not(bfra.validation.isaxis(useax))
+0196    <span class="keyword">if</span> showfig == true
+0197       h.figure = figure(<span class="string">'Position'</span>,figpos);
+0198    <span class="keyword">else</span>
+0199       h.figure = figure(<span class="string">'Position'</span>,figpos,<span class="string">'Visible'</span>,<span class="string">'off'</span>);
+0200    <span class="keyword">end</span>
+0201    h.ax = gca;
+0202 <span class="keyword">else</span>
+0203    h.ax = useax;
+0204 <span class="keyword">end</span>
+0205 
+0206 <span class="comment">% the legend is parented by the figure, so if the figure contains</span>
+0207 <span class="comment">% subplots, i can't just use findobj(gcf,'Type','Legend') to determine</span>
+0208 <span class="comment">% if the current plot has a legend already, which i want because I want</span>
+0209 <span class="comment">% to add the next trendplot trendline to the existing legend</span>
+0210 <span class="comment">% legobj      = findobj(gcf,'Type','Legend');</span>
+0211 
+0212 figchi = get(gcf,<span class="string">'Children'</span>);
+0213 axobjs = findobj(gcf,<span class="string">'Type'</span>,<span class="string">'Axes'</span>);
+0214 legobj = findobj(gcf,<span class="string">'Type'</span>,<span class="string">'Legend'</span>);
+0215 numleg = numel(legobj); <span class="comment">% 1 = one legend, 2 indicates a subplot</span>
+0216 numaxs = numel(axobjs);
+0217 
+0218 <span class="comment">% assume we want to append onto an existing legend</span>
+0219 makeleg = false; <span class="keyword">if</span> numaxs&gt;numleg || numleg==0; makeleg = true; <span class="keyword">end</span>
+0220 
+0221 <span class="comment">% assume only trendplots exist, each one has data + trend line, so the</span>
+0222 <span class="comment">% number of trendlines is numlines/2, unless errorbounds is true</span>
+0223 
+0224 axchilds = allchild(h.ax);  <span class="comment">% get the children to find lines</span>
+0225 numchild = numel(axchilds);
+0226 <span class="comment">% above here og don't mess</span>
+0227 
+0228 linesobjs = findobj(axchilds,<span class="string">'type'</span>,<span class="string">'line'</span>);
+0229 patchobjs = findobj(axchilds,<span class="string">'type'</span>,<span class="string">'patch'</span>);
+0230 errorobjs = findobj(axchilds,<span class="string">'type'</span>,<span class="string">'errorbar'</span>);
+0231 
+0232 <span class="comment">% if only the error bars have handle visibility on, this should work.</span>
+0233 <span class="comment">% also this shows that i can figure out how many have handlevis on and</span>
+0234 <span class="comment">% use that to determine thislineidx. note, thislineidx is used to set</span>
+0235 <span class="comment">% the color order, so repeated calls to trendplot use the same color for</span>
+0236 <span class="comment">% the line/patch/errorbar, but it is also used to set the new legend</span>
+0237 <span class="comment">% text</span>
+0238 numlines = numel(linesobjs);
+0239 <span class="comment">%thislineidx = numlines+1;</span>
+0240 numpatch = numel(patchobjs);
+0241 numebars = numel(errorobjs);
+0242 
+0243 <span class="comment">% if we have one timeseries plotted, there will be two lineobj's (one</span>
+0244 <span class="comment">% for the timeseries, and one for the trendline), so we want thislineidx</span>
+0245 <span class="comment">% to evaluate to 2, but I think if errorbar is true, it means there will</span>
+0246 <span class="comment">% be one line object (the trendline)</span>
+0247 
+0248 <span class="comment">% when i added errorbars, it worked to just do thislineidx = numlines+1,</span>
+0249 <span class="comment">% until i plotted wihtout errorbarrs, then it didn't work, so I added</span>
+0250 <span class="comment">% this:</span>
+0251 <span class="keyword">if</span> numebars &gt; 0 &amp;&amp; numebars == numlines
+0252    thislineidx = numlines+1;
+0253 <span class="keyword">elseif</span> numebars == 0 &amp;&amp; mod(numlines,2) == 0
+0254    thislineidx = numlines/2+1; <span class="comment">% should alwasy be two lines per plot</span>
+0255 <span class="keyword">end</span>
+0256 
+0257 <span class="comment">%    % this is the original</span>
+0258 <span class="comment">%    if errorbounds == true &amp;&amp; mod(numchilds,2) == 1</span>
+0259 <span class="comment">%       numlines = (numchilds-1)/2;</span>
+0260 <span class="comment">%       thislineidx = numlines+1;</span>
+0261 <span class="comment">%    else</span>
+0262 <span class="comment">%       numlines = numel(axchildren)/2;</span>
+0263 <span class="comment">%       thislineidx = numlines+1;</span>
+0264 <span class="comment">%    end</span>
+0265 
+0266 set(h.ax,<span class="string">'ColorOrderIndex'</span>,thislineidx);
+0267 
+0268 hold on;
+0269 
+0270 legidx = thislineidx;
+0271 
+0272 <span class="comment">% % this version hides the -o lines so the legend shows - lines</span>
+0273 <span class="comment">% h.plot = plot(useax,t,y,'-o','HandleVisibility','off',plotvarargs{:});</span>
+0274 <span class="comment">% h.trend = plot(useax,t,ytrend,'-','Color',h.plot.Color,'LineWidth',1);</span>
+0275 <span class="comment">% formatPlotMarkers;</span>
+0276 
+0277 
+0278 <span class="comment">% PLOT TRENDS</span>
+0279 <a name="_sub4" href="#_subfunctions" class="code">function h = plotTrend(h,t,y,yfit,yerr,yci,errorbars,errorbounds,varargs)</a>
+0280 
+0281 <span class="comment">% see formaterrorbar script, might use instead of formatplotmarkers or</span>
+0282 <span class="comment">% add the errorbar functionality to that one</span>
+0283 
+0284 <span class="comment">% plot errorbounds first</span>
+0285 <span class="keyword">if</span> errorbounds == true
+0286 
+0287    c = h.ax.ColorOrder(h.ax.ColorOrderIndex,:);
+0288 
+0289    Y = [yci(:,2)' fliplr(yci(:,1)')];
+0290    X = [t' fliplr(t')];
+0291 
+0292    h.bounds = patch(<span class="string">'XData'</span>,X,<span class="string">'YData'</span>,Y,<span class="string">'FaceColor'</span>,c,<span class="string">'FaceAlpha'</span>,0.15,<span class="keyword">...</span>
+0293       <span class="string">'EdgeColor'</span>,<span class="string">'none'</span>,<span class="string">'Parent'</span>,h.ax,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
+0294 <span class="keyword">end</span>
+0295 
+0296 <span class="keyword">if</span> errorbars == true
+0297 
+0298    <span class="comment">% formatPlotMarkers handles edgecolor, facecolor, and marker size</span>
+0299    h.plot = errorbar(h.ax,t,y,yerr, <span class="keyword">...</span>
+0300       <span class="string">'Marker'</span>,<span class="string">'o'</span>, <span class="keyword">...</span>
+0301       <span class="string">'LineWidth'</span>, 1.5, <span class="keyword">...</span>
+0302       <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="keyword">...</span>
+0303       <span class="string">'MarkerEdgeColor'</span>, [.5 .5 .5] );
+0304 
+0305 <span class="keyword">else</span> <span class="comment">% trendlines</span>
+0306    h.plot = plot(h.ax,t,y,<span class="string">'-o'</span>,<span class="string">'LineWidth'</span>,2,varargs{:});
+0307 <span class="keyword">end</span>
+0308 
+0309 h.trend = plot(h.ax,t,yfit,<span class="string">'-'</span>,<span class="string">'Color'</span>,h.plot.Color,  <span class="keyword">...</span>
+0310    <span class="string">'LineWidth'</span>,1,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
+0311 bfra.util.formatPlotMarkers;
+0312 
+0313 
+0314 <span class="comment">%  DRAW LEGEND</span>
+0315 
+0316 <a name="_sub5" href="#_subfunctions" class="code">function h = drawLegend(h,ab,legtext,units,alpha,err,makeleg,legidx,precision)</a>
+0317 
+0318 <span class="comment">% this is repeated here and in updateFigure</span>
+0319 legobj = findobj(gcf,<span class="string">'Type'</span>,<span class="string">'Legend'</span>);
+0320 
+0321 <span class="comment">% only draw a legend if trend units were provided</span>
+0322 <span class="comment">% if not(isempty(trendunits))</span>
+0323 
+0324 <span class="comment">%trendtext = sprintf(['%.2f ' trendunits ],ab(2));</span>
+0325 <span class="comment">%mytextbox(trendtext,50,90,'interpreter','tex','fontsize',10);</span>
+0326 
+0327 <span class="keyword">if</span> isnan(precision)
+0328    prec = ceil(abs(log10(ab(2))))+1;
+0329 <span class="keyword">else</span>
+0330    prec = precision;
+0331 <span class="keyword">end</span>
+0332 
+0333 <span class="comment">% log10(ab(2)) = the number of zeros to right or left of decimal</span>
+0334 <span class="comment">% ceil(log10(ab(2))) = ceil gets you to the digit e.g.:</span>
+0335 <span class="comment">% ceil(abs(log10(0.003))) = 3</span>
+0336 <span class="comment">% ceil(abs(log10(300))) = 3</span>
+0337 <span class="comment">% +1 gets you an extra digit of precision</span>
+0338 
+0339 <span class="keyword">if</span> prec&gt;5
+0340    bexp = floor(log10(abs(ab(2))));
+0341    bbase = ab(2)*10^-bexp;
+0342    <span class="keyword">if</span> isnan(alpha)
+0343       trendtxt = sprintf([legtext <span class="string">' (trend: %.2fe$^{%.2f}$ '</span> units <span class="string">')'</span>],bbase,bexp                );
+0344    <span class="keyword">else</span>
+0345       errstr = num2str(round(100*(1-alpha)));
+0346 
+0347       <span class="comment">%          trendtxt = sprintf([legtext ' (trend: %.2fe$^{%.2f}'     ...</span>
+0348       <span class="comment">%             '$\\pm$ %.2f (' errstr '$\\%%$ CI)$ ' units ')'],...</span>
+0349       <span class="comment">%                      bbase,bexp,err);</span>
+0350 
+0351       <span class="comment">% to turn off the 95% Ci part:</span>
+0352       trendtxt = sprintf([legtext <span class="string">' (trend: %.2fe$^{%.2f}'</span>     <span class="keyword">...</span>
+0353          <span class="string">'\\pm$ %.2f '</span> units <span class="string">')'</span>],bbase,bexp,err);
+0354 
+0355    <span class="keyword">end</span>
+0356 
+0357 <span class="keyword">else</span>
+0358    <span class="keyword">if</span> isnan(alpha)
+0359       trendtxt = sprintf([legtext <span class="string">' (trend: %.'</span> num2str(prec) <span class="string">'f '</span> units <span class="string">')'</span>], <span class="keyword">...</span>
+0360          ab(2));
+0361    <span class="keyword">else</span>
+0362       errstr = num2str(round(100*(1-alpha)));
+0363 
+0364       <span class="comment">%          trendtxt = sprintf([legtext ' (trend: %.' num2str(prec)  ...</span>
+0365       <span class="comment">%                      'f $\\pm$ %.' num2str(prec) 'f ('      ...</span>
+0366       <span class="comment">%                      errstr '$\\%%$ CI) ' units ')'],ab(2),err);</span>
+0367 
+0368       <span class="comment">% to turn off the 95% Ci part:</span>
+0369       trendtxt = sprintf([legtext <span class="string">' (trend: %.'</span> num2str(prec)  <span class="keyword">...</span>
+0370          <span class="string">'f $\\pm$ %.'</span> num2str(prec) <span class="string">'f '</span> units <span class="string">')'</span>],ab(2),err);
+0371 
+0372    <span class="keyword">end</span>
+0373 
+0374 <span class="keyword">end</span>
+0375 
+0376 <span class="keyword">if</span> makeleg == true <span class="comment">% isempty(legobj)</span>
+0377    <span class="comment">%h.legend = legend(h.trend,trendtxt,'interpreter','latex');</span>
+0378    h.legend = legend(h.plot,trendtxt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0379 <span class="keyword">else</span>
+0380    <span class="comment">% the current legend will be the first one, not numleg as I expected</span>
+0381    legobj(1).String{legidx} = trendtxt;
+0382 <span class="keyword">end</span></pre></div>
+</body>
+</html>

@@ -42,7 +42,7 @@ addRequired(p, 'q',                             @(x)isnumeric(x));
 addRequired(p, 'dqdt',                          @(x)isnumeric(x));
 addParameter(p,'mask',        true(size(q)),    @(x)islogical(x));
 addParameter(p,'reflines',    {'bestfit'},      @(x)iscell(x));
-addParameter(p,'reflabels',   false,            @(x)islogical(x)&isscalar(x));
+addParameter(p,'reflabels',   false,            @(x)bfra.validation.islogicalscalar(x));
 addParameter(p,'blate',       1,                @(x)isnumeric(x));
 addParameter(p,'userab',      [1 1],            @(x)isnumeric(x));
 addParameter(p,'precision',   1,                @(x)isnumeric(x));
@@ -50,7 +50,7 @@ addParameter(p,'timestep',    1,                @(x)isnumeric(x));
 addParameter(p,'addlegend',   true,             @(x)islogical(x));
 addParameter(p,'usertext',    '',               @(x)ischar(x));
 addParameter(p,'rain',        nan,              @(x)isnumeric(x));
-addParameter(p,'ax',          'none',           @(x)isaxis(x)|ischar(x));
+addParameter(p,'ax',          'none',           @(x)bfra.validation.isaxis(x)|ischar(x));
 
 parse(p,q,dqdt,varargin{:});
 
@@ -69,14 +69,16 @@ ax          = p.Results.ax;
 % Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
 %-------------------------------------------------------------------------------
    
-if ~isaxis(ax)
+if not(bfra.validation.isaxis(ax))
+   fig = figure('Position',[380 200 300 210]); ax = gca;
    %fig = figure('Position',[380 200 550 510]); ax = gca;
-   fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
+   %fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
 else
-   fig = gcf;
+   fig = get(ax,'Parent');
 end
 
-h0 = loglog(ax,q,-dqdt,'o'); formatPlotMarkers('markersize',6); 
+h0 = loglog(ax,q,-dqdt,'o'); 
+bfra.util.formatPlotMarkers('markersize',6); 
 hold on; grid off;
 
 % add circles around the t>tau0 values if requested
@@ -259,7 +261,7 @@ out.legend     = l;
 % 
 %    out.ab         = ab;
 
-snapnow;
+% snapnow;
 
 
 function hrain = plotrain(ax,h,rain,x,y)

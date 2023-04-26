@@ -58,17 +58,25 @@ fitab    = p.Results.fitab;
 plotfit  = p.Results.plotfit;
 %-------------------------------------------------------------------------------
 warning off
+
+%TEST BEGIN
+% t = T-T(1)+(T(2)-T(1)); % keep og T
+% [xe,ye] = prepareCurveData(t, Q./max(Q));
+%TEST END
+
+% T = datetime(T,'convertfrom','datenum'); % TEST
+
 % Fit exponential function on the entire recession event
 T.Format = 'dd-MMM-uuuu hh:mm';
-t        = days(T-T(1)+(T(2)-T(1))); % keep og T
-[xe,ye]  = prepareCurveData(t, Q./max(Q));
+t = days(T-T(1)+(T(2)-T(1))); % keep og T
+[xe,ye] = prepareCurveData(t, Q./max(Q));
 
 % fit gamma (a in the linear model -dq/dt = aQ)
-b0       = [mean(ye) 0.2 0];
-opts     = statset('Display','off');
-fnc      = @(b,x)b(1)*exp(-b(2)*x)+b(3);
+b0 = [mean(ye) 0.2 0];
+opts = statset('Display','off');
+func = @(b,x)b(1)*exp(-b(2)*x)+b(3);
 try
-   abc = nlinfit(xe,ye,fnc,b0,opts);
+   abc = nlinfit(xe,ye,func,b0,opts);
 catch ME
    try
       abc = tryexpfit(xe,ye);
@@ -76,49 +84,83 @@ catch ME
       rethrow(ME)
    end
 end
-   
 
-gamma = abc(2); % gamma = b, also a in dq/dt = aQ
-nmax  = etsparam*max(t);
-m     = 1+ceil(nmax.*exp(-1./(gamma.*t))); % Eq. 7
+
+gamm = abc(2); % gamma = b, also a in dq/dt = aQ
+nmax = etsparam*max(t);
+mpar = 1+ceil(nmax.*exp(-1./(gamm.*t))); % Eq. 7
 
 [N,q,dqdt,~,dt,tq,rq,r2] = bfra.initfit(t,'eventdqdt');
 
+% TEST
+% tq = datenum(tq);
+% TEST END
+
 % isempty(q) occurs when gamma is very small and m blows up.
 % if all(isempty(q)) || numel(q)<4
-if any(1./(gamma.*t)-log(etsparam./(max(t)-1)) < 0) || numel(q)<4
+if any(1./(gamm.*t)-log(etsparam./(max(t)-1)) < 0) || numel(q)<4
    return
 end
 
+% TEST BEGIN
+% N = length(t)-mpar(end);   % new # of events
+% for n = 1:N
+%    x     = t(n:n+mpar(n));
+%    X     = [ones(length(x),1) x];
+%    Y     = Q(n:n+mpar(n));
+%    dQdt  = X\Y;                               % eq. 8
+%    yfit  = X*dQdt;
+%    r2(n) = 1-sum((Y-yfit).^2)/sum((Y-mean(Y)).^2); r2(r2<0) = 0;
+% 
+%    dqdt(n) = dQdt(2);                 % eq. 9
+%    q(n)  = mean(Y,'omitnan');
+%    tq(n) = mean(T(n:n+mpar(n)));
+%    rq(n) = mean(R(n:n+mpar(n)));
+%    dt(n) = t(n+mpar(n))-t(n);
+% 
+% end
+% TEST END
+
 % move over the recession in windows of length m and fit dQ/dt
 n = 1;
-while n+m(n)<=N
-   x     = t(n:n+m(n));
-   X     = [ones(length(x),1) x];
-   Y     = Q(n:n+m(n));
-   dQdt  = X\Y;                               % eq. 8
+while n+mpar(n)<=N
+   
+   x = t(n:n+mpar(n));
+   X = [ones(length(x),1) x];
+   Y = Q(n:n+mpar(n));
+   
+   dQdt  = X\Y;                        % eq. 8
    yfit  = X*dQdt;
    r2(n) = 1-sum((Y-yfit).^2)/sum((Y-mean(Y)).^2); r2(r2<0) = 0;
 
-   dqdt(n)  = dQdt(2);                 % eq. 9
-   q(n)     = mean(Y,'omitnan');
-   tq(n)    = mean(T(n:n+m(n)));
-   rq(n)    = mean(R(n:n+m(n)));
-   dt(n)    = t(n+m(n))-t(n);
-   n        = n+1;
+   dqdt(n) = dQdt(2);                  % eq. 9
+   tq(n) = mean(T(n:n+mpar(n)));
+   rq(n) = mean(R(n:n+mpar(n)));
+   dt(n) = t(n+mpar(n))-t(n);
+   q(n)  = mean(Y,'omitnan');
+   
+   n = n+1;
 end
 
 inan = dqdt>0 | isnan(r2) | r2<=0;
 dqdt(inan) = NaN;
 
+% compute dq
+dq = dqdt.*dt; % need to check this, right now it isn't used anywhere
+
 % retime to the original timestep
-dq    = dqdt.*dt; % need to check this, right now it isn't used anywhere
+% TEST BEGIN
 q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);
 dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
 dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+% TEST END
+
 tq    = T;
 
 % figure; plot(t,q); hold on; plot(tets,qets)
+
+% tq_dt = datetime(tq,'ConvertFrom','datenum');
+% T_dt = datetime(T,'ConvertFrom','datenum');
 
 % ------------
 % gamma checks

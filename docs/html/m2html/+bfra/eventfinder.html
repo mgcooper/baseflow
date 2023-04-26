@@ -28,26 +28,26 @@
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">EVENTFINDER find recession events on hydrograph timeseries t,q and rainfall r
- 
+
  Syntax
- 
+
      [T,Q,R,Info] = eventfinder(t,q,r,varargin)
- 
+
  Description
- 
+
      [T,Q,R,Info] = eventfinder(t,q,r) Detects periods of declining flow on
      hydrographs defined by inputs time 't', discharge 'q', and rainfall 'r'.
      Use optional inputs to set parameters that determine how events are
-     identified. 
- 
+     identified.
+
  Required inputs
- 
+
      t           time
      q           flow (m3/time)
      r           rain (mm/time)
- 
+
  Optional name-value inputs
- 
+
      nmin        minimum event length
      fmax        maximum # of missing values gap-filled
      rmax        maximum run of sequential constant values
@@ -55,7 +55,7 @@
      rmconvex    remove convex derivatives
      rmnochange  remove consecutive constant derivates
      rmrain      remove rainfall
- 
+
  See also <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, <a href="eventsplitter.html" class="code" title="function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)">eventsplitter</a>, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>, <a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
@@ -142,7 +142,7 @@ This function is called by:
 0060 rmnochange  = p.Results.rmnochange;
 0061 rmrain      = p.Results.rmrain;
 0062 
-0063 <span class="comment">% allow input syntax eventfinder(t,q,[],...)</span>
+0063 <span class="comment">% allow empty r i.e. input syntax eventfinder(t,q,[],...)</span>
 0064 <span class="keyword">if</span> isempty(r)
 0065    r = zeros(size(t));
 0066 <span class="keyword">end</span>
@@ -153,85 +153,86 @@ This function is called by:
 0071 r = r(:);
 0072 
 0073 <span class="comment">%-------------------------------------------------------------------------------</span>
-0074    
+0074 
 0075 
-0076 iS  = [1;find(diff(isnan(q))==-1)+1];       <span class="comment">% start non-nan segments</span>
-0077 iE  = [find(diff(isnan(q))==1);length(q)];  <span class="comment">% end non-nan segments</span>
-0078 L   = iE-iS+1;                              <span class="comment">% segment lengths</span>
+0076 iS = [1;find(diff(isnan(q))==-1)+1];       <span class="comment">% start non-nan segments</span>
+0077 iE = [find(diff(isnan(q))==1);length(q)];  <span class="comment">% end non-nan segments</span>
+0078 L  = iE-iS+1;                              <span class="comment">% segment lengths</span>
 0079 
 0080 <span class="comment">% initialize the combined events</span>
-0081 T   = []; Q = []; R = []; Info = struct; iflag = false;
+0081 T = []; Q = []; R = []; Info = struct; iflag = false;
 0082 
 0083 <span class="keyword">for</span> n = 1:length(iS)
-0084 
+0084    
 0085    <span class="keyword">if</span> L(n)&lt;nmin                       <span class="comment">% set nan if &lt;nmin</span>
-0086       [Tn,Qn,Rn,Infon]  = bfra.seteventnan;
+0086       [Tn,Qn,Rn,Infon] = bfra.util.setEventEmpty;
 0087    <span class="keyword">else</span>
-0088                 tn      = t(iS(n):iE(n));
-0089                 qn      = q(iS(n):iE(n));
-0090                 rn      = r(iS(n):iE(n));
-0091 
-0092      [Tn,Qn,Rn,Infon]   = bfra.eventsplitter(tn,qn,rn,               <span class="keyword">...</span>
-0093                               <span class="string">'nmin'</span>,        nmin,                   <span class="keyword">...</span>
-0094                               <span class="string">'fmax'</span>,        fmax,                   <span class="keyword">...</span>
-0095                               <span class="string">'rmax'</span>,        rmax,                   <span class="keyword">...</span>
-0096                               <span class="string">'rmin'</span>,        rmin,                   <span class="keyword">...</span>
-0097                               <span class="string">'rmconvex'</span>,    rmconvex,               <span class="keyword">...</span>
-0098                               <span class="string">'rmnochange'</span>,  rmnochange,             <span class="keyword">...</span>
-0099                               <span class="string">'rmrain'</span>,      rmrain                  );
-0100    <span class="keyword">end</span>
-0101 
-0102    <span class="comment">% if no events were detected, Infon.istart will be empty</span>
-0103    <span class="keyword">if</span> all(isempty(Infon.istart)); <span class="keyword">continue</span>; <span class="keyword">else</span>
-0104 
-0105       <span class="comment">% iS is the start of the entire flow segment, but the indices in</span>
-0106       <span class="comment">% Info are relative to the event returned by segmentevents. here</span>
-0107       <span class="comment">% we add iS to these indices, except runlengths</span>
-0108       fields   = fieldnames(Infon);
-0109 
-0110       <span class="keyword">if</span> numel(Infon.ikeep) &gt; 0
-0111 
-0112          <span class="keyword">for</span> m = 1:numel(fields)
-0113             Infon.(fields{m}) = Infon.(fields{m}) + iS(n) - 1;
-0114          <span class="keyword">end</span>
-0115 
-0116          <span class="comment">% add the first non-nan index and runlengths to Info</span>
-0117 <span class="comment">%             Infon.ifirst      = opts.ifirst;</span>
-0118 <span class="comment">%             Infon.runlengths  = Infon.istop - Infon.istart + 1;</span>
-0119       <span class="keyword">end</span>
-0120 
-0121       <span class="comment">% this is needed b/c 'info' has no fieldnames until first detected event</span>
-0122       <span class="keyword">if</span> iflag == false           <span class="comment">% no events detected yet</span>
-0123           T = Tn; Q = Qn; R = Rn; Info = Infon; iflag = true;
-0124           <span class="keyword">continue</span>
-0125       <span class="keyword">else</span>                        <span class="comment">% at least one detected event</span>
-0126           T    = [T;Tn];
-0127           Q    = [Q;Qn];
-0128           R    = [R;Rn];
-0129           Info = catStructFields(1,Info,Infon);
-0130       <span class="keyword">end</span>   
-0131    <span class="keyword">end</span>
-0132 <span class="keyword">end</span>
-0133 
-0134 <span class="comment">% if no events were returned, set events nan</span>
-0135 <span class="keyword">if</span> isempty(fieldnames(Info))
-0136    [T,Q,R,Info] = bfra.seteventnan;
-0137 
-0138 <span class="keyword">else</span> <span class="comment">% cycle through and remove empty events</span>
-0139    inan = false(size(T));
-0140    <span class="keyword">for</span> n = 1:numel(T)
-0141       <span class="keyword">if</span> isempty(T{n})
-0142          inan(n) = true; 
-0143       <span class="keyword">end</span>
-0144    <span class="keyword">end</span>
-0145    T = T(~inan);
-0146    Q = Q(~inan);
-0147    R = R(~inan);
-0148    
-0149    Info.istart = Info.istart(~inan);
-0150    Info.istop  = Info.istop(~inan);
-0151  <span class="comment">% Info.runlengths = Info.runlengths(~inan);</span>
-0152 
-0153 <span class="keyword">end</span></pre></div>
+0088       tn = t(iS(n):iE(n));
+0089       qn = q(iS(n):iE(n));
+0090       rn = r(iS(n):iE(n));
+0091       
+0092       [Tn,Qn,Rn,Infon] = bfra.eventsplitter( <span class="keyword">...</span>
+0093          tn,qn,rn, <span class="keyword">...</span>
+0094          <span class="string">'nmin'</span>, nmin, <span class="keyword">...</span>
+0095          <span class="string">'fmax'</span>, fmax, <span class="keyword">...</span>
+0096          <span class="string">'rmax'</span>, rmax, <span class="keyword">...</span>
+0097          <span class="string">'rmin'</span>, rmin, <span class="keyword">...</span>
+0098          <span class="string">'rmrain'</span>, rmrain, <span class="keyword">...</span>
+0099          <span class="string">'rmconvex'</span>, rmconvex, <span class="keyword">...</span>
+0100          <span class="string">'rmnochange'</span>, rmnochange);
+0101    <span class="keyword">end</span>
+0102    
+0103    <span class="comment">% if no events were detected, Infon.istart will be empty</span>
+0104    <span class="keyword">if</span> all(isempty(Infon.istart)); <span class="keyword">continue</span>; <span class="keyword">else</span>
+0105       
+0106       <span class="comment">% iS is the start of the entire flow segment, but the indices in</span>
+0107       <span class="comment">% Info are relative to the event returned by segmentevents. here</span>
+0108       <span class="comment">% we add iS to these indices, except runlengths</span>
+0109       fields = fieldnames(Infon);
+0110       
+0111       <span class="keyword">if</span> numel(Infon.ikeep) &gt; 0
+0112          
+0113          <span class="keyword">for</span> m = 1:numel(fields)
+0114             Infon.(fields{m}) = Infon.(fields{m}) + iS(n) - 1;
+0115          <span class="keyword">end</span>
+0116          
+0117          <span class="comment">% add the first non-nan index and runlengths to Info</span>
+0118          <span class="comment">% Infon.ifirst = opts.ifirst;</span>
+0119          <span class="comment">% Infon.runlengths = Infon.istop - Infon.istart + 1;</span>
+0120       <span class="keyword">end</span>
+0121       
+0122       <span class="comment">% this is needed b/c 'info' has no fieldnames until first detected event</span>
+0123       <span class="keyword">if</span> iflag == false           <span class="comment">% no events detected yet</span>
+0124          T = Tn; Q = Qn; R = Rn; Info = Infon; iflag = true;
+0125          <span class="keyword">continue</span>
+0126       <span class="keyword">else</span>                        <span class="comment">% at least one detected event</span>
+0127          T = [T;Tn];
+0128          Q = [Q;Qn];
+0129          R = [R;Rn];
+0130          Info = bfra.util.catstructfields(1,Info,Infon);
+0131       <span class="keyword">end</span>
+0132    <span class="keyword">end</span>
+0133 <span class="keyword">end</span>
+0134 
+0135 <span class="comment">% if no events were returned, set events empty</span>
+0136 <span class="keyword">if</span> isempty(fieldnames(Info))
+0137    [T,Q,R,Info] = bfra.util.setEventEmpty;
+0138    
+0139 <span class="keyword">else</span> <span class="comment">% cycle through and remove empty events</span>
+0140    inan = false(size(T));
+0141    <span class="keyword">for</span> n = 1:numel(T)
+0142       <span class="keyword">if</span> isempty(T{n})
+0143          inan(n) = true;
+0144       <span class="keyword">end</span>
+0145    <span class="keyword">end</span>
+0146    T = T(~inan);
+0147    Q = Q(~inan);
+0148    R = R(~inan);
+0149    
+0150    Info.istart = Info.istart(~inan);
+0151    Info.istop  = Info.istop(~inan);
+0152    <span class="comment">% Info.runlengths = Info.runlengths(~inan);</span>
+0153    
+0154 <span class="keyword">end</span></pre></div>
 </body>
 </html>

@@ -59,24 +59,25 @@ nreps    = p.Results.nreps;
 plotfit  = p.Results.plotfit;
 
 %-------------------------------------------------------------------------------
-x0    = x;
+x0 = x;
 [x,~] = prepareCurveData(x,x);
-x     = x(x>0);
+x = x(x>0);
 if isnan(xmin)
    switch method
       case 'clauset'
-         [alpha,xmin,L,D] = plfit(x,'range',range,'limit',limit);
+         [alpha,xmin,L,D] = bfra.deps.plfit(x,'range',range,'limit',limit);
          if bootfit == true
             BootFit = plbootfit(x,range,limit,nreps);
          end
+      % undocumented feature, requires r_plfit function, not included in toolbox
       case 'hanel'
-         [~,xmin]          = plfit(x,'range',range,'limit',limit);
-         [alpha,xmin,L,D]  = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
+         [~,xmin] = bfra.deps.plfit(x,'range',range,'limit',limit);
+         [alpha,xmin,L,D] = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
             range(1),'alpha_max',range(end));
          % if I had some max value to consider, I could pass 'rangemax'
    end
 else
-   [alpha,~,L,D] = plfit(x,'xmin',xmin,'range',range,'limit',limit);
+   [alpha,~,L,D] = bfra.deps.plfit(x,'xmin',xmin,'range',range,'limit',limit);
 end
 
 Fit.x       = x0; % keep the input data
@@ -121,8 +122,9 @@ if plotfit == true
    xmin = Fit.tau0;
    aci = [Fit.alpha_H Fit.alpha_L];
    xci = [Fit.tau0_L Fit.tau0_H];
-   figure; bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
-   snapnow;
+   figure('Position',[0 0 300 200]); ax = gca;
+   bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci,'ax',ax);
+%    snapnow;
 end
 
 switch nargout
@@ -145,8 +147,8 @@ end
 % bootstrap confidence intervals
 function Fit = plbootfit(x,range,limit,nreps)
 
-%[alpha,xmin,L,D] = plfit(x,'range',range,'limit',limit);
-[~,~,~,repsmat] = plvar(x,'range',range,'limit',limit,'reps',nreps,'silent');
+%[alpha,xmin,L,D] = bfra.deps.plfit(x,'range',range,'limit',limit);
+[~,~,~,repsmat] = bfra.deps.plvar(x,'range',range,'limit',limit,'reps',nreps,'silent');
 
 vars        = {'tau0','alpha','b','tau','ntail'};
 reps.ntail  = repsmat(:,1);
@@ -196,7 +198,7 @@ Fit.reps = reps;
 % function Fit = bootstrap_alpha(x,range,limit)
 %
 %    % first get xmin, bootstrap won't change this
-%    [~,xmin] = plfit(x,'range',range,'limit',limit);
+%    [~,xmin] = bfra.deps.plfit(x,'range',range,'limit',limit);
 %
 %    % now bootstrap alpha
 %    reps  = bootstrp(1000,@(x,xmin)plfit(x,'xmin',xmin),x,xmin);

@@ -105,175 +105,174 @@ This function is called by:
 0027 <span class="comment">% if called with no input, open this file</span>
 0028 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0029 
-0030 <span class="comment">% parse inputs</span>
-0031 <span class="comment">%------------------------------------------------------------------------------</span>
-0032 p                 =  magicParser;
-0033 p.FunctionName    =  <span class="string">'bfra.loadflow'</span>;
-0034 p.PartialMatching =  true;
-0035 
-0036 p.addRequired( <span class="string">'basinname'</span>,            @(x) ischar(x));
-0037 p.addParameter(<span class="string">'t1'</span>,       NaT,        @(x) isdatetime(x)|isnumeric(x));
-0038 p.addParameter(<span class="string">'t2'</span>,       NaT,        @(x) isdatetime(x)|isnumeric(x));
-0039 p.addParameter(<span class="string">'units'</span>,    NaN,        @(x) ischar(x));
-0040 p.addParameter(<span class="string">'gapfill'</span>,  false,      @(x) islogical(x));
-0041 p.addParameter(<span class="string">'addvar'</span>,   false,      @(x) ischar(x));
-0042 
-0043 p.parseMagically(<span class="string">'caller'</span>);
-0044 
-0045 <span class="comment">%p.addParameter('projection','geo',@(x)ischar(x));</span>
-0046 
-0047 <span class="comment">% NOTE: addvar is an option to add an unrelated input var, but for now it means</span>
-0048 <span class="comment">% add a converted Q timeseries e.g. cm/yr i commented out the part where addvar</span>
-0049 <span class="comment">% is checked so it is defualt for now and I can adjust to addvar as above</span>
-0050 
-0051 <span class="keyword">if</span> isnumeric(t1) <span class="comment">%#ok&lt;*NODEF&gt;</span>
-0052    t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
-0053    t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
-0054 <span class="keyword">end</span>
-0055 <span class="comment">%------------------------------------------------------------------------------</span>
-0056 
-0057 <span class="comment">% load the flow data</span>
-0058 pathdata = fullfile(getenv(<span class="string">'USERDATAPATH'</span>),<span class="string">'interface/bfra/matfiles/'</span>);
-0059 filedata = fullfile(pathdata,<span class="string">'flow_prepped.mat'</span>);
-0060 
-0061 load(filedata,<span class="string">'Flow'</span>);
-0062 
-0063 <span class="comment">% check for categorical station name</span>
-0064 <span class="keyword">if</span> iscategorical(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <span class="keyword">end</span>
-0065 
-0066 <span class="comment">% find the flow data (for exact match use ismember not contains)</span>
-0067 allnames = lower(Flow.Meta.name);
-0068 istation = find(ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>)));
-0069 Meta     = Flow.Meta(istation,:);
-0070 
-0071 <span class="comment">%%%%%%%%%%%%%%%% new method that uses the raw .csv files</span>
-0072 <span class="comment">%    sta         =  Meta.station{:};</span>
-0073 <span class="comment">%    [Q,Time]    =  readflow(sta);</span>
-0074 <span class="comment">%%%%%%%%%%%%%%%% new method that uses the raw .csv files</span>
-0075 
-0076 <span class="comment">%%%%%%%%%%%%%%%% old method that used the database</span>
-0077 Q           =  Flow.Q(:,istation);
-0078 Time        =  Flow.T;
-0079 <span class="comment">%%%%%%%%%%%%%%%% old method that used the database</span>
-0080 
-0081 <span class="keyword">if</span> isnat(t1)
-0082    si       =  find(~isnan(Q),1,<span class="string">'first'</span>);
-0083    ei       =  find(~isnan(Q),1,<span class="string">'last'</span>);
-0084    iok      =  si:ei;
-0085 <span class="keyword">else</span>
-0086    iok      =  isbetween(Time,t1,t2);
-0087 <span class="keyword">end</span>
-0088 <span class="comment">% the t1/t2 method might remove the need for padding/trimming</span>
-0089 
-0090 Q           =  Q(iok);
-0091 Time        =  Time(iok);
-0092 Flow        =  timetable(Time,Q);
-0093 
-0094 <span class="comment">% experimental - gap fill. should prob add this to a timetable function</span>
-0095 <span class="keyword">if</span> gapfill == true
-0096    numyears    =  height(Flow)/365;
-0097    Q           =  transpose(reshape(Flow.Q,365,numyears));
-0098    Q           =  reshape(transpose(fillgaps(Q)),numyears*365,1);
-0099    Q(Q&lt;0)      =  0; Flow.Q = Q;
-0100 <span class="keyword">end</span>
-0101 <span class="comment">% (kuparuk flow is missing the last two months (Nov/Dec 2020))</span>
-0102 
-0103 <span class="keyword">if</span> notnan(units)
-0104    aream2   =  Meta.darea.*1e6;
-0105    <span class="keyword">switch</span> units
-0106       <span class="keyword">case</span> <span class="string">'mm/d'</span>
-0107          Flow.Q = cms2cmd(Flow.Q)./aream2.*1000;
-0108       <span class="keyword">case</span> <span class="string">'cm/d'</span>
-0109          Flow.Q = cms2cmd(Flow.Q)./aream2.*100;
-0110       <span class="keyword">case</span> <span class="string">'m/d'</span>
-0111          Flow.Q = cms2cmd(Flow.Q)./aream2;
-0112       <span class="keyword">case</span> <span class="string">'mm/y'</span>
-0113          Flow.Q = cms2cmd(Flow.Q)./aream2.*1000.*365.25;
-0114       <span class="keyword">case</span> <span class="string">'cm/y'</span>
-0115          Flow.Q = cms2cmd(Flow.Q)./aream2.*100.*365.25;
-0116       <span class="keyword">case</span> <span class="string">'m/y'</span>
-0117          Flow.Q = cms2cmd(Flow.Q)./aream2.*365.25;
-0118       <span class="keyword">case</span> <span class="string">'m3/d'</span>
-0119          Flow.Q = cms2cmd(Flow.Q);
-0120       <span class="keyword">case</span> <span class="string">'m3/y'</span>
-0121          Flow.Q = cms2cmd(Flow.Q)*365.25;
-0122       <span class="keyword">case</span> <span class="string">'km3/y'</span>
-0123          Flow.Q = cms2cmd(Flow.Q)*365.25./1e9; <span class="comment">% Gt/yr</span>
-0124    <span class="keyword">end</span>
-0125    
-0126    <span class="comment">% keep the original m3/s</span>
-0127    <span class="comment">%if addvar == true</span>
-0128    Qm3s  = Q;
-0129    Flow  = addvars(Flow,Qm3s);
-0130    units = {units,<span class="string">'m3/s'</span>};
-0131    <span class="comment">%end</span>
-0132    
-0133 <span class="keyword">else</span>
-0134    units = {<span class="string">'m3/s'</span>};
-0135 <span class="keyword">end</span>
-0136 
-0137 <span class="comment">% flow is in m3/s, so set that here</span>
-0138 Flow.Properties.VariableUnits = units;
+0030 <span class="comment">%% parse inputs</span>
+0031 p = bfra.deps.magicParser; <span class="comment">%#ok&lt;*NODEF&gt;</span>
+0032 p.FunctionName = <span class="string">'bfra.loadflow'</span>;
+0033 p.PartialMatching = true;
+0034 
+0035 p.addRequired( <span class="string">'basinname'</span>,            @(x) ischar(x));
+0036 p.addParameter(<span class="string">'t1'</span>,       NaT,        @(x) isdatetime(x)|isnumeric(x));
+0037 p.addParameter(<span class="string">'t2'</span>,       NaT,        @(x) isdatetime(x)|isnumeric(x));
+0038 p.addParameter(<span class="string">'units'</span>,    NaN,        @(x) ischar(x));
+0039 p.addParameter(<span class="string">'gapfill'</span>,  false,      @(x) islogical(x));
+0040 p.addParameter(<span class="string">'addvar'</span>,   false,      @(x) ischar(x));
+0041 
+0042 p.parseMagically(<span class="string">'caller'</span>);
+0043 
+0044 <span class="comment">%p.addParameter('projection','geo',@(x)ischar(x));</span>
+0045 
+0046 <span class="comment">% NOTE: addvar is an option to add an unrelated input var, but for now it means</span>
+0047 <span class="comment">% add a converted Q timeseries e.g. cm/yr i commented out the part where addvar</span>
+0048 <span class="comment">% is checked so it is defualt for now and I can adjust to addvar as above</span>
+0049 
+0050 <span class="keyword">if</span> isnumeric(t1)
+0051    t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0052    t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0053 <span class="keyword">end</span>
+0054 <span class="comment">%------------------------------------------------------------------------------</span>
+0055 
+0056 <span class="comment">% load the flow data</span>
+0057 pathdata = fullfile(getenv(<span class="string">'USERDATAPATH'</span>),<span class="string">'interface/bfra/matfiles/'</span>);
+0058 filedata = fullfile(pathdata,<span class="string">'flow_prepped.mat'</span>);
+0059 
+0060 load(filedata,<span class="string">'Flow'</span>);
+0061 
+0062 <span class="comment">% check for categorical station name</span>
+0063 <span class="keyword">if</span> iscategorical(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <span class="keyword">end</span>
+0064 
+0065 <span class="comment">% find the flow data (for exact match use ismember not contains)</span>
+0066 allnames = lower(Flow.Meta.name);
+0067 istation = find(ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>)));
+0068 Meta = Flow.Meta(istation,:);
+0069 
+0070 <span class="comment">%%%%%%%%%%%%%%%% new method that uses the raw .csv files</span>
+0071 <span class="comment">% sta = Meta.station{:};</span>
+0072 <span class="comment">% [Q,Time] = readflow(sta);</span>
+0073 <span class="comment">%%%%%%%%%%%%%%%% new method that uses the raw .csv files</span>
+0074 
+0075 <span class="comment">%%%%%%%%%%%%%%%% old method that used the database</span>
+0076 Q = Flow.Q(:,istation);
+0077 Time = Flow.T;
+0078 <span class="comment">%%%%%%%%%%%%%%%% old method that used the database</span>
+0079 
+0080 <span class="keyword">if</span> isnat(t1)
+0081    si = find(~isnan(Q),1,<span class="string">'first'</span>);
+0082    ei = find(~isnan(Q),1,<span class="string">'last'</span>);
+0083    ok = si:ei;
+0084 <span class="keyword">else</span>
+0085    ok = isbetween(Time,t1,t2);
+0086 <span class="keyword">end</span>
+0087 <span class="comment">% the t1/t2 method might remove the need for padding/trimming</span>
+0088 
+0089 Q = Q(ok);
+0090 Time = Time(ok);
+0091 Flow = timetable(Time,Q);
+0092 
+0093 <span class="comment">% experimental - gap fill. should prob add this to a timetable function</span>
+0094 <span class="keyword">if</span> gapfill == true
+0095    numyears = height(Flow)/365;
+0096    Q = transpose(reshape(Flow.Q,365,numyears));
+0097    Q = reshape(transpose(fillgaps(Q)),numyears*365,1);
+0098    Q(Q&lt;0) = 0; Flow.Q = Q;
+0099 <span class="keyword">end</span>
+0100 <span class="comment">% (kuparuk flow is missing the last two months (Nov/Dec 2020))</span>
+0101 
+0102 <span class="keyword">if</span> ~isnan(units)
+0103    aream2 = Meta.darea.*1e6;
+0104    <span class="keyword">switch</span> units
+0105       <span class="keyword">case</span> <span class="string">'mm/d'</span>
+0106          Flow.Q = cms2cmd(Flow.Q)./aream2.*1000;
+0107       <span class="keyword">case</span> <span class="string">'cm/d'</span>
+0108          Flow.Q = cms2cmd(Flow.Q)./aream2.*100;
+0109       <span class="keyword">case</span> <span class="string">'m/d'</span>
+0110          Flow.Q = cms2cmd(Flow.Q)./aream2;
+0111       <span class="keyword">case</span> <span class="string">'mm/y'</span>
+0112          Flow.Q = cms2cmd(Flow.Q)./aream2.*1000.*365.25;
+0113       <span class="keyword">case</span> <span class="string">'cm/y'</span>
+0114          Flow.Q = cms2cmd(Flow.Q)./aream2.*100.*365.25;
+0115       <span class="keyword">case</span> <span class="string">'m/y'</span>
+0116          Flow.Q = cms2cmd(Flow.Q)./aream2.*365.25;
+0117       <span class="keyword">case</span> <span class="string">'m3/d'</span>
+0118          Flow.Q = cms2cmd(Flow.Q);
+0119       <span class="keyword">case</span> <span class="string">'m3/y'</span>
+0120          Flow.Q = cms2cmd(Flow.Q)*365.25;
+0121       <span class="keyword">case</span> <span class="string">'km3/y'</span>
+0122          Flow.Q = cms2cmd(Flow.Q)*365.25./1e9; <span class="comment">% Gt/yr</span>
+0123    <span class="keyword">end</span>
+0124    
+0125    <span class="comment">% keep the original m3/s</span>
+0126    <span class="comment">%if addvar == true</span>
+0127    Qm3s = Q;
+0128    Flow = addvars(Flow,Qm3s);
+0129    units = {units,<span class="string">'m3/s'</span>};
+0130    <span class="comment">%end</span>
+0131    
+0132 <span class="keyword">else</span>
+0133    units = {<span class="string">'m3/s'</span>};
+0134 <span class="keyword">end</span>
+0135 
+0136 <span class="comment">% flow is in m3/s, so set that here</span>
+0137 Flow.Properties.VariableUnits = units;
+0138 
 0139 
-0140 
-0141 <a name="_sub1" href="#_subfunctions" class="code">function [Q,Time] = readflow(sta)</a>
-0142 
-0143 filename = [sta <span class="string">'.csv'</span>];
-0144 
-0145 <span class="comment">% check the rhbn database:</span>
-0146 pathdata = <span class="string">'/Users/coop558/mydata/interface/recession/rhbn/data/'</span>;
-0147 dirs     = {<span class="string">'rhbn99'</span>,<span class="string">'rhbnN'</span>,<span class="string">'rhbnU'</span>};
-0148 <span class="keyword">for</span> n = 1:numel(dirs)
-0149    list     = getlist([pathdata dirs{n} <span class="string">'/'</span>],<span class="string">'*.csv'</span>);
-0150    allfiles = {list.name};
-0151    fileidx  = find(ismember(allfiles,filename));
-0152    <span class="keyword">if</span> ~isempty(fileidx)
-0153       <span class="keyword">break</span>;
-0154    <span class="keyword">end</span>
-0155 <span class="keyword">end</span>
-0156 
-0157 <span class="comment">% if not found, check the usgs database:</span>
-0158 <span class="keyword">if</span> isempty(fileidx)
-0159    
-0160    pathdata = <span class="string">'/Users/coop558/mydata/interface/recession/gagesII/data/'</span>;
-0161    dirs     = {<span class="string">'ref'</span>,<span class="string">'other'</span>,<span class="string">'nonref'</span>};
-0162    <span class="keyword">for</span> n = 1:numel(dirs)
-0163       list     = getlist([pathdata dirs{n} <span class="string">'/'</span>],<span class="string">'*.csv'</span>);
-0164       allfiles = {list.name};
-0165       fileidx  = find(ismember(allfiles,filename));
-0166       <span class="keyword">if</span> ~isempty(fileidx)
-0167          <span class="keyword">break</span>;
-0168       <span class="keyword">end</span>
-0169    <span class="keyword">end</span>
-0170    
-0171 <span class="keyword">end</span>
-0172 
-0173 <span class="keyword">if</span> isempty(fileidx)
-0174    error(<span class="string">'file not found'</span>)
-0175 <span class="keyword">end</span>
-0176 
-0177 Data     = readtable([pathdata dirs{n} <span class="string">'/'</span> filename]);
-0178 Time     = datetime(Data.Year,Data.Month,Data.Day);
-0179 Q        = Data.Value;
-0180 Data     = timetable(Time,Q);
-0181 Data     = retime(Data,<span class="string">'daily'</span>,<span class="string">'fillwithmissing'</span>);
-0182 Data     = rmleapinds(Data);
-0183 Q        = Data.Q;
-0184 Time     = Data.Time;
-0185 
-0186 <span class="comment">%    % i used this to confirm the new data matches the old data:</span>
-0187 <span class="comment">%    idx      = isbetween(data.Time,Flow.Time(1),Flow.Time(end));</span>
-0188 <span class="comment">%    figure; myscatter(Flow.Q,data.Q(idx)); addOnetoOne;</span>
-0189 
-0190 <span class="comment">%    % but this also reveals that i rmeoved leap inds so feb 28-mar 1</span>
-0191 <span class="comment">%    dQ/dt is incorrect if any end up used in the analysis</span>
+0140 <a name="_sub1" href="#_subfunctions" class="code">function [Q,Time] = readflow(sta)</a>
+0141 
+0142 filename = [sta <span class="string">'.csv'</span>];
+0143 
+0144 <span class="comment">% check the rhbn database:</span>
+0145 pathdata = <span class="string">'/Users/coop558/mydata/interface/recession/rhbn/data/'</span>;
+0146 datadirs = {<span class="string">'rhbn99'</span>,<span class="string">'rhbnN'</span>,<span class="string">'rhbnU'</span>};
+0147 <span class="keyword">for</span> n = 1:numel(datadirs)
+0148    filelist = getlist([pathdata datadirs{n} <span class="string">'/'</span>],<span class="string">'*.csv'</span>);
+0149    allfiles = {filelist.name};
+0150    fileindx = find(ismember(allfiles,filename));
+0151    <span class="keyword">if</span> ~isempty(fileindx)
+0152       <span class="keyword">break</span>
+0153    <span class="keyword">end</span>
+0154 <span class="keyword">end</span>
+0155 
+0156 <span class="comment">% if not found, check the usgs database:</span>
+0157 <span class="keyword">if</span> isempty(fileindx)
+0158    
+0159    pathdata = <span class="string">'/Users/coop558/mydata/interface/recession/gagesII/data/'</span>;
+0160    datadirs = {<span class="string">'ref'</span>,<span class="string">'other'</span>,<span class="string">'nonref'</span>};
+0161    <span class="keyword">for</span> n = 1:numel(datadirs)
+0162       filelist = getlist([pathdata datadirs{n} <span class="string">'/'</span>],<span class="string">'*.csv'</span>);
+0163       allfiles = {filelist.name};
+0164       fileindx = find(ismember(allfiles,filename));
+0165       <span class="keyword">if</span> ~isempty(fileindx)
+0166          <span class="keyword">break</span>;
+0167       <span class="keyword">end</span>
+0168    <span class="keyword">end</span>
+0169    
+0170 <span class="keyword">end</span>
+0171 
+0172 <span class="keyword">if</span> isempty(fileindx)
+0173    error(<span class="string">'file not found'</span>)
+0174 <span class="keyword">end</span>
+0175 
+0176 Data  = readtable([pathdata datadirs{n} <span class="string">'/'</span> filename]);
+0177 Time  = datetime(Data.Year,Data.Month,Data.Day);
+0178 Q     = Data.Value;
+0179 Data  = timetable(Time,Q);
+0180 Data  = retime(Data,<span class="string">'daily'</span>,<span class="string">'fillwithmissing'</span>);
+0181 Data  = bfra.util.rmleapinds(Data);
+0182 Q     = Data.Q;
+0183 Time  = Data.Time;
+0184 
+0185 <span class="comment">%    % i used this to confirm the new data matches the old data:</span>
+0186 <span class="comment">%    idx = isbetween(data.Time,Flow.Time(1),Flow.Time(end));</span>
+0187 <span class="comment">%    figure; scatter(Flow.Q,data.Q(idx),'filled'); addOnetoOne;</span>
+0188 
+0189 <span class="comment">%    % but this also reveals that i rmeoved leap inds so feb 28-mar 1</span>
+0190 <span class="comment">%    dQ/dt is incorrect if any end up used in the analysis</span>
+0191 
 0192 
 0193 
 0194 
 0195 
 0196 
 0197 
-0198 
-0199</pre></div>
+0198</pre></div>
 </body>
 </html>

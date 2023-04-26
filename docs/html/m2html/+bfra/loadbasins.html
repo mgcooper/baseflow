@@ -60,8 +60,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li>
-<li><a href="version.html" class="code" title="function varargout = version()">version</a>	VERSION return the version number for the bfra toolbox</li></ul>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li></ul>
 
 
 This function is called by:
@@ -124,21 +123,21 @@ This function is called by:
 0047 parse(p,<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
 0048 
 0049 <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>   = p.Results.basinname;
-0050 <a href="version.html" class="code" title="function varargout = version()">version</a>     = p.Results.version;
+0050 version     = p.Results.version;
 0051 projection  = p.Results.projection;
 0052 
 0053 <span class="comment">%------------------------------------------------------------------------------</span>
 0054 
 0055 <span class="comment">% load the basin boundaries and the flow data</span>
-0056 pathdata    = [getenv(<span class="string">'USERDATAPATH'</span>) <span class="string">'interface/basins/matfiles/'</span>];
+0056 pathdata = fullfile(getenv(<span class="string">'USERDATAPATH'</span>),<span class="string">'interface/basins/matfiles/'</span>);
 0057 
 0058 <span class="comment">% Nov 2022, checked this out from dev-bk, and copied below from current</span>
 0059 <span class="comment">% version of loadmeta</span>
-0060 <span class="keyword">switch</span> <a href="version.html" class="code" title="function varargout = version()">version</a>
+0060 <span class="keyword">switch</span> version
 0061    <span class="keyword">case</span> <span class="string">'current'</span>
-0062       filedata  = [pathdata <span class="string">'basin_boundaries.mat'</span>];
+0062       filedata  = fullfile(pathdata,<span class="string">'basin_boundaries.mat'</span>);
 0063    <span class="keyword">case</span> <span class="string">'archive'</span>
-0064       filedata  = [pathdata <span class="string">'basin_boundaries_tmp.mat'</span>];
+0064       filedata  = fullfile(pathdata,<span class="string">'basin_boundaries_tmp.mat'</span>);
 0065 <span class="keyword">end</span>
 0066 load(filedata,<span class="string">'Bounds'</span>,<span class="string">'Meta'</span>);
 0067 

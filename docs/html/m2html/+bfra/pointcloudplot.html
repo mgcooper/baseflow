@@ -126,7 +126,7 @@ This function is called by:
 0042 addRequired(p, <span class="string">'dqdt'</span>,                          @(x)isnumeric(x));
 0043 addParameter(p,<span class="string">'mask'</span>,        true(size(q)),    @(x)islogical(x));
 0044 addParameter(p,<span class="string">'reflines'</span>,    {<span class="string">'bestfit'</span>},      @(x)iscell(x));
-0045 addParameter(p,<span class="string">'reflabels'</span>,   false,            @(x)islogical(x)&amp;isscalar(x));
+0045 addParameter(p,<span class="string">'reflabels'</span>,   false,            @(x)bfra.validation.islogicalscalar(x));
 0046 addParameter(p,<span class="string">'blate'</span>,       1,                @(x)isnumeric(x));
 0047 addParameter(p,<span class="string">'userab'</span>,      [1 1],            @(x)isnumeric(x));
 0048 addParameter(p,<span class="string">'precision'</span>,   1,                @(x)isnumeric(x));
@@ -134,7 +134,7 @@ This function is called by:
 0050 addParameter(p,<span class="string">'addlegend'</span>,   true,             @(x)islogical(x));
 0051 addParameter(p,<span class="string">'usertext'</span>,    <span class="string">''</span>,               @(x)ischar(x));
 0052 addParameter(p,<span class="string">'rain'</span>,        nan,              @(x)isnumeric(x));
-0053 addParameter(p,<span class="string">'ax'</span>,          <span class="string">'none'</span>,           @(x)isaxis(x)|ischar(x));
+0053 addParameter(p,<span class="string">'ax'</span>,          <span class="string">'none'</span>,           @(x)bfra.validation.isaxis(x)|ischar(x));
 0054 
 0055 parse(p,q,dqdt,varargin{:});
 0056 
@@ -153,226 +153,228 @@ This function is called by:
 0069 <span class="comment">% Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted</span>
 0070 <span class="comment">%-------------------------------------------------------------------------------</span>
 0071    
-0072 <span class="keyword">if</span> ~isaxis(ax)
-0073    <span class="comment">%fig = figure('Position',[380 200 550 510]); ax = gca;</span>
-0074    fig = figure(<span class="string">'Units'</span>,<span class="string">'centimeters'</span>,<span class="string">'Position'</span>,[5 5 23*4/5 19*4/5]); ax = gca;
-0075 <span class="keyword">else</span>
-0076    fig = gcf;
-0077 <span class="keyword">end</span>
-0078 
-0079 h0 = loglog(ax,q,-dqdt,<span class="string">'o'</span>); formatPlotMarkers(<span class="string">'markersize'</span>,6); 
-0080 hold on; grid off;
-0081 
-0082 <span class="comment">% add circles around the t&gt;tau0 values if requested</span>
-0083 <span class="keyword">if</span> sum(mask) &lt; numel(q)
-0084    h1 = scatter(q(mask),-dqdt(mask),<span class="string">'r'</span>);
-0085 <span class="keyword">else</span>
-0086    h1 = [];
-0087 <span class="keyword">end</span>
-0088 
-0089 <span class="comment">% add some space around the data</span>
-0090 xlims    = xlim;
-0091 ylims    = ylim;
-0092 ylowlim  = min(ylims);
-0093 yupplim  = max(ylims);
-0094 
-0095 xlim([xlims(1)*.9 xlims(2)*1.1]);
-0096 <span class="comment">% xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);</span>
-0097 
-0098 <span class="comment">% set xylabels</span>
-0099 xlabel(bfra.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,14);
-0100 ylabel(bfra.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,14);
-0101 
-0102 <span class="comment">% init containers</span>
-0103 h  = gobjects(numel(reflines),1);
-0104 ab = nan(numel(reflines),2);
-0105 
-0106 
-0107 <span class="comment">% add reflines</span>
-0108 <span class="keyword">for</span> n = 1:numel(reflines)
-0109 
-0110    <span class="keyword">switch</span> reflines{n}
+0072 <span class="keyword">if</span> not(bfra.validation.isaxis(ax))
+0073    fig = figure(<span class="string">'Position'</span>,[380 200 300 210]); ax = gca;
+0074    <span class="comment">%fig = figure('Position',[380 200 550 510]); ax = gca;</span>
+0075    <span class="comment">%fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;</span>
+0076 <span class="keyword">else</span>
+0077    fig = get(ax,<span class="string">'Parent'</span>);
+0078 <span class="keyword">end</span>
+0079 
+0080 h0 = loglog(ax,q,-dqdt,<span class="string">'o'</span>); 
+0081 bfra.util.formatPlotMarkers(<span class="string">'markersize'</span>,6); 
+0082 hold on; grid off;
+0083 
+0084 <span class="comment">% add circles around the t&gt;tau0 values if requested</span>
+0085 <span class="keyword">if</span> sum(mask) &lt; numel(q)
+0086    h1 = scatter(q(mask),-dqdt(mask),<span class="string">'r'</span>);
+0087 <span class="keyword">else</span>
+0088    h1 = [];
+0089 <span class="keyword">end</span>
+0090 
+0091 <span class="comment">% add some space around the data</span>
+0092 xlims    = xlim;
+0093 ylims    = ylim;
+0094 ylowlim  = min(ylims);
+0095 yupplim  = max(ylims);
+0096 
+0097 xlim([xlims(1)*.9 xlims(2)*1.1]);
+0098 <span class="comment">% xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);</span>
+0099 
+0100 <span class="comment">% set xylabels</span>
+0101 xlabel(bfra.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,14);
+0102 ylabel(bfra.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,14);
+0103 
+0104 <span class="comment">% init containers</span>
+0105 h  = gobjects(numel(reflines),1);
+0106 ab = nan(numel(reflines),2);
+0107 
+0108 
+0109 <span class="comment">% add reflines</span>
+0110 <span class="keyword">for</span> n = 1:numel(reflines)
 0111 
-0112       <span class="keyword">case</span> <span class="string">'early'</span>
-0113          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
-0114                            q,-dqdt,                      <span class="keyword">...</span>
-0115                            <span class="string">'refline'</span>,<span class="string">'earlytime'</span>,        <span class="keyword">...</span>
-0116                            <span class="string">'refslope'</span>,3,                 <span class="keyword">...</span>
-0117                            <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
-0118                            <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
-0119                            );
-0120 
-0121          h(n).LineWidth = 1;
+0112    <span class="keyword">switch</span> reflines{n}
+0113 
+0114       <span class="keyword">case</span> <span class="string">'early'</span>
+0115          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
+0116                            q,-dqdt,                      <span class="keyword">...</span>
+0117                            <span class="string">'refline'</span>,<span class="string">'earlytime'</span>,        <span class="keyword">...</span>
+0118                            <span class="string">'refslope'</span>,3,                 <span class="keyword">...</span>
+0119                            <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
+0120                            <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
+0121                            );
 0122 
-0123       <span class="keyword">case</span> <span class="string">'late'</span>
-0124          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
-0125                            q,-dqdt,                      <span class="keyword">...</span>
-0126                            <span class="string">'refline'</span>,<span class="string">'latetime'</span>,         <span class="keyword">...</span>
-0127                            <span class="string">'refslope'</span>,blate,             <span class="keyword">...</span>
-0128                            <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
-0129                            <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
-0130                            );
-0131 
-0132          h(n).LineWidth = 1;
+0123          h(n).LineWidth = 1;
+0124 
+0125       <span class="keyword">case</span> <span class="string">'late'</span>
+0126          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
+0127                            q,-dqdt,                      <span class="keyword">...</span>
+0128                            <span class="string">'refline'</span>,<span class="string">'latetime'</span>,         <span class="keyword">...</span>
+0129                            <span class="string">'refslope'</span>,blate,             <span class="keyword">...</span>
+0130                            <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
+0131                            <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
+0132                            );
 0133 
-0134       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
-0135          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
-0136                            q,-dqdt,                      <span class="keyword">...</span>
-0137                            <span class="string">'refline'</span>,<span class="string">'upperenvelope'</span>,    <span class="keyword">...</span>
-0138                            <span class="string">'labels'</span>,reflabels            <span class="keyword">...</span>
-0139                            );
-0140 
-0141          <span class="comment">% make ylimits span the min dq/dt to the upper envelope at max Q</span>
-0142          yupplim = ab(n,1)*max(xlims)^ab(n,2);
-0143 
-0144       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
-0145          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
-0146                            q,-dqdt,                      <span class="keyword">...</span>
-0147                            <span class="string">'refline'</span>,<span class="string">'lowerenvelope'</span>,    <span class="keyword">...</span>
-0148                            <span class="string">'labels'</span>,reflabels            <span class="keyword">...</span>
-0149                            );
-0150 
-0151          ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
+0134          h(n).LineWidth = 1;
+0135 
+0136       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
+0137          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
+0138                            q,-dqdt,                      <span class="keyword">...</span>
+0139                            <span class="string">'refline'</span>,<span class="string">'upperenvelope'</span>,    <span class="keyword">...</span>
+0140                            <span class="string">'labels'</span>,reflabels            <span class="keyword">...</span>
+0141                            );
+0142 
+0143          <span class="comment">% make ylimits span the min dq/dt to the upper envelope at max Q</span>
+0144          yupplim = ab(n,1)*max(xlims)^ab(n,2);
+0145 
+0146       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
+0147          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
+0148                            q,-dqdt,                      <span class="keyword">...</span>
+0149                            <span class="string">'refline'</span>,<span class="string">'lowerenvelope'</span>,    <span class="keyword">...</span>
+0150                            <span class="string">'labels'</span>,reflabels            <span class="keyword">...</span>
+0151                            );
 0152 
-0153       <span class="keyword">case</span> <span class="string">'bestfit'</span>
-0154          [h(n),ab(n,:)] = bfra.plotrefline(              <span class="keyword">...</span>
-0155                            q,-dqdt,                      <span class="keyword">...</span>
-0156                            <span class="string">'refline'</span>,<span class="string">'bestfit'</span>,          <span class="keyword">...</span>
-0157                            <span class="string">'labels'</span>,false                <span class="keyword">...</span>
-0158                            );
-0159 
-0160          h(n).LineWidth = 2;
+0153          ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
+0154 
+0155       <span class="keyword">case</span> <span class="string">'bestfit'</span>
+0156          [h(n),ab(n,:)] = bfra.plotrefline(              <span class="keyword">...</span>
+0157                            q,-dqdt,                      <span class="keyword">...</span>
+0158                            <span class="string">'refline'</span>,<span class="string">'bestfit'</span>,          <span class="keyword">...</span>
+0159                            <span class="string">'labels'</span>,false                <span class="keyword">...</span>
+0160                            );
 0161 
-0162       <span class="keyword">case</span> <span class="string">'userfit'</span>
+0162          h(n).LineWidth = 2;
 0163 
-0164          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
-0165                            q,-dqdt,                      <span class="keyword">...</span>
-0166                            <span class="string">'refline'</span>,<span class="string">'userfit'</span>,          <span class="keyword">...</span>
-0167                            <span class="string">'userab'</span>,userab,              <span class="keyword">...</span>
-0168                            <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
-0169                            <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
-0170                            );
-0171    <span class="keyword">end</span>
-0172 
-0173    out.ab.(reflines{n}) = ab(n,:);
+0164       <span class="keyword">case</span> <span class="string">'userfit'</span>
+0165 
+0166          [h(n),ab(n,:)] =  bfra.plotrefline(             <span class="keyword">...</span>
+0167                            q,-dqdt,                      <span class="keyword">...</span>
+0168                            <span class="string">'refline'</span>,<span class="string">'userfit'</span>,          <span class="keyword">...</span>
+0169                            <span class="string">'userab'</span>,userab,              <span class="keyword">...</span>
+0170                            <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
+0171                            <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
+0172                            );
+0173    <span class="keyword">end</span>
 0174 
-0175 <span class="keyword">end</span>
+0175    out.ab.(reflines{n}) = ab(n,:);
 0176 
-0177 set(gca,<span class="string">'YLim'</span>,[ylowlim yupplim]);
+0177 <span class="keyword">end</span>
 0178 
-0179 <span class="comment">% plot rain if provided</span>
-0180 <span class="keyword">if</span> all(~isnan(rain))
-0181    hrain = <a href="#_sub1" class="code" title="subfunction hrain = plotrain(ax,h,rain,x,y)">plotrain</a>(ax,h0,rain,q,-dqdt);
-0182 <span class="keyword">else</span>
-0183    hrain = nan;
-0184 <span class="keyword">end</span>
-0185 
-0186 <span class="comment">% leaving this out for now</span>
-0187 <span class="keyword">if</span> addlegend == true
-0188 
-0189    <span class="comment">% check if both userfit and bestfit are requested</span>
-0190    fitcheck = {<span class="string">'bestfit'</span>,<span class="string">'userfit'</span>};
-0191 
-0192    <span class="keyword">if</span> all(ismember(fitcheck,reflines))
+0179 set(gca,<span class="string">'YLim'</span>,[ylowlim yupplim]);
+0180 
+0181 <span class="comment">% plot rain if provided</span>
+0182 <span class="keyword">if</span> all(~isnan(rain))
+0183    hrain = <a href="#_sub1" class="code" title="subfunction hrain = plotrain(ax,h,rain,x,y)">plotrain</a>(ax,h0,rain,q,-dqdt);
+0184 <span class="keyword">else</span>
+0185    hrain = nan;
+0186 <span class="keyword">end</span>
+0187 
+0188 <span class="comment">% leaving this out for now</span>
+0189 <span class="keyword">if</span> addlegend == true
+0190 
+0191    <span class="comment">% check if both userfit and bestfit are requested</span>
+0192    fitcheck = {<span class="string">'bestfit'</span>,<span class="string">'userfit'</span>};
 0193 
-0194       <span class="comment">% ------------------------------------</span>
-0195 <span class="comment">%          % put them both in the legend</span>
-0196 <span class="comment">%          ibf   = ismember(reflines,fitcheck);</span>
-0197 <span class="comment">%          hleg  = h(ibf);</span>
-0198 <span class="comment">%</span>
-0199 <span class="comment">%          ibest = strcmp(reflines,'bestfit');</span>
-0200 <span class="comment">%          iuser = strcmp(reflines,'userfit');</span>
-0201 <span class="comment">%          tbest = [bfra.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];</span>
-0202 <span class="comment">%          tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];</span>
-0203 <span class="comment">%</span>
-0204 <span class="comment">%          % if user text provided, swap it out</span>
-0205 <span class="comment">%          if ~isempty(usertext)</span>
-0206 <span class="comment">%             tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];</span>
-0207 <span class="comment">%          end</span>
-0208 <span class="comment">%          ltext = {tbest; tuser};</span>
-0209       <span class="comment">% ------------------------------------</span>
-0210 
-0211       <span class="comment">% only put bestfit in the legend</span>
-0212       ibf   = strcmp(reflines,<span class="string">'bestfit'</span>);
-0213       hleg  = h(ibf);
-0214       ltext = bfra.aQbString(ab(ibf,:),<span class="string">'printvalues'</span>,true);
-0215       ltext = [ltext <span class="string">' ('</span> upper(usertext) <span class="string">' fit)'</span>]; 
-0216       <span class="comment">%ltext = [ltext ' (nonlinear least-squares)'];</span>
-0217 
-0218    <span class="comment">% check if either userfit or bestfit are requested</span>
-0219    <span class="keyword">elseif</span> any(ismember(fitcheck,reflines))
-0220 
-0221       <span class="comment">% use whichever one was requested</span>
-0222       ibf   = ismember(reflines,fitcheck);
-0223       hleg  = h(ibf);
-0224       ltext = bfra.aQbString(ab(ibf,:),<span class="string">'printvalues'</span>,true);
-0225 
-0226       <span class="keyword">if</span> ~isempty(usertext)
-0227          ltext = [ltext <span class="string">' ('</span> upper(usertext) <span class="string">' fit)'</span>];
-0228       <span class="keyword">elseif</span> ~any(ismember(reflines,<span class="string">'userfit'</span>))
-0229          ltext = [ltext <span class="string">' (NLS fit)'</span>];
-0230       <span class="keyword">elseif</span> ~any(ismember(reflines,<span class="string">'bestfit'</span>))
-0231          ltext = [ltext <span class="string">' (MLE fit)'</span>];
-0232       <span class="keyword">end</span>
-0233 
-0234    <span class="keyword">end</span>
+0194    <span class="keyword">if</span> all(ismember(fitcheck,reflines))
+0195 
+0196       <span class="comment">% ------------------------------------</span>
+0197 <span class="comment">%          % put them both in the legend</span>
+0198 <span class="comment">%          ibf   = ismember(reflines,fitcheck);</span>
+0199 <span class="comment">%          hleg  = h(ibf);</span>
+0200 <span class="comment">%</span>
+0201 <span class="comment">%          ibest = strcmp(reflines,'bestfit');</span>
+0202 <span class="comment">%          iuser = strcmp(reflines,'userfit');</span>
+0203 <span class="comment">%          tbest = [bfra.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];</span>
+0204 <span class="comment">%          tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];</span>
+0205 <span class="comment">%</span>
+0206 <span class="comment">%          % if user text provided, swap it out</span>
+0207 <span class="comment">%          if ~isempty(usertext)</span>
+0208 <span class="comment">%             tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];</span>
+0209 <span class="comment">%          end</span>
+0210 <span class="comment">%          ltext = {tbest; tuser};</span>
+0211       <span class="comment">% ------------------------------------</span>
+0212 
+0213       <span class="comment">% only put bestfit in the legend</span>
+0214       ibf   = strcmp(reflines,<span class="string">'bestfit'</span>);
+0215       hleg  = h(ibf);
+0216       ltext = bfra.aQbString(ab(ibf,:),<span class="string">'printvalues'</span>,true);
+0217       ltext = [ltext <span class="string">' ('</span> upper(usertext) <span class="string">' fit)'</span>]; 
+0218       <span class="comment">%ltext = [ltext ' (nonlinear least-squares)'];</span>
+0219 
+0220    <span class="comment">% check if either userfit or bestfit are requested</span>
+0221    <span class="keyword">elseif</span> any(ismember(fitcheck,reflines))
+0222 
+0223       <span class="comment">% use whichever one was requested</span>
+0224       ibf   = ismember(reflines,fitcheck);
+0225       hleg  = h(ibf);
+0226       ltext = bfra.aQbString(ab(ibf,:),<span class="string">'printvalues'</span>,true);
+0227 
+0228       <span class="keyword">if</span> ~isempty(usertext)
+0229          ltext = [ltext <span class="string">' ('</span> upper(usertext) <span class="string">' fit)'</span>];
+0230       <span class="keyword">elseif</span> ~any(ismember(reflines,<span class="string">'userfit'</span>))
+0231          ltext = [ltext <span class="string">' (NLS fit)'</span>];
+0232       <span class="keyword">elseif</span> ~any(ismember(reflines,<span class="string">'bestfit'</span>))
+0233          ltext = [ltext <span class="string">' (MLE fit)'</span>];
+0234       <span class="keyword">end</span>
 0235 
-0236    <span class="keyword">if</span> isobject(hrain)
-0237       hleg  = [hleg hrain];
-0238       ltext = {ltext,<span class="string">'rain'</span>};
-0239    <span class="keyword">end</span>
-0240 
-0241    l = legend(hleg,ltext,<span class="string">'location'</span>,<span class="string">'nw'</span>,<span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
-0242 <span class="keyword">else</span>
-0243    l = nan;
-0244 <span class="keyword">end</span>
-0245 
-0246 <span class="comment">% package the output</span>
-0247 out.fig        = fig;
-0248 out.scatter    = h0;
-0249 out.mask       = h1;
-0250 out.reflines   = h;
-0251 out.ax         = gca;
-0252 out.hrain      = hrain;
-0253 <span class="comment">%    out.hcloud    = h0;</span>
-0254 <span class="comment">%    out.hb1       = h1;</span>
-0255 <span class="comment">%    out.hb3       = h2;</span>
-0256 <span class="comment">%    out.hupper    = h3;</span>
-0257 out.legend     = l;
-0258 
-0259 <span class="comment">%</span>
-0260 <span class="comment">%    out.ab         = ab;</span>
-0261 
-0262 snapnow;
+0236    <span class="keyword">end</span>
+0237 
+0238    <span class="keyword">if</span> isobject(hrain)
+0239       hleg  = [hleg hrain];
+0240       ltext = {ltext,<span class="string">'rain'</span>};
+0241    <span class="keyword">end</span>
+0242 
+0243    l = legend(hleg,ltext,<span class="string">'location'</span>,<span class="string">'nw'</span>,<span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0244 <span class="keyword">else</span>
+0245    l = nan;
+0246 <span class="keyword">end</span>
+0247 
+0248 <span class="comment">% package the output</span>
+0249 out.fig        = fig;
+0250 out.scatter    = h0;
+0251 out.mask       = h1;
+0252 out.reflines   = h;
+0253 out.ax         = gca;
+0254 out.hrain      = hrain;
+0255 <span class="comment">%    out.hcloud    = h0;</span>
+0256 <span class="comment">%    out.hb1       = h1;</span>
+0257 <span class="comment">%    out.hb3       = h2;</span>
+0258 <span class="comment">%    out.hupper    = h3;</span>
+0259 out.legend     = l;
+0260 
+0261 <span class="comment">%</span>
+0262 <span class="comment">%    out.ab         = ab;</span>
 0263 
-0264 
-0265 <a name="_sub1" href="#_subfunctions" class="code">function hrain = plotrain(ax,h,rain,x,y)</a>
-0266    
-0267    <span class="comment">% ax is the axis to plot into</span>
-0268    <span class="comment">% h is the handle of the plotted q/dqdt to get the marker size to scale</span>
-0269    <span class="comment">% the rain circles</span>
-0270    <span class="comment">% x and y are q -dqdt</span>
-0271    
-0272 <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
-0273 <span class="comment">% the plotted circles</span>
-0274 <span class="keyword">if</span> sum(rain)==0
-0275    hrain = nan;
-0276 <span class="keyword">else</span>
-0277 
-0278 <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
-0279   <span class="comment">%sz    = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
-0280   <span class="comment">%scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
-0281 
-0282   <span class="comment">% this mimics the way scatter scales the circles</span>
-0283    sz    = h.MarkerSize + sqrt(pi.*(rain(rain&gt;0)).^2);
-0284    x     = x(rain&gt;0);
-0285    y     = y(rain&gt;0);
-0286 
-0287    hold on;
-0288    <span class="keyword">for</span> n = 1:numel(sz)
-0289       hrain(n) = plot(ax,x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,sz(n), <span class="keyword">...</span>
-0290                   <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
-0291    <span class="keyword">end</span>
-0292 <span class="keyword">end</span></pre></div>
+0264 <span class="comment">% snapnow;</span>
+0265 
+0266 
+0267 <a name="_sub1" href="#_subfunctions" class="code">function hrain = plotrain(ax,h,rain,x,y)</a>
+0268    
+0269    <span class="comment">% ax is the axis to plot into</span>
+0270    <span class="comment">% h is the handle of the plotted q/dqdt to get the marker size to scale</span>
+0271    <span class="comment">% the rain circles</span>
+0272    <span class="comment">% x and y are q -dqdt</span>
+0273    
+0274 <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
+0275 <span class="comment">% the plotted circles</span>
+0276 <span class="keyword">if</span> sum(rain)==0
+0277    hrain = nan;
+0278 <span class="keyword">else</span>
+0279 
+0280 <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
+0281   <span class="comment">%sz    = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
+0282   <span class="comment">%scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
+0283 
+0284   <span class="comment">% this mimics the way scatter scales the circles</span>
+0285    sz    = h.MarkerSize + sqrt(pi.*(rain(rain&gt;0)).^2);
+0286    x     = x(rain&gt;0);
+0287    y     = y(rain&gt;0);
+0288 
+0289    hold on;
+0290    <span class="keyword">for</span> n = 1:numel(sz)
+0291       hrain(n) = plot(ax,x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,sz(n), <span class="keyword">...</span>
+0292                   <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
+0293    <span class="keyword">end</span>
+0294 <span class="keyword">end</span></pre></div>
 </body>
 </html>

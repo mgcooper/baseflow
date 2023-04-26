@@ -50,8 +50,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li>
-<li><a href="version.html" class="code" title="function varargout = version()">version</a>	VERSION return the version number for the bfra toolbox</li></ul>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li></ul>
 
 
 This function is called by:
@@ -94,10 +93,10 @@ This function is called by:
 0027 addRequired(p, <span class="string">'basinname'</span>,         @(x)ischar(x)  );
 0028 addOptional(p, <span class="string">'version'</span>,<span class="string">'current'</span>, validopts      );
 0029 parse(p,<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
-0030 <a href="version.html" class="code" title="function varargout = version()">version</a> = p.Results.version;
+0030 version = p.Results.version;
 0031 <span class="comment">%------------------------------------------------------------------------------</span>
 0032 
-0033 Meta = bfra.loadmeta(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<a href="version.html" class="code" title="function varargout = version()">version</a>);
+0033 Meta = bfra.loadmeta(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,version);
 0034 A  = Meta.area_m2;
 0035 Dd = 1000*Meta.Dd;
 0036 D  = 0.5;

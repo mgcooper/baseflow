@@ -79,7 +79,7 @@ This function is called by:
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="#_sub1" class="code">function [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);</a></li>
+<li><a href="#_sub1" class="code">function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)</a></li>
 <li><a href="#_sub2" class="code">function [combos,descriptions] = allcombos()</a></li></ul>
 
 
@@ -194,11 +194,11 @@ This function is called by:
 0107 <span class="comment">%-------------------------------------------------------------------------------</span>
 0108 
 0109 <span class="comment">% parse the soln options</span>
-0110    [solns,desc,b2]  = <a href="#_sub1" class="code" title="subfunction [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);">parsesolutions</a>(soln1,soln2,b2,isflat);
+0110 [solns,desc,b2] = <a href="#_sub1" class="code" title="subfunction [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)">parsesolutions</a>(soln1,soln2,b2,isflat);
 0111 
 0112 <span class="comment">% solve for phi given the requested solutions</span>
-0113    numsoln  = numel(solns);
-0114    phi      = nan(numsoln,1);
+0113 numsoln = numel(solns);
+0114 phi     = nan(numsoln,1);
 0115 
 0116 <span class="keyword">for</span> m = 1:numsoln
 0117 
@@ -310,7 +310,7 @@ This function is called by:
 0223 <span class="keyword">end</span>
 0224 
 0225 
-0226 <a name="_sub1" href="#_subfunctions" class="code">function [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);</a>
+0226 <a name="_sub1" href="#_subfunctions" class="code">function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)</a>
 0227    
 0228 <span class="comment">% option to get all solutions</span>
 0229 <span class="keyword">if</span> strcmp(soln1,<span class="string">'all'</span>) &amp;&amp; strcmp(soln2,<span class="string">'all'</span>)
@@ -356,7 +356,7 @@ This function is called by:
 0269    <span class="comment">% if strcmp(soln2,'RS05') &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)</span>
 0270    <span class="keyword">if</span> strcmp(soln2,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt;= 1 || b2&gt;=2)
 0271       warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
-0272       soln2  = <span class="string">'BS03'</span>;
+0272       soln2 = <span class="string">'BS03'</span>;
 0273 
 0274    <span class="comment">% late-time B04 has b = 3/2</span>
 0275    <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
@@ -373,7 +373,7 @@ This function is called by:
 0286 
 0287    <span class="keyword">if</span> strcmp(soln1,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)
 0288       warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
-0289       soln2  = <span class="string">'B03'</span>;
+0289       soln2 = <span class="string">'B03'</span>;
 0290 
 0291    <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
 0292       warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
@@ -387,7 +387,7 @@ This function is called by:
 0300 <span class="keyword">end</span>
 0301 
 0302 <span class="comment">% concatenate the early-time and late-time solution</span>
-0303 soln  = strcat(soln1,[<span class="string">'_'</span> soln2]);
+0303 soln = strcat(soln1,[<span class="string">'_'</span> soln2]);
 0304 
 0305 <span class="keyword">switch</span> soln
 0306    <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>

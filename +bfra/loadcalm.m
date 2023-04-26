@@ -28,18 +28,18 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 %------------------------------------------------------------------------------
 validopts = @(x)any(validatestring(x,{'current','archive'}));
 
-p              = inputParser;
+p = inputParser;
 p.FunctionName = 'bfra.loadcalm';
 
-addRequired(p, 'basinname',               @(x) ischarlike(x)               );
-addOptional(p, 'version',     'current',  validopts                        );
-addParameter(p,'t1',          NaT,        @(x) isdatetime(x)|isnumeric(x)  );
-addParameter(p,'t2',          NaT,        @(x) isdatetime(x)|isnumeric(x)  );
-addParameter(p,'aggfunc',     'none',     @(x) ischar(x)                   );
-addParameter(p,'minlength',   10,         @(x) isnumericscalar(x)          );
-addParameter(p,'mincoverage', 0.8,        @(x) isnumericscalar(x)          );
-addParameter(p,'minoverlap',  0.5,        @(x) isnumericscalar(x)          );
-addParameter(p,'maxdiff',     0.5,        @(x) isnumericscalar(x)          );
+addRequired(p, 'basinname',               @(x) bfra.validation.ischarlike(x));
+addOptional(p, 'version',     'current',  validopts);
+addParameter(p,'t1',          NaT,        @(x) bfra.validation.isdatelike(x));
+addParameter(p,'t2',          NaT,        @(x) bfra.validation.isdatelike(x));
+addParameter(p,'aggfunc',     'none',     @(x) bfra.validation.ischarlike(x));
+addParameter(p,'minlength',   10,         @(x) bfra.validation.isnumericscalar(x));
+addParameter(p,'mincoverage', 0.8,        @(x) bfra.validation.isnumericscalar(x));
+addParameter(p,'minoverlap',  0.5,        @(x) bfra.validation.isnumericscalar(x));
+addParameter(p,'maxdiff',     0.5,        @(x) bfra.validation.isnumericscalar(x));
 
 parse(p,basinname,varargin{:});
 
@@ -74,8 +74,8 @@ switch version
 end
 
 if ~isnat(t1)
-   ok    = isbetween(Calm.Time,t1,t2);
-   Calm  = Calm(ok,:);
+   ok = isbetween(Calm.Time,t1,t2);
+   Calm = Calm(ok,:);
 end
 
 [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff);
@@ -111,9 +111,10 @@ switch aggfunc
       return
       
    case 'avg'
-      Calm  = timetablereduce(Calm); % 'avg' might as well return PM. previously 'bfra'
-      Calm  = Calm(:,{'mu','PM'});
-      Calm  = renamevars(Calm,{'mu','PM'},{'Dc','sigDc'});
+      % 'avg' might as well return PM. previously 'bfra'
+      Calm = bfra.util.timetablereduce(Calm);
+      Calm = Calm(:,{'mu','PM'});
+      Calm = renamevars(Calm,{'mu','PM'},{'Dc','sigDc'});
       return
       
    case 'robust'
@@ -122,9 +123,9 @@ switch aggfunc
 
       % if no sites have > minlength values, set nan and return
       if sum(ok)==0
-         Calm.Dc     = nan(height(Calm),1);
-         Calm.sigDc  = nan(height(Calm),1);
-         Calm        = Calm(:,{'Dc','sigDc'});
+         Calm.Dc = nan(height(Calm),1);
+         Calm.sigDc = nan(height(Calm),1);
+         Calm = Calm(:,{'Dc','sigDc'});
          return
       elseif sum(ok)==1
          % if one site has > minlength values, call case 'avg' and return
@@ -135,24 +136,24 @@ switch aggfunc
       end
 
       % remove sites with < minlength
-      Calm     = Calm(:,ok);
-      Meta     = Meta(ok,:);
+      Calm = Calm(:,ok);
+      Meta = Meta(ok,:);
 
       % use the longest record as the reference site
-      nsites   = height(Meta);
-      nyears   = Meta.nyears;
-      nmax     = max(nyears);
-      iref     = nyears == nmax;
+      nsites = height(Meta);
+      nyears = Meta.nyears;
+      nmax = max(nyears);
+      iref = nyears == nmax;
       
       % get the trend using the longest record and then using the average
-      alldata  = table2array(Calm);
-      mu       = mean(alldata,2,'omitnan');
-      Trends   = timetabletrends(addvars(Calm,mu));
+      alldata = table2array(Calm);
+      mu = mean(alldata,2,'omitnan');
+      Trends = timetabletrends(addvars(Calm,mu));
 
       % the trend slopes are added as custom props in timetable trend but the last one
       % is the "TimeX" regressor variable which is set nan
-      slopes   = Trends.Properties.CustomProperties.TrendSlope(1:end-1);
-      tseries  = table2array(Trends(:,1:end-1));
+      slopes = Trends.Properties.CustomProperties.TrendSlope(1:end-1);
+      tseries = table2array(Trends(:,1:end-1));
       
       % this handles the case with more than one "reference site"
       refslope = mean(slopes(iref));
@@ -191,11 +192,12 @@ switch aggfunc
       if plottrends == true 
          figure; plot(Calm.Time,alldata,'-o'); hold on;
          plot(Calm.Time,mean(alldata,2,'omitnan')); set(gca,'ColorOrderIndex',1)
-         plot(Calm.Time,tseries); formatPlotMarkers;
+         plot(Calm.Time,tseries); bfra.util.formatPlotMarkers;
          legend(Trends.Properties.VariableNames(1:end-1),'Location','best');
          
          % this was in the aggregateCalmData temporary function i deleted
-         trendplot(Data.Time,Data.mu,'useax',gca,'errorbars',true,'yerr',Data.sigma);
+         bfra.trendplot(Data.Time,Data.mu,'useax',gca, ...
+            'errorbars',true,'yerr',Data.sigma);
       end
       
       % NOTE:
@@ -223,12 +225,12 @@ end
 % % make a shapefile
 % [SE,CI,PM,mu,sigma] = stderr(transpose(table2array(Data)));
 % 
-% S        = MetaCalm(Points.inpolyb,:);
-% S.avg    = mu;
-% S.std    = sigma;
-% S        = table2struct(tablecategorical2char(S));
-% S        = renamestructfields(S,{'LAT','LON'},{'Lat','Lon'});
-% S        = geopoint(S);
+% S = MetaCalm(Points.inpolyb,:);
+% S.avg = mu;
+% S.std = sigma;
+% S = table2struct(tablecategorical2char(S));
+% S = renamestructfields(S,{'LAT','LON'},{'Lat','Lon'});
+% S = geopoint(S);
 
 
 
@@ -252,29 +254,29 @@ if MetaBasin.num_calm == 0
    error('no calm data for this basin')
 else
    % the indices of the calm sites for this basin
-   idx   =  MetaBasin.idx_calm{:};
-   Calm  =  Calm(:,idx);
-   Meta  =  MetaCalm(idx,:);
+   idx = MetaBasin.idx_calm{:};
+   Calm = Calm(:,idx);
+   Meta = MetaCalm(idx,:);
    
    % add number of valid years and start/end 
-   ok       = ~isnan(table2array(Calm));
-   nyears   = transpose(sum(ok));
-   istart   = transpose(table2array(varfun(@(A)(find(~isnan(A),1,'first')),Calm)));
-   iend     = transpose(table2array(varfun(@(A)(find(~isnan(A),1,'last')),Calm)));
-   syear    = year(Calm.Time(istart));
-   eyear    = year(Calm.Time(iend));
-   coverage = round(nyears./(eyear-syear+1),2);
-   Meta     = addvars(Meta,nyears,syear,eyear,coverage);
+   keep = ~isnan(table2array(Calm));
+   nyears = transpose(sum(keep));
+   ibegin = transpose(table2array(varfun(@(A)(find(~isnan(A),1,'first')),Calm)));
+   ifinal = transpose(table2array(varfun(@(A)(find(~isnan(A),1,'last')),Calm)));
+   ybegin = year(Calm.Time(ibegin));
+   yfinal = year(Calm.Time(ifinal));
+   tcover = round(nyears./(yfinal-ybegin+1),2);
+   Meta = addvars(Meta,nyears,ybegin,yfinal,tcover,'NewVariableNames', ...
+      ["NumYears","YearStart","YearEnd","Coverage"]);
 end
 
 % temp hack to check against the og list
 if strcmp(MetaBasin.name,'KUPARUK R NR DEADHORSE AK')
    sites = {'U11A','U11B','U11C','U12A','U12B','U13','U14','U32A','U32B'};
-   keep  = ismember(Calm.Properties.VariableNames,sites);
-   Calm  = Calm(:,keep);
-   Meta  = Meta(keep,:);
+   keep = ismember(Calm.Properties.VariableNames,sites);
+   Calm = Calm(:,keep);
+   Meta = Meta(keep,:);
 end
-
 
 function [Calm,MetaBasin] = loadcalmarchive(MetaBasin)
 
@@ -290,8 +292,8 @@ end
 if isempty(MetaBasin.sites_calm)
    error('no calm data for this basin')
 else
-   i1    = find(string(Calm.Properties.VariableNames) == "x1990");
-   i2    = find(string(Calm.Properties.VariableNames) == "x2019");
-   Dc    = table2array(Calm(MetaBasin.use_calm,i1:i2)); Dc = Dc';
-   Calm  = timetable(Dc,'RowTimes',Tcalm);
+   i1 = find(string(Calm.Properties.VariableNames) == "x1990");
+   i2 = find(string(Calm.Properties.VariableNames) == "x2019");
+   Dc = table2array(Calm(MetaBasin.use_calm,i1:i2)); Dc = Dc';
+   Calm = timetable(Dc,'RowTimes',Tcalm);
 end

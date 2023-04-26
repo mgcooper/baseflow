@@ -68,6 +68,13 @@ switch requestedstring
       str = [ '$-\mathrm{d}^2Q/\mathrm{d}t^2 \quad[\mathrm{m}^3\;' ...
          '\mathrm{d}^{-1}\;\mathrm{d}^{-2}]$'];
 
+   case 'R'
+      
+      str = 'Rainfall $\quad [\mathrm{mm} \;\mathrm{d}^{-1}]$';
+      
+      % this might be simpler need to compare
+      % str = 'Rainfall [mm d$^{-1}$]';
+      
    case {'dndt','dn/dt'}
       
       str = [ '$\mathrm{d}\eta/\mathrm{d}t \quad[\mathrm{cm}\;' ...
@@ -118,4 +125,7 @@ switch requestedstring
       
    case {'tau','Tau'}
       str = '$\tau$';
+      
+   case {'R','Rainfall'}
+      str = 'Rainfall';
 end

@@ -1,5 +1,5 @@
 function Data = getEventsData(Events,eventTag)
-%GETEVENTDATA get data from Events for event number eventTag
+%GETEVENTSDATA get data from Events for event number eventTag
 % 
 % Description
 % 

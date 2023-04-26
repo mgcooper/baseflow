@@ -39,7 +39,7 @@ load('data/dailyflow.mat','T','Q','R');
 t1 = datetime(1992,6,1);
 t2 = datetime(1992,12,1);
 figure('Position',[0 0 350 200]); ax = gca;
-H = hyetograph(T,Q,R,t1,t2,'units',{'m3 d-1','mm d-1'},'ax',ax);
+H = bfra.hyetograph(T,Q,R,t1,t2,'units',{'m3 d-1','mm d-1'},'ax',ax);
 
 %%% Detecting recession events from timeseries of daily streamflow
 % The toolbox supports three main tasks: event detection, event curve-fitting,

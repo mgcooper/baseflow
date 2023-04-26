@@ -27,10 +27,10 @@ p.KeepUnmatched = true;
 
 validVarNames = @(x)all(ismember(x,T.Properties.VariableNames));
 
-addRequired(p, 'T', @(x)istablelike(x));
+addRequired(p, 'T', @(x)bfra.validation.istablelike(x));
 addRequired(p, 'VarNames', validVarNames);
 addRequired(p, 'NewVars');
-addParameter(p,'NewVarNames', VarNames, @(x)ischarlike(x));
+addParameter(p,'NewVarNames', VarNames, @(x)bfra.validation.ischarlike(x));
 
 parse(p,T,VarNames,NewVars,varargin{:});
 

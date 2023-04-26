@@ -115,8 +115,8 @@ This function is called by:
 0036 C = tau/phi/(N+1); <span class="comment">% lambda in the paper [days]</span>
 0037 
 0038 <span class="comment">% compute the timeseries of ALT and the trend</span>
-0039 D        = Qb.*C;              <span class="comment">% alt timeseries, posted annually [cm]</span>
-0040 dDdt     = dQbdt.*C;           <span class="comment">% alt trend, posted annually [cm/yr]</span>
-0041 dDadt    = anomaly(dQbdt.*C);  <span class="comment">% alt trend anomaly(dDdt)</span></pre></div>
+0039 D = Qb.*C; <span class="comment">% alt timeseries, posted annually [cm]</span>
+0040 dDdt = dQbdt.*C; <span class="comment">% alt trend, posted annually [cm/yr]</span>
+0041 dDadt = bfra.util.anomaly(dQbdt.*C); <span class="comment">% alt trend anomaly(dDdt)</span></pre></div>
 </body>
 </html>

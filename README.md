@@ -28,18 +28,17 @@ For more options, see [Configuration](#configuration).
 
 ## Get started
 
-Toolbox functions are located in the `+bfra` namespace package folder. To get started using the toolbox, in your Matlab environment:
-
-- Type `doc bfra` to see the extended documentation in the help browser.
-- Type `help +bfra` at the command line then press enter to list the package contents.
-- Type `doc +bfra` to see the package contents in the help browser.
-- See the example notebook `demos/demo_bfra.mlx`.
-
 For an introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).
 
-<!-- ## More details
+Toolbox functions are located in the `+bfra` namespace package folder. To see a list of toolbox functions, type `help +bfra` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help bfra.function_name` at the command line then press enter.
 
-The theory makes various strong assumptions, including that the aquifer extent is much larger in the lateral direction than the vertical, and that capillarity can be ignored or parameterized by the concept of 'drainable porosity'. This reduces the three-dimensional Richard's equation to one dimension and eliminates unsaturated flow considerations. The theory has been validated with laboratory experiments and may work better than you expect. When applied to entire catchments ("watersheds"), the theory becomes an effective one, meaning the inferred properties are those that give the same solution to the Boussinesq equation that one would obtain for a single hillslope with those same properties and geometric similarity. -->
+Toolbox documentation and examples are also available in the Matlab help browser. To get started, in your Matlab command window:
+
+- Type `doc bfra` to open the documentation in the help browser.
+- Type `doc +bfra` to see the package contents in the help browser.
+- If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch bfra`.
+
+In addition to the toolbox documentation and examples provided in the Matlab help browser, the notebook in `demos/bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154).
 
 ## Contribute
 
@@ -63,21 +62,11 @@ If you find this software useful, please consider citing the software release in
     ISSN={1944-7973},
     }
 
-<!-- ```shell
-git clone https://github.com/mgcooper/baseflow.git baseflow
-cd baseflow
-/Applications/MATLAB_R2020b.app/bin/matlab -nodisplay -nosplash -nodesktop -r "run('Setup.m');exit;" | tail -n +11
-``` -->
-
-<!-- ## Detailed information
-
-Baseflow recession analysis is a set of methods in hydrologic science used to estimate aquifer properties from streamflow measurements. Properties that cannot be observed, such as hydraulic conductivity, are inferred from something that can be observed, such as streamflow. The underlying theory is based on solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). -->
-
 ## Configuration
 
-Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example by modifying their `startup.m` file. The `+bfra` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup.
+Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example, using the `startup.m` file. However, the `+bfra` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup. An exception to this is the `util/` folder which contains helper functions that could conflict with other functions on the search path.
 
-The convenience function `Setup.m` includes options to manage repeated use of the toolbox. Starting from an initial installation:
+For extended use of the toolbox, or to avoid conflicts between the `util/` functions and other third-party functions on your search path, the convenience function `Setup.m` includes options to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
 
 - Running `Setup('install')` does the following:
   - Toolbox paths are added to the search path (not persistent between sessions).
@@ -89,7 +78,7 @@ The convenience function `Setup.m` includes options to manage repeated use of th
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
-Running `Setup('install')` should only be necessary once. Note that all dependencies are included in this toolbox, and are added to the search path during installation. If for some reason the dependencies are not found on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using:
+Running `Setup('install')` should only be necessary once (or not at all, if you place the toolbox on your matlab search path). Note that all dependencies are included in this toolbox, and are added to the search path during installation. If for some reason the dependencies are not found on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using:
 
 - `msg = Setup('dependencies')`
 
@@ -109,3 +98,18 @@ The `baseflow` toolbox uses the package namespace prefix `+bfra`, short for **b*
 ## Acknowledgement
 
 The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project funded this work through the United States Department of Energy, Office of Science, Biological and Environmental Research (BER) Regional and Global Model Analysis (RGMA) program. Awarded under contract grant #  89233218CNA000001 to Triad National Security, LLC (“Triad”).
+
+<!-- `doc bfra` brings up the Contents pane in a small help box rather than the extended documentation in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". Alternatively, try `docsearch bfra` to bring up the search results in the help browser. This is a known issue that may occur if the version of Matlab used to generate the documentation differs from the version running locally. -->
+
+<!-- ```shell
+git clone https://github.com/mgcooper/baseflow.git baseflow
+cd baseflow
+/Applications/MATLAB_R2020b.app/bin/matlab -nodisplay -nosplash -nodesktop -r "run('Setup.m');exit;" | tail -n +11
+``` -->
+
+<!-- ## Detailed information
+
+Baseflow recession analysis is a set of methods in hydrologic science used to estimate aquifer properties from streamflow measurements. Properties that cannot be observed, such as hydraulic conductivity, are inferred from something that can be observed, such as streamflow. The underlying theory is based on solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). 
+
+The theory makes various strong assumptions, including that the aquifer extent is much larger in the lateral direction than the vertical, and that capillarity can be ignored or parameterized by the concept of 'drainable porosity'. This reduces the three-dimensional Richard's equation to one dimension and eliminates unsaturated flow considerations. The theory has been validated with laboratory experiments and may work better than you expect. When applied to entire catchments ("watersheds"), the theory becomes an effective one, meaning the inferred properties are those that give the same solution to the Boussinesq equation that one would obtain for a single hillslope with those same properties and geometric similarity. 
+-->

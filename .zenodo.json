@@ -1,0 +1,27 @@
+// the purpose of this would be to automatically update the citation info whenever a new release is published on zenodo without hving to manually update CITATION.cff or this file. 
+// this file may or may not be better than CITATION.cff
+// see this for more info: https://help.zenodo.org
+// and this: https://developers.zenodo.org/#add-metadata-to-your-github-repository-release
+{
+    "license": "other-open",
+    "title": "baseflow",
+    "upload_type": "software",
+    "creators": [
+        {
+            "orcid": "0000-0002-0165-209X",
+            "affiliation": "Pacific Northwest National Laboratory",
+            "name": "Matt Cooper"
+        },
+        {
+            "orcid": "0000-0003-1582-4005",
+            "affiliation": "Pacific Northwest National Laboratory",
+            "name": "Tian Zhou"
+        },
+        {
+            "orcid": "0000-0001-6308-8976",
+            "affiliation": "Los Alamos National Laboratory",
+            "name": "Joel C. Rowland"
+        }
+    ],
+    "access_right": "open"
+}

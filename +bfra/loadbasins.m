@@ -53,15 +53,15 @@ projection  = p.Results.projection;
 %------------------------------------------------------------------------------
 
 % load the basin boundaries and the flow data
-pathdata    = [getenv('USERDATAPATH') 'interface/basins/matfiles/'];
+pathdata = fullfile(getenv('USERDATAPATH'),'interface/basins/matfiles/');
 
 % Nov 2022, checked this out from dev-bk, and copied below from current
 % version of loadmeta  
 switch version
    case 'current'
-      filedata  = [pathdata 'basin_boundaries.mat'];
+      filedata  = fullfile(pathdata,'basin_boundaries.mat');
    case 'archive'
-      filedata  = [pathdata 'basin_boundaries_tmp.mat'];
+      filedata  = fullfile(pathdata,'basin_boundaries_tmp.mat');
 end
 load(filedata,'Bounds','Meta');
 

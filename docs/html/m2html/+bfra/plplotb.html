@@ -47,7 +47,7 @@
                  value of xmin and the expected value of x
      ax       =  graphic axis to plot into
  
- See also: plfit, <a href="plfitb.html" class="code" title="function varargout = plfitb(x,varargin)">plfitb</a>, <a href="gpfitb.html" class="code" title="function [Fit,b,alpha,k] = gpfitb(x,varargin)">gpfitb</a>, <a href="eventtau.html" class="code" title="function [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)">eventtau</a>
+ See also: plfit, <a href="plfitb.html" class="code" title="function varargout = plfitb(x,varargin)">plfitb</a>, <a href="gpfitb.html" class="code" title="function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)">gpfitb</a>, <a href="eventtau.html" class="code" title="function [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)">eventtau</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -102,21 +102,21 @@ This function is called by:
 0026 <span class="comment">% if called with no input, open this file</span>
 0027 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0028 
-0029 <span class="comment">%-------------------------------------------------------------------------------</span>
-0030 p               = inputParser;
-0031 p.FunctionName  = <span class="string">'bfra.plplotb'</span>;
+0029 <span class="comment">% --------------- parse inputs</span>
+0030 p = inputParser;
+0031 p.FunctionName = <span class="string">'bfra.plplotb'</span>;
 0032 p.CaseSensitive = false;
 0033 p.KeepUnmatched = true;
 0034 
-0035 addRequired(   p, <span class="string">'x'</span>,                          @(x)isnumeric(x)     );
-0036 addRequired(   p, <span class="string">'xmin'</span>,                       @(x)isnumeric(x)     );
-0037 addRequired(   p, <span class="string">'alpha'</span>,                      @(x)isnumeric(x)     );
-0038 addParameter(  p, <span class="string">'alphaci'</span>,        nan,        @(x)isnumeric(x)     );
-0039 addParameter(  p, <span class="string">'xminci'</span>,         nan,        @(x)isnumeric(x)     );
-0040 addParameter(  p, <span class="string">'varsym'</span>,         <span class="string">'\tau'</span>,     @(x)ischar(x)        );
-0041 addParameter(  p, <span class="string">'trimline'</span>,       false,      @(x)islogical(x)     );
-0042 addParameter(  p, <span class="string">'labelplot'</span>,      true,       @(x)islogical(x)     );
-0043 addParameter(  p, <span class="string">'ax'</span>,             gca,        @(x)isaxis(x)        );
+0035 addRequired(   p, <span class="string">'x'</span>,                          @(x)isnumeric(x));
+0036 addRequired(   p, <span class="string">'xmin'</span>,                       @(x)isnumeric(x));
+0037 addRequired(   p, <span class="string">'alpha'</span>,                      @(x)isnumeric(x));
+0038 addParameter(  p, <span class="string">'alphaci'</span>,        nan,        @(x)isnumeric(x));
+0039 addParameter(  p, <span class="string">'xminci'</span>,         nan,        @(x)isnumeric(x));
+0040 addParameter(  p, <span class="string">'varsym'</span>,         <span class="string">'\tau'</span>,     @(x)ischar(x));
+0041 addParameter(  p, <span class="string">'trimline'</span>,       false,      @(x)islogical(x));
+0042 addParameter(  p, <span class="string">'labelplot'</span>,      true,       @(x)islogical(x));
+0043 addParameter(  p, <span class="string">'ax'</span>,             gca,        @(x)bfra.validation.isaxis(x));
 0044 
 0045 parse(p,x,xmin,alpha,varargin{:});
 0046 
@@ -126,120 +126,125 @@ This function is called by:
 0050 trimline    = p.Results.trimline;
 0051 labelplot   = p.Results.labelplot;
 0052 ax          = p.Results.ax;
-0053 <span class="comment">%-------------------------------------------------------------------------------</span>
-0054    
-0055 <span class="comment">% get the complementary cumulative distribution function</span>
-0056 numData     =  numel(x);
-0057 xccp        =  sort(x);
-0058 ccp         =  (numData:-1:1)'./numData;
-0059 refy        =  ccp(find(xccp&gt;=xmin,1,<span class="string">'first'</span>));
-0060 
-0061 <span class="comment">% option to extend the line forward a bit (purely aesthetic)</span>
-0062 <span class="keyword">if</span> trimline == true
-0063    xccfit   =  sort(x(x&gt;=xmin));
-0064    xccfit   =  [xccfit; xccfit(end)*1.2];
-0065 <span class="keyword">else</span>
-0066    xccfit   =  sort(x); <span class="comment">% this extends the line back toward the origin</span>
-0067    xccfit   =  [xccfit; xccfit(end)*1.2]; <span class="comment">% this extends the line forward a bit</span>
-0068 <span class="keyword">end</span>
-0069 
-0070 <span class="comment">% compute the ccdf</span>
-0071 ccfit       =  (xccfit./xmin).^(1-alpha);
-0072 
-0073 <span class="comment">% scale the fitted x&gt;xmin ccdf to pass through the refPoint</span>
-0074 ccfit       =  ccfit.*refy; 
-0075 xccfit      =  xccfit(ccfit&lt;=1);
-0076 ccfit       =  ccfit(ccfit&lt;=1);
-0077 
-0078 <span class="comment">% plot it</span>
-0079 h.data = loglog(ax,xccp,ccp,<span class="string">'o'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'MarkerSize'</span>,10, <span class="keyword">...</span>
-0080    <span class="string">'MarkerFaceColor'</span>,<span class="string">'w'</span>); hold on;
-0081 h.fit = loglog(ax,xccfit,ccfit,<span class="string">'LineWidth'</span>,3);
-0082 
-0083 <span class="comment">% compute b for the legend</span>
-0084 b = bfra.conversions(alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>);
-0085 
-0086 <span class="comment">% build a legend, labels, etc.</span>
-0087 ltxt1    = [<span class="string">'$'</span> varsym <span class="string">'$ (data)'</span>];
-0088 <span class="keyword">if</span> ~isnan(alphaci)
-0089    bL    = bfra.conversions(alphaci(1),<span class="string">'alpha'</span>,<span class="string">'b'</span>);
-0090    bH    = bfra.conversions(alphaci(2),<span class="string">'alpha'</span>,<span class="string">'b'</span>);
-0091    ltxt2 = sprintf(<span class="string">'MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)'</span>,b,bL,bH);
-0092 <span class="keyword">else</span>
-0093    ltxt2 = sprintf(<span class="string">'MLE fit ($b=%.2f$)'</span>,bfra.conversions(alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>));
-0094    bL = nan;
-0095    bH = nan;
-0096 <span class="keyword">end</span>
-0097 xlabel(<span class="string">'$x$'</span>);
-0098 ylabel([<span class="string">'$p('</span> varsym <span class="string">'\ge x)$'</span>],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>); 
-0099 h.legend = legend(ltxt1,ltxt2,<span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'sw'</span>);
-0100 
-0101 <span class="comment">% h.legend.Position = [0.27 0.40 0.30 0.10];</span>
-0102 
-0103 <span class="keyword">if</span> ~isnan(xminci)
-0104    xminL = xminci(1);
-0105    xminH = xminci(2);
-0106 <span class="keyword">else</span>
-0107    xminL = xmin;
-0108    xminH = xmin;
-0109 <span class="keyword">end</span>
-0110 
-0111 <span class="keyword">if</span> labelplot == true
-0112    <span class="comment">%addlabels(xccfit,ccfit,xmin,xminL,xminH,b,bL,bH,refy);</span>
-0113    <a href="#_sub1" class="code" title="subfunction addlabels(xfit,yfit,tau0,tau0L,tau0H,b)">addlabels</a>(xccfit,ccfit,xmin,xminL,xminH,b);
-0114 <span class="keyword">end</span>
-0115 
-0116 h.ax = gca;
-0117 h.ax.YLim(2)  = 1.5; <span class="comment">% add a little white space above P=1</span>
-0118 
+0053 
+0054 <span class="comment">% --------------- function code</span>
+0055    
+0056 <span class="comment">% Compute the complementary cumulative distribution function</span>
+0057 N = numel(x);
+0058 xccp = sort(x);
+0059 yccp = (N:-1:1)'./N;
+0060 refy = yccp(find(xccp&gt;=xmin,1,<span class="string">'first'</span>));
+0061 
+0062 <span class="comment">% Option to extend the line forward a bit (purely aesthetic)</span>
+0063 <span class="keyword">if</span> trimline == true
+0064    xccfit = sort(x(x&gt;=xmin));
+0065    xccfit = [xccfit; xccfit(end)*1.2];
+0066 <span class="keyword">else</span>
+0067    xccfit = sort(x); <span class="comment">% this extends the line back toward the origin</span>
+0068    xccfit = [xccfit; xccfit(end)*1.2]; <span class="comment">% this extends the line forward a bit</span>
+0069 <span class="keyword">end</span>
+0070 
+0071 <span class="comment">% Compute the theoretical ccdf</span>
+0072 yccfit = (xccfit./xmin).^(1-alpha);
+0073 
+0074 <span class="comment">% scale the fitted x&gt;xmin ccdf to pass through the refPoint</span>
+0075 yccfit = yccfit.*refy; 
+0076 xccfit = xccfit(yccfit&lt;=1);
+0077 yccfit = yccfit(yccfit&lt;=1);
+0078 
+0079 <span class="comment">% plot it</span>
+0080 h.data = loglog(ax,xccp,yccp,<span class="string">'o'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'MarkerSize'</span>,10, <span class="keyword">...</span>
+0081    <span class="string">'MarkerFaceColor'</span>,<span class="string">'w'</span>); hold on;
+0082 h.fit = loglog(ax,xccfit,yccfit,<span class="string">'LineWidth'</span>,3);
+0083 
+0084 <span class="comment">% compute b for the legend</span>
+0085 b = bfra.conversions(alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0086 
+0087 <span class="comment">% build a legend, labels, etc.</span>
+0088 l1 = [<span class="string">'$'</span> varsym <span class="string">'$ (data)'</span>];
+0089 <span class="keyword">if</span> ~isnan(alphaci)
+0090    bL = bfra.conversions(alphaci(1),<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0091    bH = bfra.conversions(alphaci(2),<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0092    l2 = sprintf(<span class="string">'MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)'</span>,b,bL,bH);
+0093 <span class="keyword">else</span>
+0094    l2 = sprintf(<span class="string">'MLE fit ($b=%.2f$)'</span>,bfra.conversions(alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>));
+0095    bL = nan;
+0096    bH = nan;
+0097 <span class="keyword">end</span>
+0098 xlabel(<span class="string">'$x$'</span>);
+0099 ylabel([<span class="string">'$p('</span> varsym <span class="string">'\ge x)$'</span>],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>); 
+0100 h.legend = legend(l1,l2,<span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'sw'</span>);
+0101 
+0102 <span class="comment">% h.legend.Position = [0.27 0.40 0.30 0.10];</span>
+0103 
+0104 <span class="keyword">if</span> ~isnan(xminci)
+0105    xminL = xminci(1);
+0106    xminH = xminci(2);
+0107 <span class="keyword">else</span>
+0108    xminL = xmin;
+0109    xminH = xmin;
+0110 <span class="keyword">end</span>
+0111 
+0112 <span class="keyword">if</span> labelplot == true
+0113    <span class="comment">%addlabels(xccfit,ccfit,xmin,xminL,xminH,b,bL,bH,refy);</span>
+0114    <a href="#_sub1" class="code" title="subfunction addlabels(xfit,yfit,tau0,tau0L,tau0H,b)">addlabels</a>(xccfit,yccfit,xmin,xminL,xminH,b);
+0115 <span class="keyword">end</span>
+0116 
+0117 h.ax = gca;
+0118 h.ax.YLim(2) = 1.5; <span class="comment">% add a little white space above P=1</span>
 0119 
-0120 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)</a>
-0121 
-0122 <span class="comment">% tau0</span>
-0123 xminc = (tau0H-tau0+tau0-tau0L)/2;
-0124 xlims = xlim;
-0125 ndecx = log10(xlims(2))-log10(xlims(1));
-0126 xa    = [10^(log10(tau0)-ndecx/10) tau0];
-0127 
-0128 ya    = yfit(find(xfit&gt;=xa(1),1,<span class="string">'first'</span>));
-0129 ya    = [ya ya];
-0130 
-0131 <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
-0132 <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
-0133    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f$ days'</span>,tau0);
-0134 <span class="keyword">else</span>
-0135    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,tau0,xminc);
-0136 <span class="keyword">end</span>
-0137 
-0138 arrow([xa(1),ya(1)],[xa(2),ya(2)],<span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
-0139 text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14)
-0140 
-0141 
-0142 <span class="comment">% % tauExp</span>
-0143 <span class="comment">%----------------------------------------------------------------------------</span>
-0144 <span class="comment">% test using the new xminL/H</span>
-0145 <span class="comment">% deactivate this and reactive the two lines below to go back</span>
-0146 xexp = tau0*(2-b)/(3-2*b);
-0147 tauL = tau0L*(2-b)/(3-2*b);
-0148 tauH = tau0H*(2-b)/(3-2*b);
-0149 xexpc = (tauH-tauL)/2;
-0150 <span class="comment">% xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);</span>
-0151 <span class="comment">% xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));</span>
-0152 <span class="comment">%----------------------------------------------------------------------------</span>
-0153 
-0154 xa    = [10^(log10(xexp)-ndecx/10) xexp];
-0155 ya    = yfit(find(xfit&gt;=xa(2),1,<span class="string">'first'</span>));
-0156 ya    = [ya ya];
-0157 
-0158 <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
-0159 <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
-0160    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f$ days'</span>,xexp);
-0161 <span class="keyword">else</span>
-0162    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
-0163 <span class="keyword">end</span>
-0164 
-0165 arrow([xa(1),ya(1)],[xa(2),ya(2)],<span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
-0166 text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14)
-0167</pre></div>
+0120 
+0121 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)</a>
+0122 <span class="comment">%ADDLABELS add an arrow pointing to tau0 and tau_exp</span>
+0123 
+0124 <span class="comment">% tau0</span>
+0125 xminc = (tau0H-tau0+tau0-tau0L)/2;
+0126 xlims = xlim;
+0127 ndecx = log10(xlims(2))-log10(xlims(1));
+0128 xarrw = [10^(log10(tau0)-ndecx/10) tau0];
+0129 yarrw = yfit(find(xfit&gt;=xarrw(1),1,<span class="string">'first'</span>));
+0130 yarrw = [yarrw yarrw];
+0131 
+0132 <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
+0133 <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
+0134    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f$ days'</span>,tau0);
+0135 <span class="keyword">else</span>
+0136    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,tau0,xminc);
+0137 <span class="keyword">end</span>
+0138 
+0139 <span class="comment">% draw the arrow</span>
+0140 bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], <span class="keyword">...</span>
+0141    <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0142 text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
+0143    <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14)
+0144 
+0145 <span class="comment">% % tauExp</span>
+0146 <span class="comment">%----------------------------------------------------------------------------</span>
+0147 <span class="comment">% test using the new xminL/H</span>
+0148 <span class="comment">% deactivate this and reactive the two lines below to go back</span>
+0149 xexp = tau0*(2-b)/(3-2*b);
+0150 tauL = tau0L*(2-b)/(3-2*b);
+0151 tauH = tau0H*(2-b)/(3-2*b);
+0152 xexpc = (tauH-tauL)/2;
+0153 <span class="comment">% xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);</span>
+0154 <span class="comment">% xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));</span>
+0155 <span class="comment">%----------------------------------------------------------------------------</span>
+0156 
+0157 xarrw = [10^(log10(xexp)-ndecx/10) xexp];
+0158 yarrw = yfit(find(xfit&gt;=xarrw(2),1,<span class="string">'first'</span>));
+0159 yarrw = [yarrw yarrw];
+0160 
+0161 <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
+0162 <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
+0163    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f$ days'</span>,xexp);
+0164 <span class="keyword">else</span>
+0165    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
+0166 <span class="keyword">end</span>
+0167 
+0168 bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], <span class="keyword">...</span>
+0169    <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0170 text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
+0171    <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14)
+0172</pre></div>
 </body>
 </html>

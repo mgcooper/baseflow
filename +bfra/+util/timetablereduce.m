@@ -7,7 +7,7 @@ function NewData = timetablereduce(Data,varargin)
 % See also stderr
 
 %-------------------------------------------------------------------------------
-p = magicParser;
+p = bfra.deps.magicParser;
 p.FunctionName = mfilename;
 p.addRequired( 'Data', @(x)istimetable(x));
 p.addParameter('alpha', 0.32, @(x)isnumeric(x));

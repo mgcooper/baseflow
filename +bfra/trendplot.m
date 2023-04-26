@@ -1,21 +1,19 @@
 function h = trendplot(t,y,varargin)
-%TRENDPLOT
+%TRENDPLOT plot a timeseries and linear trendline fit
+% 
+% h = trendplot(t,y) plots time T and data Y and fits a trendline
+% 
+% 
+% Copyright Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+% 
+% See also printtrend
 
 %-------------------------------------------------------------------------------
-p = magicParser;
+p = bfra.deps.magicParser;
 p.FunctionName = mfilename;
 p.PartialMatching = true;
 
 dpos = [321 241 512 384]; % default figure size
-
-% to get this to work i think i need to first parse if the first input is
-% an axis and then pass remaining args to input parser, might also need to
-% have mutually exclusive options in json, at minimum to get function hints
-% to work as they do with plot()
-% p.addOptional('target',       gca,  @(x)isaxis(x)                    );
-% % add this back to json to try
-% {"name":"target",       "kind":"ordered",
-% "type":[["matlab.graphics.axis.AbstractAxes"], ["matlab.ui.control.UIAxes"]]},
 
 p.addRequired('t',                  @(x)isnumeric(x) || isdatetime(x));
 p.addRequired('y',                  @(x)isnumeric(x)                 );
@@ -29,7 +27,7 @@ p.addParameter('alpha',       0.05, @(x)isnumeric(x)                 );
 p.addParameter('anomalies',   true, @(x)islogical(x)                 );
 p.addParameter('quantile',    nan,  @(x)isnumeric(x)                 );
 p.addParameter('figpos',      dpos, @(x)isnumeric(x)                 );
-p.addParameter('useax',       nan,  @(x)isaxis(x)                    );
+p.addParameter('useax',       nan,  @(x)bfra.validation.isaxis(x)    );
 p.addParameter('showfig',     true, @(x)islogical(x)                 );
 p.addParameter('errorbars',   false,@(x)islogical(x)                 );
 p.addParameter('errorbounds', false,@(x)islogical(x)                 );
@@ -120,10 +118,10 @@ for n = 1:ncols
 
             % only get conf levels if requested
             if isnan(alpha)
-               abfit(n,:) = tsregr(t,y(:,n));
+               abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
             else
-               abfit(n,:) = tsregr(t,y(:,n));
-               outab = ktaub([t,y(:,n)], alpha, false);
+               abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
+               outab = bfra.deps.ktaub([t,y(:,n)], alpha, false);
                confi = [outab.CIlower, outab.CIupper];
                error(n) = mean([abfit(n,2)-confi(1),confi(2)-abfit(n,2)]);
             end
@@ -155,9 +153,9 @@ for n = 1:ncols
    else
       % only get conf levels if requested
       if isnan(alpha)
-         abfit(n,:) = quantreg(t,y(:,n),qtl);
+         abfit(n,:) = bfra.deps.quantreg(t,y(:,n),qtl);
       else
-         [abfit(n,:),S] = quantreg(t,y(:,n),qtl,1,1000,alpha);
+         [abfit(n,:),S] = bfra.deps.quantreg(t,y(:,n),qtl,1,1000,alpha);
          confi = S.ci_boot';
          error(n) = mean([abfit(n,2)-confi(2,1),confi(2,2)-abfit(n,2)]);
       end
@@ -194,7 +192,7 @@ end
 function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
 
 % if an axis was provided, use it, otherwise make a new figure
-if not(isaxis(useax))
+if not(bfra.validation.isaxis(useax))
    if showfig == true
       h.figure = figure('Position',figpos);
    else

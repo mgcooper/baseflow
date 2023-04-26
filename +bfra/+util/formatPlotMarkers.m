@@ -18,18 +18,18 @@ function h = formatPlotMarkers(varargin)
 %where lineobj is a handle to a plotted line. Note, the function checks in
 %lineobj is in fact an axis and if so,
 
-%-------------------------------------------------------------------------------
-p               = inputParser;
-p.FunctionName  = mfilename;
+% --------------- parse inputs
+p = inputParser;
+p.FunctionName = mfilename;
 p.CaseSensitive = false;
 p.KeepUnmatched = true;
 
-%addParameter(  p,'markerfacecolor', 'none',        @(x)ischar(x)     );
-addParameter(  p,'fillspacing',     nan,           @(x)isscalar(x)   );
-addParameter(  p,'sparsefill',      false,         @(x)islogical(x)  );
-addParameter(  p,'markersize',      10,            @(x)isnumeric(x)  );
-addParameter(  p,'suppliedaxes',    gca,           @(x)any(isaxis(x)));
-addParameter(  p,'suppliedline',    nan,           @(x)isobject(x)   );
+%addParameter( p,'markerfacecolor', 'none', @(x)ischar(x) );
+addParameter( p,'sparsefill', false, @(x)islogical(x) );
+addParameter( p,'markersize', 10, @(x)isnumeric(x) );
+addParameter( p,'fillspacing', nan, @(x)isscalar(x) );
+addParameter( p,'suppliedaxes', gca, @(x)any(bfra.validation.isaxis(x)));
+addParameter( p,'suppliedline', nan, @(x)isobject(x) );
 
 parse(p,varargin{:});
 
@@ -43,11 +43,8 @@ unmatched = p.Unmatched;
 
 % convert unmatched to varargin
 varargs = namedargs2cell(unmatched);
-%-------------------------------------------------------------------------------
 
-% %  rather than isobject, I could use this to check the line input handle:
-%    if isa(suppliedline,'matlab.graphics.chart.primitive.Line')
-%    end
+% --------------- code
 
 % set sparsefill true if fillspacing has a value to simplify the code.
 % this way either can be passed in, fillspacing, or sparsefill, where
@@ -151,7 +148,7 @@ for m = 1:numaxes
       %         markerColor = thisLine.MarkerEdgeColor;
 
       % errorbar doesn't have 'MarkerIndices'
-      if iserrorbar(thisLine)
+      if bfra.validation.iserrorbar(thisLine)
          set(thisLine, ...
             'MarkerSize',           markersize,       ...
             'Color',                markerColor,      ...

@@ -109,7 +109,7 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
    if nargout>1
       
     % calculate confidence intervals using bootstrap on residuals
-      stats    = bootstrapci(x,y,ab,Frho,Nboot,alpha,opts);
+      stats = bfra.deps.bootstrapci(x,y,ab,Frho,Nboot,alpha,opts);
 
    else % don't perform the bootstrap estimation
 %       ab = fliplr(ab');

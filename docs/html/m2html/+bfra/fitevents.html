@@ -24,21 +24,21 @@
 <div class="box"><strong>FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function [K,Fits] = fitevents(Events,varargin) </strong></div>
+<div class="box"><strong>function [Fits,FitTable] = fitevents(Events,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events
  
  Syntax
  
-     [K,Fits] = fitevents(Events,varargin)
+     [Fits,K] = fitevents(Events,varargin)
  
  Description
  
-     [K,Fits] = fitevents(Events) fits all recession events in Events (output
+     [Fits,K] = fitevents(Events) fits all recession events in Events (output
      of bfra.getevents) using default algorithm options.
  
-     [K,Fits] = fitevents(Events,opts) uses user-supplied algorithm options in
+     [Fits,K] = fitevents(Events,opts) uses user-supplied algorithm options in
      struct opts. See bfra.setopts for automated option setting.
  
  Required inputs
@@ -79,19 +79,19 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [K,Fits] = fitevents(Events,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Fits,FitTable] = fitevents(Events,varargin)</a>
 0002 <span class="comment">%FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Syntax</span>
 0005 <span class="comment">%</span>
-0006 <span class="comment">%     [K,Fits] = fitevents(Events,varargin)</span>
+0006 <span class="comment">%     [Fits,K] = fitevents(Events,varargin)</span>
 0007 <span class="comment">%</span>
 0008 <span class="comment">% Description</span>
 0009 <span class="comment">%</span>
-0010 <span class="comment">%     [K,Fits] = fitevents(Events) fits all recession events in Events (output</span>
+0010 <span class="comment">%     [Fits,K] = fitevents(Events) fits all recession events in Events (output</span>
 0011 <span class="comment">%     of bfra.getevents) using default algorithm options.</span>
 0012 <span class="comment">%</span>
-0013 <span class="comment">%     [K,Fits] = fitevents(Events,opts) uses user-supplied algorithm options in</span>
+0013 <span class="comment">%     [Fits,K] = fitevents(Events,opts) uses user-supplied algorithm options in</span>
 0014 <span class="comment">%     struct opts. See bfra.setopts for automated option setting.</span>
 0015 <span class="comment">%</span>
 0016 <span class="comment">% Required inputs</span>
@@ -163,9 +163,9 @@ This function is called by:
 0082 nFits          =  0;
 0083 
 0084 <span class="keyword">if</span> pickmethod == &quot;none&quot;
-0085    K = <a href="#_sub3" class="code" title="subfunction K = initFitTable(N)">initFitTable</a>(numEvents);
+0085    FitTable = <a href="#_sub3" class="code" title="subfunction K = initFitTable(N)">initFitTable</a>(numEvents);
 0086 <span class="keyword">else</span>
-0087    K = <a href="#_sub3" class="code" title="subfunction K = initFitTable(N)">initFitTable</a>(numEvents*4); <span class="comment">% allocate up to 4 picks/event</span>
+0087    FitTable = <a href="#_sub3" class="code" title="subfunction K = initFitTable(N)">initFitTable</a>(numEvents*4); <span class="comment">% allocate up to 4 picks/event</span>
 0088 <span class="keyword">end</span>
 0089 
 0090 savevars = {<span class="string">'a'</span>,<span class="string">'b'</span>,<span class="string">'aL'</span>,<span class="string">'aH'</span>,<span class="string">'bL'</span>,<span class="string">'bH'</span>,<span class="string">'rsq'</span>,<span class="string">'pvalue'</span>,<span class="string">'N'</span>};
@@ -184,156 +184,160 @@ This function is called by:
 0103    eventR      = R(eventIdx);
 0104    eventDate   = mean(eventT); <span class="comment">% keep track of the event date</span>
 0105 
-0106    <span class="keyword">if</span> thisEvent == 1 &amp;&amp; plotfits == true
-0107       figure(<span class="string">'Position'</span>,[1 1 658  576]); ax = gca;
-0108    <span class="keyword">end</span>
-0109    
-0110    <span class="comment">% get the q, dq/dt estimates (H=Hat)</span>
-0111    
-0112    [qH,dH,dtH,tH] = bfra.getdqdt(eventT,eventQ,eventR,derivmethod,   <span class="keyword">...</span>
-0113       <span class="string">'pickmethod'</span>,pickmethod,<span class="string">'fitmethod'</span>,fitmethod,<span class="string">'etsparam'</span>,etsparam, <span class="keyword">...</span>
-0114       <span class="string">'vtsparam'</span>,vtsparam,<span class="string">'plotfits'</span>,plotfits,<span class="string">'ax'</span>,ax,<span class="string">'flag'</span>,debugflag);
-0115    
-0116    <span class="keyword">if</span> saveplots == true
-0117       fname = [<span class="string">'dqdt_'</span> datenum2yyyyMMMdd(eventT) <span class="string">'.png'</span>];
-0118       pauseSaveFig(<span class="string">'s'</span>,fname);
-0119    <span class="keyword">end</span>
-0120 
-0121    <span class="comment">% if pickFits is true, then qHat, dHat, and tHat will be cell arrays</span>
-0122    numFits = 1;
-0123    <span class="keyword">if</span> iscell(qH)
-0124       numFits = numel(qH);
-0125    <span class="keyword">end</span>
-0126    
-0127    <span class="keyword">for</span> thisFit = 1:numFits
-0128 
-0129       [q,dqdt,dt,tq,ok] = <a href="#_sub1" class="code" title="subfunction [q,dqdt,dt,tq,ok] = preparefit(q,dqdt,dt,tq,thisfit)">preparefit</a>(qH,dH,dtH,tH,thisFit);
-0130       
-0131       <span class="comment">% if no flow was returned, continue, otherwise fit a/b</span>
-0132       <span class="keyword">if</span> ok == false
-0133          <span class="keyword">continue</span>
-0134       <span class="keyword">else</span>
-0135          [Fit,ok] = bfra.fitab(q,dqdt,fitmethod,<span class="string">'fitopts'</span>,fitopts);
-0136       <span class="keyword">end</span>
-0137 
-0138       [Fits,K,nFits] = <a href="#_sub2" class="code" title="subfunction [Fits,K,fitcount] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod, ">saveFit</a>(T,q,dqdt,dt,tq,derivmethod,fitmethod,<span class="keyword">...</span>
-0139          fitorder,eventDate,thisEvent,thisFit,nFits,K,Fits,Fit,savevars,ok);
-0140    <span class="keyword">end</span>   
-0141       
-0142 <span class="keyword">end</span>
-0143 
-0144 <span class="comment">% remove fits that weren't kept</span>
-0145 ikeep = ~isnan(K.a);
-0146 vars = fieldnames(K);
-0147 <span class="keyword">for</span> n = 1:numel(vars)
-0148    K.(vars{n}) = K.(vars{n})(ikeep);
-0149 <span class="keyword">end</span>
-0150 
-0151 <span class="comment">%-------------------------------------------------------------------------------</span>
-0152 <span class="comment">% PREP FITS</span>
-0153 <span class="comment">%-------------------------------------------------------------------------------</span>
-0154 <a name="_sub1" href="#_subfunctions" class="code">function [q,dqdt,dt,tq,ok] = preparefit(q,dqdt,dt,tq,thisfit)</a>
-0155    
-0156 <span class="comment">% if there are multiple fits for an event, qHat, dHat, etc. will be cell</span>
-0157 <span class="comment">% arrays. this pulls out the selected values to fit.</span>
-0158 
-0159 <span class="keyword">if</span> iscell(q)
-0160    q     = q{thisfit};
-0161    dqdt  = dqdt{thisfit};
-0162    dt    = dt{thisfit};
-0163    tq    = tq{thisfit};
-0164 <span class="keyword">end</span>
-0165 
-0166 <span class="comment">% if no flow was returned, continue</span>
-0167 <span class="keyword">if</span> all(isnan(q))
-0168    ok = false;
-0169 <span class="keyword">else</span>
-0170    ok = true;
-0171 <span class="keyword">end</span>
-0172 
-0173 <span class="comment">%-------------------------------------------------------------------------------</span>
-0174 <span class="comment">% GET FITS</span>
-0175 <span class="comment">%-------------------------------------------------------------------------------</span>
-0176 <a name="_sub2" href="#_subfunctions" class="code">function [Fits,K,fitcount] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod, </a><span class="keyword">...</span>
-0177    fitorder,eventdate,eventtag,fittag,fitcount,K,Fits,Fit,savevars,ok)
-0178 
-0179 <span class="comment">% if fitting failed, set this event nan, otherwise save the fit</span>
-0180 <span class="keyword">if</span> ok == true
+0106    <span class="comment">% if this is activated, need method to plot in getdqdt</span>
+0107    <span class="comment">% if thisEvent == 1 &amp;&amp; plotfits == true</span>
+0108    <span class="comment">%    figure('Position',[1 1 658  576]); ax = gca;</span>
+0109    <span class="comment">% end</span>
+0110    
+0111    <span class="comment">% get the q, dq/dt estimates (H=Hat)</span>
+0112    
+0113    [qH,dH,dtH,tH] = bfra.getdqdt(eventT,eventQ,eventR,derivmethod,   <span class="keyword">...</span>
+0114       <span class="string">'pickmethod'</span>,pickmethod,<span class="string">'fitmethod'</span>,fitmethod,<span class="string">'etsparam'</span>,etsparam, <span class="keyword">...</span>
+0115       <span class="string">'vtsparam'</span>,vtsparam);
+0116    
+0117    <span class="comment">% undocumented feature</span>
+0118    <span class="keyword">if</span> saveplots == true
+0119       <span class="comment">% yyyyMMMdd = sprintf('%d_%d_%d',year(eventT),month(eventT),day(eventT));</span>
+0120       <span class="comment">% fname = ['dqdt_' yyyyMMMdd '.png'];</span>
+0121       <span class="comment">% pauseSaveFig('s',fname);</span>
+0122    <span class="keyword">end</span>
+0123 
+0124    <span class="comment">% if pickFits is true, then qHat, dHat, and tHat will be cell arrays</span>
+0125    numFits = 1;
+0126    <span class="keyword">if</span> iscell(qH)
+0127       numFits = numel(qH);
+0128    <span class="keyword">end</span>
+0129    
+0130    <span class="keyword">for</span> thisFit = 1:numFits
+0131 
+0132       [q,dqdt,dt,tq,ok] = <a href="#_sub1" class="code" title="subfunction [q,dqdt,dt,tq,ok] = preparefit(q,dqdt,dt,tq,thisfit)">preparefit</a>(qH,dH,dtH,tH,thisFit);
+0133       
+0134       <span class="comment">% if no flow was returned, continue, otherwise fit a/b</span>
+0135       <span class="keyword">if</span> ok == false
+0136          <span class="keyword">continue</span>
+0137       <span class="keyword">else</span>
+0138          [iFit,ok] = bfra.fitab(q,dqdt,fitmethod,<span class="string">'fitopts'</span>,fitopts);
+0139       <span class="keyword">end</span>
+0140 
+0141       [Fits,FitTable,nFits] = <a href="#_sub2" class="code" title="subfunction [Fits,K,fitcount] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod, ">saveFit</a>(T,q,dqdt,dt,tq,derivmethod,fitmethod,<span class="keyword">...</span>
+0142          fitorder,eventDate,thisEvent,thisFit,nFits,FitTable,Fits,iFit,savevars,ok);
+0143    <span class="keyword">end</span>   
+0144       
+0145 <span class="keyword">end</span>
+0146 
+0147 <span class="comment">% remove fits that weren't kept</span>
+0148 ikeep = ~isnan(FitTable.a);
+0149 vars = fieldnames(FitTable);
+0150 <span class="keyword">for</span> n = 1:numel(vars)
+0151    FitTable.(vars{n}) = FitTable.(vars{n})(ikeep);
+0152 <span class="keyword">end</span>
+0153 
+0154 <span class="comment">%-------------------------------------------------------------------------------</span>
+0155 <span class="comment">% PREP FITS</span>
+0156 <span class="comment">%-------------------------------------------------------------------------------</span>
+0157 <a name="_sub1" href="#_subfunctions" class="code">function [q,dqdt,dt,tq,ok] = preparefit(q,dqdt,dt,tq,thisfit)</a>
+0158    
+0159 <span class="comment">% if there are multiple fits for an event, qHat, dHat, etc. will be cell</span>
+0160 <span class="comment">% arrays. this pulls out the selected values to fit.</span>
+0161 
+0162 <span class="keyword">if</span> iscell(q)
+0163    q     = q{thisfit};
+0164    dqdt  = dqdt{thisfit};
+0165    dt    = dt{thisfit};
+0166    tq    = tq{thisfit};
+0167 <span class="keyword">end</span>
+0168 
+0169 <span class="comment">% if no flow was returned, continue</span>
+0170 <span class="keyword">if</span> all(isnan(q))
+0171    ok = false;
+0172 <span class="keyword">else</span>
+0173    ok = true;
+0174 <span class="keyword">end</span>
+0175 
+0176 <span class="comment">%-------------------------------------------------------------------------------</span>
+0177 <span class="comment">% GET FITS</span>
+0178 <span class="comment">%-------------------------------------------------------------------------------</span>
+0179 <a name="_sub2" href="#_subfunctions" class="code">function [Fits,K,fitcount] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod, </a><span class="keyword">...</span>
+0180    fitorder,eventdate,eventtag,fittag,fitcount,K,Fits,iFit,savevars,ok)
 0181 
-0182    fitcount = fitcount+1;
-0183    
-0184    <span class="keyword">for</span> n = 1:numel(savevars)
-0185       K.(savevars{n})(fitcount) = Fit.(savevars{n});
-0186    <span class="keyword">end</span>
-0187    
-0188    K.eventTag(fitcount)    = eventtag;
-0189    K.fitTag(fitcount)      = fittag;
+0182 <span class="comment">% if fitting failed, set this event nan, otherwise save the fit</span>
+0183 <span class="keyword">if</span> ok == true
+0184 
+0185    fitcount = fitcount+1;
+0186    
+0187    <span class="keyword">for</span> n = 1:numel(savevars)
+0188       K.(savevars{n})(fitcount) = iFit.(savevars{n});
+0189    <span class="keyword">end</span>
 0190    
-0191 <span class="comment">%    K.method(fitcount)      = fitmethod;</span>
-0192 <span class="comment">%    K.order(fitcount)       = fitorder;</span>
-0193 <span class="comment">%    K.deriv(fitcount)       = derivmethod;</span>
-0194 <span class="comment">%    K.station(fitcount)     = station;</span>
-0195 <span class="comment">%    K.date(fitcount)        = eventdate;</span>
-0196   
-0197 
-0198    <span class="comment">% collect all data for the point-cloud</span>
-0199    fitIdx                  =  ismember(T,tq);
-0200    Fits.q(        fitIdx)  =  q;
-0201    Fits.dqdt(     fitIdx)  =  dqdt;
-0202    Fits.dt(       fitIdx)  =  dt;
-0203    Fits.t(        fitIdx)  =  tq;
-0204    Fits.eventTags(fitIdx)  =  eventtag;
-0205    Fits.fitTags(  fitIdx)  =  fittag;
-0206    
-0207    <span class="comment">% at this point, with new ets retiming, we need to remove nan to have</span>
-0208    <span class="comment">% eventTag and fitTag only span the rows with valid data, but as-is, we</span>
-0209    <span class="comment">% should have eventTag equal to the raw data, and since the fitted data is</span>
-0210    <span class="comment">% nan elsewhere, this might be better</span>
-0211 
-0212 <span class="keyword">else</span>
-0213    
-0214    <span class="comment">% this shouldn't be necessary since they're initialized to nan</span>
-0215    
-0216 <span class="comment">%    K.a(fitcount)         = nan;</span>
-0217 <span class="comment">%    K.b(fitcount)         = nan;</span>
-0218 <span class="comment">%    K.aL(fitcount)        = nan;</span>
-0219 <span class="comment">%    K.bL(fitcount)        = nan;</span>
-0220 <span class="comment">%    K.aH(fitcount)        = nan;</span>
-0221 <span class="comment">%    K.bH(fitcount)        = nan;</span>
-0222 <span class="comment">%    K.rsq(fitcount)       = nan;</span>
-0223 <span class="comment">%    K.pvalue(fitcount)    = nan;</span>
-0224 <span class="comment">%    K.N(fitcount)         = nan;</span>
-0225 <span class="comment">%    K.eventTag(fitcount)  = eventtag;</span>
-0226 <span class="comment">%    K.fitTag(fitcount)    = fittag;</span>
-0227    
-0228    <span class="comment">% K(idx).method    = method;</span>
-0229    <span class="comment">% K(idx).order     = order;</span>
-0230    <span class="comment">% K(idx).deriv     = deriv;</span>
-0231    <span class="comment">% K(idx).station   = station;</span>
-0232    <span class="comment">% K(idx).date      = date;</span>
-0233 
-0234 <span class="keyword">end</span>
-0235 
-0236 
-0237 <a name="_sub3" href="#_subfunctions" class="code">function K = initFitTable(N)</a>
-0238 
-0239 K.a         = nan(N,1);
-0240 K.b         = nan(N,1);
-0241 K.aL        = nan(N,1);
-0242 K.bL        = nan(N,1);
-0243 K.aH        = nan(N,1);
-0244 K.bH        = nan(N,1);
-0245 K.rsq       = nan(N,1);
-0246 K.pvalue    = nan(N,1);
-0247 K.N         = nan(N,1);
-0248 K.eventTag  = nan(N,1);
-0249 K.fitTag    = nan(N,1);
-0250 
-0251 <span class="comment">% these need to be redefined as strings or chars or soemthing other than nan</span>
-0252 <span class="comment">% K.method    = nan(N,1);</span>
-0253 <span class="comment">% K.order     = nan(N,1);</span>
-0254 <span class="comment">% K.deriv     = nan(N,1);</span>
-0255 <span class="comment">% K.station   = nan(N,1);</span>
-0256 <span class="comment">% K.date      = nan(N,1);</span></pre></div>
+0191    K.eventTag(fitcount)    = eventtag;
+0192    K.fitTag(fitcount)      = fittag;
+0193    
+0194 <span class="comment">%    K.method(fitcount)      = fitmethod;</span>
+0195 <span class="comment">%    K.order(fitcount)       = fitorder;</span>
+0196 <span class="comment">%    K.deriv(fitcount)       = derivmethod;</span>
+0197 <span class="comment">%    K.station(fitcount)     = station;</span>
+0198 <span class="comment">%    K.date(fitcount)        = eventdate;</span>
+0199   
+0200 
+0201    <span class="comment">% collect all data for the point-cloud</span>
+0202    fitIdx                  =  ismember(T,tq);
+0203    <span class="comment">%fitIdx                  =  ismember(T,datenum(tq)); % TEST</span>
+0204    Fits.q(        fitIdx)  =  q;
+0205    Fits.dqdt(     fitIdx)  =  dqdt;
+0206    Fits.dt(       fitIdx)  =  dt;
+0207    Fits.t(        fitIdx)  =  tq;
+0208    Fits.eventTags(fitIdx)  =  eventtag;
+0209    Fits.fitTags(  fitIdx)  =  fittag;
+0210    
+0211    <span class="comment">% at this point, with new ets retiming, we need to remove nan to have</span>
+0212    <span class="comment">% eventTag and fitTag only span the rows with valid data, but as-is, we</span>
+0213    <span class="comment">% should have eventTag equal to the raw data, and since the fitted data is</span>
+0214    <span class="comment">% nan elsewhere, this might be better</span>
+0215 
+0216 <span class="keyword">else</span>
+0217    
+0218    <span class="comment">% this shouldn't be necessary since they're initialized to nan</span>
+0219    
+0220 <span class="comment">%    K.a(fitcount)         = nan;</span>
+0221 <span class="comment">%    K.b(fitcount)         = nan;</span>
+0222 <span class="comment">%    K.aL(fitcount)        = nan;</span>
+0223 <span class="comment">%    K.bL(fitcount)        = nan;</span>
+0224 <span class="comment">%    K.aH(fitcount)        = nan;</span>
+0225 <span class="comment">%    K.bH(fitcount)        = nan;</span>
+0226 <span class="comment">%    K.rsq(fitcount)       = nan;</span>
+0227 <span class="comment">%    K.pvalue(fitcount)    = nan;</span>
+0228 <span class="comment">%    K.N(fitcount)         = nan;</span>
+0229 <span class="comment">%    K.eventTag(fitcount)  = eventtag;</span>
+0230 <span class="comment">%    K.fitTag(fitcount)    = fittag;</span>
+0231    
+0232    <span class="comment">% K(idx).method    = method;</span>
+0233    <span class="comment">% K(idx).order     = order;</span>
+0234    <span class="comment">% K(idx).deriv     = deriv;</span>
+0235    <span class="comment">% K(idx).station   = station;</span>
+0236    <span class="comment">% K(idx).date      = date;</span>
+0237 
+0238 <span class="keyword">end</span>
+0239 
+0240 
+0241 <a name="_sub3" href="#_subfunctions" class="code">function K = initFitTable(N)</a>
+0242 
+0243 K.a         = nan(N,1);
+0244 K.b         = nan(N,1);
+0245 K.aL        = nan(N,1);
+0246 K.bL        = nan(N,1);
+0247 K.aH        = nan(N,1);
+0248 K.bH        = nan(N,1);
+0249 K.rsq       = nan(N,1);
+0250 K.pvalue    = nan(N,1);
+0251 K.N         = nan(N,1);
+0252 K.eventTag  = nan(N,1);
+0253 K.fitTag    = nan(N,1);
+0254 
+0255 <span class="comment">% these need to be redefined as strings or chars or soemthing other than nan</span>
+0256 <span class="comment">% K.method    = nan(N,1);</span>
+0257 <span class="comment">% K.order     = nan(N,1);</span>
+0258 <span class="comment">% K.deriv     = nan(N,1);</span>
+0259 <span class="comment">% K.station   = nan(N,1);</span>
+0260 <span class="comment">% K.date      = nan(N,1);</span></pre></div>
 </body>
 </html>

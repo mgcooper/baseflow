@@ -36,28 +36,17 @@ function [Events] = wrapevents(T,Q,R,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% NOTE: this function is only needed to enforce year-by-year analysis.
-% findevents can be used on a timeseries of any length, but it will return
-% events in cell arrays which can then be flattened and reshaped to match a
-% regular calendar by bfra.flattenevents, rather than reshaping first here.
-% HOWEVER, this function also calls bfra.getdqdt to get a first-order estimate
-% of dqdt for quick plotting of a point cloud fit, for example. But, this should
-% almost surely be eliminated, and the output of this function should be passed
-% to fitdqdt independently of fitevents to get a quick dq/dt .
-
-%------------------------------------------------------------------------------   
-%------------------------------------------------------------------------------
-
-p              = inputParser;
+% parse inputs
+p = inputParser;
 p.FunctionName = 'bfra.wrapevents';
 p.StructExpand = true;
 
 addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
 addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
 addRequired(p, 'R',                    @(x) isnumeric(x)                      );
-addParameter(p,'qmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'qmin',        1,       @(x) isnumeric(x) & isscalar(x)        );
 addParameter(p,'nmin',        4,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'fmax',        1,       @(x) isnumeric(x) & isscalar(x)        );
+addParameter(p,'fmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
 addParameter(p,'rmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
 addParameter(p,'rmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
 addParameter(p,'cmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
@@ -66,6 +55,7 @@ addParameter(p,'rmnochange',  true,    @(x) islogical(x) & isscalar(x)        );
 addParameter(p,'rmrain',      false,   @(x) islogical(x) & isscalar(x)        );
 addParameter(p,'pickevents',  false,   @(x) islogical(x) & isscalar(x)        );
 addParameter(p,'plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
+addParameter(p,'asannual',    false,   @(x) islogical(x) & isscalar(x)        );
 
 parse(p,T,Q,R,varargin{:});
 
@@ -80,11 +70,12 @@ rmnochange  = p.Results.rmnochange;
 rmrain      = p.Results.rmrain;
 pickevents  = p.Results.pickevents;
 plotevents  = p.Results.plotevents;
+asannual    = p.Results.asannual;
 
 if isempty(R); R = zeros(size(Q)); end
 %------------------------------------------------------------------------------
 
-% % for now, re-build opts to send to bfra.findevents
+% re-build opts to send to bfra.findevents
 opts.qmin         = qmin;
 opts.nmin         = nmin;
 opts.fmax         = fmax;
@@ -96,37 +87,37 @@ opts.rmnochange   = rmnochange;
 opts.rmrain       = rmrain;
 opts.plotevents   = plotevents;
 opts.pickevents   = pickevents;
+opts.asannual     = asannual;
 
 % do some input checks
-[T,Q,R,numyears]  = prepinput(T,Q,R);
+[T,Q,R,numyears] = prepinput(T,Q,R);
 
-% save the T,Q arrays in 'events'
-Events.inputT =  T;
-Events.inputQ =  Q;
-Events.inputR =  R;
+% save the input data
+Events.inputTime = T;
+Events.inputFlow = Q;
+Events.inputRain = R;
 
-% reshape the input lists to arrays (use of 'list' is a misnomer below)
-numsteps = size(Q,1)/numyears;      % number of timesteps per year
+% number of timesteps per year
+numsteps = size(Q,1)/numyears;
 
+% reshape the input lists to matrices
 if mod(numyears,1) == 0
-   Qlist = reshape(Q,numsteps,numyears);    % flow, each year
-   Rlist = reshape(R,numsteps,numyears);    % rain, each year
-   Tlist = reshape(T,numsteps,numyears);    % calendar, each year
+   Qmat = reshape(Q,numsteps,numyears);    % flow, one column each year
+   Rmat = reshape(R,numsteps,numyears);    % rain, one column each year
+   Tmat = reshape(T,numsteps,numyears);    % calendar, one column each year
 else
-   % assume data is already in a list
-   Qlist = Q;
-   Rlist = R;
-   Tlist = T;
+   % assume data is already in matrix form
+   Qmat = Q;
+   Rmat = R;
+   Tmat = T;
 end
 
 % initialize output structure and output arrays
-Qsave       =  nan(size(Qlist));
-Rsave       =  nan(size(Qlist));
-tsave       =  nan(size(Qlist));
-dQsave      =  nan(size(Qlist));
-qQsave      =  nan(size(Qlist));       % approximated flow
-tags        =  nan(size(Qlist));
-eventCount  =  0;                      % initialize event counter
+Qsave = nan(size(Qmat));
+Rsave = nan(size(Qmat));
+tsave = NaT(size(Qmat)); % nan(size(Qmat)); % TEST
+Etags = nan(size(Qmat));
+Count = 0; % initialize event counter
 
 %------------------------------------------------------------------------------
 % compute the recession constants
@@ -134,53 +125,46 @@ eventCount  =  0;                      % initialize event counter
 
 for thisYear = 1:numyears      % events for this year at this gage
 
-   if all(isnan(Qlist(:,thisYear)))
+   if all(isnan(Qmat(:,thisYear)))
       continue;
    end
 
-   thisYearTime = Tlist(:,thisYear);
-   thisYearFlow = Qlist(:,thisYear);
-   thisYearRain = Rlist(:,thisYear);
+   thisYearTime = Tmat(:,thisYear);
+   thisYearFlow = Qmat(:,thisYear);
+   thisYearRain = Rmat(:,thisYear);
 
-   % NEEDS TO BE UPDATED WITH NEW EVENTS = BFRA.GETEVENTS(...) SYNTAX
-   % get events for this year
-   [T,Q,R,Info] = bfra.findevents(thisYearTime,thisYearFlow,thisYearRain,opts);
+   % detect events for this year
+   %[T,Q,R,Info] = bfra.findevents(thisYearTime,thisYearFlow,thisYearRain,opts);
+   [allEvents,Info] = bfra.getevents(thisYearTime,thisYearFlow,thisYearRain,opts);
 
    % for each event, compute q,dqdt with each derivative
    numEvents = numel(Info.istart);
 
    for thisEvent = 1:numEvents
 
-      eventQ = Q{thisEvent};
-      eventT = T{thisEvent};
-      eventR = R{thisEvent};
-
-      % get approximated flow and dq/dt without any fitting of a/b
-      [qQ,dQ] = bfra.getdqdt(eventT,eventQ,eventR,'B1','pickmethod','none', ...
-         'fitmethod','none'); 
-      % if fitmethod == "none", only the dQdt is returned, for the case
-      % where I don't wan't to fit events, so this function returns
-      % everything needed to fit the distribution of qQ and dQ, i think
-
-      % if no flow was returned, continue
-      if all(isnan(eventQ)); continue; else
-         eventCount = eventCount+1;
-      end
-
-
+      % % if using findevents
+      %eventQ = Q{thisEvent};
+      %eventT = T{thisEvent};
+      %eventR = R{thisEvent};
+      
       % get the start/end index on the year calendar
       si = Info.istart(thisEvent);
       ei = Info.istop(thisEvent);
+      
+      eventQ = allEvents.eventFlow(si:ei);
+      eventT = allEvents.eventTime(si:ei);
+      eventR = allEvents.eventRain(si:ei);
+
+      % if no flow was returned, continue
+      if all(isnan(eventQ)); continue; else
+         Count = Count+1;
+      end
 
       % collect all data for the point-cloud
-      Qsave(  si:ei,thisYear) = eventQ;
-      Rsave(  si:ei,thisYear) = eventR;
-      dQsave( si:ei,thisYear) = dQ;
-      qQsave( si:ei,thisYear) = qQ;
-      tsave(  si:ei,thisYear) = datenum(eventT);
-      tags(   si:ei,thisYear) = eventCount; 
-      % eventCount tags events with index in K struct
-
+      Qsave( si:ei,thisYear ) = eventQ;
+      Rsave( si:ei,thisYear ) = eventR;
+      tsave( si:ei,thisYear ) = eventT; % datenum(eventT); % TEST
+      Etags( si:ei,thisYear ) = Count;
    end
 
    % pause to look at the fits
@@ -190,38 +174,32 @@ for thisYear = 1:numyears      % events for this year at this gage
 end
 
 [ndays,numyears] = size(Qsave);
-Events.eventT = reshape(tsave, ndays*numyears, 1);
-Events.eventQ = reshape(Qsave, ndays*numyears, 1);
-Events.eventR = reshape(Rsave, ndays*numyears, 1);
-Events.eventdqdt = reshape(dQsave,ndays*numyears, 1);
-Events.eventqq = reshape(qQsave,ndays*numyears, 1);
-Events.eventTags = reshape(tags,  ndays*numyears, 1);
+Events.eventTime = reshape(tsave, ndays*numyears, 1);
+Events.eventFlow = reshape(Qsave, ndays*numyears, 1);
+Events.eventRain = reshape(Rsave, ndays*numyears, 1);
+Events.eventTags = reshape(Etags, ndays*numyears, 1);
 
-% % should convert to timetable and add units
+% % convert to timetable and add units
 % units = ["m3 d-1","mm d-1","days","m3 d-1","mm d-1","m3 d-2","m3 d-1","-"];
 % Events = struct2timetable(Events,'VariableUnits',units);
-
 
 %==========================================================================
 
 function [T,Q,R,numyears,timestep] = prepinput(T,Q,R)
-% PREPINPUT prepare input data - remove leap inds, determine timestep, determine
-% number of years.
+% PREPINPUT remove leap inds, determine timestep, determine number of years.
 
-% NOTE: this is only needed if we want to enforce year-by-year analysis.
-% findevents can be used on a timeseries of any length, and could then be
-% flattened and reshaped to match some other calendar, rather than doing it
-% first, as in getevents
+% NOTE: this is only needed for year-by-year analysis. findevents can be used on
+% a timeseries of any length, and could then be flattened and reshaped to match
+% some other calendar, rather than doing it first, as in getevents.
 
 % convert T to datetime
-if ~isdatetime(T); T =  datetime(T,'ConvertFrom','datenum'); end
+if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
 
 % check if the input data includes leap inds
 hasleap = month(T)==2 & day(T)==29;
 
 % if the time is regular, we can get the timestep here
-test = timetable(T,'RowTimes',T);
-if isregular(test,'time')
+if isregular(timetable(T,'RowTimes',T),'time')
    timestep = T(2)-T(1);
 else
    % if leap inds are already removed, the time won't be regular, so only

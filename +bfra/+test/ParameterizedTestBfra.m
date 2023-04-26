@@ -50,7 +50,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       a = 1e-2;
       b = 1.5;
       q0 = 1;
-      [q,~,t] = bfra.generateTestData(a,b,q0);
+      [q,~,t] = bfra.util.generateTestData(a,b,q0);
 
       % Calculate expected result for CTS method
       dq = q-[nan; q(1:end-1)];
@@ -84,7 +84,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       % for testing
       % FitMethod = 'ols';
       % b = 1.5;
-      % [q,dqdt] = bfra.generateTestData(a,b,q0,t);
+      % [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
       % figure; loglog(q,-dqdt,'o')
       % also useful to see this:
       % bfra.Qnonlin(a,b,q0,t,true) 
@@ -95,7 +95,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       % f = bfra.fitab(q,dqdt,'median'); ab = f.ab
 
       % generate the test data
-      [q,dqdt] = bfra.generateTestData(a,b,q0,t);
+      [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
 
       % fit the data
       switch FitMethod

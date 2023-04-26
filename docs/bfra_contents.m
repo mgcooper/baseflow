@@ -48,7 +48,6 @@
 % * |fitets|             - fit recession event using the exponential timestep method
 % * |fitphi|             - estimates drainable porosity phi using an early- and late-time solution
 % * |fitphidist|         - fit drainable porosity (phi) values with a Beta distribution
-% * |generateTestData|   - generate test data for baseflow recession analysis
 % * |getdqdt|            - Numerical estimation of the time derivative of discharge dQ/dt
 % * |getevents|          - get individual recession events from daily timeseries T, Q, and R.
 % * |getEventsData|      - get data from Events for event number eventTag
@@ -67,7 +66,6 @@
 % * |mapbasins|          - map a set of basin boundaries and color their faces by an attribute
 % * |mapgages|           - map a set of gage locations and color their faces by an attribute
 % * |phifitensemble|     - fit ensemble of phi estimates to all recession events in Fits
-% * |plotalttrend|       - plot the active layer thickness trend
 % * |prepalttrend|       - prep data for fitting linear trend to active layer thickness data
 % * |printtrend|         - print trends computed from columns in table Data to the screen
 % * |plfitb|             - fit an unbounded Pareto Distribution to recession parameter tau
@@ -81,11 +79,16 @@
 % * |QtauString|         - returns latex-formatted string for Q(tau) function
 % * |QtString|           - returns latex-formatted string for Q(t) function
 % * |setopts|            - set algorithm options for functions getevents, fitevents, and globalfit
-% * |seteventnan|        - set recessoin event nan in Events structure
 % * |stationlist|        - return list of stations from the bfra basin database
 % * |stationname|        - return string 'station' from the bfra basin database
 % * |specialfunctions|   - libarary of special functions required for recession analysis
 % * |taufunc|            - returns inline function for tau or the value of tau
-% * |version|            - return the version number for the bfra toolbox
 % * |wrapevents|         - wrapper around bfra.getevents to get recession all recession events
 % * |wrapfits|           - estimate recession coefficients (wrapper around bfra.fitab)
+% 
+% Utility functions (not documented)
+% 
+% * |generateTestData|   - generate test data for baseflow recession analysis
+% * |plotalttrend|       - plot the active layer thickness trend
+% * |setEventEmpty|      - set recessoin event empty in Events structure
+% * |version|            - return the version number for the bfra toolbox

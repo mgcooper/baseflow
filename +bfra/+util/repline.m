@@ -1,6 +1,6 @@
 function repline(filename,str_find,str_repl,varargin)
 
-opts = optionParser('appendblanks',varargin(:));
+opts = bfra.util.optionParser('appendblanks',varargin(:));
 
 fid = fopen(filename,'r');        % Open File to read
 n = 1;

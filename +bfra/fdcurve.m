@@ -6,7 +6,7 @@ function fdc = fdcurve(flow,varargin)
 % See also
 
 %-------------------------------------------------------------------------------
-p = magicParser;
+p = bfra.deps.magicParser;
 p.FunctionName = 'bfra.fdcurve';
 p.addRequired( 'flow',                    @(x)isnumeric(x)  );
 p.addParameter('axscale',     'semilogy', @(x)ischar(x)     );

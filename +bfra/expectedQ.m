@@ -34,15 +34,15 @@ addParameter(p,   'mask',     false,      @(x)islogical(x)     );
 
 parse(p,a,b,tau,q,dqdt,tau0,varargin{:});
 
-qtls     = p.Results.qtls;
-flow     = p.Results.flow;
-plotfit  = p.Results.plotfit;
-mask     = p.Results.mask;
+qtls = p.Results.qtls;
+flow = p.Results.flow;
+mask = p.Results.mask;
+plotfit = p.Results.plotfit;
 
 %------------------------------------------------------------------------------
 
-Qexp  = (a*tau)^(1/(1-b));
-Q0    = Qexp*(3-b)/(2-b);
+Qexp = (a*tau)^(1/(1-b));
+Q0 = Qexp*(3-b)/(2-b);
 
 if strcmp(plotfit,'plotfit')
    plotfit = true;
@@ -51,9 +51,9 @@ else
 end
 
 if ~isempty(qtls)
-   u     = 'm$^3$ d$^{-1}$';
-   fdc   = fdcurve(flow(flow>0),'refpoints',[Q0 Qexp],'units',u,'plotcurve',plotfit);
-   pQ0   = fdc.fref(1);
+   u = 'm$^3$ d$^{-1}$';
+   fdc = bfra.fdcurve(flow(flow>0),'refpoints',[Q0 Qexp],'units',u,'plotcurve',plotfit);
+   pQ0 = fdc.fref(1);
    pQexp = fdc.fref(2);
 else
    pQexp = nan;

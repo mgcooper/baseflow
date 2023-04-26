@@ -112,148 +112,148 @@ This function is called by:
 0032 <span class="comment">% NOTE: two fits are shown in the legend b/c the first one is from the provided</span>
 0033 <span class="comment">% inputs and the second one is computed in this function as a check on the input</span>
 0034 
-0035 <span class="comment">%-------------------------------------------------------------------------------</span>
-0036 <span class="comment">%   input checks and prep</span>
-0037 <span class="comment">%-------------------------------------------------------------------------------</span>
-0038 p              = magicParser;
-0039 p.FunctionName = <span class="string">'bfra.checkevent'</span>;
-0040 
-0041 p.addRequired(<span class="string">'T'</span>,               @(x)isnumeric(x) | isdatetime(x) );
-0042 p.addRequired(<span class="string">'Q'</span>,               @(x)isnumeric(x)  );
-0043 p.addRequired(<span class="string">'q'</span>,               @(x)isnumeric(x)  );
-0044 p.addRequired(<span class="string">'dqdt'</span>,            @(x)isnumeric(x)  );
-0045 p.addRequired(<span class="string">'r'</span>,               @(x)isnumeric(x)  );
-0046 p.addRequired(<span class="string">'alltags'</span>,         @(x)isnumeric(x)  );
-0047 p.addRequired(<span class="string">'eventtag'</span>,        @(x)isnumeric(x)  );
-0048 p.addParameter(<span class="string">'order'</span>,    nan,  @(x)isnumeric(x)  );
-0049 p.addParameter(<span class="string">'ax'</span>,       gca,  @(x)isaxis(x)     );
+0035 <span class="comment">% --------------- parse inputs</span>
+0036 p = bfra.deps.magicParser;
+0037 p.FunctionName = <span class="string">'bfra.checkevent'</span>;
+0038 
+0039 p.addRequired(<span class="string">'T'</span>,               @(x)isnumeric(x) | isdatetime(x));
+0040 p.addRequired(<span class="string">'Q'</span>,               @(x)isnumeric(x));
+0041 p.addRequired(<span class="string">'q'</span>,               @(x)isnumeric(x));
+0042 p.addRequired(<span class="string">'dqdt'</span>,            @(x)isnumeric(x));
+0043 p.addRequired(<span class="string">'r'</span>,               @(x)isnumeric(x));
+0044 p.addRequired(<span class="string">'alltags'</span>,         @(x)isnumeric(x));
+0045 p.addRequired(<span class="string">'eventtag'</span>,        @(x)isnumeric(x));
+0046 p.addParameter(<span class="string">'order'</span>,    nan,  @(x)isnumeric(x));
+0047 p.addParameter(<span class="string">'ax'</span>,       gca,  @(x)bfra.validation.isaxis(x));
+0048 
+0049 p.parseMagically(<span class="string">'caller'</span>);
 0050 
-0051 p.parseMagically(<span class="string">'caller'</span>);
+0051 order = p.Results.order;
 0052 
-0053 order = p.Results.order;
-0054 
-0055 <span class="keyword">if</span> isdatetime(T)
-0056    T = datenum(T);
-0057 <span class="keyword">end</span>
-0058 <span class="comment">%-------------------------------------------------------------------------------</span>
-0059 
-0060 warning off
-0061 col = defaultcolors;
-0062 col(3,:) = []; <span class="comment">% i find yellow and red to be a terrible combination</span>
-0063 
-0064 <span class="comment">% this allows a column vector of tags instead of a reshaped matrix</span>
-0065 rowcol = true;
-0066 <span class="keyword">if</span> all(size(Q) == size(T)) &amp;&amp; all(size(Q) == size(alltags))
-0067    rowcol = false;
-0068 <span class="keyword">end</span>
-0069 
-0070 <span class="keyword">if</span> isnan(order); fixb = false; <span class="keyword">else</span>, fixb = true; <span class="keyword">end</span>
+0053 <span class="keyword">if</span> isdatetime(T)
+0054    T = datenum(T);
+0055 <span class="keyword">end</span>
+0056 
+0057 <span class="comment">% --------------- function code</span>
+0058 import bfra.util.subtight
+0059 warning off
+0060 colors = get(0,<span class="string">'defaultaxescolororder'</span>);
+0061 colors = colors([1 2 5 4 3 6 7],:); <span class="comment">% swap yellow and green</span>
+0062 
+0063 <span class="comment">% this allows a column vector of tags instead of a reshaped matrix</span>
+0064 rowcol = true;
+0065 <span class="keyword">if</span> all(size(Q) == size(T)) &amp;&amp; all(size(Q) == size(alltags))
+0066    rowcol = false;
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="keyword">if</span> isnan(order); fixb = false; <span class="keyword">else</span>, fixb = true; <span class="keyword">end</span>
+0070 
 0071 
-0072 <span class="comment">%-------------------------------------------------------------------------------</span>
-0073 <span class="comment">% prep for fitting</span>
-0074 <span class="comment">%-------------------------------------------------------------------------------</span>
-0075 
-0076 [  eventT,eventQ,                                                       <span class="keyword">...</span>
-0077    eventq,eventdqdt,                                                    <span class="keyword">...</span>
-0078    eventr,annualT,                                                      <span class="keyword">...</span>
-0079    annualQ,annualr   ]  =  prepinput(rowcol,alltags,eventtag,T,Q,q,dqdt,r);
-0080 
-0081 
-0082 [  tfit,qfit,dqfit,                                                     <span class="keyword">...</span>
-0083    Qtstr,aQbstr,                                                        <span class="keyword">...</span>
-0084    qfit0,dqfit0,                                                        <span class="keyword">...</span>
-0085    Qtstr0,aQbstr0,                                                      <span class="keyword">...</span>
-0086    rsq0              ]  =  <a href="prepfits.html" class="code" title="function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)">prepfits</a>(eventq,eventdqdt,eventT,fixb,order);
-0087 
-0088 <span class="comment">%-------------------------------------------------------------------------------</span>
-0089 <span class="comment">% make the figure</span>
-0090 <span class="comment">%-------------------------------------------------------------------------------</span>
+0072 <span class="comment">% --------------- prep for fitting</span>
+0073 
+0074 [  eventT,eventQ,                                                       <span class="keyword">...</span>
+0075    eventq,eventdqdt,                                                    <span class="keyword">...</span>
+0076    eventr,annualT,                                                      <span class="keyword">...</span>
+0077    annualQ,annualr   ]  =  prepinput(rowcol,alltags,eventtag,T,Q,q,dqdt,r);
+0078 
+0079 
+0080 [  tfit,qfit,dqfit,                                                     <span class="keyword">...</span>
+0081    Qtstr,aQbstr,                                                        <span class="keyword">...</span>
+0082    qfit0,dqfit0,                                                        <span class="keyword">...</span>
+0083    Qtstr0,aQbstr0,                                                      <span class="keyword">...</span>
+0084    rsq0              ]  =  <a href="prepfits.html" class="code" title="function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)">prepfits</a>(eventq,eventdqdt,eventT,fixb,order);
+0085 
+0086 
+0087 <span class="comment">% --------------- make the figure</span>
+0088 
+0089 h.f = figure(<span class="string">'Position'</span>,[150 80 800 550]);
+0090 <span class="comment">% h.f = gcf;</span>
 0091 
-0092 h.f = figure(<span class="string">'Position'</span>,[150 80 800 550]);
-0093 <span class="comment">% h.f = gcf;</span>
-0094 
-0095 <span class="comment">% plot the entire year and the event  (panel 1)</span>
-0096 <span class="comment">%h.t1  = tiledlayout(3,2,'TileSpacing','none','Padding','none');</span>
-0097 <span class="comment">%nexttile([1 2]);</span>
+0092 <span class="comment">% plot the entire year and the event  (panel 1)</span>
+0093 <span class="comment">%h.t1  = tiledlayout(3,2,'TileSpacing','none','Padding','none');</span>
+0094 <span class="comment">%nexttile([1 2]);</span>
+0095 
+0096 <span class="comment">% use subplot instead</span>
+0097 h.t1 = subtight(3,2,[1 2],<span class="string">'style'</span>,<span class="string">'fitted'</span>);
 0098 
-0099 <span class="comment">% use subplot instead</span>
-0100 h.t1 = subtight(3,2,[1 2],<span class="string">'style'</span>,<span class="string">'fitted'</span>);
-0101 
-0102 h.h1a = plot(annualT,annualQ, <span class="string">'-o'</span>,<span class="string">'Color'</span>,col(1,:) ); hold on;
-0103 h.h1b = plot(eventT,eventQ,   <span class="string">'-o'</span>,<span class="string">'Color'</span>,col(2,:) );
-0104 <span class="comment">% h.h1c = plot(eventT,eventq,   '-o','Color',col(3,:) );</span>
-0105 
-0106 ylabel(<span class="string">'$Q$ [m$^3$ d$^{-1}$]'</span>); datetick(h.t1,<span class="string">'keepticks'</span>);
-0107 
-0108 <span class="comment">% these are temporary, new settings to get it to look right</span>
-0109 box off; grid off
-0110 set(gca,<span class="string">'TickLength'</span>,[0.01 0.1],<span class="string">'YScale'</span>,<span class="string">'log'</span>,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
-0111 
-0112 title([datestr(eventT(1)) <span class="string">' - '</span> datestr(eventT(end)) <span class="string">' (Event '</span> num2str(eventtag) <span class="string">')'</span>]);
-0113 
-0114 ax = gca;
-0115 
-0116 <span class="comment">% plot the rain as bars and add the legend</span>
-0117 h.ax1a   = ax; clear ax
-0118 [hb,ax]  = <a href="#_sub3" class="code" title="subfunction [h,ax] = plotrain(time,rain)">plotrain</a>(annualT,annualr); yyaxis left
-0119 h.h1d    = hb;
-0120 h.ax1b   = ax;
-0121 h.leg1   = legend(<span class="string">'$Q$ (observed)'</span>,<span class="string">'$Q$ (event)'</span>,<span class="string">'rain'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
-0122 <span class="comment">% h.leg1   = legend('$Q$ (observed)','$Q$ (event)','$Q$ (event fit)','rain');</span>
-0123 
-0124 <span class="comment">%-------------------------------------------------------------------------------</span>
-0125 <span class="comment">% plot observed flow and fitted flow vs time (panel 2)</span>
-0126 <span class="comment">%nexttile(3);</span>
-0127 h.t2 = subtight(3,2,3,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
-0128 
-0129 h.h2a = plot(eventT,eventq,<span class="string">'-o'</span>, <span class="string">'Color'</span>, col(1,:) ); hold on;
-0130 h.h2b = plot(tfit,qfit,  <span class="string">':'</span>,  <span class="string">'Color'</span>, col(2,:),<span class="string">'LineWidth'</span>,3);
+0099 h.h1a = plot(annualT,annualQ, <span class="string">'-o'</span>,<span class="string">'Color'</span>,colors(1,:) ); hold on;
+0100 h.h1b = plot(eventT,eventQ,   <span class="string">'-o'</span>,<span class="string">'Color'</span>,colors(2,:) );
+0101 <span class="comment">% h.h1c = plot(eventT,eventq,   '-o','Color',col(3,:) );</span>
+0102 
+0103 ylabel(<span class="string">'$Q$ [m$^3$ d$^{-1}$]'</span>); datetick(h.t1,<span class="string">'keepticks'</span>);
+0104 
+0105 <span class="comment">% these are temporary, new settings to get it to look right</span>
+0106 box off; grid off
+0107 set(gca,<span class="string">'TickLength'</span>,[0.01 0.1],<span class="string">'YScale'</span>,<span class="string">'log'</span>,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
+0108 
+0109 title([datestr(eventT(1)) <span class="string">' - '</span> datestr(eventT(end)) <span class="string">' (Event '</span> num2str(eventtag) <span class="string">')'</span>]);
+0110 
+0111 ax = gca;
+0112 
+0113 <span class="comment">% plot the rain as bars and add the legend</span>
+0114 h.ax1a   = ax; clear ax
+0115 [hb,ax]  = <a href="#_sub3" class="code" title="subfunction [h,ax] = plotrain(time,rain)">plotrain</a>(annualT,annualr); yyaxis left
+0116 h.h1d    = hb;
+0117 h.ax1b   = ax;
+0118 h.leg1   = legend(<span class="string">'$Q$ (observed)'</span>,<span class="string">'$Q$ (event)'</span>,<span class="string">'rain'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0119 <span class="comment">% h.leg1   = legend('$Q$ (observed)','$Q$ (event)','$Q$ (event fit)','rain');</span>
+0120 
+0121 <span class="comment">% --------------- next subplot</span>
+0122 
+0123 <span class="comment">% plot observed flow and fitted flow vs time (panel 2)</span>
+0124 <span class="comment">%nexttile(3);</span>
+0125 h.t2 = subtight(3,2,3,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0126 
+0127 h.h2a = plot(eventT,eventq,<span class="string">'-o'</span>, <span class="string">'Color'</span>, colors(1,:) ); hold on;
+0128 h.h2b = plot(tfit,qfit,  <span class="string">':'</span>,  <span class="string">'Color'</span>, colors(2,:),<span class="string">'LineWidth'</span>,3);
+0129 
+0130 ylabel(<span class="string">'$Q$ [m$^3$ d$^{-1}$]'</span>); datetick;
 0131 
-0132 ylabel(<span class="string">'$Q$ [m$^3$ d$^{-1}$]'</span>); datetick;
+0132 set(gca,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
 0133 
-0134 set(gca,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
-0135 
-0136 <span class="comment">% plot fixed-b solution and update legend</span>
-0137 <span class="keyword">if</span> fixb == true
-0138    h.h2c = plot(tfit,qfit0,<span class="string">':o'</span>,<span class="string">'Color'</span>,col(2,:));
-0139    ltxt  = {<span class="string">'$Q$ (ETS fit)'</span>,Qtstr,Qtstr0,<span class="string">'rain'</span>};
-0140 <span class="keyword">else</span>
-0141    ltxt  = {<span class="string">'$Q$ (ETS fit)'</span>,Qtstr,<span class="string">'rain'</span>};
-0142 <span class="keyword">end</span>
-0143 
-0144 <span class="comment">% plot the rain as bars and add the legend</span>
-0145 h.ax2a   = gca;
-0146 [hb,ax]  = <a href="#_sub3" class="code" title="subfunction [h,ax] = plotrain(time,rain)">plotrain</a>(eventT,eventr);
-0147 h.h2c    = hb;
-0148 h.ax2b   = ax;
-0149 h.leg2   = legend(ltxt,<span class="string">'Location'</span>,<span class="string">'northeast'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0134 <span class="comment">% plot fixed-b solution and update legend</span>
+0135 <span class="keyword">if</span> fixb == true
+0136    h.h2c = plot(tfit,qfit0,<span class="string">':o'</span>,<span class="string">'Color'</span>,colors(2,:));
+0137    ltxt  = {<span class="string">'$Q$ (ETS fit)'</span>,Qtstr,Qtstr0,<span class="string">'rain'</span>};
+0138 <span class="keyword">else</span>
+0139    ltxt  = {<span class="string">'$Q$ (ETS fit)'</span>,Qtstr,<span class="string">'rain'</span>};
+0140 <span class="keyword">end</span>
+0141 
+0142 <span class="comment">% plot the rain as bars and add the legend</span>
+0143 h.ax2a   = gca;
+0144 [hb,ax]  = <a href="#_sub3" class="code" title="subfunction [h,ax] = plotrain(time,rain)">plotrain</a>(eventT,eventr);
+0145 h.h2c    = hb;
+0146 h.ax2b   = ax;
+0147 h.leg2   = legend(ltxt,<span class="string">'Location'</span>,<span class="string">'northeast'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0148 
+0149 grid off
 0150 
-0151 grid off
-0152 <span class="comment">%-------------------------------------------------------------------------------</span>
-0153 
-0154 <span class="comment">% plot observed dQdt and fitted dQdt vs Q  (panel 3)</span>
-0155 <span class="comment">% nexttile(5);</span>
-0156 h.t3  = subtight(3,2,5,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
-0157 
-0158 h.h3a = plot(eventT,-eventdqdt,<span class="string">'-o'</span>, <span class="string">'Color'</span>,col(1,:)); hold on;
-0159 h.h3b = plot(tfit,-dqfit,    <span class="string">':'</span>,  <span class="string">'Color'</span>,col(2,:),<span class="string">'LineWidth'</span>,3);
-0160 
-0161 ylabel(<span class="string">'-d$Q$/d$t$ [m$^3$ d$^{-1}$ d$^{-1}$]'</span>); datetick;
-0162 set(gca,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
-0163 
-0164 <span class="comment">% plot fixed-b solution and update legend</span>
-0165 <span class="keyword">if</span> fixb == true
-0166    h.h3c = plot(tfit,-dqfit0,<span class="string">':o'</span>,<span class="string">'Color'</span>,col(2,:));
-0167    ltxt  = {<span class="string">'-d$Q$/d$t$ (ETS fit)'</span>,aQbstr,aQbstr0};
-0168 <span class="keyword">else</span>
-0169    ltxt  = {<span class="string">'-d$Q$/d$t$ (ETS fit)'</span>,aQbstr};
-0170 <span class="keyword">end</span>
-0171 
-0172 h.leg3   = legend(ltxt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'northeast'</span>);
-0173 h.ax3    = gca;
-0174 
-0175 grid off
-0176 <span class="comment">%-------------------------------------------------------------------------------</span>
+0151 <span class="comment">% --------------- next subplot</span>
+0152 
+0153 <span class="comment">% plot observed dQdt and fitted dQdt vs Q  (panel 3)</span>
+0154 <span class="comment">% nexttile(5);</span>
+0155 h.t3  = subtight(3,2,5,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0156 
+0157 h.h3a = plot(eventT,-eventdqdt,<span class="string">'-o'</span>, <span class="string">'Color'</span>,colors(1,:)); hold on;
+0158 h.h3b = plot(tfit,-dqfit,    <span class="string">':'</span>,  <span class="string">'Color'</span>,colors(2,:),<span class="string">'LineWidth'</span>,3);
+0159 
+0160 ylabel(<span class="string">'-d$Q$/d$t$ [m$^3$ d$^{-1}$ d$^{-1}$]'</span>); datetick;
+0161 set(gca,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
+0162 
+0163 <span class="comment">% plot fixed-b solution and update legend</span>
+0164 <span class="keyword">if</span> fixb == true
+0165    h.h3c = plot(tfit,-dqfit0,<span class="string">':o'</span>,<span class="string">'Color'</span>,colors(2,:));
+0166    ltxt  = {<span class="string">'-d$Q$/d$t$ (ETS fit)'</span>,aQbstr,aQbstr0};
+0167 <span class="keyword">else</span>
+0168    ltxt  = {<span class="string">'-d$Q$/d$t$ (ETS fit)'</span>,aQbstr};
+0169 <span class="keyword">end</span>
+0170 
+0171 h.leg3   = legend(ltxt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'northeast'</span>);
+0172 h.ax3    = gca;
+0173 
+0174 grid off
+0175 
+0176 <span class="comment">% --------------- next subplot</span>
 0177 <span class="comment">% bfra_dQdt plot</span>
 0178 
 0179 <span class="comment">%h.t4 = nexttile([2 1]);</span>
@@ -281,139 +281,135 @@ This function is called by:
 0201    
 0202    <span class="comment">% settins</span>
 0203    
-0204    set(h.h1a,<span class="string">'MarkerFaceColor'</span>,col(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
-0205    set(h.h1b,<span class="string">'MarkerFaceColor'</span>,col(2,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
+0204    set(h.h1a,<span class="string">'MarkerFaceColor'</span>,colors(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
+0205    set(h.h1b,<span class="string">'MarkerFaceColor'</span>,colors(2,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
 0206    <span class="comment">% set(h.h1c,'MarkerFaceColor',col(3,:),'MarkerEdgeColor','none');</span>
-0207    set(h.h2a,<span class="string">'MarkerFaceColor'</span>,col(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
-0208    set(h.h3a,<span class="string">'MarkerFaceColor'</span>,col(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
+0207    set(h.h2a,<span class="string">'MarkerFaceColor'</span>,colors(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
+0208    set(h.h3a,<span class="string">'MarkerFaceColor'</span>,colors(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
 0209    
-0210    <span class="comment">%-------------------------------------------------------------------------------</span>
-0211    <span class="comment">% see all events for this year</span>
-0212    <span class="comment">%-------------------------------------------------------------------------------</span>
-0213    
-0214    <span class="comment">%bfra_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');</span>
-0215    
-0216    <span class="comment">%    h.ax2a.XLim = h.ax1a.XLim;</span>
-0217    
-0218    <span class="comment">% instead send the annual flow back to main and do it there</span>
-0219    h.T     = annualT;
-0220    h.Q     = annualQ;
-0221    
-0222 <span class="keyword">end</span>
+0210    <span class="comment">% --------------- see all events for this year</span>
+0211    <span class="comment">%bfra_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');</span>
+0212    
+0213    <span class="comment">%    h.ax2a.XLim = h.ax1a.XLim;</span>
+0214    
+0215    <span class="comment">% instead send the annual flow back to main and do it there</span>
+0216    h.T     = annualT;
+0217    h.Q     = annualQ;
+0218    
+0219 <span class="keyword">end</span>
+0220 
+0221 
+0222 <span class="comment">% --------------- prep input</span>
 0223 
-0224 
-0225 <span class="comment">%-------------------------------------------------------------------------------</span>
+0224 <a name="_sub1" href="#_subfunctions" class="code">function [eventT,eventQ,eventq,eventdq, </a><span class="keyword">...</span>
+0225    eventr,annualT,annualQ,annualr] = prepinput(userc,tags,event,T,Q,q,dqdt,rain)
 0226 
-0227 <a name="_sub1" href="#_subfunctions" class="code">function [eventT,eventQ,eventq,eventdq, </a><span class="keyword">...</span>
-0228    eventr,annualT,annualQ,annualr] = prepinput(userc,tags,event,T,Q,q,dqdt,rain)
-0229 
-0230 <span class="keyword">if</span> userc == true
-0231    [r,c] = find(tags==event);
-0232 <span class="keyword">else</span>
-0233    r  = find(tags==event);
-0234    c  = 1;
-0235 <span class="keyword">end</span>
-0236 
-0237 <span class="comment">% if</span>
-0238 
-0239 eventT   = T(r);
-0240 eventQ   = Q(r,c(1));
-0241 eventq   = q(r,c(1));
+0227 <span class="keyword">if</span> userc == true
+0228    [r,c] = find(tags==event);
+0229 <span class="keyword">else</span>
+0230    r  = find(tags==event);
+0231    c  = 1;
+0232 <span class="keyword">end</span>
+0233 
+0234 <span class="comment">% if</span>
+0235 
+0236 eventT   = T(r);
+0237 eventQ   = Q(r,c(1));
+0238 eventq   = q(r,c(1));
+0239 
+0240 eventdq  = dqdt(r,c(1));
+0241 eventr   = rain(r,c(1));
 0242 
-0243 eventdq  = dqdt(r,c(1));
-0244 eventr   = rain(r,c(1));
+0243 <span class="comment">% pull out the time/flow for the entire year</span>
+0244 <span class="keyword">if</span> isdatetime(T); T = datenum(T); <span class="keyword">end</span>
 0245 
-0246 <span class="comment">% pull out the time/flow for the entire year</span>
-0247 <span class="keyword">if</span> isdatetime(T); T = datenum(T); <span class="keyword">end</span>
-0248 
-0249 dates    = datevec(eventT);
-0250 eventyr  = dates(1,1);
-0251 dates    = datevec(T);
-0252 idx      = dates(:,1)==eventyr;
-0253 annualT  = T(idx);
-0254 annualQ  = Q(idx,c(1));
-0255 annualr  = rain(idx,c(1));
+0246 dates    = datevec(eventT);
+0247 eventyr  = dates(1,1);
+0248 dates    = datevec(T);
+0249 idx      = dates(:,1)==eventyr;
+0250 annualT  = T(idx);
+0251 annualQ  = Q(idx,c(1));
+0252 annualr  = rain(idx,c(1));
+0253 
+0254 
+0255 <span class="comment">% --------------- prep fits</span>
 0256 
-0257 
-0258 <span class="comment">%-------------------------------------------------------------------------------</span>
+0257 <a name="_sub2" href="#_subfunctions" class="code">function [tfit,qfit,dqfit,Qtstr,aQbstr, </a><span class="keyword">...</span>
+0258    qfit0,dqfit0,Qtstr0,aQbstr0,rsq0] = <a href="prepfits.html" class="code" title="function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)">prepfits</a>(eventq,eventdqdt,eventT,fixb,order);
 0259 
-0260 <a name="_sub2" href="#_subfunctions" class="code">function [tfit,qfit,dqfit,Qtstr,aQbstr, </a><span class="keyword">...</span>
-0261    qfit0,dqfit0,Qtstr0,aQbstr0,rsq0] = <a href="prepfits.html" class="code" title="function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)">prepfits</a>(eventq,eventdqdt,eventT,fixb,order);
-0262 
-0263 <span class="comment">% fit ab using nonlin</span>
-0264 <span class="keyword">if</span> all(isnan(eventq))
-0265    qfit=nan;dqfit=nan;Qtstr=<span class="string">'nan'</span>;aQbstr=<span class="string">'nan'</span>;ab=nan;qfit0=nan;
-0266    dqfit0=nan;Qtstr0=<span class="string">'nan'</span>;aQbstr0=<span class="string">'nan'</span>;rsq0=nan;
-0267    <span class="keyword">return</span>
-0268 <span class="keyword">end</span>
-0269 Fit   = bfra.fitab(eventq,eventdqdt,<span class="string">'nls'</span>);
-0270 ab    = Fit.ab;
-0271 Q0    = eventq(find(~isnan(eventq),1,<span class="string">'first'</span>));
-0272 tfit  = eventT(~isnan(eventq));
-0273 
-0274 <span class="comment">% predicted Q from non-lin free</span>
-0275 [qfit,dqfit]   = bfra.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
-0276 [Qtstr,aQbstr] = bfra.QtauString(ab,<span class="string">'printvalues'</span>,true);
-0277 
-0278 <span class="comment">% if requested, fit with a fixed b value and get predicted Q and dQ/dt</span>
-0279 <span class="keyword">if</span> fixb == true
-0280    Fit            = bfra.fitab(eventq,eventdqdt,<span class="string">'mean'</span>,<span class="string">'order'</span>,order);
-0281    ab0            = Fit.ab;
-0282    rsq0           = Fit.rsq;
-0283    [qfit0,dqfit0] = bfra.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
-0284    [Qtstr0,aQbstr0]  = bfra.QtauString(ab0,<span class="string">'printvalues'</span>,true);
-0285 <span class="keyword">else</span>
-0286    ab0      = nan;
-0287    rsq0     = nan;
-0288    qfit0    = nan;
-0289    dqfit0   = nan;
-0290    Qtstr0   = nan;
-0291    aQbstr0  = nan;
-0292 <span class="keyword">end</span>
-0293 
-0294 <span class="comment">%-------------------------------------------------------------------------------</span>
-0295 
-0296 <a name="_sub3" href="#_subfunctions" class="code">function [h,ax] = plotrain(time,rain)</a>
-0297 
-0298 rcolor = [0.85 0.325 0.098];
-0299 
-0300 ax = gca; yyaxis right
-0301 h = bar(time,rain,0.2,  <span class="string">'FaceColor'</span>,   rcolor,           <span class="keyword">...</span>
-0302                         <span class="string">'FaceAlpha'</span>,   0.5,              <span class="keyword">...</span>
-0303                         <span class="string">'EdgeColor'</span>,   <span class="string">'none'</span>            );
-0304 
-0305 ylabel(<span class="string">'rain (mm d$^{-1}$)'</span>,<span class="string">'Color'</span>,rcolor);
-0306 set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
-0307 datetick; axis tight; axis(ax,<span class="string">'ij'</span>);
-0308 
-0309 <span class="comment">%-------------------------------------------------------------------------------</span>
-0310 <span class="comment">% extra stuff</span>
-0311 <span class="comment">%-------------------------------------------------------------------------------</span>
-0312 <span class="comment">% If I want to add back the log</span>
-0313 <span class="comment">%     yyaxis right</span>
-0314 <span class="comment">%     pause(0.001)</span>
-0315 <span class="comment">%     semilogy(t,q,'-o'); hold on; semilogy(t,qfit,':');</span>
-0316 <span class="comment">%     set(gca,'YScale','log')</span>
+0260 <span class="comment">% fit ab using nonlin</span>
+0261 <span class="keyword">if</span> all(isnan(eventq))
+0262    qfit=nan;dqfit=nan;Qtstr=<span class="string">'nan'</span>;aQbstr=<span class="string">'nan'</span>;ab=nan;qfit0=nan;
+0263    dqfit0=nan;Qtstr0=<span class="string">'nan'</span>;aQbstr0=<span class="string">'nan'</span>;rsq0=nan;
+0264    <span class="keyword">return</span>
+0265 <span class="keyword">end</span>
+0266 Fit   = bfra.fitab(eventq,eventdqdt,<span class="string">'nls'</span>);
+0267 ab    = Fit.ab;
+0268 Q0    = eventq(find(~isnan(eventq),1,<span class="string">'first'</span>));
+0269 tfit  = eventT(~isnan(eventq));
+0270 
+0271 <span class="comment">% predicted Q from non-lin free</span>
+0272 [qfit,dqfit]   = bfra.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
+0273 [Qtstr,aQbstr] = bfra.QtauString(ab,<span class="string">'printvalues'</span>,true);
+0274 
+0275 <span class="comment">% if requested, fit with a fixed b value and get predicted Q and dQ/dt</span>
+0276 <span class="keyword">if</span> fixb == true
+0277    Fit            = bfra.fitab(eventq,eventdqdt,<span class="string">'mean'</span>,<span class="string">'order'</span>,order);
+0278    ab0            = Fit.ab;
+0279    rsq0           = Fit.rsq;
+0280    [qfit0,dqfit0] = bfra.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
+0281    [Qtstr0,aQbstr0]  = bfra.QtauString(ab0,<span class="string">'printvalues'</span>,true);
+0282 <span class="keyword">else</span>
+0283    ab0      = nan;
+0284    rsq0     = nan;
+0285    qfit0    = nan;
+0286    dqfit0   = nan;
+0287    Qtstr0   = nan;
+0288    aQbstr0  = nan;
+0289 <span class="keyword">end</span>
+0290 
+0291 <span class="comment">% --------------- plot rain</span>
+0292 
+0293 <a name="_sub3" href="#_subfunctions" class="code">function [h,ax] = plotrain(time,rain)</a>
+0294 
+0295 rcolor = [0.85 0.325 0.098];
+0296 
+0297 ax = gca; yyaxis right
+0298 h = bar(time,rain,0.2,  <span class="string">'FaceColor'</span>,   rcolor,           <span class="keyword">...</span>
+0299                         <span class="string">'FaceAlpha'</span>,   0.5,              <span class="keyword">...</span>
+0300                         <span class="string">'EdgeColor'</span>,   <span class="string">'none'</span>            );
+0301 
+0302 ylabel(<span class="string">'rain (mm d$^{-1}$)'</span>,<span class="string">'Color'</span>,rcolor);
+0303 set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
+0304 datetick; axis tight; axis(ax,<span class="string">'ij'</span>);
+0305 
+0306 
+0307 <span class="comment">% --------------- extra stuff</span>
+0308 <span class="comment">% If I want to add back the log</span>
+0309 <span class="comment">%     yyaxis right</span>
+0310 <span class="comment">%     pause(0.001)</span>
+0311 <span class="comment">%     semilogy(t,q,'-o'); hold on; semilogy(t,qfit,':');</span>
+0312 <span class="comment">%     set(gca,'YScale','log')</span>
+0313 
+0314 <span class="comment">%     yyaxis right</span>
+0315 <span class="comment">%     semilogy(t,-dqdt,'-o'); hold on; semilogy(t,dqfit,':'); datetick;</span>
+0316 <span class="comment">%     ylabel('-dQ/dt')</span>
 0317 
-0318 <span class="comment">%     yyaxis right</span>
-0319 <span class="comment">%     semilogy(t,-dqdt,'-o'); hold on; semilogy(t,dqfit,':'); datetick;</span>
-0320 <span class="comment">%     ylabel('-dQ/dt')</span>
-0321 
-0322 
-0323 <span class="comment">%     % for debugging</span>
-0324 <span class="comment">%     f       = @(a,b,Q0,x) (Q0^(1-b)-(1-b).*a.*x).^(1/(1-b));</span>
-0325 <span class="comment">%     qtst    = f(ab(1),ab(2),q(1),t-t(1)+1);</span>
-0326 <span class="comment">%     dqtst   = ab(1).*qtst.^ab(2);</span>
+0318 
+0319 <span class="comment">%     % for debugging</span>
+0320 <span class="comment">%     f       = @(a,b,Q0,x) (Q0^(1-b)-(1-b).*a.*x).^(1/(1-b));</span>
+0321 <span class="comment">%     qtst    = f(ab(1),ab(2),q(1),t-t(1)+1);</span>
+0322 <span class="comment">%     dqtst   = ab(1).*qtst.^ab(2);</span>
+0323 <span class="comment">%</span>
+0324 <span class="comment">%     figure; plot(t,q,'-o'); legend('obs'); datetick; hold on;</span>
+0325 <span class="comment">%     figure; plot(t,qfit,'-o'); legend('fit function'); datetick</span>
+0326 <span class="comment">%     figure; plot(t,qtst,'-o'); legend('fit test'); datetick</span>
 0327 <span class="comment">%</span>
-0328 <span class="comment">%     figure; plot(t,q,'-o'); legend('obs'); datetick; hold on;</span>
-0329 <span class="comment">%     figure; plot(t,qfit,'-o'); legend('fit function'); datetick</span>
-0330 <span class="comment">%     figure; plot(t,qtst,'-o'); legend('fit test'); datetick</span>
-0331 <span class="comment">%</span>
-0332 <span class="comment">%     figure; plot(q,-dqdt,'-o');legend('obs');</span>
-0333 <span class="comment">%     figure; plot(qfit,dqfit,'-o'); legend('fit function');</span>
-0334 <span class="comment">%     figure; plot(q,-dqtst,'-o'); legend('fit test');</span>
-0335 
-0336 <span class="comment">%abl         = bfra_quickfit(q,dqdt,'lin');</span>
-0337 <span class="comment">%[q,dqdt]    = bfra_Qlin(a,b,Q0,t)</span></pre></div>
+0328 <span class="comment">%     figure; plot(q,-dqdt,'-o');legend('obs');</span>
+0329 <span class="comment">%     figure; plot(qfit,dqfit,'-o'); legend('fit function');</span>
+0330 <span class="comment">%     figure; plot(q,-dqtst,'-o'); legend('fit test');</span>
+0331 
+0332 <span class="comment">%abl         = bfra_quickfit(q,dqdt,'lin');</span>
+0333 <span class="comment">%[q,dqdt]    = bfra_Qlin(a,b,Q0,t)</span></pre></div>
 </body>
 </html>

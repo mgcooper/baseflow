@@ -11,23 +11,23 @@ end
 if nargin == 2
    logopt = 'linear';
 else
-   logopt   = varargin{1};
+   logopt = varargin{1};
 end
 
 % although prepareCurveData will do this, it issues an error which can
 % be annoying and/or confusing
-x  = x(:);
-y  = y(:);  % only single linear regression is supported
+x = x(:);
+y = y(:);  % only single linear regression is supported
 
 
 % assume nan values in y should dictate removal of x,y values
-[y,naninds] = rmnan(y);
-x(naninds)  = [];
+[y,naninds] = bfra.util.rmnan(y);
+x(naninds) = [];
 
 [x,y] = prepareCurveData(x,y);
 
 if all(isempty(x)) || all(isempty(y)) || all(isnan(x)) || all(isnan(y))
-   ab = [nan nan]; xfit = nan;   yfit = nan;
+   ab = [nan nan]; xfit = nan; yfit = nan;
    return
 end
 

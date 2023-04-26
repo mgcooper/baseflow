@@ -21,7 +21,7 @@ function [SE,CI,PM,mu,sig] = stderr(data,varargin)
 % See also timetablereduce
 
 %--------------------------------------------------------------------------
-p = magicParser;
+p = bfra.deps.magicParser;
 p.FunctionName = mfilename;
 p.addRequired('data', @(x)isnumeric(x));
 p.addParameter('alpha', 0.05, @(x)isnumeric(x));

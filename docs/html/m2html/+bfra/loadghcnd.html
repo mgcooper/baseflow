@@ -176,7 +176,7 @@ This function is called by:
 0101 GHCN(ileap,:) = [];
 0102 
 0103 <span class="comment">% % first i made Rain with the new method, then saved it as keep:</span>
-0104 <span class="comment">% figure; myscatter(GHCN.PRCP,keep.PRCP./10); addOnetoOne;</span>
+0104 <span class="comment">% figure; scatter(GHCN.PRCP,keep.PRCP./10,'filled'); addOnetoOne;</span>
 0105 
 0106 <span class="keyword">if</span> gapfill == true
 0107    numyears =  height(GHCN)/365;
@@ -202,10 +202,10 @@ This function is called by:
 0127 <span class="keyword">end</span>
 0128 
 0129 <span class="comment">% rain comes in as mm/day</span>
-0130 <span class="comment">%    GHCN.PRCP   = GHCN.PRCP./10.*ddperyy;</span>
+0130 <span class="comment">% GHCN.PRCP = GHCN.PRCP./10.*ddperyy;</span>
 0131 
-0132 <span class="keyword">if</span> notnan(units)
-0133 <span class="comment">%       aream2   =  Meta.darea.*1e6;</span>
+0132 <span class="keyword">if</span> ~isnan(units)
+0133    <span class="comment">% aream2 = Meta.darea.*1e6;</span>
 0134    vars  = {<span class="string">'PRCP'</span>,<span class="string">'SNOW'</span>,<span class="string">'SNWD'</span>};
 0135    <span class="keyword">for</span> n = 1:numel(vars)
 0136 

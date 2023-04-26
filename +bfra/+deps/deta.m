@@ -178,21 +178,21 @@ end
 f = reshape(f,sizz);
 return
 
-%a demo of this routine is
-if 1==2
-x=0:1/16:1;
-y=0:1/16:32;
-[X,Y]=meshgrid(x,y);
-z=X+i*Y;
-clear X Y
-f = deta(z,1);
-p=find(abs(f)>5);
-if ~isempty(p)
-   f(p)=NaN;
-end
-mesh(x,y,abs(f));
-view([83 3]);
-axis([0 1 0 32 0 6]);
-rotate3d
-return
-end
+% %a demo of this routine is
+% if 1==2
+% x=0:1/16:1;
+% y=0:1/16:32;
+% [X,Y]=meshgrid(x,y);
+% z=X+i*Y;
+% clear X Y
+% f = deta(z,1);
+% p=find(abs(f)>5);
+% if ~isempty(p)
+%    f(p)=NaN;
+% end
+% mesh(x,y,abs(f));
+% view([83 3]);
+% axis([0 1 0 32 0 6]);
+% rotate3d
+% return
+% end

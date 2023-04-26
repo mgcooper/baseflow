@@ -30,16 +30,16 @@
 <div class="fragment"><pre class="comment">PLOTREFLINE add a reference line to a point cloud plot
 
  Syntax
- 
+
      [href,ab] = plotrefline(x,y,varargin)
- 
+
  Required inputs
- 
+
      x  = vector of type double (nominally discharge q)
      y  = vector of type double (nominally discharge rate of change -dq/dt)
 
  Optional name-value inputs
- 
+
      mask     =  vector logical mask to exclude values from fitting
      refline  =  char indicating what type of refline to plot
      refslope =  scalar double indicating a user-defined slope
@@ -120,7 +120,7 @@ This function is called by:
 0036 
 0037 <span class="comment">% NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y</span>
 0038 <span class="comment">%-------------------------------------------------------------------------------</span>
-0039 p              = inputParser;
+0039 p = inputParser;
 0040 p.FunctionName = <span class="string">'bfra.plotrefline'</span>;
 0041 <span class="comment">% p.PartialMatching = true;</span>
 0042 
@@ -136,7 +136,7 @@ This function is called by:
 0052 addParameter(p,<span class="string">'linecolor'</span>,   [0 0 0],       @(x)isnumeric(x));
 0053 addParameter(p,<span class="string">'precision'</span>,   1,             @(x)isnumeric(x)); <span class="comment">% default = 1 m3/s</span>
 0054 addParameter(p,<span class="string">'timestep'</span>,    1,             @(x)isnumeric(x)); <span class="comment">% default = 1 day</span>
-0055 addParameter(p,<span class="string">'ax'</span>,          gobjects(0),   @(x)isaxis(x));
+0055 addParameter(p,<span class="string">'ax'</span>,          gobjects(0),   @(x)bfra.validation.isaxis(x));
 0056 
 0057 parse(p,x,y,varargin{:});
 0058 
@@ -152,7 +152,7 @@ This function is called by:
 0068 timestep    = p.Results.timestep;
 0069 ax          = p.Results.ax;
 0070 <span class="comment">%-------------------------------------------------------------------------------</span>
-0071       
+0071 
 0072 <span class="comment">% need options for how/if to apply the mask - e.g., we might want to show the</span>
 0073 <span class="comment">% 'bestfit' to all data, and use the mask for late-time fit. also keep in mind</span>
 0074 <span class="comment">% bfra.eventphi calls this. mask is default true in parsing.</span>
@@ -209,14 +209,14 @@ This function is called by:
 0125 <span class="keyword">end</span>
 0126 
 0127 <span class="comment">% send back the ab</span>
-0128 href     = [];       <span class="comment">% this gets sent back in case plotline false</span>
-0129 ab       = [a;b];
+0128 href = [];                 <span class="comment">% this gets sent back in case plotline false</span>
+0129 ab = [a;b];
 0130 
 0131 <span class="comment">% Below here only needed if plot is requested</span>
-0132 <span class="keyword">if</span> plotline == true   
+0132 <span class="keyword">if</span> plotline == true
 0133 
-0134    xref     = linspace(xlims(1),xlims(2),100);
-0135    yref     = axb(a,xref,b);
+0134    xref = linspace(xlims(1),xlims(2),100);
+0135    yref = axb(a,xref,b);
 0136 
 0137    <span class="keyword">switch</span> refline
 0138       <span class="keyword">case</span> <span class="string">'bestfit'</span>
@@ -229,7 +229,7 @@ This function is called by:
 0145 
 0146    <span class="comment">% reset the x,ylims</span>
 0147    set(ax,<span class="string">'XLim'</span>,xlims,<span class="string">'YLim'</span>,ylims,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'latex'</span>)
-0148    setlogticks(ax);
+0148    bfra.util.setlogticks(ax);
 0149 
 0150    <span class="keyword">if</span> labels == true
 0151       <a href="#_sub1" class="code" title="subfunction addlabels(a,b,refline)">addlabels</a>(a,b,refline)
@@ -244,55 +244,55 @@ This function is called by:
 0160 
 0161 
 0162 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(a,b,refline)</a>
-0163    
+0163 
 0164 <span class="comment">% for early and late, we use the early-time form to get the y position</span>
-0165 ylims    = ylim;
-0166 xlims    = xlim;
+0165 ylims = ylim;
+0166 xlims = xlim;
 0167 
 0168 <span class="comment">% use the number of decades to place the labels</span>
-0169 ndecsy   = log10(ylims(2))-log10(ylims(1));
-0170 ndecsx   = log10(xlims(2))-log10(xlims(1));
+0169 ndecsy = log10(ylims(2))-log10(ylims(1));
+0170 ndecsx = log10(xlims(2))-log10(xlims(1));
 0171 
 0172 <span class="comment">% place the label 1/2 way b/w the first and second decade</span>
-0173 ya       = 10^(log10(ylims(1))+ndecsy/20);
+0173 ya = 10^(log10(ylims(1))+ndecsy/20);
 0174 
 0175 <span class="keyword">switch</span> refline
 0176 
 0177    <span class="comment">%case {'latetime','earlytime','userfit','bestfit'}</span>
 0178    <span class="keyword">case</span> {<span class="string">'latetime'</span>,<span class="string">'earlytime'</span>,<span class="string">'userfit'</span>}
-0179       xa       = (ya/a)^(1/b);
+0179       xa = (ya/a)^(1/b);
 0180 
 0181       <span class="comment">% make the arrow span 1/10th or so of the total number of decades</span>
-0182       xa       = [xa 10^(log10(xa)+ndecsx/15)];
+0182       xa = [xa 10^(log10(xa)+ndecsx/15)];
 0183 
-0184       ya       = [ya ya];
+0184       ya = [ya ya];
 0185 
 0186       <span class="keyword">if</span> refline == &quot;userfit&quot;
-0187          ta    = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>,b);
+0187          ta = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>,b);
 0188       <span class="keyword">elseif</span> b==1 || b==3
-0189          ta    = sprintf(<span class="string">'$b=%.0f$'</span>,b);
+0189          ta = sprintf(<span class="string">'$b=%.0f$'</span>,b);
 0190       <span class="keyword">elseif</span> b==3/2
-0191          ta    = sprintf(<span class="string">'$b=%.1f$'</span>,b);
+0191          ta = sprintf(<span class="string">'$b=%.1f$'</span>,b);
 0192       <span class="keyword">else</span>
-0193          ta    = sprintf(<span class="string">'$b=%.2f$'</span>,b);
+0193          ta = sprintf(<span class="string">'$b=%.2f$'</span>,b);
 0194       <span class="keyword">end</span>
 0195 
-0196       arrow([xa(2),ya(2)],[xa(1),ya(1)],<span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
-0197       text(1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
-0198             <span class="string">'fontsize'</span>,13,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
-0199 
-0200    <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
-0201 
-0202       axpos    = plotboxpos(gca);    <span class="comment">% only works with correct axes position</span>
-0203       <span class="comment">% xtxt     = exp(mean(log(xlim)));</span>
-0204 
-0205       xlims    = log10(xlim);
-0206       xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
-0207       ytxt     = 2*xtxt;
-0208 
-0209       rot      = 0.98; 
+0196       bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
+0197          <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10);
+0198       text(1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
+0199          <span class="string">'fontsize'</span>,13,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0200 
+0201    <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
+0202 
+0203       axpos = bfra.deps.plotboxpos(gca); <span class="comment">% only works with correct axes position</span>
+0204       <span class="comment">% xtxt = exp(mean(log(xlim)));</span>
+0205 
+0206       xlims = log10(xlim);
+0207       xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
+0208       ytxt = 2*xtxt;
+0209       rtxt = 0.98;
 0210 
-0211       <span class="comment">% some values of rot that work for different types of plots</span>
+0211       <span class="comment">% some values of rtxt that work for different types of plots</span>
 0212       <span class="comment">% 5.1    bfra_checkevent2 figure (I used 5.22 in the final fig)</span>
 0213       <span class="comment">% 0.22   not sure (note said 0.22 works with tiledlayout)</span>
 0214       <span class="comment">% 3.8    not sure (note said i think 3.8 works with subplot)</span>
@@ -300,14 +300,14 @@ This function is called by:
 0216       <span class="comment">% 1.07   not sure but this was</span>
 0217       <span class="comment">% 0.98   used this in the final point cloud plot</span>
 0218 
-0219       rotatedLogLogText(xtxt,ytxt,<span class="string">'upper envelope'</span>,rot,axpos,<span class="string">'FontSize'</span>,11);
+0219       rotatedLogLogText(xtxt,ytxt,<span class="string">'upper envelope'</span>,rtxt,axpos,<span class="string">'FontSize'</span>,11);
 0220 
 0221    <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
 0222       <span class="comment">% for now, add this after the fact</span>
-0223 <span class="comment">%</span>
-0224 <span class="comment">%          xlims    = log10(xlim);</span>
-0225 <span class="comment">%          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);</span>
-0226 <span class="comment">%          ytxt     = 2*xtxt;</span>
+0223       <span class="comment">%</span>
+0224       <span class="comment">%          xlims    = log10(xlim);</span>
+0225       <span class="comment">%          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);</span>
+0226       <span class="comment">%          ytxt     = 2*xtxt;</span>
 0227 
 0228 <span class="keyword">end</span>
 0229</pre></div>

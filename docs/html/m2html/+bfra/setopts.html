@@ -52,6 +52,7 @@
      rmrain      :  remove data on days with rainfall&gt;rmin
      pickevents  :  option to manually pick events
      plotevents  :  option to plot picked events
+     asannual    :  option to detect events on an annual basis
 
   Optional name-value inputs for type 'fitevents'
  
@@ -71,11 +72,12 @@
   Optional name-value inputs for type 'globalfit'
  
      drainagearea   : drainage area [m2]
-     drainagedens   : drainage density [km-1] = streamlenght/drainagearea
+     drainagedens   : drainage density [km-1] = streamlength/drainagearea
      aquiferdepth   : reference aquifer thickness [m]
      streamlength   : effective channel length [m]
      aquiferslope   : effective aquifer slope
      aquiferbreadth : distance from channel to divide
+     drainableporos : drainable porosity
      isflat         : logical indicating true or false
      plotfits       : plot the various global fits?e
      bootfit        : logical indicating whether to bootstrap the uncertainites
@@ -135,108 +137,112 @@ This function is called by:
 0024 <span class="comment">%     rmrain      :  remove data on days with rainfall&gt;rmin</span>
 0025 <span class="comment">%     pickevents  :  option to manually pick events</span>
 0026 <span class="comment">%     plotevents  :  option to plot picked events</span>
-0027 <span class="comment">%</span>
-0028 <span class="comment">%  Optional name-value inputs for type 'fitevents'</span>
-0029 <span class="comment">%</span>
-0030 <span class="comment">%     derivmethod    : derivative (dQ/dt) method</span>
-0031 <span class="comment">%     fitmethod      : -dQ/dt = aQb fitting method</span>
-0032 <span class="comment">%     fitorder       : fitting order (value of exponent b)</span>
-0033 <span class="comment">%     fitnmin        : minimum number of values required to fit -dQ/dt = aQb</span>
-0034 <span class="comment">%     pickfits       : pick fits manually?</span>
-0035 <span class="comment">%     pickmethod     : method to fit picks manually</span>
-0036 <span class="comment">%     plotfits       : plot the fits?</span>
-0037 <span class="comment">%     savefitplots   : save plots of fits?</span>
-0038 <span class="comment">%     etsparam       : min flow length parameter for ETS algorithm</span>
-0039 <span class="comment">%     vtsparam       : min flow length parameter for VTS algorithm</span>
-0040 <span class="comment">%     drainagearea   : drainage area in m2</span>
-0041 <span class="comment">%     gageID         : station name or ID</span>
-0042 <span class="comment">%</span>
-0043 <span class="comment">%  Optional name-value inputs for type 'globalfit'</span>
-0044 <span class="comment">%</span>
-0045 <span class="comment">%     drainagearea   : drainage area [m2]</span>
-0046 <span class="comment">%     drainagedens   : drainage density [km-1] = streamlenght/drainagearea</span>
-0047 <span class="comment">%     aquiferdepth   : reference aquifer thickness [m]</span>
-0048 <span class="comment">%     streamlength   : effective channel length [m]</span>
-0049 <span class="comment">%     aquiferslope   : effective aquifer slope</span>
-0050 <span class="comment">%     aquiferbreadth : distance from channel to divide</span>
-0051 <span class="comment">%     isflat         : logical indicating true or false</span>
-0052 <span class="comment">%     plotfits       : plot the various global fits?e</span>
-0053 <span class="comment">%     bootfit        : logical indicating whether to bootstrap the uncertainites</span>
-0054 <span class="comment">%     nreps          : number of reps for bootstrapping</span>
-0055 <span class="comment">%     phimethod      : method used to fit drainable porosity</span>
-0056 <span class="comment">%     refqtls        : quantiles of Q and -dQ/dt for early/late reference lines</span>
-0057 <span class="comment">%     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines</span>
-0058 <span class="comment">%     lateqtls       : quantiles of Q and -dQ/dt for late reference lines</span>
-0059 <span class="comment">%</span>
-0060 <span class="comment">%  See also getfits, fitdqdt</span>
+0027 <span class="comment">%     asannual    :  option to detect events on an annual basis</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">%  Optional name-value inputs for type 'fitevents'</span>
+0030 <span class="comment">%</span>
+0031 <span class="comment">%     derivmethod    : derivative (dQ/dt) method</span>
+0032 <span class="comment">%     fitmethod      : -dQ/dt = aQb fitting method</span>
+0033 <span class="comment">%     fitorder       : fitting order (value of exponent b)</span>
+0034 <span class="comment">%     fitnmin        : minimum number of values required to fit -dQ/dt = aQb</span>
+0035 <span class="comment">%     pickfits       : pick fits manually?</span>
+0036 <span class="comment">%     pickmethod     : method to fit picks manually</span>
+0037 <span class="comment">%     plotfits       : plot the fits?</span>
+0038 <span class="comment">%     savefitplots   : save plots of fits?</span>
+0039 <span class="comment">%     etsparam       : min flow length parameter for ETS algorithm</span>
+0040 <span class="comment">%     vtsparam       : min flow length parameter for VTS algorithm</span>
+0041 <span class="comment">%     drainagearea   : drainage area in m2</span>
+0042 <span class="comment">%     gageID         : station name or ID</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%  Optional name-value inputs for type 'globalfit'</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">%     drainagearea   : drainage area [m2]</span>
+0047 <span class="comment">%     drainagedens   : drainage density [km-1] = streamlength/drainagearea</span>
+0048 <span class="comment">%     aquiferdepth   : reference aquifer thickness [m]</span>
+0049 <span class="comment">%     streamlength   : effective channel length [m]</span>
+0050 <span class="comment">%     aquiferslope   : effective aquifer slope</span>
+0051 <span class="comment">%     aquiferbreadth : distance from channel to divide</span>
+0052 <span class="comment">%     drainableporos : drainable porosity</span>
+0053 <span class="comment">%     isflat         : logical indicating true or false</span>
+0054 <span class="comment">%     plotfits       : plot the various global fits?e</span>
+0055 <span class="comment">%     bootfit        : logical indicating whether to bootstrap the uncertainites</span>
+0056 <span class="comment">%     nreps          : number of reps for bootstrapping</span>
+0057 <span class="comment">%     phimethod      : method used to fit drainable porosity</span>
+0058 <span class="comment">%     refqtls        : quantiles of Q and -dQ/dt for early/late reference lines</span>
+0059 <span class="comment">%     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines</span>
+0060 <span class="comment">%     lateqtls       : quantiles of Q and -dQ/dt for late reference lines</span>
 0061 <span class="comment">%</span>
-0062 <span class="comment">%  Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
-0063 
-0064 <span class="comment">% if called with no input, open this file</span>
-0065 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0066 
-0067 <span class="comment">%% set default bfra settings</span>
+0062 <span class="comment">%  See also getfits, fitdqdt</span>
+0063 <span class="comment">%</span>
+0064 <span class="comment">%  Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
+0065 
+0066 <span class="comment">% if called with no input, open this file</span>
+0067 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0068 
-0069 p                 = inputParser;
-0070 p.FunctionName    = <span class="string">'bfra.setopts'</span>;
-0071 
-0072 p.addRequired(<span class="string">'funcname'</span>,@(x)ischar(x));
-0073 parse(p,funcname);
-0074 
-0075 <span class="keyword">switch</span> funcname
+0069 <span class="comment">%% set default bfra settings</span>
+0070 
+0071 p                 = inputParser;
+0072 p.FunctionName    = <span class="string">'bfra.setopts'</span>;
+0073 
+0074 p.addRequired(<span class="string">'funcname'</span>,@(x)ischar(x));
+0075 parse(p,funcname);
 0076 
-0077    <span class="comment">% event detection - input options for getevents</span>
-0078    <span class="keyword">case</span> <span class="string">'getevents'</span>
-0079 
-0080       addParameter(p,   <span class="string">'qmin'</span>,        1,          @(x) isnumericscalar(x)  );
-0081       addParameter(p,   <span class="string">'nmin'</span>,        4,          @(x) isnumericscalar(x)  );
-0082       addParameter(p,   <span class="string">'fmax'</span>,        1,          @(x) isnumericscalar(x)  );
-0083       addParameter(p,   <span class="string">'rmax'</span>,        2,          @(x) isnumericscalar(x)  );
-0084       addParameter(p,   <span class="string">'rmin'</span>,        1,          @(x) isnumericscalar(x)  );
-0085       addParameter(p,   <span class="string">'cmax'</span>,        2,          @(x) isnumericscalar(x)  );
-0086       addParameter(p,   <span class="string">'rmconvex'</span>,    false,      @(x) islogicalscalar(x)  );
-0087       addParameter(p,   <span class="string">'rmnochange'</span>,  true,       @(x) islogicalscalar(x)  );
-0088       addParameter(p,   <span class="string">'rmrain'</span>,      true,       @(x) islogicalscalar(x)  );
-0089       addParameter(p,   <span class="string">'pickevents'</span>,  false,      @(x) islogicalscalar(x)  );
-0090       addParameter(p,   <span class="string">'plotevents'</span>,  false,      @(x) islogicalscalar(x)  );
-0091 
-0092    <span class="comment">% event fits - input options for fitevents</span>
-0093    <span class="keyword">case</span> <span class="string">'fitevents'</span>
+0077 <span class="keyword">switch</span> funcname
+0078 
+0079    <span class="comment">% event detection - input options for getevents</span>
+0080    <span class="keyword">case</span> <span class="string">'getevents'</span>
+0081 
+0082       addParameter(p,   <span class="string">'qmin'</span>,        1,          @(x) bfra.validation.isnumericscalar(x)  );
+0083       addParameter(p,   <span class="string">'nmin'</span>,        4,          @(x) bfra.validation.isnumericscalar(x)  );
+0084       addParameter(p,   <span class="string">'fmax'</span>,        1,          @(x) bfra.validation.isnumericscalar(x)  );
+0085       addParameter(p,   <span class="string">'rmax'</span>,        2,          @(x) bfra.validation.isnumericscalar(x)  );
+0086       addParameter(p,   <span class="string">'rmin'</span>,        1,          @(x) bfra.validation.isnumericscalar(x)  );
+0087       addParameter(p,   <span class="string">'cmax'</span>,        2,          @(x) bfra.validation.isnumericscalar(x)  );
+0088       addParameter(p,   <span class="string">'rmconvex'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)  );
+0089       addParameter(p,   <span class="string">'rmnochange'</span>,  true,       @(x) bfra.validation.islogicalscalar(x)  );
+0090       addParameter(p,   <span class="string">'rmrain'</span>,      true,       @(x) bfra.validation.islogicalscalar(x)  );
+0091       addParameter(p,   <span class="string">'pickevents'</span>,  false,      @(x) bfra.validation.islogicalscalar(x)  );
+0092       addParameter(p,   <span class="string">'plotevents'</span>,  false,      @(x) bfra.validation.islogicalscalar(x)  );
+0093       addParameter(p,   <span class="string">'asannual'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)  );
 0094 
-0095       addParameter(p,   <span class="string">'derivmethod'</span>, <span class="string">'ETS'</span>,      @(x) ischar(x)             );
-0096       addParameter(p,   <span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,      @(x) ischar(x)             );
-0097       addParameter(p,   <span class="string">'fitorder'</span>,    <span class="string">'free'</span>,     @(x) ischar(x)|isnumeric(x));
-0098       addParameter(p,   <span class="string">'pickfits'</span>,    false,      @(x) islogicalscalar(x)    );
-0099       addParameter(p,   <span class="string">'pickmethod'</span>,  <span class="string">'none'</span>,     @(x) ischar(x)             );
-0100       addParameter(p,   <span class="string">'plotfits'</span>,    false,      @(x) islogicalscalar(x)    );
-0101       addParameter(p,   <span class="string">'saveplots'</span>,   false,      @(x) islogicalscalar(x)    );
-0102       addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @(x) isnumericscalar(x)    );
-0103       addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @(x) isnumericscalar(x)    );
-0104       
-0105    <span class="comment">% global fit - input to bfra.globalfit</span>
-0106    <span class="keyword">case</span> <span class="string">'globalfit'</span>
-0107 
-0108       addParameter(p,   <span class="string">'drainagearea'</span>,   nan,           @(x)isnumericscalar(x)  );
-0109       addParameter(p,   <span class="string">'drainagedens'</span>,   0.8,           @(x)isnumericscalar(x)  );
-0110       addParameter(p,   <span class="string">'aquiferdepth'</span>,   nan,           @(x)isnumericscalar(x)  );
-0111       addParameter(p,   <span class="string">'streamlength'</span>,   nan,           @(x)isnumericscalar(x)  );
-0112       addParameter(p,   <span class="string">'aquiferslope'</span>,   nan,           @(x)isnumericscalar(x)  );
-0113       addParameter(p,   <span class="string">'aquiferbreadth'</span>, nan,           @(x)isnumericscalar(x)  );
-0114       addParameter(p,   <span class="string">'isflat'</span>,         true,          @(x)islogicalscalar(x)  );
-0115       addParameter(p,   <span class="string">'plotfits'</span>,       false,         @(x)islogicalscalar(x)  );
-0116       addParameter(p,   <span class="string">'bootfit'</span>,        false,         @(x)islogicalscalar(x)  );
-0117       addParameter(p,   <span class="string">'nreps'</span>,          1000,          @(x)isdoublescalar(x)   );
-0118       addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @(x)ischar(x)           );
-0119       addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @(x)isnumericvector(x)  );
-0120       addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @(x)isnumericvector(x)  );
-0121       addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @(x)isnumericvector(x)  );
-0122 
-0123 <span class="keyword">end</span>
-0124 
-0125 parse(p,funcname,varargin{:});
+0095    <span class="comment">% event fits - input options for fitevents</span>
+0096    <span class="keyword">case</span> <span class="string">'fitevents'</span>
+0097 
+0098       addParameter(p,   <span class="string">'derivmethod'</span>, <span class="string">'ETS'</span>,      @(x) ischar(x)             );
+0099       addParameter(p,   <span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,      @(x) ischar(x)             );
+0100       addParameter(p,   <span class="string">'fitorder'</span>,    <span class="string">'free'</span>,     @(x) ischar(x)|isnumeric(x));
+0101       addParameter(p,   <span class="string">'pickfits'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)    );
+0102       addParameter(p,   <span class="string">'pickmethod'</span>,  <span class="string">'none'</span>,     @(x) ischar(x)             );
+0103       addParameter(p,   <span class="string">'plotfits'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)    );
+0104       addParameter(p,   <span class="string">'saveplots'</span>,   false,      @(x) bfra.validation.islogicalscalar(x)    );
+0105       addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @(x) bfra.validation.isnumericscalar(x)    );
+0106       addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @(x) bfra.validation.isnumericscalar(x)    );
+0107       
+0108    <span class="comment">% global fit - input to bfra.globalfit</span>
+0109    <span class="keyword">case</span> <span class="string">'globalfit'</span>
+0110 
+0111       addParameter(p,   <span class="string">'drainagearea'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x)  );
+0112       addParameter(p,   <span class="string">'drainagedens'</span>,   0.8,           @(x)bfra.validation.isnumericscalar(x)  );
+0113       addParameter(p,   <span class="string">'aquiferdepth'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x)  );
+0114       addParameter(p,   <span class="string">'streamlength'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x)  );
+0115       addParameter(p,   <span class="string">'aquiferslope'</span>,   0.0,           @(x)bfra.validation.isnumericscalar(x)  );
+0116       addParameter(p,   <span class="string">'aquiferbreadth'</span>, nan,           @(x)bfra.validation.isnumericscalar(x)  );
+0117       addParameter(p,   <span class="string">'drainableporos'</span>, 0.1,           @(x)bfra.validation.isnumericscalar(x)  );
+0118       addParameter(p,   <span class="string">'isflat'</span>,         true,          @(x)bfra.validation.islogicalscalar(x)  );
+0119       addParameter(p,   <span class="string">'plotfits'</span>,       false,         @(x)bfra.validation.islogicalscalar(x)  );
+0120       addParameter(p,   <span class="string">'bootfit'</span>,        false,         @(x)bfra.validation.islogicalscalar(x)  );
+0121       addParameter(p,   <span class="string">'nreps'</span>,          1000,          @(x)bfra.validation.isdoublescalar(x)   );
+0122       addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @(x)ischar(x)           );
+0123       addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @(x)bfra.validation.isnumericvector(x)  );
+0124       addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @(x)bfra.validation.isnumericvector(x)  );
+0125       addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x)  );
 0126 
-0127 opts = p.Results;
-0128 opts = rmfield(opts,<span class="string">'funcname'</span>);
-0129</pre></div>
+0127 <span class="keyword">end</span>
+0128 
+0129 parse(p,funcname,varargin{:});
+0130 
+0131 opts = p.Results;
+0132 opts = rmfield(opts,<span class="string">'funcname'</span>);
+0133</pre></div>
 </body>
 </html>

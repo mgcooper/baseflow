@@ -4,15 +4,11 @@ digraph m2html {
   checkevent -> prepfits;
   fitets -> fitab;
   loadbasins -> basinname;
-  loadbasins -> version;
   loadcalm -> basinname;
-  loadcalm -> version;
   loadflow -> basinname;
   loadghcnd -> basinname;
   loadmeta -> basinname;
-  loadmeta -> version;
   loadprops -> basinname;
-  loadprops -> version;
   taufunc -> taufunc;
 
   Contents [URL="Contents.html"];
@@ -39,6 +35,7 @@ digraph m2html {
   eventsplitter [URL="eventsplitter.html"];
   eventtau [URL="eventtau.html"];
   expectedQ [URL="expectedQ.html"];
+  fdcurve [URL="fdcurve.html"];
   fitab [URL="fitab.html"];
   fitcts [URL="fitcts.html"];
   fitets [URL="fitets.html"];
@@ -47,7 +44,6 @@ digraph m2html {
   fitphidist [URL="fitphidist.html"];
   fitvts [URL="fitvts.html"];
   flattenevents [URL="flattenevents.html"];
-  generateTestData [URL="generateTestData.html"];
   getEventsData [URL="getEventsData.html"];
   getFitsData [URL="getFitsData.html"];
   getdqdt [URL="getdqdt.html"];
@@ -56,6 +52,7 @@ digraph m2html {
   getstring [URL="getstring.html"];
   globalfit [URL="globalfit.html"];
   gpfitb [URL="gpfitb.html"];
+  hyetograph [URL="hyetograph.html"];
   initfit [URL="initfit.html"];
   loadbasins [URL="loadbasins.html"];
   loadcalm [URL="loadcalm.html"];
@@ -67,22 +64,19 @@ digraph m2html {
   mapgages [URL="mapgages.html"];
   phifitensemble [URL="phifitensemble.html"];
   plfitb [URL="plfitb.html"];
-  plotalttrend [URL="plotalttrend.html"];
   plotdqdt [URL="plotdqdt.html"];
   plotrefline [URL="plotrefline.html"];
   plplotb [URL="plplotb.html"];
   pointcloudintercept [URL="pointcloudintercept.html"];
   pointcloudplot [URL="pointcloudplot.html"];
-  prepalttrend [URL="prepalttrend.html"];
   prepfits [URL="prepfits.html"];
   printtrend [URL="printtrend.html"];
-  seteventnan [URL="seteventnan.html"];
   setopts [URL="setopts.html"];
   specialfunctions [URL="specialfunctions.html"];
   stationlist [URL="stationlist.html"];
   stationname [URL="stationname.html"];
   taufunc [URL="taufunc.html"];
-  version [URL="version.html"];
+  trendplot [URL="trendplot.html"];
   wrapevents [URL="wrapevents.html"];
   wrapfits [URL="wrapfits.html"];
 }

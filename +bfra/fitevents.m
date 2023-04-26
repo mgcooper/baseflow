@@ -1,16 +1,16 @@
-function [K,Fits] = fitevents(Events,varargin)
+function [Fits,FitTable] = fitevents(Events,varargin)
 %FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events
 % 
 % Syntax
 % 
-%     [K,Fits] = fitevents(Events,varargin)
+%     [Fits,K] = fitevents(Events,varargin)
 % 
 % Description
 % 
-%     [K,Fits] = fitevents(Events) fits all recession events in Events (output
+%     [Fits,K] = fitevents(Events) fits all recession events in Events (output
 %     of bfra.getevents) using default algorithm options.
 % 
-%     [K,Fits] = fitevents(Events,opts) uses user-supplied algorithm options in
+%     [Fits,K] = fitevents(Events,opts) uses user-supplied algorithm options in
 %     struct opts. See bfra.setopts for automated option setting.
 % 
 % Required inputs
@@ -82,9 +82,9 @@ Fits.fitTags   =  nan(size(Q));        % 1:numFits
 nFits          =  0;
 
 if pickmethod == "none"
-   K = initFitTable(numEvents);
+   FitTable = initFitTable(numEvents);
 else
-   K = initFitTable(numEvents*4); % allocate up to 4 picks/event 
+   FitTable = initFitTable(numEvents*4); % allocate up to 4 picks/event 
 end
 
 savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
@@ -103,19 +103,22 @@ for thisEvent = 1:numEvents
    eventR      = R(eventIdx);
    eventDate   = mean(eventT); % keep track of the event date
 
-   if thisEvent == 1 && plotfits == true
-      figure('Position',[1 1 658  576]); ax = gca;
-   end
+   % if this is activated, need method to plot in getdqdt
+   % if thisEvent == 1 && plotfits == true
+   %    figure('Position',[1 1 658  576]); ax = gca;
+   % end
    
    % get the q, dq/dt estimates (H=Hat)
    
    [qH,dH,dtH,tH] = bfra.getdqdt(eventT,eventQ,eventR,derivmethod,   ...
       'pickmethod',pickmethod,'fitmethod',fitmethod,'etsparam',etsparam, ...
-      'vtsparam',vtsparam,'plotfits',plotfits,'ax',ax,'flag',debugflag);
+      'vtsparam',vtsparam);
    
+   % undocumented feature
    if saveplots == true
-      fname = ['dqdt_' datenum2yyyyMMMdd(eventT) '.png'];
-      pauseSaveFig('s',fname);
+      % yyyyMMMdd = sprintf('%d_%d_%d',year(eventT),month(eventT),day(eventT));
+      % fname = ['dqdt_' yyyyMMMdd '.png'];
+      % pauseSaveFig('s',fname);
    end
 
    % if pickFits is true, then qHat, dHat, and tHat will be cell arrays
@@ -132,20 +135,20 @@ for thisEvent = 1:numEvents
       if ok == false
          continue
       else
-         [Fit,ok] = bfra.fitab(q,dqdt,fitmethod,'fitopts',fitopts);
+         [iFit,ok] = bfra.fitab(q,dqdt,fitmethod,'fitopts',fitopts);
       end
 
-      [Fits,K,nFits] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod,...
-         fitorder,eventDate,thisEvent,thisFit,nFits,K,Fits,Fit,savevars,ok);
+      [Fits,FitTable,nFits] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod,...
+         fitorder,eventDate,thisEvent,thisFit,nFits,FitTable,Fits,iFit,savevars,ok);
    end   
       
 end
 
 % remove fits that weren't kept
-ikeep = ~isnan(K.a);
-vars = fieldnames(K);
+ikeep = ~isnan(FitTable.a);
+vars = fieldnames(FitTable);
 for n = 1:numel(vars)
-   K.(vars{n}) = K.(vars{n})(ikeep);
+   FitTable.(vars{n}) = FitTable.(vars{n})(ikeep);
 end
 
 %-------------------------------------------------------------------------------
@@ -174,7 +177,7 @@ end
 % GET FITS
 %-------------------------------------------------------------------------------
 function [Fits,K,fitcount] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod, ...
-   fitorder,eventdate,eventtag,fittag,fitcount,K,Fits,Fit,savevars,ok)
+   fitorder,eventdate,eventtag,fittag,fitcount,K,Fits,iFit,savevars,ok)
 
 % if fitting failed, set this event nan, otherwise save the fit
 if ok == true
@@ -182,7 +185,7 @@ if ok == true
    fitcount = fitcount+1;
    
    for n = 1:numel(savevars)
-      K.(savevars{n})(fitcount) = Fit.(savevars{n});
+      K.(savevars{n})(fitcount) = iFit.(savevars{n});
    end
    
    K.eventTag(fitcount)    = eventtag;
@@ -197,6 +200,7 @@ if ok == true
 
    % collect all data for the point-cloud
    fitIdx                  =  ismember(T,tq);
+   %fitIdx                  =  ismember(T,datenum(tq)); % TEST
    Fits.q(        fitIdx)  =  q;
    Fits.dqdt(     fitIdx)  =  dqdt;
    Fits.dt(       fitIdx)  =  dt;

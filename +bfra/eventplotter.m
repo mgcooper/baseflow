@@ -40,14 +40,14 @@ p.FunctionName = 'eventplotter';
 
 N = numel(Info.istart);
 
-addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
-addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
-addRequired(p, 'R',                    @(x) isnumeric(x)                      );
-addRequired(p, 'Info',                 @(x) isstruct(x)                       );
-addOptional(p, 'eventTags',   1:N,     @(x) isnumericvector(x)                );
-addParameter(p,'plotneg',     false,   @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'dqdt',   derivative(Q),@(x) isnumeric(x) & numel(x)==numel(T) );
+addRequired(p, 'T',                    @(x) bfra.validation.isdatelike(x));
+addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T));
+addRequired(p, 'R',                    @(x) isnumeric(x));
+addRequired(p, 'Info',                 @(x) isstruct(x));
+addOptional(p, 'eventTags',   1:N,     @(x) bfra.validation.isnumericvector(x));
+addParameter(p,'plotneg',     false,   @(x) bfra.validation.islogicalscalar(x));
+addParameter(p,'plotevents',  false,   @(x) bfra.validation.islogicalscalar(x));
+addParameter(p,'dqdt', bfra.deps.derivative(Q),@(x) isnumeric(x) & numel(x)==numel(T) );
 
 parse(p,T,Q,R,Info,varargin{:});
 
@@ -62,12 +62,18 @@ if plotevents == false; h = []; return; end
 if isempty(Info.istart); disp('no valid events'); h = []; return; end
 
 % otherwise, prep the data to plot
+import bfra.util.subtight
+
+% allow empty R i.e. input syntax eventplotter(T,Q,[],...)
+if isempty(R)
+   R = zeros(size(T));
+end
 
 sz = 20; % this controls the size of the scatter symbols
 
 % compute the second derivative and the increasing/decreasing values. do this
 % here so the indices are relative to the same T,Q vectors as the Info indices
-d2qdt = derivative(dqdt);
+d2qdt = bfra.deps.derivative(dqdt);
 Info.ipositive = find(dqdt>=0);
 Info.inegative = find(dqdt<0);
 
@@ -172,7 +178,7 @@ h.h3 = h3;
 % % 
 % % plot the 50th percentile as a reference line
 % % q50 = quantile(q,0.5);
-% % h1.refline = hline(h.ax(1),q50,':'); % add the 50th quantile line
+% % h1.refline = bfra.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line
 % 
 % 
 % % plot the events identified by bfra.findevents, just to be sure

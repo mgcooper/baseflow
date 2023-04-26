@@ -148,113 +148,109 @@ This function is called by:
 0060 addParameter(p,<span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,   @(x) ischar(x)                   );
 0061 addParameter(p,<span class="string">'plotfits'</span>,    false,   @(x) islogical(x) &amp; isscalar(x)  );
 0062 addParameter(p,<span class="string">'eventID'</span>,     <span class="string">'none'</span>,  @(x) ischar(x)                   );
-0063 addParameter(p,<span class="string">'ax'</span>,          <span class="string">'none'</span>,  @(x) isaxis(x) | ischar(x)       );
-0064 addParameter(p,<span class="string">'flag'</span>,        false,   @(x) islogical(x)                );
+0063 
+0064 parse(p,T,Q,R,derivmethod,varargin{:});
 0065 
-0066 parse(p,T,Q,R,derivmethod,varargin{:});
-0067 
-0068 vtsparam    = p.Results.vtsparam;
-0069 etsparam    = p.Results.etsparam;
-0070 ctsmethod   = p.Results.ctsmethod;
-0071 pickmethod  = p.Results.pickmethod;
-0072 fitmethod   = p.Results.fitmethod;
-0073 plotfits    = p.Results.plotfits;
-0074 eventID     = p.Results.eventID;
-0075 ax          = p.Results.ax;
-0076 flag        = p.Results.flag;
-0077 
-0078 <span class="comment">%-------------------------------------------------------------------------------</span>
-0079 
-0080 <span class="keyword">switch</span> derivmethod
-0081    
-0082    <span class="keyword">case</span> <span class="string">'VTS'</span>  <span class="comment">% variable time step</span>
+0066 vtsparam    = p.Results.vtsparam;
+0067 etsparam    = p.Results.etsparam;
+0068 ctsmethod   = p.Results.ctsmethod;
+0069 pickmethod  = p.Results.pickmethod;
+0070 fitmethod   = p.Results.fitmethod;
+0071 plotfits    = p.Results.plotfits;
+0072 eventID     = p.Results.eventID;
+0073 
+0074 <span class="comment">%-------------------------------------------------------------------------------</span>
+0075 
+0076 <span class="keyword">switch</span> derivmethod
+0077    
+0078    <span class="keyword">case</span> <span class="string">'VTS'</span>  <span class="comment">% variable time step</span>
+0079       
+0080       [q,dqdt,dt,tq,rq] = bfra.fitvts(T,Q,R,<span class="string">'vtsparam'</span>,vtsparam);
+0081       
+0082    <span class="keyword">case</span> <span class="string">'ETS'</span>  <span class="comment">% exponential timestep</span>
 0083       
-0084       [q,dqdt,dt,tq,rq] = bfra.fitvts(T,Q,R,<span class="string">'vtsparam'</span>,vtsparam);
+0084       [q,dqdt,dt,tq,rq] = bfra.fitets(T,Q,R,<span class="string">'etsparam'</span>,etsparam);
 0085       
-0086    <span class="keyword">case</span> <span class="string">'ETS'</span>  <span class="comment">% exponential timestep</span>
+0086    <span class="keyword">case</span> <span class="string">'CTS'</span>  <span class="comment">% constant time step</span>
 0087       
-0088       [q,dqdt,dt,tq,rq] = bfra.fitets(T,Q,R,<span class="string">'etsparam'</span>,etsparam);
+0088       [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
 0089       
-0090    <span class="keyword">case</span> <span class="string">'CTS'</span>  <span class="comment">% constant time step</span>
-0091       
-0092       [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
-0093       
-0094 <span class="keyword">end</span>
+0090 <span class="keyword">end</span>
+0091    
+0092    
+0093 <span class="comment">% this is the case where dQ/dt and q are returned without fitting a/b</span>
+0094 <span class="keyword">if</span> fitmethod == &quot;none&quot; || pickmethod == &quot;none&quot;
 0095    
-0096    
-0097 <span class="comment">% this is the case where dQ/dt and q are returned without fitting a/b</span>
-0098 <span class="keyword">if</span> fitmethod == &quot;none&quot; || pickmethod == &quot;none&quot;
-0099    
-0100    varargout{1} = nan; 
-0101    varargout{2} = nan;
-0102    <span class="keyword">return</span>
-0103 
-0104 <span class="keyword">else</span>
-0105 
-0106 <span class="comment">% if pickmethod = &quot;none&quot;, we don't need anything else so we could stop here, but</span>
-0107 <span class="comment">% fitSelector will repackage the event as a cell array which is consistent with</span>
-0108 <span class="comment">% the case where pickmethod ~= &quot;none&quot; which are the options to subdivide events</span>
-0109 <span class="comment">% into segments, for example early-time and late-time. It also returns Info</span>
-0110 <span class="comment">% which is needed to parse sub-event picks.</span>
-0111 
-0112    [hFits,Picks] = bfra.plotdqdt(q,dqdt, <span class="string">'fitmethod'</span>,fitmethod,<span class="string">'pickmethod'</span>,<span class="keyword">...</span>
-0113       pickmethod,<span class="string">'plotfits'</span>,plotfits,<span class="string">'eventID'</span>,eventID,<span class="string">'rain'</span>,rq);
-0114 
-0115    [q,dqdt,dt,tq,rq,Info] = <a href="#_sub1" class="code" title="subfunction [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)">packagefits</a>(Picks,q,dqdt,dt,tq,R);
-0116 
-0117    varargout{1}   = Info;
-0118    varargout{2}   = hFits;
-0119 
-0120 <span class="keyword">end</span>
-0121 
-0122 <span class="comment">% ------------------------------------------------------------------------------</span>
-0123 <span class="comment">% PACKAGEFITS</span>
-0124 <span class="comment">% ------------------------------------------------------------------------------</span>
-0125 <a name="_sub1" href="#_subfunctions" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a>
-0126 
-0127 <span class="comment">% this unpacks the Picks structure and repackages the T,Q,dQdt for each picked</span>
-0128 <span class="comment">% fit as individual cell arrays. I am not sure why I don't just do:</span>
-0129 <span class="comment">% Q = Picks.Q;</span>
-0130 <span class="comment">% dQdt = Picks.dQdt;</span>
-0131 <span class="comment">% and so on. But, Picks does not include T, and maybe I wanted to distinguish</span>
-0132 <span class="comment">% the og T,Q from the ets/vts fit t,q.</span>
-0133 <span class="comment">% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function</span>
-0134 <span class="comment">% abve, I confirmed that things work up to this point meaning I can still</span>
-0135 <span class="comment">% select events in plotdqdt and they get sent here, but I think the way i deal</span>
-0136 <span class="comment">% wtih retiming in ETS now throws off the istart/stop, so will need to figure</span>
-0137 <span class="comment">% out if it's being done correctly if I use manual or auto picking.</span>
-0138 
-0139 
-0140 <span class="comment">% if no events are found, return nan</span>
-0141 <span class="keyword">if</span> ~iscell(Picks.Q) &amp;&amp; isnan(Picks.Q)
-0142    T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; <span class="keyword">return</span>
-0143 <span class="keyword">end</span>
-0144 
-0145 
-0146 numPicks = numel(Picks.Q);
-0147 T     = cell(numPicks,1);
-0148 Q     = cell(numPicks,1);
-0149 R     = cell(numPicks,1);
-0150 dT    = cell(numPicks,1);
-0151 dQdT  = cell(numPicks,1);
-0152 
-0153 
-0154 <span class="keyword">for</span> m = 1:numPicks
-0155 
-0156    istart  = Picks.istart(m);
-0157    istop   = Picks.istop(m);
-0158 
-0159    <span class="comment">% previously these were put into Fits structure but I</span>
-0160    Q{m}     = q(istart:istop);
-0161    dQdT{m}  = dqdt(istart:istop);
-0162    dT{m}    = dt(istart:istop);
-0163    T{m}     = tq(istart:istop);
-0164    R        = rq(istart:istop);
-0165 
-0166    Info.istart(m)      = istart;
-0167    Info.istop(m)       = istop;
-0168    Info.runlengths(m)  = Picks.runlengths(m);
-0169 <span class="keyword">end</span>
-0170</pre></div>
+0096    varargout{1} = nan; 
+0097    varargout{2} = nan;
+0098    <span class="keyword">return</span>
+0099 
+0100 <span class="keyword">else</span>
+0101 
+0102 <span class="comment">% if pickmethod = &quot;none&quot;, we don't need anything else so we could stop here, but</span>
+0103 <span class="comment">% fitSelector will repackage the event as a cell array which is consistent with</span>
+0104 <span class="comment">% the case where pickmethod ~= &quot;none&quot; which are the options to subdivide events</span>
+0105 <span class="comment">% into segments, for example early-time and late-time. It also returns Info</span>
+0106 <span class="comment">% which is needed to parse sub-event picks.</span>
+0107 
+0108    [hFits,Picks] = bfra.plotdqdt(q,dqdt, <span class="string">'fitmethod'</span>,fitmethod,<span class="string">'pickmethod'</span>,<span class="keyword">...</span>
+0109       pickmethod,<span class="string">'plotfits'</span>,plotfits,<span class="string">'eventID'</span>,eventID,<span class="string">'rain'</span>,rq);
+0110 
+0111    [q,dqdt,dt,tq,rq,Info] = <a href="#_sub1" class="code" title="subfunction [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)">packagefits</a>(Picks,q,dqdt,dt,tq,R);
+0112 
+0113    varargout{1}   = Info;
+0114    varargout{2}   = hFits;
+0115 
+0116 <span class="keyword">end</span>
+0117 
+0118 <span class="comment">% ------------------------------------------------------------------------------</span>
+0119 <span class="comment">% PACKAGEFITS</span>
+0120 <span class="comment">% ------------------------------------------------------------------------------</span>
+0121 <a name="_sub1" href="#_subfunctions" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a>
+0122 
+0123 <span class="comment">% this unpacks the Picks structure and repackages the T,Q,dQdt for each picked</span>
+0124 <span class="comment">% fit as individual cell arrays. I am not sure why I don't just do:</span>
+0125 <span class="comment">% Q = Picks.Q;</span>
+0126 <span class="comment">% dQdt = Picks.dQdt;</span>
+0127 <span class="comment">% and so on. But, Picks does not include T, and maybe I wanted to distinguish</span>
+0128 <span class="comment">% the og T,Q from the ets/vts fit t,q.</span>
+0129 <span class="comment">% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function</span>
+0130 <span class="comment">% abve, I confirmed that things work up to this point meaning I can still</span>
+0131 <span class="comment">% select events in plotdqdt and they get sent here, but I think the way i deal</span>
+0132 <span class="comment">% wtih retiming in ETS now throws off the istart/stop, so will need to figure</span>
+0133 <span class="comment">% out if it's being done correctly if I use manual or auto picking.</span>
+0134 
+0135 
+0136 <span class="comment">% if no events are found, return nan</span>
+0137 <span class="keyword">if</span> ~iscell(Picks.Q) &amp;&amp; isnan(Picks.Q)
+0138    T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; <span class="keyword">return</span>
+0139 <span class="keyword">end</span>
+0140 
+0141 
+0142 numPicks = numel(Picks.Q);
+0143 T     = cell(numPicks,1);
+0144 Q     = cell(numPicks,1);
+0145 R     = cell(numPicks,1);
+0146 dT    = cell(numPicks,1);
+0147 dQdT  = cell(numPicks,1);
+0148 
+0149 
+0150 <span class="keyword">for</span> m = 1:numPicks
+0151 
+0152    istart  = Picks.istart(m);
+0153    istop   = Picks.istop(m);
+0154 
+0155    <span class="comment">% previously these were put into Fits structure but I</span>
+0156    Q{m}     = q(istart:istop);
+0157    dQdT{m}  = dqdt(istart:istop);
+0158    dT{m}    = dt(istart:istop);
+0159    T{m}     = tq(istart:istop);
+0160    R        = rq(istart:istop);
+0161 
+0162    Info.istart(m)      = istart;
+0163    Info.istop(m)       = istop;
+0164    Info.runlengths(m)  = Picks.runlengths(m);
+0165 <span class="keyword">end</span>
+0166</pre></div>
 </body>
 </html>

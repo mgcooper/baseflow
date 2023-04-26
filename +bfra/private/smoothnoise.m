@@ -36,13 +36,13 @@ if strcmp(varargin{1},'annual')
    for n = 1:numyears
       [y(n,:),win(n)] = smoothdata(x(n,:),dim,'sgolay');
    end
-   y = setnan(y,[],isnan(x));
+   y = bfra.util.setnan(y,[],isnan(x));
    if noneg; y(y<0) = 0; end % or nan?
    
    % send back the same size it came in
    y = reshape(y,[],1);
 else
    y = smoothdata(x,'sgolay');
-   y = setnan(y,[],isnan(x));
+   y = bfra.util.setnan(y,[],isnan(x));
    if noneg; y(y<0) = 0; end % or nan?
 end

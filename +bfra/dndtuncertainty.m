@@ -36,7 +36,7 @@ end
 
 % convert time in days to years
 if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
-[~,T] = padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), ...
+[~,T] = bfra.util.padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), ...
    datenum(year(T(end)),12,31),1);
 T = transpose(year(mean(reshape(T,365,numel(T)/365))));
 
@@ -45,12 +45,12 @@ if numel(T) ~= numel(Qb)
 end
 
 % define the sensitivity coefficient and dn/dt trend functions
-Flam        = @(tau,phi,b) tau./(phi.*(4-2.*b)); 
-Fdndt       = @(tau,phi,b,dqdt) tau./(phi.*(4-2.*b)).*dqdt;
+Flam  = @(tau,phi,b) tau./(phi.*(4-2.*b)); 
+Fdndt = @(tau,phi,b,dqdt) tau./(phi.*(4-2.*b)).*dqdt;
 
 % regress baseflow in units cm/day/year to get uncertainty on dq/dt 
 % using fitlm on the baseflow timeseries:
-% Qb          = GlobalFit.Qb./365.25;            % cm/yr -> cm/day
+% Qb = GlobalFit.Qb./365.25;            % cm/yr -> cm/day
 Qb          = Qb./365.25;            % cm/yr -> cm/day
 mdl         = fitlm(T,Qb); % plot(mdl)
 dbfdt       = mdl.Coefficients.Estimate(2);   % cm/day/year
@@ -60,9 +60,10 @@ CI_dbfdt    = CI_dbfdt(2,:);
 sig_dbfdt   = CI_dbfdt(2)-dbfdt;             % they're symetric so just take one
 
 % parameters
-A           = opts.drainagearea;     % basin area [m2]
-D           = opts.aquiferdepth;     % reference active layer thickness [m]
-L           = opts.streamlength;     % effective stream network length [m]
+A = opts.drainagearea;     % basin area [m2]
+D = opts.aquiferdepth;     % reference active layer thickness [m]
+L = opts.streamlength;     % effective stream network length [m]
+
 lateqtls    = opts.lateqtls;
 earlyqtls   = opts.earlyqtls;
 bhat        = GlobalFit.b;
@@ -70,64 +71,64 @@ PhiFit      = bfra.phifitensemble(K,Fits,A,D,L,bhat,lateqtls,earlyqtls,false);
 % the sample populations of tau, phi, and Nstar
 
 [~,~,~,~,G] = bfra.eventtau(K,Fits,Fits,'usefits',true,'aggfunc','max');
-tau         = G.tau; % [K.tauH]';
-b           = [K.b]';
-Np1         = 1./(4-2.*b);
-phi1        = PhiFit.phidist(:,1);
-phi2        = PhiFit.phidist(:,2);
-phi         = (phi1+phi2)./2;
+b     = [K.b];
+tau   = G.tau; % [K.tauH]';
+Np1   = 1./(4-2.*b);
+phi1  = PhiFit.phidist(:,1);
+phi2  = PhiFit.phidist(:,2);
+phi   = (phi1+phi2)./2;
 
 % correlation between b and phi, using the two phi dist's b=1 and b=3/2:
-rho_phi12   = nancorr(phi1,phi2);
-rho_phib1   = nancorr(Np1,phi1);
-rho_phib2   = nancorr(Np1,phi2);
-cov_phib1   = cov(Np1,phi1,'omitrows');
-cov_phib2   = cov(Np1,phi2,'omitrows');
+rho_phi12 = bfra.util.nancorr(phi1,phi2);
+rho_phib1 = bfra.util.nancorr(Np1,phi1);
+rho_phib2 = bfra.util.nancorr(Np1,phi2);
+cov_phib1 = cov(Np1,phi1,'omitrows');
+cov_phib2 = cov(Np1,phi2,'omitrows');
 
 % define the uncertainties (standard errors)
 % if we averaged phi1 and phi2, then the combined uncertainty would be:
-sig_phi1    = PhiFit.pm(1);
-sig_phi2    = PhiFit.pm(2);
-sig_phi12   = rho_phi12*sig_phi1*sig_phi2;
-sig_phi     = sqrt((0.5*sig_phi1)^2+(0.5*sig_phi2)^2+2*0.5*0.5*sig_phi12);
-sig_tau     = mean([GlobalFit.tau_H-GlobalFit.tau,GlobalFit.tau-GlobalFit.tau_L]);
-sig_b       = mean([GlobalFit.b_H-GlobalFit.b,GlobalFit.b-GlobalFit.b_L]);
-sig_Np1     = 2*sig_b;           % uncertainty on 1/(4-2*b) OR 1/(1-2*b) is 2*sig(b)
+sig_phi1 = PhiFit.pm(1);
+sig_phi2 = PhiFit.pm(2);
+sig_phi  = rho_phi12*sig_phi1*sig_phi2;
+sig_phi  = sqrt((0.5*sig_phi1)^2+(0.5*sig_phi2)^2+2*0.5*0.5*sig_phi);
+sig_tau  = mean([GlobalFit.tau_H-GlobalFit.tau,GlobalFit.tau-GlobalFit.tau_L]);
+sig_b    = mean([GlobalFit.b_H-GlobalFit.b,GlobalFit.b-GlobalFit.b_L]);
+sig_Np1  = 2*sig_b;     % uncertainty on 1/(4-2*b) OR 1/(1-2*b) is 2*sig(b)
 % the 0.5 on sig_phi1/2 is from the averaging procedure which divides by 2
 
 if alpha == 0.32
-   sig_phi     = sig_phi/2;
-   sig_tau     = sig_tau/2;
-   sig_b       = sig_b/2;
-   sig_Np1     = sig_Np1/2;         % uncertainty on 1/(N+1) = 2*sig(b)
+   sig_phi = sig_phi/2;
+   sig_tau = sig_tau/2;
+   sig_b   = sig_b/2;
+   sig_Np1 = sig_Np1/2;    % uncertainty on 1/(N+1) = 2*sig(b)
 end
 
 
 % mean values of parameters
-tauhat      = GlobalFit.tau;                       % days
-phihat      = PhiFit.mu(4);                        % -
-bhat        = GlobalFit.b;                         % -
-Nhat        = 1/(4-2*bhat);                        % -
+tauhat = GlobalFit.tau;                      % days
+phihat = PhiFit.mu(4);                       % -
+bhat = GlobalFit.b;                          % -
+Nhat = 1/(4-2*bhat);                         % -
 
 % compute the sensitivity coefficient and dn/dt
-lambda      = Flam(tauhat,phihat,bhat);
-dndt        = Fdndt(tauhat,phihat,bhat,dbfdt);      % cm/yr
+lambda = Flam(tauhat,phihat,bhat);
+dndt = Fdndt(tauhat,phihat,bhat,dbfdt);      % cm/yr
 
 % compute the jacobian 
-dqdtv       = dbfdt.*ones(size(tau));
-J           = [dndt./tauhat, -dndt./phihat, dndt./Nhat, dndt./dbfdt];
+dqdtv = dbfdt.*ones(size(tau));
+J = [dndt./tauhat, -dndt./phihat, dndt./Nhat, dndt./dbfdt];
 
-% constrtuct the covariance matrix and compute the combined uncertainty
-u           = [sig_tau, sig_phi, sig_Np1, sig_dbfdt];
-V           = corr([tau,phi,Np1,dqdtv]).*u.*u';
-sig_dndt    = sqrt(J*V*J');
+% construct the covariance matrix and compute the combined uncertainty
+u = [sig_tau, sig_phi, sig_Np1, sig_dbfdt];
+V = corr([tau,phi,Np1,dqdtv]).*u.*u';
+sig_dndt = sqrt(J*V*J');
 % w/o correlated errors: sqrt(sum((J.*u).^2))
 
 % compute the uncertainty on lambda (repeat above steps)
-J           = [lambda./tauhat, -lambda./phihat, lambda./Nhat];
-u           = [sig_tau, sig_phi, sig_Np1];
-V           = corr([tau,phi,Np1]).*u.*u';
-sig_lamda   = sqrt(J*V*J');
+J = [lambda./tauhat, -lambda./phihat, lambda./Nhat];
+u = [sig_tau, sig_phi, sig_Np1];
+V = corr([tau,phi,Np1]).*u.*u';
+sig_lamda = sqrt(J*V*J');
 % w/o correlated errors: sqrt(sum((J.*u).^2))
 
 %-------------------------------------------------------------------------------

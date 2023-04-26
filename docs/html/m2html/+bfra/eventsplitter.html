@@ -170,21 +170,21 @@ This function is called by:
 0087 <span class="comment">% Part 1: find data to be excluded (run the filters)</span>
 0088 
 0089 <span class="comment">% filters: +dq/dt, peaks +1 day, convex +1 day, and mins -1 day</span>
-0090 ipos    = find([0;diff(q)]&gt;0);
-0091 imax    = find(islocalmax(q));
-0092 imin    = find(islocalmin(q));
-0093 icon    = find(islocalmax([0;diff(q)])&amp;islocalmax([0;diff(qsmooth)]))+1;
-0094 <span class="comment">% Dralle: keep if dq/dt&lt;0 AND d2q/dt2&gt;0 (concave up) in BOTH the raw and</span>
-0095 <span class="comment">% smoothed data, i.e. exclude if both raw AND smoothed data are convex</span>
-0096 dqdt1   = [0;diff(q)];
-0097 dqdt2   = [0;diff(qsmooth)];
-0098 d2qdt1  = [0;diff(dqdt1)];
-0099 d2qdt2  = [0;diff(dqdt2)];
-0100 icon2   = find(d2qdt1&lt;=0 &amp; d2qdt2&lt;=0)-1; icon2 = icon2(icon2&gt;0);
+0090 ipos = find([0;diff(q)]&gt;0);
+0091 imax = find(islocalmax(q));
+0092 imin = find(islocalmin(q));
+0093 icon = find(islocalmax([0;diff(q)])&amp;islocalmax([0;diff(qsmooth)]))+1;
+0094 
+0095 <span class="comment">% Dralle: keep if dq/dt&lt;0 AND d2q/dt2&gt;0 (concave up) in BOTH the raw and</span>
+0096 <span class="comment">% smoothed data, i.e. exclude if both raw AND smoothed data are convex</span>
+0097 dqdt1 = [0;diff(q)];
+0098 dqdt2 = [0;diff(qsmooth)];
+0099 icon2 = find([0;diff(dqdt1)]&lt;=0 &amp; [0;diff(dqdt2)]&lt;=0)-1; 
+0100 icon2 = icon2(icon2&gt;0);
 0101 
 0102 <span class="comment">% icon always occurs on peaks and one day prior, remove them from icon,</span>
 0103 <span class="comment">% the peak will remain in imax, and one day prior in ipos</span>
-0104 icon    = icon(~ismember((icon),imax));
+0104 icon = icon(~ismember((icon),imax));
 0105 
 0106 <span class="comment">% if the first (last) point is a local max (min), add them here</span>
 0107 <span class="keyword">if</span> q(2)&lt;q(1);       imax = [1; imax];           <span class="keyword">end</span>
@@ -195,9 +195,9 @@ This function is called by:
 0112 
 0113 <span class="comment">% remove the convex points if requested</span>
 0114 <span class="keyword">if</span> rmconvex == true
-0115    ibad  = [ibad;icon];
+0115    ibad = [ibad;icon];
 0116    <span class="keyword">if</span> rmrain == false
-0117       ibad  = [ibad;icon;icon2]; <span class="comment">% substitute for lack of rain data</span>
+0117       ibad = [ibad;icon2]; <span class="comment">% substitute for lack of rain data</span>
 0118    <span class="keyword">end</span>
 0119 <span class="keyword">end</span>
 0120 
@@ -212,15 +212,15 @@ This function is called by:
 0129 
 0130 <span class="comment">% exclude sequences of two or more of (dq/dt = 0) (see setconstantnan)</span>
 0131 <span class="keyword">if</span> rmnochange == true
-0132    inoc  = [0;diff([0;diff(q)])]; inoc(inoc~=0) = nan;
-0133    inoc  = find(isminlength(inoc,rmax));
-0134    ibad  = [ibad;inoc];
+0132    inoc = [0;diff([0;diff(q)])]; inoc(inoc~=0) = nan;
+0133    inoc = find(bfra.util.isminlength(inoc,rmax));
+0134    ibad = [ibad;inoc];
 0135 <span class="keyword">end</span>
 0136 
 0137 <span class="comment">% take the unique indices and exclude 0 and &gt;numel(q)</span>
-0138 ibad                 = unique(ibad);
-0139 ibad(ibad&lt;=0)        = [];
-0140 ibad(ibad&gt;numel(q))  = [];
+0138 ibad = unique(ibad);
+0139 ibad(ibad&lt;=0) = [];
+0140 ibad(ibad&gt;numel(q)) = [];
 0141 
 0142 <span class="comment">% Part 3: extract each valid recession event</span>
 0143 
@@ -229,27 +229,27 @@ This function is called by:
 0146 tfk         = ones(size(q));            <span class="comment">% initialize keeper run lengths</span>
 0147 tfc(ibad)   = false;                    <span class="comment">% set unuseable values false</span>
 0148 tfk(ibad)   = nan;                      <span class="comment">% set unuseable values nan</span>
-0149 [tfk,is,ie] = isminlength(tfk,nmin);    <span class="comment">% find events &gt;= min length</span>
+0149 [tfk,is,ie] = bfra.util.isminlength(tfk,nmin);    <span class="comment">% find events &gt;= min length</span>
 0150 rl          = ie-is+1;                  <span class="comment">% event (run) lengths</span>
 0151 
 0152 <span class="comment">% pull out the events</span>
-0153 Nevents     = numel(is);
-0154 T           = cell(Nevents,1);
-0155 Q           = cell(Nevents,1);
-0156 R           = cell(Nevents,1);
+0153 N = numel(is);
+0154 T = cell(N,1);
+0155 Q = cell(N,1);
+0156 R = cell(N,1);
 0157 
 0158 <span class="comment">% apply min length filter and keep remaining events</span>
-0159 <span class="keyword">for</span> n = 1:Nevents   
+0159 <span class="keyword">for</span> n = 1:N   
 0160 
 0161   <span class="comment">% if event length &lt; min length, ignore it</span>
 0162   <span class="keyword">if</span> rl(n)&lt;nmin
-0163       Nevents = Nevents-1; 
-0164       <span class="keyword">continue</span>; 
+0163       N = N-1; 
+0164       <span class="keyword">continue</span>
 0165   <span class="keyword">end</span> 
-0166   qi  = q(is(n):ie(n)); 
-0167   <span class="keyword">if</span> islineconvex(qi) || islinepositive(qi)
-0168       Nevents=Nevents-1;
-0169       <span class="keyword">continue</span>; 
+0166   qi = q(is(n):ie(n)); 
+0167   <span class="keyword">if</span> bfra.util.islineconvex(qi) || bfra.util.islinepositive(qi)
+0168       N=N-1;
+0169       <span class="keyword">continue</span>
 0170   <span class="keyword">end</span>
 0171 
 0172   T{n} = t(is(n):ie(n));
@@ -259,7 +259,7 @@ This function is called by:
 0176 <span class="keyword">end</span>
 0177 
 0178 <span class="comment">% return events that passed the nmin filter</span>
-0179 <span class="keyword">if</span> Nevents &gt; 0
+0179 <span class="keyword">if</span> N &gt; 0
 0180    Info.imaxima    = imax;
 0181    Info.iminima    = imin;
 0182    Info.iconvex    = icon;
@@ -268,7 +268,7 @@ This function is called by:
 0185    Info.istart     = is;
 0186    Info.istop      = ie;
 0187 <span class="keyword">else</span>
-0188    [T,Q,R,Info]    = bfra.seteventnan;
+0188    [T,Q,R,Info] = bfra.util.setEventEmpty;
 0189 <span class="keyword">end</span>
 0190 
 0191 <span class="comment">% debug plot:</span>

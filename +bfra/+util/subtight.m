@@ -30,7 +30,7 @@ atts     = {'nonempty'};
 valg     = @(x)validateattributes(x,classes,atts,'subtight','gap');
 valw     = @(x)validateattributes(x,classes,atts,'subtight','gap');
 valh     = @(x)validateattributes(x,classes,atts,'subtight','gap');
-parser   = magicParser;
+parser   = bfra.deps.magicParser;
 parser.FunctionName = 'subplottight';
 parser.addRequired('m',@(x)isnumeric(x));
 parser.addRequired('n',@(x)isnumeric(x));

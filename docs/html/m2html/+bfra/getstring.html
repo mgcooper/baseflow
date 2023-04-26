@@ -149,56 +149,66 @@ This function is called by:
 0068       str = [ <span class="string">'$-\mathrm{d}^2Q/\mathrm{d}t^2 \quad[\mathrm{m}^3\;'</span> <span class="keyword">...</span>
 0069          <span class="string">'\mathrm{d}^{-1}\;\mathrm{d}^{-2}]$'</span>];
 0070 
-0071    <span class="keyword">case</span> {<span class="string">'dndt'</span>,<span class="string">'dn/dt'</span>}
+0071    <span class="keyword">case</span> <span class="string">'R'</span>
 0072       
-0073       str = [ <span class="string">'$\mathrm{d}\eta/\mathrm{d}t \quad[\mathrm{cm}\;'</span> <span class="keyword">...</span>
-0074          <span class="string">'\mathrm{a}^{-1}]$'</span>];
-0075       
-0076    <span class="keyword">case</span> <span class="string">'aQb'</span>
+0073       str = <span class="string">'Rainfall $\quad [\mathrm{mm} \;\mathrm{d}^{-1}]$'</span>;
+0074       
+0075       <span class="comment">% this might be simpler need to compare</span>
+0076       <span class="comment">% str = 'Rainfall [mm d$^{-1}$]';</span>
 0077       
-0078       str = [<span class="string">'$-\mathrm{d}Q/\mathrm{d}t$ = aQ$^b'</span>                    <span class="keyword">...</span>
-0079          <span class="string">'\quad[\mathrm{m}^3\;\mathrm{d}^{-1}\;\mathrm{d}^{-1}]$'</span>];
-0080       
-0081    <span class="keyword">case</span> {<span class="string">'Q(t)'</span>,<span class="string">'q(t)'</span>}
-0082       str = [<span class="string">'$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}'</span>                <span class="keyword">...</span>
-0083          <span class="string">'\quad[\mathrm{m}^3\;\mathrm{d}^{-1}]$'</span>];
+0078    <span class="keyword">case</span> {<span class="string">'dndt'</span>,<span class="string">'dn/dt'</span>}
+0079       
+0080       str = [ <span class="string">'$\mathrm{d}\eta/\mathrm{d}t \quad[\mathrm{cm}\;'</span> <span class="keyword">...</span>
+0081          <span class="string">'\mathrm{a}^{-1}]$'</span>];
+0082       
+0083    <span class="keyword">case</span> <span class="string">'aQb'</span>
 0084       
-0085    <span class="keyword">case</span> {<span class="string">'tau'</span>,<span class="string">'Tau'</span>}
-0086       str = <span class="string">'$\tau \quad$ [days]'</span>;
+0085       str = [<span class="string">'$-\mathrm{d}Q/\mathrm{d}t$ = aQ$^b'</span>                    <span class="keyword">...</span>
+0086          <span class="string">'\quad[\mathrm{m}^3\;\mathrm{d}^{-1}\;\mathrm{d}^{-1}]$'</span>];
 0087       
-0088 <span class="keyword">end</span>
-0089 
-0090 
-0091 <a name="_sub2" href="#_subfunctions" class="code">function str = getStringWithoutUnits(requestedstring)</a>
-0092 
-0093 <span class="keyword">switch</span> requestedstring
-0094    
-0095    <span class="keyword">case</span> <span class="string">'Q'</span>
-0096       str = <span class="string">'$Q$'</span>;
-0097       
-0098    <span class="keyword">case</span> {<span class="string">'dQdt'</span>,<span class="string">'dqdt'</span>,<span class="string">'dq/dt'</span>,<span class="string">'dQ/dt'</span>}
-0099       
-0100       str = <span class="string">'$-\mathrm{d}Q/\mathrm{d}t$'</span>;
-0101       
-0102    <span class="keyword">case</span> {<span class="string">'d2Qdt'</span>,<span class="string">'d2Qdt2'</span>,<span class="string">'dq2/dt'</span>,<span class="string">'dq2/dt2'</span>}
-0103       
-0104       str = <span class="string">'$-\mathrm{d}^2Q/\mathrm{d}t^2$'</span>;
-0105 
-0106    <span class="keyword">case</span> {<span class="string">'dndt'</span>,<span class="string">'dn/dt'</span>}
-0107       
-0108       str = <span class="string">'$\mathrm{d}\eta/\mathrm{d}t$'</span>;
-0109       
-0110    <span class="keyword">case</span> <span class="string">'aQb'</span>
-0111 
-0112       str = <span class="string">'$-\mathrm{d}Q/\mathrm{d}t = aQ^b$'</span>;
-0113 
-0114    <span class="keyword">case</span> {<span class="string">'Q(t)'</span>,<span class="string">'q(t)'</span>}
-0115 
-0116       str = <span class="string">'$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}$'</span>;
-0117       <span class="comment">%str = '$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';</span>
-0118       
-0119    <span class="keyword">case</span> {<span class="string">'tau'</span>,<span class="string">'Tau'</span>}
-0120       str = <span class="string">'$\tau$'</span>;
-0121 <span class="keyword">end</span></pre></div>
+0088    <span class="keyword">case</span> {<span class="string">'Q(t)'</span>,<span class="string">'q(t)'</span>}
+0089       str = [<span class="string">'$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}'</span>                <span class="keyword">...</span>
+0090          <span class="string">'\quad[\mathrm{m}^3\;\mathrm{d}^{-1}]$'</span>];
+0091       
+0092    <span class="keyword">case</span> {<span class="string">'tau'</span>,<span class="string">'Tau'</span>}
+0093       str = <span class="string">'$\tau \quad$ [days]'</span>;
+0094       
+0095 <span class="keyword">end</span>
+0096 
+0097 
+0098 <a name="_sub2" href="#_subfunctions" class="code">function str = getStringWithoutUnits(requestedstring)</a>
+0099 
+0100 <span class="keyword">switch</span> requestedstring
+0101    
+0102    <span class="keyword">case</span> <span class="string">'Q'</span>
+0103       str = <span class="string">'$Q$'</span>;
+0104       
+0105    <span class="keyword">case</span> {<span class="string">'dQdt'</span>,<span class="string">'dqdt'</span>,<span class="string">'dq/dt'</span>,<span class="string">'dQ/dt'</span>}
+0106       
+0107       str = <span class="string">'$-\mathrm{d}Q/\mathrm{d}t$'</span>;
+0108       
+0109    <span class="keyword">case</span> {<span class="string">'d2Qdt'</span>,<span class="string">'d2Qdt2'</span>,<span class="string">'dq2/dt'</span>,<span class="string">'dq2/dt2'</span>}
+0110       
+0111       str = <span class="string">'$-\mathrm{d}^2Q/\mathrm{d}t^2$'</span>;
+0112 
+0113    <span class="keyword">case</span> {<span class="string">'dndt'</span>,<span class="string">'dn/dt'</span>}
+0114       
+0115       str = <span class="string">'$\mathrm{d}\eta/\mathrm{d}t$'</span>;
+0116       
+0117    <span class="keyword">case</span> <span class="string">'aQb'</span>
+0118 
+0119       str = <span class="string">'$-\mathrm{d}Q/\mathrm{d}t = aQ^b$'</span>;
+0120 
+0121    <span class="keyword">case</span> {<span class="string">'Q(t)'</span>,<span class="string">'q(t)'</span>}
+0122 
+0123       str = <span class="string">'$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}$'</span>;
+0124       <span class="comment">%str = '$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';</span>
+0125       
+0126    <span class="keyword">case</span> {<span class="string">'tau'</span>,<span class="string">'Tau'</span>}
+0127       str = <span class="string">'$\tau$'</span>;
+0128       
+0129    <span class="keyword">case</span> {<span class="string">'R'</span>,<span class="string">'Rainfall'</span>}
+0130       str = <span class="string">'Rainfall'</span>;
+0131 <span class="keyword">end</span></pre></div>
 </body>
 </html>

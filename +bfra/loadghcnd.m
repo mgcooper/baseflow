@@ -127,10 +127,10 @@ if gapfill == true
 end
 
 % rain comes in as mm/day
-%    GHCN.PRCP   = GHCN.PRCP./10.*ddperyy;
+% GHCN.PRCP = GHCN.PRCP./10.*ddperyy;
 
-if notnan(units)
-%       aream2   =  Meta.darea.*1e6;
+if ~isnan(units)
+   % aream2 = Meta.darea.*1e6;
    vars  = {'PRCP','SNOW','SNWD'};
    for n = 1:numel(vars)
 

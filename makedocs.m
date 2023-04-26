@@ -4,8 +4,8 @@ function makedocs(varargin)
 % Note: the repo is configured to publish from docs/ and the default action
 % publishes index.html using jekyll. For custom builds, use a .nojekyll file
 
-% two options: publish example docs or function docs
-opts = optionParser({'examples','functions'},varargin(:));
+% three options: publish example docs, function docs, or build docsearch db
+opts = bfra.util.optionParser({'examples','functions','docsearch'},varargin(:));
 
 thispath = fileparts(mfilename('fullpath'));
 
@@ -27,6 +27,12 @@ mpubopts = struct( ...
    'useNewFigure',false ...
    );
 
+%% build a doc search database
+ 
+if opts.docsearch == true
+   builddocsearchdb(htmlpath)
+end
+
 %% publish the example documentation using publish
 
 if opts.examples == true
@@ -34,8 +40,10 @@ if opts.examples == true
    % publish the standard docs using matlab's publish
    publish(fullfile(docspath,'bfra_welcome.m'),mpubopts);
    publish(fullfile(docspath,'bfra_gettingStarted.m'),mpubopts);
-   % publish(fullfile(docspath,'bfra_demo.m'),mpubopts);
+   % publish(fullfile(docspath,'bfra_example_1.m'),mpubopts);
    publish(fullfile(docspath,'bfra_contents.m'),mpubopts);
+   publish(fullfile(docspath,'bfra_theory_contents.m'),mpubopts);
+   publish(fullfile(docspath,'bfra_examples_contents.m'),mpubopts);
 
    % for github actions the landing page must be saved as index.html
    copyfile(fullfile(htmlpath,'bfra_gettingStarted.html'),fullfile(docspath,'index.html'));
@@ -77,9 +85,6 @@ if opts.functions == true
       'ignored',ignored, ...              % dirs to ignore
       'verbose','on' ...
       );
-
-   % build a doc search database
-   builddocsearchdb(htmlpath)
 end
 
 

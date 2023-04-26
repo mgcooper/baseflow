@@ -1,4 +1,4 @@
-function Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
+function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
 %AQUIFERPROPS estimate aquifer properties
 % 
 % Syntax
@@ -36,6 +36,10 @@ function Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and
+% possibly phi, try to combine with fitphi for two paths - either D is known or
+% phi is known
+
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
@@ -51,24 +55,25 @@ addRequired(p, 'alate',                      @(x)isnumeric(x));
 addRequired(p, 'blate',                      @(x)isnumeric(x));
 addRequired(p, 'phi',                        @(x)isnumeric(x));
 addRequired(p, 'A',                          @(x)isnumeric(x));
-addRequired(p, 'D',                          @(x)isnumeric(x));
 addRequired(p, 'L',                          @(x)isnumeric(x));
 addRequired(p, 'soln',                       @(x)ischar(x));
 addParameter(p,'earlyqtls',   [0.95 0.95],   @(x)isnumeric(x));
 addParameter(p,'lateqtls',    [0.5 0.5],     @(x)isnumeric(x));
 addParameter(p,'mask',        true(size(q)), @(x)islogical(x));
+addParameter(p,'D',           nan,           @(x)isnumeric(x));
 addParameter(p,'Dd',          nan,           @(x)isnumeric(x));
 addParameter(p,'Q0',          nan,           @(x)isnumeric(x));
 addParameter(p,'plotfit',     false,         @(x)islogical(x));
 
-parse(p,q,dqdt,alate,blate,phi,A,D,L,soln,varargin{:});
+parse(p,q,dqdt,alate,blate,phi,A,L,soln,varargin{:});
 
-earlyqtls   = p.Results.earlyqtls;
-lateqtls    = p.Results.lateqtls;
-mask        = p.Results.mask;
-Dd          = p.Results.Dd;
-Q0          = p.Results.Q0;
-plotfit     = p.Results.plotfit;
+earlyqtls   = p.Results.earlyqtls;  % x-y quantiles to place early-time hinge point
+lateqtls    = p.Results.lateqtls;   % x-y quantiles to place late-time hinge point
+mask        = p.Results.mask;       % logical vector true for late-time discharge
+Dd          = p.Results.Dd;         % drainage density [km-1]
+D           = p.Results.D;          % initial saturated aquifer thickness [m]
+Q0          = p.Results.Q0;         % critical baseflow [m3 s-1]
+plotfit     = p.Results.plotfit;    % logical scalar indicating to make figure
 
 %-------------------------------------------------------------------------------
 
@@ -233,15 +238,16 @@ D = sqrt(Q0/(3.448*k*L^2/A)); % sqrt(Q0/(3.448*k*Dd*L)) % if using Dd
 Dcheck = sqrt(Q0check/(3.448*k*L^2/A));
                                     
 % package the output
-Props.k     = k;
-Props.Q0    = Q0;
-Props.D     = D;
+Props.k     = k*100/86400; % m/d -> cm/s
+Props.D     = D;           % m
+Props.Q0    = Q0/86400;    % m3/d -> m3/s
 Props.a1    = aearly;
 Props.b1    = bearly;
 Props.a2    = alate;
 Props.b2    = blate;
-Props.D2    = Dcheck;
+% Props.D2    = Dcheck;    % undocumented
 Props.input = p.Results;
+
 
 %-------------------------------------------------------------------------------
 

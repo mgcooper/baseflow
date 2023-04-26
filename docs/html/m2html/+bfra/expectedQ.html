@@ -95,15 +95,15 @@ This function is called by:
 0034 
 0035 parse(p,a,b,tau,q,dqdt,tau0,varargin{:});
 0036 
-0037 qtls     = p.Results.qtls;
-0038 flow     = p.Results.flow;
-0039 plotfit  = p.Results.plotfit;
-0040 mask     = p.Results.mask;
+0037 qtls = p.Results.qtls;
+0038 flow = p.Results.flow;
+0039 mask = p.Results.mask;
+0040 plotfit = p.Results.plotfit;
 0041 
 0042 <span class="comment">%------------------------------------------------------------------------------</span>
 0043 
-0044 Qexp  = (a*tau)^(1/(1-b));
-0045 Q0    = Qexp*(3-b)/(2-b);
+0044 Qexp = (a*tau)^(1/(1-b));
+0045 Q0 = Qexp*(3-b)/(2-b);
 0046 
 0047 <span class="keyword">if</span> strcmp(plotfit,<span class="string">'plotfit'</span>)
 0048    plotfit = true;
@@ -112,9 +112,9 @@ This function is called by:
 0051 <span class="keyword">end</span>
 0052 
 0053 <span class="keyword">if</span> ~isempty(qtls)
-0054    u     = <span class="string">'m$^3$ d$^{-1}$'</span>;
-0055    fdc   = fdcurve(flow(flow&gt;0),<span class="string">'refpoints'</span>,[Q0 Qexp],<span class="string">'units'</span>,u,<span class="string">'plotcurve'</span>,plotfit);
-0056    pQ0   = fdc.fref(1);
+0054    u = <span class="string">'m$^3$ d$^{-1}$'</span>;
+0055    fdc = bfra.fdcurve(flow(flow&gt;0),<span class="string">'refpoints'</span>,[Q0 Qexp],<span class="string">'units'</span>,u,<span class="string">'plotcurve'</span>,plotfit);
+0056    pQ0 = fdc.fref(1);
 0057    pQexp = fdc.fref(2);
 0058 <span class="keyword">else</span>
 0059    pQexp = nan;

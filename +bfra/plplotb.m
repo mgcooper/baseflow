@@ -26,21 +26,21 @@ function h = plplotb(x,xmin,alpha,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p               = inputParser;
-p.FunctionName  = 'bfra.plplotb';
+% --------------- parse inputs
+p = inputParser;
+p.FunctionName = 'bfra.plplotb';
 p.CaseSensitive = false;
 p.KeepUnmatched = true;
 
-addRequired(   p, 'x',                          @(x)isnumeric(x)     );
-addRequired(   p, 'xmin',                       @(x)isnumeric(x)     );
-addRequired(   p, 'alpha',                      @(x)isnumeric(x)     );
-addParameter(  p, 'alphaci',        nan,        @(x)isnumeric(x)     );
-addParameter(  p, 'xminci',         nan,        @(x)isnumeric(x)     );
-addParameter(  p, 'varsym',         '\tau',     @(x)ischar(x)        );
-addParameter(  p, 'trimline',       false,      @(x)islogical(x)     );
-addParameter(  p, 'labelplot',      true,       @(x)islogical(x)     );
-addParameter(  p, 'ax',             gca,        @(x)isaxis(x)        );
+addRequired(   p, 'x',                          @(x)isnumeric(x));
+addRequired(   p, 'xmin',                       @(x)isnumeric(x));
+addRequired(   p, 'alpha',                      @(x)isnumeric(x));
+addParameter(  p, 'alphaci',        nan,        @(x)isnumeric(x));
+addParameter(  p, 'xminci',         nan,        @(x)isnumeric(x));
+addParameter(  p, 'varsym',         '\tau',     @(x)ischar(x));
+addParameter(  p, 'trimline',       false,      @(x)islogical(x));
+addParameter(  p, 'labelplot',      true,       @(x)islogical(x));
+addParameter(  p, 'ax',             gca,        @(x)bfra.validation.isaxis(x));
 
 parse(p,x,xmin,alpha,varargin{:});
 
@@ -50,53 +50,54 @@ varsym      = p.Results.varsym;
 trimline    = p.Results.trimline;
 labelplot   = p.Results.labelplot;
 ax          = p.Results.ax;
-%-------------------------------------------------------------------------------
-   
-% get the complementary cumulative distribution function
-numData     =  numel(x);
-xccp        =  sort(x);
-ccp         =  (numData:-1:1)'./numData;
-refy        =  ccp(find(xccp>=xmin,1,'first'));
 
-% option to extend the line forward a bit (purely aesthetic)
+% --------------- function code
+   
+% Compute the complementary cumulative distribution function
+N = numel(x);
+xccp = sort(x);
+yccp = (N:-1:1)'./N;
+refy = yccp(find(xccp>=xmin,1,'first'));
+
+% Option to extend the line forward a bit (purely aesthetic)
 if trimline == true
-   xccfit   =  sort(x(x>=xmin));
-   xccfit   =  [xccfit; xccfit(end)*1.2];
+   xccfit = sort(x(x>=xmin));
+   xccfit = [xccfit; xccfit(end)*1.2];
 else
-   xccfit   =  sort(x); % this extends the line back toward the origin
-   xccfit   =  [xccfit; xccfit(end)*1.2]; % this extends the line forward a bit
+   xccfit = sort(x); % this extends the line back toward the origin
+   xccfit = [xccfit; xccfit(end)*1.2]; % this extends the line forward a bit
 end
 
-% compute the ccdf
-ccfit       =  (xccfit./xmin).^(1-alpha);
+% Compute the theoretical ccdf
+yccfit = (xccfit./xmin).^(1-alpha);
 
 % scale the fitted x>xmin ccdf to pass through the refPoint
-ccfit       =  ccfit.*refy; 
-xccfit      =  xccfit(ccfit<=1);
-ccfit       =  ccfit(ccfit<=1);
+yccfit = yccfit.*refy; 
+xccfit = xccfit(yccfit<=1);
+yccfit = yccfit(yccfit<=1);
 
 % plot it
-h.data = loglog(ax,xccp,ccp,'o','LineWidth',0.5,'MarkerSize',10, ...
+h.data = loglog(ax,xccp,yccp,'o','LineWidth',0.5,'MarkerSize',10, ...
    'MarkerFaceColor','w'); hold on;
-h.fit = loglog(ax,xccfit,ccfit,'LineWidth',3);
+h.fit = loglog(ax,xccfit,yccfit,'LineWidth',3);
 
 % compute b for the legend
 b = bfra.conversions(alpha,'alpha','b');
 
 % build a legend, labels, etc.
-ltxt1    = ['$' varsym '$ (data)'];
+l1 = ['$' varsym '$ (data)'];
 if ~isnan(alphaci)
-   bL    = bfra.conversions(alphaci(1),'alpha','b');
-   bH    = bfra.conversions(alphaci(2),'alpha','b');
-   ltxt2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)',b,bL,bH);
+   bL = bfra.conversions(alphaci(1),'alpha','b');
+   bH = bfra.conversions(alphaci(2),'alpha','b');
+   l2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)',b,bL,bH);
 else
-   ltxt2 = sprintf('MLE fit ($b=%.2f$)',bfra.conversions(alpha,'alpha','b'));
+   l2 = sprintf('MLE fit ($b=%.2f$)',bfra.conversions(alpha,'alpha','b'));
    bL = nan;
    bH = nan;
 end
 xlabel('$x$');
 ylabel(['$p(' varsym '\ge x)$'],'Interpreter','latex'); 
-h.legend = legend(ltxt1,ltxt2,'interpreter','latex','location','sw');
+h.legend = legend(l1,l2,'interpreter','latex','location','sw');
 
 % h.legend.Position = [0.27 0.40 0.30 0.10];
 
@@ -110,23 +111,23 @@ end
 
 if labelplot == true
    %addlabels(xccfit,ccfit,xmin,xminL,xminH,b,bL,bH,refy);
-   addlabels(xccfit,ccfit,xmin,xminL,xminH,b);
+   addlabels(xccfit,yccfit,xmin,xminL,xminH,b);
 end
 
 h.ax = gca;
-h.ax.YLim(2)  = 1.5; % add a little white space above P=1
+h.ax.YLim(2) = 1.5; % add a little white space above P=1
 
 
 function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
+%ADDLABELS add an arrow pointing to tau0 and tau_exp
 
 % tau0
 xminc = (tau0H-tau0+tau0-tau0L)/2;
 xlims = xlim;
 ndecx = log10(xlims(2))-log10(xlims(1));
-xa    = [10^(log10(tau0)-ndecx/10) tau0];
-
-ya    = yfit(find(xfit>=xa(1),1,'first'));
-ya    = [ya ya];
+xarrw = [10^(log10(tau0)-ndecx/10) tau0];
+yarrw = yfit(find(xfit>=xarrw(1),1,'first'));
+yarrw = [yarrw yarrw];
 
 % build the string with plus/minus if tau0L/H is provided
 if tau0==tau0L && tau0==tau0H
@@ -135,9 +136,11 @@ else
    ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',tau0,xminc);
 end
 
-arrow([xa(1),ya(1)],[xa(2),ya(2)],'BaseAngle',90,'Length',8,'TipAngle',10)
-text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right','FontSize',14)
-
+% draw the arrow
+bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
+   'BaseAngle',90,'Length',8,'TipAngle',10)
+text(0.95*xarrw(1),yarrw(1),ta, ...
+   'HorizontalAlignment','right','FontSize',14)
 
 % % tauExp
 %----------------------------------------------------------------------------
@@ -151,9 +154,9 @@ xexpc = (tauH-tauL)/2;
 % xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));
 %----------------------------------------------------------------------------
 
-xa    = [10^(log10(xexp)-ndecx/10) xexp];
-ya    = yfit(find(xfit>=xa(2),1,'first'));
-ya    = [ya ya];
+xarrw = [10^(log10(xexp)-ndecx/10) xexp];
+yarrw = yfit(find(xfit>=xarrw(2),1,'first'));
+yarrw = [yarrw yarrw];
 
 % build the string with plus/minus if tau0L/H is provided
 if tau0==tau0L && tau0==tau0H
@@ -162,6 +165,8 @@ else
    ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 end
 
-arrow([xa(1),ya(1)],[xa(2),ya(2)],'BaseAngle',90,'Length',8,'TipAngle',10)
-text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right','FontSize',14)
+bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
+   'BaseAngle',90,'Length',8,'TipAngle',10)
+text(0.95*xarrw(1),yarrw(1),ta, ...
+   'HorizontalAlignment','right','FontSize',14)
 

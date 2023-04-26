@@ -46,23 +46,24 @@ p.FunctionName    = 'bfra.globalfit';
 p.StructExpand    = true;
 p.PartialMatching = false;
 
-addRequired( p,   'K',                             @(x)isstruct(x)            );
-addRequired( p,   'Events',                        @(x)isstruct(x)            );
-addRequired( p,   'Fits',                          @(x)isstruct(x)            );
-addParameter(p,   'drainagearea',   nan,           @(x)isnumericscalar(x)     );
-addParameter(p,   'drainagedens',   0.8,           @(x)isnumericscalar(x)     );
-addParameter(p,   'aquiferdepth',   nan,           @(x)isnumericscalar(x)     );
-addParameter(p,   'streamlength',   nan,           @(x)isnumericscalar(x)     );
-addParameter(p,   'aquiferslope',   nan,           @(x)isnumericscalar(x)     );
-addParameter(p,   'aquiferbreadth', nan,           @(x)isnumericscalar(x)     );
-addParameter(p,   'isflat',         true,          @(x)islogicalscalar(x)     );
-addParameter(p,   'plotfits',       false,         @(x)islogicalscalar(x)     );
-addParameter(p,   'bootfit',        false,         @(x)islogicalscalar(x)     );
-addParameter(p,   'nreps',          1000,          @(x)isdoublescalar(x)      );
-addParameter(p,   'phimethod',      'pointcloud',  @(x)ischar(x)              );
-addParameter(p,   'refqtls',        [0.50 0.50],   @(x)isnumericvector(x)     );
-addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)isnumericvector(x)     );
-addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)isnumericvector(x)     );
+addRequired( p,   'K',                             @(x)isstruct(x));
+addRequired( p,   'Events',                        @(x)isstruct(x));
+addRequired( p,   'Fits',                          @(x)isstruct(x));
+addParameter(p,   'drainagearea',   nan,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'drainagedens',   0.8,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'aquiferdepth',   nan,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'streamlength',   nan,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'aquiferslope',   nan,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'aquiferbreadth', nan,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'drainableporos', 0.1,           @(x)bfra.validation.isnumericscalar(x));
+addParameter(p,   'isflat',         true,          @(x)bfra.validation.islogicalscalar(x));
+addParameter(p,   'plotfits',       false,         @(x)bfra.validation.islogicalscalar(x));
+addParameter(p,   'bootfit',        false,         @(x)bfra.validation.islogicalscalar(x));
+addParameter(p,   'nreps',          1000,          @(x)bfra.validation.isdoublescalar(x) );
+addParameter(p,   'phimethod',      'pointcloud',  @(x)bfra.validation.ischarlike(x));
+addParameter(p,   'refqtls',        [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
+addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)bfra.validation.isnumericvector(x));
+addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
 
 
 parse(p,K,Events,Fits,varargin{:});
@@ -71,8 +72,9 @@ A           = p.Results.drainagearea;     % basin area [m2]
 Dd          = p.Results.drainagedens;     % drainage density [km-1]
 D           = p.Results.aquiferdepth;     % reference active layer thickness [m]
 L           = p.Results.streamlength;     % effective stream network length [m]
-theta       = p.Results.aquiferslope;
-B           = p.Results.aquiferbreadth;
+theta       = p.Results.aquiferslope;     % aquifer slope [1]
+B           = p.Results.aquiferbreadth;   % aquifer breadth [m]
+phi         = p.Results.drainableporos;   % drainable porosity [1]
 plotfits    = p.Results.plotfits;
 bootfit     = p.Results.bootfit;
 nreps       = p.Results.nreps;
@@ -98,8 +100,8 @@ Q = Events.inputFlow;       % daily streamflow [m3 d-1]
 % fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 %---------------
 [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
-TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
-% TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps,'limit',20);
+% TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
+TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps,'limit',20);
 
 % [TestFit,testb] = bfra.gpfitb(GlobalFit.x,'xmin',GlobalFit.tau0,'bootfit',true);
 
@@ -121,7 +123,8 @@ itau     = TauFit.taumask;
                         
 % fit Q0 and Qhat
 %-----------------
-[Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauexp,q,dqdt,tau0,'qtls',Q,'mask',itau);
+[Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauexp,q,dqdt,tau0, ...
+   'qtls',Q,'mask',itau);
 
 % fit phi
 %---------
@@ -146,7 +149,7 @@ end
 
 % % fit k
 % %---------
-% [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,phi,A,D,L,'RS05', ...
+% [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...
 %    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);
 % Q0    = Qexp*(3-b)/(2-b);
 
