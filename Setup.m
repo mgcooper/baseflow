@@ -262,7 +262,7 @@ narginchk(0,1); if nargin==1; msg = varargin{1}; end
 if ispref('baseflow')
    rmpref('baseflow');
 end
-addpref('baseflow','version',bfra.version)
+addpref('baseflow','version',bfra.util.version)
 % prefs = {'installed','install_directory','pathdef_filename','dependencies_checked'};
 prefs = {'installed','install_directory','dependencies_checked','Curve_Fitting_Toolbox','Statistics_Toolbox'};
 for n = 1:numel(prefs)
@@ -286,6 +286,15 @@ function msg = checkdependencies(varargin)
 %CHECKDEPENDENCIES
 
 narginchk(0,1); if nargin==1; msg = varargin{1}; end
+
+% 26 Apr 2023 - removed dependency check after moving all dependencies to
+% sub-package namespace folders and running matlab built in dependency report
+% and resolving all dependencies.
+fprintf(' * all dependencies are included in package namespace folders *\n');
+fprintf(' * if users encounter missing dependencies, please open a ticket at https://github.com/mgcooper/baseflow/issues * \n');
+
+return
+
 
 % this step should resolve any errors due to missing function dependencies.
 % all required functions should be included in the toolbox, but this can be used

@@ -64,23 +64,26 @@ If you find this software useful, please consider citing the software release in
 
 ## Configuration
 
-Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example, using the `startup.m` file. However, the `+bfra` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup. An exception to this is the `util/` folder which contains helper functions that could conflict with other functions on the search path.
+Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example, using the `startup.m` file. However, the `+bfra` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup.
 
-For extended use of the toolbox, or to avoid conflicts between the `util/` functions and other third-party functions on your search path, the convenience function `Setup.m` includes options to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
+For extended use of the toolbox, the convenience function `Setup.m` includes options to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
 
 - Running `Setup('install')` does the following:
   - Toolbox paths are added to the search path (not persistent between sessions).
   - Default toolbox preferences are added to a new user preferences group `baseflow` (persistent between sessions).
-  - Dependencies are checked using `bfra.util.dependencies` to determine if the required files are on the search path.
+  <!-- - Dependencies are checked using `bfra.util.dependencies` to determine if the required files are on the search path. -->
 - Note that `Setup` does not modify `userpath`, does not call `savepath`, and never modifies the root-level `pathdef.m` file. It only calls `addpath` and `rmpath` to put the toolbox on the user search path.
 - In subsequent sessions, toolbox paths can be managed like so:
   - `Setup('addpath')` or simply `Setup` with no arguments adds the toolbox to the search path for the current session.
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
-Running `Setup('install')` should only be necessary once (or not at all, if you place the toolbox on your matlab search path). Note that all dependencies are included in this toolbox, and are added to the search path during installation. If for some reason the dependencies are not found on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using:
+Running `Setup('install')` should only be necessary once (or not at all, if you place the toolbox on your matlab search path, or manage it however you normally manage third-party matlab/octave software). Note that all dependencies are included in this toolbox. If users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
 
-- `msg = Setup('dependencies')`
+<!-- Disabled this after moving all dependencies to package namespace folders and running built in matlab dependency report -->
+ <!-- If for some reason a dependencies is found that is not on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using: -->
+
+<!-- - `msg = Setup('dependencies')` -->
 
 <!-- After installation, if Matlab is closed, the package will not be on the search path the next time Matlab is opened, unless the package folder is added to the search path on startup. For example, if the package parent folder is placed in the `userpath` folder, then it should be available on startup. Or, if a statement is added to the user `startup.m` file such as: `addpath(genpath(/full/path/to/this/package))`, that will add the package parent folder and subfolders to the search path.
 
