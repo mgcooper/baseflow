@@ -194,7 +194,7 @@ else
    
    if fixb
       plot(qfit0,-dqfit0,'--');
-      ltxt = [aQbstr0 ' (r2 = ' bfra.util.printf(rsq0,2) ')'];
+      ltxt = [aQbstr0 ' (r2 = ' bfra.util.printnum(rsq0,2) ')'];
       h2.legend.String{end} = ltxt;
    end
    

@@ -4,7 +4,7 @@ function NewData = timetablereduce(Data,varargin)
 % NewData = timetablereduce(Data,'keeptime',true) keeps the time column in the
 % case of single vector input and returns the vector with new header 'mu'
 % 
-% See also stderr
+% See also stderror
 
 %-------------------------------------------------------------------------------
 p = bfra.deps.magicParser;
@@ -35,7 +35,7 @@ if width(Data) == 1 && keeptime == true
 end
 
 % compute mean, stderr, ci, etc
-[SE,CI,PM,mu,sigma] = bfra.util.stderr(table2array(Data),'alpha',alpha); 
+[SE,CI,PM,mu,sigma] = bfra.util.stderror(table2array(Data),'alpha',alpha); 
 CIL = CI(:,1); CIH = CI(:,2);
 
 if isscalar(mu)

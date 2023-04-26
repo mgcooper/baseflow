@@ -223,7 +223,7 @@ end
 % within that buffer, whcih would also be useful for finding rain stations
 
 % % make a shapefile
-% [SE,CI,PM,mu,sigma] = stderr(transpose(table2array(Data)));
+% [SE,CI,PM,mu,sigma] = bfra.util.stderror(transpose(table2array(Data)));
 % 
 % S = MetaCalm(Points.inpolyb,:);
 % S.avg = mu;

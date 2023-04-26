@@ -184,7 +184,7 @@ Fit.reps = reps;
 %    % it is incorrect to apply the standard formula so don't use this
 %    for n = 1:numel(vars)
 %       var = vars{n};
-%       [SE,CI,~,mu,sig] = stderr(reps.(var));
+%       [SE,CI,~,mu,sig] = bfra.util.stderror(reps.(var));
 %       Fit.([var '_avg']) = mu;
 %       Fit.([var '_L']) = CI(1);
 %       Fit.([var '_H']) = CI(2);
