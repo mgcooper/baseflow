@@ -19,15 +19,10 @@ authors:
   - name: Tian Zhou
     orcid: 0000-0003-1582-4005
     affiliation: 1
-  - name: Joel C. Rowland
-    orcid: 0000-0001-6308-8976
-    affiliation: 2
 affiliations:
  - name: Atmospheric Science and Global Change, Pacific Northwest National Laboratory, Richland, WA, USA
    index: 1
- - name: Los Alamos National Laboratory, Division of Earth and Environmental Sciences, Los Alamos, NM, USA
-   index: 2
-date: DD February YYYY
+date: today
 bibliography: paper.bib
 ---
 
@@ -44,7 +39,7 @@ Baseflow is a vital component of streamflow that originates from groundwater sou
 \bigskip
 \begin{figure}[!tbh]
 \centering
-\includegraphics{docs/figure_1.png}
+\includegraphics[width=0.5\textwidth]{docs/figure_1.png}
 \caption{Example of baseflow recession analysis and the core functionality of `baseflow`.}
 \label{fig:figure_1}
 \end{figure}
