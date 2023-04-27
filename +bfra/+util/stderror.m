@@ -1,7 +1,7 @@
-function [SE,CI,PM,mu,sig] = stderr(data,varargin)
-%STDERR compute the standard error of the mean from the standard deviation
+function [SE,CI,PM,mu,sig] = stderror(data,varargin)
+%STDERROR compute the standard error of the mean from the standard deviation
 %
-% [SE,CI,PM,mu,sig] = stderr(data,varargin) computes the compute the standard
+% [SE,CI,PM,mu,sig] = stderror(data,varargin) computes the compute the standard
 % error of the mean from the standard deviation of the data and the sample size,
 % and applies a critical t-value to compute 95% confidence intervals.
 %
