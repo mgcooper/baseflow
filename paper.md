@@ -39,12 +39,12 @@ Baseflow is a vital component of streamflow that originates from groundwater sou
 \bigskip
 \begin{figure}[!tbh]
 \centering
-\includegraphics[width=0.5\textwidth]{docs/figure_1.png}
-\caption{Example of baseflow recession analysis and the core functionality of `baseflow`.}
+\includegraphics[width=\textwidth]{docs/figure_1.png}
+\caption{Example of baseflow recession analysis, the core functionality of the `baseflow` toolbox.}
 \label{fig:figure_1}
 \end{figure}
 
-<!-- ![Example of baseflow recession analysis and the core functionality of `baseflow`.\label{fig:figure_1}](./docs/figure_1.png) -->
+<!-- ![Example of baseflow recession analysis, the core functionality of the `baseflow` toolbox.\label{fig:figure_1}](./docs/figure_1.png) -->
 
 The `baseflow` API was designed to provide a user-friendly interface for common baseflow recession analysis tasks such as event detection, parameter fitting, probability-distribution fitting, and visualization (\autoref{fig:figure_1}). The toolbox emphasizes the non-linear nature of streamflow, which can arise from rate-dependent hydraulic properties [@rupp_2006_WRR], or the nonlinear collective behavior of hillslope aquifer units that comprise hydrologic catchments [@harman_2009_WRR]. `baseflow` is intended for use by researchers in the hydrologic sciences [@cooper_2023_WRR] and serves as the foundation for ongoing investigations into changing groundwater storage capacity in Arctic and Subarctic catchments resulting from permafrost thaw.
 
