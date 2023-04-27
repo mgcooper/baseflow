@@ -39,6 +39,10 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
 %
 %  Copyright (C) 2008, Aslak Grinsted
 
+% LICENSE
+% 
+%   Copyright (C) 2008, Aslak Grinsted
+% 
 %   This software may be used, copied, or redistributed as long as it is not
 %   sold and this copyright notice is reproduced on each copy made.  This
 %   routine is provided as is without any express or implied warranties

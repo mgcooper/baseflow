@@ -45,6 +45,9 @@ function [alpha,xmin,L,D,n,dat]=plfit(x, varargin)
 % Version 1.0.9  (2009 October)
 % Version 1.0.10 (2010 January)
 % Version 1.0.11 (2012 January)
+% 
+% LICENSE
+% 
 % Copyright (C) 2008-2012 Aaron Clauset (Santa Fe Institute)
 % Distributed under GPL 2.0
 % http://www.gnu.org/copyleft/gpl.html

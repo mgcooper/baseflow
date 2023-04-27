@@ -36,10 +36,13 @@ function [alpha,xmin,n,bof]=plvar(x,varargin)
 % Version 1.0.7 (2009 October)
 % Version 1.0.8 (2010 April)
 % Version 1.0.9 (2012 January)
+% 
+% LICENSE
+% 
 % Copyright (C) 2008-2012 Aaron Clauset (Santa Fe Institute)
 % Distributed under GPL 2.0
 % http://www.gnu.org/copyleft/gpl.html
-% PLVAR comes with ABSOLUTELY NO WARRANTY
+% PLFIT comes with ABSOLUTELY NO WARRANTY
 % 
 % Notes:
 % 

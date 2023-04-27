@@ -8,11 +8,14 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
 % 
 % See also quantreg
 
-% NOTE: i moved the bootstrap ci stuff out of quantreg to this dedicated
-% function, but the fitting function in quantreg involves tau, the quantile
-% chosen, so it isn't general, so either i have to require this function to
-% accept the cost function. Going forward, would be good to have a default
-% option that is general linear regression.
+% LICENSE
+% 
+%   Copyright (C) 2008, Aslak Grinsted
+% 
+%   This software may be used, copied, or redistributed as long as it is not
+%   sold and this copyright notice is reproduced on each copy made.  This
+%   routine is provided as is without any express or implied warranties
+%   whatsoever.
 
 % Fcost = @(r)sum(abs(r.*(tau-(r<0)))); % should be cost function
 
