@@ -64,7 +64,7 @@ soln1       = p.Results.soln1;
 soln2       = p.Results.soln2;
 %-------------------------------------------------------------------------------
 
-warning off
+% warning off % commented out for octave, need msgid
 
 % take out the data and init the output
 b1          = 3;
@@ -115,4 +115,4 @@ for n = 1:numevents
    a(n) = a2;
 end
 
-warning on
+% warning on % commented out for octave, need msgid

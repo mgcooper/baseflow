@@ -1,50 +1,50 @@
 function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
-%  
+%
 % Syntax
-% 
+%
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
-% 
+%
 % Description
-% 
+%
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt using
 %     variable time stepping, exponential time stepping, or one of six standard
 %     numerical derivatives given in Thomas et al. 2015, Table 2. The method is
 %     passed in as the argument derivmethod with type char.
-% 
+%
 % Required inputs
-% 
+%
 %     T     =  time (days)
 %     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
 %     R     =  rainfall (L T^-1, assumed to be mm d-1)
 %     derivmethod = method to compute numerical derivative dQ/dt. Options are
 %     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
-% 
+%
 % Optional name-value inputs
-% 
+%
 %     etsparam =  scalar double, parameter that controls window size in ETS method
 %     vtsparam =  scalar double, parameter that controls window size in VTS method
 %     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
 %     plotfit  =  logical, scalar, indicates whether to plot the fit
-% 
+%
 % See also getdqdt
-% 
+%
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% 
+%
 % Tip: this accepts pre-selected events, not raw timeseries. Use
 % bfra.findevents to pick Events, then bfra.getdqdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
 %-------------------------------------------------------------------------------
-% input handling    
+% input handling
 p                 = inputParser;
 p.FunctionName    = 'getdqdt';
 p.CaseSensitive   = true;
@@ -74,36 +74,41 @@ eventID     = p.Results.eventID;
 %-------------------------------------------------------------------------------
 
 switch derivmethod
-   
+
    case 'VTS'  % variable time step
-      
+
       [q,dqdt,dt,tq,rq] = bfra.fitvts(T,Q,R,'vtsparam',vtsparam);
-      
+
    case 'ETS'  % exponential timestep
-      
+
       [q,dqdt,dt,tq,rq] = bfra.fitets(T,Q,R,'etsparam',etsparam);
-      
+
    case 'CTS'  % constant time step
-      
+
       [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
-      
+
 end
-   
-   
+
+% this is where islineconvex and/or islinepositive to q and/or dqdt would be to
+% catch all cases regardless of fit method, but if the fitxxx functions are
+% called outside of this function, those cases wouldn't be caught, so either
+% move those functions to private/ or add checks to them.
+
+
 % this is the case where dQ/dt and q are returned without fitting a/b
 if fitmethod == "none" || pickmethod == "none"
-   
-   varargout{1} = nan; 
+
+   varargout{1} = nan;
    varargout{2} = nan;
    return
 
 else
 
-% if pickmethod = "none", we don't need anything else so we could stop here, but
-% fitSelector will repackage the event as a cell array which is consistent with
-% the case where pickmethod ~= "none" which are the options to subdivide events
-% into segments, for example early-time and late-time. It also returns Info
-% which is needed to parse sub-event picks.
+   % if pickmethod = "none", we don't need anything else so we could stop here, but
+   % fitSelector will repackage the event as a cell array which is consistent with
+   % the case where pickmethod ~= "none" which are the options to subdivide events
+   % into segments, for example early-time and late-time. It also returns Info
+   % which is needed to parse sub-event picks.
 
    [hFits,Picks] = bfra.plotdqdt(q,dqdt, 'fitmethod',fitmethod,'pickmethod',...
       pickmethod,'plotfits',plotfits,'eventID',eventID,'rain',rq);
@@ -125,12 +130,12 @@ function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 % Q = Picks.Q;
 % dQdt = Picks.dQdt;
 % and so on. But, Picks does not include T, and maybe I wanted to distinguish
-% the og T,Q from the ets/vts fit t,q. 
+% the og T,Q from the ets/vts fit t,q.
 % EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function
 % abve, I confirmed that things work up to this point meaning I can still
 % select events in plotdqdt and they get sent here, but I think the way i deal
 % wtih retiming in ETS now throws off the istart/stop, so will need to figure
-% out if it's being done correctly if I use manual or auto picking. 
+% out if it's being done correctly if I use manual or auto picking.
 
 
 % if no events are found, return nan

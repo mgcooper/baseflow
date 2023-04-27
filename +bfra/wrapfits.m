@@ -31,8 +31,6 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
 
-warning off
-
 % fit a/b
 [Fit,ok] = bfra.fitab(q,dqdt,method,'fitopts',fitopts);
 

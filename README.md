@@ -25,10 +25,9 @@ Various utility functions included in this toolbox
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).
-
-## Get started
-
+For Octave compatibility, see [Octave](#octave).
 For an introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).
+## Get started
 
 Toolbox functions are located in the `+bfra` namespace package folder. To see a list of toolbox functions, type `help +bfra` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help bfra.function_name` at the command line then press enter.
 
@@ -97,6 +96,63 @@ See `Setup.m` for additional configuration options -->
 The `baseflow` toolbox uses the package namespace prefix `+bfra`, short for **b**ase**f**low **r**ecession **a**nalysis. Package functions are accessed using dot notation: `bfra.<function name>`. If dot notation is used, the package does not need to be imported. The package is imported implicitly by the `+` folder prefix, as long as the toolbox directory is on the matlab search path. Functions can be imported into a workspace using `import bfra.<function name>`. Subsequent calls to the imported function can then omit the package prefix. The entire package can be imported using `import bfra.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
 
 <!-- If any other `+bfra` packages exist on the search path, functions in all packages share the `+bfra` namespace, similar to a [python namespace package](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/) -->
+
+## Octave
+
+Octave is not currently supported due to missing functionality in the `tablicious` package which is required to support Matlab's `datetime` objects. However, the toolbox is designed to be compatible with Octave, and work is in progress to patch the `datetime` incompatibilities. Until that time, the information below is provided for reference.
+
+`baseflow` has been tested on macOS with Octave v8.1.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an issue). If running in Octave, the following packages are required:
+
+`struct`
+`statistics`
+`tablicious`
+
+To see which packages are installed:
+`pkg list`
+
+To install packages, use the pkg command in Octave:
+
+`pkg install -forge struct`
+`pkg install -forge statistics`
+
+Install tablicious from the repository:
+`pkg install https://github.com/apjanke/octave-tablicious/archive/refs/heads/master.zip`
+
+Each time you use the baseflow toolbox, these packages need to be loaded:
+`pkg load struct`
+`pkg load statistics`
+`pkg load tablicious`
+
+To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name.
+
+The `pkg load` commands listed above are included in the .octaverc file. Depending on your configuration, it may or may not be sourced at startup. Octave users are encouraged to run `Setup` when using the toolbox, it will load the required packages and manage warnings. See `Setup.m` for more information.
+
+Limitations when running in Octave:
+
+- The live scripts in the `demos/` folder will not work on Octave.
+- Functions relying on `datetime` objects will not work on Octave.
+- The extended non-linear curve fitting try-catch block in `bfra.fitab` will not work on Octave.
+- Some graphics functions may not work on Octave, including those that use `gobjects`.
+
+Work is ongoing to patch these incompatibilities.
+
+When running in Octave, be careful with blanket `warning on` or `warning off` commands. Octave ships with about a dozen warning states off, listed below. If they are turned on by a `warning on` command, there will be endless warning messages. If this happens, type `warning` in the commandwindow to confirm if the following warnings are off. If not, simply restart Octave.
+
+```Octave
+    State  Warning ID
+    off  Octave:array-as-logical
+    off  Octave:array-to-scalar
+    off  Octave:array-to-vector
+    off  Octave:imag-to-real
+    off  Octave:language-extension
+    off  Octave:missing-semicolon
+    off  Octave:neg-dim-as-zero
+    off  Octave:separator-insert
+    off  Octave:single-quote-string
+    off  Octave:str-to-num
+    off  Octave:mixed-string-concat
+    off  Octave:variable-switch-label
+```
 
 ## Acknowledgement
 

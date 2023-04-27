@@ -135,7 +135,7 @@ if plotfit == true
    Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'}, ...
       'userab',ab,'mask',mask,'usertext',method);
 end
-
+   
 %-------------------------------------------------------------------------------
 % FITTING METHODS
 %-------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ ab = [exp(ab(1)); ab(2)];
 
 % transpose ci to be consistent with stats functions
 ci = rot90(confint(f,alpha));
-ci(1,:)  = exp(ci(1,:));
+ci(1,:) = exp(ci(1,:));
 
 % generic failure check
 ok = all(isreal(ab));
@@ -316,8 +316,6 @@ ok = all(isreal(ab));
 
 
 function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
-
-warning off
 
 % initial estimates using log-log linear fit
 ci = [nan nan; nan nan];
@@ -534,7 +532,7 @@ end
 
 function [Fit,ok] = evalFit(ab,x,y,ci,ok)
 
-warning off % otherwise rsquare issues warning
+% warning off % otherwise rsquare issues warning
 
 Fit.ab = ab;
 
@@ -555,7 +553,7 @@ Fit.y = y;
 % generic failure check
 ok = all(isreal(ab));
 
-warning on
+% warning on
 
 %    % any log-log regressions need the ci's transormed like this:
 %    aL      = exp(ci(1,1)); % 95% CI

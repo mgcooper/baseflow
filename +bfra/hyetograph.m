@@ -35,7 +35,7 @@ p.parseMagically('caller');
 H = gobjects(4,1); % figure, ax1, plot1, plot2
 
 % % get the figure handle
-fig = gcf; 
+fig = gcf;
 fig.Name = 'Hyetograph';
 fig.Tag = 'HyetographFigure';
 % fig.Position = [10,10,400,300];

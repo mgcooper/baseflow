@@ -1,13 +1,25 @@
 source('Setup.m')
+
+# To install the required packages, use the following:
+# pkg install -forge struct
+# pkg install -forge statistics
+# pkg install -forge tablicious
+# pkg install -forge optim
+
+# To see which packages are installed:
+# pkg list
+
 pkg load struct
 pkg load statistics
-pkg load optim
 pkg load tablicious
-
-# check this for building docs: https://github.com/gnu-octave/pkg-octave-doc
+# pkg load optim (not needed for now)
 
 # if for some reason Setup.m is not working, try something like this:
 # addpath(pwd());
 # rmpath([pwd() filesep "+bfra"]);
 # rmpath([pwd() filesep "demos"]);
 # rmpath([pwd() filesep ".git"]);
+
+# warning("off", "Octave:language-extension")
+
+# check this for building docs: https://github.com/gnu-octave/pkg-octave-doc

@@ -1,30 +1,29 @@
-function GlobalFit = globalfit(K,Events,Fits,varargin)
+function GlobalFit = globalfit(Results,Events,Fits,varargin)
 %GLOBALFIT fit global parameters using all individual event-scale recession data
 % 
 % Syntax
 %
-%     FIT = bfra.GLOBALFIT(K,Events,Fits);
-%     FIT = bfra.GLOBALFIT(K,Events,Fits,opts);
-%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
-%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
-%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits);
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits,opts);
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'plotfits',plotfits);
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit);
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
 %     FIT = bfra.GLOBALFIT(___,) 
 % 
 % Description
 % 
-%     FIT = bfra.GLOBALFIT(K,Events,Fits) uses the event-scale recession
-%     analysis parameters saved in data table K and the event-scale data saved
-%     in Events and Fits and computes 'global' parameters tau, tau0, phi, bhat,
-%     ahat, Qexp, and Q0.
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits) uses the event-scale recession
+%     analysis parameters saved in results table Results and fitted data saved
+%     in Fits (both outputs of bfra.fitevents) and the event-scale data saved in
+%     Events (output of bfra.getevents) and computes 'global' parameters tau,
+%     tau0, phi, bhat, ahat, Qexp, and Q0.
 %
 % Required inputs
 % 
-%     K, Events, Fits are outputs of bfra.getevents and bfra.dqdt
+%     Results, Events, Fits are outputs of bfra.getevents and bfra.fitevents
 %     opts is a struct containing fields area, D0, and L (see below)
-%     AnnualFlow is a timetable or table of annual flow containing field Qcmd
-%     which is the average daily flow (units cm/day) posted annually. 
 % 
-% See also setopts, fitphi, eventphi, eventtau
+% See also setopts, getevents, fitevents, fitphi, eventphi, eventtau
 % 
 % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
@@ -66,7 +65,7 @@ addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)bfra.validation.isnumeric
 addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
 
 
-parse(p,K,Events,Fits,varargin{:});
+parse(p,Results,Events,Fits,varargin{:});
 
 A           = p.Results.drainagearea;     % basin area [m2]
 Dd          = p.Results.drainagedens;     % drainage density [km-1]
@@ -99,7 +98,7 @@ Q = Events.inputFlow;       % daily streamflow [m3 d-1]
 
 % fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 %---------------
-[tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,'usefits',false);
+[tau,q,dqdt,tags] = bfra.eventtau(Results,Events,Fits,'usefits',false);
 % TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
 TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps,'limit',20);
 
@@ -130,7 +129,7 @@ itau     = TauFit.taumask;
 %---------
 switch phimethod
    case 'distfit'
-      phid = bfra.eventphi(K,Fits,A,D,L,bhat,'lateqtls',lateqtls, ...
+      phid = bfra.eventphi(Results,Fits,A,D,L,bhat,'lateqtls',lateqtls, ...
          'earlyqtls',earlyqtls);
       phi = bfra.fitphidist(phid,'mean','cdf',plotfits);
       
@@ -139,9 +138,9 @@ switch phimethod
          'earlyqtls',earlyqtls,'mask',itau);
       
    case 'phicombo'
-      phi1 = bfra.eventphi(K,Fits,A,D,L,1,'lateqtls',lateqtls, ...
+      phi1 = bfra.eventphi(Results,Fits,A,D,L,1,'lateqtls',lateqtls, ...
          'earlyqtls',earlyqtls);
-      phi2 = bfra.eventphi(K,Fits,A,D,L,3/2,'lateqtls',lateqtls, ...
+      phi2 = bfra.eventphi(Results,Fits,A,D,L,3/2,'lateqtls',lateqtls, ...
          'earlyqtls',earlyqtls);
       phid = vertcat(phi1,phi2); phid(phid>1) = nan; phid(phid<0) = nan;
       phi = bfra.fitphidist(phid,'mean','cdf',plotfits);

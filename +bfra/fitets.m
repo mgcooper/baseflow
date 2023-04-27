@@ -57,7 +57,7 @@ etsparam = p.Results.etsparam;
 fitab    = p.Results.fitab;
 plotfit  = p.Results.plotfit;
 %-------------------------------------------------------------------------------
-warning off
+% warning off
 
 %TEST BEGIN
 % t = T-T(1)+(T(2)-T(1)); % keep og T

@@ -156,14 +156,14 @@ Q = cell(N,1);
 R = cell(N,1);
 
 % apply min length filter and keep remaining events
-for n = 1:N   
+for n = 1:N
 
   % if event length < min length, ignore it
   if rl(n)<nmin
       N = N-1; 
       continue
   end 
-  qi = q(is(n):ie(n)); 
+  qi = q(is(n):ie(n));
   if bfra.util.islineconvex(qi) || bfra.util.islinepositive(qi)
       N=N-1;
       continue
@@ -197,6 +197,16 @@ if debug == true
    scatter(t(icon),q(icon),'m','filled')
    scatter(t(icon2),q(icon2),'k','filled')
    scatter(t(ibad),q(ibad),80,'m')
+   
+   % highlight a particular event
+   % scatter(t(is(n):ie(n)),q(is(n):ie(n)),'y','filled')
+   
+   % plot q vs -dqdt
+   % figure; hold on;
+   % for n = 1:numel(Q)
+   %    loglog(Q{iplot},-derivative(Q{iplot}))
+   %    title(num2str(n)); pause; clf
+   % end
 end
 
 

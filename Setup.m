@@ -32,7 +32,14 @@ function varargout = Setup(varargin)
 % ------------
 
 % temporarily turn off warnings about paths not already being on the path
-warning off
+if bfra.util.isoctave == false
+   warning('off','MATLAB:rmpath:DirNotFound')
+   warning('off','MATLAB:mpath:packageDirectoriesNotAllowedOnPath')
+else
+   warning('off','Octave:rmpath:DirNotFound') % may not work
+   warning('off','Octave:addpath-pkg')
+   warning('off','Octave:shadowed-function')
+end
 
 % at most one argument
 narginchk(0,1)
@@ -91,10 +98,28 @@ switch option
       msg = managedependencies(option);
 end
 
+% ------------
+% OCTAVE STUFF
+% ------------
+
+% turn warnings back on and load required packages
+
+if bfra.util.isoctave == false
+   warning('on','MATLAB:rmpath:DirNotFound')
+   warning('on','MATLAB:mpath:packageDirectoriesNotAllowedOnPath')
+else
+   pkg load struct
+   pkg load statistics
+   pkg load tablicious
+   % pkg load optim
+   warning('on','Octave:rmpath:DirNotFound') % may not work
+   warning('on','Octave:addpath-pkg')
+   warning('on','Octave:shadowed-function')
+end
+
 % -----------
 % final steps
 % -----------
-warning on % turn warning back on
 
 % return msg if requested
 if nargout == 1
@@ -237,7 +262,7 @@ thispath = fileparts(mfilename('fullpath'));
 % add paths containing source code
 addpath(genpath(thispath),'-end');
 % remove namespace +bfra and git directories from path
-rmpath(genpath(fullfile(thispath,'+bfra')));
+% rmpath(genpath(fullfile(thispath,'+bfra')));
 rmpath(genpath(fullfile(thispath,'.git')));
 setpref('baseflow','install_directory',thispath)
 setpref('baseflow','installed',true)
@@ -263,12 +288,23 @@ if ispref('baseflow')
    rmpref('baseflow');
 end
 addpref('baseflow','version',bfra.util.version)
-% prefs = {'installed','install_directory','pathdef_filename','dependencies_checked'};
-prefs = {'installed','install_directory','dependencies_checked','Curve_Fitting_Toolbox','Statistics_Toolbox'};
+% note: 'pathdef_filename' removed from prefs
+if bfra.util.isoctave == true
+   prefs = {'installed','install_directory','octave_install', ...
+      'dependencies_checked','Struct_Package','Tablicious_Package', ...
+      'Statistics_Package'};
+else
+   prefs = {'installed','install_directory','octave_install', ...
+      'dependencies_checked','Curve_Fitting_Toolbox','Statistics_Toolbox'};
+end
+
 for n = 1:numel(prefs)
    if ~ispref('baseflow',prefs{n})
       addpref('baseflow',prefs{n},false)
    end
+end
+if bfra.util.isoctave == true
+   setpref('baseflow','octave_install',true);
 end
 msg.initprefs = true;
 

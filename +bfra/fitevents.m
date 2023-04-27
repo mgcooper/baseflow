@@ -1,38 +1,43 @@
-function [Fits,FitTable] = fitevents(Events,varargin)
+function [Fits,Results] = fitevents(Events,varargin)
 %FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events
 % 
 % Syntax
 % 
-%     [Fits,K] = fitevents(Events,varargin)
+%     [Fits,Results] = fitevents(Events,varargin)
 % 
 % Description
 % 
-%     [Fits,K] = fitevents(Events) fits all recession events in Events (output
-%     of bfra.getevents) using default algorithm options.
+%     [Fits,Results] = fitevents(Events) fits all recession events in Events
+%     (output of bfra.getevents) using default algorithm options.
 % 
-%     [Fits,K] = fitevents(Events,opts) uses user-supplied algorithm options in
-%     struct opts. See bfra.setopts for automated option setting.
+%     [Fits,Results] = fitevents(Events,opts) uses user-supplied
+%     algorithm options in struct opts. See bfra.setopts to set options.
 % 
 % Required inputs
 % 
-%     Events   output of bfra.getevents (flow comes in as m3 d-1 posted daily)
+%     Events: output of bfra.getevents (flow comes in as m3 d-1 posted daily)
 % 
 % Outputs
 % 
-%     K  table of fitted values e.g., a, b, tau, for each event
-%     Fits  structure containing the fitted q/dqdt
+%     Fits: structure containing the fitted q/dqdt data
+%     Results: table of fitted values e.g., a, b, tau, for each event
 % 
 % See also getevents, getdqdt, fitdqdt
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+% 
+% TODO: move subfunctions to private/ to manage warnings, input parsing, and
+% special-case fitting routines including octave compatibility once, here. This
+% will be most problematic for fitab, because it is useful as a standalone
+% function for fitting a single event. 
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
-p                 = inputParser;
-p.FunctionName    = 'fitevents';
-p.StructExpand    = true;
+p = inputParser;
+p.FunctionName = 'fitevents';
+p.StructExpand = true;
 p.PartialMatching = true;
 
 addRequired(p, 'Events',               @(x) isstruct(x)                 );
@@ -82,9 +87,9 @@ Fits.fitTags   =  nan(size(Q));        % 1:numFits
 nFits          =  0;
 
 if pickmethod == "none"
-   FitTable = initFitTable(numEvents);
+   Results = initFitTable(numEvents);
 else
-   FitTable = initFitTable(numEvents*4); % allocate up to 4 picks/event 
+   Results = initFitTable(numEvents*4); % allocate up to 4 picks/event 
 end
 
 savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
@@ -92,7 +97,29 @@ savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
 %-------------------------------------------------------------------------------
 % compute the recession constants
 %-------------------------------------------------------------------------------
-warning off
+
+% A note on warnings. Nonlinear curve fitting to recession sequences generates a
+% few characteristic errors. One is when dQ/dt increases as Q decreases. This
+% could be interpreted to mean the recession sequence is not actually a
+% recession, but this interpretation is not applied here. This case tends to
+% produce a rank-deficient error from the left division of the jacobian (warning
+% rankDeficientMatrix), or an error that indicates some elements of the jacobian
+% are effectively zero at the solution (warning ModelConstantWRTParam), meaning
+% the model is insensitive to one or more parameters. Another case is when the Q
+% vs -dQ/dt relationship is convex, which the functional form does not
+% accomodate. This tends to produce an ill-conditioned Jacobian (warning
+% IllConditionedJacobian), which makes sense, it means the parameters cannot be
+% identified. Both cases above can also lead to an iteration limit exceeded
+% error (warning IterationLimitExceeded).
+if bfra.util.isoctave == true
+else
+   warning('off','MATLAB:rankDeficientMatrix');
+   warning('off','stats:nlinfit:IterationLimitExceeded');
+   warning('off','stats:nlinfit:ModelConstantWRTParam');
+   warning('off','stats:nlinfit:IllConditionedJacobian');
+   warning('off','bfra:deps:rsquare:NegativeRsquared');
+end
+
 debugflag = false;
    
 for thisEvent = 1:numEvents
@@ -138,17 +165,28 @@ for thisEvent = 1:numEvents
          [iFit,ok] = bfra.fitab(q,dqdt,fitmethod,'fitopts',fitopts);
       end
 
-      [Fits,FitTable,nFits] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod,...
-         fitorder,eventDate,thisEvent,thisFit,nFits,FitTable,Fits,iFit,savevars,ok);
+      [Fits,Results,nFits] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod,...
+         fitorder,eventDate,thisEvent,thisFit,nFits,Results,Fits,iFit,savevars,ok);
    end   
       
 end
 
 % remove fits that weren't kept
-ikeep = ~isnan(FitTable.a);
-vars = fieldnames(FitTable);
+ikeep = ~isnan(Results.a);
+vars = fieldnames(Results);
 for n = 1:numel(vars)
-   FitTable.(vars{n}) = FitTable.(vars{n})(ikeep);
+   Results.(vars{n}) = Results.(vars{n})(ikeep);
+end
+
+
+% TURN WARNINGS BACK ON
+if bfra.util.isoctave == true
+else
+   warning('on','MATLAB:rankDeficientMatrix');
+   warning('on','stats:nlinfit:IterationLimitExceeded');
+   warning('on','stats:nlinfit:ModelConstantWRTParam');
+   warning('on','stats:nlinfit:IllConditionedJacobian');
+   warning('on','bfra:deps:rsquare:NegativeRsquared');
 end
 
 %-------------------------------------------------------------------------------
