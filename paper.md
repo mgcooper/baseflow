@@ -71,6 +71,10 @@ Development of the `baseflow` toolbox was motivated by the need to automate Pare
 
 <!-- To address these challenges, various analytical tools and software packages have been developed to estimate baseflow from streamflow measurements.  -->
 
+# Software Availability
+
+`baseflow` is [on GitHub](https://github.com/mgcooper/baseflow/tree/joss).
+
 # Acknowledgements
 
 The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project funded this work through the United States Department of Energy, Office of Science, Biological and Environmental Research (BER) Regional and Global Model Analysis (RGMA) program. Awarded under contract grant #  89233218CNA000001 to Triad National Security, LLC (“Triad”). We acknowledge contributions from Clement Roques for the exponential time step method implemented in `baseflow` and Aaron Clauset for `plfit`.
