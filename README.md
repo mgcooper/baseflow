@@ -24,9 +24,10 @@ Various utility functions included in this toolbox
 - If running in Octave, see `.octaverc`, it should source `Setup.m`.
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
-For more options, see [Configuration](#configuration).
-For Octave compatibility, see [Octave](#octave).
-For an introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).
+For more options, see [Configuration](#configuration).  
+For Octave compatibility, see [Octave](#octave).  
+<!-- For an introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).   -->
+
 ## Get started
 
 Toolbox functions are located in the `+bfra` namespace package folder. To see a list of toolbox functions, type `help +bfra` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help bfra.function_name` at the command line then press enter.
@@ -37,7 +38,7 @@ Toolbox documentation and examples are also available in the Matlab help browser
 - Type `doc +bfra` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch bfra`.
 
-In addition to the toolbox documentation and examples provided in the Matlab help browser, the notebook in `demos/bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154).
+In addition to the toolbox documentation and examples provided in the Matlab help browser, the notebook in `demos/bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). There are also several other notebooks in the `demos` folder that demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser.
 
 ## Contribute
 
@@ -77,7 +78,7 @@ For extended use of the toolbox, the convenience function `Setup.m` includes opt
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
-Running `Setup('install')` should only be necessary once (or not at all, if you place the toolbox on your matlab search path, or manage it however you normally manage third-party matlab/octave software). Note that all dependencies are included in this toolbox. If users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
+Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party matlab/octave software). However, Octave users may find Setup particularly convenient because Setup will load the required packages (but see [Octave](#octave) for compatibility note). Although all dependencies are nominally included in this toolbox, if users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
 
 <!-- Disabled this after moving all dependencies to package namespace folders and running built in matlab dependency report -->
  <!-- If for some reason a dependencies is found that is not on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using: -->
@@ -93,7 +94,9 @@ See `Setup.m` for additional configuration options -->
 
 ## Package namespace
 
-The `baseflow` toolbox uses the package namespace prefix `+bfra`, short for **b**ase**f**low **r**ecession **a**nalysis. Package functions are accessed using dot notation: `bfra.<function name>`. If dot notation is used, the package does not need to be imported. The package is imported implicitly by the `+` folder prefix, as long as the toolbox directory is on the matlab search path. Functions can be imported into a workspace using `import bfra.<function name>`. Subsequent calls to the imported function can then omit the package prefix. The entire package can be imported using `import bfra.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
+The `baseflow` toolbox uses the package namespace prefix `+bfra`, short for **b**ase**f**low **r**ecession **a**nalysis. Package functions are accessed using dot notation: `bfra.<function name>`. If dot notation is used, the package does not need to be imported. The package is imported implicitly by the `+` prefix on the directory name, as long as the **toolbox** (not package) directory is on the matlab search path (i.e., the parent folder containing the `+bfra` package directory needs to be on the Matlab search path).
+
+If desired, package functions can be imported into a workspace using `import bfra.<function name>`. Subsequent calls to the imported function can then omit the package prefix. The entire package can be imported using `import bfra.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
 
 <!-- If any other `+bfra` packages exist on the search path, functions in all packages share the `+bfra` namespace, similar to a [python namespace package](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/) -->
 
@@ -101,7 +104,7 @@ The `baseflow` toolbox uses the package namespace prefix `+bfra`, short for **b*
 
 Octave is not currently supported due to missing functionality in the `tablicious` package which is required to support Matlab's `datetime` objects. However, the toolbox is designed to be compatible with Octave, and work is in progress to patch the `datetime` incompatibilities. Until that time, the information below is provided for reference.
 
-`baseflow` has been tested on macOS with Octave v8.1.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an issue). If running in Octave, the following packages are required:
+`baseflow` has been tested on macOS with Octave v8.1.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). If running in Octave, the following packages are required:
 
 `struct`
 `statistics`
@@ -123,20 +126,20 @@ Each time you use the baseflow toolbox, these packages need to be loaded:
 `pkg load statistics`
 `pkg load tablicious`
 
-To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name.
+To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name. Use the convenience function `Setup.m` to automatically import these packages.
 
 The `pkg load` commands listed above are included in the .octaverc file. Depending on your configuration, it may or may not be sourced at startup. Octave users are encouraged to run `Setup` when using the toolbox, it will load the required packages and manage warnings. See `Setup.m` for more information.
 
 Limitations when running in Octave:
 
-- The live scripts in the `demos/` folder will not work on Octave.
+- The live scripts in the `demos/` folder will not work on Octave (see `bfra_example_octave.m` for an octave-compatible example)
 - Functions relying on `datetime` objects will not work on Octave.
-- The extended non-linear curve fitting try-catch block in `bfra.fitab` will not work on Octave.
+- The extended non-linear curve fitting try-catch block in `bfra.fitab` may not work on Octave.
 - Some graphics functions may not work on Octave, including those that use `gobjects`.
 
 Work is ongoing to patch these incompatibilities.
 
-When running in Octave, be careful with blanket `warning on` or `warning off` commands. Octave ships with about a dozen warning states off, listed below. If they are turned on by a `warning on` command, there will be endless warning messages. If this happens, type `warning` in the commandwindow to confirm if the following warnings are off. If not, simply restart Octave.
+When running in Octave, be careful with blanket `warning on` or `warning off` commands. Octave ships with about a dozen warning states off, listed below. If they are turned on by a `warning on` command, there will be endless warning messages. If this happens, type `warning` in the commandwindow to confirm if the following warnings are off. If so, simply restart Octave to reset them, or reset them manually.
 
 ```Octave
     State  Warning ID
