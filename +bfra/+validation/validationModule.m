@@ -75,7 +75,7 @@ f = @(x) ischar(x) | isstring(x) | iscellstr(x) ;
 end
 
 function f = validDateLike
-f = @(x) isdatetime(x) | isnumeric(x) ;
+f = @(x) isdatetime(x) | isnumeric(x) & isvector(x);
 end
 
 function f = validDateTime
