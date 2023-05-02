@@ -22,6 +22,7 @@ Various utility functions included in this toolbox
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc`, it should source `Setup.m`.
+- Unit tests are located in `+bfra/+test`, they can be run in a matlab session by typing `bfra.test.runtests` at the command window and pressing enter.
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).  
@@ -34,8 +35,8 @@ Toolbox functions are located in the `+bfra` namespace package folder. To see a 
 
 Toolbox documentation and examples are also available in the Matlab help browser. To get started, in your Matlab command window:
 
-- Type `doc bfra` to open the documentation in the help browser.
-- Type `doc +bfra` to see the package contents in the help browser.
+- Type `doc baseflow` to open the documentation in the help browser.
+- Type `doc bfra` or try `doc +bfra` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch bfra`.
 
 In addition to the toolbox documentation and examples provided in the Matlab help browser, the notebook in `demos/bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). There are also several other notebooks in the `demos` folder that demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser.
