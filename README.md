@@ -8,10 +8,11 @@ A matlab toolbox for characterizing aquifer properties from streamflow measureme
 
 ## Dependencies
 
-Developed on MATLAB Version: 9.9.0 (R2020b)  
-Mathworks Statistics and Machine Learning Toolbox&trade;  
-Mathworks Curve Fitting Toolbox&trade;  
-Various utility functions included in this toolbox
+Developed on MATLAB Version: 9.9.0 (R2020b).  
+Mathworks Statistics and Machine Learning Toolbox&trade;.  
+Mathworks Curve Fitting Toolbox&trade;.  
+Compatible with Octave, tested on version 8.2.0.  
+Requires Statistics, Optimization, Struct, and Tablicious packages.  
 
 ## Install
 
@@ -38,7 +39,7 @@ Toolbox documentation and examples are also available in the Matlab help browser
 - Type `doc bfra` or try `doc +bfra` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch bfra`.
 
-In addition to the toolbox documentation and examples provided in the Matlab help browser, the notebook in `demos/bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). There are also several other notebooks in the `demos` folder that demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser.
+In addition to the toolbox documentation and examples provided in the Matlab help browser, there are several notebooks in `demos/`. The notebook `bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Several other notebooks in the `demos` folder demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with Octave.
 
 ## Contribute
 
@@ -78,7 +79,7 @@ For extended use of the toolbox, the convenience function `Setup.m` includes opt
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
-Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party matlab/octave software). However, Octave users may find Setup particularly convenient because Setup will load the required packages (but see [Octave](#octave) for compatibility note). Although all dependencies are nominally included in this toolbox, if users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
+Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party matlab/octave software). However, Octave users may find Setup particularly convenient because Setup will load the required packages. Although all dependencies are nominally included in this toolbox, if users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
 
 <!-- Disabled this after moving all dependencies to package namespace folders and running built in matlab dependency report -->
  <!-- If for some reason a dependencies is found that is not on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using: -->
@@ -102,14 +103,14 @@ If desired, package functions can be imported into a workspace using `import bfr
 
 ## Octave
 
-Octave is not currently supported due to missing functionality in the `tablicious` package which is required to support Matlab's `datetime` objects. However, the toolbox is designed to be compatible with Octave, and work is in progress to patch the `datetime` incompatibilities. Until that time, the information below is provided for reference.
-
-`baseflow` has been tested on macOS with Octave v8.1.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). If running in Octave, the following packages are required:
+Octave is supported but users may encounter errors. In particular, `baseflow` relies on the `tablicious` package for `string` and `datetime` support, but `tablicious` does not fully support these objects. `baseflow` has been tested on macOS with Octave v8.1.0 and 8.2.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). If running in Octave, the following packages are required:
 
 `struct`
 `optim`
 `statistics`
 `tablicious`
+
+For some demos, the `Symbolic` package is needed.  
 
 To see which packages are installed:
 `pkg list`
@@ -135,12 +136,12 @@ The `pkg load` commands listed above are included in the .octaverc file. Dependi
 
 Limitations when running in Octave:
 
-- The live scripts in the `demos/` folder will not work on Octave (see `bfra_example_octave.m` for an octave-compatible example)
+- The live scripts in the `demos/` folder will not work on Octave, use the `.m` files instead.
 - Functions relying on `datetime` objects will not work on Octave.
-- The extended non-linear curve fitting try-catch block in `bfra.fitab` may not work on Octave.
-- Some graphics functions may not work on Octave, including those that use `gobjects`.
+- Graphics object functions do not work in Octave, including those that use `gobjects`.
+- Latex interpreter is not supported in Octave.
 
-Work is ongoing to patch these incompatibilities.
+Work is ongoing to patch these incompatibilities. See `bfra.util.isoctave` to patch errors.
 
 When running in Octave, be careful with blanket `warning on` or `warning off` commands. Octave ships with about a dozen warning states off, listed below. If they are turned on by a `warning on` command, there will be endless warning messages. If this happens, type `warning` in the commandwindow to confirm if the following warnings are off. If so, simply restart Octave to reset them, or reset them manually.
 
