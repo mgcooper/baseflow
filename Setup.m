@@ -27,19 +27,22 @@ function varargout = Setup(varargin)
 % character (class folders), folders that begin with the + character (package
 % folders), folders named resources, or subfolders within any of these.
 
-% ------------
-% parse inputs
-% ------------
 
-% temporarily turn off warnings about paths not already being on the path
-if bfra.util.isoctave == false
-   warning('off','MATLAB:rmpath:DirNotFound')
-   warning('off','MATLAB:mpath:packageDirectoriesNotAllowedOnPath')
-else
+%% parse inputs
+
+% temporarily turn off warnings
+originalWarningState = warning;
+cleanupObj = onCleanup(@() warning(originalWarningState));
+
+if bfra.util.isoctave
    warning('off','Octave:rmpath:DirNotFound') % may not work
    warning('off','Octave:addpath-pkg')
    warning('off','Octave:shadowed-function')
+else
+   warning('off','MATLAB:rmpath:DirNotFound')
+   warning('off','MATLAB:mpath:packageDirectoriesNotAllowedOnPath')
 end
+
 
 % at most one argument
 narginchk(0,1)
@@ -74,9 +77,8 @@ elseif strcmp(option,'addpath') && ~ispref('baseflow','installed')
    % assume the user doesn't care, maybe they removed the prefs, add the paths
 end
 
-% ------------
-% switch yard
-% ------------
+
+%% switch yard
 
 % call the appropriate function for the requested option
 switch option
@@ -98,28 +100,21 @@ switch option
       msg = managedependencies(option);
 end
 
-% ------------
-% OCTAVE STUFF
-% ------------
 
-% turn warnings back on and load required packages
+%% Load OCTAVE packages
 
-if bfra.util.isoctave == false
-   warning('on','MATLAB:rmpath:DirNotFound')
-   warning('on','MATLAB:mpath:packageDirectoriesNotAllowedOnPath')
-else
+if bfra.util.isoctave
    pkg load struct
    pkg load statistics
    pkg load tablicious
-   % pkg load optim
-   warning('on','Octave:rmpath:DirNotFound') % may not work
-   warning('on','Octave:addpath-pkg')
-   warning('on','Octave:shadowed-function')
+   pkg load optim
+   % setenv ("OCTAVE_LATEX_DEBUG_FLAG", "1")
+   % setenv ("OCTAVE_LATEX_BINARY", )
+   % setenv ("OCTAVE_DVIPNG_BINARY", )
+   % setenv ("OCTAVE_DVISVG_BINARY", )
 end
 
-% -----------
-% final steps
-% -----------
+%% final steps
 
 % return msg if requested
 if nargout == 1

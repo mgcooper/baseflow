@@ -86,7 +86,8 @@ for m = 1:numaxes
    for mm = 1:numchildren
       child = Children(mm);
       
-      if child.Type == "bar" % add more types: || child.Type == ""
+      %if child.Type == "bar" % add more types: || child.Type == ""
+      if strcmp(get(child,'Type'),"bar") % add more types: || child.Type == ""
          % continue, leave linesWithMarkers(mm) = false;
          continue
       end
@@ -96,10 +97,10 @@ for m = 1:numaxes
       % true-false in linehasmarkers instead of the any() statement after
       % the try-catch
       try
-         linehasmarkers = ~ismember({child.Marker},'none');
+         linehasmarkers = ~ismember({get(child,'Marker')},'none');
       catch
          try
-            linehasmarkers = false(size({child.Marker}));
+            linehasmarkers = false(size({get(child,'Marker')}));
          catch % catch-all back up
             linehasmarkers = false;
          end
@@ -128,7 +129,8 @@ for m = 1:numaxes
          continue
       end
 
-      numPoints = numel(thisLine.XData);
+      %numPoints = numel(thisLine.XData);
+      numPoints = numel([get(thisLine,'XData')]); % for octave, may not work
 
       if sparsefill == true
          % only fill some points, use larger symbol size
@@ -144,8 +146,8 @@ for m = 1:numaxes
          markerIdx = 1:numPoints;
          markerSz = 6;
       end
-      markerColor = thisLine.Color;
-      %         markerColor = thisLine.MarkerEdgeColor;
+      markerColor = get(thisLine,'Color');
+      % markerColor = thisLine.MarkerEdgeColor;
 
       % errorbar doesn't have 'MarkerIndices'
       if bfra.validation.iserrorbar(thisLine)
@@ -157,12 +159,20 @@ for m = 1:numaxes
             'CapSize',              0,                ...
             varargs{:}                                );
       else
-         set(thisLine, ...
-            'MarkerIndices',        markerIdx,        ...
+         try
+            set(thisLine, ...
+               'MarkerIndices',        markerIdx,        ...
+               'MarkerSize',           markersize,       ...
+               'MarkerEdgeColor',      'none',           ...
+               'MarkerFaceColor',      markerColor,      ...
+               varargs{:}                                );
+         catch % for octave
+            set(thisLine, ...
             'MarkerSize',           markersize,       ...
             'MarkerEdgeColor',      'none',           ...
             'MarkerFaceColor',      markerColor,      ...
             varargs{:}                                );
+         end
       end
 
    end

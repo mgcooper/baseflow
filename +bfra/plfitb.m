@@ -60,7 +60,7 @@ plotfit  = p.Results.plotfit;
 
 %-------------------------------------------------------------------------------
 x0 = x;
-[x,~] = prepareCurveData(x,x);
+[x,~] = bfra.util.prepCurveData(x,x);
 x = x(x>0);
 if isnan(xmin)
    switch method
@@ -122,9 +122,11 @@ if plotfit == true
    xmin = Fit.tau0;
    aci = [Fit.alpha_H Fit.alpha_L];
    xci = [Fit.tau0_L Fit.tau0_H];
-   figure('Position',[0 0 300 200]); ax = gca;
+   % for publishing:
+   % figure('Position',[0 0 300 200]); ax = gca;
+   figure; ax = gca;
    bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci,'ax',ax);
-%    snapnow;
+   % snapnow;
 end
 
 switch nargout

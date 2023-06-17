@@ -1,16 +1,16 @@
-function str = getstring(requestedstring,varargin)
+function str = getstring(request,varargin)
 %GETSTRING get latex-formatted string for equations in the bfra library
 % 
 % Syntax
 % 
-%     str = getstring(requestedstring,varargin)
+%     str = getstring(request,varargin)
 % 
 % Description
 % 
-%     str = getstring(requestedstring) returns latex-formatted string for
+%     str = getstring(request) returns latex-formatted string for
 %     requested string.
 % 
-%     str = getstring(requestedstring,'units',true) returns latex-formatted
+%     str = getstring(request,'units',true) returns latex-formatted
 %     string for requested string with units. Default behavior is 'units',false.
 %  
 % Optional inputs
@@ -31,28 +31,31 @@ function str = getstring(requestedstring,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 
-%-------------------------------------------------------------------------------
-p               = inputParser;
-p.FunctionName  = 'getstring';
-p.CaseSensitive = false;
+% parse inputs
+[request, units, interpreter] = parseinputs(request, varargin{:});
 
-addRequired(   p,'requestedstring',          @(x)ischar(x)     );
-addParameter(  p,'units',           false,   @(x)islogical(x)  );
-
-parse(p,requestedstring,varargin{:});
-units = p.Results.units;
-%-------------------------------------------------------------------------------
-
+% main function
 if units == true
-   str = getStringWithUnits(requestedstring);
+   str = getStringWithUnits(request);
 else
-   str = getStringWithoutUnits(requestedstring);
+   str = getStringWithoutUnits(request);
+end
+
+% convert to tex
+switch interpreter
+   case 'tex'
+      str = bfra.util.latex2tex(str);
+   case 'latex'
+      
+   otherwise
+      error('unrecognized interpreter')
 end
 
 
-function str = getStringWithUnits(requestedstring)
+% subfunctions
+function str = getStringWithUnits(request)
 
-switch requestedstring
+switch request
    
    case 'Q'
       
@@ -95,9 +98,9 @@ switch requestedstring
 end
 
 
-function str = getStringWithoutUnits(requestedstring)
+function str = getStringWithoutUnits(request)
 
-switch requestedstring
+switch request
    
    case 'Q'
       str = '$Q$';
@@ -128,4 +131,23 @@ switch requestedstring
       
    case {'R','Rainfall'}
       str = 'Rainfall';
+end
+
+
+function [request, units, interpreter] = parseinputs(request, varargin);
+
+p = inputParser;
+p.FunctionName  = 'bfra.getstring';
+p.CaseSensitive = false;
+
+addRequired(p, 'request', @(x)ischar(x) );
+addParameter(p, 'units', false, @(x)islogical(x) );
+addParameter(p, 'interpreter', 'latex', @(x)ischar(x) );
+
+parse(p,request,varargin{:});
+units = p.Results.units;
+interpreter = p.Results.interpreter;
+
+if bfra.util.isoctave
+   interpreter = 'tex';
 end

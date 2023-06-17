@@ -55,7 +55,7 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
 %     ended up adding too many other things
    
    % mgc added these
-   [x,y] = prepareCurveData(x,y); 
+   [x,y] = bfra.util.prepCurveData(x,y); 
    if isempty(x) || isempty(y) || all(isnan(x)) || all(isnan(y))
       ab=nan; stats=nan; return
    end

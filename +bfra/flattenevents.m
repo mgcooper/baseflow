@@ -29,7 +29,8 @@ nEvents  = numel(Info.istart);
 nData    = Info.datalength;
 q        = nan(nData,1);
 r        = nan(nData,1);
-t        = NaT(nData,1,'Format','dd-MMM-uuuu HH:mm:ss');
+% t        = NaT(nData,1,'Format','dd-MMM-uuuu HH:mm:ss');
+t        = nan(nData,1);
 tags     = nan(nData,1);
 
 eventCount = 0;                      % initialize event counter

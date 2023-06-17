@@ -2,7 +2,7 @@
 
 A matlab toolbox for characterizing aquifer properties from streamflow measurements using baseflow recession analysis. Developed at the Pacific Northwest National Laboratory to study changes in soil water storage in Arctic and Subarctic watersheds. Supported by the Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project. For a quick introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).
 
-[![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mgcooper/baseflow?include_prereleases) [![MATLAB](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml) [![GitHub license](https://img.shields.io/github/license/mgcooper/baseflow)](https://github.com/mgcooper/baseflow/blob/main/LICENSE)
+[![status](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3/status.svg)](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3) [![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mgcooper/baseflow?include_prereleases) [![MATLAB](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml) [![GitHub license](https://img.shields.io/github/license/mgcooper/baseflow)](https://github.com/mgcooper/baseflow/blob/main/LICENSE)
 
 <!-- [![View baseflow on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/<insert final part of baseflow link here>) -->  
 
@@ -107,6 +107,7 @@ Octave is not currently supported due to missing functionality in the `tabliciou
 `baseflow` has been tested on macOS with Octave v8.1.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). If running in Octave, the following packages are required:
 
 `struct`
+`optim`
 `statistics`
 `tablicious`
 
@@ -116,6 +117,7 @@ To see which packages are installed:
 To install packages, use the pkg command in Octave:
 
 `pkg install -forge struct`
+`pkg install -forge optim`
 `pkg install -forge statistics`
 
 Install tablicious from the repository:
@@ -123,6 +125,7 @@ Install tablicious from the repository:
 
 Each time you use the baseflow toolbox, these packages need to be loaded:
 `pkg load struct`
+`pkg load optim`
 `pkg load statistics`
 `pkg load tablicious`
 

@@ -1,0 +1,22 @@
+/*note: this is for npm*/
+{
+  "name": "baseflow",
+  "version": "0.1.0",
+  "description": "MATLAB/Octave toolbox for baseflow recession analysis",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "demos": "demos/bfra_example_1.m"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mgcooper/baseflow.git"
+  },
+  "author": "Matthew Cooper <mguycooper at gmail.com>",
+  "license": "GPL-3.0-or-later OR BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/mgcooper/baseflow/issues"
+  },
+  "homepage": "https://mgcooper.github.io/baseflow/"
+}

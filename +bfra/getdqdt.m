@@ -96,7 +96,7 @@ end
 
 
 % this is the case where dQ/dt and q are returned without fitting a/b
-if fitmethod == "none" || pickmethod == "none"
+if strcmp(fitmethod,'none') || strcmp(pickmethod,'none')
 
    varargout{1} = nan;
    varargout{2} = nan;
@@ -145,27 +145,26 @@ end
 
 
 numPicks = numel(Picks.Q);
-T     = cell(numPicks,1);
-Q     = cell(numPicks,1);
-R     = cell(numPicks,1);
-dT    = cell(numPicks,1);
-dQdT  = cell(numPicks,1);
-
+T = cell(numPicks,1);
+Q = cell(numPicks,1);
+R = cell(numPicks,1);
+dT = cell(numPicks,1);
+dQdT = cell(numPicks,1);
 
 for m = 1:numPicks
 
-   istart  = Picks.istart(m);
-   istop   = Picks.istop(m);
+   istart = Picks.istart(m);
+   istop = Picks.istop(m);
 
    % previously these were put into Fits structure but I
-   Q{m}     = q(istart:istop);
-   dQdT{m}  = dqdt(istart:istop);
-   dT{m}    = dt(istart:istop);
-   T{m}     = tq(istart:istop);
-   R        = rq(istart:istop);
+   Q{m} = q(istart:istop);
+   dQdT{m} = dqdt(istart:istop);
+   dT{m} = dt(istart:istop);
+   T{m} = tq(istart:istop);
+   R = rq(istart:istop);
 
-   Info.istart(m)      = istart;
-   Info.istop(m)       = istop;
-   Info.runlengths(m)  = Picks.runlengths(m);
+   Info.istart(m) = istart;
+   Info.istop(m) = istop;
+   Info.runlengths(m) = Picks.runlengths(m);
 end
 

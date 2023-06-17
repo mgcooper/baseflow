@@ -51,7 +51,7 @@ if nargin == 1
 end
 X = x;
 x = x(x>xmin)-xmin;
-[x,~] = prepareCurveData(x,x);
+[x,~] = bfra.util.prepCurveData(x,x);
 
 % get k, klow, and khigh then convert to b
 Dist = fitdist(x,'GeneralizedPareto');
@@ -209,7 +209,7 @@ if plotfit == true
    % % test using plplot instead
    % aci = [alphaH alphaL];
    % x = X(X>0);
-   % [x,~] = prepareCurveData(x,x);
+   % [x,~] = bfra.util.prepCurveData(x,x);
    % figure;
    % bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
 end

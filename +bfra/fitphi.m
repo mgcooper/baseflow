@@ -37,7 +37,7 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
-p              = inputParser;
+p = inputParser;
 p.StructExpand = false;
 p.FunctionName = 'fitphi';
 

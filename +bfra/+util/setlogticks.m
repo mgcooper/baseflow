@@ -6,19 +6,20 @@ function setlogticks(ax,varargin)
 % See also
 
 % --------------- parse inputs
-p = bfra.deps.magicParser;
+p = inputParser;
 p.FunctionName = mfilename;
 p.addRequired( 'ax', @(x)bfra.validation.isaxis(x));
 p.addParameter('axset', 'xy', @(x)ischar(x));
 p.addParameter('minxticks', 2, @(x)isnumeric(x)); % minimum # of ticks
 p.addParameter('minyticks', 2, @(x)isnumeric(x)); % minimum # of ticks
-p.parseMagically('caller');
+p.parse(ax,varargin{:});
+opts = p.Results;
 
 % --------------- get axis limits
-xlims = ax.XLim;
-ylims = ax.YLim;
-xticks = ax.XTick;
-yticks = ax.YTick;
+xlims = get(ax,'XLim');
+ylims = get(ax,'YLim');
+xticks = get(ax,'XTick');
+yticks = get(ax,'YTick');
 
 % get the number of decades spanned by each axis and ensure 2 ticks for one
 % decade or max 5 ticks for >5 decades
@@ -34,23 +35,23 @@ if isnumeric(xlims)
 end
 
 
-% need to check if ax.XTickMode or ax.XTickLabelMode is manual
+% need to check if get(ax,'XTickMode or get(ax,'XTickLabelMode is manual
 skipx = false;
 skipy = false;
-if strcmp(ax.XTickMode,'manual'); skipx = true; end
-if strcmp(ax.YTickMode,'manual'); skipy = true; end
+if strcmp(get(ax,'XTickMode'),'manual'); skipx = true; end
+if strcmp(get(ax,'YTickMode'),'manual'); skipy = true; end
 
-% Update Nov 2022: added numel(ax.XTick) b/c I am pretty sure I am getting the
+% Update Nov 2022: added numel(get(ax,'XTick) b/c I am pretty sure I am getting the
 % number of ticks and only resetting them if there are less than two. Also,
 % added isnumeric check for categorical boxchart axes.
 
 % if the axes only span <1 order of magnitude and there are already
 % ticks, don't replace them with the decades
-if isnumeric(xlims) && numdecx < 1; numticks = numel(ax.XTick);
+if isnumeric(xlims) && numdecx < 1; numticks = numel(get(ax,'XTick'));
    if numticks > 2; skipx = true; else, sub10x = true; end
 end
 
-if isnumeric(ylims) && numdecy < 1; numticks = numel(ax.YTick);
+if isnumeric(ylims) && numdecy < 1; numticks = numel(get(ax,'YTick'));
    if numticks > 2; skipy = true; else, sub10x = true; end
 end
 
@@ -77,12 +78,12 @@ else
    skipy = true;
 end
 
-switch axset
+switch opts.axset
    case 'xy'
 
       if skipx == false
 
-         if numel(xticks)<minxticks
+         if numel(xticks) < opts.minxticks
 
             % need to determine which new ticks to add, for now assume
             % we need to add one tick, covering the case where only one
@@ -94,23 +95,23 @@ switch axset
             iticks = find(tickdist == min(tickdist),1,'first');
             xticks = sort([xticks,10^newticks(iticks)]);
          end
-         ax.XTick = xticks;
+         set(ax,'XTick',xticks);
       end
 
       if skipy == false
-         ax.YTick = yticks;
+         set(ax,'YTick',yticks);
       end
 
    case 'x'
 
       if skipx == false
-         ax.XTick = xticks;
+         set(ax,'XTick',xticks);
       end
 
    case 'y'
 
       if skipy == false
-         ax.YTick = yticks;
+         set(ax,'YTick',yticks);
       end
 end
 

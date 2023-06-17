@@ -50,7 +50,7 @@ addParameter(p,'timestep',    1,                @(x)isnumeric(x));
 addParameter(p,'addlegend',   true,             @(x)islogical(x));
 addParameter(p,'usertext',    '',               @(x)ischar(x));
 addParameter(p,'rain',        nan,              @(x)isnumeric(x));
-addParameter(p,'ax',          'none',           @(x)bfra.validation.isaxis(x)|ischar(x));
+addParameter(p,'ax', bfra.util.emptyaxes,       @(x)bfra.validation.isaxis(x));
 
 parse(p,q,dqdt,varargin{:});
 
@@ -68,17 +68,17 @@ ax          = p.Results.ax;
 
 % Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
 %-------------------------------------------------------------------------------
-   
-if not(bfra.validation.isaxis(ax))
-   fig = figure('Position',[380 200 300 210]); ax = gca;
-   %fig = figure('Position',[380 200 550 510]); ax = gca;
+
+if not(bfra.validation.isaxis(ax)) || isempty(ax)
+   %fig = figure('Position',[380 200 300 210]); ax = gca;
+   fig = figure('Position',[380 200 550 510]); ax = gca;
    %fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
 else
    fig = get(ax,'Parent');
 end
 
 h0 = loglog(ax,q,-dqdt,'o'); 
-bfra.util.formatPlotMarkers('markersize',6); 
+bfra.util.formatPlotMarkers('markersize',6);
 hold on; grid off;
 
 % add circles around the t>tau0 values if requested
@@ -89,20 +89,28 @@ else
 end
 
 % add some space around the data
-xlims    = xlim;
-ylims    = ylim;
-ylowlim  = min(ylims);
-yupplim  = max(ylims);
+xlims = xlim;
+ylims = ylim;
+ylowlim = min(ylims);
+yupplim = max(ylims);
 
 xlim([xlims(1)*.9 xlims(2)*1.1]);
 % xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
 
-% set xylabels
-xlabel(bfra.getstring('Q','units',true),'FontSize',14);
-ylabel(bfra.getstring('dQdt','units',true),'FontSize',14);
+% set xylabels and init containers for reflines
+if bfra.util.isoctave
+   xlabel('Q (m^3 d^{-1})','FontSize',14, 'Interpreter', 'tex');
+   ylabel('-dQ/dt (m^3 d^{-2})','FontSize',14, 'Interpreter', 'tex');
+   
+   h = zeros(numel(reflines),1);
+else
+   xlabel(bfra.getstring('Q','units',true),'FontSize', 14, 'Interpreter', 'latex');
+   ylabel(bfra.getstring('dQdt','units',true),'FontSize',14, 'Interpreter', 'latex');
+   
+   h = gobjects(numel(reflines),1);
+end
 
-% init containers
-h  = gobjects(numel(reflines),1);
+% initialize array to hold parameters a and b
 ab = nan(numel(reflines),2);
 
 
@@ -120,7 +128,7 @@ for n = 1:numel(reflines)
                            'mask',mask                   ...
                            );
 
-         h(n).LineWidth = 1;
+         set(h(n),'LineWidth',1);
 
       case 'late'
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
@@ -131,7 +139,7 @@ for n = 1:numel(reflines)
                            'mask',mask                   ...
                            );
 
-         h(n).LineWidth = 1;
+         set(h(n),'LineWidth',1);
 
       case 'upperenvelope'
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
@@ -159,7 +167,7 @@ for n = 1:numel(reflines)
                            'labels',false                ...
                            );
 
-         h(n).LineWidth = 2;
+         set(h(n),'LineWidth',2);
 
       case 'userfit'
 
@@ -211,36 +219,48 @@ if addlegend == true
       % ------------------------------------
 
       % only put bestfit in the legend
-      ibf   = strcmp(reflines,'bestfit');
-      hleg  = h(ibf);
-      ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
-      ltext = [ltext ' (' upper(usertext) ' fit)']; 
-      %ltext = [ltext ' (nonlinear least-squares)'];
+      keep = strcmp(reflines,'bestfit');
+      hleg = h(keep);
+      ltxt = bfra.aQbString(ab(keep,:),'printvalues',true);
+      ltxt = [ltxt ' (' upper(usertext) ' fit)']; 
+      %ltxt = [ltxt ' (nonlinear least-squares)'];
 
    % check if either userfit or bestfit are requested
    elseif any(ismember(fitcheck,reflines))
 
       % use whichever one was requested
-      ibf   = ismember(reflines,fitcheck);
-      hleg  = h(ibf);
-      ltext = bfra.aQbString(ab(ibf,:),'printvalues',true);
+      keep = ismember(reflines,fitcheck);
+      hleg = h(keep);
+      ltxt = bfra.aQbString(ab(keep,:),'printvalues',true);
 
       if ~isempty(usertext)
-         ltext = [ltext ' (' upper(usertext) ' fit)'];
+         ltxt = [ltxt ' (' upper(usertext) ' fit)'];
       elseif ~any(ismember(reflines,'userfit'))
-         ltext = [ltext ' (NLS fit)'];
+         ltxt = [ltxt ' (NLS fit)'];
       elseif ~any(ismember(reflines,'bestfit'))
-         ltext = [ltext ' (MLE fit)'];
+         ltxt = [ltxt ' (MLE fit)'];
       end
 
    end
 
    if isobject(hrain)
-      hleg  = [hleg hrain];
-      ltext = {ltext,'rain'};
+      hleg = [hleg hrain];
+      ltxt = {ltxt,'rain'};
    end
 
-   l = legend(hleg,ltext,'location','nw','interpreter','latex','AutoUpdate','off');
+   ltxt = strrep(ltxt,'$','');
+      l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
+         'AutoUpdate','off');
+      
+%    if bfra.util.isoctave
+%       ltxt = strrep(ltxt,'$','');
+%       l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
+%          'AutoUpdate','off');
+%    else
+%       l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...
+%          'AutoUpdate','off');
+%    end
+   
 else
    l = nan;
 end
@@ -252,24 +272,17 @@ out.mask       = h1;
 out.reflines   = h;
 out.ax         = gca;
 out.hrain      = hrain;
-%    out.hcloud    = h0;
-%    out.hb1       = h1;
-%    out.hb3       = h2;
-%    out.hupper    = h3;
 out.legend     = l;
-
-% 
-%    out.ab         = ab;
 
 % snapnow;
 
 
 function hrain = plotrain(ax,h,rain,x,y)
    
-   % ax is the axis to plot into
-   % h is the handle of the plotted q/dqdt to get the marker size to scale
-   % the rain circles
-   % x and y are q -dqdt
+% ax is the axis to plot into
+% h is the handle of the plotted q/dqdt to get the marker size to scale
+% the rain circles
+% x and y are q -dqdt
    
 % add rain. scale the circles such that 1 mm of rain equals the size of
 % the plotted circles 
@@ -277,14 +290,14 @@ if sum(rain)==0
    hrain = nan;
 else
 
-% scatter is producing pixelated symbols so I use plot instead
-  %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
-  %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
+   % scatter is producing pixelated symbols so I use plot instead
+   % sz = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
+   % scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
 
-  % this mimics the way scatter scales the circles
-   sz    = h.MarkerSize + sqrt(pi.*(rain(rain>0)).^2);
-   x     = x(rain>0);
-   y     = y(rain>0);
+   % this mimics the way scatter scales the circles
+   sz = get(h,'MarkerSize') + sqrt(pi.*(rain(rain>0)).^2);
+   x = x(rain>0);
+   y = y(rain>0);
 
    hold on;
    for n = 1:numel(sz)

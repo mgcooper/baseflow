@@ -3,7 +3,7 @@ source('Setup.m')
 # To install the required packages, use the following:
 # pkg install -forge struct
 # pkg install -forge statistics
-# pkg install -forge tablicious
+# pkg install -verbose -forge tablicious
 # pkg install -forge optim
 
 # To see which packages are installed:
@@ -12,14 +12,38 @@ source('Setup.m')
 pkg load struct
 pkg load statistics
 pkg load tablicious
-# pkg load optim (not needed for now)
+pkg load optim
+
+# may need pkg load nan
+
+# Could add this to readme:
+% On Linux use your package manager to install Octave packages:
+% `apt-get install octave-statistics`
+
+% Or download, compile and install packages in Octave:
+% `pkg install -forge statistics`
+
+% Resolve errors due to required packages that are not installed e.g. io:
+
+% `pkg install -forge io`
+
+% – On Windows all packages are usually installed with Octave. Consult the Octave documentation for more information.
+
+% For help with windows installation see [octave beginner's guide](http://calliope.dem.uniud.it/CLASS/ING-AMB/2018/GNU-Octave-for-beginners.pdf).
+
+% Install octave:
+% MacOS: brew install octave
+% Windows: choco install octave or download
+% Linux: Flatpak
+
+
+# Enable the Octave:language-extension warning if you want to be told about writing code that works in Octave but not MATLAB: 
+# warning("on", "Octave:language-extension")
 
 # if for some reason Setup.m is not working, try something like this:
 # addpath(pwd());
 # rmpath([pwd() filesep "+bfra"]);
 # rmpath([pwd() filesep "demos"]);
 # rmpath([pwd() filesep ".git"]);
-
-# warning("off", "Octave:language-extension")
 
 # check this for building docs: https://github.com/gnu-octave/pkg-octave-doc

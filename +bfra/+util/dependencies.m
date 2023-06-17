@@ -65,7 +65,7 @@ function report = getdependencyreport(funclist,prodlist,funcname)
 skip = {'+bfra',funcname,'ExtractNameVal','Cupid'};
 keep = true(numel(funclist),1);
 for n = 1:numel(funclist)
-   keep(n) = ~contains(funclist{n},skip);
+   keep(n) = ~ismember(funclist{n},skip);
 end
 report.function_dependencies = funclist(keep);
 report.product_dependencies = prodlist;
@@ -96,7 +96,7 @@ missing = funclist;
 skip = {'+bfra',funcname,'ExtractNameVal','Cupid'};
 keep = true(numel(missing),1);
 for n = 1:numel(missing)
-   keep(n) = ~contains(missing{n},skip);
+   keep(n) = ~ismember(missing{n},skip);
 end
 missing = missing(keep);
 
@@ -104,19 +104,19 @@ missing = missing(keep);
 skip = {'bfra/util'};
 keep = true(numel(missing),1);
 for n = 1:numel(missing)
-   keep(n) = ~contains(missing{n},skip);
+   keep(n) = ~ismember(missing{n},skip);
 end
 missing = missing(keep);
 
 % % since I use addpath(...,'-end'), the dependency check finds functions in my
 % main function folder not the ones in bfra/util. 
-% % now check if funclist contains paths to versions elsewhere that are in util .
+% % now check if funclist ismember paths to versions elsewhere that are in util .
 % % what remains are missing. 
 keep = true(numel(missing),1);
 for n = 1:numel(missing)
    [~,funcname] = fileparts(missing{n});
    allfuncs = which(funcname,'-all');
-   if any(contains(allfuncs,fullfile('bfra','util',funcname)))
+   if any(ismember(allfuncs,fullfile('bfra','util',funcname)))
       keep(n) = false;
    end
 end

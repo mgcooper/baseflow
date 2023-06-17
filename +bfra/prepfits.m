@@ -1,4 +1,4 @@
-function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
+function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)
 %PREPFITS preps q and -dq/dt for event-scale fitting
 %
 % Syntax
@@ -20,46 +20,33 @@ function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
 %  See also: fitab
 
 %-------------------------------------------------------------------------------
-p              = inputParser;
-p.FunctionName = 'prepfits';
+p = inputParser;
+p.FunctionName = 'bfra.prepfits';
 
-addRequired(p,    'q',                           @(x)isnumeric(x)  );
-addRequired(p,    'dqdt',                        @(x)isnumeric(x)  );
+addRequired(p,    'q',                          @(x)isnumeric(x)  );
+addRequired(p,    'dqdt',                       @(x)isnumeric(x)  );
 addParameter(p,   'weights',  ones(size(q)),    @(x)isnumeric(x)  );
 addParameter(p,   'mask',     true(size(q)),    @(x)islogical(x)  );
 
 parse(p,q,dqdt,varargin{:});
 
-weights  = p.Results.weights;
-mask     = p.Results.mask;
-
+w = p.Results.weights;
+m = p.Results.mask;
 %-------------------------------------------------------------------------------
 
-% take the negative dq/dt values
-ok       = dqdt<0;
-x        = abs(q(ok));
-y        = abs(dqdt(ok));
-weights  = weights(ok);
-mask     = mask(ok);
+% keep the negative dq/dt values
+keep = dqdt<0;
+x = abs(q(keep));
+y = abs(dqdt(keep));
+w = w(keep);
+m = m(keep);
 
 % convert the mask to weights
-weights(mask==false) = 0;
+w(m==false) = 0;
 
-logx  = log(x);
-logy  = log(y);
+[x, y, w] = bfra.util.prepCurveData(x, y, w);
+[logx, logy, w] = bfra.util.prepCurveData(log(x), log(y), w);
 
-[  x,    ...
-   y,    ...
-   weights ]   = prepareCurveData( x, y, weights );
-
-
-[  logx, ...
-   logy, ...
-   weights ]   = prepareCurveData(logx,logy,weights);
-
-
-success = true;
-if numel(y)<4 % || numnodif >4
-   success = false;
-end
+% failure check
+ok = numel(y)>3;
 

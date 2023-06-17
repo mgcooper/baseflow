@@ -36,12 +36,16 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
+persistent inoctave
+if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
+end
+
 % if nmin is set to 0 (and maybe if it is set to 1) this method will fail
 % because runlength returns 1 for consecutive nan values, see isminlength.
 
 % parse inputs
 %-------------------------------------------------------------------------------
-p              = inputParser;
+p = inputParser;
 p.FunctionName = 'eventsplitter';
 
 addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)     );
@@ -79,10 +83,17 @@ debug       = false;
 %    end    
 %-------------------------------------------------------------------------------
 
+% import bfra.util.islocalmax
+
 % below follows recommendations in Dralle et al. 2017
 
 % get a 3-day smoothed timeseries to control false positive convexity
-qsmooth = smoothdata(q,'movmean',3);
+if inoctave
+   qsmooth = bfra.util.nanmovmean(q,3);
+else
+   qsmooth = movmean(q,3,'omitnan');
+end
+
 
 % Part 1: find data to be excluded (run the filters)
 
@@ -209,5 +220,10 @@ if debug == true
    % end
 end
 
+function tf = islocalmax(X)
+tf = false(size(X));
+tf(bfra.deps.peakfinder(X,0,0,1,false)) = true;
 
-
+function tf = islocalmin(X)
+tf = false(size(X));
+tf(bfra.deps.peakfinder(X,0,0,-1,false)) = true;

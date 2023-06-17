@@ -18,12 +18,6 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 
       %-------------------------------------------
       %-------------------------------------------
-      % function test_setup(testCase,SetupOption)
-      %    
-      % end
-
-      %-------------------------------------------
-      %-------------------------------------------
       function test_getstring(testCase,VarStr)
 
       switch VarStr
@@ -250,8 +244,24 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 
       % Verify that the actual result matches the expected result
       testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
+      end
 
-      % for debugging
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_basinname(testCase,BasinName)
+
+      % get the basin name from the database
+      ActualName = bfra.basinname(BasinName);
+
+      % Verify that the actual result matches the expected result
+      testCase.verifyEqual(BasinName,ActualName);
+
+      end
+
+   end
+end
+
+% for debugging test_eventfinder
       % --------------
       % convert to start/stop indices. remove the peak + 1 day, and the min.
       % ievent1 = idx(1,1)+2 : idx(1,2)-1;
@@ -281,21 +291,4 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 %       % remove the peak + 1 day, and the min
 %       s1 = s1+2; s2 = s2+2;
 %       e1 = e1-1; e2 = e2-1;
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_basinname(testCase,BasinName)
-
-      % get the basin name from the database
-      ActualName = bfra.basinname(BasinName);
-
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual(BasinName,ActualName);
-
-      end
-
-   end
-end
 

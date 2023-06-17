@@ -26,14 +26,14 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
-p              = inputParser;
+p = inputParser;
 p.FunctionName = 'fitvts';
 
-addRequired(p, 'T',                 @(x)isnumeric(x)|isdatetime(x));
-addRequired(p, 'Q',                 @(x)isnumeric(x));
-addRequired(p, 'R',                 @(x)isnumeric(x));
-addParameter(p,'vtsparam', 1,       @(x)isnumeric(x)); % default=1 m3/d
-addParameter(p,'plotfit',  false,   @(x)islogical(x));
+addRequired(p, 'T', @(x)isnumeric(x)|isdatetime(x));
+addRequired(p, 'Q', @(x)isnumeric(x));
+addRequired(p, 'R', @(x)isnumeric(x));
+addParameter(p,'vtsparam', 1, @(x)isnumeric(x)); % default=1 m3/d
+addParameter(p,'plotfit', false, @(x)islogical(x));
 
 parse(p,T,Q,R,varargin{:});
 

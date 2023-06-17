@@ -24,7 +24,7 @@ y = y(:);  % only single linear regression is supported
 [y,naninds] = bfra.util.rmnan(y);
 x(naninds) = [];
 
-[x,y] = prepareCurveData(x,y);
+[x,y] = bfra.util.prepCurveData(x,y);
 
 if all(isempty(x)) || all(isempty(y)) || all(isnan(x)) || all(isnan(y))
    ab = [nan nan]; xfit = nan; yfit = nan;

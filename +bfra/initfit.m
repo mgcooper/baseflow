@@ -23,7 +23,8 @@ switch fittype
       dt    = nan(N,1);
       rq    = nan(N,1);
       r2    = nan(N,1);
-      tq    = NaT(N,1);
+      tq    = nan(N,1);
+%       tq    = NaT(N,1);
 %       tq    = NaT(N,1,'Format','dd-MMM-uuuu HH:mm:ss');
       
    case 'eventab'

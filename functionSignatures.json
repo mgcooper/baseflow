@@ -16,7 +16,7 @@
       [
          {"name":"ab",           "kind":"ordered","type":["vector","double"]},
          {"name":"Q0",           "kind":"ordered","type":["scalar","double"]},
-         {"name":"printvalues",  "kind":"namevalue", "type":["logical"],"purpose":"Option"}
+         {"name":"printvalues",  "kind":"namevalue", "type":["logical", "scalar"],"purpose":"Option"}
       ]
    },
    "bfra.aquiferprops":
@@ -27,14 +27,15 @@
          {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
          {"name":"alate",     "kind": "required",  "type": ["scalar","double"]},
          {"name":"blate",     "kind": "required",  "type": ["scalar","double"]},
+         {"name":"soln",      "kind": "required",  "type": ["char", "choices={'RS05','BS04','Rupp and Selker, 2005','Boussinesq, 1904 b=3/2'}"],"default":"'BS04'","purpose":"Option"},
          {"name":"phi",       "kind": "required",  "type": ["scalar","double"]},
          {"name":"A",         "kind": "required",  "type": ["scalar","double"]},
-         {"name":"D",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"L",         "kind": "required",  "type": ["scalar","double"]},
-         {"name":"soln",      "kind": "namevalue", "type": ["char", "choices={'RS05','BS04','Rupp and Selker, 2005','Boussinesq, 1904 b=3/2'}"],"default":"'RS05'","purpose":"Option"},
          {"name":"earlyqtls", "kind": "namevalue", "type": ["vector","double"]},
          {"name":"lateqtls",  "kind": "namevalue", "type": ["vector","double"]},
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]},
+         {"name":"Q0",        "kind": "namevalue", "type": ["scalar","double"]},
+         {"name":"D",         "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"Dd",        "kind": "namevalue", "type": ["scalar","double"]}
       ]
    },
@@ -230,7 +231,6 @@
          {"name":"Q",         "kind":"required",   "type":["vector","double"]},
          {"name":"R",         "kind":"required",   "type":["vector","double"]},
          {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
-         {"name":"fitab",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
@@ -356,8 +356,9 @@
    {
       "inputs":
       [
-         {"name":"requestedstring", "kind":"required",   "type":["char"]},
-         {"name":"units",           "kind":"namevalue",  "type":["logical"],"purpose":"Option"}
+         {"name":"request",      "kind":"required",   "type":["char"]},
+         {"name":"units",        "kind":"namevalue",  "type":["logical"],"purpose":"Option"},
+         {"name":"interpreter",  "kind":"namevalue",  "type":["char","choices={'latex','tex'}"]}
       ]
    },
    "bfra.globalfit":
@@ -743,6 +744,13 @@
          {"name":"wstyle",   "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},
          {"name":"hstyle",   "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},
          {"name":"style",    "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"}
+      ]
+   },
+   "bfra.test.testdata":
+   {
+      "inputs":
+      [
+         {"name":"whichdata", "kind":"required",   "type": ["char", "choices={'example','tests'}"],"purpose":"Option" }
       ]
    }
 }

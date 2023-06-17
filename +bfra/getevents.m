@@ -105,6 +105,12 @@ asannual    = p.Results.asannual;
 
 %-------------------------------------------------------------------------------
 
+% test
+% try
+%    T = datetime(T,'ConvertFrom','datenum');
+% catch
+% end
+
 % allow empyt R i.e. input syntax getevents(T,Q,[],...)
 if isempty(R); R = zeros(size(Q)); end
 

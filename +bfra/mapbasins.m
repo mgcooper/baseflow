@@ -202,7 +202,7 @@ if facemapping == true
    h.cbar.Label.String = cbartxt;
    
    % default text use tex, otherwise depends on whats passed in
-   if contains(p.UsingDefaults,'cbartxt')
+   if ismember('cbartxt',p.UsingDefaults)
       %h.cbar.Label.Interpreter = 'tex'; 
    else
       h.cbar.Label.Interpreter = 'latex';

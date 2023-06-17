@@ -8,7 +8,7 @@ newlines = {[]};
 while true
    thisline = fgetl(fid);
    if ~ischar(thisline); break; end  % end of file
-   if contains(thisline,str_find)
+   if ismember(thisline,str_find)
       
       newlines{n} = thisline;
       

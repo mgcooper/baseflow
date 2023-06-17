@@ -52,7 +52,7 @@ addParameter(p,'plotline',    true,          @(x)islogical(x));
 addParameter(p,'linecolor',   [0 0 0],       @(x)isnumeric(x));
 addParameter(p,'precision',   1,             @(x)isnumeric(x)); % default = 1 m3/s
 addParameter(p,'timestep',    1,             @(x)isnumeric(x)); % default = 1 day
-addParameter(p,'ax',          gobjects(0),   @(x)bfra.validation.isaxis(x));
+addParameter(p,'ax', bfra.util.emptyaxes,    @(x)bfra.validation.isaxis(x));
 
 parse(p,x,y,varargin{:});
 
@@ -144,7 +144,7 @@ if plotline == true
    end
 
    % reset the x,ylims
-   set(ax,'XLim',xlims,'YLim',ylims,'TickLabelInterpreter','latex')
+   set(ax,'XLim',xlims,'YLim',ylims,'TickLabelInterpreter','tex')
    bfra.util.setlogticks(ax);
 
    if labels == true
@@ -183,7 +183,7 @@ switch refline
 
       ya = [ya ya];
 
-      if refline == "userfit"
+      if strcmp(refline, 'userfit')
          ta = sprintf('$b=%.2f$ ($\\hat{b}$)',b);
       elseif b==1 || b==3
          ta = sprintf('$b=%.0f$',b);
@@ -193,10 +193,12 @@ switch refline
          ta = sprintf('$b=%.2f$',b);
       end
 
-      bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
-         'BaseAngle',90,'Length',8,'TipAngle',10);
-      text(1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
-         'fontsize',13,'Interpreter','latex');
+      if ~bfra.util.isoctave
+         bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
+            'BaseAngle',90,'Length',8,'TipAngle',10);
+         text(1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
+            'fontsize',13,'Interpreter','latex');
+      end
 
    case 'upperenvelope'
 

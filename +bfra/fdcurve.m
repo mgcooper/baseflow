@@ -5,19 +5,13 @@ function fdc = fdcurve(flow,varargin)
 %
 % See also
 
-% --------------- if called with no input, open this file
+% if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% --------------- parse inputs
-p = bfra.deps.magicParser;
-p.FunctionName = 'bfra.fdcurve';
-p.addRequired( 'flow', @(x)isnumeric(x)  );
-p.addParameter('axscale', 'semilogy', @(x)ischar(x) );
-p.addParameter('units', '', @(x)ischar(x) );
-p.addParameter('refpoints', nan, @(x)isnumeric(x) );
-p.addParameter('plotcurve', true, @(x)islogical(x) );
-p.parseMagically('caller');
-%------------------------------
+% parse inputs
+[axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin{:});
+
+% main function
 
 N = length(flow);
 M = 1:N;
@@ -77,6 +71,23 @@ fdc.f = f;
 fdc.x = x;
 fdc.xref = xref;
 fdc.fref = fref;
+
+function [axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin)
+
+p = inputParser;
+p.FunctionName = 'bfra.fdcurve';
+p.addRequired( 'flow', @(x)isnumeric(x) );
+p.addParameter('axscale', 'semilogy', @(x) ischar(x) );
+p.addParameter('units', '', @(x) ischar(x) );
+p.addParameter('refpoints', nan, @(x)isnumeric(x) );
+p.addParameter('plotcurve', true, @(x)islogical(x) );
+p.parse(flow, varargin{:});
+
+refpoints = p.Results.refpoints;
+plotcurve= p.Results.plotcurve;
+axscale = p.Results.axscale;
+units = p.Results.units;
+
 
 % function [F,x] = ecdfpot(x,xmin,alpha,sigma)
 %

@@ -95,9 +95,21 @@ else
    bL = nan;
    bH = nan;
 end
-xlabel('$x$');
-ylabel(['$p(' varsym '\ge x)$'],'Interpreter','latex'); 
-h.legend = legend(l1,l2,'interpreter','latex','location','sw');
+
+xtext = '$x$';
+ytext = ['$p(' varsym '\ge x)$'];
+
+if bfra.util.isoctave
+   l1 = bfra.util.latex2tex(l1);
+   l2 = sprintf('MLE fit (b=%.2f [%.2f,%.2f] 95%% CI)',b,bL,bH);
+   xlabel(bfra.util.latex2tex(xtext),'Interpreter','tex'); 
+   ylabel(bfra.util.latex2tex(ytext),'Interpreter','tex'); 
+   h.legend = legend({l1,l2},'interpreter','tex','location','southwest');
+else
+   xlabel(xtext);
+   ylabel(ytext,'Interpreter','latex'); 
+   h.legend = legend({l1,l2},'interpreter','latex','location','southwest');
+end
 
 % h.legend.Position = [0.27 0.40 0.30 0.10];
 
@@ -114,12 +126,20 @@ if labelplot == true
    addlabels(xccfit,yccfit,xmin,xminL,xminH,b);
 end
 
+% add a little white space above P=1
 h.ax = gca;
-h.ax.YLim(2) = 1.5; % add a little white space above P=1
+ylimits = get(ax, 'YLim');
+ylimits(2) = 1.5;
+set(h.ax, 'YLim', ylimits); 
 
 
 function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
 %ADDLABELS add an arrow pointing to tau0 and tau_exp
+
+% 'arrow' is not octave compatible afaik
+if bfra.util.isoctave
+   return 
+end
 
 % tau0
 xminc = (tau0H-tau0+tau0-tau0L)/2;

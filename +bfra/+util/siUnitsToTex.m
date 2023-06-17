@@ -29,7 +29,7 @@ for i = 1:numel(units)
    end
 
    % Replace spaces with '\cdot' for TeX multiplication
-%    unit = strrep(unit, ' ', ' \cdot ');
+   % unit = strrep(unit, ' ', ' \cdot ');
 
    % Replace negative powers with LaTeX-style exponents
    unit = regexprep(unit, '(-\d+)', '^{$1}');
@@ -37,8 +37,12 @@ for i = 1:numel(units)
    % Replace positive powers with LaTeX-style exponents
    unit = regexprep(unit, '(\d+)', '^{$1}');
 
-   % Convert the unit to TeX format
-   tex_labels{i} = texlabel(unit);
+   if bfra.util.isoctave
+      tex_labels{i} = unit;
+   else
+      % Convert the unit to TeX format
+      tex_labels{i} = texlabel(unit);
+   end
 end
 
 % Replace '\{cdot}' with '\cdot' for proper TeX syntax

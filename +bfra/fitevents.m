@@ -38,7 +38,7 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 p = inputParser;
 p.FunctionName = 'fitevents';
 p.StructExpand = true;
-p.PartialMatching = true;
+% p.PartialMatching = true;
 
 addRequired(p, 'Events',               @(x) isstruct(x)                 );
 addParameter(p,'derivmethod', 'ETS',   @(x) ischar(x)                   );
@@ -74,10 +74,16 @@ eventTags   =  Events.eventTags;
 numEvents   =  max(eventTags);
 ax          =  'none';
 
+% try
+%    T = datetime(T,'ConvertFrom','datenum');
+% catch
+% end
+
 % initialize output structure and output arrays
 Fits.eventTime =  Events.eventTime;    % event-times
 Fits.eventFlow =  Events.eventFlow;    % detected event-Q
-Fits.t         =  NaT(size(Q));        % fitted t
+% Fits.t         =  NaT(size(Q));        % fitted t
+Fits.t         =  nan(size(Q));        % fitted t
 Fits.q         =  nan(size(Q));        % fitted Q
 Fits.r         =  nan(size(Q));        % rain
 Fits.dt        =  nan(size(Q));        % fitted dt
@@ -112,6 +118,8 @@ savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
 % identified. Both cases above can also lead to an iteration limit exceeded
 % error (warning IterationLimitExceeded).
 if bfra.util.isoctave == true
+   %warning('off','Octave:invalid-fun-call');
+   warning('off','Octave:nearly-singular-matrix');
 else
    warning('off','MATLAB:rankDeficientMatrix');
    warning('off','stats:nlinfit:IterationLimitExceeded');
@@ -181,6 +189,7 @@ end
 
 % TURN WARNINGS BACK ON
 if bfra.util.isoctave == true
+   warning('on','Octave:nearly-singular-matrix');
 else
    warning('on','MATLAB:rankDeficientMatrix');
    warning('on','stats:nlinfit:IterationLimitExceeded');
