@@ -34,45 +34,18 @@ function [Fits,Results] = fitevents(Events,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'fitevents';
-p.StructExpand = true;
-% p.PartialMatching = true;
+% PARSE INPUTS
 
-addRequired(p, 'Events',               @(x) isstruct(x)                 );
-addParameter(p,'derivmethod', 'ETS',   @(x) ischar(x)                   );
-addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
-addParameter(p,'fitorder',    'free',  @(x) ischar(x) | isnumeric(x)    );
-addParameter(p,'pickfits',    false,   @(x) islogical(x) & isscalar(x)  );
-addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
-addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
-addParameter(p,'saveplots',   false,   @(x) islogical(x) & isscalar(x)  );
-addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
-addParameter(p,'vtsparam',    1.0,     @(x) isnumeric(x) & isscalar(x)  );
+[derivmethod, fitmethod, fitorder, pickfits, pickmethod, plotfits, saveplots, ...
+   etsparam, vtsparam, fitopts] = parseinputs(Events, mfilename, varargin{:});
 
+% MAIN FUNCTION
 
-parse(p,Events,varargin{:});
-
-derivmethod = p.Results.derivmethod;
-fitmethod   = p.Results.fitmethod;
-fitorder    = p.Results.fitorder;
-pickfits    = p.Results.pickfits;
-pickmethod  = p.Results.pickmethod;
-plotfits    = p.Results.plotfits;
-saveplots   = p.Results.saveplots;
-etsparam    = p.Results.etsparam;
-vtsparam    = p.Results.vtsparam;
-fitopts     = struct(); % removed fitopts from parser, it may mess up autounpacking
-%-------------------------------------------------------------------------------
-
-% pull out the events
-T           =  Events.eventTime;       % time [days]
-Q           =  Events.eventFlow;       % daily discharge [m3 d-1] 
-R           =  Events.eventRain;       % daily rainfall [mm d-1]
-eventTags   =  Events.eventTags;
-numEvents   =  max(eventTags);
-ax          =  'none';
+eventTime = Events.eventTime;               % time [days]
+eventFlow = Events.eventFlow;               % daily discharge [m3 d-1] 
+eventRain = Events.eventRain;               % daily rainfall [mm d-1]
+eventTags = Events.eventTags;
+numEvents = max(eventTags);
 
 % try
 %    T = datetime(T,'ConvertFrom','datenum');
@@ -80,16 +53,15 @@ ax          =  'none';
 % end
 
 % initialize output structure and output arrays
-Fits.eventTime =  Events.eventTime;    % event-times
-Fits.eventFlow =  Events.eventFlow;    % detected event-Q
-% Fits.t         =  NaT(size(Q));        % fitted t
-Fits.t         =  nan(size(Q));        % fitted t
-Fits.q         =  nan(size(Q));        % fitted Q
-Fits.r         =  nan(size(Q));        % rain
-Fits.dt        =  nan(size(Q));        % fitted dt
-Fits.dqdt      =  nan(size(Q));        % fitted dQdt
-Fits.eventTags =  nan(size(Q));        % 1:numEvents
-Fits.fitTags   =  nan(size(Q));        % 1:numFits
+Fits.eventTime = Events.eventTime;            % event-times
+Fits.eventFlow = Events.eventFlow;            % detected event-Q
+Fits.eventTags = nan(size(eventFlow));        % 1:numEvents
+Fits.t         = nan(size(eventFlow));        % fitted t  % NaT(size(Q));
+Fits.q         = nan(size(eventFlow));        % fitted Q
+Fits.r         = nan(size(eventFlow));        % rain
+Fits.dt        = nan(size(eventFlow));        % fitted dt
+Fits.dqdt      = nan(size(eventFlow));        % fitted dQdt
+Fits.fitTags   = nan(size(eventFlow));        % 1:numFits
 nFits          =  0;
 
 if pickmethod == "none"
@@ -97,26 +69,9 @@ if pickmethod == "none"
 else
    Results = initFitTable(numEvents*4); % allocate up to 4 picks/event 
 end
-
 savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
 
-%-------------------------------------------------------------------------------
-% compute the recession constants
-%-------------------------------------------------------------------------------
-
-% A note on warnings. Nonlinear curve fitting to recession sequences generates a
-% few characteristic errors. One is when dQ/dt increases as Q decreases. This
-% could be interpreted to mean the recession sequence is not actually a
-% recession, but this interpretation is not applied here. This case tends to
-% produce a rank-deficient error from the left division of the jacobian (warning
-% rankDeficientMatrix), or an error that indicates some elements of the jacobian
-% are effectively zero at the solution (warning ModelConstantWRTParam), meaning
-% the model is insensitive to one or more parameters. Another case is when the Q
-% vs -dQ/dt relationship is convex, which the functional form does not
-% accomodate. This tends to produce an ill-conditioned Jacobian (warning
-% IllConditionedJacobian), which makes sense, it means the parameters cannot be
-% identified. Both cases above can also lead to an iteration limit exceeded
-% error (warning IterationLimitExceeded).
+% manage warnings
 if bfra.util.isoctave == true
    %warning('off','Octave:invalid-fun-call');
    warning('off','Octave:nearly-singular-matrix');
@@ -129,21 +84,22 @@ else
 end
 
 debugflag = false;
-   
+
+% compute the recession constants
 for thisEvent = 1:numEvents
 
-   eventIdx    = eventTags == thisEvent;
-   eventT      = T(eventIdx);
-   eventQ      = Q(eventIdx);
-   eventR      = R(eventIdx);
-   eventDate   = mean(eventT); % keep track of the event date
+   eventI = eventTags == thisEvent;
+   eventT = eventTime(eventI);
+   eventQ = eventFlow(eventI);
+   eventR = eventRain(eventI);
+   eventDate = mean(eventT); % keep track of the event date
 
    % if this is activated, need method to plot in getdqdt
    % if thisEvent == 1 && plotfits == true
    %    figure('Position',[1 1 658  576]); ax = gca;
    % end
    
-   % get the q, dq/dt estimates (H=Hat)
+   % get the q, dq/dt estimates (H = Hat)
    
    [qH,dH,dtH,tH] = bfra.getdqdt(eventT,eventQ,eventR,derivmethod,   ...
       'pickmethod',pickmethod,'fitmethod',fitmethod,'etsparam',etsparam, ...
@@ -173,7 +129,7 @@ for thisEvent = 1:numEvents
          [iFit,ok] = bfra.fitab(q,dqdt,fitmethod,'fitopts',fitopts);
       end
 
-      [Fits,Results,nFits] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod,...
+      [Fits,Results,nFits] = saveFit(eventTime,q,dqdt,dt,tq,derivmethod,fitmethod,...
          fitorder,eventDate,thisEvent,thisFit,nFits,Results,Fits,iFit,savevars,ok);
    end   
       
@@ -198,19 +154,17 @@ else
    warning('on','bfra:deps:rsquare:NegativeRsquared');
 end
 
-%-------------------------------------------------------------------------------
 % PREP FITS
-%-------------------------------------------------------------------------------
 function [q,dqdt,dt,tq,ok] = preparefit(q,dqdt,dt,tq,thisfit)
    
 % if there are multiple fits for an event, qHat, dHat, etc. will be cell
 % arrays. this pulls out the selected values to fit.
 
 if iscell(q)
-   q     = q{thisfit};
-   dqdt  = dqdt{thisfit};
-   dt    = dt{thisfit};
-   tq    = tq{thisfit};
+   q = q{thisfit};
+   dqdt = dqdt{thisfit};
+   dt = dt{thisfit};
+   tq = tq{thisfit};
 end
 
 % if no flow was returned, continue
@@ -220,9 +174,8 @@ else
    ok = true;
 end
 
-%-------------------------------------------------------------------------------
+
 % GET FITS
-%-------------------------------------------------------------------------------
 function [Fits,K,fitcount] = saveFit(T,q,dqdt,dt,tq,derivmethod,fitmethod, ...
    fitorder,eventdate,eventtag,fittag,fitcount,K,Fits,iFit,savevars,ok)
 
@@ -235,25 +188,25 @@ if ok == true
       K.(savevars{n})(fitcount) = iFit.(savevars{n});
    end
    
-   K.eventTag(fitcount)    = eventtag;
-   K.fitTag(fitcount)      = fittag;
+   K.eventTag(fitcount) = eventtag;
+   K.fitTag(fitcount) = fittag;
    
-%    K.method(fitcount)      = fitmethod;
-%    K.order(fitcount)       = fitorder;
-%    K.deriv(fitcount)       = derivmethod;
-%    K.station(fitcount)     = station;
-%    K.date(fitcount)        = eventdate;
+%    K.method(fitcount) = fitmethod;
+%    K.order(fitcount) = fitorder;
+%    K.deriv(fitcount) = derivmethod;
+%    K.station(fitcount) = station;
+%    K.date(fitcount) = eventdate;
   
 
    % collect all data for the point-cloud
-   fitIdx                  =  ismember(T,tq);
-   %fitIdx                  =  ismember(T,datenum(tq)); % TEST
-   Fits.q(        fitIdx)  =  q;
-   Fits.dqdt(     fitIdx)  =  dqdt;
-   Fits.dt(       fitIdx)  =  dt;
-   Fits.t(        fitIdx)  =  tq;
-   Fits.eventTags(fitIdx)  =  eventtag;
-   Fits.fitTags(  fitIdx)  =  fittag;
+   fitIdx = ismember(T,tq);
+   %fitIdx = ismember(T,datenum(tq)); % TEST
+   Fits.q(        fitIdx) = q;
+   Fits.dqdt(     fitIdx) = dqdt;
+   Fits.dt(       fitIdx) = dt;
+   Fits.t(        fitIdx) = tq;
+   Fits.eventTags(fitIdx) = eventtag;
+   Fits.fitTags(  fitIdx) = fittag;
    
    % at this point, with new ets retiming, we need to remove nan to have
    % eventTag and fitTag only span the rows with valid data, but as-is, we
@@ -264,44 +217,79 @@ else
    
    % this shouldn't be necessary since they're initialized to nan
    
-%    K.a(fitcount)         = nan;
-%    K.b(fitcount)         = nan;
-%    K.aL(fitcount)        = nan;
-%    K.bL(fitcount)        = nan;
-%    K.aH(fitcount)        = nan;
-%    K.bH(fitcount)        = nan;
-%    K.rsq(fitcount)       = nan;
-%    K.pvalue(fitcount)    = nan;
-%    K.N(fitcount)         = nan;
-%    K.eventTag(fitcount)  = eventtag;
-%    K.fitTag(fitcount)    = fittag;
+%    K.a(fitcount) = nan;
+%    K.b(fitcount) = nan;
+%    K.aL(fitcount) = nan;
+%    K.bL(fitcount) = nan;
+%    K.aH(fitcount) = nan;
+%    K.bH(fitcount) = nan;
+%    K.rsq(fitcount) = nan;
+%    K.pvalue(fitcount) = nan;
+%    K.N(fitcount) = nan;
+%    K.eventTag(fitcount) = eventtag;
+%    K.fitTag(fitcount) = fittag;
    
-   % K(idx).method    = method;
-   % K(idx).order     = order;
-   % K(idx).deriv     = deriv;
-   % K(idx).station   = station;
-   % K(idx).date      = date;
+   % K(idx).method = method;
+   % K(idx).order = order;
+   % K(idx).deriv = deriv;
+   % K(idx).station = station;
+   % K(idx).date = date;
 
 end
 
 
 function K = initFitTable(N)
 
-K.a         = nan(N,1);
-K.b         = nan(N,1);
-K.aL        = nan(N,1);
-K.bL        = nan(N,1);
-K.aH        = nan(N,1);
-K.bH        = nan(N,1);
-K.rsq       = nan(N,1);
-K.pvalue    = nan(N,1);
-K.N         = nan(N,1);
-K.eventTag  = nan(N,1);
-K.fitTag    = nan(N,1);
+K.a = nan(N,1);
+K.b = nan(N,1);
+K.aL = nan(N,1);
+K.bL = nan(N,1);
+K.aH = nan(N,1);
+K.bH = nan(N,1);
+K.rsq = nan(N,1);
+K.pvalue = nan(N,1);
+K.N = nan(N,1);
+K.eventTag = nan(N,1);
+K.fitTag = nan(N,1);
 
 % these need to be redefined as strings or chars or soemthing other than nan
-% K.method    = nan(N,1);
-% K.order     = nan(N,1);
-% K.deriv     = nan(N,1);
-% K.station   = nan(N,1);
-% K.date      = nan(N,1);
+% K.method = nan(N,1);
+% K.order = nan(N,1);
+% K.deriv = nan(N,1);
+% K.station = nan(N,1);
+% K.date = nan(N,1);
+
+
+function [derivmethod, fitmethod, fitorder, pickfits, pickmethod, plotfits, ...
+   saveplots, etsparam, vtsparam, fitopts] = parseinputs(Events, funcname, varargin)
+%PARSEINPUTS parse inputs
+
+import bfra.validation.*
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   parser.StructExpand = true;
+   addRequired( parser, 'Events',               @isstruct         );
+   addParameter(parser, 'derivmethod', 'ETS',   @ischar           );
+   addParameter(parser, 'fitmethod',   'nls',   @ischar           );
+   addParameter(parser, 'fitorder',    nan,     @isnumericscalar  );
+   addParameter(parser, 'pickfits',    false,   @islogicalscalar  );
+   addParameter(parser, 'pickmethod',  'none',  @ischar           );
+   addParameter(parser, 'plotfits',    false,   @islogicalscalar  );
+   addParameter(parser, 'saveplots',   false,   @islogicalscalar  );
+   addParameter(parser, 'etsparam',    0.2,     @isnumericscalar  );
+   addParameter(parser, 'vtsparam',    1.0,     @isnumericscalar  );
+end
+parse(parser,Events,varargin{:});
+
+fitopts = struct();
+fitorder = parser.Results.fitorder;
+pickfits = parser.Results.pickfits;
+plotfits = parser.Results.plotfits;
+etsparam = parser.Results.etsparam;
+vtsparam = parser.Results.vtsparam;
+saveplots = parser.Results.saveplots;
+fitmethod = parser.Results.fitmethod;
+pickmethod = parser.Results.pickmethod;
+derivmethod = parser.Results.derivmethod;

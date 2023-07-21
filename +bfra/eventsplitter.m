@@ -43,47 +43,15 @@ end
 % if nmin is set to 0 (and maybe if it is set to 1) this method will fail
 % because runlength returns 1 for consecutive nan values, see isminlength.
 
-% parse inputs
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'eventsplitter';
+% PARSE INPUTS
+[t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = ...
+   parseinputs(t, q, r, mfilename, varargin{:});
 
-addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)     );
-addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t));
-addRequired(p, 'r',                  @(x) isnumeric(x)                     );
-addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x) & x>2 );
-addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)       );
+debug = false;
 
-parse(p,t,q,r,varargin{:});
+import bfra.util.islocalmax
 
-nmin        = p.Results.nmin;
-fmax        = p.Results.fmax;
-rmax        = p.Results.rmax;
-rmin        = p.Results.rmin;
-rmconvex    = p.Results.rmconvex;
-rmnochange  = p.Results.rmnochange;
-rmrain      = p.Results.rmrain;
-
-debug       = false;
-
-%-------------------------------------------------------------------------------
-% % other way to parse inputs (not octave compatible):
-%    arguments
-%       t           datetime                         = NaT
-%       q           double                           = NaN
-%       r           double                           = zeros(size(q))
-%       opts.nmin   double {mustBePositive}          = 4
-%       opts.rmin   double {mustBePositive}          = 0
-%       opts.rmax   double {mustBePositive}          = 2
-%    end    
-%-------------------------------------------------------------------------------
-
-% import bfra.util.islocalmax
+% MAIN CODE
 
 % below follows recommendations in Dralle et al. 2017
 
@@ -227,3 +195,46 @@ tf(bfra.deps.peakfinder(X,0,0,1,false)) = true;
 function tf = islocalmin(X)
 tf = false(size(X));
 tf(bfra.deps.peakfinder(X,0,0,-1,false)) = true;
+
+%% INPUT PARSER
+
+function [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = ...
+   parseinputs(t, q, r, funcname, varargin)
+
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   addRequired(parser, 't',                  @bfra.validation.isdatelike);
+   addRequired(parser, 'q',                  @bfra.validation.isdoublevector);
+   addRequired(parser, 'r',                  @isnumeric);
+   addParameter(parser,'nmin',        4,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'fmax',        2,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmax',        2,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmin',        0,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmconvex',    false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'rmnochange',  false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'rmrain',      false, @bfra.validation.islogicalscalar);
+end
+parse(parser,t,q,r,varargin{:});
+
+nmin        = parser.Results.nmin;
+fmax        = parser.Results.fmax;
+rmax        = parser.Results.rmax;
+rmin        = parser.Results.rmin;
+rmconvex    = parser.Results.rmconvex;
+rmnochange  = parser.Results.rmnochange;
+rmrain      = parser.Results.rmrain;
+
+validateattributes(t, {'double'},{'size', size(q)}, funcname,'t', 1)
+validateattributes(nmin, {'double'},{'>', 2}, funcname,'nmin', 4)
+
+% allow empty r i.e. input syntax eventsplitter(t,q,[],...)
+if isempty(r)
+   r = zeros(size(t));
+end
+
+% convert to columns, in case this is not called from bfra.getevents
+t = t(:);
+q = q(:);
+r = r(:);

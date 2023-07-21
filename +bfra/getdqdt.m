@@ -5,7 +5,7 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
-%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitmethod)
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitmethod',fitmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
 %
@@ -31,48 +31,22 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
 %     plotfit  =  logical, scalar, indicates whether to plot the fit
 %
-% See also getdqdt
+% See also fitdqdt
 %
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-% if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
-
-%
 % Tip: this accepts pre-selected events, not raw timeseries. Use
 % bfra.findevents to pick Events, then bfra.getdqdt to fit the events.
 % This is a wrapper for multi-year, final analysis.
 
-%-------------------------------------------------------------------------------
-% input handling
-p                 = inputParser;
-p.FunctionName    = 'getdqdt';
-p.CaseSensitive   = true;
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
-addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x));
-addRequired(p, 'Q',                    @(x) isnumeric(x)                );
-addRequired(p, 'R',                    @(x) isnumeric(x)                );
-addRequired(p, 'derivmethod',          @(x) ischar(x)                   );
-addParameter(p,'vtsparam',    1,       @(x) isnumeric(x) & isscalar(x)  );
-addParameter(p,'etsparam',    0.2,     @(x) isnumeric(x) & isscalar(x)  );
-addParameter(p,'ctsmethod',   'B1',    @(x) ischar(x)                   );
-addParameter(p,'pickmethod',  'none',  @(x) ischar(x)                   );
-addParameter(p,'fitmethod',   'nls',   @(x) ischar(x)                   );
-addParameter(p,'plotfits',    false,   @(x) islogical(x) & isscalar(x)  );
-addParameter(p,'eventID',     'none',  @(x) ischar(x)                   );
+% PARSE INPUTS
+[vtsparam, etsparam, ctsmethod, pickmethod, fitmethod, plotfits, eventID] = ...
+   parseinputs(T,Q,R,derivmethod,mfilename,varargin{:});
 
-parse(p,T,Q,R,derivmethod,varargin{:});
-
-vtsparam    = p.Results.vtsparam;
-etsparam    = p.Results.etsparam;
-ctsmethod   = p.Results.ctsmethod;
-pickmethod  = p.Results.pickmethod;
-fitmethod   = p.Results.fitmethod;
-plotfits    = p.Results.plotfits;
-eventID     = p.Results.eventID;
-
-%-------------------------------------------------------------------------------
-
+% MAIN FUNCTION
 switch derivmethod
 
    case 'VTS'  % variable time step
@@ -97,11 +71,9 @@ end
 
 % this is the case where dQ/dt and q are returned without fitting a/b
 if strcmp(fitmethod,'none') || strcmp(pickmethod,'none')
-
    varargout{1} = nan;
    varargout{2} = nan;
    return
-
 else
 
    % if pickmethod = "none", we don't need anything else so we could stop here, but
@@ -110,19 +82,17 @@ else
    % into segments, for example early-time and late-time. It also returns Info
    % which is needed to parse sub-event picks.
 
-   [hFits,Picks] = bfra.plotdqdt(q,dqdt, 'fitmethod',fitmethod,'pickmethod',...
+   [hFits,Picks] = bfra.plotdqdt(q,dqdt,'fitmethod',fitmethod,'pickmethod',...
       pickmethod,'plotfits',plotfits,'eventID',eventID,'rain',rq);
 
    [q,dqdt,dt,tq,rq,Info] = packagefits(Picks,q,dqdt,dt,tq,R);
 
-   varargout{1}   = Info;
-   varargout{2}   = hFits;
-
+   varargout{1} = Info;
+   varargout{2} = hFits;
 end
 
-% ------------------------------------------------------------------------------
+
 % PACKAGEFITS
-% ------------------------------------------------------------------------------
 function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 
 % this unpacks the Picks structure and repackages the T,Q,dQdt for each picked
@@ -142,7 +112,6 @@ function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 if ~iscell(Picks.Q) && isnan(Picks.Q)
    T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; return
 end
-
 
 numPicks = numel(Picks.Q);
 T = cell(numPicks,1);
@@ -168,3 +137,33 @@ for m = 1:numPicks
    Info.runlengths(m) = Picks.runlengths(m);
 end
 
+% INPUT PARSER
+function [vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = ...
+   parseinputs(T,Q,R,derivmethod,funcname,varargin)
+
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   parser.CaseSensitive = true;
+   parser.addRequired('T', @bfra.validation.isdatelike);
+   parser.addRequired('Q', @bfra.validation.isnumericvector);
+   parser.addRequired('R', @isnumeric);
+   parser.addRequired('derivmethod', @ischar);
+   parser.addParameter('pickmethod', 'none', @ischar);
+   parser.addParameter('fitmethod', 'nls', @ischar);
+   parser.addParameter('ctsmethod', 'B1', @ischar);
+   parser.addParameter('vtsparam', 1, @bfra.validation.isnumericscalar);
+   parser.addParameter('etsparam', 0.2, @bfra.validation.isnumericscalar);
+   parser.addParameter('plotfits', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('eventID', 'none', @ischar);
+end
+parser.parse(T,Q,R,derivmethod,varargin{:});
+
+vtsparam    = parser.Results.vtsparam;
+etsparam    = parser.Results.etsparam;
+ctsmethod   = parser.Results.ctsmethod;
+pickmethod  = parser.Results.pickmethod;
+fitmethod   = parser.Results.fitmethod;
+plotfits    = parser.Results.plotfits;
+eventID     = parser.Results.eventID;

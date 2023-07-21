@@ -35,44 +35,12 @@ function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p              = inputParser;
-p.FunctionName = 'eventfinder';
-
-addRequired(p, 't',                  @(x) isnumeric(x) | isdatetime(x)     );
-addRequired(p, 'q',                  @(x) isnumeric(x) & numel(x)==numel(t));
-addRequired(p, 'r',                  @(x) isnumeric(x)                     );
-addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x) & x>2 );
-addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)       );
-
-parse(p,t,q,r,varargin{:});
-
-nmin        = p.Results.nmin;
-fmax        = p.Results.fmax;
-rmax        = p.Results.rmax;
-rmin        = p.Results.rmin;
-rmconvex    = p.Results.rmconvex;
-rmnochange  = p.Results.rmnochange;
-rmrain      = p.Results.rmrain;
-
-% allow empty r i.e. input syntax eventfinder(t,q,[],...)
-if isempty(r)
-   r = zeros(size(t));
-end
-
-% convert to columns, in case this is not called from bfra.getevents
-t = t(:);
-q = q(:);
-r = r(:);
-
-%-------------------------------------------------------------------------------
+% PARSE INPUTS
+[t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = ...
+   parseinputs(t, q, r, mfilename, varargin{:});
 
 
+% MAIN CODE
 iS = [1;find(diff(isnan(q))==-1)+1];       % start non-nan segments
 iE = [find(diff(isnan(q))==1);length(q)];  % end non-nan segments
 L  = iE-iS+1;                              % segment lengths
@@ -150,5 +118,55 @@ else % cycle through and remove empty events
    Info.istart = Info.istart(~inan);
    Info.istop  = Info.istop(~inan);
    % Info.runlengths = Info.runlengths(~inan);
-   
 end
+
+%% INPUT PARSER
+
+function [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = ...
+   parseinputs(t, q, r, funcname, varargin)
+
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   
+   addRequired(parser, 't',                  @bfra.validation.isdatelike);
+   addRequired(parser, 'q',                  @bfra.validation.isdoublevector);
+   addRequired(parser, 'r',                  @isnumeric);
+   addParameter(parser,'nmin',        4,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'fmax',        2,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmax',        2,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmin',        0,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmconvex',    false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'rmnochange',  false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'rmrain',      false, @bfra.validation.islogicalscalar);
+end
+parse(parser,t,q,r,varargin{:});
+
+nmin        = parser.Results.nmin;
+fmax        = parser.Results.fmax;
+rmax        = parser.Results.rmax;
+rmin        = parser.Results.rmin;
+rmconvex    = parser.Results.rmconvex;
+rmnochange  = parser.Results.rmnochange;
+rmrain      = parser.Results.rmrain;
+
+validateattributes(t, {'double'},{'size', size(q)}, funcname,'t', 1)
+validateattributes(nmin, {'double'},{'>', 2}, funcname,'nmin')
+
+% allow empty r i.e. input syntax eventfinder(t,q,[],...)
+if isempty(r)
+   r = zeros(size(t));
+end
+
+% convert to columns, in case this is not called from bfra.getevents
+t = t(:);
+q = q(:);
+r = r(:);
+
+% parser.Results includes all arguments, i.e., required, optional, and
+% parameters, and orders the fields alphabetically, so its more trouble than its
+% worth to use the simpler dealout syntax, which would require alphabetical
+% assignment lists, but for reference:
+% [fmax,nmin,q,r,rmax,rmconvex,rmin,rmnochange,rmrain,t] = ...
+%    dealout(parser.Results);

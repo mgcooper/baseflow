@@ -68,10 +68,12 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 %% set default bfra settings
 
-p                 = inputParser;
-p.FunctionName    = 'bfra.setopts';
+import bfra.validation.*
 
-p.addRequired('funcname',@(x)ischar(x));
+p = inputParser;
+p.FunctionName = 'bfra.setopts';
+
+p.addRequired('funcname', @ischar);
 parse(p,funcname);
 
 switch funcname
@@ -79,50 +81,50 @@ switch funcname
    % event detection - input options for getevents
    case 'getevents'
 
-      addParameter(p,   'qmin',        1,          @(x) bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'nmin',        4,          @(x) bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'fmax',        1,          @(x) bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'rmax',        2,          @(x) bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'rmin',        1,          @(x) bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'cmax',        2,          @(x) bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'rmconvex',    false,      @(x) bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'rmnochange',  true,       @(x) bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'rmrain',      true,       @(x) bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'pickevents',  false,      @(x) bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'plotevents',  false,      @(x) bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'asannual',    false,      @(x) bfra.validation.islogicalscalar(x)  );
+      addParameter(p,   'qmin',        1,          @isnumericscalar );
+      addParameter(p,   'nmin',        4,          @isnumericscalar );
+      addParameter(p,   'fmax',        1,          @isnumericscalar );
+      addParameter(p,   'rmax',        2,          @isnumericscalar );
+      addParameter(p,   'rmin',        1,          @isnumericscalar );
+      addParameter(p,   'cmax',        2,          @isnumericscalar );
+      addParameter(p,   'rmconvex',    false,      @islogicalscalar );
+      addParameter(p,   'rmnochange',  true,       @islogicalscalar );
+      addParameter(p,   'rmrain',      true,       @islogicalscalar );
+      addParameter(p,   'pickevents',  false,      @islogicalscalar );
+      addParameter(p,   'plotevents',  false,      @islogicalscalar );
+      addParameter(p,   'asannual',    false,      @islogicalscalar );
 
    % event fits - input options for fitevents
    case 'fitevents'
 
-      addParameter(p,   'derivmethod', 'ETS',      @(x) ischar(x)             );
-      addParameter(p,   'fitmethod',   'nls',      @(x) ischar(x)             );
-      addParameter(p,   'fitorder',    'free',     @(x) ischar(x)|isnumeric(x));
-      addParameter(p,   'pickfits',    false,      @(x) bfra.validation.islogicalscalar(x)    );
-      addParameter(p,   'pickmethod',  'none',     @(x) ischar(x)             );
-      addParameter(p,   'plotfits',    false,      @(x) bfra.validation.islogicalscalar(x)    );
-      addParameter(p,   'saveplots',   false,      @(x) bfra.validation.islogicalscalar(x)    );
-      addParameter(p,   'etsparam',    0.2,        @(x) bfra.validation.isnumericscalar(x)    );
-      addParameter(p,   'vtsparam',    1.0,        @(x) bfra.validation.isnumericscalar(x)    );
+      addParameter(p,   'derivmethod', 'ETS',      @ischar           );
+      addParameter(p,   'fitmethod',   'nls',      @ischar           );
+      addParameter(p,   'fitorder',    nan,        @isnumericscalar  );
+      addParameter(p,   'pickfits',    false,      @islogicalscalar  );
+      addParameter(p,   'pickmethod',  'none',     @ischar           );
+      addParameter(p,   'plotfits',    false,      @islogicalscalar  );
+      addParameter(p,   'saveplots',   false,      @islogicalscalar  );
+      addParameter(p,   'etsparam',    0.2,        @isnumericscalar  );
+      addParameter(p,   'vtsparam',    1.0,        @isnumericscalar  );
       
    % global fit - input to bfra.globalfit
    case 'globalfit'
 
-      addParameter(p,   'drainagearea',   nan,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'drainagedens',   0.8,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'aquiferdepth',   nan,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'streamlength',   nan,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'aquiferslope',   0.0,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'aquiferbreadth', nan,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'drainableporos', 0.1,           @(x)bfra.validation.isnumericscalar(x)  );
-      addParameter(p,   'isflat',         true,          @(x)bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'plotfits',       false,         @(x)bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'bootfit',        false,         @(x)bfra.validation.islogicalscalar(x)  );
-      addParameter(p,   'nreps',          1000,          @(x)bfra.validation.isdoublescalar(x)   );
-      addParameter(p,   'phimethod',      'pointcloud',  @(x)ischar(x)           );
-      addParameter(p,   'refqtls',        [0.50 0.50],   @(x)bfra.validation.isnumericvector(x)  );
-      addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)bfra.validation.isnumericvector(x)  );
-      addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x)  );
+      addParameter(p,   'drainagearea',   nan,           @isnumericscalar );
+      addParameter(p,   'drainagedens',   0.8,           @isnumericscalar );
+      addParameter(p,   'aquiferdepth',   nan,           @isnumericscalar );
+      addParameter(p,   'streamlength',   nan,           @isnumericscalar );
+      addParameter(p,   'aquiferslope',   0.0,           @isnumericscalar );
+      addParameter(p,   'aquiferbreadth', nan,           @isnumericscalar );
+      addParameter(p,   'drainableporos', 0.1,           @isnumericscalar );
+      addParameter(p,   'isflat',         true,          @islogicalscalar );
+      addParameter(p,   'plotfits',       false,         @islogicalscalar );
+      addParameter(p,   'bootfit',        false,         @islogicalscalar );
+      addParameter(p,   'nreps',          1000,          @isnumericscalar );
+      addParameter(p,   'phimethod',      'pointcloud',  @ischar           );
+      addParameter(p,   'refqtls',        [0.50 0.50],   @isnumericvector );
+      addParameter(p,   'earlyqtls',      [0.95 0.95],   @isnumericvector );
+      addParameter(p,   'lateqtls',       [0.50 0.50],   @isnumericvector );
 
 end
 
