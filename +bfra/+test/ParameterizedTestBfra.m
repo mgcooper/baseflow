@@ -232,8 +232,10 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       idx = find(abs(round(cos(t),prec))==0);
       idx = transpose(reshape(idx,2,[])); % [istart istop]
 
+      % if sizes don't match, try not removing one prior to min
       for n = 1:numel(idx)/2
-         ievent = idx(n,1)+2 : idx(n,2)-1;
+         %ievent = idx(n,1)+2 : idx(n,2)-1;
+         ievent = idx(n,1)+2 : idx(n,2);
          tExpected{n,1} = transpose(t(ievent));
          qExpected{n,1} = transpose(q(ievent));
       end
@@ -244,6 +246,54 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 
       % Verify that the actual result matches the expected result
       testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
+
+%       % for debugging test_eventfinder
+%       % --------------
+%       % convert to start/stop indices. remove the peak + 1 day, and the min.
+%       ievent1 = idx(1,1)+2 : idx(1,2)-1;
+%       ievent2 = idx(2,1)+2 : idx(2,2)-1;
+% 
+%       % if sizes don't match, try not removing one prior to min
+%       ievent1 = idx(1,1)+2 : idx(1,2);
+%       ievent2 = idx(2,1)+2 : idx(2,2);
+% 
+%       tExpected{n} = transpose(t(ievent1));
+%       qExpected{n} = transpose(q(ievent1));
+%       tExpected{2} = transpose(t(ievent2));
+%       qExpected{2} = transpose(q(ievent2));
+% 
+%       isequal(tExpected{1},tActual{1})
+%       isequal(tExpected{2},tActual{2})
+% 
+%       [size(tExpected{1}); size(tActual{1})]
+%       [size(tExpected{2}); size(tActual{2})]
+% 
+%       % depending on which one is missing, reverse the setdiff
+%       [val1, i1] = setdiff(tExpected{1}, tActual{1});
+%       [val1, i1] = setdiff(tActual{1}, tExpected{1});
+% 
+%       [val2, i2] = setdiff(tExpected{2}, tActual{2})
+%       [val2, i2] = setdiff(tActual{2}, tExpected{2})
+%       
+%       loc = ~ismember(tExpected{1}, tActual{1})
+% 
+%       figure; plot(t,q); hold on; 
+%       plot(tExpected{1},qExpected{1});
+%       plot(tExpected{2},qExpected{2});
+%       plot(tActual{1},qActual{1},'o','MarkerSize',6);
+%       plot(tActual{2},qActual{2},'o');
+% 
+%       % minima should be at -pi/2, 3*pi/2
+%       % maxima should be at pi/2, -3*pi/2
+%       s1 = find(t+3*pi/2>0,1,'first')-1;
+%       e1 = find(t+pi/2>0,1,'first')-1;
+%       s2 = find(t-pi/2>0,1,'first')-1;
+%       e2 = find(t-3*pi/2>0,1,'first')-1;
+% 
+%       % remove the peak + 1 day, and the min
+%       s1 = s1+2; s2 = s2+2;
+%       e1 = e1-1; e2 = e2-1;
+
       end
 
       %-------------------------------------------
@@ -261,34 +311,4 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
    end
 end
 
-% for debugging test_eventfinder
-      % --------------
-      % convert to start/stop indices. remove the peak + 1 day, and the min.
-      % ievent1 = idx(1,1)+2 : idx(1,2)-1;
-      % ievent2 = idx(2,1)+2 : idx(2,2)-1;
-
-      % tExpected{n} = transpose(t(ievent1));
-      % qExpected{n} = transpose(q(ievent1));
-      % tExpected{2} = transpose(t(ievent2));
-      % qExpected{2} = transpose(q(ievent2));
-
-      % isequal(tExpected{1},tActual{1})
-      % isequal(tExpected{2},tActual{2})
-
-      % figure; plot(t,q); hold on; 
-      % plot(tExpected{1},qExpected{1});
-      % plot(tExpected{2},qExpected{2});
-      % plot(tActual{1},qActual{1},':');
-      % plot(tActual{2},qActual{2},':');
-
-%       % minima should be at -pi/2, 3*pi/2
-%       % maxima should be at pi/2, -3*pi/2
-%       s1 = find(t+3*pi/2>0,1,'first')-1;
-%       e1 = find(t+pi/2>0,1,'first')-1;
-%       s2 = find(t-pi/2>0,1,'first')-1;
-%       e2 = find(t-3*pi/2>0,1,'first')-1;
-% 
-%       % remove the peak + 1 day, and the min
-%       s1 = s1+2; s2 = s2+2;
-%       e1 = e1-1; e2 = e2-1;
 

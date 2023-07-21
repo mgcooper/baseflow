@@ -7,13 +7,12 @@ function varargout = testdata(varargin)
       case 'example'
          
          [T, Q, R] = load_example_data;
-         [varargout{1:nargout}] = deal(T, Q, R);
          
       case 'tests'
          
    end
-   
-   [varargout{1:nargout}] = deal(T,Q,R);
+   data = {T,Q,R};
+   [varargout{1:nargout}] = data{:};
 
 end
 
