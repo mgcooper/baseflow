@@ -593,16 +593,6 @@
          {"name":"bci",       "kind": "namevalue", "type": ["vector","double"]}
       ]
    },
-   "bfra.prepalttrend":
-   {
-      "inputs":
-      [
-         {"name":"q",         "kind": "required",  "type": ["vector","double"]},
-         {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
-         {"name":"weights",   "kind": "namevalue", "type": ["vector","double"]},
-         {"name":"mask",      "kind": "namevalue", "type": ["logical"]}
-      ]
-   },
    "bfra.prepfits":
    {
       "inputs":
