@@ -40,8 +40,6 @@ p.FunctionName = 'eventplotter';
 
 N = numel(Info.istart);
 
-N = numel(Info.istart);
-
 addRequired(p, 'T',                    @(x) bfra.validation.isdatelike(x));
 addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T));
 addRequired(p, 'R',                    @(x) isnumeric(x));

@@ -8,8 +8,16 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitmethod',fitmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
 %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
-% 
-%  Required inputs
+%
+% Description
+%
+%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt using
+%     variable time stepping, exponential time stepping, or one of six standard
+%     numerical derivatives given in Thomas et al. 2015, Table 2. The method is
+%     passed in as the argument derivmethod with type char.
+%
+% Required inputs
+%
 %     T     =  time (days)
 %     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
 %     R     =  rainfall (L T^-1, assumed to be mm d-1)
@@ -112,37 +120,45 @@ R = cell(numPicks,1);
 dT = cell(numPicks,1);
 dQdT = cell(numPicks,1);
 
-   for m = 1:numPicks
-      
-      istart  = Picks.istart(m);
-      istop   = Picks.istop(m);
-      
-      % previously these were put into Fits structure but I
-      Q{m}     = q(istart:istop);
-      dQdT{m}  = dqdt(istart:istop);
-      dT{m}    = dt(istart:istop);
-      T{m}     = tq(istart:istop);
-      R        = rq(istart:istop);
-      
-      Info.istart(m)      = istart;
-      Info.istop(m)       = istop;
-      Info.runlengths(m)  = Picks.runlengths(m);
-   end
+for m = 1:numPicks
+
+   istart = Picks.istart(m);
+   istop = Picks.istop(m);
+
+   % previously these were put into Fits structure but I
+   Q{m} = q(istart:istop);
+   dQdT{m} = dqdt(istart:istop);
+   dT{m} = dt(istart:istop);
+   T{m} = tq(istart:istop);
+   R = rq(istart:istop);
+
+   Info.istart(m) = istart;
+   Info.istop(m) = istop;
+   Info.runlengths(m) = Picks.runlengths(m);
 end
 
-% ------------------------------------------------------------------------------
-% PREPINPUT
-% ------------------------------------------------------------------------------
+% INPUT PARSER
+function [vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = ...
+   parseinputs(T,Q,R,derivmethod,funcname,varargin)
 
-function [Q,T,R,exitFlag] = prepInput(Q,T,R)
-
-   % convert to columns
-   Q = Q(:); T = T(:); R = R(:);
-   
-   % if the input is all nan and/or zero, return the outputs as nan
-   exitFlag=false; if sum(isnan(Q))+sum(Q==0)>=length(Q);exitFlag=true; end
-   
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   parser.CaseSensitive = true;
+   parser.addRequired('T', @bfra.validation.isdatelike);
+   parser.addRequired('Q', @bfra.validation.isnumericvector);
+   parser.addRequired('R', @isnumeric);
+   parser.addRequired('derivmethod', @ischar);
+   parser.addParameter('pickmethod', 'none', @ischar);
+   parser.addParameter('fitmethod', 'nls', @ischar);
+   parser.addParameter('ctsmethod', 'B1', @ischar);
+   parser.addParameter('vtsparam', 1, @bfra.validation.isnumericscalar);
+   parser.addParameter('etsparam', 0.2, @bfra.validation.isnumericscalar);
+   parser.addParameter('plotfits', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('eventID', 'none', @ischar);
 end
+parser.parse(T,Q,R,derivmethod,varargin{:});
 
 vtsparam    = parser.Results.vtsparam;
 etsparam    = parser.Results.etsparam;

@@ -1,23 +1,36 @@
 function [T,Q,R,Info] = eventfinder(t,q,r,varargin)
-%EVENTFINDER finds recession events on input hydrographs with time 't',
-%discharge 'q', and rain 'r'. Use optional inputs to set parameters that
-%determine how events are identified. 
-% 
-% Required inputs:
-%  t           =  time
-%  q           =  flow (m3/time)
-%  r           =  rain (mm/time)
-% 
-% Optional name-value inputs:
-%  nmin        =  minimum event length
-%  fmax        =  maximum # of missing values gap-filled
-%  rmax        =  maximum run of sequential constant values
-%  rmin        =  minimum rainfall required to censor flow (mm/day?)
-%  rmconvex    =  remove convex derivatives
-%  rmnochange  =  remove consecutive constant derivates
-%  rmrain      =  remove rainfall
-% 
-%  See also: getevents, findevents, eventsplitter, eventpicker, eventplotter
+%EVENTFINDER find recession events on hydrograph timeseries t,q and rainfall r
+%
+% Syntax
+%
+%     [T,Q,R,Info] = eventfinder(t,q,r,varargin)
+%
+% Description
+%
+%     [T,Q,R,Info] = eventfinder(t,q,r) Detects periods of declining flow on
+%     hydrographs defined by inputs time 't', discharge 'q', and rainfall 'r'.
+%     Use optional inputs to set parameters that determine how events are
+%     identified.
+%
+% Required inputs
+%
+%     t           time
+%     q           flow (m3/time)
+%     r           rain (mm/time)
+%
+% Optional name-value inputs
+%
+%     nmin        minimum event length
+%     fmax        maximum # of missing values gap-filled
+%     rmax        maximum run of sequential constant values
+%     rmin        minimum rainfall required to censor flow (mm/day?)
+%     rmconvex    remove convex derivatives
+%     rmnochange  remove consecutive constant derivates
+%     rmrain      remove rainfall
+%
+% See also getevents, eventsplitter, eventpicker, eventplotter
+%
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
@@ -87,28 +100,59 @@ for n = 1:length(iS)
    end
 end
 
-    % if no events were returned, set events nan
-    if isempty(fieldnames(Info))
-        [T,Q,R,Info] = seteventnan;
-    else
+% if no events were returned, set events empty
+if isempty(fieldnames(Info))
+   [T,Q,R,Info] = bfra.util.setEventEmpty;
+   
+else % cycle through and remove empty events
+   inan = false(size(T));
+   for n = 1:numel(T)
+      if isempty(T{n})
+         inan(n) = true;
+      end
+   end
+   T = T(~inan);
+   Q = Q(~inan);
+   R = R(~inan);
+   
+   Info.istart = Info.istart(~inan);
+   Info.istop  = Info.istop(~inan);
+   % Info.runlengths = Info.runlengths(~inan);
+end
 
-        % cycle through and remove empty events
-        inan = false(size(T));
-        for n = 1:numel(T)
-            if isempty(T{n})
-                inan(n) = true; 
-            end
-        end
+%% INPUT PARSER
 
-        T   = T(~inan);
-        Q   = Q(~inan);
-        R   = R(~inan);
+function [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = ...
+   parseinputs(t, q, r, funcname, varargin)
 
-        Info.istart     = Info.istart(~inan);
-        Info.istop      = Info.istop(~inan);
-%         Info.runlengths = Info.runlengths(~inan);
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   
+   addRequired(parser, 't',                  @bfra.validation.isdatelike);
+   addRequired(parser, 'q',                  @bfra.validation.isdoublevector);
+   addRequired(parser, 'r',                  @isnumeric);
+   addParameter(parser,'nmin',        4,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'fmax',        2,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmax',        2,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmin',        0,     @bfra.validation.isnumericscalar);
+   addParameter(parser,'rmconvex',    false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'rmnochange',  false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'rmrain',      false, @bfra.validation.islogicalscalar);
+end
+parse(parser,t,q,r,varargin{:});
 
-    end
+nmin        = parser.Results.nmin;
+fmax        = parser.Results.fmax;
+rmax        = parser.Results.rmax;
+rmin        = parser.Results.rmin;
+rmconvex    = parser.Results.rmconvex;
+rmnochange  = parser.Results.rmnochange;
+rmrain      = parser.Results.rmrain;
+
+validateattributes(t, {'double'},{'size', size(q)}, funcname,'t', 1)
+validateattributes(nmin, {'double'},{'>', 2}, funcname,'nmin')
 
 % allow empty r i.e. input syntax eventfinder(t,q,[],...)
 if isempty(r)

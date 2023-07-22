@@ -293,7 +293,7 @@
          {"name":"plottype",   "kind": "ordered",   "type": ["char", "choices={'pdf','cdf','probplot','none'}"],"default":"'none'","purpose":"Option"}
       ]
    },
-   "bfra.fitdqdt":
+   "bfra.getdqdt":
    {
       "inputs":
       [
@@ -318,7 +318,7 @@
          {"name":"rq",        "type": ["double"] }
       ]
    },
-      "bfra.getevents":
+   "bfra.getevents":
    {
       "inputs":
       [
