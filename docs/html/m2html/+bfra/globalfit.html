@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of globalfit</title>
+  <meta name="keywords" content="globalfit">
+  <meta name="description" content="GLOBALFIT fit global parameters using all individual event-scale recession data">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; globalfit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>globalfit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>GLOBALFIT fit global parameters using all individual event-scale recession data</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function GlobalFit = globalfit(K,Events,Fits,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">GLOBALFIT fit global parameters using all individual event-scale recession data
+ 
+ Syntax
+
+     FIT = bfra.GLOBALFIT(K,Events,Fits);
+     FIT = bfra.GLOBALFIT(K,Events,Fits,opts);
+     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);
+     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);
+     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
+     FIT = bfra.GLOBALFIT(___,) 
+ 
+ Description
+ 
+     FIT = bfra.GLOBALFIT(K,Events,Fits) uses the event-scale recession
+     analysis parameters saved in data table K and the event-scale data saved
+     in Events and Fits and computes 'global' parameters tau, tau0, phi, bhat,
+     ahat, Qexp, and Q0.
+
+ Required inputs
+ 
+     K, Events, Fits are outputs of bfra.getevents and bfra.dqdt
+     opts is a struct containing fields area, D0, and L (see below)
+     AnnualFlow is a timetable or table of annual flow containing field Qcmd
+     which is the average daily flow (units cm/day) posted annually. 
+ 
+ See also <a href="setopts.html" class="code" title="function opts = setopts(funcname,varargin)">setopts</a>, <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, <a href="eventphi.html" class="code" title="function [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)">eventphi</a>, <a href="eventtau.html" class="code" title="function [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)">eventtau</a>
+
+ Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function GlobalFit = globalfit(K,Events,Fits,varargin)</a>
+0002 <span class="comment">%GLOBALFIT fit global parameters using all individual event-scale recession data</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     FIT = bfra.GLOBALFIT(K,Events,Fits);</span>
+0007 <span class="comment">%     FIT = bfra.GLOBALFIT(K,Events,Fits,opts);</span>
+0008 <span class="comment">%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'plotfits',plotfits);</span>
+0009 <span class="comment">%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit);</span>
+0010 <span class="comment">%     FIT = bfra.GLOBALFIT(K,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);</span>
+0011 <span class="comment">%     FIT = bfra.GLOBALFIT(___,)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Description</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%     FIT = bfra.GLOBALFIT(K,Events,Fits) uses the event-scale recession</span>
+0016 <span class="comment">%     analysis parameters saved in data table K and the event-scale data saved</span>
+0017 <span class="comment">%     in Events and Fits and computes 'global' parameters tau, tau0, phi, bhat,</span>
+0018 <span class="comment">%     ahat, Qexp, and Q0.</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Required inputs</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%     K, Events, Fits are outputs of bfra.getevents and bfra.dqdt</span>
+0023 <span class="comment">%     opts is a struct containing fields area, D0, and L (see below)</span>
+0024 <span class="comment">%     AnnualFlow is a timetable or table of annual flow containing field Qcmd</span>
+0025 <span class="comment">%     which is the average daily flow (units cm/day) posted annually.</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">% See also setopts, fitphi, eventphi, eventtau</span>
+0028 <span class="comment">%</span>
+0029 <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
+0030 
+0031 <span class="comment">% if called with no input, open this file</span>
+0032 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0033 
+0034 
+0035 <span class="comment">% TODO make the inputs more general, rather than these hard-coded structures</span>
+0036 <span class="comment">% and tables</span>
+0037 
+0038 <span class="comment">% NOTE in the current setup, early/lateqtls are used for eventphi, refqtls for</span>
+0039 <span class="comment">% point cloud</span>
+0040 
+0041 <span class="comment">%-------------------------------------------------------------------------------</span>
+0042 <span class="comment">% input parsing</span>
+0043 <span class="comment">%-------------------------------------------------------------------------------</span>
+0044 p                 = inputParser;
+0045 p.FunctionName    = <span class="string">'bfra.globalfit'</span>;
+0046 p.StructExpand    = true;
+0047 p.PartialMatching = false;
+0048 
+0049 addRequired( p,   <span class="string">'K'</span>,                             @(x)isstruct(x));
+0050 addRequired( p,   <span class="string">'Events'</span>,                        @(x)isstruct(x));
+0051 addRequired( p,   <span class="string">'Fits'</span>,                          @(x)isstruct(x));
+0052 addParameter(p,   <span class="string">'drainagearea'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x));
+0053 addParameter(p,   <span class="string">'drainagedens'</span>,   0.8,           @(x)bfra.validation.isnumericscalar(x));
+0054 addParameter(p,   <span class="string">'aquiferdepth'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x));
+0055 addParameter(p,   <span class="string">'streamlength'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x));
+0056 addParameter(p,   <span class="string">'aquiferslope'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x));
+0057 addParameter(p,   <span class="string">'aquiferbreadth'</span>, nan,           @(x)bfra.validation.isnumericscalar(x));
+0058 addParameter(p,   <span class="string">'drainableporos'</span>, 0.1,           @(x)bfra.validation.isnumericscalar(x));
+0059 addParameter(p,   <span class="string">'isflat'</span>,         true,          @(x)bfra.validation.islogicalscalar(x));
+0060 addParameter(p,   <span class="string">'plotfits'</span>,       false,         @(x)bfra.validation.islogicalscalar(x));
+0061 addParameter(p,   <span class="string">'bootfit'</span>,        false,         @(x)bfra.validation.islogicalscalar(x));
+0062 addParameter(p,   <span class="string">'nreps'</span>,          1000,          @(x)bfra.validation.isdoublescalar(x) );
+0063 addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @(x)bfra.validation.ischarlike(x));
+0064 addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
+0065 addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @(x)bfra.validation.isnumericvector(x));
+0066 addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
+0067 
+0068 
+0069 parse(p,K,Events,Fits,varargin{:});
+0070 
+0071 A           = p.Results.drainagearea;     <span class="comment">% basin area [m2]</span>
+0072 Dd          = p.Results.drainagedens;     <span class="comment">% drainage density [km-1]</span>
+0073 D           = p.Results.aquiferdepth;     <span class="comment">% reference active layer thickness [m]</span>
+0074 L           = p.Results.streamlength;     <span class="comment">% effective stream network length [m]</span>
+0075 theta       = p.Results.aquiferslope;     <span class="comment">% aquifer slope [1]</span>
+0076 B           = p.Results.aquiferbreadth;   <span class="comment">% aquifer breadth [m]</span>
+0077 phi         = p.Results.drainableporos;   <span class="comment">% drainable porosity [1]</span>
+0078 plotfits    = p.Results.plotfits;
+0079 bootfit     = p.Results.bootfit;
+0080 nreps       = p.Results.nreps;
+0081 phimethod   = p.Results.phimethod;
+0082 refqtls     = p.Results.refqtls;
+0083 earlyqtls   = p.Results.earlyqtls;
+0084 lateqtls    = p.Results.lateqtls;
+0085 
+0086 <span class="comment">% if stream lenght and drainage density are both provided, check that they are</span>
+0087 <span class="comment">% consistent with the provided area. note: Dd comes in as 1/km b/c that's how it</span>
+0088 <span class="comment">% is almost always reported (km/km2). divide by 1000 to get 1/m.</span>
+0089 <span class="keyword">if</span> ~isnan(Dd) &amp;&amp; ~isnan(L)
+0090    <span class="keyword">if</span> Dd/1000*A ~= L        <span class="comment">% 1/m * m^2 = m</span>
+0091       warning(<span class="string">'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd'</span>);
+0092       L = Dd/1000*A;
+0093    <span class="keyword">end</span>
+0094 <span class="keyword">end</span>
+0095 <span class="comment">%-------------------------------------------------------------------------------</span>
+0096 
+0097 <span class="comment">% take values out of the data structures that are needed</span>
+0098 Q = Events.inputFlow;       <span class="comment">% daily streamflow [m3 d-1]</span>
+0099 
+0100 <span class="comment">% fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])</span>
+0101 <span class="comment">%---------------</span>
+0102 [tau,q,dqdt,tags] = bfra.eventtau(K,Events,Fits,<span class="string">'usefits'</span>,false);
+0103 <span class="comment">% TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);</span>
+0104 TauFit = bfra.plfitb(tau,<span class="string">'plotfit'</span>,plotfits,<span class="string">'bootfit'</span>,bootfit,<span class="string">'nreps'</span>,nreps,<span class="string">'limit'</span>,20);
+0105 
+0106 <span class="comment">% [TestFit,testb] = bfra.gpfitb(GlobalFit.x,'xmin',GlobalFit.tau0,'bootfit',true);</span>
+0107 
+0108 <span class="comment">% parameters needed for next steps</span>
+0109 <span class="comment">%---------------------------------</span>
+0110 bhat     = TauFit.b;
+0111 bhatL    = TauFit.b_L;
+0112 bhatH    = TauFit.b_H;
+0113 tau0     = TauFit.tau0;
+0114 tauexp   = TauFit.tau;
+0115 itau     = TauFit.taumask;
+0116 
+0117 <span class="comment">% fit a</span>
+0118 <span class="comment">% -------</span>
+0119 [ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,<span class="string">'envelope'</span>,  <span class="keyword">...</span>
+0120    <span class="string">'refqtls'</span>,refqtls,<span class="string">'mask'</span>,itau,<span class="string">'bci'</span>,[bhatL bhatH]);
+0121 
+0122 <span class="comment">% the alternative approach would find a</span>
+0123                         
+0124 <span class="comment">% fit Q0 and Qhat</span>
+0125 <span class="comment">%-----------------</span>
+0126 [Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauexp,q,dqdt,tau0, <span class="keyword">...</span>
+0127    <span class="string">'qtls'</span>,Q,<span class="string">'mask'</span>,itau);
+0128 
+0129 <span class="comment">% fit phi</span>
+0130 <span class="comment">%---------</span>
+0131 <span class="keyword">switch</span> phimethod
+0132    <span class="keyword">case</span> <span class="string">'distfit'</span>
+0133       phid = bfra.eventphi(K,Fits,A,D,L,bhat,<span class="string">'lateqtls'</span>,lateqtls, <span class="keyword">...</span>
+0134          <span class="string">'earlyqtls'</span>,earlyqtls);
+0135       phi = bfra.fitphidist(phid,<span class="string">'mean'</span>,<span class="string">'cdf'</span>,plotfits);
+0136       
+0137    <span class="keyword">case</span> <span class="string">'pointcloud'</span>
+0138       phi = bfra.cloudphi(q,dqdt,bhat,A,D,L,<span class="string">'envelope'</span>,<span class="string">'lateqtls'</span>,refqtls, <span class="keyword">...</span>
+0139          <span class="string">'earlyqtls'</span>,earlyqtls,<span class="string">'mask'</span>,itau);
+0140       
+0141    <span class="keyword">case</span> <span class="string">'phicombo'</span>
+0142       phi1 = bfra.eventphi(K,Fits,A,D,L,1,<span class="string">'lateqtls'</span>,lateqtls, <span class="keyword">...</span>
+0143          <span class="string">'earlyqtls'</span>,earlyqtls);
+0144       phi2 = bfra.eventphi(K,Fits,A,D,L,3/2,<span class="string">'lateqtls'</span>,lateqtls, <span class="keyword">...</span>
+0145          <span class="string">'earlyqtls'</span>,earlyqtls);
+0146       phid = vertcat(phi1,phi2); phid(phid&gt;1) = nan; phid(phid&lt;0) = nan;
+0147       phi = bfra.fitphidist(phid,<span class="string">'mean'</span>,<span class="string">'cdf'</span>,plotfits);
+0148 <span class="keyword">end</span>
+0149 
+0150 <span class="comment">% % fit k</span>
+0151 <span class="comment">% %---------</span>
+0152 <span class="comment">% [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...</span>
+0153 <span class="comment">%    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);</span>
+0154 <span class="comment">% Q0    = Qexp*(3-b)/(2-b);</span>
+0155 
+0156 <span class="comment">% note on units: ahat is estimated from the point cloud. the dimensions of ahat</span>
+0157 <span class="comment">% are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units</span>
+0158 <span class="comment">% d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we get:</span>
+0159 <span class="comment">% (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1</span>
+0160 
+0161 <span class="comment">% % turned this off b/c phicloud makes one</span>
+0162 <span class="comment">% % plot the pointcloud if requested</span>
+0163 <span class="comment">% %----------------------------------</span>
+0164 <span class="comment">% if plotfits == true</span>
+0165 <span class="comment">%</span>
+0166 <span class="comment">%    h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...</span>
+0167 <span class="comment">%    'reflines',{'early','late','userfit'},'reflabels',true, ...</span>
+0168 <span class="comment">%    'userab',[ahat bhat],'addlegend',true);</span>
+0169 <span class="comment">%    h.legend.AutoUpdate = 'off';</span>
+0170 <span class="comment">%    scatter(xbar,ybar,60,'k','filled','s');</span>
+0171 <span class="comment">% end</span>
+0172 
+0173 
+0174 
+0175 <span class="comment">% package up the data and save it</span>
+0176 GlobalFit      = TauFit;
+0177 GlobalFit.phi  = phi;
+0178 GlobalFit.q    = q;
+0179 GlobalFit.dqdt = dqdt;
+0180 GlobalFit.tags = tags;
+0181 GlobalFit.a    = ahat;
+0182 GlobalFit.a_L  = ahatLH(1);
+0183 GlobalFit.a_H  = ahatLH(2);
+0184 GlobalFit.xbar = xbar;
+0185 GlobalFit.ybar = ybar;
+0186 GlobalFit.Q0   = Q0;
+0187 GlobalFit.Qexp = Qexp;
+0188 GlobalFit.pQexp = pQexp;
+0189 GlobalFit.pQ0  = pQ0;
+0190</pre></div>
+</body>
+</html>

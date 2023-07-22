@@ -1,19 +1,26 @@
 function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
 %POINTCLOUDINTERCEPT estimate parameter 'a' from the point cloud intercept
 % 
-% Required inputs:
+% Required inputs
+% 
 %  q        =  vector double of discharge data (L T^-1)
 %  dqdt     =  vector double of discharge rate of change (L T^-2)
 %  bhat     =  late-time b parameter in -dqdt = aq^b (dimensionless)
 %  method   =  char indicating the fitting method
 % 
-% Optional inputs:
+% Optional name-value inputs
+% 
 %  mask     =  logical mask to exclude data
 %  refqtls  =  reference quantiles that together define a pivot point through
 %              which the straight line must pass. use with method 'envelope'.
 % 
 % 
-% See also: bfra.fitab
+% See also: fitab
+% 
+% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
 
 % input parsing
 %-------------------------------------------------------------------------------
@@ -43,6 +50,10 @@ tau      = p.Results.tau;
 tau0     = p.Results.tau0;
 %-------------------------------------------------------------------------------
 
+persistent inoctave
+if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
+end
+
 % TODO: consider making this a call to fitab. however, fitab does not return
 % xbar/ybar, and I confirmed the results are identical, but it would be
 % preferable to reduce the potential for inconsistent methods e.g. if this is
@@ -61,36 +72,54 @@ switch method
       ybar = median(-dqdt(mask),'omitnan');
       ahat = ybar/xbar^bhat;
    case 'envelope'
-      xbar = quantile(q(mask),qtls(1),'Method','approximate');
-      ybar = quantile(-dqdt(mask),qtls(2),'Method','approximate');
+      
+      if inoctave
+         xbar = quantile(q(mask),qtls(1));
+         ybar = quantile(-dqdt(mask),qtls(2));
+      else
+         xbar = quantile(q(mask),qtls(1),'Method','approximate');
+         ybar = quantile(-dqdt(mask),qtls(2),'Method','approximate');
+      end
       ahat = ybar/xbar^bhat;
+      
    case 'brutsaert'
       % start with median
-      xbar  = median(q(mask),'omitnan');
-      ybar  = median(-dqdt(mask),'omitnan');
-      N     = numel(q(mask));
-      ahat  = ybar/xbar^bhat; % init a using the median approach
-      P     = 1;
+      xbar = median(q(mask),'omitnan');
+      ybar = median(-dqdt(mask),'omitnan');
+      ahat = ybar/xbar^bhat; % init a using the median
+      N = numel(q(mask));
+      P = 1;
       while P>thresh
-         ahat  = 0.99*ahat;
-         P     = sum( (ahat.*q(mask).^bhat) > -dqdt(mask) ) / N;
+         ahat = 0.99*ahat;
+         P = sum( (ahat.*q(mask).^bhat) > -dqdt(mask) ) / N;
       end
    case 'cooper' % only works if b>1 and tau/tau0 are provided
       
       % if no tau>tau0 mask is provided, use the 95th pctl for a1
       if all(mask)
-         xbar  = quantile(q,0.95,'Method','approximate');
-         ybar  = quantile(-dqdt,0.95,'Method','approximate');
+         
+         if inoctave
+            xbar = quantile(q,0.95);
+            ybar = quantile(-dqdt,0.95);
+         else
+            xbar = quantile(q,0.95,'Method','approximate');
+            ybar = quantile(-dqdt,0.95,'Method','approximate');
+         end
       else
          % if a mask is provided, use the 50th pctl of tau<tau0
-         xbar  = quantile(q(~mask),qtls(1),'Method','approximate');
-         ybar  = quantile(-dqdt(~mask),qtls(2),'Method','approximate');
+         if inoctave
+            xbar = quantile(q(~mask),qtls(1));
+            ybar = quantile(-dqdt(~mask),qtls(2));
+         else
+            xbar = quantile(q(~mask),qtls(1),'Method','approximate');
+            ybar = quantile(-dqdt(~mask),qtls(2),'Method','approximate');
+         end
       end
-      a0    = ybar/xbar^3;
-      ahat  = (1/tau)*(sqrt(a0*tau0)*(bhat-3)/(bhat-2))^(bhat-1);
+      a0 = ybar/xbar^3;
+      ahat = (1/tau)*(sqrt(a0*tau0)*(bhat-3)/(bhat-2))^(bhat-1);
       
       % temporary method to send back a0 for method 'cooper'
-      ahat  = [ahat a0];
+      ahat = [ahat a0];
       
       % here xbar/ybar are identical to 'envelope'. use this to show that ahat
       % returned by this function is identical to the case where a0 is returned
@@ -129,7 +158,7 @@ switch nargout
       varargout{3} = xbar;
       varargout{4} = ybar;
 end
-      
+
 % % one = ahat
 % % two = ahat, [aL aH]
 % % three = ahat, xbar, ybar

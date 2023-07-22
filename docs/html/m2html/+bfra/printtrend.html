@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of printtrend</title>
+  <meta name="keywords" content="printtrend">
+  <meta name="description" content="PRINTTREND print trends computed from columns in table Data to the screen">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; printtrend.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>printtrend
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PRINTTREND print trends computed from columns in table Data to the screen</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [ddt,err] = printtrend(Data,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PRINTTREND print trends computed from columns in table Data to the screen
+ 
+  Syntax
+ 
+  [ddt,err] = printtrend(Data,varargin)
+ 
+ See also</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ddt,err] = printtrend(Data,varargin)</a>
+0002 <span class="comment">%PRINTTREND print trends computed from columns in table Data to the screen</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%  [ddt,err] = printtrend(Data,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% See also</span>
+0009 
+0010 <span class="comment">%-------------------------------------------------------------------------------</span>
+0011 p = bfra.deps.magicParser;
+0012 p.StructExpand = true;  <span class="comment">% this has to be true to use autocomplete fieldname</span>
+0013 p.FunctionName = <span class="string">'printtrend'</span>;
+0014 
+0015 p.addRequired(    <span class="string">'Data'</span>,                    @(x)istimetable(x));
+0016 p.addParameter(   <span class="string">'var'</span>,            <span class="string">'Qb'</span>,    @(x)ischar(x));
+0017 p.addParameter(   <span class="string">'alpha'</span>,          0.05,    @(x)isnumeric(x));
+0018 p.addParameter(   <span class="string">'unitconversion'</span>, 1,       @(x)isnumeric(x));
+0019 p.addParameter(   <span class="string">'metric'</span>,         <span class="string">'CI'</span>,    @(x)ischar(x));
+0020 p.addParameter(   <span class="string">'method'</span>,         <span class="string">'ols'</span>,   @(x)ischar(x));
+0021 p.addParameter(   <span class="string">'quantile'</span>,       nan,     @(x)isnumeric(x));
+0022 
+0023 p.parseMagically(<span class="string">'caller'</span>);
+0024 
+0025 var   = p.Results.var;
+0026 cf    = p.Results.unitconversion;
+0027 alpha = p.Results.alpha;
+0028 qtl   = p.Results.quantile;
+0029 
+0030 <span class="comment">%-------------------------------------------------------------------------------</span>
+0031 <span class="comment">% create a regular time in years, works for both months and years</span>
+0032 
+0033 t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
+0034 dt = numel(t);
+0035 dat = Data.(var); <span class="comment">% cm/yr -&gt; cm/day</span>
+0036 
+0037 <span class="keyword">switch</span> method
+0038    <span class="keyword">case</span> <span class="string">'ols'</span>
+0039       mdl = fitlm(t,dat); 
+0040       ddt = mdl.Coefficients.Estimate(2);  <span class="comment">% cm/day/year</span>
+0041       CIs = coefCI(mdl,alpha);
+0042       err = CIs(2,2)-ddt;
+0043    <span class="keyword">case</span> <span class="string">'qtl'</span>
+0044       [ab,S] = bfra.deps.quantreg(t,dat,qtl,1,1000,alpha);
+0045       ddt = ab(2);
+0046       CIs = S.ci_boot';
+0047       err = CIs(2,2)-ddt;
+0048 <span class="keyword">end</span>
+0049 <span class="comment">% adjust the trend and error units using the conversion factor</span>
+0050 ddt = cf*ddt;
+0051 d = ddt*dt;
+0052 err = cf*err;
+0053 derr = err*dt;
+0054 errstr = num2str(round(100*(1-alpha)));
+0055 str = [<span class="string">'\nd'</span> var <span class="string">'/dt = %.3f '</span> char(177) <span class="string">' %.3f ('</span> errstr <span class="string">'%% CI) '</span>];
+0056 str = [str <span class="string">', d'</span> var <span class="string">' = %.3f '</span> char(177) <span class="string">' %.3f \n\n'</span>];
+0057 fprintf(str,ddt,err,d,derr);
+0058 
+0059 <span class="comment">%    if alpha == 0.05 || alpha == 0.95</span>
+0060 <span class="comment">%       metric   = 'CI';</span>
+0061 <span class="comment">%       err      = coefCI(mdl,alpha)*cf;</span>
+0062 <span class="comment">%       CI       = mdl.coefCI;                    % 95% CI's</span>
+0063 <span class="comment">%       CI       = CI(2,:);</span>
+0064 <span class="comment">%       CI2      = CI(2)-ddt;                     % CI half-width</span>
+0065 <span class="comment">%    elseif alpha == 0.32 || alpha == 0.68</span>
+0066 <span class="comment">%       metric = 'SE';</span>
+0067 <span class="comment">%       SE       = mdl.Coefficients.SE(2);        % standard error</span>
+0068 <span class="comment">%    else</span>
+0069 <span class="comment">%       metric = 'userdefined';</span>
+0070 <span class="comment">%    end</span>
+0071 <span class="comment">%</span>
+0072 <span class="comment">%    switch metric</span>
+0073 <span class="comment">%       case 'SE'</span>
+0074 <span class="comment">%          fprintf(['\n d' var '/dt = %.2f ' char(177) ' %.2f (68% CI) \n'],ddt,err);</span>
+0075 <span class="comment">%       case 'CI'</span>
+0076 <span class="comment">%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (95% CI) \n'],ddt*cf,CI2*cf);</span>
+0077 <span class="comment">%       case 'userdefined'</span>
+0078 <span class="comment">%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (' alpha '%CI) \n'],ddt*cf,CI2*cf);</span>
+0079 <span class="comment">%    end</span>
+0080 <span class="comment">%</span>
+0081 <span class="comment">%</span></pre></div>
+</body>
+</html>

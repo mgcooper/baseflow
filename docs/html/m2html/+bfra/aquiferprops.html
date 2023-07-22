@@ -1,0 +1,480 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of aquiferprops</title>
+  <meta name="keywords" content="aquiferprops">
+  <meta name="description" content="AQUIFERPROPS estimate aquifer properties">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; aquiferprops.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>aquiferprops
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>AQUIFERPROPS estimate aquifer properties</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">AQUIFERPROPS estimate aquifer properties
+ 
+ Syntax
+ 
+     Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)
+ 
+ Description 
+ 
+     Estimate aquifer properties hydraulic conductivity k, depth D, and
+     critical baseflow Q0 
+ 
+ Required inputs
+ 
+  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+  dqdt        =  discharge rate of change (L T^-2)
+  alate       =  late-time a parameter in -dqdt = aq^b ()
+  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
+  phi         =  drainable porosity (L/L)
+  A           =  basin area contributing to baseflow (L^2)
+  D           =  saturated aquifer thickness (L)
+  L           =  active stream length (L)
+  soln        =  optional string indicating late-time theoretical solution
+ 
+ Optional name-value inputs
+ 
+  earlyqtls   =  reference quantiles that together define a pivot point
+                 through which the straight line must pass (early time fit)
+  lateqtls    =  reference quantiles that together define a pivot point
+                 through which the straight line must pass (late time fit)
+  mask        =  logical mask to exclude data
+  Dd          =  drainage density. if provided, the relationship L=Dd*A will be
+                 used to compute L instead of the input L value
+ 
+ See also <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)</a>
+0002 <span class="comment">%AQUIFERPROPS estimate aquifer properties</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     Props = aquiferprops(q,dqdt,alate,blate,phi,A,D,L,soln,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     Estimate aquifer properties hydraulic conductivity k, depth D, and</span>
+0011 <span class="comment">%     critical baseflow Q0</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Required inputs</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)</span>
+0016 <span class="comment">%  dqdt        =  discharge rate of change (L T^-2)</span>
+0017 <span class="comment">%  alate       =  late-time a parameter in -dqdt = aq^b ()</span>
+0018 <span class="comment">%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)</span>
+0019 <span class="comment">%  phi         =  drainable porosity (L/L)</span>
+0020 <span class="comment">%  A           =  basin area contributing to baseflow (L^2)</span>
+0021 <span class="comment">%  D           =  saturated aquifer thickness (L)</span>
+0022 <span class="comment">%  L           =  active stream length (L)</span>
+0023 <span class="comment">%  soln        =  optional string indicating late-time theoretical solution</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% Optional name-value inputs</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">%  earlyqtls   =  reference quantiles that together define a pivot point</span>
+0028 <span class="comment">%                 through which the straight line must pass (early time fit)</span>
+0029 <span class="comment">%  lateqtls    =  reference quantiles that together define a pivot point</span>
+0030 <span class="comment">%                 through which the straight line must pass (late time fit)</span>
+0031 <span class="comment">%  mask        =  logical mask to exclude data</span>
+0032 <span class="comment">%  Dd          =  drainage density. if provided, the relationship L=Dd*A will be</span>
+0033 <span class="comment">%                 used to compute L instead of the input L value</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">% See also fitphi</span>
+0036 <span class="comment">%</span>
+0037 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0038 
+0039 <span class="comment">% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and</span>
+0040 <span class="comment">% possibly phi, try to combine with fitphi for two paths - either D is known or</span>
+0041 <span class="comment">% phi is known</span>
+0042 
+0043 <span class="comment">% if called with no input, open this file</span>
+0044 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0045 
+0046 <span class="comment">%-------------------------------------------------------------------------------</span>
+0047 <span class="comment">% input parsing</span>
+0048 <span class="comment">%-------------------------------------------------------------------------------</span>
+0049 p = inputParser;
+0050 p.FunctionName = <span class="string">'bfra.aquiferprops'</span>;
+0051 
+0052 addRequired(p, <span class="string">'q'</span>,                          @(x)isnumeric(x));
+0053 addRequired(p, <span class="string">'dqdt'</span>,                       @(x)isnumeric(x));
+0054 addRequired(p, <span class="string">'alate'</span>,                      @(x)isnumeric(x));
+0055 addRequired(p, <span class="string">'blate'</span>,                      @(x)isnumeric(x));
+0056 addRequired(p, <span class="string">'phi'</span>,                        @(x)isnumeric(x));
+0057 addRequired(p, <span class="string">'A'</span>,                          @(x)isnumeric(x));
+0058 addRequired(p, <span class="string">'L'</span>,                          @(x)isnumeric(x));
+0059 addRequired(p, <span class="string">'soln'</span>,                       @(x)ischar(x));
+0060 addParameter(p,<span class="string">'earlyqtls'</span>,   [0.95 0.95],   @(x)isnumeric(x));
+0061 addParameter(p,<span class="string">'lateqtls'</span>,    [0.5 0.5],     @(x)isnumeric(x));
+0062 addParameter(p,<span class="string">'mask'</span>,        true(size(q)), @(x)islogical(x));
+0063 addParameter(p,<span class="string">'D'</span>,           nan,           @(x)isnumeric(x));
+0064 addParameter(p,<span class="string">'Dd'</span>,          nan,           @(x)isnumeric(x));
+0065 addParameter(p,<span class="string">'Q0'</span>,          nan,           @(x)isnumeric(x));
+0066 addParameter(p,<span class="string">'plotfit'</span>,     false,         @(x)islogical(x));
+0067 
+0068 parse(p,q,dqdt,alate,blate,phi,A,L,soln,varargin{:});
+0069 
+0070 earlyqtls   = p.Results.earlyqtls;  <span class="comment">% x-y quantiles to place early-time hinge point</span>
+0071 lateqtls    = p.Results.lateqtls;   <span class="comment">% x-y quantiles to place late-time hinge point</span>
+0072 mask        = p.Results.mask;       <span class="comment">% logical vector true for late-time discharge</span>
+0073 Dd          = p.Results.Dd;         <span class="comment">% drainage density [km-1]</span>
+0074 D           = p.Results.D;          <span class="comment">% initial saturated aquifer thickness [m]</span>
+0075 Q0          = p.Results.Q0;         <span class="comment">% critical baseflow [m3 s-1]</span>
+0076 plotfit     = p.Results.plotfit;    <span class="comment">% logical scalar indicating to make figure</span>
+0077 
+0078 <span class="comment">%-------------------------------------------------------------------------------</span>
+0079 
+0080 <span class="comment">% Note: This follows the method in Troch et al. 1993, which assumes D is unknown</span>
+0081 <span class="comment">% and the goal is to estimate k and Q0 to get D. Here, only Q0 uses the</span>
+0082 <span class="comment">% intersection of the early- and late-time lines, k is from late-time a. Troch</span>
+0083 <span class="comment">% uses a1/b1 = late time and a2/b2 = early time, whereas fitphi uses the</span>
+0084 <span class="comment">% opposite. The notes below follow Troch's paper so a1/b1 == late time, but the</span>
+0085 <span class="comment">% implementation uses early/late for clarity</span>
+0086 <span class="comment">%</span>
+0087 <span class="comment">% bfra_fitphi assumes D is known and eliminates k to get phi by setting early-</span>
+0088 <span class="comment">% and late-time equations equal. Q0 is not involved in that approach.</span>
+0089 
+0090 <span class="comment">% It should be possible to modify this using the fitphi method by settting</span>
+0091 <span class="comment">% early- and late-time equal to eliminate phi.</span>
+0092 
+0093 <span class="comment">% the steps / theory are:</span>
+0094 <span class="comment">% 1. Equation 8 provides late time q expression (hillslope outflow)</span>
+0095 <span class="comment">%     (8) q = 0.862 * k * D^2 / (B * (1 + 1.115*k*D/(f*B^2)*t )^2)</span>
+0096 <span class="comment">%</span>
+0097 <span class="comment">% 2. Equation 9 provides late time average water table thickness - obtained by</span>
+0098 <span class="comment">% integrating the inverse incomplete beta function phi(x/B) from 0-&gt;B = 0.773</span>
+0099 <span class="comment">%     (9) hbar = 0.773 * D / (1 + 1.115*k*D/(f*B^2)*t )</span>
+0100 <span class="comment">%</span>
+0101 <span class="comment">% 3. Sub 9 into 8 to get an expression for q in terms of hbar rather than D</span>
+0102 <span class="comment">% (note that hbar changes wrt time so q varies with time)</span>
+0103 <span class="comment">%     (10) q = 1.443 * k/B * hbar^2</span>
+0104 <span class="comment">%</span>
+0105 <span class="comment">% 4. integrate 10 along L to get basin outflow, sub Dd for L/A</span>
+0106 <span class="comment">%     (11) Q = 5.772*k*hbar^2*Dd*L</span>
+0107 <span class="comment">%</span>
+0108 <span class="comment">% 5. repeat step 4 for early time, by setting t=0 in Eq 8 (step 1)</span>
+0109 <span class="comment">%     (12) Q0 = 3.450 * k * D^2 * Dd * L</span>
+0110 <span class="comment">%</span>
+0111 <span class="comment">% 6. set a1*Q^b1 = a2*Q^b2 and solve for Q - the intersection of the early- and</span>
+0112 <span class="comment">% late-time -dQ/dt lines on the point cloud - this is Q0</span>
+0113 <span class="comment">%</span>
+0114 <span class="comment">% 7. estimate a1/b1 (late time) and a2/b2 (early time) on the point cloud</span>
+0115 <span class="comment">%</span>
+0116 <span class="comment">% 8. estimate Q0 from the intersection of early-and late-time curves (formal</span>
+0117 <span class="comment">% equation not shown, but should be: Q = (a1/a2)^(1/(b2-b1)) = (a2/a1)^(1/(b1-b2))</span>
+0118 <span class="comment">%</span>
+0119 <span class="comment">% 9. estimate k from equation 15a (late-time a1) using known L/A/f (f=porosity)</span>
+0120 <span class="comment">% NOTE: paper says use equation 16a (early-time a2) and 13, but clearly 13 is</span>
+0121 <span class="comment">% supposed to be 12, and since 16a includes D which is supposed to be solved for</span>
+0122 <span class="comment">% in the next step, i am nearly certain 15a should be used (both equations step</span>
+0123 <span class="comment">% back one)</span>
+0124 <span class="comment">%</span>
+0125 <span class="comment">% 10. estimate D from k and known A/L/Dd using equation 12 (step 5)</span>
+0126 
+0127 <span class="comment">%  Important notes</span>
+0128 <span class="comment">% -----------------</span>
+0129 <span class="comment">% Troch found k was 25-100 times larger than laboratory measurements and argued</span>
+0130 <span class="comment">% that this k is a catchment effective value which includes macropore flow,</span>
+0131 <span class="comment">% channel flow, etc.</span>
+0132 <span class="comment">%</span>
+0133 <span class="comment">% This method needs a late-time solution that does not depend on aquifer depth</span>
+0134 <span class="comment">% in order to get k without assuming D, so that k can be used with Q0 to get D.</span>
+0135 <span class="comment">% if a late-time solution that depends on D is used, then you can still get k,</span>
+0136 <span class="comment">% but you cannot get D</span>
+0137 
+0138 <span class="comment">% changing L changes k but does not change D b/c it cancels</span>
+0139 <span class="comment">% increasing a32 will increase k and decrease D</span>
+0140 <span class="comment">% decreasing a32 will decrease k and increase D</span>
+0141 <span class="comment">% changing a3 will not change k but will change Q0 and therefore D</span>
+0142 <span class="comment">% increasing a3 will decrease Q0 and decrease D</span>
+0143 <span class="comment">% decreasing a3 will increase Q0 and increase D</span>
+0144 <span class="comment">% changing any value of a/b will change Q0 and therefore D</span>
+0145 
+0146 <span class="comment">% takeaway: the most important thing is the placement of a3.</span>
+0147 <span class="comment">% change L to change k</span>
+0148 <span class="comment">% change a3 to change D (or a32, but thats more constrained by tau mask)</span>
+0149 <span class="comment">% change a3 or a32 to change Q0, and thereby D</span>
+0150 <span class="comment">% using early time soln for k increases k which decreases D, but the BS04 soln</span>
+0151 <span class="comment">% for k appears much more sensitive to this choice than RS05. The only</span>
+0152 <span class="comment">% difference b/w the BS04 and RS05 early-time solution is the numerator which is</span>
+0153 <span class="comment">% fixed to 1.113 for BS04 but is fR1 for RS05.</span>
+0154 
+0155 <span class="comment">%-------------------------------------------------------------------------------</span>
+0156 
+0157 <span class="comment">% check if Dd was provided; if so, adjust L</span>
+0158 <span class="keyword">if</span> ~isnan(Dd)
+0159    L = Dd/1000*A;           <span class="comment">% 1/m * m^2 = m</span>
+0160 <span class="keyword">end</span>
+0161 
+0162 <span class="comment">% check if Q0 was provided, if so, save it</span>
+0163 <span class="keyword">if</span> ~isnan(Q0)
+0164    Q0check = Q0;
+0165 <span class="keyword">else</span>
+0166    Q0check = nan;
+0167 <span class="keyword">end</span>
+0168 
+0169 <span class="comment">% Step 7: compute the early- and late-time intercepts</span>
+0170 bearly = 3;
+0171 aearly = bfra.pointcloudintercept(q,dqdt,bearly,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
+0172 
+0173 <span class="comment">% late-time intercept either Boussinesq 1904 or Rupp and Selker, 2005</span>
+0174 <span class="keyword">switch</span> soln
+0175    <span class="keyword">case</span> <span class="string">'BS04'</span>
+0176       blate = 3/2;
+0177       alate = bfra.pointcloudintercept(q,dqdt,blate,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
+0178    <span class="keyword">case</span> <span class="string">'RS05'</span>
+0179       alate = bfra.pointcloudintercept(q,dqdt,blate,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
+0180 <span class="keyword">end</span>
+0181 
+0182 <span class="comment">% Step 8: upper bound Q, where b=3 and b=bhat intersect (m3/d)</span>
+0183 Q0 = (aearly/alate)^(1/(blate-bearly));
+0184 
+0185 <span class="comment">% Step 9: hydraulic conductivity using the late time soln (m/d)</span>
+0186 <span class="keyword">switch</span> soln
+0187    <span class="keyword">case</span> <span class="string">'BS04'</span>
+0188       
+0189       <span class="comment">% method 1: phi is known, D is not</span>
+0190       <span class="comment">% --------------------------------</span>
+0191       
+0192       <span class="comment">% late time</span>
+0193       clate    = 4.804*L/A^(3/2);
+0194       k        = (alate*phi/clate)^2;  <span class="comment">% *100/86400 m/d -&gt; cm/s</span>
+0195       
+0196       <span class="comment">% early time</span>
+0197       <span class="comment">% cearly = 1.133/(D^3*L^2);</span>
+0198       <span class="comment">% k      = cearly/(aearly*phi);  % same as RS05</span>
+0199       
+0200       <span class="comment">% method 2: D is known, phi is not</span>
+0201       <span class="comment">% (equates early and late time to eliminate phi)</span>
+0202       <span class="comment">% -----------------------------------------------</span>
+0203       <span class="comment">% k   = ((cearly/aearly)*(alate/clate))^(2/3);</span>
+0204       
+0205    <span class="keyword">case</span> <span class="string">'RS05'</span>
+0206       
+0207       <span class="comment">% method 1: phi is known, D is not</span>
+0208       <span class="comment">% --------------------------------</span>
+0209       
+0210       <span class="comment">% late time:</span>
+0211       n     = bfra.conversions(blate,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,true);
+0212       fR2   = bfra.specialfunctions(<span class="string">'fR2'</span>,n);
+0213       clate = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
+0214       k     = (alate*phi/clate)^(n+2);
+0215       
+0216       <span class="comment">% early time:</span>
+0217       <span class="comment">% fR1      = bfra_specialfunctions('fR1',n);</span>
+0218       <span class="comment">% cearly   = fR1/(D^3*L^2);</span>
+0219       <span class="comment">% k        = cearly/(aearly*phi);</span>
+0220       
+0221       <span class="comment">% method 2: D is known, phi is not</span>
+0222       <span class="comment">% (equates early and late time to eliminate phi)</span>
+0223       <span class="comment">% -----------------------------------------------</span>
+0224       <span class="comment">% k   = ((cearly/clate)*(alate/aearly))^((n+2)/(n+3));</span>
+0225       
+0226       <span class="comment">% Note: once clate/cearly are known, the expressions for k are identical</span>
+0227       <span class="comment">% for both early and late time for RS05 and BS04, but I keep them inside</span>
+0228       <span class="comment">% the switch block b/c we only use the late-time solution right now, and</span>
+0229       <span class="comment">% it's a bit clearer to keep them separate. Note this applies to method 1</span>
+0230       <span class="comment">% and method 2. The reason is because for b=3/2, n=0, so the exponenets on</span>
+0231       <span class="comment">% the RS05 solutions equal the one for BS04 (the solutions are equivalent</span>
+0232       <span class="comment">% at b=3/2).</span>
+0233 <span class="keyword">end</span>
+0234 
+0235 <span class="comment">% Step 10: aquifer depth (m)</span>
+0236 D = sqrt(Q0/(3.448*k*L^2/A)); <span class="comment">% sqrt(Q0/(3.448*k*Dd*L)) % if using Dd</span>
+0237 
+0238 Dcheck = sqrt(Q0check/(3.448*k*L^2/A));
+0239                                     
+0240 <span class="comment">% package the output</span>
+0241 Props.k     = k*100/86400; <span class="comment">% m/d -&gt; cm/s</span>
+0242 Props.D     = D;           <span class="comment">% m</span>
+0243 Props.Q0    = Q0/86400;    <span class="comment">% m3/d -&gt; m3/s</span>
+0244 Props.a1    = aearly;
+0245 Props.b1    = bearly;
+0246 Props.a2    = alate;
+0247 Props.b2    = blate;
+0248 <span class="comment">% Props.D2    = Dcheck;    % undocumented</span>
+0249 Props.input = p.Results;
+0250 
+0251 
+0252 <span class="comment">%-------------------------------------------------------------------------------</span>
+0253 
+0254 <span class="comment">% these can be used to get D directly from alate. for RS05, this will return the</span>
+0255 <span class="comment">% D that was used to get k in the above method. These expressions don't use</span>
+0256 <span class="comment">% cearly/clate (c1/c2 in the paper) b/c D is included in c2 for RS05, and there</span>
+0257 <span class="comment">% isn't an easy way to express D in terms of c2 for that case.</span>
+0258 
+0259 <span class="comment">% % RS05 non-linear late time:</span>
+0260 <span class="comment">% D = ((fR2/(alate*phi))^(n+2) * ( k*L^2/(2^n*(n+1)*A^(n+3))))^(1/n);</span>
+0261 <span class="comment">%</span>
+0262 <span class="comment">% RS05 non-linear late time using just the Q(t=0) expression:</span>
+0263 <span class="comment">% n = bfra.conversions(blate,'b','n','isflat',true)</span>
+0264 <span class="comment">% Bn = beta((n+2)/(n+3),1/2)</span>
+0265 <span class="comment">% D = sqrt(Q0*(n+3)*(n+1)/(4*Bn*L*k*Dd)) % try k=100</span>
+0266 <span class="comment">%</span>
+0267 <span class="comment">% % RS06 non-linear sloped late time:</span>
+0268 <span class="comment">% D = (2*k*L*sin(theta)/(n+1)*((n+1)^2/(alate*(n+0.01)*phi*A))^(n+1))^(1/n);</span>
+0269 
+0270 
+0271 <span class="comment">% TO PICK BACK UP ON GETTING D FROM RS05, right now on the white board i have</span>
+0272 <span class="comment">% three expressions for D:</span>
+0273 <span class="comment">%  1. from setting a0Q^b0 = aQ^b where a0 is early time a, b0 = 3, and a/b are  late time a/b.</span>
+0274 <span class="comment">%  2. from setting t=0 in the late-tie expression for q(t)</span>
+0275 <span class="comment">%  3. from the notes above</span>
+0276 <span class="comment">%</span>
+0277 <span class="comment">% k is present in all of them, and phi is probably in 1 and 3, so I need to</span>
+0278 <span class="comment">% figure out if I can cancel somehow, i.e. find a third equation, and/or use the</span>
+0279 <span class="comment">% graphical Q0 solution to get D in terms of k, then plug into the phi method</span>
+0280 <span class="comment">% ... note that phi cancels when setting a1 = a2 so that may be the key</span>
+0281 <span class="comment">%</span>
+0282 <span class="comment">% The three expressions are:</span>
+0283 <span class="comment">% 1. D = ((c1/c2)^((n+2)/(n+3))*Q0/k)^(1/2)</span>
+0284 <span class="comment">% 2. D = ( (Q0*(n+3)(n+1))/(4*Bn*L*k*Dd))^(1/2)</span>
+0285 <span class="comment">% 3. D = ((fR2/(alate*phi))^(n+2) * ( k*L^2/(2^n*(n+1)*A^(n+3))))^(1/n);</span>
+0286 <span class="comment">%</span>
+0287 <span class="comment">% In 1: c1 = fR1/L^2, c2 = fR2*(L^2/(N*A^(n+3)))^(1/(n+2)), N = see RS06 table</span>
+0288 <span class="comment">% set a0Q^b0 = aQ^b, sub in c1,c2, and solve for D</span>
+0289 <span class="comment">% In 2, I had to derive the form of Eq 8 Troch for RS05 late time: q = Q/(2*L)</span>
+0290 <span class="comment">% q = Bn*k*D^2/((n+3)*(n+1)*B*(1+Bn^2/(2*(n+3))*k*D/(phi*B^2)*t)^((n+2)/(n+1)));</span>
+0291 <span class="comment">% put a 2*L on top and you get Q. Sub in Dd you get:</span>
+0292 <span class="comment">% Q = 2*L*Bn*k*D^2*2*Dd/((n+3)*(n+1)*(1+Bn^2/(2*(n+3))*k*D*4*Dd/phi*t)^((n+2)/(n+1)));</span>
+0293 <span class="comment">% fR2 = (n+2)*(B_R2/(n+3))^(1/(n+2))</span>
+0294 <span class="comment">% a = phi_2*4*k*D*L^2/((n+1)*phi*A^2)*((n+1)*A/(4*k*D^2*L^2))^((n+2)/(n+1))</span>
+0295 <span class="comment">% phi_2 = (n+2)*Bn^2/(2*(n+3))*((n+3)/Bn)^((n+2)/(n+1))), Bn = beta((n+2)/(n+3),1/2)</span>
+0296 <span class="comment">% set t=0:</span>
+0297 <span class="comment">% Q0 = 2*L*Bn*k*D^2*2*Dd/((n+3)*(n+1)) = 4*Bn*L*k*Dd*D^2/((n+3)*(n+1))</span>
+0298 <span class="comment">% from which we find:</span>
+0299 <span class="comment">% D = (Q0*((n+3)*(n+1))/(4*Bn*L*k*Dd))^(1/2);</span>
+0300 <span class="comment">% note that phi is eliminated in this version</span>
+0301 
+0302 <span class="comment">% NOTE: the key thing in all of these is correctly equating early and late time</span>
+0303 <span class="comment">% so the math matches the graphical solution which is where we get Q0.</span>
+0304 
+0305 
+0306 <span class="comment">% ------------------------------------------------------------------------------</span>
+0307 
+0308 <span class="comment">% the notes that start here are good in principle but I screwed up by</span>
+0309 <span class="comment">% introducing the third equation, see notes at the end where instead I just set</span>
+0310 <span class="comment">% a1 = a2 and solve for D but I still got a weird result</span>
+0311 
+0312 <span class="comment">% this is for PK62 / BS04. I am not sure why it doesn't work. The idea is that</span>
+0313 <span class="comment">% we have two equations and three uknowns:</span>
+0314 <span class="comment">% -dQ/dt = a0*Q^b0, a0 = 1.133/(k*phi*D^3*L)*Q^3</span>
+0315 <span class="comment">% -dQ/dt = a*Q^b, a = 4.804*k^(1/2)*L/(phi*A^(3/2))*Q^b</span>
+0316 <span class="comment">% the three unknowns are k, phi, and D. So we get a third equation from the</span>
+0317 <span class="comment">% expression above for D, which comes from setting the late-time solution for</span>
+0318 <span class="comment">% q(t=0):</span>
+0319 <span class="comment">% D = sqrt(Q0/(3.448*k*L^2/A)) = c1/k^(1/2), c1 = sqrt((Q0*A/(3.448*L^2))</span>
+0320 <span class="comment">% therefore k = (c1/D)^2, plug that in to the first two equations:</span>
+0321 <span class="comment">% -dQ/dt = 1.133*D^2/(c1^2*phi*D^3*L^2)*Q^3 = c2/(phi*D)*Q^3, c2 = 1.133/(c1^2*L^2)</span>
+0322 <span class="comment">% -dQ/dt = 4.804*c1*L/(phi*A^(3/2)*D)*Q^b = c3/(phi*D)*Q^b, c3 = 4.804*c1*L/A^(3/2)</span>
+0323 <span class="comment">% set them equal at Q = Q0 and rearrange for D</span>
+0324 <span class="comment">% D  = (c2/c3*Q0^(3-blate))^(2/3)</span>
+0325 <span class="comment">% but the answer is non sensical, which could be because this is for b=3/2 in</span>
+0326 <span class="comment">% which case it reduces to:</span>
+0327 <span class="comment">% D  = (3/2*L)^(2/3)</span>
+0328 <span class="comment">% to get the correct answer I need to do this over again for RS05 instead of</span>
+0329 <span class="comment">% BS04 and then I can use blate, but might still have an issue with the</span>
+0330 <span class="comment">% definition of Q0.</span>
+0331 
+0332 <span class="comment">% c1 = sqrt((Q0*A/(3.448*L^2)))</span>
+0333 <span class="comment">% c2 = 1.133/(c1^2*L^2)</span>
+0334 <span class="comment">% c3 = 4.804*c1*L/(A^(3/2))</span>
+0335 <span class="comment">% ... shoot ... now D cancels and we just get back to where we started:</span>
+0336 <span class="comment">% Q0 = (c3/c2)^(2/3) = (4.804/1.133)^(2/3)*(c1*L)^2/A</span>
+0337 
+0338 <span class="comment">% c1 = Q0*A/(3.448*L^2);</span>
+0339 <span class="comment">% c2 = 1.133/(c1*L^2);                % = 3.9066 / (Q0 * A)</span>
+0340 <span class="comment">% c3 = 4.804*sqrt(c1)*L/(A^(3/2));    % = 2.5871 * sqrt(Q0) / A</span>
+0341 <span class="comment">% D  = (c2/c3*Q0^(3-blate))^(2/3);    % = (3/2 * Q0^(3/2-blate) )^(2/3)</span>
+0342 <span class="comment">%                                     % c2/c3 = 1.51/Q0^(3/2)</span>
+0343 <span class="comment">%                                     % note: if blate = 3/2, then D=1.3162*Q0</span>
+0344 
+0345 <span class="comment">% here begins the right way excep tfor the confusion about Dd units ad the fact</span>
+0346 <span class="comment">% that the first two D results are different</span>
+0347 
+0348 <span class="comment">% NOTE: I think I made this more complicated by using the c1 = Q0... equation</span>
+0349 <span class="comment">% because that may come from setting them equal ... this is D just by setting a1</span>
+0350 <span class="comment">% = a2:</span>
+0351 <span class="comment">% c1 = 1.133/(L^2)</span>
+0352 <span class="comment">% c2 = 4.804*L/(A^(3/2))</span>
+0353 <span class="comment">% D = (c1/c2)^(1/3)*sqrt(Q0/k) % this should equal the next line</span>
+0354 <span class="comment">% D = (1.133/4.804)*sqrt(A*Q0/(k*L^2)) % this is correct</span>
+0355 <span class="comment">% D = (1.133/4.804)*sqrt(Q0/(k*L*Dd)) % this is wrong b/c Dd is in 1/km i think</span>
+0356 <span class="comment">% which gives a reasonable result, so maybe that is right ...</span>
+0357 
+0358 <span class="comment">% ------------------------------------------------------------------------------</span>
+0359 <span class="comment">% RS05</span>
+0360 <span class="comment">% I started to do this for RS05/RS05 but stopped b/c I think it's a dead end b/c</span>
+0361 <span class="comment">% D is in the late-time unlike BS04 and I can use remote sensing or model data</span>
+0362 <span class="comment">% to get reference D, ... but then i went ahead with it s o here goes:</span>
+0363 
+0364 <span class="comment">% -dQ/dt = a0*Q^b0, a0 = fR1/(k*phi*D^3*L^2)*Q^3 = c1/(k*phi*D^3), c1 = fR1/L^2</span>
+0365 <span class="comment">% -dQ/dt = a*Q^b, a = 4.804*k^(1/2)*L/(phi*A^(3/2))*Q^b</span>
+0366 <span class="comment">% UPDATE, line above is BS04 I think, but from whiteboard, RS05 late tiem:</span>
+0367 <span class="comment">% -dQ/dt = a*Q^b, a = fR2/phi*(k*L^2/(N*D^n*A^(n+3))^(1/(n+2)) =</span>
+0368 <span class="comment">% c2/phi*(k/D^n)^(1/(n+2)), c2 = fR2*(L^2/(N*A^(n+3)))^(1/(n+2)), N = see RS06 table</span>
+0369 
+0370 <span class="comment">% to exactly track troch, on the white board right now, I would need to do the</span>
+0371 <span class="comment">% hbar integration for RS05 and sub that into the q(t) to get a simpler</span>
+0372 <span class="comment">% expression for q(hbar), then multiply by 2L to get Q, otherwise,</span>
+0373 
+0374 <span class="comment">% unlike PK62/BS04 (a1/a2), for which D is not involved in a2, D is involved in</span>
+0375 <span class="comment">% a1 and a2 for RS05, and it is also involved in Q(t=0) using the late-time</span>
+0376 <span class="comment">% solution, so we cannot solve for k directly from a2 like Troch does.</span>
+0377 
+0378 <span class="comment">% the thing I did differently from Troch is set a0Q^b0 = aQb at Q = Q0, which</span>
+0379 <span class="comment">% should be the value of Q at the intersection of the early and late time lines.</span>
+0380 <span class="comment">% Troch does this too, but he does it graphically to get a1/a2 then gets k from</span>
+0381 <span class="comment">% a1 and D.</span>
+0382 
+0383 <span class="comment">% with RS05, I can get D(Q0,L,k,Dd), and Q0 from point cloud, leaving k as the</span>
+0384 <span class="comment">% uknown, for which literature values could be used if necessary. since D is</span>
+0385 <span class="comment">% needed to get phi, I assume it is needed to get k, so I cannot get k using the</span>
+0386 <span class="comment">% phi method. The</span>
+0387 
+0388 
+0389 <span class="comment">% ------------------------------------------------------------------------------</span>
+0390 
+0391 
+0392</pre></div>
+</body>
+</html>

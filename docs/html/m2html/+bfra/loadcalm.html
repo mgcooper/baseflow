@@ -1,0 +1,375 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of loadcalm</title>
+  <meta name="keywords" content="loadcalm">
+  <meta name="description" content="LOADCALM loads calm ALT data for a basin in the Bounds struct">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; loadcalm.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>loadcalm
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>LOADCALM loads calm ALT data for a basin in the Bounds struct</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Calm,Meta] = loadcalm(basinname,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">LOADCALM loads calm ALT data for a basin in the Bounds struct
+ 
+ Syntax
+ 
+     [Calm,Meta] = loadcalm(basinname,varargin)
+ 
+ Description
+ 
+     [Calm,Meta] = loadcalm(basinname) loads table Calm containing active layer
+     thickness data for basin basinname from the Circumpolar Active Layer
+     Monitoring program database, and metadata about the site Meta.
+ 
+     [Calm,Meta] = loadcalm(__,'t1',t1,'t2',t2) returns table Calm for
+     the time period bounded by datetimes t1 and t2.
+ 
+ See also loadbounds, <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>
+
+ Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)</a></li>
+<li><a href="#_sub2" class="code">function [Calm,Meta] = loadcalmcurrent(MetaBasin)</a></li>
+<li><a href="#_sub3" class="code">function [Calm,MetaBasin] = loadcalmarchive(MetaBasin)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Calm,Meta] = loadcalm(basinname,varargin)</a>
+0002 <span class="comment">%LOADCALM loads calm ALT data for a basin in the Bounds struct</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     [Calm,Meta] = loadcalm(basinname,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     [Calm,Meta] = loadcalm(basinname) loads table Calm containing active layer</span>
+0011 <span class="comment">%     thickness data for basin basinname from the Circumpolar Active Layer</span>
+0012 <span class="comment">%     Monitoring program database, and metadata about the site Meta.</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">%     [Calm,Meta] = loadcalm(__,'t1',t1,'t2',t2) returns table Calm for</span>
+0015 <span class="comment">%     the time period bounded by datetimes t1 and t2.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% See also loadbounds, loadflow</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</span>
+0020 
+0021 <span class="comment">% if called with no input, open this file</span>
+0022 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0023 
+0024 <span class="comment">% NOTE: does not support multiple basins, use loadcalm(&quot;All_Basins&quot;) and select</span>
+0025 <span class="comment">% since I think in terms of basins right now, not calm sites, this accepts</span>
+0026 <span class="comment">% the basin name not the calm site name</span>
+0027 
+0028 <span class="comment">%------------------------------------------------------------------------------</span>
+0029 validopts = @(x)any(validatestring(x,{<span class="string">'current'</span>,<span class="string">'archive'</span>}));
+0030 
+0031 p = inputParser;
+0032 p.FunctionName = <span class="string">'bfra.loadcalm'</span>;
+0033 
+0034 addRequired(p, <span class="string">'basinname'</span>,               @(x) bfra.validation.ischarlike(x));
+0035 addOptional(p, <span class="string">'version'</span>,     <span class="string">'current'</span>,  validopts);
+0036 addParameter(p,<span class="string">'t1'</span>,          NaT,        @(x) bfra.validation.isdatelike(x));
+0037 addParameter(p,<span class="string">'t2'</span>,          NaT,        @(x) bfra.validation.isdatelike(x));
+0038 addParameter(p,<span class="string">'aggfunc'</span>,     <span class="string">'none'</span>,     @(x) bfra.validation.ischarlike(x));
+0039 addParameter(p,<span class="string">'minlength'</span>,   10,         @(x) bfra.validation.isnumericscalar(x));
+0040 addParameter(p,<span class="string">'mincoverage'</span>, 0.8,        @(x) bfra.validation.isnumericscalar(x));
+0041 addParameter(p,<span class="string">'minoverlap'</span>,  0.5,        @(x) bfra.validation.isnumericscalar(x));
+0042 addParameter(p,<span class="string">'maxdiff'</span>,     0.5,        @(x) bfra.validation.isnumericscalar(x));
+0043 
+0044 parse(p,<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
+0045 
+0046 <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>   = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>);
+0047 version     = p.Results.version;
+0048 t1          = p.Results.t1;
+0049 t2          = p.Results.t2;
+0050 aggfunc     = p.Results.aggfunc;
+0051 
+0052 <span class="comment">% these parameters control whether or not we accept the average of all sites</span>
+0053 <span class="comment">% when multiple sites exist within a basin. Sites that do not satisfy these</span>
+0054 <span class="comment">% parameters are removed.</span>
+0055 minlength   = p.Results.minlength;     <span class="comment">% minimum record length (# of values)</span>
+0056 mincoverage = p.Results.mincoverage;   <span class="comment">% percent coverage (# of values / # years)</span>
+0057 minoverlap  = p.Results.minoverlap;    <span class="comment">% percent overlap (like coverage but between sites)</span>
+0058 maxdiff     = p.Results.maxdiff;       <span class="comment">% percent difference in trend between sites</span>
+0059 <span class="comment">%------------------------------------------------------------------------------</span>
+0060 
+0061 <span class="comment">% get the meta data</span>
+0062 <span class="keyword">if</span> ~istable(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>) &amp;&amp; <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> == &quot;ALL_BASINS&quot;
+0063    MetaBasin = <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>;
+0064 <span class="keyword">else</span>
+0065    MetaBasin = bfra.loadmeta(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,version);
+0066 <span class="keyword">end</span>
+0067 
+0068 <span class="comment">% load the calm data</span>
+0069 <span class="keyword">switch</span> version
+0070    <span class="keyword">case</span> <span class="string">'current'</span>
+0071       [Calm,Meta] = <a href="#_sub2" class="code" title="subfunction [Calm,Meta] = loadcalmcurrent(MetaBasin)">loadcalmcurrent</a>(MetaBasin);
+0072    <span class="keyword">case</span> <span class="string">'archive'</span>
+0073       [Calm,Meta] = <a href="#_sub3" class="code" title="subfunction [Calm,MetaBasin] = loadcalmarchive(MetaBasin)">loadcalmarchive</a>(MetaBasin);
+0074 <span class="keyword">end</span>
+0075 
+0076 <span class="keyword">if</span> ~isnat(t1)
+0077    ok = isbetween(Calm.Time,t1,t2);
+0078    Calm = Calm(ok,:);
+0079 <span class="keyword">end</span>
+0080 
+0081 [Calm,Meta] = <a href="#_sub1" class="code" title="subfunction [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)">aggregateCalm</a>(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff);
+0082 
+0083 <span class="comment">% add the basiname to the Calm Meta table</span>
+0084 <span class="keyword">if</span> <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> ~= &quot;ALL_BASINS&quot;
+0085    Meta.basin = repmat(categorical({<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>}),height(Meta),1);
+0086    Meta.station = repmat(categorical(MetaBasin.station),height(Meta),1);
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">% % if requested, aggregate the multi-site data</span>
+0090 <span class="comment">% switch aggfunc</span>
+0091 <span class="comment">%    case 'avg'</span>
+0092 <span class="comment">%       Calm = aggregateCalm(Calm,Meta,minlength,mincoverage,minoverlap,maxdiff);</span>
+0093 <span class="comment">%    case 'robust'</span>
+0094 <span class="comment">%       [Calm,Meta] = aggregateCalm(Calm,Meta,minlength,mincoverage,minoverlap,maxdiff);</span>
+0095 <span class="comment">% end</span>
+0096 
+0097 <span class="comment">% if case 'avg' with timetablereduce is problematic, this was the original method</span>
+0098 <span class="comment">%Time  = Calm.Time;</span>
+0099 <span class="comment">%Dc    = nanmean(table2array(Calm),2);</span>
+0100 <span class="comment">%Calm  = array2timetable(Dc,'RowTimes',Time);</span>
+0101 
+0102 
+0103 
+0104 <a name="_sub1" href="#_subfunctions" class="code">function [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)</a>
+0105 
+0106 <span class="comment">% outside of this function, we can decide to fit trends to all sites that pass</span>
+0107 <span class="comment">% the filters and then average those trends versus fitting to the average across sites</span>
+0108 
+0109 <span class="keyword">switch</span> aggfunc 
+0110    <span class="keyword">case</span> <span class="string">'none'</span>
+0111       <span class="keyword">return</span>
+0112       
+0113    <span class="keyword">case</span> <span class="string">'avg'</span>
+0114       <span class="comment">% 'avg' might as well return PM. previously 'bfra'</span>
+0115       Calm = bfra.util.timetablereduce(Calm);
+0116       Calm = Calm(:,{<span class="string">'mu'</span>,<span class="string">'PM'</span>});
+0117       Calm = renamevars(Calm,{<span class="string">'mu'</span>,<span class="string">'PM'</span>},{<span class="string">'Dc'</span>,<span class="string">'sigDc'</span>});
+0118       <span class="keyword">return</span>
+0119       
+0120    <span class="keyword">case</span> <span class="string">'robust'</span>
+0121 
+0122       ok = Meta.nyears&gt;=minlength &amp; Meta.coverage&gt;=mincoverage;
+0123 
+0124       <span class="comment">% if no sites have &gt; minlength values, set nan and return</span>
+0125       <span class="keyword">if</span> sum(ok)==0
+0126          Calm.Dc = nan(height(Calm),1);
+0127          Calm.sigDc = nan(height(Calm),1);
+0128          Calm = Calm(:,{<span class="string">'Dc'</span>,<span class="string">'sigDc'</span>});
+0129          <span class="keyword">return</span>
+0130       <span class="keyword">elseif</span> sum(ok)==1
+0131          <span class="comment">% if one site has &gt; minlength values, call case 'avg' and return</span>
+0132          Calm = Calm(:,ok);
+0133          Meta = Meta(ok,:);
+0134          Calm = <a href="#_sub1" class="code" title="subfunction [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)">aggregateCalm</a>(Calm,Meta,<span class="string">'avg'</span>,minlength,mincoverage,minoverlap,maxdiff);
+0135          <span class="keyword">return</span>
+0136       <span class="keyword">end</span>
+0137 
+0138       <span class="comment">% remove sites with &lt; minlength</span>
+0139       Calm = Calm(:,ok);
+0140       Meta = Meta(ok,:);
+0141 
+0142       <span class="comment">% use the longest record as the reference site</span>
+0143       nsites = height(Meta);
+0144       nyears = Meta.nyears;
+0145       nmax = max(nyears);
+0146       iref = nyears == nmax;
+0147       
+0148       <span class="comment">% get the trend using the longest record and then using the average</span>
+0149       alldata = table2array(Calm);
+0150       mu = mean(alldata,2,<span class="string">'omitnan'</span>);
+0151       Trends = timetabletrends(addvars(Calm,mu));
+0152 
+0153       <span class="comment">% the trend slopes are added as custom props in timetable trend but the last one</span>
+0154       <span class="comment">% is the &quot;TimeX&quot; regressor variable which is set nan</span>
+0155       slopes = Trends.Properties.CustomProperties.TrendSlope(1:end-1);
+0156       tseries = table2array(Trends(:,1:end-1));
+0157       
+0158       <span class="comment">% this handles the case with more than one &quot;reference site&quot;</span>
+0159       refslope = mean(slopes(iref));
+0160 
+0161       <span class="comment">% if the trend of the average is less than X% different than the trend of the</span>
+0162       <span class="comment">% longest record, then don't worry about overlap, use the average timeseries</span>
+0163       <span class="keyword">if</span> abs(1-slopes(end)/refslope) &lt; maxdiff
+0164          Calm = <a href="#_sub1" class="code" title="subfunction [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)">aggregateCalm</a>(Calm,Meta,<span class="string">'avg'</span>,minlength,mincoverage,minoverlap,maxdiff);
+0165          <span class="keyword">return</span>
+0166       <span class="keyword">end</span>
+0167       <span class="comment">% if here, all sites have minlength, mincoverage, but when averaged, their</span>
+0168       <span class="comment">% trend is more than maxdiff percent different from the trend of the</span>
+0169       <span class="comment">% reference site. If this is due to spatial variability, that's ok, but if</span>
+0170       <span class="comment">% it's due to temporal mismatch, like one site has 12 years of data from</span>
+0171       <span class="comment">% 1990-2002 and the other sites have 20 years from 2000-2020, then we</span>
+0172       <span class="comment">% exclude the one from 1990-2002 based on the minoverlap parameter, i.e.</span>
+0173       <span class="comment">% we remove sites that do not overlap with all other sites by minoverlap</span>
+0174       <span class="comment">% in percent terms relative to the total number of years.</span>
+0175       
+0176       <span class="comment">% determine overlap. simplest method: ok = nyears./nmax &gt; minoverlap;</span>
+0177       <span class="comment">% better method: get actual overlap of each site relative to the ref site.</span>
+0178       <span class="comment">% this works if iref has more than one site.</span>
+0179       overlap = nan(nsites,1);
+0180       <span class="keyword">for</span> n = 1:nsites
+0181          overlap(n) = sum(all(~isnan([alldata(:,iref),alldata(:,n)]),2))/nmax;
+0182       <span class="keyword">end</span>
+0183       ok = overlap &gt; minoverlap;
+0184       
+0185       <span class="comment">% select the sites that qualify and call the 'avg' case</span>
+0186       Calm = Calm(:,ok);
+0187       Meta = Meta(ok,:);
+0188       Calm = <a href="#_sub1" class="code" title="subfunction [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)">aggregateCalm</a>(Calm,Meta,<span class="string">'avg'</span>,minlength,mincoverage,minoverlap,maxdiff);
+0189       
+0190       <span class="comment">% for debugging:</span>
+0191       plottrends = false;
+0192       <span class="keyword">if</span> plottrends == true 
+0193          figure; plot(Calm.Time,alldata,<span class="string">'-o'</span>); hold on;
+0194          plot(Calm.Time,mean(alldata,2,<span class="string">'omitnan'</span>)); set(gca,<span class="string">'ColorOrderIndex'</span>,1)
+0195          plot(Calm.Time,tseries); bfra.util.formatPlotMarkers;
+0196          legend(Trends.Properties.VariableNames(1:end-1),<span class="string">'Location'</span>,<span class="string">'best'</span>);
+0197          
+0198          <span class="comment">% this was in the aggregateCalmData temporary function i deleted</span>
+0199          bfra.trendplot(Data.Time,Data.mu,<span class="string">'useax'</span>,gca, <span class="keyword">...</span>
+0200             <span class="string">'errorbars'</span>,true,<span class="string">'yerr'</span>,Data.sigma);
+0201       <span class="keyword">end</span>
+0202       
+0203       <span class="comment">% NOTE:</span>
+0204       <span class="comment">% say one site has values every other year, then the overlap is only 50%,</span>
+0205       <span class="comment">% but it may be good data. Return to that edge case if needed. For now,</span>
+0206       <span class="comment">% use total overlap. Besides, in that case, the data will be retained if</span>
+0207       <span class="comment">% the trends are not more than maxdiff apart.</span>
+0208       
+0209       <span class="comment">% Regarding maxdiff check: two checks are considered: 1) is the trend of</span>
+0210       <span class="comment">% any individual site more than x% different than the site with the</span>
+0211       <span class="comment">% longest record? and 2) is the trend of the average of all sites more</span>
+0212       <span class="comment">% than x% different than the site with the longest record? The second</span>
+0213       <span class="comment">% method is implemented. The first method would require this:</span>
+0214       
+0215       <span class="comment">% ok = abs(slopes(1:end-1)-slopes(iref))./slopes(iref) &lt; maxdiff;</span>
+0216 <span class="keyword">end</span>
+0217 
+0218 
+0219 <span class="comment">% there was a note about using this to make a function bfra.writeshapefile but</span>
+0220 <span class="comment">% it could also be used to find calm sites within a given boundary on the fly,</span>
+0221 <span class="comment">% e.g. if I want to expand my search programatically using this function, I</span>
+0222 <span class="comment">% could pass in the basin shapefile and a buffer tolerance and find all sites</span>
+0223 <span class="comment">% within that buffer, whcih would also be useful for finding rain stations</span>
+0224 
+0225 <span class="comment">% % make a shapefile</span>
+0226 <span class="comment">% [SE,CI,PM,mu,sigma] = stderr(transpose(table2array(Data)));</span>
+0227 <span class="comment">%</span>
+0228 <span class="comment">% S = MetaCalm(Points.inpolyb,:);</span>
+0229 <span class="comment">% S.avg = mu;</span>
+0230 <span class="comment">% S.std = sigma;</span>
+0231 <span class="comment">% S = table2struct(tablecategorical2char(S));</span>
+0232 <span class="comment">% S = renamestructfields(S,{'LAT','LON'},{'Lat','Lon'});</span>
+0233 <span class="comment">% S = geopoint(S);</span>
+0234 
+0235 
+0236 
+0237 
+0238       
+0239 <a name="_sub2" href="#_subfunctions" class="code">function [Calm,Meta] = loadcalmcurrent(MetaBasin)</a>
+0240 
+0241 <span class="comment">% load the calm data</span>
+0242 fname = setpath(<span class="string">'/interface/permafrost/matfiles/CALM_ALT.mat'</span>,<span class="string">'data'</span>);
+0243 
+0244 load(fname,<span class="string">'Calm'</span>,<span class="string">'Meta'</span>);
+0245 
+0246 <span class="keyword">if</span> ~istable(MetaBasin) &amp;&amp; MetaBasin == &quot;ALL_BASINS&quot;
+0247    <span class="keyword">return</span>
+0248 <span class="keyword">end</span>
+0249 
+0250 MetaCalm = Meta; clear Meta;
+0251 
+0252 <span class="comment">% find the calm data</span>
+0253 <span class="keyword">if</span> MetaBasin.num_calm == 0
+0254    error(<span class="string">'no calm data for this basin'</span>)
+0255 <span class="keyword">else</span>
+0256    <span class="comment">% the indices of the calm sites for this basin</span>
+0257    idx = MetaBasin.idx_calm{:};
+0258    Calm = Calm(:,idx);
+0259    Meta = MetaCalm(idx,:);
+0260    
+0261    <span class="comment">% add number of valid years and start/end</span>
+0262    keep = ~isnan(table2array(Calm));
+0263    nyears = transpose(sum(keep));
+0264    ibegin = transpose(table2array(varfun(@(A)(find(~isnan(A),1,<span class="string">'first'</span>)),Calm)));
+0265    ifinal = transpose(table2array(varfun(@(A)(find(~isnan(A),1,<span class="string">'last'</span>)),Calm)));
+0266    ybegin = year(Calm.Time(ibegin));
+0267    yfinal = year(Calm.Time(ifinal));
+0268    tcover = round(nyears./(yfinal-ybegin+1),2);
+0269    Meta = addvars(Meta,nyears,ybegin,yfinal,tcover,<span class="string">'NewVariableNames'</span>, <span class="keyword">...</span>
+0270       [&quot;NumYears&quot;,&quot;YearStart&quot;,&quot;YearEnd&quot;,&quot;Coverage&quot;]);
+0271 <span class="keyword">end</span>
+0272 
+0273 <span class="comment">% temp hack to check against the og list</span>
+0274 <span class="keyword">if</span> strcmp(MetaBasin.name,<span class="string">'KUPARUK R NR DEADHORSE AK'</span>)
+0275    sites = {<span class="string">'U11A'</span>,<span class="string">'U11B'</span>,<span class="string">'U11C'</span>,<span class="string">'U12A'</span>,<span class="string">'U12B'</span>,<span class="string">'U13'</span>,<span class="string">'U14'</span>,<span class="string">'U32A'</span>,<span class="string">'U32B'</span>};
+0276    keep = ismember(Calm.Properties.VariableNames,sites);
+0277    Calm = Calm(:,keep);
+0278    Meta = Meta(keep,:);
+0279 <span class="keyword">end</span>
+0280 
+0281 <a name="_sub3" href="#_subfunctions" class="code">function [Calm,MetaBasin] = loadcalmarchive(MetaBasin)</a>
+0282 
+0283 fname = setpath(<span class="string">'interface/permafrost/alt/CALM/archive/CALM_ALT.mat'</span>,<span class="string">'data'</span>);
+0284 
+0285 load(fname,<span class="string">'Calm'</span>,<span class="string">'Tcalm'</span>);
+0286 
+0287 <span class="keyword">if</span> ~istable(MetaBasin) &amp;&amp; MetaBasin == &quot;ALL_BASINS&quot;
+0288    <span class="keyword">return</span>
+0289 <span class="keyword">end</span>
+0290 
+0291 <span class="comment">% find the calm data</span>
+0292 <span class="keyword">if</span> isempty(MetaBasin.sites_calm)
+0293    error(<span class="string">'no calm data for this basin'</span>)
+0294 <span class="keyword">else</span>
+0295    i1 = find(string(Calm.Properties.VariableNames) == &quot;x1990&quot;);
+0296    i2 = find(string(Calm.Properties.VariableNames) == &quot;x2019&quot;);
+0297    Dc = table2array(Calm(MetaBasin.use_calm,i1:i2)); Dc = Dc';
+0298    Calm = timetable(Dc,<span class="string">'RowTimes'</span>,Tcalm);
+0299 <span class="keyword">end</span></pre></div>
+</body>
+</html>

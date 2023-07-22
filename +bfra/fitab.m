@@ -1,12 +1,12 @@
 function [Fit,ok] = fitab(q,dqdt,method,varargin)
 %FITAB fit event-scale recession equation -dq/dt = aQ^b
-% 
+%
 % Syntax
-% 
+%
 %     [Fit,ok] = fitab(q,dqdt,method,varargin)
-% 
+%
 % Description
-% 
+%
 %     [Fit,ok] = fitab(q,dqdt,method) fits event-scale recession equation
 %     -dq/dt = aQ^b to estimate parameters a and b using the specified fitting
 %     method. Valid methods are ordinary least squares (ols), non-linear least
@@ -14,13 +14,13 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 %     difference ('median').
 %
 % Required inputs
-% 
+%
 %     q        vector double of discharge data (L T^-1)
 %     dqdt     vector double of discharge rate of change (L T^-2)
 %     method   char indicating the fitting method
 %
 % Optional inputs
-% 
+%
 %     weights  vector double of weights for the fitting algorithm
 %     mask     vector logical mask to exclude values from fitting
 %     order    scalar, exponent in -dq/dt = aQ^b
@@ -31,17 +31,21 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 %     fitopts  struct containing fitting options (not currently implemented)
 %
 % See also prepfits
-% 
+%
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-methodlist     = {'nls','ols','mle','qtl','mean','median','envelope'};
-validmethod    = @(x)any(validatestring(x,methodlist));
+persistent inoctave
+if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
+end
 
-p              = inputParser;
+%-------------------------------------------------------------------------------
+methodslist = {'nls','ols','mle','qtl','mean','median','envelope'};
+validmethod = @(x)any(validatestring(x,methodslist));
+
+p = inputParser;
 p.FunctionName = 'bfra.fitab';
 p.StructExpand = false;
 % p.PartialMatching = true;
@@ -55,6 +59,7 @@ addParameter(p,'mask',     true(size(q)),    @(x)islogical(x)     );
 addParameter(p,'quantile', 0.05,             @(x)isnumeric(x)     );
 addParameter(p,'refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
 addParameter(p,'Nboot',    100,              @(x)isnumeric(x)     );
+addParameter(p,'alpha',    0.68,             @(x)isnumeric(x)     );
 addParameter(p,'plotfit',  false,            @(x)islogical(x)     );
 addParameter(p,'fitopts',  struct(),         @(x)isstruct(x)      );
 
@@ -66,6 +71,7 @@ mask     = p.Results.mask;
 qtl      = p.Results.quantile;
 refqtls  = p.Results.refqtls;
 Nboot    = p.Results.Nboot;
+alpha    = p.Results.alpha;
 plotfit  = p.Results.plotfit;
 fitopts  = p.Unmatched;
 
@@ -81,16 +87,13 @@ fitopts  = p.Unmatched;
 
 %-------------------------------------------------------------------------------
 
-[x,y,logx,logy,weights,ok] = bfra.prepfits( ...
-   q,dqdt,'weights',weights,'mask',mask);
+[x,y,logx,logy,weights,ok] = bfra.prepfits(q,dqdt,'weights',weights,'mask',mask);
 
 % weights will equal zero anywhere mask is false
 
 if ok == false
    Fit = nan; return;
 end
-
-alpha = 0.68;
 
 % method 'envelope' allows for passing a line through an arbitrary x,y
 % pair (refpoints), specified in terms of the quantile of the x/y data
@@ -106,70 +109,76 @@ if strcmp(method,'ols') && order == 1
 end
 
 switch method
-   
+
    case 'ols'
-      [ab,ci,ok]  = fitOLS(logx,logy,weights,alpha);
+      [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave);
    case 'qtl'
-      [ab,ci,ok]  = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,fitopts);
+      [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave);
    case 'mle'
       error('mle fitting not currently supported');
-      % [ab,ci,ok]  = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
+      % [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
    case 'nls'
-      [ab,ci,ok,s]= fitNLS(x,y,logx,logy,weights,alpha,fitopts);
+      [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave);
    case 'mean'
-      [ab,ci,ok]  = fitLIN(logx,logy,weights,alpha,order,fitopts);
+      [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,inoctave);
    case 'median'
-      [ab,ci,ok]  = fitMED(logx,logy,weights,order,fitopts);
+      [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave);
    case 'envelope'
-      [ab,ci,ok]  = fitENV(logx,logy,weights,order,refqtls);
+      [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave);
 end
 
 
 % NOW THAT FITTING IS DONE, SELECT THE FINAL FIT
 [Fit,ok] = evalFit(ab,x,y,ci,ok);
 
-if exist('fs','var')
-   Fit.fselect = s;
+if exist('fselect','var')
+   Fit.fselect = fselect;
 end
 
 if plotfit == true
-   Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'},'userab',ab,'mask',mask);
+   Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'}, ...
+      'userab',ab,'mask',mask,'usertext',method);
 end
 
 %-------------------------------------------------------------------------------
 % FITTING METHODS
 %-------------------------------------------------------------------------------
-function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
+function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave)
 % ordinary least squares linear regression in log-log
 
+% TODO: replace this with octave compatible fitting
+
 % Set up fittype and options.
-ft       =  fittype(     'poly1'                         );
-fopts    =  fitoptions(  'Method', 'LinearLeastSquares'  );
-fopts    =  setfield(fopts,'Weights',weights);
-[f, ~]   =  fit( logx, logy, ft, fopts );
-ab       =  fliplr(coeffvalues(f));
-
-ab       =  [exp(ab(1)); ab(2)];
-
-% transpose ci to be consistent with stats functions
-ci       =  rot90(confint(f,alpha));
-ci(1,:)  =  exp(ci(1,:));
-
-% generic failure check
-ok = true;
-if any(~isreal(ab))
-   ok = false;
+if inoctave
+   error('ordinary least squares not currently supported in octave, use nls')
+else
+   ft = fittype('poly1');
+   fopts = fitoptions( 'Method', 'LinearLeastSquares');
+   fopts = setfield(fopts,'Weights', weights);
+   [f,~] = fit( logx, logy, ft, fopts );
+   ab = fliplr(coeffvalues(f));
 end
 
+% transform a to linear space and package a/b
+ab = [exp(ab(1)); ab(2)];
 
-function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,fitopts)
+% transpose ci to be consistent with stats functions
+ci = rot90(confint(f,alpha));
+ci(1,:) = exp(ci(1,:));
+
+% generic failure check
+ok = all(isreal(ab));
+
+
+function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order,inoctave)
 % linear model fit in log-log, equivalent to forcing a line of slope 1 through
 % the mean x-y, with option to control the slope using input parameter 'order'
 
-% check fitopts
-if isfield(fitopts,'order')
-   if isnumeric(fitopts.order); order = fitopts.order; end
-end
+% % not sure if this was ever functional
+% % check fitopts
+% if isfield(fitopts,'order')
+%    if isnumeric(fitopts.order); order = fitopts.order; end
+% end
 
 % apply the mask / weights
 logx = logx(weights>0);
@@ -189,48 +198,46 @@ ab = [exp(-(mean(logx)-mean(logy))); order];
 ci = [exp(ci(1)) exp(ci(2)); ab(2), ab(2)];
 
 % generic failure check
-ok = true;
-if any(~isreal(ab))
-   ok = false;
-end
+ok = all(isreal(ab));
 
 
-function [ab,ci,ok] = fitMED(logx,logy,weights,order,fitopts)
+function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)
 % force a line of slope 'order' through the median x-y
 
 % % not sure why this was here, order is passed in with default 1, maybe i was
 % gonna do away wiht that or maybe i was testing here before implementing that
-%    order = 1;
-%
-%       if isfield(fitopts,'order')
-%             order =  fitopts.order;
-%       end
+% order = 1;
+% if isfield(fitopts,'order')
+%    order = fitopts.order;
+% end
 
 % apply the mask / weights
-logx     =  logx(weights>0);
-logy     =  logy(weights>0);
+logx = logx(weights>0);
+logy = logy(weights>0);
 
-logx     =  order*logx;
-pv       =  signrank(-logx,-logy); % or ranksum or kruskalwallis
+logx = order*logx;
+
+if inoctave
+   pval = nan; % ranksum and kruskalwallis both supported, need to implement
+else
+   pval = signrank(-logx,-logy); % or ranksum or kruskalwallis
+end
 
 % med(x-y)!=med(x)-med(y)
-ab       =  [exp(-(median(logx)-median(logy))); order];
+ab = [exp(-(median(logx)-median(logy))); order];
 
 % non-parametric test, no ci
-ci       =  [ab(1), ab(1); ab(2), ab(2)];
+ci = [ab(1), ab(1); ab(2), ab(2)];
 
 % could return to this later
-%bootfun  = @(x,y)(median(y)-median(x));
+%bootfun = @(x,y)(median(y)-median(x));
 %bootci(100,bootfun(logx,logy))
 
 % generic failure check
-ok    =  true;
-if any(~isreal(ab))
-   ok    =  false;
-end
+ok = all(isreal(ab));
 
 
-function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls)
+function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)
 % force a line of slope 'order' through any two points 'refpoints' that
 % together define an 'envelope'. default x refpoint is median(x). To control
 % the vertical location of the line, set y refpoint higher or lower while
@@ -250,60 +257,71 @@ function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls)
 %       end
 
 % apply the mask / weights
-logx     =  logx(weights>0);
-logy     =  logy(weights>0);
-
-logx     =  order.*logx;
+logx = logx(weights>0);
+logy = logy(weights>0);
+logx = order.*logx;
 
 % force the line through the provided quantile
-xbar     =  quantile(logx,refqtls(1),'Method','approximate');
-ybar     =  quantile(logy,refqtls(2),'Method','approximate');
-
-% note: mean(x-y) = mean(x)-mean(y)
-ab       =  [ exp(-(xbar-ybar)); order];
-
-% transpose ci to be consistent with stats functions
-ci       =  [nan nan; nan, nan];
-
-% generic failure check
-ok    =  true;
-if any(~isreal(ab))
-   ok    =  false;
+if inoctave
+   xbar = quantile(logx,refqtls(1),1,8);
+   ybar = quantile(logy,refqtls(2),1,8);
+else
+   xbar = quantile(logx,refqtls(1),'Method','approximate');
+   ybar = quantile(logy,refqtls(2),'Method','approximate');
 end
 
+% note: mean(x-y) = mean(x)-mean(y)
+ab = [ exp(-(xbar-ybar)); order];
 
-function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,quantile,Nboot,fitopts)
+% transpose ci to be consistent with stats functions
+ci = [nan nan; nan, nan];
+
+% generic failure check
+ok = all(isreal(ab));
+
+
+function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)
 
 % quantile regression
-if isfield(fitopts,'quantile')
-   quantile =  fitopts.pctl;
-   order    =  fitopts.order; % 1=linear regression
-   Nboot    =  fitopts.Nboot;
-   % alpha    =  fitopts.alpha;
-elseif isnan(quantile)
-   quantile    = 0.05;
+if inoctave
+   error('quantile regression not currently supported in octave, use nls')
+end
+
+% % If fitopts is abandoned, need to figure out how to deal with extra
+% parameters for quantile regression.
+% if isfield(fitopts,'qtl')
+%    qtl = fitopts.pctl;
+%    order = fitopts.order; % 1=linear regression
+%    Nboot = fitopts.Nboot;
+%    % alpha = fitopts.alpha;
+% elseif isnan(qtl)
+%    qtl = 0.05;
+% end
+
+if isnan(qtl)
+   qtl = 0.05;
 end
 
 % apply the mask / weights
-logx     = logx(weights>0);
-logy     = logy(weights>0);
+logx = logx(weights>0);
+logy = logy(weights>0);
 
-[ab,s]   =  quantreg(logx,logy,quantile,order,Nboot,1-alpha);
-ab       =  [exp(ab(1)); ab(2)];
+% fit a,b using quantile regression
+[ab,s] = bfra.deps.quantreg(logx,logy,qtl,order,Nboot,1-alpha);
+
+% transform a to linear space and package a/b
+ab = [exp(ab(1)); ab(2)];
 
 % transpose ci to be consistent with stats functions
-ci       =  transpose(s.ci_boot);   % comes in the same order as confint
-ci(1,:)  =  exp(ci(1,:));
+ci = transpose(s.ci_boot);   % comes in the same order as confint
+ci(1,:) = exp(ci(1,:));
 
 % generic failure check
-ok =  true;
-if any(~isreal(ab))
-   ok =  false;
-end
+ok = all(isreal(ab));
 
 
 % function [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy)
-% 
+%
 % % Set default values for maximum likelihood estimation
 % if nargin == 2
 %    sigx     =  std(logx);       % error in x
@@ -311,15 +329,15 @@ end
 %    rxy      =  0;               % correlation b/w error in x and y
 %    alpha    =  0.68;            % confidence level
 % end
-% 
+%
 % % fit
 % [ab,s] = yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
-% 
+%
 % ab = [exp(ab(1)); ab(2)];
-% 
+%
 % % transpose ci to be consistent with stats functions
 % ci = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
-% 
+%
 % % generic failure check
 % ok = true;
 % if any(~isreal(ab))
@@ -327,30 +345,82 @@ end
 % end
 
 
-function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,fitopts)
+function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave)
 
-warning off
+if inoctave
+   [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha);
+else
+   try
+      [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha);
+   catch
+      [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha);
+   end
+end
+
+function [Fit,ok] = evalFit(ab,x,y,ci,ok)
+
+% ok is from the fitting function, passed in here but not used
+if ok == false
+   % error? 
+end
+
+Fit.ab = ab;
+
+% all ci's should already be transformed to this form:
+Fit.a = ab(1);
+Fit.b = ab(2);
+Fit.aL = ci(1,1);
+Fit.aH = ci(1,2);
+Fit.bL = ci(2,1);
+Fit.bH = ci(2,2);
+
+Fit.rsq = bfra.deps.rsquare(y,ab(1).*x.^ab(2));
+Fit.pvalue = nan;
+Fit.N = numel(y);
+Fit.x = x;
+Fit.y = y;
+
+% generic failure check
+ok = all(isreal(ab));
+
+%    % any log-log regressions need the ci's transormed like this:
+%    aL      = exp(ci(1,1)); % 95% CI
+%    aH      = exp(ci(1,2));
+%    bL      = ci(2,1);      % = betaL
+%    bH      = ci(2,2);      % = betaH
+
+%    % any nlinfit regressions should already be in teh right order:
+%    aL      = ci(1,1); % for confint: ci(1,1);
+%    aH      = ci(1,2); % for confint: ci(2,1);
+%    bL      = ci(2,1); % for confint: ci(1,2);
+%    bH      = ci(2,2); % for confint: ci(2,2);
+
+% this does not work if robust fitting is used
+%r2      = 1-sum(R.^2)/sum((y-mean(y)).^2); % for fit: gof.rsquare;
+%figure; loglog(x,y,'o'); hold on; loglog(x,ab(1).*x.^ab(2))
+
+
+function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
 
 % initial estimates using log-log linear fit
-ci    = [nan nan; nan nan];
-ok    = true;
-ab0   = [ones(size(x)) logx]\logy;
-ab0   = [exp(ab0(1)), ab0(2)];
-
-% iniital rsq
-rsq0  = rsquare(y,ab0(1).*x.^ab0(2)); rsq = rsq0;
-
+ok = true;
+ab0 = [ones(size(x)) logx]\logy;
+ab0 = [exp(ab0(1)), ab0(2)];
 
 % to use user-specified weights:
-%opts    = statset('Display','off','RobustWgtFun',[]);
-%ab      = nlinfit(q,dqdt,fnc,ab0,opts,'Weights',weights);
+%opts = statset('Display','off','RobustWgtFun',[]);
+%ab = nlinfit(q,dqdt,fnc,ab0,opts,'Weights',weights);
 
+% initialize r2
+rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2)); 
+rsq = rsq0;
 
 % 'nlinfit' function options
-fnc   = @(ab,x)ab(1).*x.^ab(2);
+fnc = @(ab,x)ab(1).*x.^ab(2);
 
-%    fnc      =  @(ab,x)ab(1).^(3-2.*ab(2)).*x.^ab(2);
+% fnc = @(ab,x)ab(1).^(3-2.*ab(2)).*x.^ab(2);
 
+% opts1 = statset('Display','off','RobustWgtFun','bisquare');
 opts1 = statset('Display','off','RobustWgtFun','bisquare');
 opts2 = statset('Display','off');
 
@@ -373,212 +443,253 @@ opts4 = fitoptions('Method','NonlinearLeastSquares',          ...
 %  select nlinfit non-robust
 %  else
 
-% warning off
 % try robust nonlinear least squares fitting
+ab1ok = true;
 try
    [ab1,R1,~,C1] = nlinfit(x,y,fnc,ab0,opts1); % R=resids,C=error variance
-   rsq1  = rsquare(y,ab1(1).*x.^ab1(2));
-   
+   rsq1 = bfra.deps.rsquare(y,ab1(1).*x.^ab1(2));
+
 catch ME
-   
+
    if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
-      
-      msg            =  'Fitting failed using nlinfit at ab1';
-      causeException =  MException('BFRA:fitab:fitting',msg);
-      ME             = addCause(ME,causeException);
-      
+
+      msg = 'Fitting failed using nlinfit at ab1';
+      causeException = MException('BFRA:fitab:fitting',msg);
+      ME = addCause(ME,causeException);
+
    end
+   ab1ok = false;
    % rethrow(ME)
 end
 
-
-
 % if nlinfit worked and it's 'better' than rsq (here, rsq0), select it
-if exist('ab1','var') && rsq1 > rsq && rsq1 > 0
-   
-   fselect  = 'nlinfit_robust';
-   rsq      = rsq1;
-   
+if ab1ok && rsq1 > rsq && rsq1 > 0
+
+   fselect = 'nlinfit_robust';
+   rsq = rsq1;
 else
-   
+
    % try curve fitting functions
-   
+   ab3ok = true;
    try
-      
-      f3    = fit(x,y,ftype,opts3); ab3 = coeffvalues(f3);
-      rsq3  = rsquare(y,ab3(1).*x.^ab3(2));
-      
+      f3 = fit(x,y,ftype,opts3);
+      ab3 = coeffvalues(f3);
+      rsq3 = bfra.deps.rsquare(y,ab3(1).*x.^ab3(2));
+
    catch ME
-      
+
       if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
-         
-         msg            = 'Fitting failed using fit at ab3';
+
+         msg = 'Fitting failed using fit at ab3';
          causeException = MException('BFRA:fitab:fitting',msg);
-         ME             = addCause(ME,causeException);
+         ME = addCause(ME,causeException);
       end
-      %             rethrow(ME)
+      ab3ok = false;
+      % rethrow(ME)
    end
-   
-   
-   
+
    % if fit worked, select it
-   if exist('ab3','var') && rsq3 > rsq && rsq3 > 0
-      
-      fselect  = 'fit_robust';
-      rsq      = rsq3;
+   if ab3ok && rsq3 > rsq && rsq3 > 0
+
+      fselect = 'fit_robust';
+      rsq = rsq3;
    else
-      fselect  = 'none';
-      
+      fselect = 'none';
+
    end
 end
 
-
-
 % if neither nlinfit nor fit worked, try non-robust fitting
 if strcmp(fselect,'none')
-   
+
+   ab2ok = true;
    try
-      [ab2,R2,~,C2]  = nlinfit(x,y,fnc,ab0,opts2);
-      rsq2           = rsquare(y,ab2(1).*x.^ab2(2));
-      
+      [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
+      rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+
    catch ME
-      
+
       if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
-         
-         msg            = 'Fitting failed using nlinfit at ab2';
+
+         msg = 'Fitting failed using nlinfit at ab2';
          causeException = MException('BFRA:fitab:fitting',msg);
-         ME             = addCause(ME,causeException);
+         ME = addCause(ME,causeException);
       end
-      %             rethrow(ME)
+      ab2ok = false;
+      %rethrow(ME)
    end
-   
-   
-   if exist('ab2','var') && rsq2 > rsq && rsq2 > 0
-      
-      fselect  = 'nlinfit';
-      rsq      = rsq2;
-      
+
+   if ab2ok && rsq2 > rsq && rsq2 > 0
+
+      fselect = 'nlinfit';
+      rsq = rsq2;
+
    else                            % try curve fitting functions
-      
+
+      ab4ok = true;
       try
-         f4    = fit(x,y,ftype,opts4); ab4 = coeffvalues(f4);
-         rsq4  = rsquare(y,ab4(1).*x.^ab4(2));
-         
+         f4 = fit(x,y,ftype,opts4); ab4 = coeffvalues(f4);
+         rsq4 = bfra.deps.rsquare(y,ab4(1).*x.^ab4(2));
+
       catch ME
-         
+
          if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
-            
-            msg            = 'Fitting failed using fit at ab4';
+
+            msg = 'Fitting failed using fit at ab4';
             causeException = MException('BFRA:fitab:fitting',msg);
-            ME             = addCause(ME,causeException);
+            ME = addCause(ME,causeException);
          end
-         %                 rethrow(ME)
+         ab4ok = false;
+         %rethrow(ME)
       end
-      
-      
-      
+
       % we don't compare with rsq2 because we already know its <rsq0
-      if exist('ab4','var') && rsq4 > rsq && rsq4 > 0
-         
-         fselect  = 'fit';
-         rsq      = rsq4;
+      if ab4ok && rsq4 > rsq && rsq4 > 0
+
+         fselect = 'fit';
+         rsq = rsq4;
       else
-         fselect  = 'none';
+         fselect = 'none';
       end
    end
-   
-   
 end
 
 % finally, if rsq is still low but linear rsq is good, choose lin
 if strcmp(fselect,'none') && rsq > 0
-   
-   fselect  = 'linear';
+   fselect = 'linear';
 elseif rsq < 0
    % NOTE: nov 2022, i think in some cases we can get here and rsq < 0 so I
    % added this option , previously there was no else, just end
-   fselect  = 'none';
+   fselect = 'none';
 end
 
 switch fselect
-   
+
    case 'none'
       ok = false;   % should never occur with option linear
       ab = [nan,nan]; % turns out can occur if q vs dqdt is decreasing
+      ci = [nan nan; nan nan];
       
    case 'nlinfit_robust'
       ci = nlparci(ab1,R1,'covariance',C1,'alpha',alpha);
       ab = ab1;
-      
+
    case 'nlinfit'
       ci = nlparci(ab2,R2,'covariance',C2,'alpha',0.68);
       ab = ab2;
-      
+
    case 'fit_robust'
       ab = ab3;
       ci = transpose(confint(f3,alpha));
-      
+
    case 'fit'
       ab = ab4;
       ci = transpose(confint(f4,alpha));
-      
+
    case 'linear'
-      
-      [ab,ci]  = regress(logy,[ones(size(y)) logx]);
-      ci(1,:)  = exp(ci(1,:));
-      ab       = [exp(ab(1)); ab(2)];
-      
+
+      [ab,ci] = regress(logy,[ones(size(y)) logx]);
+      ci(1,:) = exp(ci(1,:));
+      ab = [exp(ab(1)); ab(2)];
+
       % might check metrics such as islineconvex(y), and if x<xmin where
       % xmin is some very small flow value below which the data is corrupt
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% the original method was here
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
 
+% initial estimates using log-log linear fit
+ok = true;
+ab0 = [ones(size(x)) logx]\logy;
+ab0 = [exp(ab0(1)), ab0(2)];
 
-function [Fit,ok] = evalFit(ab,x,y,ci,ok)
+% initialize r2
+rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+rsq = rsq0;
 
-warning off % otherwise rsquare issues warning
+% 'nlinfit' function options
+fnc = @(ab,x)ab(1).*x.^ab(2);
 
-Fit.ab = ab;
+opts2 = statset('Display','off');
 
-% all ci's should already be transformed to this form:
-Fit.a       =  ab(1);
-Fit.b       =  ab(2);
-Fit.aL      =  ci(1,1);
-Fit.aH      =  ci(1,2);
-Fit.bL      =  ci(2,1);
-Fit.bH      =  ci(2,2);
+%  Summary of the method:
 
-Fit.rsq     =  rsquare(y,ab(1).*x.^ab(2));
-Fit.pvalue  =  nan;
-Fit.N       =  numel(y);
-Fit.x       =  x;
-Fit.y       =  y;
+%  start with linear=rsq0, set rsq=rsq0
+%  try non-robust nlinfit=rsq2, if rsq2>rsq, set rsq=rsq2 and
+%  select nlinfit non-robust
+%  else
 
-% generic failure check
-ok    =  true;
-if any(~isreal(ab))
-   ok    =  false;
+% try non-robust nonlinear least squares fitting
+ab2ok = true;
+try
+   [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
+   rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+
+catch ME
+
+   if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
+
+      msg = 'Fitting failed using nlinfit at ab2';
+      causeException = MException('BFRA:fitab:fitting',msg);
+      ME = addCause(ME,causeException);
+   end
+   ab2ok = false;
+   %rethrow(ME)
 end
 
-warning on
+if ab2ok && rsq2 > rsq && rsq2 > 0
 
-%    % any log-log regressions need the ci's transormed like this:
-%    aL      = exp(ci(1,1)); % 95% CI
-%    aH      = exp(ci(1,2));
-%    bL      = ci(2,1);      % = betaL
-%    bH      = ci(2,2);      % = betaH
+   fselect = 'nlinfit';
+   rsq = rsq2;
+else
+   fselect = 'none';
+end
 
-%    % any nlinfit regressions should already be in teh right order:
-%    aL      = ci(1,1); % for confint: ci(1,1);
-%    aH      = ci(1,2); % for confint: ci(2,1);
-%    bL      = ci(2,1); % for confint: ci(1,2);
-%    bH      = ci(2,2); % for confint: ci(2,2);
+% finally, if rsq is still low but linear rsq is good, choose lin
+if strcmp(fselect,'none') && rsq > 0
+   fselect = 'linear';
+elseif rsq < 0
+   fselect = 'none';
+end
 
-% this does not work if robust fitting is used
-%r2      = 1-sum(R.^2)/sum((y-mean(y)).^2); % for fit: gof.rsquare;
-%figure; loglog(x,y,'o'); hold on; loglog(x,ab(1).*x.^ab(2))
+switch fselect
+
+   case 'none'
+      ok = false;
+      ab = [nan,nan];
+      ci = [nan nan; nan nan];
+
+   case 'nlinfit'
+      ci = nlparci_octave(ab2, C2, 0.68);
+      ab = ab2;
+      
+   case 'linear'
+
+      %[B, BINT, R, RINT, STATS] = regress (Y, X, [ALPHA])
+      
+      [ab,ci] = regress(logy,[ones(size(y)) logx]);
+      ci(1,:) = exp(ci(1,:));
+      ab = [exp(ab(1)); ab(2)];
+end
+
+
+function ci = nlparci_octave(beta, CovB, alpha)
+
+% INPUTS:
+%   beta: coefficients from nlinfit
+%   CovB: covariance matrix from nlinfit
+%   alpha: desired confidence level (e.g., 0.68 for 68%)
+%
+% OUTPUTS:
+%   ci_lower: lower bounds of the confidence intervals
+%   ci_upper: upper bounds of the confidence intervals
+
+n = length(beta); % Number of coefficients
+dof = n - 1; % Degrees of freedom
+t_score = tinv(1 - (1 - alpha) / 2, dof); % t-score for desired confidence level
+se = sqrt(diag(CovB)); % Standard errors of the coefficients
+ci_lower = beta' - t_score * se; % Lower bounds of the confidence intervals
+ci_upper = beta' + t_score * se; % Upper bounds of the confidence intervals
+ci = [ci_lower, ci_upper];
 

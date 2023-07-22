@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fitvts</title>
+  <meta name="keywords" content="fitvts">
+  <meta name="description" content="FITVTS fit recession event using the variable timestep method">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitvts.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>fitvts
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>FITVTS fit recession event using the variable timestep method</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">FITVTS fit recession event using the variable timestep method
+
+  Syntax
+ 
+     VTS = bfra.fitvts(T,Q,R)
+     VTS = bfra.fitvts(___,'vtsparam',vtsparam)
+     VTS = bfra.fitvts(___,'plotfit',plotfit)
+
+ Required inputs
+ 
+     T        : time (days)
+     Q        : discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
+     R        : rainfall (L T^-1, assumed to be mm d-1)
+
+ Optional name-value inputs
+ 
+     vtsparam : scalar, double, parameter that controls window size
+     plotfit  : logical, scalar, indicates whether to plot the fit
+
+ See also fitdqdt, <a href="fitets.html" class="code" title="function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)">fitets</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)</a>
+0002 <span class="comment">%FITVTS fit recession event using the variable timestep method</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%  Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     VTS = bfra.fitvts(T,Q,R)</span>
+0007 <span class="comment">%     VTS = bfra.fitvts(___,'vtsparam',vtsparam)</span>
+0008 <span class="comment">%     VTS = bfra.fitvts(___,'plotfit',plotfit)</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Required inputs</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">%     T        : time (days)</span>
+0013 <span class="comment">%     Q        : discharge (L T^-1, assumed to be m d-1 or m^3 d-1)</span>
+0014 <span class="comment">%     R        : rainfall (L T^-1, assumed to be mm d-1)</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Optional name-value inputs</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%     vtsparam : scalar, double, parameter that controls window size</span>
+0019 <span class="comment">%     plotfit  : logical, scalar, indicates whether to plot the fit</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% See also fitdqdt, fitets</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0024 
+0025 <span class="comment">% if called with no input, open this file</span>
+0026 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0027 
+0028 <span class="comment">%-------------------------------------------------------------------------------</span>
+0029 p              = inputParser;
+0030 p.FunctionName = <span class="string">'fitvts'</span>;
+0031 
+0032 addRequired(p, <span class="string">'T'</span>,                 @(x)isnumeric(x)|isdatetime(x));
+0033 addRequired(p, <span class="string">'Q'</span>,                 @(x)isnumeric(x));
+0034 addRequired(p, <span class="string">'R'</span>,                 @(x)isnumeric(x));
+0035 addParameter(p,<span class="string">'vtsparam'</span>, 1,       @(x)isnumeric(x)); <span class="comment">% default=1 m3/d</span>
+0036 addParameter(p,<span class="string">'plotfit'</span>,  false,   @(x)islogical(x));
+0037 
+0038 parse(p,T,Q,R,varargin{:});
+0039 
+0040 vtsparam = p.Results.vtsparam;
+0041 plotfit  = p.Results.plotfit;
+0042 <span class="comment">%-------------------------------------------------------------------------------</span>
+0043 
+0044 <span class="comment">% the C value should be chosen such that dt(i) = t(i)-t(i-j) &lt;= t(i)/4</span>
+0045 <span class="comment">% the limit value is limit = C*(Q(H+e)-Qi)) where H is stage height, e</span>
+0046 <span class="comment">% is stage precision, and Qi is the estimated Q. To implement this, I</span>
+0047 <span class="comment">% need e and the stage-discharge relation.</span>
+0048 
+0049 <span class="comment">% prep the time vector</span>
+0050 t = days(T-T(1)+(T(2)-T(1))); <span class="comment">% keep og T</span>
+0051 
+0052 <span class="comment">% initialize the approximations for dq/dt and Q (and dq and dt)</span>
+0053 [N,q,dqdt,dq,dt,tq,rq] = bfra.initfit(Q,<span class="string">'eventdqdt'</span>);
+0054 
+0055 <span class="comment">% if the input flow is less than the dq limit, decrease the limit</span>
+0056 <span class="keyword">if</span> mean(Q,<span class="string">'omitnan'</span>) &lt; vtsparam                   <span class="comment">% could use nanmax</span>
+0057    vtsparam = min(Q(Q&gt;0),[],<span class="string">'omitnan'</span>)*vtsparam;
+0058    <span class="keyword">while</span> mean(Q,<span class="string">'omitnan'</span>) &lt; vtsparam
+0059       vtsparam = 0.9*vtsparam;              <span class="comment">% decrease by 10%</span>
+0060    <span class="keyword">end</span>
+0061 <span class="keyword">end</span>
+0062 
+0063 <span class="keyword">for</span> n = 2:N
+0064    <span class="keyword">for</span> m = 1:n-1 <span class="comment">% go back i-1 steps until the limit criteria is met</span>
+0065       
+0066       dq(n) = Q(n) - Q(n-m);
+0067       <span class="comment">% see notes at end on C criteria from Rupp and Selker</span>
+0068       
+0069       <span class="comment">% dq is zero or (+), or is (-) and meets the limit criteria</span>
+0070       <span class="keyword">if</span> dq(n) &gt;= 0 || round(abs(dq(n))) &gt; vtsparam
+0071          q(n)     = 1/(m+1) * sum(Q(n-m:n));
+0072          tq(n)    = mean(T(n-m:n)); <span class="comment">% 1/(m+1) * sum(t(n-m:n));</span>
+0073          rq(n)    = 1/(m+1) * sum(R(n-m:n)); <span class="comment">% rain</span>
+0074          dt(n)    = t(n) - t(n-m);
+0075          dqdt(n)  = dq(n)/dt(n);
+0076          <span class="keyword">break</span>
+0077       <span class="keyword">else</span> <span class="comment">% dqdt is (-) and does not meet the limit criteria</span>
+0078          dq(n)   = nan; <span class="comment">% NOTE: this must be reset to nan</span>
+0079          <span class="keyword">continue</span> <span class="comment">% continue until it meets the criteria</span>
+0080       <span class="keyword">end</span>
+0081    <span class="keyword">end</span>
+0082 <span class="keyword">end</span>
+0083 
+0084 <span class="comment">% retime to the original timestep</span>
+0085 <span class="comment">% tq    = T(1) + days(tq);</span>
+0086 <span class="comment">% q     = interp1(tq(~isnan(q)),q(~isnan(q)),T);</span>
+0087 <span class="comment">% dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);</span>
+0088 <span class="comment">% dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);</span>
+0089 tq    = T;
+0090 
+0091 <span class="keyword">if</span> plotfit == true
+0092    
+0093    <span class="comment">% option to plot would go here</span>
+0094    
+0095 <span class="keyword">end</span>
+0096    
+0097 
+0098 
+0099 <span class="comment">% NOTES ON C-CRITERIA test C criteria the C criteria is that dt&lt;ti/4, where</span>
+0100 <span class="comment">% dt is t(i)-t(i-j) and ti is time since start of recession. currently i am</span>
+0101 <span class="comment">% not tracking the start/end of each recession period, I am just treating</span>
+0102 <span class="comment">% each dQ = Q(i)-Q(i-1) as a change in Q, and applying the variable dt</span>
+0103 <span class="comment">% criteria, aiming to then later identify actual recessions, so i might</span>
+0104 <span class="comment">% need to rethink this and find a way to identify the start of a recession</span>
+0105 <span class="comment">% event, and then count forward from there for each dQ, where the number of</span>
+0106 <span class="comment">% timesteps counting forward would be ti, and the variable dt would be</span>
+0107 <span class="comment">% ti_j, and then I could check that ti_j&lt;=ti/4</span>
+0108    
+0109 <span class="comment">%    tn    =   t(n);</span>
+0110 <span class="comment">%    tn_m  =   t(n-m);</span>
+0111 <span class="comment">%</span>
+0112 <span class="comment">%    if 4*(tn-tn_m)</span>
+0113 <span class="comment">%    if 4*(t(n) - t(n-m));</span></pre></div>
+</body>
+</html>

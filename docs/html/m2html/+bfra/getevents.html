@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getevents</title>
+  <meta name="keywords" content="getevents">
+  <meta name="description" content="GETEVENTS get individual recession events from daily timeseries T, Q, and R.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; getevents.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>getevents
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>GETEVENTS get individual recession events from daily timeseries T, Q, and R.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Events,Info] = getevents(T,Q,R,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">GETEVENTS get individual recession events from daily timeseries T, Q, and R.
+
+ Syntax
+
+     Events = getevents(T,Q,R,varargin)
+
+ Description
+
+     Events = getevents(T,Q,R) Detects, processes, and organizes individual
+     recession events from daily hydrograph timeseries T, Q, and rainfall R
+     using default algorithm options. Event discharge, timestamps, and
+     diagnostic info about the events are returned in output structure Events.
+     Note: this function is a wrapper around eventfinder to perform pre- and
+     post-processing and organize all recession events into the Events
+     structure.
+
+     Events = getevents(___,opts) uses user-defined options. See bfra.setopts
+     for default options and optional values.
+
+     [Events,Info] = getevents(___) also returns struct Info which contains the
+     indices of the identified local maxima, minima, convex points, candidate
+     recession values, kept recession values, and the start and stop index of
+     each kept event. Use this information with bfra.eventplotter.
+
+     Tip: events are identified by their indices on the t,q,r arrays, so if
+     any filtering is applied prior to passing in the arrays, the data needs
+     to be used in subsequent functions or the indices won't be correct
+
+ Required inputs
+
+     T     time, nx1 vector of datetimes
+     Q     flow, nx1 vector of discharge (length/time) (assumed m3/day/day)
+     R     rain, nx1 vector of rainfall (length/time) (assumed mm/day)
+
+ Optional name-value inputs
+
+     opts        (optional) structure containing the following fields:
+     qmin        minimum flow value, below which values are set nan
+     nmin        minimum event length
+     fmax        maximum # of missing values gap-filled
+     rmax        maximum run of sequential constant values
+     rmin        minimum rainfall required to censor flow (mm/day?)
+     cmax        maximum run of sequential convex dQ/dt values
+     rmconvex    remove convex derivatives
+     rmnochange  remove consecutive constant derivates
+     rmrain      remove rainfall
+     pickevents  option to manually pick events
+     plotevents  option to plot picked events
+
+ See also <a href="fitevents.html" class="code" title="function [Fits,FitTable] = fitevents(Events,varargin)">fitevents</a>, <a href="eventfinder.html" class="code" title="function [T,Q,R,Info] = eventfinder(t,q,r,varargin)">eventfinder</a>, <a href="eventsplitter.html" class="code" title="function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)">eventsplitter</a>, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>, <a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+ Note to users: for data-heavy workflows, replace the Events output struct
+ with the eventTags list. The Events struct includes the input data and the
+ event-data for convenience, but the event-data can be easily extracted from
+ the input data using the eventTags.</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function Info = updateinfo(Info,ifirst,numdata)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Events,Info] = getevents(T,Q,R,varargin)</a>
+0002 <span class="comment">%GETEVENTS get individual recession events from daily timeseries T, Q, and R.</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     Events = getevents(T,Q,R,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     Events = getevents(T,Q,R) Detects, processes, and organizes individual</span>
+0011 <span class="comment">%     recession events from daily hydrograph timeseries T, Q, and rainfall R</span>
+0012 <span class="comment">%     using default algorithm options. Event discharge, timestamps, and</span>
+0013 <span class="comment">%     diagnostic info about the events are returned in output structure Events.</span>
+0014 <span class="comment">%     Note: this function is a wrapper around eventfinder to perform pre- and</span>
+0015 <span class="comment">%     post-processing and organize all recession events into the Events</span>
+0016 <span class="comment">%     structure.</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%     Events = getevents(___,opts) uses user-defined options. See bfra.setopts</span>
+0019 <span class="comment">%     for default options and optional values.</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">%     [Events,Info] = getevents(___) also returns struct Info which contains the</span>
+0022 <span class="comment">%     indices of the identified local maxima, minima, convex points, candidate</span>
+0023 <span class="comment">%     recession values, kept recession values, and the start and stop index of</span>
+0024 <span class="comment">%     each kept event. Use this information with bfra.eventplotter.</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">%     Tip: events are identified by their indices on the t,q,r arrays, so if</span>
+0027 <span class="comment">%     any filtering is applied prior to passing in the arrays, the data needs</span>
+0028 <span class="comment">%     to be used in subsequent functions or the indices won't be correct</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% Required inputs</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">%     T     time, nx1 vector of datetimes</span>
+0033 <span class="comment">%     Q     flow, nx1 vector of discharge (length/time) (assumed m3/day/day)</span>
+0034 <span class="comment">%     R     rain, nx1 vector of rainfall (length/time) (assumed mm/day)</span>
+0035 <span class="comment">%</span>
+0036 <span class="comment">% Optional name-value inputs</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">%     opts        (optional) structure containing the following fields:</span>
+0039 <span class="comment">%     qmin        minimum flow value, below which values are set nan</span>
+0040 <span class="comment">%     nmin        minimum event length</span>
+0041 <span class="comment">%     fmax        maximum # of missing values gap-filled</span>
+0042 <span class="comment">%     rmax        maximum run of sequential constant values</span>
+0043 <span class="comment">%     rmin        minimum rainfall required to censor flow (mm/day?)</span>
+0044 <span class="comment">%     cmax        maximum run of sequential convex dQ/dt values</span>
+0045 <span class="comment">%     rmconvex    remove convex derivatives</span>
+0046 <span class="comment">%     rmnochange  remove consecutive constant derivates</span>
+0047 <span class="comment">%     rmrain      remove rainfall</span>
+0048 <span class="comment">%     pickevents  option to manually pick events</span>
+0049 <span class="comment">%     plotevents  option to plot picked events</span>
+0050 <span class="comment">%</span>
+0051 <span class="comment">% See also fitevents, eventfinder, eventsplitter, eventpicker, eventplotter</span>
+0052 <span class="comment">%</span>
+0053 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0054 <span class="comment">%</span>
+0055 <span class="comment">% Note to users: for data-heavy workflows, replace the Events output struct</span>
+0056 <span class="comment">% with the eventTags list. The Events struct includes the input data and the</span>
+0057 <span class="comment">% event-data for convenience, but the event-data can be easily extracted from</span>
+0058 <span class="comment">% the input data using the eventTags.</span>
+0059 
+0060 <span class="comment">% if called with no input, open this file</span>
+0061 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0062 
+0063 <span class="comment">% Updates</span>
+0064 <span class="comment">% 17 Jan: renamed old getevents to wrapevents and old findevents to getevents</span>
+0065 
+0066 <span class="comment">%-------------------------------------------------------------------------------</span>
+0067 <span class="comment">% input handling</span>
+0068 <span class="comment">%-------------------------------------------------------------------------------</span>
+0069 p                 = inputParser;
+0070 p.FunctionName    = <span class="string">'getevents'</span>;
+0071 p.StructExpand    = true;
+0072 p.PartialMatching = false;
+0073 p.CaseSensitive   = true;              <span class="comment">% true because T,Q,R are sent back</span>
+0074 
+0075 addRequired(p, <span class="string">'T'</span>,                  @(x) isnumeric(x) | isdatetime(x)     );
+0076 addRequired(p, <span class="string">'Q'</span>,                  @(x) isnumeric(x) &amp; numel(x)==numel(T));
+0077 addRequired(p, <span class="string">'R'</span>,                  @(x) isnumeric(x)                     );
+0078 addParameter(p,<span class="string">'qmin'</span>,        1,     @(x) isnumeric(x) &amp; isscalar(x)       );
+0079 addParameter(p,<span class="string">'nmin'</span>,        4,     @(x) isnumeric(x) &amp; isscalar(x)       );
+0080 addParameter(p,<span class="string">'fmax'</span>,        2,     @(x) isnumeric(x) &amp; isscalar(x)       );
+0081 addParameter(p,<span class="string">'rmax'</span>,        2,     @(x) isnumeric(x) &amp; isscalar(x)       );
+0082 addParameter(p,<span class="string">'rmin'</span>,        0,     @(x) isnumeric(x) &amp; isscalar(x)       );
+0083 addParameter(p,<span class="string">'cmax'</span>,        2,     @(x) isnumeric(x) &amp; isscalar(x)       );
+0084 addParameter(p,<span class="string">'rmconvex'</span>,    false, @(x) islogical(x) &amp; isscalar(x)       );
+0085 addParameter(p,<span class="string">'rmnochange'</span>,  false, @(x) islogical(x) &amp; isscalar(x)       );
+0086 addParameter(p,<span class="string">'rmrain'</span>,      false, @(x) islogical(x) &amp; isscalar(x)       );
+0087 addParameter(p,<span class="string">'pickevents'</span>,  false, @(x) islogical(x) &amp; isscalar(x)       );
+0088 addParameter(p,<span class="string">'plotevents'</span>,  false, @(x) islogical(x) &amp; isscalar(x)       );
+0089 addParameter(p,<span class="string">'asannual'</span>,    false, @(x) islogical(x) &amp; isscalar(x)       );
+0090 
+0091 parse(p,T,Q,R,varargin{:});
+0092 
+0093 qmin        = p.Results.qmin;
+0094 nmin        = p.Results.nmin;
+0095 fmax        = p.Results.fmax;
+0096 rmax        = p.Results.rmax;
+0097 rmin        = p.Results.rmin;
+0098 cmax        = p.Results.cmax;
+0099 rmconvex    = p.Results.rmconvex;
+0100 rmnochange  = p.Results.rmnochange;
+0101 rmrain      = p.Results.rmrain;
+0102 pickevents  = p.Results.pickevents;
+0103 plotevents  = p.Results.plotevents;
+0104 asannual    = p.Results.asannual;
+0105 
+0106 <span class="comment">%-------------------------------------------------------------------------------</span>
+0107 
+0108 <span class="comment">% allow empyt R i.e. input syntax getevents(T,Q,[],...)</span>
+0109 <span class="keyword">if</span> isempty(R); R = zeros(size(Q)); <span class="keyword">end</span>
+0110 
+0111 <span class="comment">% save the input data</span>
+0112 Events.inputTime = T;
+0113 Events.inputFlow = Q;
+0114 Events.inputRain = R;
+0115 
+0116 <span class="comment">% iF is the first non-nan index, to recover indices after removing nans</span>
+0117 numdata     = numel(T);
+0118 Q(Q&lt;qmin)   = nan;                              <span class="comment">% set values &lt; qmin nan</span>
+0119 Q           = bfra.util.setconstantnan(Q,rmax); <span class="comment">% set constant non-nan values nan</span>
+0120 [T,Q,R,iF]  = bfra.util.rmleadingnans(T,Q,R);   <span class="comment">% remove leading nans</span>
+0121 [T,Q,R]     = bfra.util.rmtrailingnans(T,Q,R);  <span class="comment">% remove trailing nans</span>
+0122 Q           = bfra.util.fillnans(Q,fmax);       <span class="comment">% gap fill missing values</span>
+0123 
+0124 <span class="comment">% smooth measurement noise</span>
+0125 <span class="keyword">if</span> asannual
+0126    Q = bfra.util.smoothflow(Q);
+0127 <span class="keyword">end</span>
+0128 
+0129 
+0130 <span class="keyword">if</span> isempty(Q)||sum(~isnan(Q))&lt;nmin <span class="comment">% fast exit</span>
+0131    [t,q,r,Info] = bfra.util.setEventEmpty;
+0132 
+0133 <span class="keyword">else</span>
+0134    <span class="comment">% call eventfinder either way, then update if pickfits == true</span>
+0135    [t,q,r,Info] = bfra.eventfinder(T,Q,R, <span class="keyword">...</span>
+0136       <span class="string">'nmin'</span>,        nmin,          <span class="keyword">...</span>
+0137       <span class="string">'fmax'</span>,        fmax,          <span class="keyword">...</span>
+0138       <span class="string">'rmax'</span>,        rmax,          <span class="keyword">...</span>
+0139       <span class="string">'rmin'</span>,        rmin,          <span class="keyword">...</span>
+0140       <span class="string">'rmconvex'</span>,    rmconvex,      <span class="keyword">...</span>
+0141       <span class="string">'rmnochange'</span>,  rmnochange,    <span class="keyword">...</span>
+0142       <span class="string">'rmrain'</span>,      rmrain         );
+0143 
+0144    Info = <a href="#_sub1" class="code" title="subfunction Info = updateinfo(Info,ifirst,numdata)">updateinfo</a>(Info,iF,numdata);
+0145 
+0146    <span class="comment">% NOTE: eventpicker doesn't update Info for events that are picked</span>
+0147    <span class="comment">% within an eventfinder event, but only Info.istart is used in the</span>
+0148    <span class="comment">% main algorithm so it is sufficient at this point</span>
+0149    <span class="keyword">if</span> pickevents == true
+0150       [t,q,r,Info] = bfra.eventpicker(T,Q,R,nmin,Info);
+0151    <span class="keyword">elseif</span> plotevents == true
+0152       Info.hEvents = bfra.eventplotter(T,Q,R,Info,<span class="string">'plotevents'</span>,plotevents);
+0153    <span class="keyword">end</span>
+0154 <span class="keyword">end</span>
+0155 
+0156 <span class="comment">% if asannual == false</span>
+0157    [ <span class="keyword">...</span>
+0158       Events.eventTime, <span class="keyword">...</span>
+0159       Events.eventFlow, <span class="keyword">...</span>
+0160       Events.eventRain, <span class="keyword">...</span>
+0161       Events.eventTags] = bfra.flattenevents(t,q,r,Info);
+0162 <span class="comment">% end</span>
+0163 
+0164 
+0165 <a name="_sub1" href="#_subfunctions" class="code">function Info = updateinfo(Info,ifirst,numdata)</a>
+0166 
+0167 fields = fieldnames(Info);
+0168 
+0169 <span class="keyword">for</span> m = 1:numel(fields)
+0170    Info.(fields{m}) = Info.(fields{m}) + ifirst - 1;
+0171 <span class="keyword">end</span>
+0172 
+0173 Info.runlengths   = Info.istop - Info.istart + 1;
+0174 Info.ifirst       = ifirst;
+0175 Info.datalength   = numdata;</pre></div>
+</body>
+</html>

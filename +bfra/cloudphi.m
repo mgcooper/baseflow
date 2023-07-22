@@ -47,7 +47,6 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 %-------------------------------------------------------------------------------
 p                 = inputParser;
 p.StructExpand    = false;
-p.PartialMatching = true;
 p.FunctionName    = 'bfra.cloudphi';
 
 addRequired(p, 'q',                       @(x)isnumeric(x)  );
@@ -116,5 +115,11 @@ a = a2;
 bfra.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
    {'early','userfit'},'userab',[a2 blate],'reflabels',true);
 hdum = plot(0,0,'Color','none','HandleVisibility','off');
-txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
-legend(hdum,txt,'Interpreter','latex','Location','nw','box','off');
+
+if bfra.util.isoctave
+   txt = sprintf('phi = %.2f',phi);
+   legend(hdum,txt,'Interpreter','tex','Location','northwest','box','off');
+else
+   txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
+   legend(hdum,txt,'Interpreter','latex','Location','northwest','box','off');
+end

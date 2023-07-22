@@ -1,3 +1,3 @@
 function N = numfits(Fits)
 
-N = numel(unique(Fits.eventTag(~isnan(Fits.eventTag))));
+N = numel(unique(Fits.eventTags(~isnan(Fits.eventTags))));

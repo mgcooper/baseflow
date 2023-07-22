@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of conversions</title>
+  <meta name="keywords" content="conversions">
+  <meta name="description" content="CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; conversions.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>conversions
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname
+ 
+ Syntax
+ 
+     varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
+ 
+ Description
+ 
+     outputvalue = conversions(inputvalue,inputvarname,outputvarname) converts
+     inputvalue from its value in terms of inputvarname to its equivalent value
+     in terms of outputvarname (use tab completion to get a list of supported
+     input and output varnames)
+ 
+     outputvalue = conversions(inputvalue,inputvarname,outputvarname,'isflat',false)
+     uses the sloped-aquifer solution. Default behavior is true.
+ 
+ Example
+ 
+     b = 1.5;
+     n = bfra.conversions(b,'b','n')
+        n = 0
+ 
+ 
+ See also bfra.<a href="getstring.html" class="code" title="function str = getstring(requestedstring,varargin)">getstring</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function b = convert2b(inputvalue,inputvarname,isflat)</a></li>
+<li><a href="#_sub2" class="code">function varargout = convertb(b,outputvarname,isflat)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)</a>
+0002 <span class="comment">%CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     outputvalue = conversions(inputvalue,inputvarname,outputvarname) converts</span>
+0011 <span class="comment">%     inputvalue from its value in terms of inputvarname to its equivalent value</span>
+0012 <span class="comment">%     in terms of outputvarname (use tab completion to get a list of supported</span>
+0013 <span class="comment">%     input and output varnames)</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%     outputvalue = conversions(inputvalue,inputvarname,outputvarname,'isflat',false)</span>
+0016 <span class="comment">%     uses the sloped-aquifer solution. Default behavior is true.</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Example</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%     b = 1.5;</span>
+0021 <span class="comment">%     n = bfra.conversions(b,'b','n')</span>
+0022 <span class="comment">%        n = 0</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% See also bfra.getstring</span>
+0026 <span class="comment">%</span>
+0027 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0028 
+0029 <span class="comment">% if called with no input, open this file</span>
+0030 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0031 
+0032 <span class="comment">%-------------------------------------------------------------------------------</span>
+0033 p = inputParser;
+0034 p.FunctionName = <span class="string">'bfra.conversions'</span>;
+0035 
+0036 addRequired(   p,    <span class="string">'inputvalue'</span>,              @(x)isnumeric(x));
+0037 addRequired(   p,    <span class="string">'inputvarname'</span>,            @(x)ischar(x));
+0038 addRequired(   p,    <span class="string">'outputvarname'</span>,           @(x)ischar(x));
+0039 addParameter(  p,    <span class="string">'isflat'</span>,         true,    @(x)islogical(x));
+0040 
+0041 parse(p,inputvalue,inputvarname,outputvarname,varargin{:});
+0042 
+0043 isflat = p.Results.isflat;
+0044 
+0045 <span class="comment">%-------------------------------------------------------------------------------</span>
+0046 
+0047 <span class="comment">% convert whatever is passed in to b, then from b to whatever is requested</span>
+0048 b              = <a href="#_sub1" class="code" title="subfunction b = convert2b(inputvalue,inputvarname,isflat)">convert2b</a>(inputvalue,inputvarname,isflat);
+0049 varargout{1}   = <a href="#_sub2" class="code" title="subfunction varargout = convertb(b,outputvarname,isflat)">convertb</a>(b,outputvarname,isflat);
+0050 
+0051 
+0052 
+0053 <a name="_sub1" href="#_subfunctions" class="code">function b = convert2b(inputvalue,inputvarname,isflat)</a>
+0054 <span class="comment">%bfra.CONVERT2B Convert the recession flow power law exponent b to any</span>
+0055 <span class="comment">%of several other recession flow parameters</span>
+0056 
+0057 <span class="comment">%   Inputs:   alpha,    from Q ~ t*^-alpha</span>
+0058 <span class="comment">%              beta,    from Q ~ S^-beta (beta = -d)</span>
+0059 <span class="comment">%             gamma,    from 1/gamma = 1/alpha + 1/beta</span>
+0060 <span class="comment">%                 N,    from a = c1*D^N, where c1 is a coefficient</span>
+0061 <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
+0062 <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
+0063 <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
+0064 <span class="comment">%                 k,    from P(Q) ~ Q^-(1+1/k)</span>
+0065 <span class="comment">%            isflat,    true if flat aquifer</span>
+0066 
+0067 <span class="comment">%  Outputs:       b,    from dQ(t)=a*Q^b</span>
+0068 
+0069 <span class="keyword">switch</span> inputvarname
+0070    
+0071    <span class="keyword">case</span> <span class="string">'b'</span>
+0072       b        = inputvalue;
+0073    <span class="keyword">case</span> <span class="string">'alpha'</span>
+0074       alpha    = inputvalue;
+0075       b        = 1+1./alpha;
+0076    <span class="keyword">case</span> <span class="string">'beta'</span>
+0077       beta     = inputvalue;
+0078       b        = 2+1./beta;
+0079    <span class="keyword">case</span> <span class="string">'gamma'</span>
+0080       gamma    = inputvalue;
+0081       b        = 1/2.*(3+1./gamma);
+0082    <span class="keyword">case</span> <span class="string">'d'</span>
+0083       d        = inputvalue;
+0084       b        = 2-1./d;
+0085    <span class="keyword">case</span> <span class="string">'k'</span>
+0086       k        = inputvalue;
+0087       b        = (2.*k+1)./(k+1);
+0088       <span class="comment">%b        = (k+1)./(2.*k+1);</span>
+0089       
+0090    <span class="keyword">case</span> <span class="string">'n'</span>
+0091       n        =  inputvalue;
+0092       <span class="keyword">switch</span> isflat
+0093          <span class="keyword">case</span> true
+0094             b  =  (2.*n+3)./(n+2);
+0095          <span class="keyword">case</span> false
+0096             b  =  (2.*n+1)./(n+1);
+0097       <span class="keyword">end</span>
+0098       
+0099    <span class="keyword">case</span> <span class="string">'N'</span>
+0100       N        =  inputvalue;
+0101       <span class="keyword">switch</span> isflat
+0102          <span class="keyword">case</span> true
+0103             b  =  (3-N)./2;
+0104          <span class="keyword">case</span> false
+0105             b  =  1-N;
+0106       <span class="keyword">end</span>
+0107 <span class="keyword">end</span>
+0108 
+0109 <a name="_sub2" href="#_subfunctions" class="code">function varargout = convertb(b,outputvarname,isflat)</a>
+0110 <span class="comment">%bfra.BCONVERSIONS Convert the recession flow power law exponent b to any</span>
+0111 <span class="comment">%of several other recession flow parameters</span>
+0112 
+0113 <span class="comment">%  Inputs:        b,    from dQ(t)=a*Q^b</span>
+0114 <span class="comment">%            isflat,    true if flat aquifer</span>
+0115 
+0116 <span class="comment">%  Outputs:   alpha,    from P(Q) ~ t*^-alpha</span>
+0117 <span class="comment">%              beta,    from Q ~ S^-beta (beta = -d)</span>
+0118 <span class="comment">%             gamma,    from 1/gamma = 1/alpha + 1/beta</span>
+0119 <span class="comment">%                 N,    from a = c1*D^N, where c1 is a coefficient</span>
+0120 <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
+0121 <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
+0122 <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
+0123 <span class="comment">%                 k,    from P(Q) ~ Q^-(1+1/k)</span>
+0124 
+0125 alpha = 1./(b-1);       <span class="comment">% power law exponent alpha</span>
+0126 beta  = 1./(b-2);
+0127 gamma = 1./(2.*b-3);
+0128 d     = 1./(2-b);
+0129 k     = (1-b)./(b-2);   <span class="comment">% gpd shape parameter power law exponent k</span>
+0130 <span class="comment">%    k     = (b-2)./(1-b);   % gpd shape parameter power law exponent k</span>
+0131 
+0132 <span class="keyword">switch</span> isflat
+0133    
+0134    <span class="keyword">case</span> true
+0135       n     = (3-2.*b)./(b-2);   <span class="comment">% saturated hyd. cond. power function exponent</span>
+0136       N     = 3-2.*b;            <span class="comment">% scale parameter power law exponent N</span>
+0137       Nstar = 1./(4-2.*b);
+0138       
+0139    <span class="keyword">case</span> false
+0140       n     = (1-b)./(b-2);
+0141       N     = 1-b;
+0142       Nstar = 1./(2-b);
+0143 <span class="keyword">end</span>
+0144 
+0145 <span class="keyword">switch</span> outputvarname
+0146    <span class="keyword">case</span> <span class="string">'b'</span>
+0147       varargout{1} = b;
+0148    <span class="keyword">case</span> <span class="string">'alpha'</span>
+0149       varargout{1} = alpha;
+0150    <span class="keyword">case</span> <span class="string">'beta'</span>
+0151       varargout{1} = beta;
+0152    <span class="keyword">case</span> <span class="string">'gamma'</span>
+0153       varargout{1} = gamma;
+0154    <span class="keyword">case</span> <span class="string">'d'</span>
+0155       varargout{1} = d;
+0156    <span class="keyword">case</span> <span class="string">'k'</span>
+0157       varargout{1} = k;
+0158    <span class="keyword">case</span> <span class="string">'n'</span>
+0159       varargout{1} = n;
+0160    <span class="keyword">case</span> <span class="string">'N'</span>
+0161       varargout{1} = N;
+0162    <span class="keyword">case</span> <span class="string">'Nstar'</span>
+0163       varargout{1} = Nstar;
+0164 <span class="keyword">end</span></pre></div>
+</body>
+</html>

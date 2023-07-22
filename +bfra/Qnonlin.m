@@ -1,12 +1,12 @@
 function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
 %QNONLIN plots the theoretical discharge predicted by a/b values
 % 
-% 
-% 
-% 
-% See also taufunc, getfunction, QtauString, QtString
+% [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t) plots a theoretical discharge predicted by
+% a/b values for Q = (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+% 
+% See also taufunc, getfunction, QtauString, QtString
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
@@ -18,7 +18,7 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % and t have the right orientation for matrix multiplication
 
 plotFig = false;
-hFig    = [];
+hFig = [];
 if nargin==5
    plotFig = varargin{1};
 end
@@ -26,74 +26,71 @@ end
 % This lets a scalar t or a vector t to be passed in. In both cases t is
 % time elapsed since t=0, so to recover Q0 and dqdt0 we set t(1) = 0
 if numel(t) ~= 1 && t(1) ~= 0
-   t   = [0;t(:)];
+   t = [0;t(:)];
 end
 
-numA    = numel(a);
-numB    = numel(b);
-numQ    = numel(Q0);
-numT    = numel(t);
+numA = numel(a);
+numB = numel(b);
+numQ = numel(Q0);
+numT = numel(t);
 
-Q       = nan(numA,numB,numQ,numT);
-dQdt    = nan(numA,numB,numQ,numT);
+Q = nan(numA,numB,numQ,numT);
+dQdt = nan(numA,numB,numQ,numT);
 
-f       = @(a,b,Q0,t) (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));
+f = @(a,b,Q0,t) (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));
 
 for n = 1:numA
    for m = 1:numB
       for p = 1:numQ
          
-         qtmp            = f(a(n),b(m),Q0(p),t);
-         Q(n,m,p,:)      = qtmp;
-         dQdt(n,m,p,:)   = -a(n).*qtmp.^b(m);
+         qtmp = f(a(n),b(m),Q0(p),t);
+         Q(n,m,p,:) = qtmp;
+         dQdt(n,m,p,:) = -a(n).*qtmp.^b(m);
          
       end
    end
 end
 
-Q       = squeeze(Q);
-dQdt    = squeeze(dQdt);
+Q = squeeze(Q);
+dQdt = squeeze(dQdt);
 
 % only plot the first one for now, if I am getting an ensemble of Q(t)
 % I can add functionality later to plot some number of them
 if plotFig
    
    % get the characterisitc timescale
-   tc  = bfra.characteristicTime(a(1),b(1),Q0(1));
+   tc = bfra.characteristicTime(a(1),b(1),Q0(1));
    
    % get formatted strings for the legend
-   showAB  = false;
-   Qtstr   = bfra.getstring('Q(t)');
-%    Qtstr   = bfra.QtString([a,b],Q0,showAB);
-%    tcstr   = bfra.tcString(a,b,Q0,showAB);
+   showAB = false;
+   Qtstr = bfra.getstring('Q(t)');
+   % Qtstr = bfra.QtString([a,b],Q0,showAB);
+   % tcstr = bfra.tcString(a,b,Q0,showAB);
    
    % make a figure
-   tileFigure();
+   % tileFigure();
+   subplot(2,1,1);
    
    plot(t,Q);
    xlabel('$t \quad [T]$');
    ylabel('$Q(t) \quad [L/T]$');
    legend(Qtstr,'Interpreter','latex');
    axis tight
-
-   %hFig1 = figformat;
    
    
-   nexttile
+   % nexttile
+   subplot(2,1,2);
    plot(t./tc,Q./Q0); % hold on; plot(t./tc,Q./Q0);
-   xylabel('$t/t_c \quad [-]$','$Q/Q_0 \quad [-]$','Interpreter','latex');
-%    legend(tcstr)
+   xlabel('$t/t_c \quad [-]$','Interpreter','latex');
+   ylabel('$Q/Q_0 \quad [-]$','Interpreter','latex');
+   % legend(tcstr)
    
    axis tight
    ylim([0 1])
    
-   %hFig2 = figformat;
-   
    % fix the axes if they got misaligned
    %hFig1.backgroundAxis.Position = hFig1.mainAxis.Position;
    %hFig2.backgroundAxis.Position = hFig2.mainAxis.Position;
-   
-   
 end
 
 % % NOTE: with the tc value, we can compute the Q(t) like this:

@@ -37,8 +37,8 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 %     NOTE: use geo!
 %     NOTE: variable name of cvar
 
-%-------------------------------------------------------------------------------
-p              = magicParser;
+% --------------- parse inputs
+p = bfra.deps.magicParser;
 p.FunctionName = 'mapbasins';
 p.StructExpand = false;
 
@@ -47,17 +47,17 @@ defaulttxt = 'permafrost extent (%)';
 defaultlatlims = [40 84]; % [50 75]
 defaultlonlims = [-168 -40]; % [-168 -60]
 
-p.addRequired( 'Basins',                              @(x)isstruct(x)   );
-p.addParameter('Meta',        '',                     @(x)istable(x)    );
-p.addParameter('facemapping', false,                  @(x)islogical(x)  );
-p.addParameter('cvarname',    defaultvar,             @(x)ischar(x)     );
-p.addParameter('cbartxt',     defaulttxt,             @(x)ischar(x)     );
-p.addParameter('latlims',     defaultlatlims,         @(x)isnumeric(x)  );
-p.addParameter('lonlims',     defaultlonlims,         @(x)isnumeric(x)  );
-p.addParameter('proj',        'lambert',              @(x)ischar(x)     );
-p.addParameter('facealpha',   0.35,                   @(x)isnumeric(x)  );
-p.addParameter('facelabels',  false,                  @(x)islogical(x)  );
-p.addParameter('ax',          gobjects,               @(x)isaxis(x)     );
+p.addRequired( 'Basins',                     @(x)isstruct(x)   );
+p.addParameter('Meta',        '',            @(x)istable(x)    );
+p.addParameter('facemapping', false,         @(x)islogical(x)  );
+p.addParameter('cvarname',    defaultvar,    @(x)ischar(x)     );
+p.addParameter('cbartxt',     defaulttxt,    @(x)ischar(x)     );
+p.addParameter('latlims',     defaultlatlims,@(x)isnumeric(x)  );
+p.addParameter('lonlims',     defaultlonlims,@(x)isnumeric(x)  );
+p.addParameter('proj',        'lambert',     @(x)ischar(x)     );
+p.addParameter('facealpha',   0.35,          @(x)isnumeric(x)  );
+p.addParameter('facelabels',  false,         @(x)islogical(x)  );
+p.addParameter('ax',          gobjects,      @(x)bfra.validation.isaxis(x));
 
 p.parseMagically('caller');
 
@@ -88,7 +88,7 @@ borders = loadworldborders({'United States','Canada'},'merge');
 coastlat = [ borders.Lat ];
 coastlon = [ borders.Lon ];
 
-h.figure = macfig;
+h.figure = figure('Position',[1 1 1152 720]);
 % h.map  = worldmap(latlims,lonlims);
 % h.map  = worldmap('North Pole');
 h.map    = axesm('MapProjection',proj,'MapLatLimit',latlims,'MapLonLimit',lonlims);
@@ -177,7 +177,7 @@ if facemapping == true
    end
    
    % make the colorbar
-   caxis([cmin cmax])
+   clim([cmin cmax])
    
    %------------------------------------------------------
    % horizontal, south
@@ -202,7 +202,7 @@ if facemapping == true
    h.cbar.Label.String = cbartxt;
    
    % default text use tex, otherwise depends on whats passed in
-   if contains(p.UsingDefaults,'cbartxt')
+   if ismember('cbartxt',p.UsingDefaults)
       %h.cbar.Label.Interpreter = 'tex'; 
    else
       h.cbar.Label.Interpreter = 'latex';

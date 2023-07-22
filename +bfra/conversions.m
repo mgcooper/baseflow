@@ -32,11 +32,11 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 %-------------------------------------------------------------------------------
 p = inputParser;
 p.FunctionName = 'bfra.conversions';
-
-addRequired(   p,    'inputvalue',              @(x)isnumeric(x));
-addRequired(   p,    'inputvarname',            @(x)ischar(x));
-addRequired(   p,    'outputvarname',           @(x)ischar(x));
-addParameter(  p,    'isflat',         true,    @(x)islogical(x));
+validvarnames = {'b', 'alpha', 'beta', 'gamma', 'd', 'k', 'n', 'N', 'Nstar'};
+addRequired( p, 'inputvalue', @(x) isnumeric(x));
+addRequired( p, 'inputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
+addRequired( p, 'outputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
+addParameter( p, 'isflat', true, @(x) islogical(x));
 
 parse(p,inputvalue,inputvarname,outputvarname,varargin{:});
 
@@ -45,8 +45,8 @@ isflat = p.Results.isflat;
 %-------------------------------------------------------------------------------
 
 % convert whatever is passed in to b, then from b to whatever is requested
-b              = convert2b(inputvalue,inputvarname,isflat);
-varargout{1}   = convertb(b,outputvarname,isflat);
+b = convert2b(inputvalue,inputvarname,isflat);
+varargout{1} = convertb(b,outputvarname,isflat);
 
 
 
@@ -65,44 +65,44 @@ function b = convert2b(inputvalue,inputvarname,isflat)
 %            isflat,    true if flat aquifer
 
 %  Outputs:       b,    from dQ(t)=a*Q^b
-
+    
 switch inputvarname
    
    case 'b'
-      b        = inputvalue;
+      b = inputvalue;
    case 'alpha'
-      alpha    = inputvalue;
-      b        = 1+1./alpha;
+      alpha = inputvalue;
+      b = 1+1./alpha;
    case 'beta'
-      beta     = inputvalue;
-      b        = 2+1./beta;
+      beta = inputvalue;
+      b = 2+1./beta;
    case 'gamma'
-      gamma    = inputvalue;
-      b        = 1/2.*(3+1./gamma);
+      gamma = inputvalue;
+      b = 1/2.*(3+1./gamma);
    case 'd'
-      d        = inputvalue;
-      b        = 2-1./d;
+      d = inputvalue;
+      b = 2-1./d;
    case 'k'
-      k        = inputvalue;
-      b        = (2.*k+1)./(k+1);
-      %b        = (k+1)./(2.*k+1);
+      k = inputvalue;
+      b = (2.*k+1)./(k+1);
+      %b = (k+1)./(2.*k+1);
       
    case 'n'
-      n        =  inputvalue;
+      n =  inputvalue;
       switch isflat
          case true
-            b  =  (2.*n+3)./(n+2);
+            b = (2.*n+3)./(n+2);
          case false
-            b  =  (2.*n+1)./(n+1);
+            b = (2.*n+1)./(n+1);
       end
       
    case 'N'
-      N        =  inputvalue;
+      N = inputvalue;
       switch isflat
          case true
-            b  =  (3-N)./2;
+            b = (3-N)./2;
          case false
-            b  =  1-N;
+            b = 1-N;
       end
 end
 
@@ -127,18 +127,18 @@ beta  = 1./(b-2);
 gamma = 1./(2.*b-3);
 d     = 1./(2-b);
 k     = (1-b)./(b-2);   % gpd shape parameter power law exponent k
-%    k     = (b-2)./(1-b);   % gpd shape parameter power law exponent k
+% k     = (b-2)./(1-b);   % gpd shape parameter power law exponent k
 
 switch isflat
    
    case true
-      n     = (3-2.*b)./(b-2);   % saturated hyd. cond. power function exponent
-      N     = 3-2.*b;            % scale parameter power law exponent N
+      n = (3-2.*b)./(b-2);   % saturated hyd. cond. power function exponent
+      N = 3-2.*b;            % scale parameter power law exponent N
       Nstar = 1./(4-2.*b);
       
    case false
-      n     = (1-b)./(b-2);
-      N     = 1-b;
+      n = (1-b)./(b-2);
+      N = 1-b;
       Nstar = 1./(2-b);
 end
 

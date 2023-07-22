@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getstring</title>
+  <meta name="keywords" content="getstring">
+  <meta name="description" content="GETSTRING get latex-formatted string for equations in the bfra library">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; getstring.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>getstring
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>GETSTRING get latex-formatted string for equations in the bfra library</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function str = getstring(requestedstring,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">GETSTRING get latex-formatted string for equations in the bfra library
+ 
+ Syntax
+ 
+     str = getstring(requestedstring,varargin)
+ 
+ Description
+ 
+     str = getstring(requestedstring) returns latex-formatted string for
+     requested string.
+ 
+     str = getstring(requestedstring,'units',true) returns latex-formatted
+     string for requested string with units. Default behavior is 'units',false.
+  
+ Optional inputs
+ 
+     'aQb', 'Q', 'dQ/dt'
+ 
+ Example
+ 
+     str = bfra.getstring('Q','units',true)
+     str =
+           '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'
+ 
+ See also bfra.<a href="aQbString.html" class="code" title="function [aQbstr,Qtstr] = aQbString(varargin)">aQbString</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function str = getStringWithUnits(requestedstring)</a></li>
+<li><a href="#_sub2" class="code">function str = getStringWithoutUnits(requestedstring)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function str = getstring(requestedstring,varargin)</a>
+0002 <span class="comment">%GETSTRING get latex-formatted string for equations in the bfra library</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     str = getstring(requestedstring,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     str = getstring(requestedstring) returns latex-formatted string for</span>
+0011 <span class="comment">%     requested string.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">%     str = getstring(requestedstring,'units',true) returns latex-formatted</span>
+0014 <span class="comment">%     string for requested string with units. Default behavior is 'units',false.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Optional inputs</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%     'aQb', 'Q', 'dQ/dt'</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Example</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%     str = bfra.getstring('Q','units',true)</span>
+0023 <span class="comment">%     str =</span>
+0024 <span class="comment">%           '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% See also bfra.aQbString</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0029 
+0030 <span class="comment">% if called with no input, open this file</span>
+0031 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0032 
+0033 
+0034 <span class="comment">%-------------------------------------------------------------------------------</span>
+0035 p               = inputParser;
+0036 p.FunctionName  = <span class="string">'getstring'</span>;
+0037 p.CaseSensitive = false;
+0038 
+0039 addRequired(   p,<span class="string">'requestedstring'</span>,          @(x)ischar(x)     );
+0040 addParameter(  p,<span class="string">'units'</span>,           false,   @(x)islogical(x)  );
+0041 
+0042 parse(p,requestedstring,varargin{:});
+0043 units = p.Results.units;
+0044 <span class="comment">%-------------------------------------------------------------------------------</span>
+0045 
+0046 <span class="keyword">if</span> units == true
+0047    str = <a href="#_sub1" class="code" title="subfunction str = getStringWithUnits(requestedstring)">getStringWithUnits</a>(requestedstring);
+0048 <span class="keyword">else</span>
+0049    str = <a href="#_sub2" class="code" title="subfunction str = getStringWithoutUnits(requestedstring)">getStringWithoutUnits</a>(requestedstring);
+0050 <span class="keyword">end</span>
+0051 
+0052 
+0053 <a name="_sub1" href="#_subfunctions" class="code">function str = getStringWithUnits(requestedstring)</a>
+0054 
+0055 <span class="keyword">switch</span> requestedstring
+0056    
+0057    <span class="keyword">case</span> <span class="string">'Q'</span>
+0058       
+0059       str = <span class="string">'$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'</span>;
+0060       
+0061    <span class="keyword">case</span> {<span class="string">'dQdt'</span>,<span class="string">'dqdt'</span>,<span class="string">'dq/dt'</span>,<span class="string">'dQ/dt'</span>}
+0062       
+0063       str = [ <span class="string">'$-\mathrm{d}Q/\mathrm{d}t \quad[\mathrm{m}^3\;'</span> <span class="keyword">...</span>
+0064          <span class="string">'\mathrm{d}^{-1}\;\mathrm{d}^{-1}]$'</span>];
+0065       
+0066    <span class="keyword">case</span> {<span class="string">'d2Qdt'</span>,<span class="string">'d2Qdt2'</span>,<span class="string">'dq2/dt'</span>,<span class="string">'dq2/dt2'</span>}
+0067 
+0068       str = [ <span class="string">'$-\mathrm{d}^2Q/\mathrm{d}t^2 \quad[\mathrm{m}^3\;'</span> <span class="keyword">...</span>
+0069          <span class="string">'\mathrm{d}^{-1}\;\mathrm{d}^{-2}]$'</span>];
+0070 
+0071    <span class="keyword">case</span> <span class="string">'R'</span>
+0072       
+0073       str = <span class="string">'Rainfall $\quad [\mathrm{mm} \;\mathrm{d}^{-1}]$'</span>;
+0074       
+0075       <span class="comment">% this might be simpler need to compare</span>
+0076       <span class="comment">% str = 'Rainfall [mm d$^{-1}$]';</span>
+0077       
+0078    <span class="keyword">case</span> {<span class="string">'dndt'</span>,<span class="string">'dn/dt'</span>}
+0079       
+0080       str = [ <span class="string">'$\mathrm{d}\eta/\mathrm{d}t \quad[\mathrm{cm}\;'</span> <span class="keyword">...</span>
+0081          <span class="string">'\mathrm{a}^{-1}]$'</span>];
+0082       
+0083    <span class="keyword">case</span> <span class="string">'aQb'</span>
+0084       
+0085       str = [<span class="string">'$-\mathrm{d}Q/\mathrm{d}t$ = aQ$^b'</span>                    <span class="keyword">...</span>
+0086          <span class="string">'\quad[\mathrm{m}^3\;\mathrm{d}^{-1}\;\mathrm{d}^{-1}]$'</span>];
+0087       
+0088    <span class="keyword">case</span> {<span class="string">'Q(t)'</span>,<span class="string">'q(t)'</span>}
+0089       str = [<span class="string">'$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}'</span>                <span class="keyword">...</span>
+0090          <span class="string">'\quad[\mathrm{m}^3\;\mathrm{d}^{-1}]$'</span>];
+0091       
+0092    <span class="keyword">case</span> {<span class="string">'tau'</span>,<span class="string">'Tau'</span>}
+0093       str = <span class="string">'$\tau \quad$ [days]'</span>;
+0094       
+0095 <span class="keyword">end</span>
+0096 
+0097 
+0098 <a name="_sub2" href="#_subfunctions" class="code">function str = getStringWithoutUnits(requestedstring)</a>
+0099 
+0100 <span class="keyword">switch</span> requestedstring
+0101    
+0102    <span class="keyword">case</span> <span class="string">'Q'</span>
+0103       str = <span class="string">'$Q$'</span>;
+0104       
+0105    <span class="keyword">case</span> {<span class="string">'dQdt'</span>,<span class="string">'dqdt'</span>,<span class="string">'dq/dt'</span>,<span class="string">'dQ/dt'</span>}
+0106       
+0107       str = <span class="string">'$-\mathrm{d}Q/\mathrm{d}t$'</span>;
+0108       
+0109    <span class="keyword">case</span> {<span class="string">'d2Qdt'</span>,<span class="string">'d2Qdt2'</span>,<span class="string">'dq2/dt'</span>,<span class="string">'dq2/dt2'</span>}
+0110       
+0111       str = <span class="string">'$-\mathrm{d}^2Q/\mathrm{d}t^2$'</span>;
+0112 
+0113    <span class="keyword">case</span> {<span class="string">'dndt'</span>,<span class="string">'dn/dt'</span>}
+0114       
+0115       str = <span class="string">'$\mathrm{d}\eta/\mathrm{d}t$'</span>;
+0116       
+0117    <span class="keyword">case</span> <span class="string">'aQb'</span>
+0118 
+0119       str = <span class="string">'$-\mathrm{d}Q/\mathrm{d}t = aQ^b$'</span>;
+0120 
+0121    <span class="keyword">case</span> {<span class="string">'Q(t)'</span>,<span class="string">'q(t)'</span>}
+0122 
+0123       str = <span class="string">'$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}$'</span>;
+0124       <span class="comment">%str = '$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';</span>
+0125       
+0126    <span class="keyword">case</span> {<span class="string">'tau'</span>,<span class="string">'Tau'</span>}
+0127       str = <span class="string">'$\tau$'</span>;
+0128       
+0129    <span class="keyword">case</span> {<span class="string">'R'</span>,<span class="string">'Rainfall'</span>}
+0130       str = <span class="string">'Rainfall'</span>;
+0131 <span class="keyword">end</span></pre></div>
+</body>
+</html>

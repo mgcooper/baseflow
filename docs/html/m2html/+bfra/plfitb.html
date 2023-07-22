@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plfitb</title>
+  <meta name="keywords" content="plfitb">
+  <meta name="description" content="PLFITB fit an unbounded Pareto Distribution to recession parameter tau">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; plfitb.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>plfitb
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PLFITB fit an unbounded Pareto Distribution to recession parameter tau</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function varargout = plfitb(x,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PLFITB fit an unbounded Pareto Distribution to recession parameter tau
+ 
+ Syntax
+ 
+     Fit = plfitb(x,varargin)
+ 
+ Description
+ 
+     Fit = plfitb(x,varargin) returns Fit containing the Pareto Distribution
+     fit to input data x, where x is continuous data believed to follow an
+     untruncated Pareto distribution with some unknown xmin such that
+     xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where plfit
+     is Aaron Clauset's function.
+
+ Required inputs
+ 
+     x        data believed to follow an untruncated Pareto distribution
+
+ Optional name-value inputs
+ 
+     xmin     scalar double indicating the lower bound of the distribution
+     range    the range of scaling parameters considered (see plfit.m)
+     limit    scalar double that sets the upper bound of fitted exponent
+     method   char indicating one of two algorithms (Clauset's or Hanel's)
+     bootfit  logical indicating whether to bootstrap the uncertainties (slow)
+     nreps    scalar double indicating how many replicates in the boot fit
+     plotfit  logical indicating whether to call plplot
+
+ See also plfit, <a href="plplotb.html" class="code" title="function h = plplotb(x,xmin,alpha,varargin)">plplotb</a>, <a href="gpfitb.html" class="code" title="function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)">gpfitb</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function Fit = plbootfit(x,range,limit,nreps)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function varargout = plfitb(x,varargin)</a>
+0002 <span class="comment">%PLFITB fit an unbounded Pareto Distribution to recession parameter tau</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     Fit = plfitb(x,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     Fit = plfitb(x,varargin) returns Fit containing the Pareto Distribution</span>
+0011 <span class="comment">%     fit to input data x, where x is continuous data believed to follow an</span>
+0012 <span class="comment">%     untruncated Pareto distribution with some unknown xmin such that</span>
+0013 <span class="comment">%     xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where plfit</span>
+0014 <span class="comment">%     is Aaron Clauset's function.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% Required inputs</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%     x        data believed to follow an untruncated Pareto distribution</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Optional name-value inputs</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">%     xmin     scalar double indicating the lower bound of the distribution</span>
+0023 <span class="comment">%     range    the range of scaling parameters considered (see plfit.m)</span>
+0024 <span class="comment">%     limit    scalar double that sets the upper bound of fitted exponent</span>
+0025 <span class="comment">%     method   char indicating one of two algorithms (Clauset's or Hanel's)</span>
+0026 <span class="comment">%     bootfit  logical indicating whether to bootstrap the uncertainties (slow)</span>
+0027 <span class="comment">%     nreps    scalar double indicating how many replicates in the boot fit</span>
+0028 <span class="comment">%     plotfit  logical indicating whether to call plplot</span>
+0029 <span class="comment">%</span>
+0030 <span class="comment">% See also plfit, plplotb, gpfitb</span>
+0031 <span class="comment">%</span>
+0032 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0033 
+0034 <span class="comment">% if called with no input, open this file</span>
+0035 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0036 
+0037 <span class="comment">%-------------------------------------------------------------------------------</span>
+0038 p              = inputParser;
+0039 p.FunctionName = <span class="string">'bfra.plfitb'</span>;
+0040 <span class="comment">% p.PartialMatching = true;</span>
+0041 
+0042 addRequired(p,    <span class="string">'x'</span>,                          @(x)isnumeric(x)  );
+0043 addParameter(p,   <span class="string">'xmin'</span>,     nan,              @(x)isnumeric(x)  );
+0044 addParameter(p,   <span class="string">'range'</span>,    1.01:0.01:25.01,  @(x)isnumeric(x)  );
+0045 addParameter(p,   <span class="string">'limit'</span>,    [],               @(x)isnumeric(x)  );
+0046 addParameter(p,   <span class="string">'method'</span>,   <span class="string">'clauset'</span>,        @(x)ischar(x)     );
+0047 addParameter(p,   <span class="string">'bootfit'</span>,  false,            @(x)islogical(x)  );
+0048 addParameter(p,   <span class="string">'nreps'</span>,    1000,             @(x)isnumeric(x)  );
+0049 addParameter(p,   <span class="string">'plotfit'</span>,  false,            @(x)islogical(x)  );
+0050 
+0051 parse(p,x,varargin{:});
+0052 
+0053 xmin     = p.Results.xmin;
+0054 range    = p.Results.range;
+0055 limit    = p.Results.limit;
+0056 method   = p.Results.method;
+0057 bootfit  = p.Results.bootfit;
+0058 nreps    = p.Results.nreps;
+0059 plotfit  = p.Results.plotfit;
+0060 
+0061 <span class="comment">%-------------------------------------------------------------------------------</span>
+0062 x0 = x;
+0063 [x,~] = prepareCurveData(x,x);
+0064 x = x(x&gt;0);
+0065 <span class="keyword">if</span> isnan(xmin)
+0066    <span class="keyword">switch</span> method
+0067       <span class="keyword">case</span> <span class="string">'clauset'</span>
+0068          [alpha,xmin,L,D] = bfra.deps.plfit(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
+0069          <span class="keyword">if</span> bootfit == true
+0070             BootFit = <a href="#_sub1" class="code" title="subfunction Fit = plbootfit(x,range,limit,nreps)">plbootfit</a>(x,range,limit,nreps);
+0071          <span class="keyword">end</span>
+0072       <span class="comment">% undocumented feature, requires r_plfit function, not included in toolbox</span>
+0073       <span class="keyword">case</span> <span class="string">'hanel'</span>
+0074          [~,xmin] = bfra.deps.plfit(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
+0075          [alpha,xmin,L,D] = r_plfit(x,<span class="string">'rangemin'</span>,xmin,<span class="string">'alpha_min'</span>,  <span class="keyword">...</span>
+0076             range(1),<span class="string">'alpha_max'</span>,range(end));
+0077          <span class="comment">% if I had some max value to consider, I could pass 'rangemax'</span>
+0078    <span class="keyword">end</span>
+0079 <span class="keyword">else</span>
+0080    [alpha,~,L,D] = bfra.deps.plfit(x,<span class="string">'xmin'</span>,xmin,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
+0081 <span class="keyword">end</span>
+0082 
+0083 Fit.x       = x0; <span class="comment">% keep the input data</span>
+0084 Fit.alpha   = alpha;
+0085 Fit.b       = 1+1/Fit.alpha;
+0086 Fit.tau     = xmin*(2-Fit.b)/(3-2*Fit.b);
+0087 Fit.tau0    = xmin;
+0088 Fit.L       = L;
+0089 Fit.D       = D;
+0090 Fit.k       = 1/(Fit.alpha-1);
+0091 Fit.taumask = x0&gt;xmin;
+0092 
+0093 <span class="keyword">if</span> bootfit == true
+0094    Fit.b_L = Fit.b - BootFit.b_sig;
+0095    Fit.b_H = Fit.b + BootFit.b_sig;
+0096    Fit.alpha_L = Fit.alpha - BootFit.alpha_sig;
+0097    Fit.alpha_H = Fit.alpha + BootFit.alpha_sig;
+0098    Fit.tau0_L = Fit.tau0 - BootFit.tau0_sig;
+0099    Fit.tau0_H = Fit.tau0 + BootFit.tau0_sig;
+0100    Fit.tau_L = Fit.tau - BootFit.tau_sig;
+0101    Fit.tau_H = Fit.tau + BootFit.tau_sig;
+0102    Fit.reps = BootFit.reps;
+0103    BootFit = rmfield(BootFit,<span class="string">'reps'</span>);
+0104    Fit.BootFit = BootFit;
+0105 <span class="keyword">else</span>
+0106    <span class="comment">% assign null confidence bounds so other functions will work</span>
+0107    Fit.b_L = Fit.b;
+0108    Fit.b_H = Fit.b;
+0109    Fit.alpha_L = Fit.alpha;
+0110    Fit.alpha_H = Fit.alpha;
+0111    Fit.tau0_L = Fit.tau0;
+0112    Fit.tau0_H = Fit.tau0;
+0113    Fit.tau_L = Fit.tau;
+0114    Fit.tau_H = Fit.tau;
+0115 <span class="keyword">end</span>
+0116 
+0117 <span class="comment">% also: b = (2*k+1)/(k+1)</span>
+0118 <span class="comment">% and:  alpha = 1 + 1/k</span>
+0119 
+0120 <span class="keyword">if</span> plotfit == true
+0121    alpha = Fit.alpha;
+0122    xmin = Fit.tau0;
+0123    aci = [Fit.alpha_H Fit.alpha_L];
+0124    xci = [Fit.tau0_L Fit.tau0_H];
+0125    figure(<span class="string">'Position'</span>,[0 0 300 200]); ax = gca;
+0126    bfra.plplotb(x,xmin,alpha,<span class="string">'trimline'</span>,true,<span class="string">'alphaci'</span>,aci,<span class="string">'xminci'</span>,xci,<span class="string">'ax'</span>,ax);
+0127 <span class="comment">%    snapnow;</span>
+0128 <span class="keyword">end</span>
+0129 
+0130 <span class="keyword">switch</span> nargout
+0131    <span class="keyword">case</span> 1
+0132       varargout{1} = Fit;
+0133    <span class="keyword">case</span> 2
+0134       varargout{1} = 1+1/alpha;
+0135       varargout{2} = alpha;
+0136    <span class="keyword">case</span> 3
+0137       varargout{1} = b;
+0138       varargout{2} = 1+1/alpha;
+0139       varargout{3} = xmin;
+0140 <span class="keyword">end</span>
+0141 
+0142 <span class="comment">% NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should</span>
+0143 <span class="comment">% be about 0.01-0.02. This is indeed the case for the data I have tested</span>
+0144 <span class="comment">% from the Kuparuk (the error was about 0.03, but alpha was about 3.12). See</span>
+0145 <span class="comment">% Figure 10 in Clauset et al. 2009.</span>
+0146 
+0147 <span class="comment">% bootstrap confidence intervals</span>
+0148 <a name="_sub1" href="#_subfunctions" class="code">function Fit = plbootfit(x,range,limit,nreps)</a>
+0149 
+0150 <span class="comment">%[alpha,xmin,L,D] = bfra.deps.plfit(x,'range',range,'limit',limit);</span>
+0151 [~,~,~,repsmat] = bfra.deps.plvar(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit,<span class="string">'reps'</span>,nreps,<span class="string">'silent'</span>);
+0152 
+0153 vars        = {<span class="string">'tau0'</span>,<span class="string">'alpha'</span>,<span class="string">'b'</span>,<span class="string">'tau'</span>,<span class="string">'ntail'</span>};
+0154 reps.ntail  = repsmat(:,1);
+0155 reps.tau0   = repsmat(:,2);
+0156 reps.alpha  = repsmat(:,3);
+0157 reps.b      = bfra.conversions(reps.alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0158 reps.tau    = reps.tau0.*(2-reps.b)./(3-2.*reps.b);
+0159 
+0160 <span class="keyword">for</span> n = 1:numel(vars)
+0161    var = vars{n};
+0162    Fit.(var) = mean(reps.(var));
+0163    Fit.([var <span class="string">'_sig'</span>]) = std(reps.(var));
+0164    Fit.([var <span class="string">'_L'</span>]) = mean(reps.(var)) - 1.96*std(reps.(var));
+0165    Fit.([var <span class="string">'_H'</span>]) = mean(reps.(var)) + 1.96*std(reps.(var));
+0166 <span class="keyword">end</span>
+0167 
+0168 Fit.reps = reps;
+0169 <span class="comment">% replaced this with ntail</span>
+0170 <span class="comment">% Fit.numtau  = numel(x(x&gt;Fit.tau0_avg));</span>
+0171 
+0172 <span class="comment">% As a rough check on the sampling distribution of the parameter</span>
+0173 <span class="comment">% estimators, we can look at histograms of the bootstrap replicates.</span>
+0174 <span class="comment">% figure; subplot(1,3,1);</span>
+0175 <span class="comment">% histogram(reps.b);</span>
+0176 <span class="comment">% title('Bootstrap estimates of $b$');</span>
+0177 <span class="comment">% subplot(1,3,2);</span>
+0178 <span class="comment">% histogram(reps.tau0);</span>
+0179 <span class="comment">% title('Bootstrap estimates of $\tau_0$');</span>
+0180 <span class="comment">% subplot(1,3,3);</span>
+0181 <span class="comment">% histogram(reps.alpha);</span>
+0182 <span class="comment">% title('Bootstrap estimates of $\alpha$');</span>
+0183 
+0184 <span class="comment">%    % it is incorrect to apply the standard formula so don't use this</span>
+0185 <span class="comment">%    for n = 1:numel(vars)</span>
+0186 <span class="comment">%       var = vars{n};</span>
+0187 <span class="comment">%       [SE,CI,~,mu,sig] = stderr(reps.(var));</span>
+0188 <span class="comment">%       Fit.([var '_avg']) = mu;</span>
+0189 <span class="comment">%       Fit.([var '_L']) = CI(1);</span>
+0190 <span class="comment">%       Fit.([var '_H']) = CI(2);</span>
+0191 <span class="comment">%       Fit.([var '_sig']) = sig;</span>
+0192 <span class="comment">%       Fit.([var '_SE']) = SE;</span>
+0193 <span class="comment">%    end</span>
+0194 
+0195 
+0196 <span class="comment">% % this might still be a good approach, just need to figure out how to get the</span>
+0197 <span class="comment">% stdv of xmin</span>
+0198 <span class="comment">% function Fit = bootstrap_alpha(x,range,limit)</span>
+0199 <span class="comment">%</span>
+0200 <span class="comment">%    % first get xmin, bootstrap won't change this</span>
+0201 <span class="comment">%    [~,xmin] = bfra.deps.plfit(x,'range',range,'limit',limit);</span>
+0202 <span class="comment">%</span>
+0203 <span class="comment">%    % now bootstrap alpha</span>
+0204 <span class="comment">%    reps  = bootstrp(1000,@(x,xmin)plfit(x,'xmin',xmin),x,xmin);</span>
+0205 <span class="comment">%</span>
+0206 <span class="comment">%    Fit.alpha = mean(reps);</span>
+0207 <span class="comment">%    Fit.tau0 = xmin;</span>
+0208 <span class="comment">%    Fit.alpha_sig = std(reps);</span>
+0209 <span class="comment">%    %Fit.tau0_sig % this is why we use plbootfit b/c it returns xmin_sig</span>
+0210 <span class="comment">%    Fit.reps = reps;</span>
+0211 <span class="comment">%</span>
+0212 <span class="comment">%    % see the appendix</span>
+0213 <span class="comment">%    % N = numel(reps)</span>
+0214 <span class="comment">%    % alphatrue = (1 + alpha*(N-1))/N</span>
+0215 <span class="comment">%    % alphasig = N*(alphatrue-1)/((N-1)*sqrt(N-2))</span>
+0216 <span class="comment">%    % N*(alpha-1)/((N-1)*sqrt(N-2))</span>
+0217 <span class="comment">% end</span></pre></div>
+</body>
+</html>

@@ -12,10 +12,10 @@
 %    title={{The Baseflow Recession Analysis Toolbox for MATLAB}},
 %    author={Cooper, Matthew G and Zhou, Tian},
 %    journal={Journal of Open Source Software},
-%    year={2022},
+%    year={2023},
 %    volume={XX},
 %    pages={XXXX-XXXX},
 %    publisher={}, 
 %    doi={10.XXXX/2022XXYYYYY}, 
-%    url={https://doi.org/10.XXXX/2022XXYYYYY}
+%    url={https://doi.org/10.XXXX/2023XXYYYYY}
 %  }

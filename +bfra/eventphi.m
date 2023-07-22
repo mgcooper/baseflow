@@ -64,14 +64,14 @@ soln1       = p.Results.soln1;
 soln2       = p.Results.soln2;
 %-------------------------------------------------------------------------------
 
-warning off
+% warning off % commented out for octave, need msgid
 
 % take out the data and init the output
 b1          = 3;
 b2          = p.Results.blate; 
 q           = Fits.q;
 dqdt        = Fits.dqdt;
-fittags     = Fits.eventTag;
+fittags     = Fits.eventTags;
 numevents   = numel(K.eventTag);
 phi         = nan(numevents,1);
 a           = nan(numevents,1);
@@ -115,4 +115,4 @@ for n = 1:numevents
    a(n) = a2;
 end
 
-warning on
+% warning on % commented out for octave, need msgid

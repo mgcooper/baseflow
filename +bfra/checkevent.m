@@ -32,21 +32,19 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % NOTE: two fits are shown in the legend b/c the first one is from the provided
 % inputs and the second one is computed in this function as a check on the input
 
-%-------------------------------------------------------------------------------
-%   input checks and prep
-%-------------------------------------------------------------------------------
-p              = magicParser;
+% --------------- parse inputs
+p = bfra.deps.magicParser;
 p.FunctionName = 'bfra.checkevent';
 
-p.addRequired('T',               @(x)isnumeric(x) | isdatetime(x) );
-p.addRequired('Q',               @(x)isnumeric(x)  );
-p.addRequired('q',               @(x)isnumeric(x)  );
-p.addRequired('dqdt',            @(x)isnumeric(x)  );
-p.addRequired('r',               @(x)isnumeric(x)  );
-p.addRequired('alltags',         @(x)isnumeric(x)  );
-p.addRequired('eventtag',        @(x)isnumeric(x)  );
-p.addParameter('order',    nan,  @(x)isnumeric(x)  );
-p.addParameter('ax',       gca,  @(x)isaxis(x)     );
+p.addRequired('T',               @(x)isnumeric(x) | isdatetime(x));
+p.addRequired('Q',               @(x)isnumeric(x));
+p.addRequired('q',               @(x)isnumeric(x));
+p.addRequired('dqdt',            @(x)isnumeric(x));
+p.addRequired('r',               @(x)isnumeric(x));
+p.addRequired('alltags',         @(x)isnumeric(x));
+p.addRequired('eventtag',        @(x)isnumeric(x));
+p.addParameter('order',    nan,  @(x)isnumeric(x));
+p.addParameter('ax',       gca,  @(x)bfra.validation.isaxis(x));
 
 p.parseMagically('caller');
 
@@ -55,11 +53,11 @@ order = p.Results.order;
 if isdatetime(T)
    T = datenum(T);
 end
-%-------------------------------------------------------------------------------
 
-warning off
-col = defaultcolors;
-col(3,:) = []; % i find yellow and red to be a terrible combination
+% --------------- function code
+% warning off % commented out for octave, need to get the msgid
+colors = get(0,'defaultaxescolororder');
+colors = colors([1 2 5 4 3 6 7],:); % swap yellow and green
 
 % this allows a column vector of tags instead of a reshaped matrix
 rowcol = true;
@@ -69,9 +67,8 @@ end
 
 if isnan(order); fixb = false; else, fixb = true; end
 
-%-------------------------------------------------------------------------------
-% prep for fitting
-%-------------------------------------------------------------------------------
+
+% --------------- prep for fitting
 
 [  eventT,eventQ,                                                       ...
    eventq,eventdqdt,                                                    ...
@@ -85,22 +82,21 @@ if isnan(order); fixb = false; else, fixb = true; end
    Qtstr0,aQbstr0,                                                      ...
    rsq0              ]  =  prepfits(eventq,eventdqdt,eventT,fixb,order);
 
-%-------------------------------------------------------------------------------
-% make the figure
-%-------------------------------------------------------------------------------
 
-% h.f = figure('Position',[150 80 800 550]);
-h.f = gcf;
+% --------------- make the figure
+
+h.f = figure('Position',[150 80 800 550]);
+% h.f = gcf;
 
 % plot the entire year and the event  (panel 1)
 %h.t1  = tiledlayout(3,2,'TileSpacing','none','Padding','none');
 %nexttile([1 2]);
 
-% use subplot instead
-h.t1 = subtight(3,2,[1 2],'style','fitted');
+% use subplot instead of tiledlayout
+h.t1 = bfra.util.subtight(3,2,[1 2],'style','fitted');
 
-h.h1a = plot(annualT,annualQ, '-o','Color',col(1,:) ); hold on;
-h.h1b = plot(eventT,eventQ,   '-o','Color',col(2,:) );
+h.h1a = plot(annualT,annualQ, '-o','Color',colors(1,:) ); hold on;
+h.h1b = plot(eventT,eventQ,   '-o','Color',colors(2,:) );
 % h.h1c = plot(eventT,eventq,   '-o','Color',col(3,:) );
 
 ylabel('$Q$ [m$^3$ d$^{-1}$]'); datetick(h.t1,'keepticks');
@@ -121,13 +117,14 @@ h.ax1b   = ax;
 h.leg1   = legend('$Q$ (observed)','$Q$ (event)','rain','Interpreter','latex');
 % h.leg1   = legend('$Q$ (observed)','$Q$ (event)','$Q$ (event fit)','rain');
 
-%-------------------------------------------------------------------------------
+% --------------- next subplot
+
 % plot observed flow and fitted flow vs time (panel 2)
 %nexttile(3);
-h.t2 = subtight(3,2,3,'style','fitted');
+h.t2 = bfra.util.subtight(3,2,3,'style','fitted');
 
-h.h2a = plot(eventT,eventq,'-o', 'Color', col(1,:) ); hold on;
-h.h2b = plot(tfit,qfit,  ':',  'Color', col(2,:),'LineWidth',3);
+h.h2a = plot(eventT,eventq,'-o', 'Color', colors(1,:) ); hold on;
+h.h2b = plot(tfit,qfit,  ':',  'Color', colors(2,:),'LineWidth',3);
 
 ylabel('$Q$ [m$^3$ d$^{-1}$]'); datetick;
 
@@ -135,7 +132,7 @@ set(gca,'TickLabelInterpreter','latex')
 
 % plot fixed-b solution and update legend
 if fixb == true
-   h.h2c = plot(tfit,qfit0,':o','Color',col(2,:));
+   h.h2c = plot(tfit,qfit0,':o','Color',colors(2,:));
    ltxt  = {'$Q$ (ETS fit)',Qtstr,Qtstr0,'rain'};
 else
    ltxt  = {'$Q$ (ETS fit)',Qtstr,'rain'};
@@ -149,21 +146,22 @@ h.ax2b   = ax;
 h.leg2   = legend(ltxt,'Location','northeast','Interpreter','latex');
 
 grid off
-%-------------------------------------------------------------------------------
+
+% --------------- next subplot
 
 % plot observed dQdt and fitted dQdt vs Q  (panel 3)
 % nexttile(5);
-h.t3  = subtight(3,2,5,'style','fitted');
+h.t3  = bfra.util.subtight(3,2,5,'style','fitted');
 
-h.h3a = plot(eventT,-eventdqdt,'-o', 'Color',col(1,:)); hold on;
-h.h3b = plot(tfit,-dqfit,    ':',  'Color',col(2,:),'LineWidth',3);
+h.h3a = plot(eventT,-eventdqdt,'-o', 'Color',colors(1,:)); hold on;
+h.h3b = plot(tfit,-dqfit,    ':',  'Color',colors(2,:),'LineWidth',3);
 
 ylabel('-d$Q$/d$t$ [m$^3$ d$^{-1}$ d$^{-1}$]'); datetick;
 set(gca,'TickLabelInterpreter','latex')
 
 % plot fixed-b solution and update legend
 if fixb == true
-   h.h3c = plot(tfit,-dqfit0,':o','Color',col(2,:));
+   h.h3c = plot(tfit,-dqfit0,':o','Color',colors(2,:));
    ltxt  = {'-d$Q$/d$t$ (ETS fit)',aQbstr,aQbstr0};
 else
    ltxt  = {'-d$Q$/d$t$ (ETS fit)',aQbstr};
@@ -173,18 +171,19 @@ h.leg3   = legend(ltxt,'Interpreter','latex','location','northeast');
 h.ax3    = gca;
 
 grid off
-%-------------------------------------------------------------------------------
+
+% --------------- next subplot
 % bfra_dQdt plot
 
 %h.t4 = nexttile([2 1]);
-h.t4 = subtight(3,2,[4 6],'style','fitted');
+h.t4 = bfra.util.subtight(3,2,[4 6],'style','fitted');
 
 if all(isnan(eventq))
    return   
 else
    h2 = bfra.pointcloudplot(eventq,eventdqdt,'ax',h.t4,'reflines', ...
       {'lowerenvelope','upperenvelope','early','late','bestfit'}, ...
-      'reflabels',true,'rain',eventr,'addlegend',true);
+      'reflabels',false,'rain',eventr,'addlegend',true);
    % h2  = bfra_plotdQdt(eventq,eventdqdt,'ax',ax,'rain',eventr); hold on;
    
    h.pcloud = h2;
@@ -195,22 +194,19 @@ else
    
    if fixb
       plot(qfit0,-dqfit0,'--');
-      ltxt = [aQbstr0 ' (r2 = ' printf(rsq0,2) ')'];
+      ltxt = [aQbstr0 ' (r2 = ' bfra.util.printnum(rsq0,2) ')'];
       h2.legend.String{end} = ltxt;
    end
    
    % settins
    
-   set(h.h1a,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none');
-   set(h.h1b,'MarkerFaceColor',col(2,:),'MarkerEdgeColor','none');
+   set(h.h1a,'MarkerFaceColor',colors(1,:),'MarkerEdgeColor','none');
+   set(h.h1b,'MarkerFaceColor',colors(2,:),'MarkerEdgeColor','none');
    % set(h.h1c,'MarkerFaceColor',col(3,:),'MarkerEdgeColor','none');
-   set(h.h2a,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none');
-   set(h.h3a,'MarkerFaceColor',col(1,:),'MarkerEdgeColor','none');
+   set(h.h2a,'MarkerFaceColor',colors(1,:),'MarkerEdgeColor','none');
+   set(h.h3a,'MarkerFaceColor',colors(1,:),'MarkerEdgeColor','none');
    
-   %-------------------------------------------------------------------------------
-   % see all events for this year
-   %-------------------------------------------------------------------------------
-   
+   % --------------- see all events for this year
    %bfra_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');
    
    %    h.ax2a.XLim = h.ax1a.XLim;
@@ -222,7 +218,7 @@ else
 end
 
 
-%-------------------------------------------------------------------------------
+% --------------- prep input
 
 function [eventT,eventQ,eventq,eventdq, ...
    eventr,annualT,annualQ,annualr] = prepinput(userc,tags,event,T,Q,q,dqdt,rain)
@@ -255,7 +251,7 @@ annualQ  = Q(idx,c(1));
 annualr  = rain(idx,c(1));
 
 
-%-------------------------------------------------------------------------------
+% --------------- prep fits
 
 function [tfit,qfit,dqfit,Qtstr,aQbstr, ...
    qfit0,dqfit0,Qtstr0,aQbstr0,rsq0] = prepfits(eventq,eventdqdt,eventT,fixb,order);
@@ -291,7 +287,7 @@ else
    aQbstr0  = nan;
 end
 
-%-------------------------------------------------------------------------------
+% --------------- plot rain
 
 function [h,ax] = plotrain(time,rain)
 
@@ -306,9 +302,8 @@ ylabel('rain (mm d$^{-1}$)','Color',rcolor);
 set(gca,'YColor','k')
 datetick; axis tight; axis(ax,'ij');
 
-%-------------------------------------------------------------------------------
-% extra stuff
-%-------------------------------------------------------------------------------
+
+% --------------- extra stuff
 % If I want to add back the log
 %     yyaxis right
 %     pause(0.001)

@@ -36,6 +36,6 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 C = tau/phi/(N+1); % lambda in the paper [days]
 
 % compute the timeseries of ALT and the trend
-D        = Qb.*C;              % alt timeseries, posted annually [cm]
-dDdt     = dQbdt.*C;           % alt trend, posted annually [cm/yr]
-dDadt    = anomaly(dQbdt.*C);  % alt trend anomaly(dDdt)
+D = Qb.*C; % alt timeseries, posted annually [cm]
+dDdt = dQbdt.*C; % alt trend, posted annually [cm/yr]
+dDadt = bfra.util.anomaly(dQbdt.*C); % alt trend anomaly(dDdt)

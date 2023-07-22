@@ -64,11 +64,11 @@ numfits  = numel(a);            % use K b/c some 'Events' don't get fit
 if usefits == true
    Q     = Fits.q;
    dQdt  = Fits.dqdt;
-   Qtags = Fits.eventTag;
+   Qtags = Fits.eventTags;
 else
-   Q     = Events.q;
+   Q     = Events.eventFlow;
    dQdt  = Fits.dqdt;
-   Qtags = Events.tag;
+   Qtags = Events.eventTags;
 
 end
 
@@ -88,11 +88,11 @@ tauagg   = nan(numfits,1);
 for m = 1:numfits
    tag      = Ktags(m);
    i        = Ktags == tag;   % should just be m
-   ii       = Qtags == tag;   % Fits.eventTag == m;
+   ii       = Qtags == tag;   % Fits.eventTags == m;
    tau(ii)  = Taufnc(a(i),b(i),Q(ii));
 
 % return fit q/dqdt for point cloud plot but use event q for tau
-   iii       = Fits.eventTag == tag;
+   iii       = Fits.eventTags == tag;
    q(iii)    = Fits.q(iii);
    dqdt(iii) = Fits.dqdt(iii);
 

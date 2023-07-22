@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fdcurve</title>
+  <meta name="keywords" content="fdcurve">
+  <meta name="description" content="FDCURVE Flow duration curve">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fdcurve.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>fdcurve
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>FDCURVE Flow duration curve</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function fdc = fdcurve(flow,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">FDCURVE Flow duration curve
+
+     fdc = fdcurve(flow,varargin)
+
+ See also</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function fdc = fdcurve(flow,varargin)</a>
+0002 <span class="comment">%FDCURVE Flow duration curve</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%     fdc = fdcurve(flow,varargin)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% See also</span>
+0007 
+0008 <span class="comment">%-------------------------------------------------------------------------------</span>
+0009 p = bfra.deps.magicParser;
+0010 p.FunctionName = <span class="string">'bfra.fdcurve'</span>;
+0011 p.addRequired( <span class="string">'flow'</span>,                    @(x)isnumeric(x)  );
+0012 p.addParameter(<span class="string">'axscale'</span>,     <span class="string">'semilogy'</span>, @(x)ischar(x)     );
+0013 p.addParameter(<span class="string">'units'</span>,       <span class="string">''</span>,         @(x)ischar(x)     );
+0014 p.addParameter(<span class="string">'refpoints'</span>,   nan,        @(x)isnumeric(x)  );
+0015 p.addParameter(<span class="string">'plotcurve'</span>,   true,       @(x)islogical(x)  );
+0016 p.parseMagically(<span class="string">'caller'</span>);
+0017 <span class="comment">%-------------------------------------------------------------------------------</span>
+0018 
+0019 N = length(flow);
+0020 M = 1:N;
+0021 x = sort(flow,<span class="string">'descend'</span>);
+0022 f = 1-M./(N+1);
+0023 
+0024 <span class="comment">% if requested, compute reference point values</span>
+0025 xref = nan(numel(refpoints,1));
+0026 fref = nan(numel(refpoints,1));
+0027 <span class="keyword">if</span> ~isnan(refpoints)
+0028    <span class="keyword">for</span> n = 1:numel(refpoints)
+0029       iref = find(x&gt;=refpoints(n),1,<span class="string">'last'</span>);
+0030       xref(n) = x(iref);
+0031       fref(n) = f(iref);
+0032    <span class="keyword">end</span>
+0033 <span class="keyword">end</span>
+0034 
+0035 <span class="comment">% plot the curve if requested</span>
+0036 <span class="keyword">if</span> plotcurve == true
+0037    figure;
+0038    <span class="keyword">switch</span> axscale
+0039       <span class="keyword">case</span> <span class="string">'loglog'</span>
+0040          h.fdc = loglog(100.*f,x); ax = gca;
+0041       <span class="keyword">case</span> <span class="string">'semilogy'</span>
+0042          h.fdc = semilogy(100.*f,x); ax = gca;
+0043       <span class="keyword">case</span> <span class="string">'semilogx'</span>
+0044          h.fdc = semilogx(100.*f,x); ax = gca;
+0045       <span class="keyword">case</span> <span class="string">'linear'</span>
+0046          h.fdc = plot(100.*f,x); ax = gca;
+0047    <span class="keyword">end</span>
+0048 
+0049    <span class="comment">% if requested, add a refpoint line</span>
+0050    <span class="keyword">if</span> ~isnan(refpoints)
+0051       hold on;
+0052       <span class="keyword">for</span> n = 1:numel(refpoints)
+0053          xplot = [min(xlim) 100*fref(n) 100*fref(n) 100*fref(n)];
+0054          yplot = [xref(n) xref(n) min(ylim) xref(n)];
+0055          h.ref(n) = plot(xplot,yplot,<span class="string">'Color'</span>,[0.85 0.325 0.098],<span class="string">'LineWidth'</span>,1);
+0056       <span class="keyword">end</span>
+0057    <span class="keyword">end</span>
+0058 
+0059    ylabel([<span class="string">'$x$ ['</span> units <span class="string">']'</span>]);
+0060    xlabel <span class="string">'flow exceedence probability, $P(Q\ge x)$'</span>
+0061 
+0062    ax.YAxis.TickLabels = compose(<span class="string">'%g'</span>,ax.YAxis.TickValues);
+0063    ax.XAxis.TickLabels = compose(<span class="string">'$%g\\%%$'</span>,ax.XAxis.TickValues);
+0064 
+0065    <span class="comment">% since i manually set the ticklabels, i think this is necessary</span>
+0066    <span class="comment">% otherwise if the figure is resized, matlab will make new ticks</span>
+0067    set(gca,<span class="string">'XTickMode'</span>,<span class="string">'manual'</span>,<span class="string">'YTickMode'</span>,<span class="string">'manual'</span>);
+0068 
+0069    fdc.h = h;
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="comment">% package output</span>
+0073 fdc.f = f;
+0074 fdc.x = x;
+0075 fdc.xref = xref;
+0076 fdc.fref = fref;
+0077 
+0078 <span class="comment">% function [F,x] = ecdfpot(x,xmin,alpha,sigma)</span>
+0079 <span class="comment">%</span>
+0080 <span class="comment">%    % not implemented</span>
+0081 <span class="comment">%</span>
+0082 <span class="comment">%    % http://sfb649.wiwi.hu-berlin.de/fedc_homepage/xplore/tutorials/sfehtmlnode91.html</span>
+0083 <span class="comment">%</span>
+0084 <span class="comment">%    % peaks over threshold exceedance probability:</span>
+0085 <span class="comment">%    % F(x) = N(u)/n(1+gamma(x-u)/beta)^(-1/gamm),</span>
+0086 <span class="comment">%    % N(u) is the number of obs&gt;u</span>
+0087 <span class="comment">%    % n is totla number, i think</span>
+0088 <span class="comment">%    % x would be tau</span>
+0089 <span class="comment">%    % u would be taumin</span>
+0090 <span class="comment">%    % gamma/beta would be b-1/tau0 i think</span>
+0091 <span class="comment">%    % so 1/gamm would be 1/b-1</span>
+0092 <span class="comment">%</span>
+0093 <span class="comment">%</span>
+0094 <span class="comment">%    N     = numel(x(x&gt;xmin));</span>
+0095 <span class="comment">%    n     = numel(x);</span>
+0096 <span class="comment">%    gamma = b-1; % might be 1-b;</span>
+0097 <span class="comment">%    beta  = tau0;</span>
+0098 <span class="comment">%    F     = N/n.*(1+gamma.*(x-x0)/beta)^(-1/gamm);</span>
+0099</pre></div>
+</body>
+</html>

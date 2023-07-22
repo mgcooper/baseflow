@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of prepfits</title>
+  <meta name="keywords" content="prepfits">
+  <meta name="description" content="PREPFITS preps q and -dq/dt for event-scale fitting">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; prepfits.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>prepfits
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PREPFITS preps q and -dq/dt for event-scale fitting</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PREPFITS preps q and -dq/dt for event-scale fitting
+
+ Syntax
+ 
+  [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
+ 
+ Required inputs
+ 
+     q        =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+     dqdt     =  discharge rate of change (L T^-2)
+
+ Optional name-value inputs
+ 
+     weights  =  nx1 double of weights for the fitting algorithm
+     mask     =  nx1 logical mask to exclude values from fitting
+
+  note: dqdt comes in as its actual value i.e. negative
+
+  See also: <a href="fitab.html" class="code" title="function [Fit,ok] = fitab(q,dqdt,method,varargin)">fitab</a></pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="checkevent.html" class="code" title="function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)">checkevent</a>	CHECKEVENT plot detected recession event and fitted values</li></ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)</a>
+0002 <span class="comment">%PREPFITS preps q and -dq/dt for event-scale fitting</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%  [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Required inputs</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     q        =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)</span>
+0011 <span class="comment">%     dqdt     =  discharge rate of change (L T^-2)</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Optional name-value inputs</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">%     weights  =  nx1 double of weights for the fitting algorithm</span>
+0016 <span class="comment">%     mask     =  nx1 logical mask to exclude values from fitting</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">%  note: dqdt comes in as its actual value i.e. negative</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">%  See also: fitab</span>
+0021 
+0022 <span class="comment">%-------------------------------------------------------------------------------</span>
+0023 p              = inputParser;
+0024 p.FunctionName = <span class="string">'prepfits'</span>;
+0025 
+0026 addRequired(p,    <span class="string">'q'</span>,                           @(x)isnumeric(x)  );
+0027 addRequired(p,    <span class="string">'dqdt'</span>,                        @(x)isnumeric(x)  );
+0028 addParameter(p,   <span class="string">'weights'</span>,  ones(size(q)),    @(x)isnumeric(x)  );
+0029 addParameter(p,   <span class="string">'mask'</span>,     true(size(q)),    @(x)islogical(x)  );
+0030 
+0031 parse(p,q,dqdt,varargin{:});
+0032 
+0033 weights  = p.Results.weights;
+0034 mask     = p.Results.mask;
+0035 
+0036 <span class="comment">%-------------------------------------------------------------------------------</span>
+0037 
+0038 <span class="comment">% take the negative dq/dt values</span>
+0039 ok       = dqdt&lt;0;
+0040 x        = abs(q(ok));
+0041 y        = abs(dqdt(ok));
+0042 weights  = weights(ok);
+0043 mask     = mask(ok);
+0044 
+0045 <span class="comment">% convert the mask to weights</span>
+0046 weights(mask==false) = 0;
+0047 
+0048 logx  = log(x);
+0049 logy  = log(y);
+0050 
+0051 [  x,    <span class="keyword">...</span>
+0052    y,    <span class="keyword">...</span>
+0053    weights ]   = prepareCurveData( x, y, weights );
+0054 
+0055 
+0056 [  logx, <span class="keyword">...</span>
+0057    logy, <span class="keyword">...</span>
+0058    weights ]   = prepareCurveData(logx,logy,weights);
+0059 
+0060 
+0061 success = true;
+0062 <span class="keyword">if</span> numel(y)&lt;4 <span class="comment">% || numnodif &gt;4</span>
+0063    success = false;
+0064 <span class="keyword">end</span>
+0065</pre></div>
+</body>
+</html>

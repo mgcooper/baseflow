@@ -22,28 +22,26 @@ function h = mapgages(lat,lon,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%     NOTE: use geo!
+% NOTE: use geo!
 
 % not sure if this function is deprecated by mapbasins, but I added the
 % parsing from that function in case it's worth keeping this
 
-%-------------------------------------------------------------------------------
-p                = magicParser;
-p.FunctionName   = 'mapgages';
-
-p.addRequired( 'lat',                                 @(x)isnumeric(x)  );
-p.addRequired( 'lon',                                 @(x)isnumeric(x)  );
-p.addParameter('cvar',        nan,                    @(x)isnumeric(x)  );
-p.addParameter('cbartitle',   '',                     @(x)ischar(x)     );
-p.addParameter('latlims',     [50 75],                @(x)isnumeric(x)  );
-p.addParameter('lonlims',     [-168 -60],             @(x)isnumeric(x)  );
-p.addParameter('proj',        'lambert',              @(x)ischar(x)     );
-p.addParameter('useax',       gca,                    @(x)isaxis(x)     );
-
+% --------------- parse inputs
+p = bfra.deps.magicParser;
+p.FunctionName = 'bfra.mapgages';
+p.addRequired( 'lat', @(x)isnumeric(x));
+p.addRequired( 'lon', @(x)isnumeric(x));
+p.addParameter('cvar', nan, @(x)isnumeric(x));
+p.addParameter('cbartitle', '', @(x)ischar(x));
+p.addParameter('latlims', [50 75], @(x)isnumeric(x));
+p.addParameter('lonlims', [-168 -60], @(x)isnumeric(x));
+p.addParameter('projstr', 'lambert', @(x)ischar(x));
+p.addParameter('ax', gca, @(x)bfra.validation.isaxis(x));
 p.parseMagically('caller');
-%-------------------------------------------------------------------------------
 
-% load world borders
+
+% --------------- load world borders
 borders = loadworldborders({'United States','Canada'},'merge');
 
 coastlat = [ borders.Lat ];
@@ -52,16 +50,16 @@ coastlon = [ borders.Lon ];
 h.figure = figure;
 % h.map  = worldmap(latlims,lonlims);
 % h.map  = worldmap('North Pole');
-h.map    = axesm('MapProjection',proj,'MapLatLimit',latlims,'MapLonLimit',lonlims);
-h.coast  = plotm(coastlat,coastlon,'LineWidth',1,'Color','k');
+h.map = axesm('MapProjection',proj,'MapLatLimit',latlims,'MapLonLimit',lonlims);
+h.coast = plotm(coastlat,coastlon,'LineWidth',1,'Color','k');
 hold on;
 
 % % Old method before migrating updates from mapbasins
 % load coastlines.mat coastlat coastlon
 % 
 % figure
-% h.h1  = worldmap(latlims,lonlims);
-% h.h2  = plotm(coastlat,coastlon,'LineWidth',1,'Color','k'); hold on;
+% h.h1 = worldmap(latlims,lonlims);
+% h.h2 = plotm(coastlat,coastlon,'LineWidth',1,'Color','k'); hold on;
 
 if ~isnan(cvar) % shade the circles by the provided variable
    h.gages = scatterm(lat,lon,20,cvar,'filled');
@@ -72,6 +70,6 @@ else
 end
 
 if isfield(h,'cbar')
-   set(get(h.cbar,'title'),'string',cbartitle,           ...
+   set(get(h.cbar,'title'),'string',cbartitle, ...
       'VerticalAlignment','baseline');
 end

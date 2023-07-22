@@ -37,7 +37,7 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 %-------------------------------------------------------------------------------
-p              = inputParser;
+p = inputParser;
 p.StructExpand = false;
 p.FunctionName = 'fitphi';
 
@@ -107,11 +107,11 @@ soln2    = p.Results.soln2;
 %-------------------------------------------------------------------------------
 
 % parse the soln options
-   [solns,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);
+[solns,desc,b2] = parsesolutions(soln1,soln2,b2,isflat);
 
 % solve for phi given the requested solutions
-   numsoln  = numel(solns);
-   phi      = nan(numsoln,1);
+numsoln = numel(solns);
+phi     = nan(numsoln,1);
 
 for m = 1:numsoln
 
@@ -223,7 +223,7 @@ for m = 1:numsoln
 end
 
 
-function [soln,desc,b2]  = parsesolutions(soln1,soln2,b2,isflat);
+function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)
    
 % option to get all solutions
 if strcmp(soln1,'all') && strcmp(soln2,'all')
@@ -269,7 +269,7 @@ if isflat == true
    % if strcmp(soln2,'RS05') && (b2 < 3/2 || b2>=2)
    if strcmp(soln2,'RS05') && (b2 <= 1 || b2>=2)
       warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
-      soln2  = 'BS03';
+      soln2 = 'BS03';
 
    % late-time B04 has b = 3/2
    elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
@@ -286,7 +286,7 @@ else
 
    if strcmp(soln1,'RS05') && (b2 < 3/2 || b2>=2)
       warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
-      soln2  = 'B03';
+      soln2 = 'B03';
 
    elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
       warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
@@ -300,7 +300,7 @@ else
 end
 
 % concatenate the early-time and late-time solution
-soln  = strcat(soln1,['_' soln2]);
+soln = strcat(soln1,['_' soln2]);
 
 switch soln
    case 'PK62_BS04'

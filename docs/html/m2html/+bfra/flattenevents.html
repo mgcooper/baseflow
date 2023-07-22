@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of flattenevents</title>
+  <meta name="keywords" content="flattenevents">
+  <meta name="description" content="FLATTENEVENTS flatten the cell arrays returned by findevents">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; flattenevents.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>flattenevents
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>FLATTENEVENTS flatten the cell arrays returned by findevents</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [t,q,r,tags] = flattenevents(T,Q,R,Info) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">FLATTENEVENTS flatten the cell arrays returned by findevents
+ 
+ Syntax
+ 
+     [t,q,r,tags] = flattenevents(T,Q,R,Info)
+ 
+ Description
+ 
+     [t,q,r,tags] = flattenevents(T,Q,R,Info) returns lists of time, t,
+     discharge, q, rainfall, r, and event-tags, tags from input cell arrays
+     T,Q,R output from bfra.eventfinder
+ 
+ Required inputs
+ 
+     T, Q, R : lists of time, streamflow, and rainfall 
+     t, q, r : cell arrays of events
+ 
+ See also <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, findevents
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [t,q,r,tags] = flattenevents(T,Q,R,Info)</a>
+0002 <span class="comment">%FLATTENEVENTS flatten the cell arrays returned by findevents</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Syntax</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%     [t,q,r,tags] = flattenevents(T,Q,R,Info)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Description</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">%     [t,q,r,tags] = flattenevents(T,Q,R,Info) returns lists of time, t,</span>
+0011 <span class="comment">%     discharge, q, rainfall, r, and event-tags, tags from input cell arrays</span>
+0012 <span class="comment">%     T,Q,R output from bfra.eventfinder</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Required inputs</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">%     T, Q, R : lists of time, streamflow, and rainfall</span>
+0017 <span class="comment">%     t, q, r : cell arrays of events</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% See also getevents, findevents</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0022 
+0023 <span class="comment">% if called with no input, open this file</span>
+0024 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0025 
+0026       
+0027 <span class="comment">% initialize output structure and output arrays</span>
+0028 nEvents  = numel(Info.istart);
+0029 nData    = Info.datalength;
+0030 q        = nan(nData,1);
+0031 r        = nan(nData,1);
+0032 t        = NaT(nData,1,<span class="string">'Format'</span>,<span class="string">'dd-MMM-uuuu HH:mm:ss'</span>);
+0033 tags     = nan(nData,1);
+0034 
+0035 eventCount = 0;                      <span class="comment">% initialize event counter</span>
+0036 
+0037 <span class="keyword">for</span> thisEvent = 1:nEvents
+0038 
+0039    eventQ = Q{thisEvent};
+0040    eventT = T{thisEvent};
+0041    eventR = R{thisEvent};
+0042 
+0043    <span class="comment">% if no flow was returned, continue</span>
+0044    <span class="keyword">if</span> all(isnan(eventQ)); <span class="keyword">continue</span>; <span class="keyword">else</span>
+0045       eventCount = eventCount+1;
+0046    <span class="keyword">end</span>
+0047 
+0048    <span class="comment">% get the start/end index on the year calendar</span>
+0049    si = Info.istart(thisEvent);
+0050    ei = Info.istop(thisEvent);
+0051 
+0052    <span class="comment">% collect all data for the point-cloud</span>
+0053    q(si:ei) = eventQ;
+0054    r(si:ei) = eventR;
+0055    t(si:ei) = eventT;   <span class="comment">% datenum(eventT);</span>
+0056    tags(si:ei) = eventCount; 
+0057 <span class="keyword">end</span>
+0058</pre></div>
+</body>
+</html>

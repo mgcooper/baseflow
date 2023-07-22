@@ -39,12 +39,12 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 p              = inputParser;
 p.FunctionName = 'bfra.baseflowtrend';
 
-addRequired(   p,    't',                 @(x)isdatetime(x)|isnumeric(x)   );
-addRequired(   p,    'Q',                 @(x)isnumericvector(x)           );
-addRequired(   p,    'A',                 @(x)isnumericscalar(x)           );
-addParameter(  p,    'method',   'ols',   @(x)ischar(x)                    );
-addParameter(  p,    'pctl',     0.25,    @(x)isnumeric(x)                 );
-addParameter(  p,    'showfig',  false,   @(x)islogical(x)                 );
+addRequired(   p,    't',                 @(x)bfra.validation.isdatelike(x));
+addRequired(   p,    'Q',                 @(x)bfra.validation.isnumericvector(x));
+addRequired(   p,    'A',                 @(x)bfra.validation.isnumericscalar(x));
+addParameter(  p,    'method',   'ols',   @(x)bfra.validation.ischarlike(x));
+addParameter(  p,    'pctl',     0.25,    @(x)bfra.validation.isnumericscalar(x));
+addParameter(  p,    'showfig',  false,   @(x)bfra.validation.islogicalscalar(x));
 
 parse(p,t,Q,A,varargin{:});
 
@@ -54,8 +54,9 @@ showfig  = p.Results.showfig;
 
 %-------------------------------------------------------------------------------
 
-[Q,t] = padtimeseries(Q,t,datenum(year(t(1)),1,1),datenum(year(t(end)),12,31),1);
-[Q,t] = rmleapinds(Q,t);
+[Q,t] = bfra.util.padtimeseries(Q,t,datenum(year(t(1)),1,1), ...
+   datenum(year(t(end)),12,31),1);
+[Q,t] = bfra.util.rmleapinds(Q,t);
 
 % convert the flow from m3/d posted daily to cm/d posted annually
 if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end
@@ -63,13 +64,13 @@ t = transpose(year(mean(reshape(t,365,numel(t)/365))));
 Qa = transpose(mean(reshape(Q,365,numel(Q)/365),'omitnan')).*(100/A);
 
 % regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually
-ha  = trendplot(t,Qa,'anom',false,'units','cm/d/y',             ...
-            'title','mean flow','leg','mean flow regression',        ...
-            'showfig',showfig,'method',method);
-hb  = trendplot(t,Qa,'anom',false,'units','cm/d/y','quan',      ...
-            pctl,'title','baseflow','leg','baseflow regression',    ...
-            'showfig',showfig,'alpha',0.05);
-dQadt    = ha.trend.YData(:);  % mean flow trend         
-dQbdt    = hb.trend.YData(:);  % baseflow trend     
-Qb       = Qa-(dQadt-dQbdt);         % baseflow timeseries, cm/day  
+ha = bfra.trendplot(t,Qa,'anom',false,'units','cm/d/y', ...
+   'title','mean flow','leg','mean flow regression','showfig', ...
+   showfig,'method',method);
+hb = bfra.trendplot(t,Qa,'anom',false,'units','cm/d/y','quan', ...
+   pctl,'title','baseflow','leg','baseflow regression',...
+   'showfig',showfig,'alpha',0.05);
+dQadt = ha.trend.YData(:);  % mean flow trend         
+dQbdt = hb.trend.YData(:);  % baseflow trend     
+Qb = Qa-(dQadt-dQbdt);         % baseflow timeseries, cm/day  
    

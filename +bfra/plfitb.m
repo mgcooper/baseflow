@@ -17,7 +17,7 @@ function varargout = plfitb(x,varargin)
 % 
 %     x        data believed to follow an untruncated Pareto distribution
 %
-% Optional inputs
+% Optional name-value inputs
 % 
 %     xmin     scalar double indicating the lower bound of the distribution
 %     range    the range of scaling parameters considered (see plfit.m)
@@ -59,24 +59,25 @@ nreps    = p.Results.nreps;
 plotfit  = p.Results.plotfit;
 
 %-------------------------------------------------------------------------------
-x0    = x;
-[x,~] = prepareCurveData(x,x);
-x     = x(x>0);
+x0 = x;
+[x,~] = bfra.util.prepCurveData(x,x);
+x = x(x>0);
 if isnan(xmin)
    switch method
       case 'clauset'
-         [alpha,xmin,L,D] = plfit(x,'range',range,'limit',limit,'plotdiag');
+         [alpha,xmin,L,D] = bfra.deps.plfit(x,'range',range,'limit',limit);
          if bootfit == true
             BootFit = plbootfit(x,range,limit,nreps);
          end
+      % undocumented feature, requires r_plfit function, not included in toolbox
       case 'hanel'
-         [~,xmin]          = plfit(x,'range',range,'limit',limit);
-         [alpha,xmin,L,D]  = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
+         [~,xmin] = bfra.deps.plfit(x,'range',range,'limit',limit);
+         [alpha,xmin,L,D] = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
             range(1),'alpha_max',range(end));
          % if I had some max value to consider, I could pass 'rangemax'
    end
 else
-   [alpha,~,L,D] = plfit(x,'xmin',xmin,'range',range,'limit',limit);
+   [alpha,~,L,D] = bfra.deps.plfit(x,'xmin',xmin,'range',range,'limit',limit);
 end
 
 Fit.x       = x0; % keep the input data
@@ -121,8 +122,11 @@ if plotfit == true
    xmin = Fit.tau0;
    aci = [Fit.alpha_H Fit.alpha_L];
    xci = [Fit.tau0_L Fit.tau0_H];
-   figure; bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
-   snapnow;
+   % for publishing:
+   % figure('Position',[0 0 300 200]); ax = gca;
+   figure; ax = gca;
+   bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci,'ax',ax);
+   % snapnow;
 end
 
 switch nargout
@@ -145,8 +149,8 @@ end
 % bootstrap confidence intervals
 function Fit = plbootfit(x,range,limit,nreps)
 
-%[alpha,xmin,L,D] = plfit(x,'range',range,'limit',limit);
-[~,~,~,repsmat] = plvar(x,'range',range,'limit',limit,'reps',nreps,'silent');
+%[alpha,xmin,L,D] = bfra.deps.plfit(x,'range',range,'limit',limit);
+[~,~,~,repsmat] = bfra.deps.plvar(x,'range',range,'limit',limit,'reps',nreps,'silent');
 
 vars        = {'tau0','alpha','b','tau','ntail'};
 reps.ntail  = repsmat(:,1);
@@ -169,20 +173,20 @@ Fit.reps = reps;
 
 % As a rough check on the sampling distribution of the parameter
 % estimators, we can look at histograms of the bootstrap replicates.
-figure; subplot(1,3,1);
-histogram(reps.b);
-title('Bootstrap estimates of $b$');
-subplot(1,3,2);
-histogram(reps.tau0);
-title('Bootstrap estimates of $\tau_0$');
-subplot(1,3,3);
-histogram(reps.alpha);
-title('Bootstrap estimates of $\alpha$');
+% figure; subplot(1,3,1);
+% histogram(reps.b);
+% title('Bootstrap estimates of $b$');
+% subplot(1,3,2);
+% histogram(reps.tau0);
+% title('Bootstrap estimates of $\tau_0$');
+% subplot(1,3,3);
+% histogram(reps.alpha);
+% title('Bootstrap estimates of $\alpha$');
 
 %    % it is incorrect to apply the standard formula so don't use this
 %    for n = 1:numel(vars)
 %       var = vars{n};
-%       [SE,CI,~,mu,sig] = stderr(reps.(var));
+%       [SE,CI,~,mu,sig] = bfra.util.stderror(reps.(var));
 %       Fit.([var '_avg']) = mu;
 %       Fit.([var '_L']) = CI(1);
 %       Fit.([var '_H']) = CI(2);
@@ -196,7 +200,7 @@ title('Bootstrap estimates of $\alpha$');
 % function Fit = bootstrap_alpha(x,range,limit)
 %
 %    % first get xmin, bootstrap won't change this
-%    [~,xmin] = plfit(x,'range',range,'limit',limit);
+%    [~,xmin] = bfra.deps.plfit(x,'range',range,'limit',limit);
 %
 %    % now bootstrap alpha
 %    reps  = bootstrp(1000,@(x,xmin)plfit(x,'xmin',xmin),x,xmin);

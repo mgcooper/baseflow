@@ -1,23 +1,22 @@
 function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
-%PLOTDQDT Plots the log-log q vs dq/dt with options to select the
-%portion of data to fit and then fits the data
-% 
-%  Syntax
-% 
+%PLOTDQDT Plot the log-log q vs dq/dt point-cloud
+%
+% Syntax
+%
 %     [hFits,Picks,Fits] = bfra.plotdqdt(q,dqdt)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'fitmethod',fitmethod)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'pickmethod',pickmethod)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'weights',weights)
 %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)
-% 
-%  Required inputs
-% 
+%
+% Required inputs
+%
 %     q     =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
 %     dqdt  =  discharge rate of change (L T^-2)
-% 
-%  Optional name-value pairs:
-% 
-% 
+%
+% Optional name-value inputs
+%
+%
 %  See also getdqdt, fitdqdt
 
 % NOTE: now that pickFitter calls bfra.fitab, this function does everything
@@ -27,48 +26,28 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 % NOTE: rain is optional b/c at this point, events are picked
 
 % NOTE: this is only called from getdqdt, and only if 'pickmethod' is something
-% other than 'none'. 
+% other than 'none'.
 
-%-------------------------------------------------------------------------------  
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+%-------------------------------------------------------------------------------
 % input parser
-p               = magicParser;
-p.FunctionName  = 'plotdqdt';
+p = bfra.deps.magicParser;
+p.FunctionName  = 'bfra.plotdqdt';
 p.CaseSensitive = false;
 
-validq         = @(x)validateattributes(x,{'numeric'},               ...
-                  {'real','column','size',size(dqdt)},            ...
-                  'plotdqdt','q',1);
-validqdt       = @(x)validateattributes(x,{'numeric'},               ...
-                  {'real','column','size',size(q)},               ...
-                  'plotdqdt','dqdt',2);
-validfitmethod = @(x)validateattributes(x,{'char','string'},         ...
-                  {'scalartext'},                                 ...
-                  'plotdqdt','fitmethod');
-validpickmethod= @(x)validateattributes(x,{'char','string'},         ...
-                  {'scalartext'},                                 ...
-                  'plotdqdt','pickmethod');
-validplotopt   = @(x)validateattributes(x,{'logical','scalar'},      ...
-                  {'nonempty'},                                   ...
-                  'plotdqdt','plotfits');
-validweights   = @(x)validateattributes(x,{'numeric'},               ...
-                  {'real','column','size',size(q)},               ...
-                  'plotdqdt','weights');
-validax        = @(x)validateattributes(x,                           ...
-                  {'matlab.graphics.axis.Axes','char'},           ...
-                  { 'scalar' },     ...
-                  'bfra.plotdqdt','ax');
-validtimestep  = @(x)validateattributes(x,{'numeric','duration'},    ...
-                  {'nonempty'},                                   ...
-                  'plotdqdt','timestep');
-validprecision = @(x)validateattributes(x,{'numeric'},               ...
-                  {'nonempty'},                                   ...
-                  'plotdqdt','precision');                     
-validblate     = @(x)validateattributes(x,{'numeric'},               ...
-                  {'real','scalar'},                              ...
-                  'plotdqdt','blate');
-validrain      = @(x)validateattributes(x,{'numeric'},               ...
-                  {'real','column','size',size(dqdt)},            ...
-                  'plotdqdt','rain');
+validq = @(x)validateattributes(x, {'numeric'},{'real','column','size',size(dqdt)}, mfilename, 'q', 1);
+validqdt = @(x)validateattributes(x, {'numeric'},{'real','column','size',size(q)}, mfilename, 'dqdt', 2);
+validfitmethod = @(x)validateattributes(x,{'char','string'},{'scalartext'},mfilename,'fitmethod');
+validpickmethod= @(x)validateattributes(x,{'char','string'},{'scalartext'},mfilename,'pickmethod');
+validplotopt = @(x)validateattributes(x,{'logical','scalar'},{'nonempty'},mfilename,'plotfits');
+validweights = @(x)validateattributes(x,{'numeric'},{'real','column','size',size(q)},mfilename,'weights');
+validax = @(x)validateattributes(x,{'matlab.graphics.axis.Axes','char'},{'scalar'},mfilename,'ax');
+validtimestep = @(x)validateattributes(x,{'numeric','duration'},{'nonempty'},mfilename,'timestep');
+validprecision = @(x)validateattributes(x,{'numeric'},{'nonempty'},mfilename,'precision');
+validblate = @(x)validateattributes(x,{'numeric'},{'real','scalar'},mfilename,'blate');
+validrain = @(x)validateattributes(x,{'numeric'},{'real','column','size',size(dqdt)},mfilename,'rain');
 
 p.addRequired(   'q',                           validq            );
 p.addRequired(   'dqdt',                        validqdt          );
@@ -105,24 +84,24 @@ end
 Picks = fitSelector(logx,logy,weights,pickmethod,rain);
 
 % Fit picks
-Fits  = pickFitter(Picks,fitmethod);
+Fits = pickFitter(Picks,fitmethod);
 
 % plot the fits
 hFits = plotFits(Fits,Picks,fitmethod,ax,plotfits,         ...
-                  showfig,blate,timestep,precision,labelplot);
+   showfig,blate,timestep,precision,labelplot);
 
 % INITIALIZE OUTPUT
 function [hFits,Fits,Picks] = initOutput()
 
 % initialize output
 Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
-Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan; 
+Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
 Picks.nPicks = nan; hFits = nan;
 
 
 % SELECT FITS
 
-function Picks  = fitSelector(q,dqdt,weights,pickmethod,rain)
+function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)
 
 switch pickmethod
 
@@ -134,14 +113,13 @@ switch pickmethod
    case 'auto'       % auto detect transition between early/late time
 
       % if called w/o output, it will generate a figure
-      chgpts   = findchangepts(dqdt,   'MaxNumChanges',  2,          ...
-                                       'Statistic',      'linear',   ...
-                                       'MinDistance',    2           );
-      nPicks   = numel(chgpts);
+      chgpts = findchangepts(dqdt, 'MaxNumChanges', 2,'Statistic', ...
+         'linear', 'MinDistance', 2 );
+      nPicks = numel(chgpts);
 
       % get the segment start/ends
       istart   = [ 1;                chgpts(1:nPicks) ];
-      istop    = [ chgpts(1:nPicks); numel(q);        ]; 
+      istop    = [ chgpts(1:nPicks); numel(q);        ];
 
       % exclude segments <4. these are always included in the event fit
       rlengths = istop-istart+1;
@@ -153,29 +131,29 @@ switch pickmethod
 
       % pause helps with buggy ginput
       pickFig     = eventPlotter(q,dqdt); pause(0.5);
-      pickedPts   = ginputc();            pause(0.5);
+      pickedPts   = bfra.deps.ginputc(); pause(0.5);
       startPts    = pickedPts(1:2:end);
       endPts      = pickedPts(2:2:end);
 
       close(pickFig);
 
       % for manual, need to find the indices
-      istart      = nan(size(startPts));
-      istop       = nan(size(startPts));
+      istart = nan(size(startPts));
+      istop  = nan(size(startPts));
 
       for n = 1:numel(startPts)
-         difStart    = abs(q-startPts(n));
-         difStop     = abs(q-endPts(n));
-         istart(n)   = findmin(difStart,1,'first');
-         istop(n)    = findmin(difStop,1,'first');
+         difStart = abs(q-startPts(n));
+         difStop = abs(q-endPts(n));
+         istart(n) = bfra.util.findmin(difStart,1,'first');
+         istop(n) = bfra.util.findmin(difStop,1,'first');
       end
 
 end
 
 % add the full-event to the start/stop indices
-istart      = [istart; 1];
-istop       = [istop; numel(q)];
-nPicks      = numel(istart);
+istart = [istart; 1];
+istop  = [istop; numel(q)];
+nPicks = numel(istart);
 
 if pickmethod ~= "none"
    fprintf('%.f picks identified +event = %.f\n',nPicks-1,nPicks)
@@ -238,7 +216,7 @@ Fits.nFits  = Picks.nPicks;
 % PLOT FITS
 
 function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
-                     showfig,blate,timestep,precision,labelplot)
+   showfig,blate,timestep,precision,labelplot)
 
 if plotfits == true
    if showfig == true
@@ -246,12 +224,12 @@ if plotfits == true
       if strcmp(ax,'none')
          % changed this to make a figure instead
          %ax = gca;
-         macfig('size','large');
+         figure('Position',[1 1 658  576]);
          ax = gca;
       end % else, useax was passed in
 
    else
-      macfig('size','large','visible','off');
+      figure('Position',[1 1 658  576],'visible','off');
       ax = gca;
    end
    h.ax = ax;
@@ -260,61 +238,62 @@ else
 end
 
 
-c  =  [  0        0.447    0.741;
-         0.85     0.325    0.098;
-         0.929    0.694    0.125;
-         0.494    0.184    0.556;
-         0.466    0.674    0.188;
-         0.301    0.745    0.933;
-         0.635    0.078    0.184  ];
+c  =  [  
+   0        0.447    0.741;
+   0.85     0.325    0.098;
+   0.929    0.694    0.125;
+   0.494    0.184    0.556;
+   0.466    0.674    0.188;
+   0.301    0.745    0.933;
+   0.635    0.078    0.184  ];
 
 
-nFits       = Fits.nFits;
-nPlots      = max(nFits,1); % max(nFits-1,1);
-ltext       = repmat({''},nPlots,1);
+nFits = Fits.nFits;
+nPlot = max(nFits,1); % max(nFits-1,1);
+ltext = repmat({''},nPlot,1);
 
 % this converts the entire event back to linear space
-x           = exp(Picks.Q{end});
-y           = exp(Picks.dQdt{end});
-rain        =     Picks.Rain{end};
+x = exp(Picks.Q{end});
+y = exp(Picks.dQdt{end});
+rain = Picks.Rain{end};
 hold on;
 
 % plot the entire event and get ax lims before setting log scale
-h.scatter   = plot(h.ax,x,y,'o', 'MarkerSize',        8,             ...
-                                 'MarkerFaceColor',   c(1,:),        ...
-                                 'MarkerEdgeColor',   'none'         );
+h.scatter = plot(h.ax,x,y,'o',   'MarkerSize',          8,     ...
+                                 'MarkerFaceColor',   c(1,:),  ...
+                                 'MarkerEdgeColor',   'none'   );
 
-for n = 1:nPlots
+for n = 1:nPlot
 
    % 'comp' not implemented, this is a template
-   if strcmp(fitmethod,'comp') 
-      abnls       = Fits.abnls(n,:);
-      xplot       = Fits.xplot(n,:);
-      yplot       = abnls(1).*xplot.^abnls(2);
+   if strcmp(fitmethod,'comp')
+      abnls = Fits.abnls(n,:);
+      xplot = Fits.xplot(n,:);
+      yplot = abnls(1).*xplot.^abnls(2);
 
-      h.plots{n}  = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
-      ltext{n}    = bfra.aQbString(abnls,'printvalues',true);
+      h.plots{n} = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
+      ltext{n} = bfra.aQbString(abnls,'printvalues',true);
 
    else
-%          if Fits.ab(n,2)<0; continue; end
-      xplot       = Fits.xplot(n,:);
-      yplot       = Fits.yplot(n,:);
-      if nPlots == 1
+      % if Fits.ab(n,2)<0; continue; end
+      xplot = Fits.xplot(n,:);
+      yplot = Fits.yplot(n,:);
+      if nPlot == 1
          % if only one plot, use black dots
-         h.plots{n}  = plot(h.ax,xplot,yplot,':','Color','k');
+         h.plots{n} = plot(h.ax,xplot,yplot,':','Color','k');
       else
          % otherwise cycle through the colors
-         h.plots{n}  = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
+         h.plots{n} = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
       end
-      ltext{n}    = bfra.aQbString(Fits.ab(n,:),'printvalues',true);
+      ltext{n} = bfra.aQbString(Fits.ab(n,:),'printvalues',true);
    end
 end
 
 % remove empty legend text
-ltext    = ltext(~ismember(ltext,''));
+ltext = ltext(~ismember(ltext,''));
 
 % % I moved this up so the lines plot on top, might have wanted it here for
-% the case where we plot multiple events 
+% the case where we plot multiple events
 %    % plot the entire event and get ax lims before setting log scale
 %    h.scatter   = plot(h.ax,x,y,'o', 'MarkerSize',        8,             ...
 %                                     'MarkerFaceColor',   c(1,:),        ...
@@ -334,85 +313,94 @@ ylabel(bfra.strings('dQdt','units',true));
 xlimkeep = get(gca,'XLim');
 ylimkeep = get(gca,'YLim');
 
-% % no longer used, 'earlytime' and 'latetime' reflines instead   
+% % no longer used, 'earlytime' and 'latetime' reflines instead
 %    if isnan(refpoints)
 %       refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl
 %    end
 
-[hUpper,abUpper]  = bfra.plotrefline(x,y, 'refline',  'upperenvelope',  ...
-                                          'timestep', timestep             );
-[hLower,abLower]  = bfra.plotrefline(x,y, 'refline',  'lowerenvelope',  ...
-                                          'precision',precision            );
-[hLate,abLate]    = bfra.plotrefline(x,y, 'refline',  'latetime',       ...
-                                          'refslope', blate                );
-[hEarly,abEarly]  = bfra.plotrefline(x,y, 'refline',  'earlytime'          );
+[hUpper,abUpper] = bfra.plotrefline(x,y, ...
+   'refline',  'upperenvelope',  ...
+   'timestep', timestep );
+
+[hLower,abLower]  = bfra.plotrefline(x,y, ...
+   'refline',  'lowerenvelope',  ...
+   'precision',precision );
+
+[hLate,abLate] = bfra.plotrefline(x,y, ...
+   'refline', 'latetime', ...
+   'refslope', blate );
+
+[hEarly,abEarly] = bfra.plotrefline(x,y, ...
+   'refline', 'earlytime' );
 
 % add the ref-point a/b values
-h.aEarly    = abEarly(1);
-h.bEarly    = abEarly(2);
-h.aLate     = abLate(1);
-h.bLate     = abLate(2);
+h.aEarly = abEarly(1);
+h.bEarly = abEarly(2);
+h.aLate  = abLate(1);
+h.bLate  = abLate(2);
 
 % make the ylimits span the minimum dq/dt to the upper envelope at max Q
 if timestep >= 1
-   ylowlim     = min(0.8*abLower(1),min(ylimkeep));
-   yupplim     = abUpper(1)*max(xlimkeep)^abUpper(2);
+   ylowlim = min(0.8*abLower(1),min(ylimkeep));
+   yupplim = abUpper(1)*max(xlimkeep)^abUpper(2);
 
    set(gca,'YLim',[ylowlim yupplim]);
 end
 
-h        = plotrain(h,rain,x,y);
+h = plotrain(h,rain,x,y);
 
 % I added this so rain is in the legend
-if isfield(h,'hrain') && isaxis(h.hrain)
-   ltext    = [ltext 'rain'];
-   h.leg    = legend(   [h.plots{:} h.hrain(1)],ltext,               ...
-                           'Location','best','Interpreter','latex',  ...
-                           'FontSize',11,'AutoUpdate','off');
+if isfield(h,'hrain') && bfra.validation.isaxis(h.hrain)
+   ltext = [ltext 'rain'];
+   h.leg = legend( [h.plots{:} h.hrain(1)],ltext, ...
+      'Location','best','Interpreter','latex', ...
+      'FontSize',11,'AutoUpdate','off');
 else
-   h.leg    = legend(   [h.plots{:} hUpper],ltext,                   ...
-                           'Location','best','Interpreter','latex',  ...
-                           'FontSize',11,'AutoUpdate','off');
+   h.leg = legend( [h.plots{:} hUpper],ltext, ...
+      'Location','best','Interpreter','latex', ...
+      'FontSize',11,'AutoUpdate','off');
 end
 
-%    ff    = figformat('labelinterpreter','latex','linelinewidth',2,   ...
-%                      'suppliedline',h.plots{1},'legendlocation',     ...
-%                      'northwest'); 
-%    h.ff  = ff;
+% ff = figformat('labelinterpreter','latex','linelinewidth',2,   ...
+%    'suppliedline',h.plots{1},'legendlocation',     ...
+%    'northwest');
+% h.ff = ff;
 
 grid off;
 
-%    fprintf('%.f picks selected to plot\n',numel(ltext))
+% fprintf('%.f picks selected to plot\n',numel(ltext))
 
 if labelplot == true
    addlabels(h)
 end
-   
-   
-%    axpos    = plotboxpos(gca);    % only works with correct axes position
-%    xtxt     = exp(mean(log(xlimkeep)));
-%    addRotatedText(4*xtxt,axb(aEarly,4*xtxt,bEarly),'b=3',bEarly,axpos);
-%    addRotatedText(2*xtxt,axb(aLate,2*xtxt,bLate),'b=1',1.5,axpos);
-%    addRotatedText(1*xtxt,axb(aMax,1*xtxt,bMax),'upper envelope',1.5,axpos);
+
+
+% axpos = bfra.deps.plotboxpos(gca); % only works with correct axes position
+% xtext = exp(mean(log(xlimkeep)));
+% addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);
+% addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);
+% addRotatedText(1*xtext,axb(aMax,1*xtext,bMax),'upper envelope',1.5,axpos);
 
 
 
 function addlabels(h)
 
-ya       = 50;
-xa       = (ya/h.aLate)^(1/h.bLate);
-xa       = [xa xa*3];
-ya       = [ya ya];
-ta       = sprintf('$b=%.2f$ ($\\hat{b}$)',h.bLate);
+ya = 50;
+xa = (ya/h.aLate)^(1/h.bLate);
+xa = [xa xa*3];
+ya = [ya ya];
+ta = sprintf('$b=%.2f$ ($\\hat{b}$)',h.bLate);
 
-arrow([xa(2),ya(2)],[xa(1),ya(1)],'BaseAngle',90,'Length',8,'TipAngle',10)
+bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
+   'BaseAngle',90,'Length',8,'TipAngle',10)
 text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
 
-xa       = (ya(1)/h.aEarly)^(1/h.bEarly);
-xa       = [xa xa*3];
-ta       = sprintf('$b=%.0f$',h.bEarly);
+xa = (ya(1)/h.aEarly)^(1/h.bEarly);
+xa = [xa xa*3];
+ta = sprintf('$b=%.0f$',h.bEarly);
 
-arrow([xa(2),ya(2)],[xa(1),ya(1)],'BaseAngle',90,'Length',8,'TipAngle',10)
+bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
+   'BaseAngle',90,'Length',8,'TipAngle',10)
 text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
 
 
@@ -420,7 +408,7 @@ text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
 function h = plotrain(h,rain,x,y)
 
 % add rain. scale the circles such that 1 mm of rain equals the size of
-% the plotted circles 
+% the plotted circles
 if sum(rain)==0
 
    h.hrain = nan;
@@ -428,18 +416,18 @@ if sum(rain)==0
 else
 
    % scatter is producing pixelated symbols so I use plot instead
-  %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
-  %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
+   %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
+   %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
 
-  % this mimics the way scatter scales the circles
-   sz    = h.scatter.MarkerSize + sqrt(pi.*(rain(rain>0)).^2);
-   x     = x(rain>0);
-   y     = y(rain>0);
+   % this mimics the way scatter scales the circles
+   s = h.scatter.MarkerSize + sqrt(pi.*(rain(rain>0)).^2);
+   x = x(rain>0);
+   y = y(rain>0);
 
    hold on;
-   for n = 1:numel(sz)
-      h.hrain(n) = plot(x(n),y(n),'o','MarkerSize',sz(n), ...
-                  'MarkerFaceColor','none','Color','m','LineWidth',1);
+   for n = 1:numel(s)
+      h.hrain(n) = plot(x(n),y(n),'o','MarkerSize',s(n), ...
+         'MarkerFaceColor','none','Color','m','LineWidth',1);
    end
 end
 
@@ -449,19 +437,19 @@ end
 function addRotatedText(xtxt,ytxt,txt,slope,axpos)
 
 % https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib
-   
-% to add text, need the slope in figure space
-xlims    = xlim;
-ylims    = ylim;
-xfactor  = axpos(1)/(log(xlims(2))-log(xlims(1)));
-yfactor  = axpos(2)/(log(ylims(2))-log(ylims(1)));   % slope adjustment
-atxt     = slope*atand(yfactor/xfactor);           % adjust angle
 
-text(  xtxt,ytxt,txt,                   ...
-      'HorizontalAlignment','center',     ...
-      'VerticalAlignment', 'bottom',      ...
-      'FontSize',12,                      ...
-      'rotation',atxt);
+% to add text, need the slope in figure space
+xlims = xlim;
+ylims = ylim;
+xfact = axpos(1)/(log(xlims(2))-log(xlims(1)));
+yfact = axpos(2)/(log(ylims(2))-log(ylims(1)));   % slope adjustment
+atext = slope*atand(yfact/xfact);           % adjust angle
+
+text( xtxt,ytxt,txt,                   ...
+   'HorizontalAlignment','center',     ...
+   'VerticalAlignment', 'bottom',      ...
+   'FontSize',12,                      ...
+   'rotation',atext);
 
 
 % PLOT EVENT
@@ -469,8 +457,8 @@ function pickFig = eventPlotter(q,dqdt)
 
 pickFig = figure;
 
-myscatter(q,dqdt);
-   
+scatter(q,dqdt,36,[0,0.447,0.741],'filled');
+
 
 
 % DETECT TRANSITION
@@ -480,27 +468,27 @@ nPicks   = numel(istart);
 rlengths = istop-istart+1;
 
 if nPicks == 3
-  % if rlengths(1)>rlengths(2) && rlengths(3)>rlengths(2)
+   % if rlengths(1)>rlengths(2) && rlengths(3)>rlengths(2)
 
-      q1    = q(istart(1):istop(1));
-      q2    = q(istart(2):istop(2));
-      q3    = q(istart(3):istop(3));
-      dq1   = dqdt(istart(1):istop(1));
-      dq2   = dqdt(istart(2):istop(2));
-      dq3   = dqdt(istart(3):istop(3));
-      ab1   = bfra.wols(log(q1),log(-dq1));
-      ab2   = bfra.wols(log(q2),log(-dq2));
-      ab3   = bfra.wols(log(q3),log(-dq3));
+   q1    = q(istart(1):istop(1));
+   q2    = q(istart(2):istop(2));
+   q3    = q(istart(3):istop(3));
+   dq1   = dqdt(istart(1):istop(1));
+   dq2   = dqdt(istart(2):istop(2));
+   dq3   = dqdt(istart(3):istop(3));
+   ab1   = bfra.wols(log(q1),log(-dq1));
+   ab2   = bfra.wols(log(q2),log(-dq2));
+   ab3   = bfra.wols(log(q3),log(-dq3));
 
-      % three cases we want to :
-      % 1: a flat period between two recessions
-      % 2: a flat period followed by another one then a recession
-      % 2: a recession followed by two flat periods
+   % three cases we want to :
+   % 1: a flat period between two recessions
+   % 2: a flat period followed by another one then a recession
+   % 2: a recession followed by two flat periods
 
-      if ab1(2)>1 && ab2(2)<1 && ab3(2)>1
-         istart(2)   = [];
-         istop(2)    = [];
-      end
+   if ab1(2)>1 && ab2(2)<1 && ab3(2)>1
+      istart(2)   = [];
+      istop(2)    = [];
+   end
 
    %end
 end

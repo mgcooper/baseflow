@@ -1,6 +1,6 @@
 function repline(filename,str_find,str_repl,varargin)
 
-opts = optionParser('appendblanks',varargin(:));
+opts = bfra.util.optionParser('appendblanks',varargin(:));
 
 fid = fopen(filename,'r');        % Open File to read
 n = 1;
@@ -8,7 +8,7 @@ newlines = {[]};
 while true
    thisline = fgetl(fid);
    if ~ischar(thisline); break; end  % end of file
-   if contains(thisline,str_find)
+   if ismember(thisline,str_find)
       
       newlines{n} = thisline;
       
@@ -38,8 +38,8 @@ while true
          newlines{n} = '';
 
          % if the line wasn't blank, or was a tab, insert it after the blank
-         if notempty(checkline) && notequal(checkline,sprintf('\t')) && ...
-               notequal(checkline,'   ')
+         if ~all(isempty(checkline)) && ~isequal(checkline,sprintf('\t')) && ...
+               ~isequal(checkline,'   ')
             n = n+1;
             newlines{n} = checkline;
          end

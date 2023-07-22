@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of Qnonlin</title>
+  <meta name="keywords" content="Qnonlin">
+  <meta name="description" content="QNONLIN plots the theoretical discharge predicted by a/b values">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; Qnonlin.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>Qnonlin
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>QNONLIN plots the theoretical discharge predicted by a/b values</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">QNONLIN plots the theoretical discharge predicted by a/b values
+ 
+ 
+ 
+ 
+ See also <a href="taufunc.html" class="code" title="function [taufunc,tau] = taufunc(a,b,Q)">taufunc</a>, <a href="getfunction.html" class="code" title="function Fnc = getfunction(funcname)">getfunction</a>, <a href="QtauString.html" class="code" title="function [Qtaustr,aQbstr] = QtauString(varargin)">QtauString</a>, <a href="QtString.html" class="code" title="function [Qtstr,aQbstr] = QtString(varargin)">QtString</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)</a>
+0002 <span class="comment">%QNONLIN plots the theoretical discharge predicted by a/b values</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% See also taufunc, getfunction, QtauString, QtString</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0010 
+0011 <span class="comment">% if called with no input, open this file</span>
+0012 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0013 
+0014 
+0015 <span class="comment">% the loop is ugly but it's the easiest way to allow any size a,b,Q0.</span>
+0016 <span class="comment">% if I wanted to restrict two of the three a,b,Q0 to be scalar and let</span>
+0017 <span class="comment">% a third be a vector, I could check that the vector valued quantity</span>
+0018 <span class="comment">% and t have the right orientation for matrix multiplication</span>
+0019 
+0020 plotFig = false;
+0021 hFig    = [];
+0022 <span class="keyword">if</span> nargin==5
+0023    plotFig = varargin{1};
+0024 <span class="keyword">end</span>
+0025 
+0026 <span class="comment">% This lets a scalar t or a vector t to be passed in. In both cases t is</span>
+0027 <span class="comment">% time elapsed since t=0, so to recover Q0 and dqdt0 we set t(1) = 0</span>
+0028 <span class="keyword">if</span> numel(t) ~= 1 &amp;&amp; t(1) ~= 0
+0029    t   = [0;t(:)];
+0030 <span class="keyword">end</span>
+0031 
+0032 numA    = numel(a);
+0033 numB    = numel(b);
+0034 numQ    = numel(Q0);
+0035 numT    = numel(t);
+0036 
+0037 Q       = nan(numA,numB,numQ,numT);
+0038 dQdt    = nan(numA,numB,numQ,numT);
+0039 
+0040 f       = @(a,b,Q0,t) (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));
+0041 
+0042 <span class="keyword">for</span> n = 1:numA
+0043    <span class="keyword">for</span> m = 1:numB
+0044       <span class="keyword">for</span> p = 1:numQ
+0045          
+0046          qtmp            = f(a(n),b(m),Q0(p),t);
+0047          Q(n,m,p,:)      = qtmp;
+0048          dQdt(n,m,p,:)   = -a(n).*qtmp.^b(m);
+0049          
+0050       <span class="keyword">end</span>
+0051    <span class="keyword">end</span>
+0052 <span class="keyword">end</span>
+0053 
+0054 Q       = squeeze(Q);
+0055 dQdt    = squeeze(dQdt);
+0056 
+0057 <span class="comment">% only plot the first one for now, if I am getting an ensemble of Q(t)</span>
+0058 <span class="comment">% I can add functionality later to plot some number of them</span>
+0059 <span class="keyword">if</span> plotFig
+0060    
+0061    <span class="comment">% get the characterisitc timescale</span>
+0062    tc  = bfra.characteristicTime(a(1),b(1),Q0(1));
+0063    
+0064    <span class="comment">% get formatted strings for the legend</span>
+0065    showAB  = false;
+0066    Qtstr   = bfra.getstring(<span class="string">'Q(t)'</span>);
+0067 <span class="comment">%    Qtstr   = bfra.QtString([a,b],Q0,showAB);</span>
+0068 <span class="comment">%    tcstr   = bfra.tcString(a,b,Q0,showAB);</span>
+0069    
+0070    <span class="comment">% make a figure</span>
+0071    tileFigure();
+0072    
+0073    plot(t,Q);
+0074    xlabel(<span class="string">'$t \quad [T]$'</span>);
+0075    ylabel(<span class="string">'$Q(t) \quad [L/T]$'</span>);
+0076    legend(Qtstr,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0077    axis tight
+0078    
+0079    
+0080    nexttile
+0081    plot(t./tc,Q./Q0); <span class="comment">% hold on; plot(t./tc,Q./Q0);</span>
+0082    xlabel(<span class="string">'$t/t_c \quad [-]$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0083    ylabel(<span class="string">'$Q/Q_0 \quad [-]$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0084    <span class="comment">% legend(tcstr)</span>
+0085    
+0086    axis tight
+0087    ylim([0 1])
+0088    
+0089    <span class="comment">% fix the axes if they got misaligned</span>
+0090    <span class="comment">%hFig1.backgroundAxis.Position = hFig1.mainAxis.Position;</span>
+0091    <span class="comment">%hFig2.backgroundAxis.Position = hFig2.mainAxis.Position;</span>
+0092 <span class="keyword">end</span>
+0093 
+0094 <span class="comment">% % NOTE: with the tc value, we can compute the Q(t) like this:</span>
+0095   <span class="comment">% Qfunc = @(tc,b,Q0) (Q0.*(1+(exp(b-1)-1).*t./tc).^(1/(1-b)));</span>
+0096 
+0097 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0098 <span class="comment">% % notes from trying to figure out how to handle Q0:</span>
+0099 
+0100 <span class="comment">% % not sure what is best. If I do t-t(1),</span>
+0101     
+0102 <span class="comment">% % this assumes that t(1) = t0, so Q(t) = Q(t-t0)</span>
+0103 <span class="comment">%     t = t-t(1);</span>
+0104       
+0105 <span class="comment">% % this appends a zero ahead of t(1) if t doesn't already start at zero</span>
+0106 <span class="comment">%     if t(1) ~= 0</span>
+0107 <span class="comment">%         t   = [0;t(:)];</span>
+0108 <span class="comment">%     end</span>
+0109 
+0110 
+0111 <span class="comment">%     % append Q0 and t0 to the output</span>
+0112 <span class="comment">%     dqdt0   =</span>
+0113 <span class="comment">%     q       = cat(3,q,Q0);</span>
+0114 <span class="comment">%     t       = cat(1,0,t);</span>
+0115     
+0116     
+0117 <span class="comment">%     flin    = @(a,Q0,t) Q0.*exp(-t.*a);</span>
+0118 <span class="comment">%     out.Qlin    = fnlin(a,Q0,t);</span>
+0119 <span class="comment">%     out.dQlin   = a.*Qnlin;</span>
+0120</pre></div>
+</body>
+</html>
