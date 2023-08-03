@@ -30,9 +30,9 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % Todo: 'ALL_BASINS' should return all of the basin names, see bfra.stationlist
 % which appends 'ALL_BASINS' to the stationlist for use with loaddata functions
 
-p              = inputParser;
+p = inputParser;
 p.FunctionName = 'bfra.basinname';
-addRequired( p,'typenamehere');
+addRequired(p,'typenamehere');
 parse(p,typenamehere);
 basin = p.Results.typenamehere;
    

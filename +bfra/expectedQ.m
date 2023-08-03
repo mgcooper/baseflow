@@ -14,33 +14,11 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%------------------------------------------------------------------------------
-% input parsing
-%------------------------------------------------------------------------------
-p                 = inputParser;
-p.FunctionName    = 'bfra.expectedQ';
-validopt          = @(x)any(validatestring(x,{'qtls','plotfit'}));
+% PARSE INPUTS
+[a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = parseinputs( ...
+   a, b, tau, q, dqdt, tau0, varargin{:}); %#ok<*ASGLU> 
 
-addRequired(p,    'a',                    @(x)isnumeric(x)     );
-addRequired(p,    'b',                    @(x)isnumeric(x)     );
-addRequired(p,    'tau',                  @(x)isnumeric(x)     );
-addRequired(p,    'q',                    @(x)isnumeric(x)     );
-addRequired(p,    'dqdt',                 @(x)isnumeric(x)     );
-addRequired(p,    'tau0',                 @(x)isnumeric(x)     );
-addOptional(p,    'qtls',     '',         validopt             );
-addOptional(p,    'flow',     nan,        @(x)isnumeric(x)     );
-addOptional(p,    'plotfit',  '',         validopt             );
-addParameter(p,   'mask',     false,      @(x)islogical(x)     );
-
-parse(p,a,b,tau,q,dqdt,tau0,varargin{:});
-
-qtls = p.Results.qtls;
-flow = p.Results.flow;
-mask = p.Results.mask;
-plotfit = p.Results.plotfit;
-
-%------------------------------------------------------------------------------
-
+% MAIN FUNCTION
 Qexp = (a*tau)^(1/(1-b));
 Q0 = Qexp*(3-b)/(2-b);
 
@@ -60,7 +38,41 @@ else
    pQ0 = nan;
 end
 
-% % error propagation:
+%% INPUT PARSER
+function [a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = parseinputs( ...
+   a, b, tau, q, dqdt, tau0, varargin)
+
+validopt = @(x)any(validatestring(x,{'qtls','plotfit'}));
+
+parser = inputParser;
+parser.FunctionName = 'bfra.expectedQ';
+
+parser.addRequired('a', @isnumeric);
+parser.addRequired('b', @isnumeric);
+parser.addRequired('tau', @isnumeric);
+parser.addRequired('q', @isnumeric);
+parser.addRequired('dqdt', @isnumeric);
+parser.addRequired('tau0', @isnumeric);
+parser.addOptional('qtls', '', validopt);
+parser.addOptional('flow', nan, @isnumeric);
+parser.addOptional('plotfit', '', validopt);
+parser.addParameter('mask', false, @islogical);
+
+parser.parse(a, b, tau, q, dqdt, tau0, varargin{:});
+
+a = parser.Results.a;
+b = parser.Results.b;
+q = parser.Results.q;
+tau = parser.Results.tau;
+dqdt = parser.Results.dqdt;
+tau0 = parser.Results.tau0;
+qtls = parser.Results.qtls;
+flow = parser.Results.flow;
+mask = parser.Results.mask;
+plotfit = parser.Results.plotfit;
+
+%% error propagation notes
+% 
 % % need Qexp/Q0 L/H 
 % Qexp     = GlobalFit.Qexp;
 % sig_tau  = GlobalFit.BootFit.tau_sig;

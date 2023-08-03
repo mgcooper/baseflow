@@ -35,7 +35,7 @@ function [Fits,Results] = fitevents(Events,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 % PARSE INPUTS
-
+ %#ok<*ASGLU> 
 [derivmethod, fitmethod, fitorder, pickfits, pickmethod, plotfits, saveplots, ...
    etsparam, vtsparam, fitopts] = parseinputs(Events, mfilename, varargin{:});
 

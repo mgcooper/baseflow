@@ -23,27 +23,8 @@ function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'bfra.gpfitb';
-% p.PartialMatching=true;
-
-addRequired(   p, 'x',                    @(x)isnumeric(x)  );
-addParameter(  p, 'xmin',        0,       @(x)isnumeric(x)  );
-addParameter(  p, 'varsym',      '\tau',  @(x)ischar(x)     );
-addParameter(  p, 'bootfit',     false,   @(x)islogical(x)  );
-addParameter(  p, 'plotfit',     true,    @(x)islogical(x)  );
-addParameter(  p, 'labelplot',   true,    @(x)islogical(x)  );
-
-parse(p,x,varargin{:});
-
-xmin = p.Results.xmin;
-varsymb = p.Results.varsym;
-bootfit = p.Results.bootfit;
-plotfit = p.Results.plotfit;
-labelplot = p.Results.labelplot;
-%------------------------------------------------------------------------------
-
+% PARSE INPUTS
+[x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin{:});
 
 
 if nargin == 1
@@ -244,3 +225,24 @@ ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 bfra.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
    'BaseAngle',90,'Length',8,'TipAngle',10)
 text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
+
+
+%% INPUT PARSER
+function [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.gpfitb';
+
+parser.addRequired('x', @isnumeric);
+parser.addParameter('xmin', 0, @isnumeric);
+parser.addParameter('varsym', '\tau', @ischar);
+parser.addParameter('bootfit', false, @islogical);
+parser.addParameter('plotfit', true, @islogical);
+parser.addParameter('labelplot', true, @islogical);
+
+parser.parse(x, varargin{:});
+
+xmin     = parser.Results.xmin;
+varsymb  = parser.Results.varsym;
+bootfit  = parser.Results.bootfit;
+plotfit  = parser.Results.plotfit;
+labelplot = parser.Results.labelplot;

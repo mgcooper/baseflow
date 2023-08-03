@@ -37,75 +37,16 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % NOTE in the current setup, early/lateqtls are used for eventphi, refqtls for
 % point cloud 
 
-%-------------------------------------------------------------------------------
-% input parsing
-%-------------------------------------------------------------------------------
-p                 = inputParser;
-p.FunctionName    = 'bfra.globalfit';
-p.StructExpand    = true;
-p.PartialMatching = false;
+% PARSE INPUTS
+%#ok<*ASGLU> 
+[Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, refqtls, ...
+   earlyqtls, lateqtls] = parseinputs(K, Events, Fits, mfilename, varargin{:});
 
-addRequired( p,   'K',                             @(x)isstruct(x));
-addRequired( p,   'Events',                        @(x)isstruct(x));
-addRequired( p,   'Fits',                          @(x)isstruct(x));
-addParameter(p,   'drainagearea',   nan,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'drainagedens',   0.8,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'aquiferdepth',   nan,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'streamlength',   nan,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'aquiferslope',   nan,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'aquiferbreadth', nan,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'drainableporos', 0.1,           @(x)bfra.validation.isnumericscalar(x));
-addParameter(p,   'isflat',         true,          @(x)bfra.validation.islogicalscalar(x));
-addParameter(p,   'plotfits',       false,         @(x)bfra.validation.islogicalscalar(x));
-addParameter(p,   'bootfit',        false,         @(x)bfra.validation.islogicalscalar(x));
-addParameter(p,   'nreps',          1000,          @(x)bfra.validation.isdoublescalar(x) );
-addParameter(p,   'phimethod',      'pointcloud',  @(x)bfra.validation.ischarlike(x));
-addParameter(p,   'refqtls',        [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
-addParameter(p,   'earlyqtls',      [0.95 0.95],   @(x)bfra.validation.isnumericvector(x));
-addParameter(p,   'lateqtls',       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x));
-
-
-parse(p,Results,Events,Fits,varargin{:});
-
-A           = p.Results.drainagearea;     % basin area [m2]
-Dd          = p.Results.drainagedens;     % drainage density [km-1]
-D           = p.Results.aquiferdepth;     % reference active layer thickness [m]
-L           = p.Results.streamlength;     % effective stream network length [m]
-theta       = p.Results.aquiferslope;     % aquifer slope [1]
-B           = p.Results.aquiferbreadth;   % aquifer breadth [m]
-phi         = p.Results.drainableporos;   % drainable porosity [1]
-plotfits    = p.Results.plotfits;
-bootfit     = p.Results.bootfit;
-nreps       = p.Results.nreps;
-phimethod   = p.Results.phimethod;
-refqtls     = p.Results.refqtls;
-earlyqtls   = p.Results.earlyqtls;
-lateqtls    = p.Results.lateqtls;
-
-% if stream lenght and drainage density are both provided, check that they are
-% consistent with the provided area. note: Dd comes in as 1/km b/c that's how it
-% is almost always reported (km/km2). divide by 1000 to get 1/m.
-if ~isnan(Dd) && ~isnan(L)
-   if Dd/1000*A ~= L        % 1/m * m^2 = m
-      warning('provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd');
-      L = Dd/1000*A;
-   end
-end
-%-------------------------------------------------------------------------------
-
-% take values out of the data structures that are needed
-Q = Events.inputFlow;       % daily streamflow [m3 d-1]
-
-% fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
-%---------------
+% Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 [tau,q,dqdt,tags] = bfra.eventtau(Results,Events,Fits,'usefits',false);
-% TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
-TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps,'limit',20);
+TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
 
-% [TestFit,testb] = bfra.gpfitb(GlobalFit.x,'xmin',GlobalFit.tau0,'bootfit',true);
-
-% parameters needed for next steps
-%---------------------------------
+% Parameters needed for next steps
 bhat     = TauFit.b;
 bhatL    = TauFit.b_L;
 bhatH    = TauFit.b_H;
@@ -113,20 +54,15 @@ tau0     = TauFit.tau0;
 tauexp   = TauFit.tau;
 itau     = TauFit.taumask;
 
-% fit a
-% -------
+% Fit a
 [ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
    'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
-
-% the alternative approach would find a
                         
-% fit Q0 and Qhat
-%-----------------
+% Fit Q0 and Qhat
 [Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauexp,q,dqdt,tau0, ...
    'qtls',Q,'mask',itau);
 
-% fit phi
-%---------
+% Fit phi
 switch phimethod
    case 'distfit'
       phid = bfra.eventphi(Results,Fits,A,D,L,bhat,'lateqtls',lateqtls, ...
@@ -146,8 +82,7 @@ switch phimethod
       phi = bfra.fitphidist(phid,'mean','cdf',plotfits);
 end
 
-% % fit k
-% %---------
+% % Fit k
 % [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...
 %    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);
 % Q0    = Qexp*(3-b)/(2-b);
@@ -159,7 +94,6 @@ end
 
 % % turned this off b/c phicloud makes one
 % % plot the pointcloud if requested
-% %----------------------------------
 % if plotfits == true
 % 
 %    h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
@@ -169,9 +103,7 @@ end
 %    scatter(xbar,ybar,60,'k','filled','s');
 % end
 
-
-
-% package up the data and save it
+% PARSE OUTPUTS
 GlobalFit      = TauFit;
 GlobalFit.phi  = phi;
 GlobalFit.q    = q;
@@ -187,3 +119,60 @@ GlobalFit.Qexp = Qexp;
 GlobalFit.pQexp = pQexp;
 GlobalFit.pQ0  = pQ0;
 
+%% INPUT PARSER
+function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, ...
+   refqtls, earlyqtls, lateqtls] = parseinputs(K, Events, Fits, funcname, varargin)
+
+parser = inputParser;
+parser.FunctionName = ['bfra.' funcname];
+parser.StructExpand = true;
+parser.PartialMatching = false;
+
+parser.addRequired('K', @isstruct);
+parser.addRequired('Events', @isstruct);
+parser.addRequired('Fits', @isstruct);
+parser.addParameter('drainagearea', nan, @bfra.validation.isnumericscalar);
+parser.addParameter('drainagedens', 0.8, @bfra.validation.isnumericscalar);
+parser.addParameter('aquiferdepth', nan, @bfra.validation.isnumericscalar);
+parser.addParameter('streamlength', nan, @bfra.validation.isnumericscalar);
+parser.addParameter('aquiferslope', nan, @bfra.validation.isnumericscalar);
+parser.addParameter('aquiferbreadth', nan, @bfra.validation.isnumericscalar);
+parser.addParameter('drainableporosity', 0.1, @bfra.validation.isnumericscalar);
+parser.addParameter('isflat', true, @bfra.validation.islogicalscalar);
+parser.addParameter('plotfits', false, @bfra.validation.islogicalscalar);
+parser.addParameter('bootfit', false, @bfra.validation.islogicalscalar);
+parser.addParameter('bootreps', 1000, @bfra.validation.isdoublescalar);
+parser.addParameter('phimethod', 'pointcloud', @bfra.validation.ischarlike);
+parser.addParameter('refqtls', [0.50 0.50],  @bfra.validation.isnumericvector);
+parser.addParameter('earlyqtls', [0.95 0.95],  @bfra.validation.isnumericvector);
+parser.addParameter('lateqtls', [0.50 0.50],  @bfra.validation.isnumericvector);
+
+parser.parse(K, Events, Fits, varargin{:});
+
+A           = parser.Results.drainagearea;      % basin area [m2]
+Dd          = parser.Results.drainagedens;      % drainage density [km-1]
+D           = parser.Results.aquiferdepth;      % reference active layer thickness [m]
+L           = parser.Results.streamlength;      % effective stream network length [m]
+theta       = parser.Results.aquiferslope;      % aquifer slope [1]
+B           = parser.Results.aquiferbreadth;    % aquifer breadth [m]
+phi         = parser.Results.drainableporosity; % drainable porosity [1]
+plotfits    = parser.Results.plotfits;
+bootfit     = parser.Results.bootfit;
+nreps       = parser.Results.bootreps;
+phimethod   = parser.Results.phimethod;
+refqtls     = parser.Results.refqtls;
+earlyqtls   = parser.Results.earlyqtls;
+lateqtls    = parser.Results.lateqtls;
+
+% if stream length and drainage density are both provided, check that they are
+% consistent with the provided area. note: Dd comes in as 1/km b/c that's how it
+% is almost always reported (km/km2). divide by 1000 to get 1/m.
+if ~isnan(Dd) && ~isnan(L)
+   if Dd/1000*A ~= L        % 1/m * m^2 = m
+      warning('provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd');
+      L = Dd/1000*A;
+   end
+end
+
+% take values out of the data structures that are needed
+Q = Events.inputFlow;       % daily streamflow [m3 d-1]

@@ -29,20 +29,9 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % versions in dev-bk. Cursory glance - eventPlotter includes option to plot
 % rain, but does not include 3rd subplot of d2q/dt in bfra.eventplotter
 
-%-------------------------------------------------------------------------------
-p              = inputParser;
-p.FunctionName = 'eventpicker';
-p.StructExpand = false;             % for 'Info' input
+% PARSE INPUTS
+[t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info);
 
-addRequired(p, 't',     @(x) isnumeric(x) | isdatetime(x)         );
-addRequired(p, 'q',     @(x) isnumeric(x) & numel(x)==numel(t)    );
-addRequired(p, 'r',     @(x) isnumeric(x)                         );
-addRequired(p, 'nmin',  @(x) isnumeric(x) & isscalar(x)           );
-addRequired(p, 'Info',  @(x) isstruct(x)                          );
-
-parse(p,t,q,r,nmin,Info);
-
-%-------------------------------------------------------------------------------
 
 % compute the first derivative
 qdot = bfra.deps.derivative(q);
@@ -111,6 +100,7 @@ Info.runlengths = Info.runlengths(~inan);
 % close all
 % f = f(isgraphics(f)); close(f);
 
+%% local functions
 function Events = eventSelector(t,q,r,qdot,Info)
 
 % convert t to datenum for easier arithmetic
@@ -299,3 +289,24 @@ for n = 1:Events.nEvents
 end
 
 Events.h = h;
+
+%% INPUT PARSER
+function [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)
+
+parser = inputParser;
+parser.FunctionName = 'bfra.eventpicker';
+parser.StructExpand = false; % for 'Info' input
+
+parser.addRequired('t', @bfra.validation.isdatelike);
+parser.addRequired('q', @isnumeric);
+parser.addRequired('r', @isnumeric);
+parser.addRequired('nmin', @bfra.validation.isnumericscalar);
+parser.addRequired('Info', @isstruct);
+parser.parse(t, q, r, nmin, Info);
+
+t = parser.Results.t;
+q = parser.Results.q;
+r = parser.Results.r;
+nmin = parser.Results.nmin;
+Info = parser.Results.Info;
+assert(numel(q) == numel(t));

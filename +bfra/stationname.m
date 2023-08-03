@@ -18,9 +18,8 @@ function station = stationname(typenamehere)
 % 
 % 
 %  See also bfra.loadcalm bfra.loadflow bfra.loadgrace bfra.stationlist
-% 
 
-p              = inputParser;
+p = inputParser;
 p.FunctionName = 'bfra.stationname';
 addRequired( p,'typenamehere');
 parse(p,typenamehere);

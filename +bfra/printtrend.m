@@ -1,4 +1,4 @@
-function [ddt,err] = printtrend(Data,varargin)
+function [ddt, err] = printtrend(Data, varargin)
 %PRINTTREND print trends computed from columns in table Data to the screen
 % 
 %  Syntax
@@ -7,29 +7,10 @@ function [ddt,err] = printtrend(Data,varargin)
 % 
 % See also
 
-%-------------------------------------------------------------------------------
-p = bfra.deps.magicParser;
-p.StructExpand = true;  % this has to be true to use autocomplete fieldname
-p.FunctionName = 'printtrend';
+% PARSE INPUTS
+[Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin{:});
 
-p.addRequired(    'Data',                    @(x)istimetable(x));
-p.addParameter(   'var',            'Qb',    @(x)ischar(x));
-p.addParameter(   'alpha',          0.05,    @(x)isnumeric(x));
-p.addParameter(   'unitconversion', 1,       @(x)isnumeric(x));
-p.addParameter(   'metric',         'CI',    @(x)ischar(x));
-p.addParameter(   'method',         'ols',   @(x)ischar(x));
-p.addParameter(   'quantile',       nan,     @(x)isnumeric(x));
-
-p.parseMagically('caller');
-
-var   = p.Results.var;
-cf    = p.Results.unitconversion;
-alpha = p.Results.alpha;
-qtl   = p.Results.quantile;
-
-%-------------------------------------------------------------------------------
 % create a regular time in years, works for both months and years
-
 t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
 dt = numel(t);
 dat = Data.(var); % cm/yr -> cm/day
@@ -56,6 +37,31 @@ str = ['\nd' var '/dt = %.3f ' char(177) ' %.3f (' errstr '%% CI) '];
 str = [str ', d' var ' = %.3f ' char(177) ' %.3f \n\n'];
 fprintf(str,ddt,err,d,derr);
 
+%% PARSE INPUTS
+function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)
+parser = inputParser;
+parser.StructExpand = true; % this has to be true to use autocomplete fieldname
+parser.FunctionName = 'bfra.printtrend';
+
+parser.addRequired('Data', @istimetable);
+parser.addParameter('var', 'Qb', @ischar);
+parser.addParameter('alpha', 0.05, @isnumeric);
+parser.addParameter('metric', 'CI', @ischar);
+parser.addParameter('method', 'ols', @ischar);
+parser.addParameter('quantile', nan, @isnumeric);
+parser.addParameter('unitconversion', 1, @isnumeric);
+
+parser.parse(Data, varargin{:});
+
+cf = parser.Results.unitconversion;
+var  = parser.Results.var;
+qtl = parser.Results.quantile;
+alpha = parser.Results.alpha;
+method = parser.Results.method;
+
+% no longer used:
+% metric = parser.Results.metric;
+
 %    if alpha == 0.05 || alpha == 0.95
 %       metric   = 'CI';
 %       err      = coefCI(mdl,alpha)*cf;
@@ -77,5 +83,3 @@ fprintf(str,ddt,err,d,derr);
 %       case 'userdefined'
 %          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (' alpha '%CI) \n'],ddt*cf,CI2*cf);
 %    end
-%    
-%    

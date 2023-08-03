@@ -32,45 +32,19 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 % See also eventphi, cloudphi, fitdistphi
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
-
-% if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
-
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.StructExpand = false;
-p.FunctionName = 'fitphi';
-
-addRequired(p, 'a1',                @(x)isnumeric(x)  );
-addRequired(p, 'a2',                @(x)isnumeric(x)  );
-addRequired(p, 'b2',                @(x)isnumeric(x)  );
-addRequired(p, 'A',                 @(x)isnumeric(x)  );
-addRequired(p, 'D',                 @(x)isnumeric(x)  );
-addRequired(p, 'L',                 @(x)isnumeric(x)  );
-addParameter(p,'theta',    0,       @(x)isnumeric(x)  );
-addParameter(p,'isflat',   true,    @(x)islogical(x)  );
-addParameter(p,'dispfit',  false,   @(x)islogical(x)  );
-addParameter(p,'soln1',    'RS05',  @(x)ischar(x)     );
-addParameter(p,'soln2',    'RS05',  @(x)ischar(x)     );
-
-parse(p,a1,a2,b2,A,D,L,varargin{:});
-
-theta    = p.Results.theta;
-isflat   = p.Results.isflat;
-dispfit  = p.Results.dispfit;
-soln1    = p.Results.soln1;
-soln2    = p.Results.soln2;
-%-------------------------------------------------------------------------------
+% 
+% Details
+% -------
 % b1  = early-time b (not needed for any solutions but assumed)
 % b2  = late-time b
 % a1  = early-time a
 % a2  = late-time a
-
+% 
 % options for early-time solution:
 %  Polubarinova-Kochina, 1962 (nonlinear, flat, constant k(z), b=3)
 %  Rupp and Selker, 2005      (nonlinear, flat, k(z)=(Z/D)^n, b=3)
 %  Brutsaert, 1994            (linearized, sloped, constant k(z), b=3)
-
+% 
 % options for late-time solution:
 %  Boussinesq, 1903           (linearized, flat, constant k(z), b=1)
 %  Boussinesq, 1904           (nonlinear, flat, constant k(z), b=3/2)
@@ -78,33 +52,40 @@ soln2    = p.Results.soln2;
 %  Rupp and Selker, 2006      (nonlinear, sloped, b=(2n+1)/(n+1) 
 %  Rupp and Selker, 2006 b=1  (nonlinear, sloped, b=1)
 %  Brutsaert, 1994            (linearized, sloped, constant k(z), b=1)
-
+% 
 % * denotes ones that are implemented
 % so we have these early/late options for flat
 % *PK62 / BS04   constant k(z) + nonlinear early and late
 % *PK62 / BS03   constant k(z) + nonlinear early, constant k(z) + linear late
 % *RS05 / RS05   k(z)=(Z/D)^n + nonlinear early and late
 % PK62 / RS05   constant k(z) + nonlinear early, k(z)=(Z/D)^n + nonlinear late
-
+% 
 % and these early/late options for sloped:
 % *BR94 / BR94   constant k(z) + linearized early and late
 % *BR94 / RS06   constant k(z) + linearized early, k(z)~Z^n + nonlinear late
 % *BR94 / RS06b1 constant k(z) + linearized early, k(z)~Z^n + nonlinear late
-
+% 
 % and these options for sloped early, flat late:
 % BR94 / BS04   constant k(z) + linearized early; constant k(z) + nonlinear late
 % BR94 / BS03   constant k(z) + linearized early; constant k(z) + linearized late
 % BR94 / RS05   constant k(z) + linearized early; k(z)~Z^n + nonlinear late
-
+% 
 % see subroutine allsolutions to build all possible combos
-
+% 
 % the two soln options dictate the early-time expression for 'a'. the
 % late-time value is dictated by 'blate', but warn the user in case
-
+% 
 % NOTE: I don't think L is involved in any of the standard solutions. it appears
 % in PK62-BS04 but I think it cancels.
 
-%-------------------------------------------------------------------------------
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+% PARSE INPUTS
+[a1, a2, b2, A, D, L, theta, isflat, dispfit, soln1, soln2] = ...
+   parseinputs(a1, a2, b2, A, D, L, varargin{:});
+
+% MAIN FUNCTION
 
 % parse the soln options
 [solns,desc,b2] = parsesolutions(soln1,soln2,b2,isflat);
@@ -122,6 +103,10 @@ for m = 1:numsoln
       % NOTE: this is probably not a valid choice, because B94 is for
       % homogeneous soils whereas RS06 is heterogeneous.
       case 'BR94_RS06'        % Brutsaert 1994, early-time, b=3
+         
+         % sloped, late-time b=1-2 (heterogeneous soils)
+         % note: if b=3/2, n=1, which means homogeneous soils
+         
          n     = bfra.conversions(b2,'b','n','isflat',false);
         
          
@@ -136,11 +121,16 @@ for m = 1:numsoln
          
          
       case 'BR94_RS06b1'
+         
+         % sloped, late-time b=1 (heterogeneous soils)
 
          c1c2  = sqrt(200*tand(theta)*1.133/(L*A*D^3));
          a1a2  = sqrt(a1*a2);
          
       case 'BR94_BR94'
+         
+         % sloped, late-time b=1 (homogeneous soils)
+         
          eta   = A*tand(theta)/(2*L*D);
          p     = 1/3;
          c1c2  = sqrt(1.133)*(pi*p+eta)/(D*A*sqrt(p));
@@ -148,8 +138,28 @@ for m = 1:numsoln
          
          % conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2
          
-      case 'RS05_RS05'     % Rupp and Selker, 2005 (early-time, b=3)
-                           % Rupp and Selker, 2005 (late-time, b=f(n))
+         % Need to double check these notes:
+         % this is another way to express phi for this solution i added as a
+         % check need to revisit the sloped case and figure out how to get 
+         % valid solutions
+         % 
+         % c1c2  = 1.133*pi^2*p/(a1*a2*D^2*A^2);
+         % c3    = (eta/(pi*p))^2;
+         % phi   = sqrt(c1c2*(1+c3));
+         
+         % a1 = c1/(k*phi)
+         % a2 = c2*k/phi*(1+c3)
+         % c1 = 1.133/(D^3*L^2*cos(theta))
+         % c2 = pi^2*p*D*L^2*cos(theta)/A^2
+         % c3 = (eta/(pi*p))^2
+         % a2 = c1*c2/(phi^2*a1)*(1+c3)
+         % phi = sqrt(c1*c2*(1+c3)/(a1*a2))
+         
+         
+       case 'RS05_RS05'       % Rupp and Selker, 2005 (early-time, b=3)
+                              % Rupp and Selker, 2005 (late-time, b=f(n))
+         
+         % flat, late-time b=3/2-2  (heterogeneous soils)
          
          n        = bfra.conversions(b2,'b','n','isflat',true);         
          fR1      = bfra.specialfunctions('fR1',n);
@@ -165,20 +175,20 @@ for m = 1:numsoln
          
          % phi = c1c2/a1a2;
          
-% % this is in aquiferprops. probably better to use that, but should combine.
-% trouble is that it all deepends what is known a priori (phi, D, or K)
-%          % once phi is known, this can be used to compute kD in units m/d
-%          % (should be around 100 m/d at most): 
-%          k1       = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time
-%          k2       = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time
-%          
-%          % this method is based on the same method used to estimate phi, by
-%          % equating early- and late-time and isolating k, but assumes D is known
-%          
-%          % this c1/c2 are as defined in my derivation in overleaf.
-%          c1    = fR1/(D^3*L^2);
-%          c2    = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
-%          k     = ((c1/c2)*(a2/a1))^((n+2)/(n+3));
+         % % this is in aquiferprops. probably better to use that, but should combine.
+         % trouble is that it all deepends what is known a priori (phi, D, or K)
+         % % once phi is known, this can be used to compute kD in units m/d
+         % % (should be around 100 m/d at most):
+         % k1       = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time
+         % k2       = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time
+         %
+         % % this method is based on the same method used to estimate phi, by
+         % % equating early- and late-time and isolating k, but assumes D is known
+         %
+         % % this c1/c2 are as defined in my derivation in overleaf.
+         % c1    = fR1/(D^3*L^2);
+         % c2    = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
+         % k     = ((c1/c2)*(a2/a1))^((n+2)/(n+3));
          
       case 'PK62_BS04'        % Polubarinova-Kochina, 1962 (early-time, b=3)
                               % Boussinesq, 1904 (late-time, b=1.5)
@@ -348,6 +358,35 @@ combos = cell(10,1);
 for n = 1:numel(earlysolns)
    combos{n} = [earlysolns{n} '_' latesolns{n}];
 end
+
+%% INPUT PARSER
+function [a1, a2, b2, A, D, L, theta, isflat, dispfit, soln1, soln2] = ...
+   parseinputs(a1, a2, b2, A, D, L, varargin)
+
+parser = inputParser;
+parser.StructExpand = false;
+parser.FunctionName = 'bfra.fitphi';
+
+parser.addRequired('a1', @isnumeric);
+parser.addRequired('a2', @isnumeric);
+parser.addRequired('b2', @isnumeric);
+parser.addRequired('A', @isnumeric);
+parser.addRequired('D', @isnumeric);
+parser.addRequired('L', @isnumeric);
+parser.addParameter('theta', 0, @isnumeric);
+parser.addParameter('isflat', true, @islogical);
+parser.addParameter('dispfit', false, @islogical);
+parser.addParameter('soln1', 'RS05', @ischar);
+parser.addParameter('soln2', 'RS05', @ischar);
+
+parser.parse(a1, a2, b2, A, D, L, varargin{:});
+
+theta = parser.Results.theta;
+soln1 = parser.Results.soln1;
+soln2 = parser.Results.soln2;
+isflat = parser.Results.isflat;
+dispfit = parser.Results.dispfit;
+
 
 % note that at early time, the solutions do not depend on k(z) (b=3 for all
 % solutions used here), so it would seem appropriate to use a constant k(z)

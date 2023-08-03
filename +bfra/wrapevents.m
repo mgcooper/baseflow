@@ -36,44 +36,11 @@ function [Events] = wrapevents(T,Q,R,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% parse inputs
-p = inputParser;
-p.FunctionName = 'bfra.wrapevents';
-p.StructExpand = true;
 
-addRequired(p, 'T',                    @(x) isnumeric(x) | isdatetime(x)      );
-addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T) );
-addRequired(p, 'R',                    @(x) isnumeric(x)                      );
-addParameter(p,'qmin',        1,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'nmin',        4,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'fmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'rmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'rmin',        0,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'cmax',        2,       @(x) isnumeric(x) & isscalar(x)        );
-addParameter(p,'rmconvex',    false,   @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'rmnochange',  true,    @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'rmrain',      false,   @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'pickevents',  false,   @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'plotevents',  false,   @(x) islogical(x) & isscalar(x)        );
-addParameter(p,'asannual',    false,   @(x) islogical(x) & isscalar(x)        );
-
-parse(p,T,Q,R,varargin{:});
-
-qmin        = p.Results.qmin;
-nmin        = p.Results.nmin;
-fmax        = p.Results.fmax;
-rmax        = p.Results.rmax;
-rmin        = p.Results.rmin;
-cmax        = p.Results.cmax;
-rmconvex    = p.Results.rmconvex;
-rmnochange  = p.Results.rmnochange;
-rmrain      = p.Results.rmrain;
-pickevents  = p.Results.pickevents;
-plotevents  = p.Results.plotevents;
-asannual    = p.Results.asannual;
-
-if isempty(R); R = zeros(size(Q)); end
-%------------------------------------------------------------------------------
+% PARSE INPUTS
+[qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
+   pickevents, plotevents, asannual, T, Q, R] = parseinputs( ...
+   T, Q, R, mfilename, varargin{:});
 
 % re-build opts to send to bfra.findevents
 opts.qmin         = qmin;
@@ -223,3 +190,48 @@ numyears = numel(T)/365;
 % firstyear   = year(T(1));
 % lastyear    = year(T(end));
 % numyears    = lastyear-firstyear+1;
+
+%% INPUT PARSER
+function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
+   pickevents, plotevents, asannual, T, Q, R] = parseinputs(T, Q, R, ...
+   mfilename, varargin)
+
+parser = inputParser;
+parser.FunctionName = ['bfra.' mfilename];
+parser.StructExpand = true;
+
+parser.addRequired('T', @(x) isnumeric(x) | isdatetime(x));
+parser.addRequired('Q', @(x) isnumeric(x) & numel(x)==numel(T));
+parser.addRequired('R', @isnumeric);
+
+parser.addParameter('qmin', 1, @bfra.validation.isnumericscalar);
+parser.addParameter('nmin', 4, @bfra.validation.isnumericscalar);
+parser.addParameter('fmax', 2, @bfra.validation.isnumericscalar);
+parser.addParameter('rmax', 2, @bfra.validation.isnumericscalar);
+parser.addParameter('rmin', 0, @bfra.validation.isnumericscalar);
+parser.addParameter('cmax', 2, @bfra.validation.isnumericscalar);
+parser.addParameter('rmconvex', false, @islogical);
+parser.addParameter('rmnochange', true, @islogical);
+parser.addParameter('rmrain', false, @islogical);
+parser.addParameter('pickevents', false, @islogical);
+parser.addParameter('plotevents', false, @islogical);
+parser.addParameter('asannual', false, @islogical);
+
+parser.parse(T, Q, R, varargin{:});
+
+qmin = parser.Results.qmin;
+nmin = parser.Results.nmin;
+fmax = parser.Results.fmax;
+rmax = parser.Results.rmax;
+rmin = parser.Results.rmin;
+cmax = parser.Results.cmax;
+rmrain = parser.Results.rmrain;
+asannual = parser.Results.asannual;
+rmconvex = parser.Results.rmconvex;
+rmnochange = parser.Results.rmnochange;
+pickevents = parser.Results.pickevents;
+plotevents = parser.Results.plotevents;
+
+if isempty(R)
+   R = zeros(size(Q));
+end

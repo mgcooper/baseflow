@@ -19,46 +19,22 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-% if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
-
-% input parsing
-%-------------------------------------------------------------------------------
-p              =  inputParser;
-p.FunctionName =  'bfra.pointcloudintercept';
-% p.PartialMatching = true;
-
-addRequired(p, 'q',                       @(x)isnumeric(x));
-addRequired(p, 'dqdt',                    @(x)isnumeric(x));
-addRequired(p, 'bhat',                    @(x)isnumeric(x));
-addRequired(p, 'method',                  @(x)ischar(x));
-addOptional(p, 'threshold',0.05,          @(x)isnumeric(x));
-addParameter(p,'mask',     true(size(q)), @(x)islogical(x));
-addParameter(p,'refqtls',  [0.5 0.5],     @(x)isnumeric(x));
-addParameter(p,'bci',      nan,           @(x)isnumeric(x));
-addParameter(p,'tau',      nan,           @(x)isnumeric(x));
-addParameter(p,'tau0',     nan,           @(x)isnumeric(x));
-
-parse(p,q,dqdt,bhat,method,varargin{:});
-
-thresh   = p.Results.threshold;
-method   = p.Results.method;
-mask     = p.Results.mask;
-qtls     = p.Results.refqtls;
-bci      = p.Results.bci;
-tau      = p.Results.tau;
-tau0     = p.Results.tau0;
-%-------------------------------------------------------------------------------
-
-persistent inoctave
-if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
-end
-
 % TODO: consider making this a call to fitab. however, fitab does not return
 % xbar/ybar, and I confirmed the results are identical, but it would be
 % preferable to reduce the potential for inconsistent methods e.g. if this is
 % used to estimate ahat but a different method is used when calling fitab for
 % some other purpose such as fitting phi.
+
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+persistent inoctave
+if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
+end
+
+% PARSE INPUTS
+[q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] = parseinputs( ...
+   q, dqdt, bhat, method, varargin{:});
 
 switch method
    case 'mean'
@@ -142,6 +118,7 @@ else
    ahatL = nan;
 end
 
+% PARSE OUTPUTS
 switch nargout
    case 1
       varargout{1} = ahat;
@@ -164,6 +141,31 @@ end
 % % three = ahat, xbar, ybar
 % % four = ahat, [aL aH], xbar, ybar
 
+%% INPUT PARSER
+function [q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] = ...
+   parseinputs(q, dqdt, bhat, method, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.pointcloudintercept';
+
+parser.addRequired('q', @isnumeric);
+parser.addRequired('dqdt', @isnumeric);
+parser.addRequired('bhat', @isnumeric);
+parser.addRequired('method', @ischar);
+parser.addOptional('threshold',0.05, @isnumeric);
+parser.addParameter('mask', true(size(q)), @islogical);
+parser.addParameter('refqtls', [0.5 0.5], @isnumeric);
+parser.addParameter('bci', nan, @isnumeric);
+parser.addParameter('tau', nan, @isnumeric);
+parser.addParameter('tau0', nan, @isnumeric);
+
+parser.parse(q, dqdt, bhat, method, varargin{:});
+
+thresh = parser.Results.threshold;
+mask = parser.Results.mask;
+qtls = parser.Results.refqtls;
+bci = parser.Results.bci;
+tau = parser.Results.tau;
+tau0 = parser.Results.tau0;
 
 
 

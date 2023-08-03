@@ -19,35 +19,19 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(K,Events,Fits,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-% if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
-
-% old syntax:
-% function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)
-
-%-------------------------------------------------------------------------------
-p              = inputParser;
-p.StructExpand = false;
-p.FunctionName = 'eventtau';
-
-addRequired(p, 'K',                 @(x)isstruct(x)   );
-addRequired(p, 'Events',            @(x)isstruct(x)   );
-addRequired(p, 'Fits',              @(x)isstruct(x)   );
-addParameter(p,'usefits',  false,   @(x)islogical(x)  );
-addParameter(p,'aggfunc',  'none',  @(x)ischar(x)     );
-
-parse(p,K,Events,Fits,varargin{:});
-
-usefits = p.Results.usefits;
-aggfunc = p.Results.aggfunc;
-%-------------------------------------------------------------------------------
-
 % TODO: implement aggfunc option to compute an event-aggregate tau e.g. using
 % the mean flow, median flow, max flow, or min flow
 
-dqfnc    = @(a,dqdt) -dqdt./a;   % must have derived this at some point
-Taufnc   = bfra.taufunc;
-Sfnc     = @(a,b,q) (q.^(2-b))./(a*(2-b));
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+% PARSE INPUTS
+[K, Events, Fits, usefits, aggfunc] = parseinputs(K, Events, Fits, varargin{:});
+
+% MAIN FUNCTION
+Taufnc = bfra.taufunc;
+dqfnc = @(a,dqdt) -dqdt./a; % must have derived this at some point
+Sfnc = @(a,b,q) (q.^(2-b))./(a*(2-b));
 
 if isscalar(K)
    Ktags    = K.eventTag;
@@ -138,3 +122,23 @@ aggvals.q = qagg;
 aggvals.dqdt = dqagg;
 aggvals.tau = tauagg;
 
+%% INPUT PARSER
+function [K, Events, Fits, usefits, aggfunc] = parseinputs(K, Events, Fits, varargin)
+
+parser = inputParser;
+parser.StructExpand = false;
+parser.FunctionName = 'bfra.eventtau';
+
+parser.addRequired('K', @isstruct);
+parser.addRequired('Events', @isstruct);
+parser.addRequired('Fits', @isstruct);
+parser.addParameter('usefits', false, @islogical);
+parser.addParameter('aggfunc', 'none', @ischar);
+
+parser.parse(K, Events, Fits, varargin{:});
+
+K = parser.Results.K;
+Fits = parser.Results.Fits;
+Events = parser.Results.Events;
+usefits = parser.Results.usefits;
+aggfunc = parser.Results.aggfunc;

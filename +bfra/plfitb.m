@@ -34,31 +34,11 @@ function varargout = plfitb(x,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p              = inputParser;
-p.FunctionName = 'bfra.plfitb';
-% p.PartialMatching = true;
+% PARSE INPUTS
+[x, xmin, range, limit, method, bootfit, nreps, plotfit] = parseinputs( ...
+   x, varargin{:});
 
-addRequired(p,    'x',                          @(x)isnumeric(x)  );
-addParameter(p,   'xmin',     nan,              @(x)isnumeric(x)  );
-addParameter(p,   'range',    1.01:0.01:25.01,  @(x)isnumeric(x)  );
-addParameter(p,   'limit',    [],               @(x)isnumeric(x)  );
-addParameter(p,   'method',   'clauset',        @(x)ischar(x)     );
-addParameter(p,   'bootfit',  false,            @(x)islogical(x)  );
-addParameter(p,   'nreps',    1000,             @(x)isnumeric(x)  );
-addParameter(p,   'plotfit',  false,            @(x)islogical(x)  );
-
-parse(p,x,varargin{:});
-
-xmin     = p.Results.xmin;
-range    = p.Results.range;
-limit    = p.Results.limit;
-method   = p.Results.method;
-bootfit  = p.Results.bootfit;
-nreps    = p.Results.nreps;
-plotfit  = p.Results.plotfit;
-
-%-------------------------------------------------------------------------------
+% MAIN FUNCTION
 x0 = x;
 [x,~] = bfra.util.prepCurveData(x,x);
 x = x(x>0);
@@ -146,6 +126,8 @@ end
 % from the Kuparuk (the error was about 0.03, but alpha was about 3.12). See
 % Figure 10 in Clauset et al. 2009.
 
+%% LOCAL FUNCTIONS
+
 % bootstrap confidence intervals
 function Fit = plbootfit(x,range,limit,nreps)
 
@@ -171,6 +153,33 @@ Fit.reps = reps;
 % replaced this with ntail
 % Fit.numtau  = numel(x(x>Fit.tau0_avg));
 
+%% INPUT PARSER
+function [x, xmin, range, limit, method, bootfit, nreps, plotfit] = ...
+   parseinputs(x, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.plfitb';
+
+parser.addRequired('x', @isnumeric);
+parser.addParameter('xmin', nan, @isnumeric);
+parser.addParameter('range', 1.01:0.01:25.01, @isnumeric);
+parser.addParameter('limit', [], @isnumeric);
+parser.addParameter('method', 'clauset', @ischar);
+parser.addParameter('bootfit', false, @islogical);
+parser.addParameter('nreps', 1000, @isnumeric);
+parser.addParameter('plotfit', false, @islogical);
+
+parser.parse(x, varargin{:});
+
+xmin    = parser.Results.xmin;
+range   = parser.Results.range;
+limit   = parser.Results.limit;
+method  = parser.Results.method;
+bootfit = parser.Results.bootfit;
+nreps   = parser.Results.nreps;
+plotfit = parser.Results.plotfit;
+
+
+%% extra
 % As a rough check on the sampling distribution of the parameter
 % estimators, we can look at histograms of the bootstrap replicates.
 % figure; subplot(1,3,1);

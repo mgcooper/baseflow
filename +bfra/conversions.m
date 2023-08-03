@@ -29,25 +29,13 @@ function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'bfra.conversions';
-validvarnames = {'b', 'alpha', 'beta', 'gamma', 'd', 'k', 'n', 'N', 'Nstar'};
-addRequired( p, 'inputvalue', @(x) isnumeric(x));
-addRequired( p, 'inputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
-addRequired( p, 'outputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
-addParameter( p, 'isflat', true, @(x) islogical(x));
-
-parse(p,inputvalue,inputvarname,outputvarname,varargin{:});
-
-isflat = p.Results.isflat;
-
-%-------------------------------------------------------------------------------
+% PARSE INPUTS
+[inputvalue, inputvarname, outputvarname, isflat] = parseinputs( ...
+   inputvalue, inputvarname, outputvarname, varargin{:});
 
 % convert whatever is passed in to b, then from b to whatever is requested
 b = convert2b(inputvalue,inputvarname,isflat);
 varargout{1} = convertb(b,outputvarname,isflat);
-
 
 
 function b = convert2b(inputvalue,inputvarname,isflat)
@@ -162,3 +150,24 @@ switch outputvarname
    case 'Nstar'
       varargout{1} = Nstar;
 end
+
+
+%% INPUT PARSER
+function [inputvalue, inputvarname, outputvarname, isflat] = parseinputs(inputvalue, inputvarname, outputvarname, varargin)
+
+validvarnames = {'b', 'alpha', 'beta', 'gamma', 'd', 'k', 'n', 'N', 'Nstar'};
+
+parser = inputParser;
+parser.FunctionName = 'bfra.conversions';
+
+parser.addRequired('inputvalue', @isnumeric);
+parser.addRequired('inputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
+parser.addRequired('outputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
+parser.addParameter('isflat', true, @islogical);
+
+parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});
+
+inputvalue = parser.Results.inputvalue;
+inputvarname = parser.Results.inputvarname;
+outputvarname = parser.Results.outputvarname;
+isflat = parser.Results.isflat;

@@ -22,24 +22,12 @@ function h = mapgages(lat,lon,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% NOTE: use geo!
-
 % not sure if this function is deprecated by mapbasins, but I added the
 % parsing from that function in case it's worth keeping this
 
-% --------------- parse inputs
-p = bfra.deps.magicParser;
-p.FunctionName = 'bfra.mapgages';
-p.addRequired( 'lat', @(x)isnumeric(x));
-p.addRequired( 'lon', @(x)isnumeric(x));
-p.addParameter('cvar', nan, @(x)isnumeric(x));
-p.addParameter('cbartitle', '', @(x)ischar(x));
-p.addParameter('latlims', [50 75], @(x)isnumeric(x));
-p.addParameter('lonlims', [-168 -60], @(x)isnumeric(x));
-p.addParameter('projstr', 'lambert', @(x)ischar(x));
-p.addParameter('ax', gca, @(x)bfra.validation.isaxis(x));
-p.parseMagically('caller');
-
+% parse inputs
+[lat, lon, cvar, cbartitle, latlims, lonlims] = parseinputs( ...
+   lat, lon, varargin{:});
 
 % --------------- load world borders
 borders = loadworldborders({'United States','Canada'},'merge');
@@ -73,3 +61,27 @@ if isfield(h,'cbar')
    set(get(h.cbar,'title'),'string',cbartitle, ...
       'VerticalAlignment','baseline');
 end
+
+
+%% INPUT PARSER
+function [lat, lon, cvar, cbartitle, latlims, lonlims] = parseinputs( ...
+   lat, lon, varargin)
+
+p = inputParser;
+p.FunctionName = 'bfra.mapgages';
+p.addRequired('lat', @isnumeric);
+p.addRequired('lon', @isnumeric);
+p.addParameter('cvar', nan, @isnumeric);
+p.addParameter('cbartitle', '', @ischar);
+p.addParameter('latlims', [50 75], @isnumeric);
+p.addParameter('lonlims', [-168 -60], @isnumeric);
+p.addParameter('projstr', 'lambert', @ischar);
+p.addParameter('ax', gca, @bfra.validation.isaxis);
+p.parse(lat, lon, varargin{:});
+
+lat = p.Results.lat;
+lon = p.Results.lon;
+cvar = p.Results.cvar;
+latlims = p.Results.latlims;
+lonlims = p.Results.lonlims;
+cbartitle = p.Results.cbartitle;

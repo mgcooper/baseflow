@@ -46,52 +46,10 @@ function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
 % See also fitphi
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
-
-% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and
-% possibly phi, try to combine with fitphi for two paths - either D is known or
-% phi is known
-
-% if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
-
-%-------------------------------------------------------------------------------
-% input parsing
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'bfra.aquiferprops';
-
-addRequired(p, 'q',                          @(x)isnumeric(x));
-addRequired(p, 'dqdt',                       @(x)isnumeric(x));
-addRequired(p, 'alate',                      @(x)isnumeric(x));
-addRequired(p, 'blate',                      @(x)isnumeric(x));
-addRequired(p, 'soln',                       @(x)ischar(x));
-addRequired(p, 'phi',                        @(x)isnumeric(x));
-addRequired(p, 'A',                          @(x)isnumeric(x));
-addRequired(p, 'L',                          @(x)isnumeric(x));
-addParameter(p,'earlyqtls',   [0.95 0.95],   @(x)isnumeric(x));
-addParameter(p,'lateqtls',    [0.5 0.5],     @(x)isnumeric(x));
-addParameter(p,'mask',        true(size(q)), @(x)islogical(x));
-addParameter(p,'Dd',          nan,           @(x)isnumeric(x));
-addParameter(p,'D',           nan,           @(x)isnumeric(x));
-addParameter(p,'Q0',          nan,           @(x)isnumeric(x));
-addParameter(p,'plotfit',     false,         @(x)islogical(x));
-
-parse(p,q,dqdt,alate,blate,soln,phi,A,L,varargin{:});
-
-earlyqtls   = p.Results.earlyqtls;  % x-y quantiles to place early-time hinge point
-lateqtls    = p.Results.lateqtls;   % x-y quantiles to place late-time hinge point
-mask        = p.Results.mask;       % logical vector true for late-time discharge
-Dd          = p.Results.Dd;         % drainage density [km-1]
-D           = p.Results.D;          % initial saturated aquifer thickness [m]
-Q0          = p.Results.Q0;         % critical baseflow [m3 s-1]
-plotfit     = p.Results.plotfit;    % logical scalar indicating to make figure
-
-if strcmp(soln, 'RS05') && isnan(D)
-   error('soln method RS05 requires optional input D')
-end
-%-------------------------------------------------------------------------------
-
-% Note: This follows the method in Troch et al. 1993, which assumes D is unknown
+% 
+% Extended Notes
+% 
+% This follows the method in Troch et al. 1993, which assumes D is unknown
 % and the goal is to estimate k and Q0 to get D. Here, only Q0 uses the
 % intersection of the early- and late-time lines, k is from late-time a. Troch
 % uses a1/b1 = late time and a2/b2 = early time, whereas fitphi uses the
@@ -100,10 +58,10 @@ end
 % 
 % bfra_fitphi assumes D is known and eliminates k to get phi by setting early-
 % and late-time equations equal. Q0 is not involved in that approach.
-
+% 
 % It should be possible to modify this using the fitphi method by settting
 % early- and late-time equal to eliminate phi. 
-
+% 
 % the steps / theory are:
 % 1. Equation 8 provides late time q expression (hillslope outflow)
 %     (8) q = 0.862 * k * D^2 / (B * (1 + 1.115*k*D/(f*B^2)*t )^2)
@@ -137,7 +95,7 @@ end
 % back one)
 % 
 % 10. estimate D from k and known A/L/Dd using equation 12 (step 5)
-
+% 
 %  Important notes
 % -----------------
 % Troch found k was 25-100 times larger than laboratory measurements and argued
@@ -148,7 +106,7 @@ end
 % in order to get k without assuming D, so that k can be used with Q0 to get D.
 % if a late-time solution that depends on D is used, then you can still get k,
 % but you cannot get D
-
+% 
 % changing L changes k but does not change D b/c it cancels
 % increasing a32 will increase k and decrease D 
 % decreasing a32 will decrease k and increase D
@@ -156,7 +114,7 @@ end
 % increasing a3 will decrease Q0 and decrease D
 % decreasing a3 will increase Q0 and increase D
 % changing any value of a/b will change Q0 and therefore D
-
+% 
 % takeaway: the most important thing is the placement of a3. 
 % change L to change k
 % change a3 to change D (or a32, but thats more constrained by tau mask)
@@ -165,32 +123,44 @@ end
 % for k appears much more sensitive to this choice than RS05. The only
 % difference b/w the BS04 and RS05 early-time solution is the numerator which is
 % fixed to 1.113 for BS04 but is fR1 for RS05.
+% 
+% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and
+% possibly phi, try to combine with fitphi for two paths - either D is known or
+% phi is known
 
-%-------------------------------------------------------------------------------
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
+% PARSE INPUTS
+[q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( ...
+   q, dqdt, alate, blate, soln, phi, A, L, varargin{:});
 
 % check if Dd was provided; if so, adjust L
-if ~isnan(Dd)
-   L = Dd/1000*A;           % 1/m * m^2 = m
+if ~isnan(args.Dd)
+   L = args.Dd/1000*A; % 1/m * m^2 = m
 end
 
 % check if Q0 was provided, if so, save it
-if ~isnan(Q0)
-   Q0check = Q0;
+if ~isnan(args.Q0)
+   Q0check = args.Q0;
 else
    Q0check = nan;
 end
 
 % Step 7: compute the early- and late-time intercepts
 bearly = 3;
-aearly = bfra.pointcloudintercept(q,dqdt,bearly,'envelope','refqtls',earlyqtls);
+aearly = bfra.pointcloudintercept(q, dqdt, bearly, 'envelope', ...
+   'refqtls', args.earlyqtls);
 
 % late-time intercept either Boussinesq 1904 or Rupp and Selker, 2005
 switch soln
    case 'BS04'
       blate = 3/2;
-      alate = bfra.pointcloudintercept(q,dqdt,blate,'envelope','refqtls',lateqtls,'mask',mask);
+      alate = bfra.pointcloudintercept(q, dqdt, blate, 'envelope', ...
+         'refqtls', args.lateqtls, 'mask', args.mask);
    case 'RS05'
-      alate = bfra.pointcloudintercept(q,dqdt,blate,'envelope','refqtls',lateqtls,'mask',mask);
+      alate = bfra.pointcloudintercept(q, dqdt, blate, 'envelope', ...
+         'refqtls', args.lateqtls, 'mask', args.mask);
 end
 
 % Step 8: upper bound Q, where b=3 and b=bhat intersect (m3/d)
@@ -262,4 +232,45 @@ Props.a2    = alate;
 Props.b2    = blate;
 % Props.D2    = sqrt(Q0check/(3.448*k*L^2/A));    % undocumented
 Props.input = p.Results;
+
+%% INPUT PARSER
+function [q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( ...
+   q, dqdt, alate, blate, soln, phi, A, L, varargin)
+
+parser = inputParser;
+parser.FunctionName = 'bfra.aquiferprops';
+
+parser.addRequired('q', @isnumeric);
+parser.addRequired('dqdt', @isnumeric);
+parser.addRequired('alate', @isnumeric);
+parser.addRequired('blate', @isnumeric);
+parser.addRequired('soln', @ischar);
+parser.addRequired('phi', @isnumeric);
+parser.addRequired('A', @isnumeric);
+parser.addRequired('L', @isnumeric);
+parser.addParameter('Dd', nan, @isnumeric);
+parser.addParameter('D', nan, @isnumeric);
+parser.addParameter('Q0', nan, @isnumeric);
+parser.addParameter('mask', true(size(q)), @islogical);
+parser.addParameter('plotfit', false, @islogical);
+parser.addParameter('lateqtls', [0.5 0.5], @isnumeric);
+parser.addParameter('earlyqtls', [0.95 0.95], @isnumeric);
+
+parser.parse(q, dqdt, alate, blate, soln, phi, A, L, varargin{:});
+
+args = parser.Results;
+q = parser.Results.q;
+A = parser.Results.A;
+L = parser.Results.L;
+D = parser.Results.D;
+phi = parser.Results.phi;
+soln = parser.Results.soln;
+dqdt = parser.Results.dqdt;
+alate = parser.Results.alate;
+blate = parser.Results.blate;
+
+if strcmp(soln, 'RS05') && isnan(D)
+   error('soln method RS05 requires optional input D')
+end
+
 

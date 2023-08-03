@@ -14,49 +14,25 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
 %     [Calm,Meta] = loadcalm(__,'t1',t1,'t2',t2) returns table Calm for
 %     the time period bounded by datetimes t1 and t2.
 % 
-% See also loadbounds, loadflow
+% See also: baseflow.loadbounds, baseflow.loadflow
 % 
 % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
+% fast exit if toolbox not configured for data 
+if ~isenv('BASEFLOW_DATA_PATH')
+   error('BASEFLOW_DATA_PATH environment variable not set')
+end
+
 % NOTE: does not support multiple basins, use loadcalm("All_Basins") and select
 % since I think in terms of basins right now, not calm sites, this accepts
 % the basin name not the calm site name
 
-%------------------------------------------------------------------------------
-validopts = @(x)any(validatestring(x,{'current','archive'}));
-
-p = inputParser;
-p.FunctionName = 'bfra.loadcalm';
-
-addRequired(p, 'basinname',               @(x) bfra.validation.ischarlike(x));
-addOptional(p, 'version',     'current',  validopts);
-addParameter(p,'t1',          NaT,        @(x) bfra.validation.isdatelike(x));
-addParameter(p,'t2',          NaT,        @(x) bfra.validation.isdatelike(x));
-addParameter(p,'aggfunc',     'none',     @(x) bfra.validation.ischarlike(x));
-addParameter(p,'minlength',   10,         @(x) bfra.validation.isnumericscalar(x));
-addParameter(p,'mincoverage', 0.8,        @(x) bfra.validation.isnumericscalar(x));
-addParameter(p,'minoverlap',  0.5,        @(x) bfra.validation.isnumericscalar(x));
-addParameter(p,'maxdiff',     0.5,        @(x) bfra.validation.isnumericscalar(x));
-
-parse(p,basinname,varargin{:});
-
-basinname   = char(basinname);
-version     = p.Results.version;
-t1          = p.Results.t1;
-t2          = p.Results.t2;
-aggfunc     = p.Results.aggfunc;
-
-% these parameters control whether or not we accept the average of all sites
-% when multiple sites exist within a basin. Sites that do not satisfy these
-% parameters are removed. 
-minlength   = p.Results.minlength;     % minimum record length (# of values)
-mincoverage = p.Results.mincoverage;   % percent coverage (# of values / # years)
-minoverlap  = p.Results.minoverlap;    % percent overlap (like coverage but between sites)
-maxdiff     = p.Results.maxdiff;       % percent difference in trend between sites
-%------------------------------------------------------------------------------
+% PARSE INPUTS
+[basinname, version, t1, t2, aggfunc, minlength, mincoverage, minoverlap, ...
+   maxdiff] = parseinputs(basinname, varargin{:});
 
 % get the meta data
 if ~istable(basinname) && basinname == "ALL_BASINS"
@@ -99,8 +75,7 @@ end
 %Dc    = nanmean(table2array(Calm),2);
 %Calm  = array2timetable(Dc,'RowTimes',Time);
 
-
-
+%% local functions
 function [Calm,Meta] = aggregateCalm(Calm,Meta,aggfunc,minlength,mincoverage,minoverlap,maxdiff)
 
 % outside of this function, we can decide to fit trends to all sites that pass
@@ -297,3 +272,40 @@ else
    Dc = table2array(Calm(MetaBasin.use_calm,i1:i2)); Dc = Dc';
    Calm = timetable(Dc,'RowTimes',Tcalm);
 end
+
+
+%%
+function [basinname, version, t1, t2, aggfunc, minlength, mincoverage, ...
+   minoverlap, maxdiff] = parseinputs(basinname, varargin)
+
+validopts = @(x) any(validatestring(x,{'current','archive'}));
+
+parser = inputParser;
+parser.FunctionName = 'bfra.loadcalm';
+
+addRequired(parser, 'basinname', @bfra.validation.ischarlike);
+addOptional(parser, 'version', 'current', validopts);
+addParameter(parser,'t1', NaT, @bfra.validation.isdatelike);
+addParameter(parser,'t2', NaT, @bfra.validation.isdatelike);
+addParameter(parser,'aggfunc', 'none', @bfra.validation.ischarlike);
+addParameter(parser,'minlength', 10, @bfra.validation.isnumericscalar);
+addParameter(parser,'mincoverage', 0.8, @bfra.validation.isnumericscalar);
+addParameter(parser,'minoverlap', 0.5, @bfra.validation.isnumericscalar);
+addParameter(parser,'maxdiff', 0.5, @bfra.validation.isnumericscalar);
+
+parse(parser,basinname,varargin{:});
+
+basinname   = char(parser.Results.basinname);
+version     = parser.Results.version;
+t1          = parser.Results.t1;
+t2          = parser.Results.t2;
+aggfunc     = parser.Results.aggfunc;
+
+% these parameters control whether or not we accept the average of all sites
+% when multiple sites exist within a basin. Sites that do not satisfy these
+% parameters are removed. 
+minlength   = parser.Results.minlength;     % minimum record length (# of values)
+mincoverage = parser.Results.mincoverage;   % percent coverage (# of values / # years)
+minoverlap  = parser.Results.minoverlap;    % percent overlap (like coverage but between sites)
+maxdiff     = parser.Results.maxdiff;       % percent difference in trend between sites
+

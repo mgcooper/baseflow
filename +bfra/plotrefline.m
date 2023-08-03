@@ -31,43 +31,14 @@ function [href,ab] = plotrefline(x,y,varargin)
 %
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
+
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'bfra.plotrefline';
-% p.PartialMatching = true;
-
-addRequired(p, 'x',                          @(x)isnumeric(x));
-addRequired(p, 'y',                          @(x)isnumeric(x));
-addParameter(p,'mask',        true(size(x)), @(x)islogical(x));
-addParameter(p,'refline',     'none',        @(x)ischar(x));
-addParameter(p,'refslope',    1,             @(x)isnumeric(x));
-addParameter(p,'userab',      [1 1],         @(x)isnumeric(x));
-addParameter(p,'labels',      false,         @(x)islogical(x));
-addParameter(p,'refqtls',     nan,           @(x)isnumeric(x));
-addParameter(p,'plotline',    true,          @(x)islogical(x));
-addParameter(p,'linecolor',   [0 0 0],       @(x)isnumeric(x));
-addParameter(p,'precision',   1,             @(x)isnumeric(x)); % default = 1 m3/s
-addParameter(p,'timestep',    1,             @(x)isnumeric(x)); % default = 1 day
-addParameter(p,'ax', bfra.util.emptyaxes,    @(x)bfra.validation.isaxis(x));
-
-parse(p,x,y,varargin{:});
-
-mask        = p.Results.mask;
-refline     = p.Results.refline;
-refslope    = p.Results.refslope;
-userab      = p.Results.userab;
-labels      = p.Results.labels;
-refqtls     = p.Results.refqtls;
-plotline    = p.Results.plotline;
-linecolor   = p.Results.linecolor;
-precision   = p.Results.precision;
-timestep    = p.Results.timestep;
-ax          = p.Results.ax;
-%-------------------------------------------------------------------------------
+% PARSE INPUTS
+[x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
+   linecolor, precision, timestep, ax] = parseinputs(x, y, varargin{:});
 
 % need options for how/if to apply the mask - e.g., we might want to show the
 % 'bestfit' to all data, and use the mask for late-time fit. also keep in mind
@@ -158,6 +129,7 @@ end
 % this lower envelope would appear as a horizontal line, also at
 % integer multiples of it.
 
+%% LOCAL FUNCTIONS
 
 function addlabels(a,b,refline)
 
@@ -228,4 +200,39 @@ switch refline
       %          ytxt     = 2*xtxt;
 
 end
+
+%% INPUT PARSER
+function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
+   linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.plotrefline';
+
+parser.addRequired('x', @isnumeric);
+parser.addRequired('y', @isnumeric);
+parser.addParameter('mask', true(size(x)), @islogical);
+parser.addParameter('refline', 'none', @ischar);
+parser.addParameter('refslope', 1, @isnumeric);
+parser.addParameter('userab', [1 1], @isnumeric);
+parser.addParameter('labels', false, @islogical);
+parser.addParameter('refqtls', nan, @isnumeric);
+parser.addParameter('plotline', true, @islogical);
+parser.addParameter('linecolor', [0 0 0], @isnumeric);
+parser.addParameter('precision', 1, @isnumeric); % default = 1 m3/s
+parser.addParameter('timestep', 1, @isnumeric); % default = 1 day
+parser.addParameter('ax', bfra.util.emptyaxes, @bfra.validation.isaxis);
+
+parser.parse(x, y, varargin{:});
+
+mask        = parser.Results.mask;
+refline     = parser.Results.refline;
+refslope    = parser.Results.refslope;
+userab      = parser.Results.userab;
+labels      = parser.Results.labels;
+refqtls     = parser.Results.refqtls;
+plotline    = parser.Results.plotline;
+linecolor   = parser.Results.linecolor;
+precision   = parser.Results.precision;
+timestep    = parser.Results.timestep;
+ax          = parser.Results.ax;
+
 

@@ -26,26 +26,9 @@ function [Fit,h] = fitphidist(phi,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-% input parsing
-%-------------------------------------------------------------------------------
-p                 = inputParser;
-p.FunctionName    = 'bfra.fitphidist';
+% PARSE INPUTS
+[phi, outputtype, plottype, showfit] = parseinputs(phi, varargin{:});
 
-validoutput       = @(x) any(validatestring(x,{'PD','mean','std','median'}));
-validplottype     = @(x) any(validatestring(x,{'cdf','pdf','probplot'}));
-
-addRequired(p,    'phi',                  @(x)isvector(x)            );
-addOptional(p,    'outputtype',  'PD',    validoutput                );
-addOptional(p,    'plottype',    'none',  validplottype              );
-addOptional(p,    'showfit',     true,    @(x)islogical(x)           );
-
-parse(p,phi,varargin{:});
-outputtype  = p.Results.outputtype;
-plottype    = p.Results.plottype;
-showfit     = p.Results.showfit;
-
-%-------------------------------------------------------------------------------
 
 % Force all inputs to be column vectors
 phi = phi(:);
@@ -180,3 +163,22 @@ title('')
 set(gca,'XLim',[0 0.2])
 
 h.ax = gca;
+
+%% INPUT PARSER
+function [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.fitphidist';
+
+validoutput = @(x) any(validatestring(x,{'PD','mean','std','median'}));
+validplottype = @(x) any(validatestring(x,{'cdf','pdf','probplot'}));
+
+parser.addRequired('phi', @isvector);
+parser.addOptional('outputtype', 'PD', validoutput);
+parser.addOptional('plottype', 'none', validplottype);
+parser.addOptional('showfit', true, @islogical);
+
+parser.parse(phi, varargin{:});
+
+outputtype = parser.Results.outputtype;
+plottype = parser.Results.plottype;
+showfit = parser.Results.showfit;
