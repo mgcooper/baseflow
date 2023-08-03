@@ -16,25 +16,20 @@ function Meta = loadmeta(basinname,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-validopts = @(x)any(validatestring(x,{'current','archive'}));
+% fast exit if toolbox not configured for data 
+if ~isenv('BASEFLOW_DATA_PATH')
+   error('BASEFLOW_DATA_PATH environment variable not set')
+end
 
-p                = inputParser;
-p.FunctionName   = 'bfra.loadmeta';
-addRequired(p, 'basinname',         @(x)ischar(x)  );
-addOptional(p, 'version','current', validopts      );
-parse(p,basinname,varargin{:});
-version = p.Results.version;
-%-------------------------------------------------------------------------------
+%  PARSE INPUTS
+[basinname, version] = parseinputs(basinname, varargin{:});
 
-% load the meta data - use the one from 'Bounds'
-pathbounds  = [getenv('USERDATAPATH') 'interface/basins/matfiles/'];
-
+% load the basin metadata
 switch version
    case 'current'
-      filebounds  = [pathbounds 'basin_boundaries.mat'];
+      filebounds = fullfile(getenv('BASEFLOW_DATA_PATH'), 'basin_boundaries.mat');
    case 'archive'
-      filebounds  = [pathbounds 'basin_boundaries_tmp.mat'];
+      filebounds = fullfile(getenv('BASEFLOW_DATA_PATH'), 'basin_boundaries_tmp.mat');
 end
 load(filebounds,'Meta');
 
@@ -54,10 +49,17 @@ if sum(istation) == 0
 end
 Meta = Meta(istation,:);
 
+end
 
+%% input parser
 
+function [basinname, version] = parseinputs(basinname, varargin)
 
-
-
-
-
+   validopts = @(x)any(validatestring(x,{'current','archive'}));
+   parser = inputParser;
+   parser.FunctionName = 'bfra.loadmeta';
+   parser.addRequired('basinname', @ischar);
+   parser.addOptional('version', 'current', validopts);
+   parser.parse(basinname,varargin{:});
+   version = parser.Results.version;
+end

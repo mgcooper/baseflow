@@ -2,11 +2,11 @@ function [Flow,Meta] = loadflow(basinname,varargin)
 %LOADFLOW load timeseries of streamflow and metadata for basin
 %
 % Syntax
-% 
+%
 %     [Flow,Meta] = loadflow(basinname,varargin)
-% 
+%
 % Description
-% 
+%
 %     [Flow,Meta] = loadflow(basinname) returns table Flow containing discharge
 %     data for basin basinname and metadata about the site and catchment Meta.
 %
@@ -19,45 +19,24 @@ function [Flow,Meta] = loadflow(basinname,varargin)
 %
 %     [Flow,Meta] = loadflow(___,'gapfill',true) gap-fills missing data using an
 %     auto-regressive fit to annual data values.
-% 
+%
 % See also loadcalm, loadbounds
-% 
+%
 % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%% parse inputs
-p = bfra.deps.magicParser; %#ok<*NODEF>
-p.FunctionName = 'bfra.loadflow';
-p.PartialMatching = true;
-
-p.addRequired( 'basinname',            @(x) ischar(x));
-p.addParameter('t1',       NaT,        @(x) isdatetime(x)|isnumeric(x));
-p.addParameter('t2',       NaT,        @(x) isdatetime(x)|isnumeric(x));
-p.addParameter('units',    NaN,        @(x) ischar(x));
-p.addParameter('gapfill',  false,      @(x) islogical(x));
-p.addParameter('addvar',   false,      @(x) ischar(x));
-
-p.parseMagically('caller');
-
-%p.addParameter('projection','geo',@(x)ischar(x));
-
-% NOTE: addvar is an option to add an unrelated input var, but for now it means
-% add a converted Q timeseries e.g. cm/yr i commented out the part where addvar
-% is checked so it is defualt for now and I can adjust to addvar as above
-
-if isnumeric(t1)
-   t1 = datetime(t1,'ConvertFrom','datenum');
-   t2 = datetime(t2,'ConvertFrom','datenum');
+% fast exit if toolbox not configured for data
+if ~isenv('BASEFLOW_DATA_PATH')
+   error('BASEFLOW_DATA_PATH environment variable not set')
 end
-%------------------------------------------------------------------------------
+
+% PARSE INPUTS
+[basinname, t1, t2, units, gapfill, ~] = parseinputs(basinname, varargin{:});
 
 % load the flow data
-pathdata = fullfile(getenv('USERDATAPATH'),'interface/bfra/matfiles/');
-filedata = fullfile(pathdata,'flow_prepped.mat');
-
-load(filedata,'Flow');
+load(fullfile(getenv('BASEFLOW_DATA_PATH'),'flow', 'flow_prepped.mat'), 'Flow');
 
 % check for categorical station name
 if iscategorical(basinname); basinname = char(basinname); end
@@ -122,14 +101,14 @@ if ~isnan(units)
       case 'km3/y'
          Flow.Q = cms2cmd(Flow.Q)*365.25./1e9; % Gt/yr
    end
-   
+
    % keep the original m3/s
    %if addvar == true
    Qm3s = Q;
    Flow = addvars(Flow,Qm3s);
    units = {units,'m3/s'};
    %end
-   
+
 else
    units = {'m3/s'};
 end
@@ -137,7 +116,7 @@ end
 % flow is in m3/s, so set that here
 Flow.Properties.VariableUnits = units;
 
-
+%% LOCAL FUNCTIONS
 function [Q,Time] = readflow(sta)
 
 filename = [sta '.csv'];
@@ -156,7 +135,7 @@ end
 
 % if not found, check the usgs database:
 if isempty(fileindx)
-   
+
    pathdata = '/Users/coop558/mydata/interface/recession/gagesII/data/';
    datadirs = {'ref','other','nonref'};
    for n = 1:numel(datadirs)
@@ -167,7 +146,7 @@ if isempty(fileindx)
          break;
       end
    end
-   
+
 end
 
 if isempty(fileindx)
@@ -190,10 +169,33 @@ Time  = Data.Time;
 %    % but this also reveals that i rmeoved leap inds so feb 28-mar 1
 %    dQ/dt is incorrect if any end up used in the analysis
 
+%% INPUT PARSER
+function [basinname, t1, t2, units, gapfill, addvar] = parseinputs( ...
+   basinname, varargin)
 
+parser = inputParser;
+parser.FunctionName = 'bfra.loadflow';
+parser.PartialMatching = true;
 
+parser.addRequired('basinname', @ischar);
+parser.addParameter('t1', NaT, @bfra.validation.isdatelike);
+parser.addParameter('t2', NaT, @bfra.validation.isdatelike);
+parser.addParameter('units', NaN, @ischar);
+parser.addParameter('gapfill', false, @islogical);
+parser.addParameter('addvar', false, @ischar);
 
+parser.parse(basinname, varargin{:});
 
+basinname = parser.Results.basinname;
+gapfill = parser.Results.gapfill;
+addvar = parser.Results.addvar;
+units = parser.Results.units;
+t1 = parser.Results.t1;
+t2 = parser.Results.t2;
 
+if ~isdatetime(t1)
+   t1 = datetime(t1, 'ConvertFrom', 'datenum');
+   t2 = datetime(t2, 'ConvertFrom', 'datenum');
+end
 
 

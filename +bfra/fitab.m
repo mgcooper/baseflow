@@ -30,6 +30,18 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 %     plotfit  logical scalar indicating whether to make a plot or not
 %     fitopts  struct containing fitting options (not currently implemented)
 %
+% Notes 
+%     weights are set zero anywhere mask is false
+% 
+%     Use method 'envelope' to pass a line through an arbitrary x,y pair
+%     (refpoints), specified in terms of the quantile of the x/y data
+%     distributions. this method is similar to 'mean' or 'median', but allows
+%     different ref points for the x/y values, for example the median of the x
+%     values (0.50 quantile) and some other quantile of the y values. The
+%     default (recommended) behavior is to keep the x-quantile = 0.5 and vary
+%     the y-quantile to move the line up and down as desired to define an
+%     "envelope"
+% 
 % See also prepfits
 %
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
@@ -41,75 +53,28 @@ persistent inoctave
 if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
 end
 
-%-------------------------------------------------------------------------------
-methodslist = {'nls','ols','mle','qtl','mean','median','envelope'};
-validmethod = @(x)any(validatestring(x,methodslist));
+% PARSE INPUTS
+[weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = parseinputs( ...
+   q, dqdt, method, mfilename, varargin{:});
 
-p = inputParser;
-p.FunctionName = 'bfra.fitab';
-p.StructExpand = false;
-% p.PartialMatching = true;
+% PREP FITS
+[x, y, logx, logy, weights, ok] = bfra.prepfits( ...
+   q, dqdt, 'weights', weights, 'mask', mask);
 
-addRequired(p, 'q',                          @(x)isnumeric(x)     );
-addRequired(p, 'dqdt',                       @(x)isnumeric(x)     );
-addRequired(p, 'method',                     validmethod          );
-addParameter(p,'weights',  ones(size(q)),    @(x)isnumeric(x)     );
-addParameter(p,'order',    nan,              @(x)isnumeric(x)     );
-addParameter(p,'mask',     true(size(q)),    @(x)islogical(x)     );
-addParameter(p,'quantile', 0.05,             @(x)isnumeric(x)     );
-addParameter(p,'refqtls',  [0.50 0.50],      @(x)isnumeric(x)     );
-addParameter(p,'Nboot',    100,              @(x)isnumeric(x)     );
-addParameter(p,'alpha',    0.68,             @(x)isnumeric(x)     );
-addParameter(p,'plotfit',  false,            @(x)islogical(x)     );
-addParameter(p,'fitopts',  struct(),         @(x)isstruct(x)      );
-
-parse(p,q,dqdt,method,varargin{:});
-
-weights  = p.Results.weights;
-order    = p.Results.order;
-mask     = p.Results.mask;
-qtl      = p.Results.quantile;
-refqtls  = p.Results.refqtls;
-Nboot    = p.Results.Nboot;
-alpha    = p.Results.alpha;
-plotfit  = p.Results.plotfit;
-fitopts  = p.Unmatched;
-
-% NOTE: fitopts is not implemented, but see bfra.Fit, where it could be used
-% to simplify calling this function from wrapper functions. Using the
-% unmatched method, it can be used to pass in arbitrary fitopts accepted
-% by any function but requires that the user know what to pass in.
-
-% could require:
-% if method = 'qtl', fitopts.quantile, fitopts.Nboot
-% if method = 'mle', fitopts.sigx, fitopts.sigy, fitopts.rxy
-% for all methods, fitopts.order, fitopts.alpha, fitopts.
-
-%-------------------------------------------------------------------------------
-
-[x,y,logx,logy,weights,ok] = bfra.prepfits(q,dqdt,'weights',weights,'mask',mask);
-
-% weights will equal zero anywhere mask is false
-
+% FAST EXIT
 if ok == false
    Fit = nan; return;
 end
 
-% method 'envelope' allows for passing a line through an arbitrary x,y
-% pair (refpoints), specified in terms of the quantile of the x/y data
-% distributions. this method is similar to 'mean' or 'median', but allows
-% different ref points for the x/y values, for example the median of the x
-% values (0.50 quantile) and some other quantile of the y values. The
-% default (recommended) behavior is to keep the x-quantile = 0.5 and vary the
-% y-quantile to move the line up and down as desired to define an "envelope"
-
-% if method = 'ols' and 'order' = 1, assume they want a line of slope 1
+% If method = 'ols' and 'order' = 1, use method 'mean' with a line of slope 1
 if strcmp(method,'ols') && order == 1
    method = 'mean';
 end
 
-switch method
+% SWITCH YARD
+fselect = method;
 
+switch method
    case 'ols'
       [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave);
    case 'qtl'
@@ -127,8 +92,7 @@ switch method
       [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave);
 end
 
-
-% NOW THAT FITTING IS DONE, SELECT THE FINAL FIT
+% EVALUATE THE FIT
 [Fit,ok] = evalFit(ab,x,y,ci,ok);
 
 if exist('fselect','var')
@@ -140,9 +104,8 @@ if plotfit == true
       'userab',ab,'mask',mask,'usertext',method);
 end
 
-%-------------------------------------------------------------------------------
+
 % FITTING METHODS
-%-------------------------------------------------------------------------------
 function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave)
 % ordinary least squares linear regression in log-log
 
@@ -693,3 +656,58 @@ ci_lower = beta' - t_score * se; % Lower bounds of the confidence intervals
 ci_upper = beta' + t_score * se; % Upper bounds of the confidence intervals
 ci = [ci_lower, ci_upper];
 
+
+%% INPUT PARSER
+function [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = ...
+   parseinputs(q, dqdt, method, funcname, varargin)
+
+methodslist = {'nls','ols','mle','qtl','mean','median','envelope'};
+validmethod = @(x) any(validatestring(x, methodslist));
+
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.FunctionName = funcname;
+   parser.StructExpand = false;
+   parser.addRequired( 'q',                          @isnumeric   );
+   parser.addRequired( 'dqdt',                       @isnumeric   );
+   parser.addRequired( 'method',                     validmethod  );
+   parser.addParameter('weights',  1,                @isnumeric   );
+   parser.addParameter('order',    nan,              @isnumeric   );
+   parser.addParameter('mask',     1,                @islogical   );
+   parser.addParameter('quantile', 0.05,             @isnumeric   );
+   parser.addParameter('refqtls',  [0.50 0.50],      @isnumeric   );
+   parser.addParameter('Nboot',    100,              @isnumeric   );
+   parser.addParameter('alpha',    0.68,             @isnumeric   );
+   parser.addParameter('plotfit',  false,            @islogical   );
+   parser.addParameter('fitopts',  struct(),         @isstruct    );
+end
+parse(parser,q,dqdt,method,varargin{:});
+
+weights  = parser.Results.weights;
+order    = parser.Results.order;
+mask     = parser.Results.mask;
+qtl      = parser.Results.quantile;
+refqtls  = parser.Results.refqtls;
+Nboot    = parser.Results.Nboot;
+alpha    = parser.Results.alpha;
+plotfit  = parser.Results.plotfit;
+fitopts  = parser.Unmatched;
+
+if isscalar(weights) && weights == 1
+   weights = ones(size(q));
+end
+
+if isscalar(mask) && mask == 1
+   mask = true(size(q));
+end
+
+% NOTE: fitopts is not implemented, but see bfra.Fit, where it could be used
+% to simplify calling this function from wrapper functions. Using the
+% unmatched method, it can be used to pass in arbitrary fitopts accepted
+% by any function but requires that the user know what to pass in.
+
+% could require:
+% if method = 'qtl', fitopts.quantile, fitopts.Nboot
+% if method = 'mle', fitopts.sigx, fitopts.sigy, fitopts.rxy
+% for all methods, fitopts.order, fitopts.alpha, fitopts.

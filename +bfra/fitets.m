@@ -37,23 +37,14 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % is an estimate of dq/dt and the average q within the window and those
 % two values are used to compute -dq/dt = aQ^b.
 
-%% parse inputs
-p = inputParser;
-p.FunctionName = 'fitets';
-addRequired(p, 'T', @(x)isnumeric(x) | isdatetime(x));
-addRequired(p, 'Q', @(x)isnumeric(x));
-addRequired(p, 'R', @(x)isnumeric(x));
-addParameter(p, 'etsparam', 0.2, @(x)isnumeric(x)); % default=recommended 20%
-addParameter(p, 'plotfit', false, @(x)islogical(x));
-parse(p,T,Q,R,varargin{:});
-etsparam = p.Results.etsparam;
-plotfit = p.Results.plotfit;
-
 persistent inoctave
 if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0; 
 end
 
-%% main function
+% PARSE INPUTS 
+[T, Q, R, etsparam, plotfit] = parseinputs(T, Q, R, varargin{:});
+
+% MAIN FUNCTION
 
 % Fit exponential function on the entire recession event
 
@@ -164,7 +155,6 @@ if plotfit == true
 end
 
 
-
 % tq_dt = datetime(tq,'ConvertFrom','datenum');
 % T_dt = datetime(T,'ConvertFrom','datenum');
 
@@ -192,6 +182,21 @@ end
 % tqq   = hours(tq-tq(1)+(tq(2)-tq(1)))./24; % keep og T
 % q     = interp1(tq,q,t,'linear');
 % dqdt  = interp1(tq,dqdt,t,'linear');
+
+%% INPUT PARSER
+function [T, Q, R, etsparam, plotfit] = parseinputs(T, Q, R, varargin)
+
+parser = inputParser;
+parser.FunctionName = 'bfra.fitets';
+parser.addRequired('T', @isnumeric);
+parser.addRequired('Q', @isnumeric);
+parser.addRequired('R', @isnumeric);
+parser.addParameter('etsparam', 0.2, @isnumeric); % default=recommended 20%
+parser.addParameter('plotfit', false, @islogical);
+parser.parse(T,Q,R,varargin{:});
+
+etsparam = parser.Results.etsparam;
+plotfit = parser.Results.plotfit;
 
 
 %% TRY EXPFIT

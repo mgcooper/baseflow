@@ -34,42 +34,27 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % entry for the basins or the index in Meta, so maybe doing that with boundaries
 % would simplify thigns here.
 
-%------------------------------------------------------------------------------
-validopts = @(x)any(validatestring(x,{'current','archive'}));
-validproj = @(x)any(validatestring(x,{'ease','geo'}));
+% parse inputs
+[basinname, version, projection] = parseinputs(basinname,varargin{:});
 
-p                = inputParser;
-p.FunctionName   = 'bfra.loadbasins';
-p.addRequired('basinname',                @(x)ischar(x)|iscell(x) );
-p.addOptional( 'version',     'current',  validopts               );
-p.addParameter('projection',  'geo',      validproj               );
-
-parse(p,basinname,varargin{:});
-
-basinname   = p.Results.basinname;
-version     = p.Results.version;
-projection  = p.Results.projection;
-
-%------------------------------------------------------------------------------
-
-% load the basin boundaries and the flow data
-pathdata = fullfile(getenv('USERDATAPATH'),'interface/basins/matfiles/');
+% load the basin metadata
 
 % Nov 2022, checked this out from dev-bk, and copied below from current
 % version of loadmeta  
 switch version
    case 'current'
-      filedata  = fullfile(pathdata,'basin_boundaries.mat');
+      filename = 'basin_boundaries.mat';
    case 'archive'
-      filedata  = fullfile(pathdata,'basin_boundaries_tmp.mat');
+      filename = 'basin_boundaries_tmp.mat';
 end
-load(filedata,'Bounds','Meta');
+filename = fullfile(getenv('BASEFLOW_DATA_PATH'),'basins', filename);
+load(filename, 'Bounds', 'Meta');
 
 if strcmp(basinname,'ALL_BASINS')    % return all the basins
 
-   % Meta     = Bounds.meta; % commented out nov 2022, instead load Meta
-   Poly     = [Bounds.poly.(projection)];
-   Basins   = Bounds.(projection);
+   % Meta = Bounds.meta; % commented out nov 2022, instead load Meta
+   Basins = Bounds.(projection);
+   Poly = [Bounds.poly.(projection)];
 
    % Sep 2, 2022, this was below this if/else/end, but seems like it
    % should only be applicable to this case, unless I pass in a list of
@@ -77,23 +62,23 @@ if strcmp(basinname,'ALL_BASINS')    % return all the basins
    % comment this out and test uncommenting the block below 
 
    % sort the Basins, Meta, and Poly by station
-   Meta     = sortrows(Meta,'station');
-   [~,idx]  = sort({Basins.Station}); 
-   Basins   = Basins(idx(:));
-   Poly     = Poly(idx(:));
+   Meta = sortrows(Meta,'station');
+   [~,ii] = sort({Basins.Station}); 
+   Basins = Basins(ii(:));
+   Poly = Poly(ii(:));
 
 else
 
    % use ismember for exact match not contains
-   allnames    = lower({Bounds.(projection).Name});
-   idx         = find(ismember(allnames,lower(basinname)));
+   allnames = lower({Bounds.(projection).Name});
+   ii = find(ismember(allnames,lower(basinname)));
 
-   if isempty(idx)
+   if isempty(ii)
       error('basin not found, check name');
    else
-      Basins   = Bounds.(projection)(idx,:);
-      Poly     = Bounds.poly.(projection)(idx);
-      Meta     = Meta(idx,:);
+      Basins = Bounds.(projection)(ii,:);
+      Poly = Bounds.poly.(projection)(ii);
+      Meta = Meta(ii,:);
    end
 end
 
@@ -107,4 +92,20 @@ end
 % [~,idx] = sort({shp1.Station}); idx = idx'; 
 % shp1    = shp1(idx);
 % Basins   = sort
-   
+
+%% input parser
+function [basinname, version, projection] = parseinputs(basinname,varargin)
+
+validopts = @(x)any(validatestring(x,{'current','archive'}));
+validproj = @(x)any(validatestring(x,{'ease','geo'}));
+
+parser = inputParser;
+parser.FunctionName = 'bfra.loadbasins';
+parser.addRequired('basinname', @(x)ischar(x)|iscell(x));
+parser.addOptional( 'version', 'current', validopts);
+parser.addParameter('projection', 'geo', validproj);
+parser.parse(basinname,varargin{:});
+
+basinname   = parser.Results.basinname;
+version     = parser.Results.version;
+projection  = parser.Results.projection;

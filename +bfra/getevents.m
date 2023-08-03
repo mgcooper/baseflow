@@ -63,53 +63,11 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % Updates
 % 17 Jan: renamed old getevents to wrapevents and old findevents to getevents
 
-%-------------------------------------------------------------------------------
-% input handling
-%-------------------------------------------------------------------------------
-p                 = inputParser;
-p.FunctionName    = 'getevents';
-p.StructExpand    = true;
-p.PartialMatching = false;
-p.CaseSensitive   = true;              % true because T,Q,R are sent back
+% PARSE INPUTS
+[qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
+   pickevents, plotevents, asannual, T, Q, R] = parseinputs(mfilename, ...
+   T, Q, R, varargin{:});
 
-addRequired(p, 'T',                  @(x) bfra.validation.isdatelike(x)    );
-addRequired(p, 'Q',                  @(x) isnumeric(x) & numel(x)==numel(T));
-addRequired(p, 'R',                  @(x) isnumeric(x)                     );
-addParameter(p,'qmin',        1,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'nmin',        4,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'fmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmin',        0,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'cmax',        2,     @(x) isnumeric(x) & isscalar(x)       );
-addParameter(p,'rmconvex',    false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'rmnochange',  false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'rmrain',      false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'pickevents',  false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'plotevents',  false, @(x) islogical(x) & isscalar(x)       );
-addParameter(p,'asannual',    false, @(x) islogical(x) & isscalar(x)       );
-
-parse(p,T,Q,R,varargin{:});
-
-qmin        = p.Results.qmin;
-nmin        = p.Results.nmin;
-fmax        = p.Results.fmax;
-rmax        = p.Results.rmax;
-rmin        = p.Results.rmin;
-cmax        = p.Results.cmax;
-rmconvex    = p.Results.rmconvex;
-rmnochange  = p.Results.rmnochange;
-rmrain      = p.Results.rmrain;
-pickevents  = p.Results.pickevents;
-plotevents  = p.Results.plotevents;
-asannual    = p.Results.asannual;
-
-%-------------------------------------------------------------------------------
-
-% test
-% try
-%    T = datetime(T,'ConvertFrom','datenum');
-% catch
-% end
 
 % allow empyt R i.e. input syntax getevents(T,Q,[],...)
 if isempty(R); R = zeros(size(Q)); end
@@ -179,3 +137,50 @@ end
 Info.runlengths   = Info.istop - Info.istart + 1;
 Info.ifirst       = ifirst;
 Info.datalength   = numdata;
+
+%% INPUT PARSER
+function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
+   pickevents, plotevents, asannual, T, Q, R] = parseinputs(mfilename, ...
+   T, Q, R, varargin)
+
+persistent parser
+if isempty(parser)
+   parser = inputParser;
+   parser.StructExpand = true;
+   parser.PartialMatching = false;
+   parser.CaseSensitive = true;
+
+   parser.addRequired('T', @bfra.validation.isdatelike);
+   parser.addRequired('Q', @isnumeric);
+   parser.addRequired('R', @isnumeric);
+
+   parser.addParameter('qmin', 1, @bfra.validation.isnumericscalar);
+   parser.addParameter('nmin', 4, @bfra.validation.isnumericscalar);
+   parser.addParameter('fmax', 2, @bfra.validation.isnumericscalar);
+   parser.addParameter('rmax', 2, @bfra.validation.isnumericscalar);
+   parser.addParameter('rmin', 0, @bfra.validation.isnumericscalar);
+   parser.addParameter('cmax', 2, @bfra.validation.isnumericscalar);
+   parser.addParameter('rmconvex', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('rmnochange', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('rmrain', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('pickevents', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('plotevents', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('asannual', false, @bfra.validation.islogicalscalar);
+end
+parser.FunctionName = ['bfra.' mfilename];
+parser.parse(T, Q, R, varargin{:});
+
+qmin = parser.Results.qmin;
+nmin = parser.Results.nmin;
+fmax = parser.Results.fmax;
+rmax = parser.Results.rmax;
+rmin = parser.Results.rmin;
+cmax = parser.Results.cmax;
+rmrain = parser.Results.rmrain;
+rmconvex = parser.Results.rmconvex;
+rmnochange = parser.Results.rmnochange;
+pickevents = parser.Results.pickevents;
+plotevents = parser.Results.plotevents;
+asannual = parser.Results.asannual;
+
+assert(numel(x)==numel(T))

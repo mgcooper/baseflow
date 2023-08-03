@@ -25,21 +25,8 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'fitvts';
-
-addRequired(p, 'T', @(x)isnumeric(x)|isdatetime(x));
-addRequired(p, 'Q', @(x)isnumeric(x));
-addRequired(p, 'R', @(x)isnumeric(x));
-addParameter(p,'vtsparam', 1, @(x)isnumeric(x)); % default=1 m3/d
-addParameter(p,'plotfit', false, @(x)islogical(x));
-
-parse(p,T,Q,R,varargin{:});
-
-vtsparam = p.Results.vtsparam;
-plotfit  = p.Results.plotfit;
-%-------------------------------------------------------------------------------
+% PARSE INPUTS
+[T, Q, R, vtsparam, plotfit] = parseinputs(T, Q, R, varargin{:});
 
 % the C value should be chosen such that dt(i) = t(i)-t(i-j) <= t(i)/4
 % the limit value is limit = C*(Q(H+e)-Qi)) where H is stage height, e
@@ -94,6 +81,21 @@ if plotfit == true
    
 end
    
+%% INPUT PARSER
+function [T, Q, R, vtsparam, plotfit] = parseinputs(T, Q, R, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.fitvts';
+
+parser.addRequired('T', @bfra.validation.isdatelike);
+parser.addRequired('Q', @isnumeric);
+parser.addRequired('R', @isnumeric);
+parser.addParameter('vtsparam', 1, @isnumeric); % default=1 m3/d
+parser.addParameter('plotfit', false, @islogical);
+
+parser.parse(T, Q, R, varargin{:});
+
+vtsparam = parser.Results.vtsparam;
+plotfit  = parser.Results.plotfit;
 
 
 % NOTES ON C-CRITERIA test C criteria the C criteria is that dt<ti/4, where

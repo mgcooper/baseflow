@@ -26,32 +26,9 @@ function h = plplotb(x,xmin,alpha,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% --------------- parse inputs
-p = inputParser;
-p.FunctionName = 'bfra.plplotb';
-p.CaseSensitive = false;
-p.KeepUnmatched = true;
-
-addRequired(   p, 'x',                          @(x)isnumeric(x));
-addRequired(   p, 'xmin',                       @(x)isnumeric(x));
-addRequired(   p, 'alpha',                      @(x)isnumeric(x));
-addParameter(  p, 'alphaci',        nan,        @(x)isnumeric(x));
-addParameter(  p, 'xminci',         nan,        @(x)isnumeric(x));
-addParameter(  p, 'varsym',         '\tau',     @(x)ischar(x));
-addParameter(  p, 'trimline',       false,      @(x)islogical(x));
-addParameter(  p, 'labelplot',      true,       @(x)islogical(x));
-addParameter(  p, 'ax',             gca,        @(x)bfra.validation.isaxis(x));
-
-parse(p,x,xmin,alpha,varargin{:});
-
-alphaci     = p.Results.alphaci;
-xminci      = p.Results.xminci;
-varsym      = p.Results.varsym;
-trimline    = p.Results.trimline;
-labelplot   = p.Results.labelplot;
-ax          = p.Results.ax;
-
-% --------------- function code
+% PARSE INPUTS
+[x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] = ...
+   parseinputs(x, xmin, alpha, varargin{:});
    
 % Compute the complementary cumulative distribution function
 N = numel(x);
@@ -132,7 +109,7 @@ ylimits = get(ax, 'YLim');
 ylimits(2) = 1.5;
 set(h.ax, 'YLim', ylimits); 
 
-
+%% LOCAL FUNCTIONS
 function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
 %ADDLABELS add an arrow pointing to tau0 and tau_exp
 
@@ -190,3 +167,29 @@ bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
 text(0.95*xarrw(1),yarrw(1),ta, ...
    'HorizontalAlignment','right','FontSize',14)
 
+%% INPUT PARSER
+function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] = ...
+   parseinputs(x, xmin, alpha, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.plplotb';
+parser.CaseSensitive = false;
+parser.KeepUnmatched = true;
+
+parser.addRequired('x', @isnumeric);
+parser.addRequired('xmin', @isnumeric);
+parser.addRequired('alpha', @isnumeric);
+parser.addParameter('alphaci', nan, @isnumeric);
+parser.addParameter('xminci', nan, @isnumeric);
+parser.addParameter('varsym', '\tau', @ischar);
+parser.addParameter('trimline', false, @islogical);
+parser.addParameter('labelplot', true, @islogical);
+parser.addParameter('ax', gca, @(x)bfra.validation.isaxis(x));
+
+parser.parse(x, xmin, alpha, varargin{:});
+
+alphaci     = parser.Results.alphaci;
+xminci      = parser.Results.xminci;
+varsym      = parser.Results.varsym;
+trimline    = parser.Results.trimline;
+labelplot   = parser.Results.labelplot;
+ax          = parser.Results.ax;

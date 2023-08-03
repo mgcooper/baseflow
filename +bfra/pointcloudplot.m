@@ -31,52 +31,24 @@ function out = pointcloudplot(q,dqdt,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
+% Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
+
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p              = inputParser;
-p.FunctionName = 'bfra.pointcloudplot';
+% PARSE INPUTS
+[q, dqdt, mask, reflines, reflabels, blate, userab, precision, timestep, ...
+   addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin{:});
 
-addRequired(p, 'q',                             @(x)isnumeric(x));
-addRequired(p, 'dqdt',                          @(x)isnumeric(x));
-addParameter(p,'mask',        true(size(q)),    @(x)islogical(x));
-addParameter(p,'reflines',    {'bestfit'},      @(x)iscell(x));
-addParameter(p,'reflabels',   false,            @(x)bfra.validation.islogicalscalar(x));
-addParameter(p,'blate',       1,                @(x)isnumeric(x));
-addParameter(p,'userab',      [1 1],            @(x)isnumeric(x));
-addParameter(p,'precision',   1,                @(x)isnumeric(x));
-addParameter(p,'timestep',    1,                @(x)isnumeric(x));
-addParameter(p,'addlegend',   true,             @(x)islogical(x));
-addParameter(p,'usertext',    '',               @(x)ischar(x));
-addParameter(p,'rain',        nan,              @(x)isnumeric(x));
-addParameter(p,'ax', bfra.util.emptyaxes,       @(x)bfra.validation.isaxis(x));
-
-parse(p,q,dqdt,varargin{:});
-
-mask        = p.Results.mask;
-reflines    = p.Results.reflines;
-reflabels   = p.Results.reflabels;
-blate       = p.Results.blate;
-userab      = p.Results.userab;
-precision   = p.Results.precision;
-timestep    = p.Results.timestep;
-addlegend   = p.Results.addlegend;
-usertext    = p.Results.usertext;
-rain        = p.Results.rain;
-ax          = p.Results.ax;
-
-% Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted
-%-------------------------------------------------------------------------------
-
+% create the figure / axes
 if not(bfra.validation.isaxis(ax)) || isempty(ax)
-   %fig = figure('Position',[380 200 300 210]); ax = gca;
-   fig = figure('Position',[380 200 550 510]); ax = gca;
-   %fig = figure('Units','centimeters','Position',[5 5 23*4/5 19*4/5]); ax = gca;
+   fig = figure('Position',[380 200 550 510]); 
+   ax = gca;
 else
    fig = get(ax,'Parent');
 end
 
+% plot the data
 h0 = loglog(ax,q,-dqdt,'o'); 
 bfra.util.formatPlotMarkers('markersize',6);
 hold on; grid off;
@@ -114,11 +86,9 @@ end
 ab = nan(numel(reflines),2);
 
 
-% add reflines
+% add reference lines
 for n = 1:numel(reflines)
-
    switch reflines{n}
-
       case 'early'
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
                            q,-dqdt,                      ...
@@ -127,9 +97,7 @@ for n = 1:numel(reflines)
                            'labels',reflabels,           ...
                            'mask',mask                   ...
                            );
-
          set(h(n),'LineWidth',1);
-
       case 'late'
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
                            q,-dqdt,                      ...
@@ -138,37 +106,29 @@ for n = 1:numel(reflines)
                            'labels',reflabels,           ...
                            'mask',mask                   ...
                            );
-
          set(h(n),'LineWidth',1);
-
       case 'upperenvelope'
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
                            q,-dqdt,                      ...
                            'refline','upperenvelope',    ...
                            'labels',reflabels            ...
                            );
-
          % make ylimits span the min dq/dt to the upper envelope at max Q
          yupplim = ab(n,1)*max(xlims)^ab(n,2);
-
       case 'lowerenvelope'
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
                            q,-dqdt,                      ...
                            'refline','lowerenvelope',    ...
                            'labels',reflabels            ...
                            );
-
          ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
-
       case 'bestfit'
          [h(n),ab(n,:)] = bfra.plotrefline(              ...
                            q,-dqdt,                      ...
                            'refline','bestfit',          ...
                            'labels',false                ...
                            );
-
          set(h(n),'LineWidth',2);
-
       case 'userfit'
 
          [h(n),ab(n,:)] =  bfra.plotrefline(             ...
@@ -179,11 +139,8 @@ for n = 1:numel(reflines)
                            'mask',mask                   ...
                            );
    end
-
    out.ab.(reflines{n}) = ab(n,:);
-
 end
-
 set(gca,'YLim',[ylowlim yupplim]);
 
 % plot rain if provided
@@ -276,7 +233,7 @@ out.legend     = l;
 
 % snapnow;
 
-
+%% LOCAL FUNCTIONS
 function hrain = plotrain(ax,h,rain,x,y)
    
 % ax is the axis to plot into
@@ -305,3 +262,37 @@ else
                   'MarkerFaceColor','none','Color','m','LineWidth',1);
    end
 end
+
+%% INPUT PARSER
+function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
+   timestep, addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.pointcloudplot';
+
+ parser.addRequired('q', @isnumeric);
+ parser.addRequired('dqdt', @isnumeric);
+ parser.addParameter('mask', true(size(q)), @islogical);
+ parser.addParameter('reflines', {'bestfit'}, @iscell);
+ parser.addParameter('reflabels', false, @islogical);
+ parser.addParameter('blate', 1, @isnumeric);
+ parser.addParameter('userab', [1 1], @isnumeric);
+ parser.addParameter('precision', 1, @isnumeric);
+ parser.addParameter('timestep', 1, @isnumeric);
+ parser.addParameter('addlegend', true, @islogical);
+ parser.addParameter('usertext', '', @ischar);
+ parser.addParameter('rain', nan, @isnumeric);
+ parser.addParameter('ax', bfra.util.emptyaxes, @(x)bfra.validation.isaxis(x));
+
+ parser.parse(q, dqdt, varargin{:});
+
+ mask = parser.Results.mask;
+ reflines = parser.Results.reflines;
+ reflabels = parser.Results.reflabels;
+ blate = parser.Results.blate;
+ userab = parser.Results.userab;
+ precision = parser.Results.precision;
+ timestep = parser.Results.timestep;
+ addlegend = parser.Results.addlegend;
+ usertext = parser.Results.usertext;
+ rain = parser.Results.rain;
+ ax = parser.Results.ax;

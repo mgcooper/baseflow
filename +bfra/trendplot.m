@@ -8,42 +8,9 @@ function h = trendplot(t,y,varargin)
 % 
 % See also printtrend
 
-%-------------------------------------------------------------------------------
-p = bfra.deps.magicParser;
-p.FunctionName = mfilename;
-p.PartialMatching = true;
-
-dpos = [321 241 512 384]; % default figure size
-
-p.addRequired('t',                  @(x)isnumeric(x) || isdatetime(x));
-p.addRequired('y',                  @(x)isnumeric(x)                 );
-p.addParameter('units',       '',   @(x)ischar(x)                    );
-p.addParameter('ylabeltext',  '',   @(x)ischar(x)                    );
-p.addParameter('xlabeltext',  '',   @(x)ischar(x)                    );
-p.addParameter('titletext',   '',   @(x)ischar(x)                    );
-p.addParameter('legendtext',  '',   @(x)ischar(x)                    );
-p.addParameter('method',      'ols',@(x)ischar(x)                    );
-p.addParameter('alpha',       0.05, @(x)isnumeric(x)                 );
-p.addParameter('anomalies',   true, @(x)islogical(x)                 );
-p.addParameter('quantile',    nan,  @(x)isnumeric(x)                 );
-p.addParameter('figpos',      dpos, @(x)isnumeric(x)                 );
-p.addParameter('useax',       nan,  @(x)bfra.validation.isaxis(x)    );
-p.addParameter('showfig',     true, @(x)islogical(x)                 );
-p.addParameter('errorbars',   false,@(x)islogical(x)                 );
-p.addParameter('errorbounds', false,@(x)islogical(x)                 );
-p.addParameter('reference',   nan,  @(x)isnumeric(x)                 );
-p.addParameter('yerr',        nan,  @(x)isnumeric(x)                 );
-p.addParameter('precision',   nan,  @(x)isnumeric(x)                 );
-p.parseMagically('caller');
-
-useax = p.Results.useax;
-units = p.Results.units;
-qntls = p.Results.quantile; clear quantile
-alpha = p.Results.alpha;
-preci = p.Results.precision;
-yerrs = p.Results.yerr;
-vargs = namedargs2cell(p.Unmatched);
-%-------------------------------------------------------------------------------
+% PARSE INPUTS
+[useax, units, qntls, alpha, preci, yerrs, vargs] = parseinputs( ...
+   t, y, mfilename, varargin{:});
 
 % convert to anomalies etc.
 [t,y,yerrs] = prepInput(t,y,yerrs,anomalies,reference);
@@ -64,12 +31,14 @@ h = drawLegend(h,ab,legendtext,units,alpha,err,makeleg,legidx,preci);
 
 ylabel(ylabeltext); xlabel(xlabeltext); title(titletext);
 
+% PACKAGE OUTPUT
 h.ax = gca;
 h.ab = ab;
 h.err = err;
 h.yfit = yfit;
 h.yci = yci;
 
+%% LOCAL FUNCTIONS
 function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)
 
 % create a regular time in years, works for both months and years
@@ -380,3 +349,44 @@ else
    % the current legend will be the first one, not numleg as I expected
    legobj(1).String{legidx} = trendtxt;
 end
+
+%% INPUT PARSER
+function [useax, units, qntls, alpha, preci, yerrs, vargs] = parseinputs( ...
+   t, y, mfilename, varargin)
+
+parser = inputParser;
+parser.FunctionName = mfilename;
+parser.PartialMatching = true;
+
+dpos = [321 241 512 384]; % default figure size
+
+parser.addRequired('t',                   @isnumeric);
+parser.addRequired('y',                   @isnumeric);
+parser.addParameter('units',        '',   @ischar);
+parser.addParameter('ylabeltext',   '',   @ischar);
+parser.addParameter('xlabeltext',   '',   @ischar);
+parser.addParameter('titletext',    '',   @ischar);
+parser.addParameter('legendtext',   '',   @ischar);
+parser.addParameter('method',       'ols',@ischar);
+parser.addParameter('alpha',        0.05, @isnumeric);
+parser.addParameter('anomalies',    true, @islogical);
+parser.addParameter('quantile',     nan,  @isnumeric);
+parser.addParameter('figpos',       dpos, @isnumeric);
+parser.addParameter('useax',        nan,  @bfra.validation.isaxis);
+parser.addParameter('showfig',      true, @islogical);
+parser.addParameter('errorbars',    false,@islogical);
+parser.addParameter('errorbounds',  false,@islogical);
+parser.addParameter('reference',    nan,  @isnumeric);
+parser.addParameter('yerr',         nan,  @isnumeric);
+parser.addParameter('precision',    nan,  @isnumeric);
+
+parser.parse(t, y, varargin{:});
+
+useax = parser.Results.useax;
+units = parser.Results.units;
+qntls = parser.Results.quantile;
+alpha = parser.Results.alpha;
+preci = parser.Results.precision;
+yerrs = parser.Results.yerr;
+vargs = namedargs2cell(parser.Unmatched);
+

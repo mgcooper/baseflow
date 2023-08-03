@@ -31,47 +31,15 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-% input parser
-p = bfra.deps.magicParser;
-p.FunctionName  = 'bfra.plotdqdt';
-p.CaseSensitive = false;
+% PARSE INPUTS
+[q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, rain, ax, ...
+   blate, precision, timestep, eventID, labelplot] = parseinputs( ...
+   q, dqdt, mfilename, varargin{:});
 
-validq = @(x)validateattributes(x, {'numeric'},{'real','column','size',size(dqdt)}, mfilename, 'q', 1);
-validqdt = @(x)validateattributes(x, {'numeric'},{'real','column','size',size(q)}, mfilename, 'dqdt', 2);
-validfitmethod = @(x)validateattributes(x,{'char','string'},{'scalartext'},mfilename,'fitmethod');
-validpickmethod= @(x)validateattributes(x,{'char','string'},{'scalartext'},mfilename,'pickmethod');
-validplotopt = @(x)validateattributes(x,{'logical','scalar'},{'nonempty'},mfilename,'plotfits');
-validweights = @(x)validateattributes(x,{'numeric'},{'real','column','size',size(q)},mfilename,'weights');
-validax = @(x)validateattributes(x,{'matlab.graphics.axis.Axes','char'},{'scalar'},mfilename,'ax');
-validtimestep = @(x)validateattributes(x,{'numeric','duration'},{'nonempty'},mfilename,'timestep');
-validprecision = @(x)validateattributes(x,{'numeric'},{'nonempty'},mfilename,'precision');
-validblate = @(x)validateattributes(x,{'numeric'},{'real','scalar'},mfilename,'blate');
-validrain = @(x)validateattributes(x,{'numeric'},{'real','column','size',size(dqdt)},mfilename,'rain');
-
-p.addRequired(   'q',                           validq            );
-p.addRequired(   'dqdt',                        validqdt          );
-p.addParameter(  'fitmethod', 'nls',            validfitmethod    );
-p.addParameter(  'pickmethod','none',           validpickmethod   );
-p.addParameter(  'plotfits',  true,             validplotopt      );
-p.addParameter(  'showfig',   true,             @(x)islogical(x)  );
-p.addParameter(  'weights',   ones(size(q)),    validweights      );
-p.addParameter(  'rain',      zeros(size(q)),   validrain         );
-p.addParameter(  'ax',        'none',           validax           );
-p.addParameter(  'blate',     1.0,              validblate        );
-p.addParameter(  'precision', 1,                validprecision    );
-p.addParameter(  'timestep',  1,                validtimestep     );
-p.addParameter(  'eventID',   '',               @(x)ischar(x)     );
-p.addParameter(  'labelplot', true,             @(x)islogical(x)  );
-
-p.parseMagically('caller');
-
-weights  = p.Results.weights;
 
 % INIT OUTPUT
 [hFits,Fits,Picks] = initOutput();
 
-%------------------------------------------------------------------------------
 
 % Prep fits
 [~,~,logx,logy,weights,ok] = bfra.prepfits(q,dqdt,'weights',weights);
@@ -90,7 +58,7 @@ Fits = pickFitter(Picks,fitmethod);
 hFits = plotFits(Fits,Picks,fitmethod,ax,plotfits,         ...
    showfig,blate,timestep,precision,labelplot);
 
-% INITIALIZE OUTPUT
+%% LOCAL FUNCTIONS
 function [hFits,Fits,Picks] = initOutput()
 
 % initialize output
@@ -492,3 +460,58 @@ if nPicks == 3
 
    %end
 end
+
+%% INPUT PARSER
+function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
+   rain, ax, blate, precision, timestep, eventID, labelplot] = parseinputs(...
+   q, dqdt, mfilename, varargin)
+
+parser = inputParser;
+parser.FunctionName = ['bfra.' mfilename];
+parser.CaseSensitive = false;
+
+validateattributes(q, {'numeric'},{'real','column'}, mfilename, 'q');
+validateattributes(dqdt, {'numeric'},{'real','column'}, mfilename, 'dqdt');
+validateattributes('fitmethod', {'char','string'},{'scalartext'}, mfilename);
+validateattributes('pickmethod', {'char','string'},{'scalartext'}, mfilename);
+validateattributes('plotfits', {'logical'},{'scalar'}, mfilename);
+validateattributes('weights', {'numeric'},{'real','column'}, mfilename);
+validateattributes('ax', {'matlab.graphics.axis.Axes','char'},{'scalar'}, mfilename);
+validateattributes('timestep', {'numeric','duration'}, mfilename);
+validateattributes('precision', {'numeric'}, mfilename);
+validateattributes('blate', {'numeric'},{'real','scalar'}, mfilename);
+validateattributes('rain', {'numeric'},{'real','column'}, mfilename);
+
+parser.addRequired('q');
+parser.addRequired('dqdt');
+parser.addParameter('fitmethod', 'nls');
+parser.addParameter('pickmethod', 'none');
+parser.addParameter('plotfits', true);
+parser.addParameter('showfig', true, @islogical);
+parser.addParameter('weights', ones(size(q)));
+parser.addParameter('rain', zeros(size(q)));
+parser.addParameter('ax', 'none');
+parser.addParameter('blate', 1.0);
+parser.addParameter('precision', 1);
+parser.addParameter('timestep', 1);
+parser.addParameter('eventID', '', @ischar);
+parser.addParameter('labelplot', true, @islogical);
+
+parser.parse(q, dqdt, varargin{:});
+
+q = parser.Results.q;
+ax = parser.Results.ax;
+dqdt = parser.Results.dqdt;
+rain = parser.Results.rain;
+blate = parser.Results.blate;
+showfig = parser.Results.showfig;
+weights = parser.Results.weights;
+eventID = parser.Results.eventID;
+timestep = parser.Results.timestep;
+plotfits = parser.Results.plotfits;
+labelplot = parser.Results.labelplot;
+precision = parser.Results.precision;
+fitmethod = parser.Results.fitmethod;
+pickmethod = parser.Results.pickmethod;
+
+

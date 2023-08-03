@@ -44,41 +44,10 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-p                 = inputParser;
-p.StructExpand    = false;
-p.FunctionName    = 'bfra.cloudphi';
-
-addRequired(p, 'q',                       @(x)isnumeric(x)  );
-addRequired(p, 'dqdt',                    @(x)isnumeric(x)  );
-addRequired(p, 'blate',                   @(x)isnumeric(x)  );
-addRequired(p, 'A',                       @(x)isnumeric(x)  );
-addRequired(p, 'D',                       @(x)isnumeric(x)  );
-addRequired(p, 'L',                       @(x)isnumeric(x)  );
-addRequired(p, 'method',                  @(x)ischar(x)     );
-addParameter(p,'earlyqtls',[0.95 0.95],   @(x)isnumeric(x)  );
-addParameter(p,'lateqtls', [0.5 0.5],     @(x)isnumeric(x)  );
-addParameter(p,'userab',   nan,           @(x)isnumeric(x)  );
-addParameter(p,'mask',     true(size(q)), @(x)islogical(x)  );
-addParameter(p,'theta',    0,             @(x)isnumeric(x)  );
-addParameter(p,'isflat',   true,          @(x)islogical(x)  );
-addParameter(p,'soln1',    'RS05',        @(x)ischar(x)     );
-addParameter(p,'soln2',    'RS05',        @(x)ischar(x)     );
-addParameter(p,'dispfit',  false,         @(x)islogical(x)  );
-
-parse(p,q,dqdt,blate,A,D,L,method,varargin{:});
-
-earlyqtls   = p.Results.earlyqtls;
-lateqtls    = p.Results.lateqtls;
-userab      = p.Results.userab;
-mask        = p.Results.mask;
-theta       = p.Results.theta;
-isflat      = p.Results.isflat;
-soln1       = p.Results.soln1;
-soln2       = p.Results.soln2;
-dispfit     = p.Results.dispfit;
-
-%-------------------------------------------------------------------------------
+% parse inputs
+[q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ...
+   theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, ...
+   A, D, L, method, varargin{:});
 
 % note: the method used for ahat = pointcloudintercept should also be used here
 
@@ -123,3 +92,72 @@ else
    txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
    legend(hdum,txt,'Interpreter','latex','Location','northwest','box','off');
 end
+
+%% input parser
+
+function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ...
+   theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, ...
+   A, D, L, method, varargin)
+
+parser = inputParser;
+parser.StructExpand = false;
+parser.FunctionName = 'bfra.cloudphi';
+
+addRequired(parser, 'q', @isnumeric);
+addRequired(parser, 'dqdt', @isnumeric);
+addRequired(parser, 'blate', @isnumeric);
+addRequired(parser, 'A', @isnumeric);
+addRequired(parser, 'D', @isnumeric);
+addRequired(parser, 'L', @isnumeric);
+addRequired(parser, 'method', @ischar);
+addParameter(parser,'earlyqtls',[0.95 0.95], @isnumeric);
+addParameter(parser,'lateqtls', [0.5 0.5], @isnumeric);
+addParameter(parser,'userab', nan, @isnumeric);
+addParameter(parser,'mask', true(size(q)), @islogical);
+addParameter(parser,'theta', 0, @isnumeric);
+addParameter(parser,'isflat', true,  @islogical);
+addParameter(parser,'soln1', 'RS05', @ischar);
+addParameter(parser,'soln2', 'RS05', @ischar);
+addParameter(parser,'dispfit', false, @islogical);
+
+parse(parser,q,dqdt,blate,A,D,L,method,varargin{:});
+
+earlyqtls   = parser.Results.earlyqtls;
+lateqtls    = parser.Results.lateqtls;
+userab      = parser.Results.userab;
+mask        = parser.Results.mask;
+theta       = parser.Results.theta;
+isflat      = parser.Results.isflat;
+soln1       = parser.Results.soln1;
+soln2       = parser.Results.soln2;
+dispfit     = parser.Results.dispfit;
+
+%% 
+% found this in an older test version, need to integrate or delete
+% 
+% if isflat
+%    switch blate
+%       case 1
+%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+%             'soln2','BS03','dispfit',dispfit);
+%       case 3/2
+%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+%             'soln2','BS04','dispfit',dispfit);
+%       otherwise
+%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
+%             'soln2','RS05','dispfit',dispfit);
+%    end
+% else
+%    switch blate
+%       case 1
+%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...
+%             'soln2','BR94','dispfit',dispfit,'theta',theta);
+%       case 3/2
+%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...
+%             'soln2','RS06','dispfit',dispfit,'theta',theta);
+%       otherwise
+%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...
+%             'soln2','RS06','dispfit',dispfit,'theta',theta);
+%    end
+% end
+% a = a2;

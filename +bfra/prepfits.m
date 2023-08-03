@@ -19,20 +19,8 @@ function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)
 %
 %  See also: fitab
 
-%-------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'bfra.prepfits';
-
-addRequired(p,    'q',                          @(x)isnumeric(x)  );
-addRequired(p,    'dqdt',                       @(x)isnumeric(x)  );
-addParameter(p,   'weights',  ones(size(q)),    @(x)isnumeric(x)  );
-addParameter(p,   'mask',     true(size(q)),    @(x)islogical(x)  );
-
-parse(p,q,dqdt,varargin{:});
-
-w = p.Results.weights;
-m = p.Results.mask;
-%-------------------------------------------------------------------------------
+% PARSE INPUTS
+[q, dqdt, w, m] = parseinputs(q, dqdt, varargin{:});
 
 % keep the negative dq/dt values
 keep = dqdt<0;
@@ -50,3 +38,17 @@ w(m==false) = 0;
 % failure check
 ok = numel(y)>3;
 
+%% parse inputs
+function [q, dqdt, weights, mask] = parseinputs(q, dqdt, varargin)
+parser = inputParser;
+parser.FunctionName = 'bfra.prepfits';
+
+parser.addRequired('q', @isnumeric);
+parser.addRequired('dqdt', @isnumeric);
+parser.addParameter('weights', ones(size(q)), @isnumeric);
+parser.addParameter('mask', true(size(q)), @islogical);
+
+parser.parse(q, dqdt, varargin{:});
+
+weights = parser.Results.weights;
+mask = parser.Results.mask;

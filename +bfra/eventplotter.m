@@ -33,29 +33,10 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%-------------------------------------------------------------------------------
-% input handling
-p              = inputParser;
-p.FunctionName = 'eventplotter';
+% PARSE INPUTS
+[T, Q, R, Info, eventTags, plotneg, plotevents, dqdt] = ...
+   parseinputs(T, Q, R, Info, varargin{:});
 
-N = numel(Info.istart);
-
-addRequired(p, 'T',                    @(x) bfra.validation.isdatelike(x));
-addRequired(p, 'Q',                    @(x) isnumeric(x) & numel(x)==numel(T));
-addRequired(p, 'R',                    @(x) isnumeric(x));
-addRequired(p, 'Info',                 @(x) isstruct(x));
-addOptional(p, 'eventTags',   1:N,     @(x) bfra.validation.isnumericvector(x));
-addParameter(p,'plotneg',     false,   @(x) bfra.validation.islogicalscalar(x));
-addParameter(p,'plotevents',  false,   @(x) bfra.validation.islogicalscalar(x));
-addParameter(p,'dqdt', bfra.deps.derivative(Q),@(x) isnumeric(x) & numel(x)==numel(T) );
-
-parse(p,T,Q,R,Info,varargin{:});
-
-eventTags   = p.Results.eventTags;
-plotneg     = p.Results.plotneg;
-plotevents  = p.Results.plotevents;
-dqdt        = p.Results.dqdt;
-%-------------------------------------------------------------------------------
 
 % short circuits
 if plotevents == false; h = []; return; end
@@ -166,6 +147,37 @@ h3.zeroline = plot(h.ax(3),xlim(h.ax(3)),[0 0],'k-','LineWidth',1);
 h.h1 = h1;
 h.h2 = h2;
 h.h3 = h3;
+
+%% INPUT PARSER
+function [T, Q, R, Info, eventTags, plotneg, plotevents, dqdt] = parseinputs(T, Q, R, Info, varargin)
+
+parser = inputParser;
+parser.FunctionName = 'bfra.eventplotter';
+
+N = numel(Info.istart);
+
+parser.addRequired('T', @bfra.validation.isdatelike);
+parser.addRequired('Q', @isnumeric);
+parser.addRequired('R', @isnumeric);
+parser.addRequired('Info', @isstruct);
+parser.addOptional('eventTags', 1:N, @bfra.validation.isnumericvector);
+parser.addParameter('plotneg', false, @bfra.validation.islogicalscalar);
+parser.addParameter('plotevents', false, @bfra.validation.islogicalscalar);
+parser.addParameter('dqdt', bfra.deps.derivative(Q), @isnumeric);
+
+parser.parse(T, Q, R, Info, varargin{:});
+
+T = parser.Results.T;
+Q = parser.Results.Q;
+R = parser.Results.R;
+Info = parser.Results.Info;
+dqdt = parser.Results.dqdt;
+plotneg = parser.Results.plotneg;
+plotevents = parser.Results.plotevents;
+eventTags = parser.Results.eventTags;
+
+assert(numel(Q) == numel(T))
+assert(numel(dqdt) == numel(T))
 
 % if ispublishing
 %    exportgraphics(gcf,'html/event_example.png','Resolution',400);

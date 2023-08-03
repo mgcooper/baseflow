@@ -34,41 +34,12 @@ function h = mapbasins(Basins,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%     NOTE: use geo!
-%     NOTE: variable name of cvar
 
-% --------------- parse inputs
-p = bfra.deps.magicParser;
-p.FunctionName = 'mapbasins';
-p.StructExpand = false;
+% PARSE INPUTS
+[Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, ...
+   facealpha, facelabels, cvar, usegeoshow] = parseinputs(Basins, varargin{:});
 
-defaultvar = 'perm_mean';
-defaulttxt = 'permafrost extent (%)';
-defaultlatlims = [40 84]; % [50 75]
-defaultlonlims = [-168 -40]; % [-168 -60]
-
-p.addRequired( 'Basins',                     @(x)isstruct(x)   );
-p.addParameter('Meta',        '',            @(x)istable(x)    );
-p.addParameter('facemapping', false,         @(x)islogical(x)  );
-p.addParameter('cvarname',    defaultvar,    @(x)ischar(x)     );
-p.addParameter('cbartxt',     defaulttxt,    @(x)ischar(x)     );
-p.addParameter('latlims',     defaultlatlims,@(x)isnumeric(x)  );
-p.addParameter('lonlims',     defaultlonlims,@(x)isnumeric(x)  );
-p.addParameter('proj',        'lambert',     @(x)ischar(x)     );
-p.addParameter('facealpha',   0.35,          @(x)isnumeric(x)  );
-p.addParameter('facelabels',  false,         @(x)islogical(x)  );
-p.addParameter('ax',          gobjects,      @(x)bfra.validation.isaxis(x));
-
-p.parseMagically('caller');
-
-if facemapping == true
-   cvar = [Basins.(cvarname)];
-end
-usegeoshow = false; % need to add option or eliminate
-
-% for lonlims, this owrks well for Alaska: [-170 -120]
-%-------------------------------------------------------------------------------
-
+% MAIN FUNCTION
 if isstruct(Meta)
    Meta = struct2table(Meta);
 end
@@ -80,7 +51,6 @@ if ~isempty(Meta)
    Basins   = Basins(idx(:));
    Basins   = Basins(ismember({Basins.Station},Meta.station));
 end
-
 
 % world borders has more detail than the ak state
 borders = loadworldborders({'United States','Canada'},'merge');
@@ -95,11 +65,11 @@ h.map    = axesm('MapProjection',proj,'MapLatLimit',latlims,'MapLonLimit',lonlim
 h.coast  = plotm(coastlat,coastlon,'LineWidth',1,'Color','k');
 hold on;
 
-
-% h.hworldmap     = worldmap('North America');
-% h.hworldmap     = usamap('ak');
-%h.hworldmap     = worldmap([45 90],[-58 -165]);
-%h.hcoastlines   = plotm(borders.LAT,borders.LON,'LineWidth',1,'Color','k');
+% OTHER METHODS
+% h.hworldmap = worldmap('North America');
+% h.hworldmap = usamap('ak');
+% h.hworldmap = worldmap([45 90],[-58 -165]);
+% h.hcoastlines = plotm(borders.LAT,borders.LON,'LineWidth',1,'Color','k');
 
 % setm(h.hworldmap,'MapLatLimit',latlims)
 % setm(h.hworldmap,'MapLonLimit',lonlims)
@@ -377,3 +347,50 @@ cspec = makesymbolspec('Polygon',{cname,[cmin cmax],  ...
 % (in my test case) the big yukon basin was originally on top and you can
 % see how a smaller one gets plotted on top when they're reordered and
 % that's why we get more colors.
+
+%% INPUT PARSER
+function [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, ...
+   facealpha, facelabels, cvar, usegeoshow] = parseinputs( Basins, varargin)
+
+defaultvar = 'perm_mean';
+defaulttxt = 'permafrost extent (%)';
+defaultlatlims = [40 84];
+defaultlonlims = [-168 -40];
+
+% NOTE: for lonlims, this works well for Alaska: [-170 -120]
+% NOTE: use geo!
+% NOTE: variable name of cvar
+
+p = inputParser;
+p.FunctionName = 'bfra.mapbasins';
+p.StructExpand = true;
+
+p.addRequired('Basins', @isstruct);
+p.addParameter('Meta', '', @istable);
+p.addParameter('facemapping', false, @islogical);
+p.addParameter('cvarname', defaultvar, @ischar);
+p.addParameter('cbartxt', defaulttxt, @ischar);
+p.addParameter('latlims', defaultlatlims, @isnumeric);
+p.addParameter('lonlims', defaultlonlims, @isnumeric);
+p.addParameter('facealpha', 0.35, @isnumeric);
+p.addParameter('facelabels', false, @islogical);
+p.addParameter('proj', 'lambert', @ischar);
+
+p.parse(Basins, varargin{:});
+
+Basins = p.Results.Basins;
+Meta = p.Results.Meta;
+proj = p.Results.proj;
+latlims = p.Results.latlims;
+lonlims = p.Results.lonlims;
+cbartxt = p.Results.cbartxt;
+cvarname = p.Results.cvarname;
+facealpha = p.Results.facealpha;
+facelabels = p.Results.facelabels;
+facemapping = p.Results.facemapping;
+
+cvar = [];
+if facemapping == true
+    cvar = [Basins.(cvarname)];
+end
+usegeoshow = false;

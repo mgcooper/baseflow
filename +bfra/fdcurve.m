@@ -76,11 +76,11 @@ function [axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin)
 
 p = inputParser;
 p.FunctionName = 'bfra.fdcurve';
-p.addRequired( 'flow', @(x)isnumeric(x) );
-p.addParameter('axscale', 'semilogy', @(x) ischar(x) );
-p.addParameter('units', '', @(x) ischar(x) );
-p.addParameter('refpoints', nan, @(x)isnumeric(x) );
-p.addParameter('plotcurve', true, @(x)islogical(x) );
+p.addRequired( 'flow', @isnumeric);
+p.addParameter('axscale', 'semilogy', @ischar);
+p.addParameter('units', '', @ischar);
+p.addParameter('refpoints', nan, @isnumeric);
+p.addParameter('plotcurve', true, @islogical);
 p.parse(flow, varargin{:});
 
 refpoints = p.Results.refpoints;

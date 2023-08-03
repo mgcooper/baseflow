@@ -32,29 +32,12 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 % NOTE: two fits are shown in the legend b/c the first one is from the provided
 % inputs and the second one is computed in this function as a check on the input
 
-% --------------- parse inputs
-p = bfra.deps.magicParser;
-p.FunctionName = 'bfra.checkevent';
+% PARSE INPUTS
+[T, Q, q, dqdt, r, alltags, eventtag, order] = parseinputs( ...
+   T, Q, q, dqdt, r, alltags, eventtag, varargin{:});
 
-p.addRequired('T',               @(x)isnumeric(x) | isdatetime(x));
-p.addRequired('Q',               @(x)isnumeric(x));
-p.addRequired('q',               @(x)isnumeric(x));
-p.addRequired('dqdt',            @(x)isnumeric(x));
-p.addRequired('r',               @(x)isnumeric(x));
-p.addRequired('alltags',         @(x)isnumeric(x));
-p.addRequired('eventtag',        @(x)isnumeric(x));
-p.addParameter('order',    nan,  @(x)isnumeric(x));
-p.addParameter('ax',       gca,  @(x)bfra.validation.isaxis(x));
+% FUNCTION CODE
 
-p.parseMagically('caller');
-
-order = p.Results.order;
-
-if isdatetime(T)
-   T = datenum(T);
-end
-
-% --------------- function code
 % warning off % commented out for octave, need to get the msgid
 colors = get(0,'defaultaxescolororder');
 colors = colors([1 2 5 4 3 6 7],:); % swap yellow and green
@@ -220,8 +203,8 @@ end
 
 % --------------- prep input
 
-function [eventT,eventQ,eventq,eventdq, ...
-   eventr,annualT,annualQ,annualr] = prepinput(userc,tags,event,T,Q,q,dqdt,rain)
+function [eventT, eventQ, eventq, eventdq, eventr, annualT, annualQ, annualr] = ...
+   prepinput(userc,tags,event,T,Q,q,dqdt,rain)
 
 if userc == true
    [r,c] = find(tags==event);
@@ -253,8 +236,8 @@ annualr  = rain(idx,c(1));
 
 % --------------- prep fits
 
-function [tfit,qfit,dqfit,Qtstr,aQbstr, ...
-   qfit0,dqfit0,Qtstr0,aQbstr0,rsq0] = prepfits(eventq,eventdqdt,eventT,fixb,order);
+function [tfit, qfit, dqfit, Qtstr, aQbstr, qfit0, dqfit0, Qtstr0, ...
+   aQbstr0, rsq0] = prepfits(eventq, eventdqdt, eventT, fixb, order)
 
 % fit ab using nonlin
 if all(isnan(eventq))
@@ -301,6 +284,39 @@ h = bar(time,rain,0.2,  'FaceColor',   rcolor,           ...
 ylabel('rain (mm d$^{-1}$)','Color',rcolor);
 set(gca,'YColor','k')
 datetick; axis tight; axis(ax,'ij');
+
+%% INPUT PARSER
+function [T, Q, q, dqdt, r, alltags, eventtag, order] = parseinputs( ...
+   T, Q, q, dqdt, r, alltags, eventtag, varargin)
+
+parser = inputParser;
+parser.FunctionName = 'bfra.checkevent';
+
+parser.addRequired('T', @(x) isnumeric(x) | isdatetime(x));
+parser.addRequired('Q', @isnumeric);
+parser.addRequired('q', @isnumeric);
+parser.addRequired('dqdt', @isnumeric);
+parser.addRequired('r', @isnumeric);
+parser.addRequired('alltags', @isnumeric);
+parser.addRequired('eventtag', @isnumeric);
+parser.addParameter('order', nan, @isnumeric);
+parser.addParameter('ax', gca, @bfra.validation.isaxis);
+
+parser.parse(T, Q, q, dqdt, r, alltags, eventtag, varargin{:});
+
+T = parser.Results.T;
+Q = parser.Results.Q;
+q = parser.Results.q;
+r = parser.Results.r;
+dqdt = parser.Results.dqdt;
+order = parser.Results.order;
+alltags = parser.Results.alltags;
+eventtag = parser.Results.eventtag;
+
+if isdatetime(T)
+   T = datenum(T); %#ok<*DATNM> 
+end
+
 
 
 % --------------- extra stuff
