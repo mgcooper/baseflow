@@ -667,7 +667,6 @@ validmethod = @(x) any(validatestring(x, methodslist));
 persistent parser
 if isempty(parser)
    parser = inputParser;
-   parser.FunctionName = funcname;
    parser.StructExpand = false;
    parser.addRequired( 'q',                          @isnumeric   );
    parser.addRequired( 'dqdt',                       @isnumeric   );
@@ -682,6 +681,7 @@ if isempty(parser)
    parser.addParameter('plotfit',  false,            @islogical   );
    parser.addParameter('fitopts',  struct(),         @isstruct    );
 end
+parser.FunctionName = funcname;
 parse(parser,q,dqdt,method,varargin{:});
 
 weights  = parser.Results.weights;

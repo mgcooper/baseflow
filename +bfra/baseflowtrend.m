@@ -67,12 +67,12 @@ function [t, Q, A, method, pctl, showfig] = parseinputs(t,Q,A,varargin)
 
 parser = inputParser;
 parser.FunctionName = 'bfra.baseflowtrend';
-parser.addRequired(   parser, 't', @bfra.validation.isdatelike);
-parser.addRequired(   parser, 'Q', @bfra.validation.isnumericvector);
-parser.addRequired(   parser, 'A', @bfra.validation.isnumericscalar);
-parser.addParameter(  parser, 'method', 'ols', @bfra.validation.ischarlike);
-parser.addParameter(  parser, 'pctl', 0.25, @bfra.validation.isnumericscalar);
-parser.addParameter(  parser, 'showfig', false, @bfra.validation.islogicalscalar);
+parser.addRequired('t', @bfra.validation.isdatelike);
+parser.addRequired('Q', @bfra.validation.isnumericvector);
+parser.addRequired('A', @bfra.validation.isnumericscalar);
+parser.addParameter('method', 'ols', @bfra.validation.ischarlike);
+parser.addParameter('pctl', 0.25, @bfra.validation.isnumericscalar);
+parser.addParameter('showfig', false, @bfra.validation.islogicalscalar);
 parser.parse(t,Q,A,varargin{:});
 
 method   = parser.Results.method;

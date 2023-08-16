@@ -83,6 +83,11 @@ switch request
       str = [ '$\mathrm{d}\eta/\mathrm{d}t \quad[\mathrm{cm}\;' ...
          '\mathrm{a}^{-1}]$'];
       
+   case {'dSdt','dS/dt'}
+      
+      str = [ '$\mathrm{d}S/\mathrm{d}t \quad[\mathrm{cm}\;' ...
+         '\mathrm{a}^{-1}]$'];
+      
    case 'aQb'
       
       str = ['$-\mathrm{d}Q/\mathrm{d}t$ = aQ$^b'                    ...
@@ -116,6 +121,10 @@ switch request
    case {'dndt','dn/dt'}
       
       str = '$\mathrm{d}\eta/\mathrm{d}t$';
+      
+   case {'dSdt','dS/dt'}
+      
+      str = '$\mathrm{d}S/\mathrm{d}t$';
       
    case 'aQb'
 

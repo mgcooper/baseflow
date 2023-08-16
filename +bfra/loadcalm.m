@@ -94,29 +94,29 @@ switch aggfunc
       
    case 'robust'
 
-      ok = Meta.nyears>=minlength & Meta.coverage>=mincoverage;
+      keep = (Meta.NumYears >= minlength) & (Meta.Coverage >= mincoverage);
 
       % if no sites have > minlength values, set nan and return
-      if sum(ok)==0
+      if sum(keep)==0
          Calm.Dc = nan(height(Calm),1);
          Calm.sigDc = nan(height(Calm),1);
          Calm = Calm(:,{'Dc','sigDc'});
          return
-      elseif sum(ok)==1
+      elseif sum(keep)==1
          % if one site has > minlength values, call case 'avg' and return
-         Calm = Calm(:,ok);
-         Meta = Meta(ok,:);
+         Calm = Calm(:,keep);
+         Meta = Meta(keep,:);
          Calm = aggregateCalm(Calm,Meta,'avg',minlength,mincoverage,minoverlap,maxdiff);
          return
       end
 
       % remove sites with < minlength
-      Calm = Calm(:,ok);
-      Meta = Meta(ok,:);
+      Calm = Calm(:,keep);
+      Meta = Meta(keep,:);
 
       % use the longest record as the reference site
       nsites = height(Meta);
-      nyears = Meta.nyears;
+      nyears = Meta.NumYears;
       nmax = max(nyears);
       iref = nyears == nmax;
       
@@ -125,16 +125,17 @@ switch aggfunc
       mu = mean(alldata,2,'omitnan');
       Trends = timetabletrends(addvars(Calm,mu));
 
-      % the trend slopes are added as custom props in timetable trend but the last one
-      % is the "TimeX" regressor variable which is set nan
+      % the trend slopes are added as custom props in timetable trend but the
+      % last one is the "TimeX" regressor variable which is set nan
       slopes = Trends.Properties.CustomProperties.TrendSlope(1:end-1);
       tseries = table2array(Trends(:,1:end-1));
       
       % this handles the case with more than one "reference site"
       refslope = mean(slopes(iref));
 
-      % if the trend of the average is less than X% different than the trend of the
-      % longest record, then don't worry about overlap, use the average timeseries
+      % if the trend of the average is less than X% different than the trend of
+      % the longest record, then don't worry about overlap, use the average
+      % timeseries
       if abs(1-slopes(end)/refslope) < maxdiff
          Calm = aggregateCalm(Calm,Meta,'avg',minlength,mincoverage,minoverlap,maxdiff);
          return
@@ -155,11 +156,11 @@ switch aggfunc
       for n = 1:nsites
          overlap(n) = sum(all(~isnan([alldata(:,iref),alldata(:,n)]),2))/nmax;
       end
-      ok = overlap > minoverlap;
+      keep = overlap > minoverlap;
       
       % select the sites that qualify and call the 'avg' case
-      Calm = Calm(:,ok);
-      Meta = Meta(ok,:);
+      Calm = Calm(:,keep);
+      Meta = Meta(keep,:);
       Calm = aggregateCalm(Calm,Meta,'avg',minlength,mincoverage,minoverlap,maxdiff);
       
       % for debugging:
@@ -214,8 +215,7 @@ end
 function [Calm,Meta] = loadcalmcurrent(MetaBasin)
 
 % load the calm data
-fname = setpath('/interface/permafrost/matfiles/CALM_ALT.mat','data');
-
+fname = fullfile(getenv('BASEFLOW_DATA_PATH'), 'calm', 'CALM_ALT.mat');
 load(fname,'Calm','Meta');
 
 if ~istable(MetaBasin) && MetaBasin == "ALL_BASINS"

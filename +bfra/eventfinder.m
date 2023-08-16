@@ -51,7 +51,7 @@ T = []; Q = []; R = []; Info = struct; iflag = false;
 for n = 1:length(iS)
    
    if L(n)<nmin                       % set nan if <nmin
-      [Tn,Qn,Rn,Infon] = bfra.util.setEventEmpty;
+      [Tn,Qn,Rn,Infon] = bfra.util.setEventEmpty();
    else
       tn = t(iS(n):iE(n));
       qn = q(iS(n):iE(n));
@@ -102,7 +102,7 @@ end
 
 % if no events were returned, set events empty
 if isempty(fieldnames(Info))
-   [T,Q,R,Info] = bfra.util.setEventEmpty;
+   [T,Q,R,Info] = bfra.util.setEventEmpty();
    
 else % cycle through and remove empty events
    inan = false(size(T));
@@ -128,8 +128,6 @@ function [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = ...
 persistent parser
 if isempty(parser)
    parser = inputParser;
-   parser.FunctionName = funcname;
-   
    addRequired(parser, 't',                  @bfra.validation.isdatelike);
    addRequired(parser, 'q',                  @bfra.validation.isdoublevector);
    addRequired(parser, 'r',                  @isnumeric);
@@ -141,6 +139,7 @@ if isempty(parser)
    addParameter(parser,'rmnochange',  false, @bfra.validation.islogicalscalar);
    addParameter(parser,'rmrain',      false, @bfra.validation.islogicalscalar);
 end
+parser.FunctionName = funcname;
 parse(parser,t,q,r,varargin{:});
 
 nmin        = parser.Results.nmin;

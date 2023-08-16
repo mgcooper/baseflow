@@ -5,6 +5,9 @@ function [Grace,Meta] = loadgrace(varargin)
 % 
 % See also: bfra.loadghcnd, bfra.loadflow, bfra.loadcalm
 
+% if called with no input, open this file
+if nargin == 0; open(mfilename('fullpath')); return; end
+
 % fast exit if toolbox not configured for data functions
 if ~isenv('BASEFLOW_DATA_PATH')
    error('BASEFLOW_DATA_PATH environment variable not set')
@@ -46,14 +49,14 @@ else
       %          Grace.S  = Grace.S-nanmean(Grace.S);
       % 
       %       else
-      %          Time     = tocol(Grace.time);
-      %          S        = tocol(Grace.Sa_avg(idx,:));
+      %          Time     = tocolumn(Grace.time);
+      %          S        = tocolumn(Grace.Sa_avg(idx,:));
       %          Grace    = timetable(S,'RowTimes',Time);
       %       end
 
       % % delete this and replace w/above if using 2022 data
-      Time     = tocol(Grace.time);
-      S        = tocol(Grace.Sa_avg(idx,:));
+      Time     = tocolumn(Grace.time);
+      S        = tocolumn(Grace.Sa_avg(idx,:));
       Grace    = timetable(S,'RowTimes',Time);
       % %
 

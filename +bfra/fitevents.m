@@ -259,29 +259,28 @@ K.fitTag = nan(N,1);
 % K.station = nan(N,1);
 % K.date = nan(N,1);
 
-
+%% INPUT PARSER
 function [derivmethod, fitmethod, fitorder, pickfits, pickmethod, plotfits, ...
    saveplots, etsparam, vtsparam, fitopts] = parseinputs(Events, funcname, varargin)
-%PARSEINPUTS parse inputs
 
 import bfra.validation.*
 persistent parser
 if isempty(parser)
    parser = inputParser;
-   parser.FunctionName = funcname;
    parser.StructExpand = true;
-   addRequired( parser, 'Events',               @isstruct         );
-   addParameter(parser, 'derivmethod', 'ETS',   @ischar           );
-   addParameter(parser, 'fitmethod',   'nls',   @ischar           );
-   addParameter(parser, 'fitorder',    nan,     @isnumericscalar  );
-   addParameter(parser, 'pickfits',    false,   @islogicalscalar  );
-   addParameter(parser, 'pickmethod',  'none',  @ischar           );
-   addParameter(parser, 'plotfits',    false,   @islogicalscalar  );
-   addParameter(parser, 'saveplots',   false,   @islogicalscalar  );
-   addParameter(parser, 'etsparam',    0.2,     @isnumericscalar  );
-   addParameter(parser, 'vtsparam',    1.0,     @isnumericscalar  );
+   parser.addRequired( 'Events',               @isstruct         );
+   parser.addParameter('derivmethod', 'ETS',   @ischar           );
+   parser.addParameter('fitmethod',   'nls',   @ischar           );
+   parser.addParameter('fitorder',    nan,     @isnumericscalar  );
+   parser.addParameter('pickfits',    false,   @islogicalscalar  );
+   parser.addParameter('pickmethod',  'none',  @ischar           );
+   parser.addParameter('plotfits',    false,   @islogicalscalar  );
+   parser.addParameter('saveplots',   false,   @islogicalscalar  );
+   parser.addParameter('etsparam',    0.2,     @isnumericscalar  );
+   parser.addParameter('vtsparam',    1.0,     @isnumericscalar  );
 end
-parse(parser,Events,varargin{:});
+parser.FunctionName = funcname;
+parser.parse(Events,varargin{:});
 
 fitopts = struct();
 fitorder = parser.Results.fitorder;

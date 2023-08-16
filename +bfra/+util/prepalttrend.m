@@ -17,47 +17,40 @@ function varargout = prepalttrend(Calm,T,Q,Qb,Sb,Db,sigDb,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-%------------------------------------------------------------------------------
-% input parsing
-%------------------------------------------------------------------------------
-p = inputParser;
-p.FunctionName = 'bfra.util.prepalttrend';
-p.addRequired( 'Calm', @(x)bfra.validation.istablelike(x));
-p.addRequired( 'T', @(x)bfra.validation.isdatelike(x));
-p.addRequired( 'Q', @(x)bfra.validation.isnumericvector(x));
-p.addRequired( 'Qb', @(x)bfra.validation.isnumericvector(x));
-p.addRequired( 'Sb', @(x)bfra.validation.isnumericvector(x));
-p.addRequired( 'Db', @(x)bfra.validation.isnumericvector(x));
-p.addRequired( 'sigDb', @(x)bfra.validation.isnumericvector(x));
-p.addParameter('rmnan', true, @(x)bfra.validation.islogicalscalar(x));
+% PARSE INPUTS
+[Calm, T, Q, Qb, Sb, Db, sigDb, removenans] = parseinputs(Calm, T, Q, Qb, ...
+   Sb, Db, sigDb, varargin{:});
 
-parse(p,Calm,T,Q,Qb,Sb,Db,sigDb,varargin{:});
-removenans = p.Results.rmnan;
-%------------------------------------------------------------------------------
+% MAIN FUNCTION
+[Q,T] = bfra.util.padtimeseries(Q,T,datenum(year(T(1)), 1, 1), ...
+   datenum(year(T(end)), 12, 31), 1);
+Data = timetable(Q, 'RowTimes', T);
+Data = retime(Data, 'regular', 'mean', 'TimeStep', calyears(1));
 
-[Q,T] = bfra.util.padtimeseries(Q,T,datenum(year(T(1)),1,1), ...
-   datenum(year(T(end)),12,31),1);
-Data = timetable(Q,'RowTimes',T);
-Data = retime(Data,'regular','mean','TimeStep',calyears(1));
-
-% I am not sure about this ... I think this is for water years? either way it
-% must be to ensure the baseflow matches the calm data, but I commented it out
+% This lines up the baseflow water years with the calm end-of summer data
 % Data = retime(Data,'yearly','previous');
 % %Data = Data(2:end,:);
 
-Data = addvars(Data,Qb,Sb,Db);
-Data = synchronize(Data,Calm,Data.Time,'fillwithmissing');
-sigDb = Data.Db.*sigDb; % convert relative to absolute uncertainty
-Data = addvars(Data,sigDb);
+Data = addvars(Data, Qb, Sb, Db);
+Data = synchronize(Data, Calm, Data.Time, 'fillwithmissing');
+sigDb = Data.Db .* sigDb; % convert relative to absolute uncertainty
+Data = addvars(Data, sigDb);
 
 if removenans == true
    inanC = isnan(Data.Dc);%  | isnan(Data.Q);
-   DataC = Data(~inanC,:);
+   DataC = Data(~inanC, :);
 else
-   DataC = Data(find(year(Data.Time)==1990):end,:);
+   % Use this to require the first year is 1990
+   % DataC = Data(find(year(Data.Time)==1990):end, :);
+   
+   iyear = find(year(Data.Time)==1990);
+   if isempty(iyear)
+      iyear = 1;
+   end
+   DataC = Data(iyear:end,:);
 end
 
-DataG = DataC(find(year(DataC.Time)==2002):end,:);
+DataG = Data(find(year(Data.Time)==2001):end, :);
 
 varargout{1} = Data;
 switch nargout
@@ -67,3 +60,21 @@ switch nargout
       varargout{2} = DataC;
       varargout{3} = DataG;
 end
+
+%% INPUT PARSER
+function [Calm, T, Q, Qb, Sb, Db, sigDb, removenans] = parseinputs( ...
+   Calm, T, Q, Qb, Sb, Db, sigDb, varargin)
+
+parser = inputParser;
+parser.FunctionName = 'bfra.util.prepalttrend';
+parser.addRequired('Calm', @bfra.validation.istablelike);
+parser.addRequired('T', @bfra.validation.isdatelike);
+parser.addRequired('Q', @bfra.validation.isnumericvector);
+parser.addRequired('Qb', @bfra.validation.isnumericvector);
+parser.addRequired('Sb', @bfra.validation.isnumericvector);
+parser.addRequired('Db', @bfra.validation.isnumericvector);
+parser.addRequired('sigDb', @bfra.validation.isnumericvector);
+parser.addParameter('rmnan', true, @bfra.validation.islogicalscalar);
+
+parser.parse(Calm, T, Q, Qb, Sb, Db, sigDb, varargin{:});
+removenans = parser.Results.rmnan;

@@ -27,9 +27,9 @@ end
 % load the basin metadata
 switch version
    case 'current'
-      filebounds = fullfile(getenv('BASEFLOW_DATA_PATH'), 'basin_boundaries.mat');
+      filebounds = fullfile(getenv('BASEFLOW_DATA_PATH'), 'basins', 'basin_boundaries.mat');
    case 'archive'
-      filebounds = fullfile(getenv('BASEFLOW_DATA_PATH'), 'basin_boundaries_tmp.mat');
+      filebounds = fullfile(getenv('BASEFLOW_DATA_PATH'), 'basins', 'basin_boundaries_tmp.mat');
 end
 load(filebounds,'Meta');
 
