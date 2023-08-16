@@ -137,14 +137,13 @@ for m = 1:numPicks
    Info.runlengths(m) = Picks.runlengths(m);
 end
 
-% INPUT PARSER
+%% INPUT PARSER
 function [vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = ...
    parseinputs(T,Q,R,derivmethod,funcname,varargin)
 
 persistent parser
 if isempty(parser)
    parser = inputParser;
-   parser.FunctionName = funcname;
    parser.CaseSensitive = true;
    parser.addRequired('T', @bfra.validation.isdatelike);
    parser.addRequired('Q', @bfra.validation.isnumericvector);
@@ -158,6 +157,7 @@ if isempty(parser)
    parser.addParameter('plotfits', false, @bfra.validation.islogicalscalar);
    parser.addParameter('eventID', 'none', @ischar);
 end
+parser.FunctionName = funcname;
 parser.parse(T,Q,R,derivmethod,varargin{:});
 
 vtsparam    = parser.Results.vtsparam;

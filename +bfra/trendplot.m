@@ -9,27 +9,33 @@ function h = trendplot(t,y,varargin)
 % See also printtrend
 
 % PARSE INPUTS
-[useax, units, qntls, alpha, preci, yerrs, vargs] = parseinputs( ...
-   t, y, mfilename, varargin{:});
+[t, y, opts, vargs] = parseinputs(t, y, mfilename, varargin{:});
 
 % convert to anomalies etc.
-[t,y,yerrs] = prepInput(t,y,yerrs,anomalies,reference);
+[t, y, yerrs] = prepInput(t, y, ...
+   opts.yerr, opts.anomalies, opts.reference);
 
 % compute trends
-[ab,err,yfit,yci] = computeTrends(t,y,method,alpha,qntls);
+[ab, err, yfit, yci] = computeTrends(t, y, ...
+   opts.method, opts.alpha, opts.quantile);
 
 % update the figure or make a new one
-[h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds);
+[h, makeleg, legidx] = updateFigure( ...
+   opts.useax, opts.showfig, opts.figpos, opts.errorbounds);
 
 % draw the plot
-h = plotTrend(h,t,y,yfit,yerrs,yci,errorbars,errorbounds,vargs);
+h = plotTrend(h, t, y, yfit, yerrs, yci, ...
+   opts.errorbars, opts.errorbounds, vargs);
 
 % draw the legend
-h = drawLegend(h,ab,legendtext,units,alpha,err,makeleg,legidx,preci);
+h = drawLegend(h, ab, err, makeleg, legidx, ...
+   opts.precision, opts.legendtext, opts.units, opts.alpha);
 
 %axis tight
 
-ylabel(ylabeltext); xlabel(xlabeltext); title(titletext);
+ylabel(opts.ylabeltext); 
+xlabel(opts.xlabeltext); 
+title(opts.titletext);
 
 % PACKAGE OUTPUT
 h.ax = gca;
@@ -282,7 +288,7 @@ bfra.util.formatPlotMarkers;
 
 %  DRAW LEGEND
 
-function h = drawLegend(h,ab,legtext,units,alpha,err,makeleg,legidx,precision)
+function h = drawLegend(h,ab,err,makeleg,legidx,precision,legtext,units,alpha)
 
 % this is repeated here and in updateFigure
 legobj = findobj(gcf,'Type','Legend');
@@ -351,12 +357,12 @@ else
 end
 
 %% INPUT PARSER
-function [useax, units, qntls, alpha, preci, yerrs, vargs] = parseinputs( ...
-   t, y, mfilename, varargin)
+function [t, y, opts, vargs] = parseinputs(t, y, mfilename, varargin)
 
 parser = inputParser;
 parser.FunctionName = mfilename;
 parser.PartialMatching = true;
+parser.KeepUnmatched = true;
 
 dpos = [321 241 512 384]; % default figure size
 
@@ -381,12 +387,15 @@ parser.addParameter('yerr',         nan,  @isnumeric);
 parser.addParameter('precision',    nan,  @isnumeric);
 
 parser.parse(t, y, varargin{:});
+opts = parser.Results;
+vargs = unmatched2varargin(parser.Unmatched);
 
-useax = parser.Results.useax;
-units = parser.Results.units;
-qntls = parser.Results.quantile;
-alpha = parser.Results.alpha;
-preci = parser.Results.precision;
-yerrs = parser.Results.yerr;
-vargs = namedargs2cell(parser.Unmatched);
+% Update aug 2023, not sure about this, vargs is passed to the plotTrend
+% subfunction which passes it to plot as varagin{:} style, but here
+% namedargs2cell converts all values in the parser to a cell array, which isn't
+% right, so maybe it was supposed to be parser2varargin
+% vargs = namedargs2cell(parser.Results);
+% vargs = parser2varargin(parser, {'t', 'y'}, 'usingdefaults');
+% vargs = parser2varargin(parser, {'t', 'y'}, 'notusingdefaults');
+
 

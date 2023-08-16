@@ -41,16 +41,14 @@ function [basinname, version] = parseinputs(basinname, varargin)
 
 validopts = @(x) any(validatestring(x, {'current', 'archive'}));
 
-p = inputParser;
-p.FunctionName = 'bfra.loadprops';
+parser = inputParser;
+parser.FunctionName = 'bfra.loadprops';
+parser.addRequired('basinname', @ischar);
+parser.addOptional('version', 'current', validopts);
+parser.parse(basinname, varargin{:});
 
-p.addRequired('basinname', @ischar);
-p.addOptional('version', 'current', validopts);
-
-p.parse(basinname, varargin{:});
-
-basinname = p.Results.basinname;
-version = p.Results.version;
+basinname = parser.Results.basinname;
+version = parser.Results.version;
 
 end
 
