@@ -60,17 +60,10 @@ function [Events,Info] = getevents(T,Q,R,varargin)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
-% Updates
-% 17 Jan: renamed old getevents to wrapevents and old findevents to getevents
-
 % PARSE INPUTS
-[qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
+[qmin, nmin, fmax, rmax, rmin, ~, rmconvex, rmnochange, rmrain, ...
    pickevents, plotevents, asannual, T, Q, R] = parseinputs(mfilename, ...
    T, Q, R, varargin{:});
-
-
-% allow empyt R i.e. input syntax getevents(T,Q,[],...)
-if isempty(R); R = zeros(size(Q)); end
 
 % save the input data
 Events.inputTime = T;
@@ -92,7 +85,7 @@ end
 
 
 if isempty(Q)||sum(~isnan(Q))<nmin % fast exit
-   [t,q,r,Info] = bfra.util.setEventEmpty;
+   [t,q,r,Info] = bfra.util.setEventEmpty();
 
 else
    % call eventfinder either way, then update if pickfits == true
@@ -183,4 +176,9 @@ pickevents = parser.Results.pickevents;
 plotevents = parser.Results.plotevents;
 asannual = parser.Results.asannual;
 
-assert(numel(x)==numel(T))
+% Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )
+validateattributes(T, {'double'}, {'size', size(Q)}, mfilename, 'T', 1)
+validateattributes(nmin, {'double'}, {'>', 2}, mfilename, 'nmin', 4)
+if isempty(R)
+   R = zeros(size(Q));
+end

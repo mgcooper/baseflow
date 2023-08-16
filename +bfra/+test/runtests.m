@@ -3,9 +3,9 @@ function result = runtests(varargin)
 
 % Import necessary classes
 import matlab.unittest.TestSuite
-import matlab.unittest.TestRunner;
-import matlab.unittest.Verbosity;
-import matlab.unittest.plugins.DiagnosticsValidationPlugin;
+import matlab.unittest.TestRunner
+import matlab.unittest.Verbosity
+import matlab.unittest.plugins.DiagnosticsValidationPlugin
 import matlab.unittest.plugins.StopOnFailuresPlugin
 
 % Create a test suite from a package

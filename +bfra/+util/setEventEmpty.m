@@ -1,9 +1,9 @@
-function  [T,Q,R,Info] = seteventnan()
-%SETEVENTNAN set recessoin event nan in Events structure
+function  [T,Q,R,Info] = setEventEmpty()
+%SETEVENTEMPTY set recession event to empty array in Events structure
 % 
-%  [T,Q,R,Info] = seteventnan()
+%  [T,Q,R,Info] = bfra.util.setEventEmpty()
 % 
-% See also
+% See also: None
 
 T               = [];
 Q               = [];

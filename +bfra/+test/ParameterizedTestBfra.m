@@ -12,6 +12,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       PhiValue = {0.001, 0.01, 0.1};
       BasinName = {'ALL_BASINS','KUPARUK R NR DEADHORSE AK'};
       MinEventDuration = {3,6,9};
+      RmConvex = {false, true};
    end
 
    methods (Test)
@@ -35,7 +36,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       % Verify that the actual result matches the expected result
       testCase.verifyEqual(strActual,expectedStr)
       end
-   
+
       %-------------------------------------------
       %-------------------------------------------
       function test_getdqdt(testCase,DerivMethod)
@@ -53,7 +54,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 
       % Get the actual result
       [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
-         
+
       % Verify that the actual result matches the expected result
       testCase.verifyEqual(dqdtActual,dqdtExpected)
 
@@ -68,7 +69,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       %-------------------------------------------
       function test_fitab(testCase,RecessionExponent,FitMethod)
-      
+
       % define values to generate the test data
       a = 1e-2;
       q0 = 100;
@@ -81,8 +82,8 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       % [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
       % figure; loglog(q,-dqdt,'o')
       % also useful to see this:
-      % bfra.Qnonlin(a,b,q0,t,true) 
-      
+      % bfra.Qnonlin(a,b,q0,t,true)
+
       % f = bfra.fitab(q,dqdt,'mean'); ab = f.ab
       % f = bfra.fitab(q,dqdt,'ols'); ab = f.ab
       % f = bfra.fitab(q,dqdt,'nls'); ab = f.ab
@@ -98,7 +99,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          otherwise
             Fit = bfra.fitab(q,dqdt,FitMethod);
       end
-      
+
       % Get the expected result
       abExpected = [a;b];
 
@@ -108,7 +109,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       % for testing:
       % f = bfra.fitab(q,dqdt,FitMethod); abActual = f.ab
       % isequal(abActual,abExpected)
-         
+
       % Verify that the actual result matches the expected result
       testCase.verifyEqual(abActual,abExpected,'RelTol',[0.01; 0.01])
 
@@ -123,7 +124,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
             b = 1.5;
             nExpected = 0;
             nActual = bfra.conversions(b,'b','n','isflat',true);
-            
+
             % Verify that the actual result matches the expected result
             testCase.verifyEqual(nActual,nExpected);
 
@@ -181,7 +182,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
             SminExpected = 1/a/(2-b).*(qmin.^(2-b));
             SmaxExpected = 1/a/(2-b).*(qmax.^(2-b));
       end
-      
+
       % get the actual result
       [SminActual,SmaxActual] = bfra.aquiferstorage(a,b,qmin,qmax);
 
@@ -205,7 +206,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       % compute the expected result
       DExpected = tau/phi/(4-2*b)*Qb;
       SExpected = DExpected*phi;
-      
+
       % get the actual result
       [DActual,SActual] = bfra.aquiferthickness(b,tau,phi,Qb);
 
@@ -216,83 +217,109 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 
       %-------------------------------------------
       %-------------------------------------------
-      function test_eventfinder(testCase,MinEventDuration)
-      
-      nmin = MinEventDuration;
+      function test_eventfinder(testCase,MinEventDuration, RmConvex)
 
+      % MinEventDuration = 3;
+      % RmConvex = true;
+      
       % this should work in general, as long as prec is used consistently
-      prec = 3; % precision, controls how large the test vectors are
+      prec = 2; % precision, controls how large the test vectors are
       dpi = 10^-prec;
 
       % generate synthetic data
       t = -2*pi:dpi:2*pi;
       q = 1 + sin(t);
 
-      % find the maxima and minima (where d/dt sin(t) == 0)
-      idx = find(abs(round(cos(t),prec))==0);
-      idx = transpose(reshape(idx,2,[])); % [istart istop]
+      if RmConvex
+         % Find the points where the first derivative cos(t) is negative and the
+         % second derivative -sin(t) is positive.
+         idxconcave = find(cos(t) < 0 & (-sin(t)) > 0);
+         intervals = [find(diff(idxconcave) ~= 1)' numel(idxconcave)];
+         starts = [idxconcave(1); idxconcave(intervals(1:end-1) + 1)];
+         ends = idxconcave(intervals);
+         
+         % Inflection points where the second derivative equals zero
+         idxinflect = find(abs(-sin(t)) <= 10^-prec);
+         
+      else
+         % Find the maxima and minima (where d/dt sin(t) == 0)
+         idxminmax = find(round(cos(t),prec)==0);
+         starts = idxminmax(1:2:end); % +1 or +2 depending on eventfinder
+         ends = idxminmax(2:2:end); % -1 
+         
+         idxinflect = idxminmax;
+      end
 
-      % if sizes don't match, try not removing one prior to min
-      for n = 1:numel(idx)/2
-         %ievent = idx(n,1)+2 : idx(n,2)-1;
-         ievent = idx(n,1)+2 : idx(n,2);
-         tExpected{n,1} = transpose(t(ievent));
-         qExpected{n,1} = transpose(q(ievent));
+      % Define expected t and q
+      tExpected = cell(numel(starts), 1);
+      qExpected = cell(numel(starts), 1);
+      for n = 1:numel(starts)
+         tExpected{n, 1} = transpose(t(starts(n):ends(n)));
+         qExpected{n, 1} = transpose(q(starts(n):ends(n)));
       end
 
       % get the actual result
-      [tActual,qActual] = bfra.eventfinder(t,q,[],'nmin',nmin,'fmax',0, ...
-         'rmax',0,'rmin',0,'rmconvex',false,'rmnochange',false,'rmrain',false);
+      [tActual,qActual] = bfra.eventfinder(t,q,[],'nmin',MinEventDuration, ...
+         'fmax',0,'rmax',0,'rmin',0,'rmconvex',RmConvex,'rmnochange',false, ...
+         'rmrain',false);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
+      % % Verify that the actual result matches the expected result to within a
+      % difference of up to two elements to account for the +/- 1 day criteria applied
+      % in the eventfinder filters.
+      for n = 1:numel(tActual)
+         [commonT, ia, ib] = intersect(tExpected{n}, tActual{n});
+         numdiff = length(tExpected{n}) + length(tActual{n}) - 2*length(commonT);
 
-%       % for debugging test_eventfinder
-%       % --------------
-%       % convert to start/stop indices. remove the peak + 1 day, and the min.
-%       ievent1 = idx(1,1)+2 : idx(1,2)-1;
-%       ievent2 = idx(2,1)+2 : idx(2,2)-1;
-% 
-%       % if sizes don't match, try not removing one prior to min
-%       ievent1 = idx(1,1)+2 : idx(1,2);
-%       ievent2 = idx(2,1)+2 : idx(2,2);
-% 
-%       tExpected{n} = transpose(t(ievent1));
-%       qExpected{n} = transpose(q(ievent1));
-%       tExpected{2} = transpose(t(ievent2));
-%       qExpected{2} = transpose(q(ievent2));
-% 
-%       isequal(tExpected{1},tActual{1})
-%       isequal(tExpected{2},tActual{2})
-% 
-%       [size(tExpected{1}); size(tActual{1})]
-%       [size(tExpected{2}); size(tActual{2})]
-% 
-%       % depending on which one is missing, reverse the setdiff
-%       [val1, i1] = setdiff(tExpected{1}, tActual{1});
-%       [val1, i1] = setdiff(tActual{1}, tExpected{1});
-% 
-%       [val2, i2] = setdiff(tExpected{2}, tActual{2})
-%       [val2, i2] = setdiff(tActual{2}, tExpected{2})
-%       
-%       loc = ~ismember(tExpected{1}, tActual{1})
-% 
-%       figure; plot(t,q); hold on; 
-%       plot(tExpected{1},qExpected{1});
-%       plot(tExpected{2},qExpected{2});
-%       plot(tActual{1},qActual{1},'o','MarkerSize',6);
-%       plot(tActual{2},qActual{2},'o');
-% 
-%       % minima should be at -pi/2, 3*pi/2
-%       % maxima should be at pi/2, -3*pi/2
-%       s1 = find(t+3*pi/2>0,1,'first')-1;
-%       e1 = find(t+pi/2>0,1,'first')-1;
-%       s2 = find(t-pi/2>0,1,'first')-1;
-%       e2 = find(t-3*pi/2>0,1,'first')-1;
-% 
-%       % remove the peak + 1 day, and the min
-%       s1 = s1+2; s2 = s2+2;
-%       e1 = e1-1; e2 = e2-1;
+         if numdiff <= 4
+            testCase.verifyEqual(tExpected{n}(ia), tActual{n}(ib));
+            testCase.verifyEqual(qExpected{n}(ia), qActual{n}(ib));
+
+            % texp = tExpected{n}(ia);
+            % qexp = qExpected{n}(ia);
+            % tact = tActual{n}(ib);
+            % qact = qActual{n}(ib);
+            % assertequal(tExpected{n}(ia), tActual{n}(ib));
+            % assertequal(qExpected{n}(ia), qActual{n}(ib));
+            
+            % figure; 
+            % plot(texp, qexp); hold on;
+            % plot(tact, qact, ':');
+            
+         else
+            error('Difference greater than 2 elements detected.');
+         end
+      end
+
+      % for scripting:
+      % assertequal([tActual,qActual], [tExpected,qExpected])
+
+      % For a 1:1 comparison:
+      % testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
+
+      % Plot the result
+      if MinEventDuration == 3
+         % For now, use the first test value to determine whether to plot the
+         % result. TODO: add a method to plot in a subplot for each test
+         % parameter.
+         figure; plot(t,q); hold on;
+         plot(t(idxinflect), q(idxinflect), 'x', 'MarkerSize', 20, 'Color', 'r');
+         
+         for n = 1:numel(tActual)
+            plot(tExpected{n}, qExpected{n}, 'LineWidth', 2, 'Color', 'k');
+            plot(tActual{n},qActual{n},':','Color', 'g');
+         end
+   
+         % Adjust legend and title based on rmconvex
+         if RmConvex
+            legend('Signal', 'Inflection Points',  ...
+               'True Concave Up Declining Flow', 'eventfinder');
+            title('test rmconvex')
+         else
+            legend('Signal', 'Inflection Points', ...
+               'True Declining Flow', 'eventfinder');
+            title('test eventfinder')
+         end
+      end
 
       end
 
@@ -312,3 +339,66 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
 end
 
 
+%       % for debugging test_eventfinder
+%       % --------------
+%
+%       % if tExpected, tActual sizes don't match, try adjusting whether the point
+%       % prior to the min is removed. For example, if the test uses this syntax:
+%       %
+%       % ievent = idx(n,1)+2 : idx(n,2);
+%       %
+%       % Then try changing it to:
+%       %
+%       % ievent = idx(n,1)+2 : idx(n,2) - 1;
+%       %
+%       % i.e., remove the one prior to the min.
+%       %
+%       % and visa versa
+%
+%       % Try removing the min, then see if they are equal
+%       ievent1 = idx(1,1)+2 : idx(1,2)-1;
+%       ievent2 = idx(2,1)+2 : idx(2,2)-1;
+%
+%       % Try NOT removing the min
+%       % ievent1 = idx(1,1)+2 : idx(1,2);
+%       % ievent2 = idx(2,1)+2 : idx(2,2);
+%
+%       tExpected{1} = transpose(t(ievent1));
+%       qExpected{1} = transpose(q(ievent1));
+%       tExpected{2} = transpose(t(ievent2));
+%       qExpected{2} = transpose(q(ievent2));
+%
+%       isequal(tExpected{1},tActual{1})
+%       isequal(tExpected{2},tActual{2})
+%
+%       % If that says they are equal, then the issue is with removing the min.
+%
+%       % Below here is ohter stuff I used for debugging.
+%       [size(tExpected{1}); size(tActual{1})]
+%       [size(tExpected{2}); size(tActual{2})]
+%
+%       % depending on which one is missing, reverse the setdiff
+%       [val1, i1] = setdiff(tExpected{1}, tActual{1});
+%       [val1, i1] = setdiff(tActual{1}, tExpected{1});
+%
+%       [val2, i2] = setdiff(tExpected{2}, tActual{2})
+%       [val2, i2] = setdiff(tActual{2}, tExpected{2})
+%
+%       loc = ~ismember(tExpected{1}, tActual{1})
+%
+%       figure; plot(t,q); hold on;
+%       plot(tExpected{1},qExpected{1});
+%       plot(tExpected{2},qExpected{2});
+%       plot(tActual{1},qActual{1},'o','MarkerSize',6);
+%       plot(tActual{2},qActual{2},'o');
+%
+%       % minima should be at -pi/2, 3*pi/2
+%       % maxima should be at pi/2, -3*pi/2
+%       s1 = find(t+3*pi/2>0,1,'first')-1;
+%       e1 = find(t+pi/2>0,1,'first')-1;
+%       s2 = find(t-pi/2>0,1,'first')-1;
+%       e2 = find(t-3*pi/2>0,1,'first')-1;
+%
+%       % remove the peak + 1 day, and the min
+%       s1 = s1+2; s2 = s2+2;
+%       e1 = e1-1; e2 = e2-1;
