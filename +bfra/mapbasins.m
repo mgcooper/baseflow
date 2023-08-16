@@ -37,7 +37,8 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 % PARSE INPUTS
 [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, ...
-   facealpha, facelabels, cvar, usegeoshow] = parseinputs(Basins, varargin{:});
+   facealpha, facelabels, cvar, usegeoshow, cbarinterpreter, cmap, climits] = ...
+   parseinputs(Basins, varargin{:});
 
 % MAIN FUNCTION
 if isstruct(Meta)
@@ -46,10 +47,10 @@ end
 
 % ensure that Basins and Meta contain the same basins and order
 if ~isempty(Meta)
-   Meta     = sortrows(Meta,'station');
-   [~,idx]  = sort({Basins.Station});
-   Basins   = Basins(idx(:));
-   Basins   = Basins(ismember({Basins.Station},Meta.station));
+   Meta = sortrows(Meta,'station');
+   [~,ii] = sort({Basins.Station});
+   Basins = Basins(ii(:));
+   Basins = Basins(ismember({Basins.Station},Meta.station));
 end
 
 % world borders has more detail than the ak state
@@ -96,11 +97,11 @@ if facemapping == true
       
    else
       % nan goes last
-      [cvar,idx] = sort(cvar);
-      Basins = Basins(idx); % must sort or use basins(idx(n).lat in loop
+      [cvar,ii] = sort(cvar);
+      Basins = Basins(ii); % must sort or use basins(idx(n).lat in loop
       for n = 1:numel(Basins)
-         latn  = [Basins(n).Lat];
-         lonn  = [Basins(n).Lon];
+         latn = [Basins(n).Lat];
+         lonn = [Basins(n).Lon];
          if isnan(cvar(n)) || cvar(n) == 0
             patchm(latn,lonn,'FaceVertexCData',[0.255 0.255 0.255],'FaceColor', ...
                'flat','FaceAlpha',0);
@@ -119,7 +120,7 @@ if facemapping == true
       % parts of the code which assumes it is a struct.
       
       Basins = flipud(struct2table(Basins));
-      [Basins,idx] = sortrows(Basins,'Area','ascend');
+      [Basins,ii] = sortrows(Basins,'Area','ascend');
       Basins = table2struct(Basins);
       
       % this was the sort method before I added the flipud to simplify the
@@ -138,7 +139,7 @@ if facemapping == true
          warning(['number of patch objects does not match number of basins' newline...
             'colorbar will not be accurate'])
       else
-         ax.Children = [patchobjs(idx);lineobjs];
+         ax.Children = [patchobjs(ii);lineobjs];
       end
       
       % this is not needed if we use 'ascend' to sort Area, but in other cases,
@@ -147,7 +148,14 @@ if facemapping == true
    end
    
    % make the colorbar
-   clim([cmin cmax])
+   if ~isnan(cmap)
+      colormap(cmap);
+   end
+   if isnan(climits)
+      clim([cmin cmax])
+   else
+      clim(climits)
+   end
    
    %------------------------------------------------------
    % horizontal, south
@@ -170,13 +178,7 @@ if facemapping == true
    
    h.cbar.AxisLocation = 'in'; 
    h.cbar.Label.String = cbartxt;
-   
-   % default text use tex, otherwise depends on whats passed in
-   if ismember('cbartxt',p.UsingDefaults)
-      %h.cbar.Label.Interpreter = 'tex'; 
-   else
-      h.cbar.Label.Interpreter = 'latex';
-   end
+   h.cbar.Label.Interpreter = cbarinterpreter;
 
    % for vertical cbar, we use Label not title
    %set(get(h.cbar,'title'),'string',ctxt,           ...
@@ -350,7 +352,8 @@ cspec = makesymbolspec('Polygon',{cname,[cmin cmax],  ...
 
 %% INPUT PARSER
 function [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, ...
-   facealpha, facelabels, cvar, usegeoshow] = parseinputs( Basins, varargin)
+   facealpha, facelabels, cvar, usegeoshow, cbarinterpreter, cmap, climits] = ...
+   parseinputs(Basins, varargin)
 
 defaultvar = 'perm_mean';
 defaulttxt = 'permafrost extent (%)';
@@ -361,36 +364,53 @@ defaultlonlims = [-168 -40];
 % NOTE: use geo!
 % NOTE: variable name of cvar
 
-p = inputParser;
-p.FunctionName = 'bfra.mapbasins';
-p.StructExpand = true;
+parser = inputParser;
+parser.FunctionName = 'bfra.mapbasins';
+parser.StructExpand = true;
 
-p.addRequired('Basins', @isstruct);
-p.addParameter('Meta', '', @istable);
-p.addParameter('facemapping', false, @islogical);
-p.addParameter('cvarname', defaultvar, @ischar);
-p.addParameter('cbartxt', defaulttxt, @ischar);
-p.addParameter('latlims', defaultlatlims, @isnumeric);
-p.addParameter('lonlims', defaultlonlims, @isnumeric);
-p.addParameter('facealpha', 0.35, @isnumeric);
-p.addParameter('facelabels', false, @islogical);
-p.addParameter('proj', 'lambert', @ischar);
+parser.addRequired('Basins', @isstruct);
+parser.addParameter('Meta', '', @istable);
+parser.addParameter('facemapping', false, @islogical);
+parser.addParameter('cvarname', defaultvar, @ischar);
+parser.addParameter('cbartxt', defaulttxt, @ischar);
+parser.addParameter('climits', nan, @isnumeric);
+parser.addParameter('latlims', defaultlatlims, @isnumeric);
+parser.addParameter('lonlims', defaultlonlims, @isnumeric);
+parser.addParameter('colormap', parula, @isnumeric);
+parser.addParameter('facealpha', 0.35, @isnumeric);
+parser.addParameter('facelabels', false, @islogical);
+parser.addParameter('proj', 'lambert', @ischar);
+% parser.addParameter('cbarinterpreter', 'tex', @ischar);
 
-p.parse(Basins, varargin{:});
+parser.parse(Basins, varargin{:});
 
-Basins = p.Results.Basins;
-Meta = p.Results.Meta;
-proj = p.Results.proj;
-latlims = p.Results.latlims;
-lonlims = p.Results.lonlims;
-cbartxt = p.Results.cbartxt;
-cvarname = p.Results.cvarname;
-facealpha = p.Results.facealpha;
-facelabels = p.Results.facelabels;
-facemapping = p.Results.facemapping;
+Basins = parser.Results.Basins;
+Meta = parser.Results.Meta;
+proj = parser.Results.proj;
+cmap = parser.Results.colormap;
+latlims = parser.Results.latlims;
+lonlims = parser.Results.lonlims;
+cbartxt = parser.Results.cbartxt;
+climits = parser.Results.climits;
+cvarname = parser.Results.cvarname;
+facealpha = parser.Results.facealpha;
+facelabels = parser.Results.facelabels;
+facemapping = parser.Results.facemapping;
+% cbarinterpreter = parser.Results.cbarinterpreter;
 
 cvar = [];
 if facemapping == true
     cvar = [Basins.(cvarname)];
 end
 usegeoshow = false;
+
+% default text use tex, otherwise depends on whats passed in
+if ismember('cbartxt', parser.UsingDefaults)
+   cbarinterpreter = 'tex';
+else
+   if ismember('$', cbartxt)
+      cbarinterpreter = 'latex';
+   else
+      cbarinterpreter = 'tex';
+   end
+end
