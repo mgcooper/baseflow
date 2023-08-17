@@ -1,6 +1,8 @@
 # `baseflow`
 
-A matlab toolbox for characterizing aquifer properties from streamflow measurements using baseflow recession analysis. Developed at the Pacific Northwest National Laboratory to study changes in soil water storage in Arctic and Subarctic watersheds. Supported by the Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project. For a quick introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).
+A matlab toolbox for characterizing aquifer properties from streamflow measurements using baseflow recession analysis. Developed at the Pacific Northwest National Laboratory to study changes in soil water storage in Arctic and Subarctic watersheds. Supported by the Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project.  
+
+For a quick introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).  
 
 [![status](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3/status.svg)](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3) [![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mgcooper/baseflow?include_prereleases) [![MATLAB](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/mgcooper/baseflow/actions/workflows/ci.yml) [![GitHub license](https://img.shields.io/github/license/mgcooper/baseflow)](https://github.com/mgcooper/baseflow/blob/main/LICENSE)
 
@@ -22,7 +24,7 @@ Requires Statistics, Optimization, Struct, and Tablicious packages.
 - Run `Setup.m`:
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
-- If running in Octave, see `.octaverc`, it should source `Setup.m`.
+- If running in Octave, see `.octaverc` for recommended startup options.
 - Unit tests are located in `+bfra/+test`, they can be run in a matlab session by typing `bfra.test.runtests` at the command window and pressing enter.
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
@@ -105,10 +107,10 @@ If desired, package functions can be imported into a workspace using `import bfr
 
 Octave is supported but users may encounter errors. In particular, `baseflow` relies on the `tablicious` package for `string` and `datetime` support, but `tablicious` does not fully support these objects. `baseflow` has been tested on macOS with Octave v8.1.0 and 8.2.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). If running in Octave, the following packages are required:
 
-`struct`
-`optim`
-`statistics`
-`tablicious`
+`struct`  
+`optim`  
+`statistics`  
+`tablicious`  
 
 For some demos, the `Symbolic` package is needed.  
 
@@ -117,18 +119,18 @@ To see which packages are installed:
 
 To install packages, use the pkg command in Octave:
 
-`pkg install -forge struct`
-`pkg install -forge optim`
-`pkg install -forge statistics`
+`pkg install -forge struct`  
+`pkg install -forge optim`  
+`pkg install -forge statistics`  
 
-Install tablicious from the repository:
+Install tablicious from the repository:  
 `pkg install https://github.com/apjanke/octave-tablicious/archive/refs/heads/master.zip`
 
-Each time you use the baseflow toolbox, these packages need to be loaded:
-`pkg load struct`
-`pkg load optim`
-`pkg load statistics`
-`pkg load tablicious`
+Each time you use the baseflow toolbox, these packages need to be loaded:  
+`pkg load struct`  
+`pkg load optim`  
+`pkg load statistics`  
+`pkg load tablicious`  
 
 To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name. Use the convenience function `Setup.m` to automatically import these packages.
 
