@@ -73,7 +73,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [T, Q, R, Info, eventTags, plotneg, plotevents, dqdt] = parseinputs(T, Q, R, Info, varargin)</a></li></ul>
 
 
 
@@ -113,161 +116,172 @@ This function is called by:
 0033 <span class="comment">% if called with no input, open this file</span>
 0034 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0035 
-0036 <span class="comment">%-------------------------------------------------------------------------------</span>
-0037 <span class="comment">% input handling</span>
-0038 p              = inputParser;
-0039 p.FunctionName = <span class="string">'eventplotter'</span>;
+0036 <span class="comment">% PARSE INPUTS</span>
+0037 [T, Q, R, Info, eventTags, plotneg, plotevents, dqdt] = <span class="keyword">...</span>
+0038    <a href="#_sub1" class="code" title="subfunction [T, Q, R, Info, eventTags, plotneg, plotevents, dqdt] = parseinputs(T, Q, R, Info, varargin)">parseinputs</a>(T, Q, R, Info, varargin{:});
+0039 
 0040 
-0041 N = numel(Info.istart);
-0042 
-0043 addRequired(p, <span class="string">'T'</span>,                    @(x) bfra.validation.isdatelike(x));
-0044 addRequired(p, <span class="string">'Q'</span>,                    @(x) isnumeric(x) &amp; numel(x)==numel(T));
-0045 addRequired(p, <span class="string">'R'</span>,                    @(x) isnumeric(x));
-0046 addRequired(p, <span class="string">'Info'</span>,                 @(x) isstruct(x));
-0047 addOptional(p, <span class="string">'eventTags'</span>,   1:N,     @(x) bfra.validation.isnumericvector(x));
-0048 addParameter(p,<span class="string">'plotneg'</span>,     false,   @(x) bfra.validation.islogicalscalar(x));
-0049 addParameter(p,<span class="string">'plotevents'</span>,  false,   @(x) bfra.validation.islogicalscalar(x));
-0050 addParameter(p,<span class="string">'dqdt'</span>, bfra.deps.derivative(Q),@(x) isnumeric(x) &amp; numel(x)==numel(T) );
+0041 <span class="comment">% short circuits</span>
+0042 <span class="keyword">if</span> plotevents == false; h = []; <span class="keyword">return</span>; <span class="keyword">end</span>
+0043 <span class="keyword">if</span> isempty(Info.istart); disp(<span class="string">'no valid events'</span>); h = []; <span class="keyword">return</span>; <span class="keyword">end</span>
+0044 
+0045 <span class="comment">% otherwise, prep the data to plot</span>
+0046 
+0047 <span class="comment">% allow empty R i.e. input syntax eventplotter(T,Q,[],...)</span>
+0048 <span class="keyword">if</span> isempty(R)
+0049    R = zeros(size(T));
+0050 <span class="keyword">end</span>
 0051 
-0052 parse(p,T,Q,R,Info,varargin{:});
+0052 sz = 20; <span class="comment">% this controls the size of the scatter symbols</span>
 0053 
-0054 eventTags   = p.Results.eventTags;
-0055 plotneg     = p.Results.plotneg;
-0056 plotevents  = p.Results.plotevents;
-0057 dqdt        = p.Results.dqdt;
-0058 <span class="comment">%-------------------------------------------------------------------------------</span>
+0054 <span class="comment">% compute the second derivative and the increasing/decreasing values. do this</span>
+0055 <span class="comment">% here so the indices are relative to the same T,Q vectors as the Info indices</span>
+0056 d2qdt = bfra.deps.derivative(dqdt);
+0057 Info.ipositive = find(dqdt&gt;=0);
+0058 Info.inegative = find(dqdt&lt;0);
 0059 
-0060 <span class="comment">% short circuits</span>
-0061 <span class="keyword">if</span> plotevents == false; h = []; <span class="keyword">return</span>; <span class="keyword">end</span>
-0062 <span class="keyword">if</span> isempty(Info.istart); disp(<span class="string">'no valid events'</span>); h = []; <span class="keyword">return</span>; <span class="keyword">end</span>
-0063 
-0064 <span class="comment">% otherwise, prep the data to plot</span>
-0065 import bfra.util.subtight
+0060 <span class="comment">% get the data for the requested events identified by their event tags</span>
+0061 <span class="keyword">if</span> numel(eventTags) == N
+0062    idx = 1:numel(T); <span class="comment">% all events were requested</span>
+0063 <span class="keyword">else</span>
+0064    <span class="comment">% create an index for the period of requested events padded by a week</span>
+0065    idx = Info.istart(min(eventTags)):1:Info.istop(max(eventTags));
 0066 
-0067 <span class="comment">% allow empty R i.e. input syntax eventplotter(T,Q,[],...)</span>
-0068 <span class="keyword">if</span> isempty(R)
-0069    R = zeros(size(T));
-0070 <span class="keyword">end</span>
-0071 
-0072 sz = 20; <span class="comment">% this controls the size of the scatter symbols</span>
+0067    <span class="comment">% this pads the indices by one week (or any other amount)</span>
+0068    idx = [idx(1)-10:1:idx(1)-1 idx idx(end)+1:1:idx(end)+10];
+0069 
+0070    <span class="comment">% this uses all indices in the year(s) of this event(s)</span>
+0071    <span class="comment">% idx = find(ismember(year(t),unique(year(t(idx)))));</span>
+0072 <span class="keyword">end</span>
 0073 
-0074 <span class="comment">% compute the second derivative and the increasing/decreasing values. do this</span>
-0075 <span class="comment">% here so the indices are relative to the same T,Q vectors as the Info indices</span>
-0076 d2qdt = bfra.deps.derivative(dqdt);
-0077 Info.ipositive = find(dqdt&gt;=0);
-0078 Info.inegative = find(dqdt&lt;0);
-0079 
-0080 <span class="comment">% get the data for the requested events identified by their event tags</span>
-0081 <span class="keyword">if</span> numel(eventTags) == N
-0082    idx = 1:numel(T); <span class="comment">% all events were requested</span>
-0083 <span class="keyword">else</span>
-0084    <span class="comment">% create an index for the period of requested events padded by a week</span>
-0085    idx = Info.istart(min(eventTags)):1:Info.istop(max(eventTags));
+0074 fields = fieldnames(Info);
+0075 <span class="keyword">for</span> n = 1:numel(fields)
+0076    thisfield = Info.(fields{n});
+0077    keep = ismember(thisfield,idx);
+0078    Info.(fields{n}) = thisfield(keep);
+0079 <span class="keyword">end</span>
+0080 
+0081 <span class="comment">% convert the first and second derivatives to positive values</span>
+0082 <span class="keyword">if</span> plotneg == true
+0083    dqdt = -dqdt;
+0084    d2qdt = -d2qdt;
+0085 <span class="keyword">end</span>
 0086 
-0087    <span class="comment">% this pads the indices by one week (or any other amount)</span>
-0088    idx = [idx(1)-10:1:idx(1)-1 idx idx(end)+1:1:idx(end)+10];
+0087 <span class="comment">% fields to plot</span>
+0088 plotfields = {<span class="string">'ipositive'</span>,<span class="string">'inegative'</span>,<span class="string">'imaxima'</span>,<span class="string">'iminima'</span>,<span class="string">'iconvex'</span>,<span class="string">'ikeep'</span>};
 0089 
-0090    <span class="comment">% this uses all indices in the year(s) of this event(s)</span>
-0091    <span class="comment">% idx = find(ismember(year(t),unique(year(t(idx)))));</span>
-0092 <span class="keyword">end</span>
-0093 
-0094 fields = fieldnames(Info);
-0095 <span class="keyword">for</span> n = 1:numel(fields)
-0096    thisfield = Info.(fields{n});
-0097    keep = ismember(thisfield,idx);
-0098    Info.(fields{n}) = thisfield(keep);
-0099 <span class="keyword">end</span>
+0090 <span class="comment">% turned this off so h is a gobjects array</span>
+0091 <span class="comment">% h.Info = Info;</span>
+0092 
+0093 <span class="comment">% make the figure</span>
+0094 <span class="comment">% h.f = figure('Position',[1,1,1152*2/3,616*2/3]);</span>
+0095 f = figure(<span class="string">'Units'</span>,<span class="string">'inches'</span>,<span class="string">'Position'</span>,[1,1,8.5,5],<span class="string">'Visible'</span>,<span class="string">'on'</span>);
+0096 <span class="comment">% tiledlayout(3,1,'TileSpacing','tight','Padding','tight');</span>
+0097 
+0098 <span class="comment">% plot the panels</span>
+0099 <span class="keyword">for</span> m = 1:3
 0100 
-0101 <span class="comment">% convert the first and second derivatives to positive values</span>
-0102 <span class="keyword">if</span> plotneg == true
-0103    dqdt = -dqdt;
-0104    d2qdt = -d2qdt;
-0105 <span class="keyword">end</span>
-0106 
-0107 <span class="comment">% fields to plot</span>
-0108 plotfields = {<span class="string">'ipositive'</span>,<span class="string">'inegative'</span>,<span class="string">'imaxima'</span>,<span class="string">'iminima'</span>,<span class="string">'iconvex'</span>,<span class="string">'ikeep'</span>};
-0109 
-0110 <span class="comment">% turned this off so h is a gobjects array</span>
-0111 <span class="comment">% h.Info = Info;</span>
-0112 
-0113 <span class="comment">% make the figure</span>
-0114 <span class="comment">% h.f = figure('Position',[1,1,1152*2/3,616*2/3]);</span>
-0115 f = figure(<span class="string">'Units'</span>,<span class="string">'inches'</span>,<span class="string">'Position'</span>,[1,1,8.5,5],<span class="string">'Visible'</span>,<span class="string">'on'</span>);
-0116 <span class="comment">% tiledlayout(3,1,'TileSpacing','tight','Padding','tight');</span>
-0117 
-0118 <span class="comment">% plot the panels</span>
-0119 <span class="keyword">for</span> m = 1:3
-0120 
-0121 <span class="comment">%    nexttile;</span>
-0122    h.subplot(m) = subtight(3,1,m,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
-0123    h.ax(m) = gca; hold on;
-0124 
-0125    <span class="keyword">for</span> n = 1:numel(plotfields)
-0126       
-0127       thisfield = plotfields{n};
-0128       ifield = Info.(thisfield);
-0129    
-0130       <span class="comment">% increase the plot symbol size depending on the field</span>
-0131       <span class="keyword">switch</span> thisfield
-0132          <span class="keyword">case</span> {<span class="string">'imaxima'</span>,<span class="string">'iminima'</span>}
-0133             ssize = 2*sz;
-0134          <span class="keyword">case</span> <span class="string">'ikeep'</span>
-0135             ssize = 2.5*sz;
-0136          <span class="keyword">otherwise</span>
-0137             ssize = sz;
-0138       <span class="keyword">end</span>
-0139 
-0140       <span class="keyword">switch</span> m
-0141          <span class="keyword">case</span> 1 <span class="comment">% Q</span>
-0142             h1.(thisfield) = scatter(h.ax(m),T(ifield),Q(ifield),ssize,<span class="string">'filled'</span>);
-0143          <span class="keyword">case</span> 2 <span class="comment">% dQ/dt</span>
-0144             h2.(thisfield) = scatter(h.ax(m),T(ifield),dqdt(ifield),ssize,<span class="string">'filled'</span>);
-0145          <span class="keyword">case</span> 3 <span class="comment">% d2Q/dt2</span>
-0146             h3.(thisfield) = scatter(h.ax(m),T(ifield),d2qdt(ifield),ssize,<span class="string">'filled'</span>);
-0147       <span class="keyword">end</span>
-0148       
-0149    <span class="keyword">end</span>
+0101 <span class="comment">%    nexttile;</span>
+0102    h.subplot(m) = bfra.util.subtight(3,1,m,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0103    h.ax(m) = gca; hold on;
+0104 
+0105    <span class="keyword">for</span> n = 1:numel(plotfields)
+0106       
+0107       thisfield = plotfields{n};
+0108       ifield = Info.(thisfield);
+0109    
+0110       <span class="comment">% increase the plot symbol size depending on the field</span>
+0111       <span class="keyword">switch</span> thisfield
+0112          <span class="keyword">case</span> {<span class="string">'imaxima'</span>,<span class="string">'iminima'</span>}
+0113             ssize = 2*sz;
+0114          <span class="keyword">case</span> <span class="string">'ikeep'</span>
+0115             ssize = 2.5*sz;
+0116          <span class="keyword">otherwise</span>
+0117             ssize = sz;
+0118       <span class="keyword">end</span>
+0119 
+0120       <span class="keyword">switch</span> m
+0121          <span class="keyword">case</span> 1 <span class="comment">% Q</span>
+0122             h1.(thisfield) = scatter(h.ax(m),T(ifield),Q(ifield),ssize,<span class="string">'filled'</span>);
+0123          <span class="keyword">case</span> 2 <span class="comment">% dQ/dt</span>
+0124             h2.(thisfield) = scatter(h.ax(m),T(ifield),dqdt(ifield),ssize,<span class="string">'filled'</span>);
+0125          <span class="keyword">case</span> 3 <span class="comment">% d2Q/dt2</span>
+0126             h3.(thisfield) = scatter(h.ax(m),T(ifield),d2qdt(ifield),ssize,<span class="string">'filled'</span>);
+0127       <span class="keyword">end</span>
+0128       
+0129    <span class="keyword">end</span>
+0130 
+0131    legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>,<span class="string">'keep'</span>, <span class="keyword">...</span>
+0132       <span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>,<span class="string">'Orientation'</span>,<span class="string">'horizontal'</span>,<span class="string">'Location'</span>,<span class="string">'ne'</span>,<span class="keyword">...</span>
+0133       <span class="string">'FontSize'</span>,10);
+0134    
+0135    set(gca,<span class="string">'FontSize'</span>,10)
+0136 <span class="keyword">end</span>
+0137 
+0138 <span class="comment">% add labels</span>
+0139 ylabel(h.ax(1),bfra.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,10);
+0140 ylabel(h.ax(2),bfra.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,10);
+0141 ylabel(h.ax(3),bfra.getstring(<span class="string">'d2Qdt2'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,10);
+0142 
+0143 <span class="comment">% add a line at zero</span>
+0144 h2.zeroline = plot(h.ax(2),xlim(h.ax(2)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
+0145 h3.zeroline = plot(h.ax(3),xlim(h.ax(3)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
+0146 
+0147 h.h1 = h1;
+0148 h.h2 = h2;
+0149 h.h3 = h3;
 0150 
-0151    legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>,<span class="string">'keep'</span>, <span class="keyword">...</span>
-0152       <span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>,<span class="string">'Orientation'</span>,<span class="string">'horizontal'</span>,<span class="string">'Location'</span>,<span class="string">'ne'</span>,<span class="keyword">...</span>
-0153       <span class="string">'FontSize'</span>,10);
-0154    
-0155    set(gca,<span class="string">'FontSize'</span>,10)
-0156 <span class="keyword">end</span>
-0157 
-0158 <span class="comment">% add labels</span>
-0159 ylabel(h.ax(1),bfra.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,10);
-0160 ylabel(h.ax(2),bfra.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,10);
-0161 ylabel(h.ax(3),bfra.getstring(<span class="string">'d2Qdt2'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,10);
-0162 
-0163 <span class="comment">% add a line at zero</span>
-0164 h2.zeroline = plot(h.ax(2),xlim(h.ax(2)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
-0165 h3.zeroline = plot(h.ax(3),xlim(h.ax(3)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
-0166 
-0167 h.h1 = h1;
-0168 h.h2 = h2;
-0169 h.h3 = h3;
-0170 
-0171 <span class="comment">% if ispublishing</span>
-0172 <span class="comment">%    exportgraphics(gcf,'html/event_example.png','Resolution',400);</span>
-0173 <span class="comment">% end</span>
-0174 
-0175 <span class="comment">% snapnow</span>
-0176 
-0177 <span class="comment">% % other options not in use</span>
-0178 <span class="comment">% %</span>
-0179 <span class="comment">% % plot the 50th percentile as a reference line</span>
-0180 <span class="comment">% % q50 = quantile(q,0.5);</span>
-0181 <span class="comment">% % h1.refline = bfra.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line</span>
-0182 <span class="comment">%</span>
-0183 <span class="comment">%</span>
-0184 <span class="comment">% % plot the events identified by bfra.findevents, just to be sure</span>
-0185 <span class="comment">% %     for i = 1:length(T)</span>
-0186 <span class="comment">% %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);</span>
-0187 <span class="comment">% %     end</span>
-0188 <span class="comment">% % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep','keep (check)');</span>
-0189 <span class="comment">%</span>
-0190 <span class="comment">% h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep');</span>
-0191 <span class="comment">% ylabel(bfra.getstring('Q','units',true));</span></pre></div>
+0151 <span class="comment">%% INPUT PARSER</span>
+0152 <a name="_sub1" href="#_subfunctions" class="code">function [T, Q, R, Info, eventTags, plotneg, plotevents, dqdt] = parseinputs(T, Q, R, Info, varargin)</a>
+0153 
+0154 parser = inputParser;
+0155 parser.FunctionName = <span class="string">'bfra.eventplotter'</span>;
+0156 
+0157 N = numel(Info.istart);
+0158 
+0159 parser.addRequired(<span class="string">'T'</span>, @bfra.validation.isdatelike);
+0160 parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
+0161 parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0162 parser.addRequired(<span class="string">'Info'</span>, @isstruct);
+0163 parser.addOptional(<span class="string">'eventTags'</span>, 1:N, @bfra.validation.isnumericvector);
+0164 parser.addParameter(<span class="string">'plotneg'</span>, false, @bfra.validation.islogicalscalar);
+0165 parser.addParameter(<span class="string">'plotevents'</span>, false, @bfra.validation.islogicalscalar);
+0166 parser.addParameter(<span class="string">'dqdt'</span>, bfra.deps.derivative(Q), @isnumeric);
+0167 
+0168 parser.parse(T, Q, R, Info, varargin{:});
+0169 
+0170 T = parser.Results.T;
+0171 Q = parser.Results.Q;
+0172 R = parser.Results.R;
+0173 Info = parser.Results.Info;
+0174 dqdt = parser.Results.dqdt;
+0175 plotneg = parser.Results.plotneg;
+0176 plotevents = parser.Results.plotevents;
+0177 eventTags = parser.Results.eventTags;
+0178 
+0179 assert(numel(Q) == numel(T))
+0180 assert(numel(dqdt) == numel(T))
+0181 
+0182 <span class="comment">% if ispublishing</span>
+0183 <span class="comment">%    exportgraphics(gcf,'html/event_example.png','Resolution',400);</span>
+0184 <span class="comment">% end</span>
+0185 
+0186 <span class="comment">% snapnow</span>
+0187 
+0188 <span class="comment">% % other options not in use</span>
+0189 <span class="comment">% %</span>
+0190 <span class="comment">% % plot the 50th percentile as a reference line</span>
+0191 <span class="comment">% % q50 = quantile(q,0.5);</span>
+0192 <span class="comment">% % h1.refline = bfra.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line</span>
+0193 <span class="comment">%</span>
+0194 <span class="comment">%</span>
+0195 <span class="comment">% % plot the events identified by bfra.findevents, just to be sure</span>
+0196 <span class="comment">% %     for i = 1:length(T)</span>
+0197 <span class="comment">% %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);</span>
+0198 <span class="comment">% %     end</span>
+0199 <span class="comment">% % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep','keep (check)');</span>
+0200 <span class="comment">%</span>
+0201 <span class="comment">% h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep');</span>
+0202 <span class="comment">% ylabel(bfra.getstring('Q','units',true));</span></pre></div>
 </body>
 </html>

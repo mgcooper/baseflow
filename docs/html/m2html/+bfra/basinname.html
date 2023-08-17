@@ -47,7 +47,7 @@
      basinname string as input to load data for that basin.
  
  
- See also bfra.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> bfra.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> bfra.loadgrace bfra.<a href="stationlist.html" class="code" title="function stations = stationlist">stationlist</a>
+ See also bfra.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> bfra.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> bfra.<a href="loadgrace.html" class="code" title="function [Grace,Meta] = loadgrace(varargin)">loadgrace</a> bfra.<a href="stationlist.html" class="code" title="function stations = stationlist">stationlist</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -67,8 +67,9 @@ This function is called by:
 <li><a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>	LOADCALM loads calm ALT data for a basin in the Bounds struct</li>
 <li><a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>	LOADFLOW load timeseries of streamflow and metadata for basin</li>
 <li><a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>	LOADGHCND reads in a global hydroclimatology network database file</li>
+<li><a href="loadgrace.html" class="code" title="function [Grace,Meta] = loadgrace(varargin)">loadgrace</a>	LOADGRACE load grace data for basin in baseflow basin database</li>
 <li><a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>	LOADMETA load metadata for basin indicated by basinname</li>
-<li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname,varargin)">loadprops</a>	LOADPROPS load basin properties from metadata table</li></ul>
+<li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>	LOADPROPS load basin properties from metadata table</li></ul>
 <!-- crossreference -->
 
 
@@ -109,9 +110,9 @@ This function is called by:
 0030 <span class="comment">% Todo: 'ALL_BASINS' should return all of the basin names, see bfra.stationlist</span>
 0031 <span class="comment">% which appends 'ALL_BASINS' to the stationlist for use with loaddata functions</span>
 0032 
-0033 p              = inputParser;
+0033 p = inputParser;
 0034 p.FunctionName = <span class="string">'bfra.basinname'</span>;
-0035 addRequired( p,<span class="string">'typenamehere'</span>);
+0035 addRequired(p,<span class="string">'typenamehere'</span>);
 0036 parse(p,typenamehere);
 0037 basin = p.Results.typenamehere;
 0038    

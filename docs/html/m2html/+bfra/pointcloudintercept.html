@@ -62,7 +62,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] =</a></li></ul>
 
 
 
@@ -88,131 +91,155 @@ This function is called by:
 0019 <span class="comment">%</span>
 0020 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0021 
-0022 <span class="comment">% if called with no input, open this file</span>
-0023 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0024 
-0025 <span class="comment">% input parsing</span>
-0026 <span class="comment">%-------------------------------------------------------------------------------</span>
-0027 p              =  inputParser;
-0028 p.FunctionName =  <span class="string">'bfra.pointcloudintercept'</span>;
-0029 <span class="comment">% p.PartialMatching = true;</span>
+0022 <span class="comment">% TODO: consider making this a call to fitab. however, fitab does not return</span>
+0023 <span class="comment">% xbar/ybar, and I confirmed the results are identical, but it would be</span>
+0024 <span class="comment">% preferable to reduce the potential for inconsistent methods e.g. if this is</span>
+0025 <span class="comment">% used to estimate ahat but a different method is used when calling fitab for</span>
+0026 <span class="comment">% some other purpose such as fitting phi.</span>
+0027 
+0028 <span class="comment">% if called with no input, open this file</span>
+0029 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0030 
-0031 addRequired(p, <span class="string">'q'</span>,                       @(x)isnumeric(x));
-0032 addRequired(p, <span class="string">'dqdt'</span>,                    @(x)isnumeric(x));
-0033 addRequired(p, <span class="string">'bhat'</span>,                    @(x)isnumeric(x));
-0034 addRequired(p, <span class="string">'method'</span>,                  @(x)ischar(x));
-0035 addOptional(p, <span class="string">'threshold'</span>,0.05,          @(x)isnumeric(x));
-0036 addParameter(p,<span class="string">'mask'</span>,     true(size(q)), @(x)islogical(x));
-0037 addParameter(p,<span class="string">'refqtls'</span>,  [0.5 0.5],     @(x)isnumeric(x));
-0038 addParameter(p,<span class="string">'bci'</span>,      nan,           @(x)isnumeric(x));
-0039 addParameter(p,<span class="string">'tau'</span>,      nan,           @(x)isnumeric(x));
-0040 addParameter(p,<span class="string">'tau0'</span>,     nan,           @(x)isnumeric(x));
-0041 
-0042 parse(p,q,dqdt,bhat,method,varargin{:});
-0043 
-0044 thresh   = p.Results.threshold;
-0045 method   = p.Results.method;
-0046 mask     = p.Results.mask;
-0047 qtls     = p.Results.refqtls;
-0048 bci      = p.Results.bci;
-0049 tau      = p.Results.tau;
-0050 tau0     = p.Results.tau0;
-0051 <span class="comment">%-------------------------------------------------------------------------------</span>
-0052 
-0053 <span class="comment">% TODO: consider making this a call to fitab. however, fitab does not return</span>
-0054 <span class="comment">% xbar/ybar, and I confirmed the results are identical, but it would be</span>
-0055 <span class="comment">% preferable to reduce the potential for inconsistent methods e.g. if this is</span>
-0056 <span class="comment">% used to estimate ahat but a different method is used when calling fitab for</span>
-0057 <span class="comment">% some other purpose such as fitting phi.</span>
-0058 
-0059 <span class="keyword">switch</span> method
-0060    <span class="keyword">case</span> <span class="string">'mean'</span>
-0061       <span class="comment">%ybar = mean(-dqdt(mask),'omitnan');</span>
-0062       <span class="comment">%xbar = mean(q(mask),'omitnan');</span>
-0063       ybar = mean(log(-dqdt(mask)),<span class="string">'omitnan'</span>);
-0064       xbar = mean(log(q(mask)),<span class="string">'omitnan'</span>);
-0065       ahat = exp(ybar - bhat*xbar);
-0066    <span class="keyword">case</span> <span class="string">'median'</span>
-0067       xbar = median(q(mask),<span class="string">'omitnan'</span>);
-0068       ybar = median(-dqdt(mask),<span class="string">'omitnan'</span>);
-0069       ahat = ybar/xbar^bhat;
-0070    <span class="keyword">case</span> <span class="string">'envelope'</span>
-0071       xbar = quantile(q(mask),qtls(1),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0072       ybar = quantile(-dqdt(mask),qtls(2),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0073       ahat = ybar/xbar^bhat;
-0074    <span class="keyword">case</span> <span class="string">'brutsaert'</span>
-0075       <span class="comment">% start with median</span>
-0076       xbar  = median(q(mask),<span class="string">'omitnan'</span>);
-0077       ybar  = median(-dqdt(mask),<span class="string">'omitnan'</span>);
-0078       N     = numel(q(mask));
-0079       ahat  = ybar/xbar^bhat; <span class="comment">% init a using the median approach</span>
-0080       P     = 1;
-0081       <span class="keyword">while</span> P&gt;thresh
-0082          ahat  = 0.99*ahat;
-0083          P     = sum( (ahat.*q(mask).^bhat) &gt; -dqdt(mask) ) / N;
-0084       <span class="keyword">end</span>
-0085    <span class="keyword">case</span> <span class="string">'cooper'</span> <span class="comment">% only works if b&gt;1 and tau/tau0 are provided</span>
-0086       
-0087       <span class="comment">% if no tau&gt;tau0 mask is provided, use the 95th pctl for a1</span>
-0088       <span class="keyword">if</span> all(mask)
-0089          xbar  = quantile(q,0.95,<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0090          ybar  = quantile(-dqdt,0.95,<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0091       <span class="keyword">else</span>
-0092          <span class="comment">% if a mask is provided, use the 50th pctl of tau&lt;tau0</span>
-0093          xbar  = quantile(q(~mask),qtls(1),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0094          ybar  = quantile(-dqdt(~mask),qtls(2),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0095       <span class="keyword">end</span>
-0096       a0    = ybar/xbar^3;
-0097       ahat  = (1/tau)*(sqrt(a0*tau0)*(bhat-3)/(bhat-2))^(bhat-1);
-0098       
-0099       <span class="comment">% temporary method to send back a0 for method 'cooper'</span>
-0100       ahat  = [ahat a0];
-0101       
-0102       <span class="comment">% here xbar/ybar are identical to 'envelope'. use this to show that ahat</span>
-0103       <span class="comment">% returned by this function is identical to the case where a0 is returned</span>
-0104       <span class="comment">% by this function usine method 'envelope' and then passed to the a(a0...)</span>
-0105       <span class="comment">% function from bfra.getfunction('aofa0')</span>
-0106       <span class="comment">% xbar = quantile(q(mask),qtls(1),'Method','approximate');</span>
-0107       <span class="comment">% ybar = quantile(-dqdt(mask),qtls(2),'Method','approximate');</span>
-0108 <span class="keyword">end</span>
+0031 <span class="keyword">persistent</span> inoctave
+0032 <span class="keyword">if</span> isempty(inoctave); inoctave = exist(&quot;OCTAVE_VERSION&quot;, &quot;builtin&quot;)&gt;0;
+0033 <span class="keyword">end</span>
+0034 
+0035 <span class="comment">% PARSE INPUTS</span>
+0036 [q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] = parseinputs( <span class="keyword">...</span>
+0037    q, dqdt, bhat, method, varargin{:});
+0038 
+0039 <span class="keyword">switch</span> method
+0040    <span class="keyword">case</span> <span class="string">'mean'</span>
+0041       <span class="comment">%ybar = mean(-dqdt(mask),'omitnan');</span>
+0042       <span class="comment">%xbar = mean(q(mask),'omitnan');</span>
+0043       ybar = mean(log(-dqdt(mask)),<span class="string">'omitnan'</span>);
+0044       xbar = mean(log(q(mask)),<span class="string">'omitnan'</span>);
+0045       ahat = exp(ybar - bhat*xbar);
+0046    <span class="keyword">case</span> <span class="string">'median'</span>
+0047       xbar = median(q(mask),<span class="string">'omitnan'</span>);
+0048       ybar = median(-dqdt(mask),<span class="string">'omitnan'</span>);
+0049       ahat = ybar/xbar^bhat;
+0050    <span class="keyword">case</span> <span class="string">'envelope'</span>
+0051       
+0052       <span class="keyword">if</span> inoctave
+0053          xbar = quantile(q(mask),qtls(1));
+0054          ybar = quantile(-dqdt(mask),qtls(2));
+0055       <span class="keyword">else</span>
+0056          xbar = quantile(q(mask),qtls(1),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0057          ybar = quantile(-dqdt(mask),qtls(2),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0058       <span class="keyword">end</span>
+0059       ahat = ybar/xbar^bhat;
+0060       
+0061    <span class="keyword">case</span> <span class="string">'brutsaert'</span>
+0062       <span class="comment">% start with median</span>
+0063       xbar = median(q(mask),<span class="string">'omitnan'</span>);
+0064       ybar = median(-dqdt(mask),<span class="string">'omitnan'</span>);
+0065       ahat = ybar/xbar^bhat; <span class="comment">% init a using the median</span>
+0066       N = numel(q(mask));
+0067       P = 1;
+0068       <span class="keyword">while</span> P&gt;thresh
+0069          ahat = 0.99*ahat;
+0070          P = sum( (ahat.*q(mask).^bhat) &gt; -dqdt(mask) ) / N;
+0071       <span class="keyword">end</span>
+0072    <span class="keyword">case</span> <span class="string">'cooper'</span> <span class="comment">% only works if b&gt;1 and tau/tau0 are provided</span>
+0073       
+0074       <span class="comment">% if no tau&gt;tau0 mask is provided, use the 95th pctl for a1</span>
+0075       <span class="keyword">if</span> all(mask)
+0076          
+0077          <span class="keyword">if</span> inoctave
+0078             xbar = quantile(q,0.95);
+0079             ybar = quantile(-dqdt,0.95);
+0080          <span class="keyword">else</span>
+0081             xbar = quantile(q,0.95,<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0082             ybar = quantile(-dqdt,0.95,<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0083          <span class="keyword">end</span>
+0084       <span class="keyword">else</span>
+0085          <span class="comment">% if a mask is provided, use the 50th pctl of tau&lt;tau0</span>
+0086          <span class="keyword">if</span> inoctave
+0087             xbar = quantile(q(~mask),qtls(1));
+0088             ybar = quantile(-dqdt(~mask),qtls(2));
+0089          <span class="keyword">else</span>
+0090             xbar = quantile(q(~mask),qtls(1),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0091             ybar = quantile(-dqdt(~mask),qtls(2),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0092          <span class="keyword">end</span>
+0093       <span class="keyword">end</span>
+0094       a0 = ybar/xbar^3;
+0095       ahat = (1/tau)*(sqrt(a0*tau0)*(bhat-3)/(bhat-2))^(bhat-1);
+0096       
+0097       <span class="comment">% temporary method to send back a0 for method 'cooper'</span>
+0098       ahat = [ahat a0];
+0099       
+0100       <span class="comment">% here xbar/ybar are identical to 'envelope'. use this to show that ahat</span>
+0101       <span class="comment">% returned by this function is identical to the case where a0 is returned</span>
+0102       <span class="comment">% by this function usine method 'envelope' and then passed to the a(a0...)</span>
+0103       <span class="comment">% function from bfra.getfunction('aofa0')</span>
+0104       <span class="comment">% xbar = quantile(q(mask),qtls(1),'Method','approximate');</span>
+0105       <span class="comment">% ybar = quantile(-dqdt(mask),qtls(2),'Method','approximate');</span>
+0106 <span class="keyword">end</span>
+0107 
+0108 
 0109 
-0110 
-0111 
-0112 <span class="comment">% NOTE: this isn't the best way to get aL/H, but use it for now</span>
-0113 <span class="keyword">if</span> ~isnan(bci)
-0114    bhatL = bci(1);
-0115    bhatH = bci(2);
-0116    ahatH = ybar/xbar^bhatL;
-0117    ahatL = ybar/xbar^bhatH;
-0118 <span class="keyword">else</span>
-0119    ahatH = nan;
-0120    ahatL = nan;
-0121 <span class="keyword">end</span>
-0122 
-0123 <span class="keyword">switch</span> nargout
-0124    <span class="keyword">case</span> 1
-0125       varargout{1} = ahat;
-0126    <span class="keyword">case</span> 2
-0127       varargout{1} = ahat;
-0128       varargout{2} = [ahatL ahatH];
-0129    <span class="keyword">case</span> 3
-0130       varargout{1} = ahat;
-0131       varargout{2} = xbar;
-0132       varargout{3} = ybar;
-0133    <span class="keyword">case</span> 4
-0134       varargout{1} = ahat;
-0135       varargout{2} = [ahatL ahatH];
-0136       varargout{3} = xbar;
-0137       varargout{4} = ybar;
-0138 <span class="keyword">end</span>
-0139 
-0140 <span class="comment">% % one = ahat</span>
-0141 <span class="comment">% % two = ahat, [aL aH]</span>
-0142 <span class="comment">% % three = ahat, xbar, ybar</span>
-0143 <span class="comment">% % four = ahat, [aL aH], xbar, ybar</span>
-0144 
-0145 
-0146 
-0147</pre></div>
+0110 <span class="comment">% NOTE: this isn't the best way to get aL/H, but use it for now</span>
+0111 <span class="keyword">if</span> ~isnan(bci)
+0112    bhatL = bci(1);
+0113    bhatH = bci(2);
+0114    ahatH = ybar/xbar^bhatL;
+0115    ahatL = ybar/xbar^bhatH;
+0116 <span class="keyword">else</span>
+0117    ahatH = nan;
+0118    ahatL = nan;
+0119 <span class="keyword">end</span>
+0120 
+0121 <span class="comment">% PARSE OUTPUTS</span>
+0122 <span class="keyword">switch</span> nargout
+0123    <span class="keyword">case</span> 1
+0124       varargout{1} = ahat;
+0125    <span class="keyword">case</span> 2
+0126       varargout{1} = ahat;
+0127       varargout{2} = [ahatL ahatH];
+0128    <span class="keyword">case</span> 3
+0129       varargout{1} = ahat;
+0130       varargout{2} = xbar;
+0131       varargout{3} = ybar;
+0132    <span class="keyword">case</span> 4
+0133       varargout{1} = ahat;
+0134       varargout{2} = [ahatL ahatH];
+0135       varargout{3} = xbar;
+0136       varargout{4} = ybar;
+0137 <span class="keyword">end</span>
+0138 
+0139 <span class="comment">% % one = ahat</span>
+0140 <span class="comment">% % two = ahat, [aL aH]</span>
+0141 <span class="comment">% % three = ahat, xbar, ybar</span>
+0142 <span class="comment">% % four = ahat, [aL aH], xbar, ybar</span>
+0143 
+0144 <span class="comment">%% INPUT PARSER</span>
+0145 <a name="_sub1" href="#_subfunctions" class="code">function [q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] = </a><span class="keyword">...</span>
+0146    parseinputs(q, dqdt, bhat, method, varargin)
+0147 parser = inputParser;
+0148 parser.FunctionName = <span class="string">'bfra.pointcloudintercept'</span>;
+0149 
+0150 parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0151 parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
+0152 parser.addRequired(<span class="string">'bhat'</span>, @isnumeric);
+0153 parser.addRequired(<span class="string">'method'</span>, @ischar);
+0154 parser.addOptional(<span class="string">'threshold'</span>,0.05, @isnumeric);
+0155 parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
+0156 parser.addParameter(<span class="string">'refqtls'</span>, [0.5 0.5], @isnumeric);
+0157 parser.addParameter(<span class="string">'bci'</span>, nan, @isnumeric);
+0158 parser.addParameter(<span class="string">'tau'</span>, nan, @isnumeric);
+0159 parser.addParameter(<span class="string">'tau0'</span>, nan, @isnumeric);
+0160 
+0161 parser.parse(q, dqdt, bhat, method, varargin{:});
+0162 
+0163 thresh = parser.Results.threshold;
+0164 mask = parser.Results.mask;
+0165 qtls = parser.Results.refqtls;
+0166 bci = parser.Results.bci;
+0167 tau = parser.Results.tau;
+0168 tau0 = parser.Results.tau0;
+0169 
+0170 
+0171</pre></div>
 </body>
 </html>

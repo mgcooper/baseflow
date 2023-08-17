@@ -4,7 +4,7 @@
 <head>
   <title>Description of hyetograph</title>
   <meta name="keywords" content="hyetograph">
-  <meta name="description" content="HYETOGRAPH Plot a discharge rainfall hyetograph">
+  <meta name="description" content="function H = hyetograph(time,flow,prec,t1,t2)">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,14 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>HYETOGRAPH Plot a discharge rainfall hyetograph</strong></div>
+<div class="box"><strong>function H = hyetograph(time,flow,prec,t1,t2)</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function H = hyetograph(time,flow,prec,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">HYETOGRAPH Plot a discharge rainfall hyetograph
+<div class="fragment"><pre class="comment"> function H = hyetograph(time,flow,prec,t1,t2)
+HYETOGRAPH Plot a discharge rainfall hyetograph
 
   H = hyetograph(time,flow,ppt) plots hyetograph using data in flow and ppt
 
@@ -60,231 +61,182 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [time, flow, prec, t1, t2, units] = parseinputs(funcname, time, flow,</a></li></ul>
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function H = hyetograph(time,flow,prec,varargin)</a>
-0002 <span class="comment">%HYETOGRAPH Plot a discharge rainfall hyetograph</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">%  H = hyetograph(time,flow,ppt) plots hyetograph using data in flow and ppt</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%  H = hyetograph(time,flow,ppt,t1,t2) plots hyetograph using data in flow and</span>
-0007 <span class="comment">%  ppt for time period bounded by datetimes t1 and t2</span>
-0008 <span class="comment">%</span>
-0009 <span class="comment">% Example, how to later access the plot objects</span>
-0010 <span class="comment">%  H = hyetograph(...);</span>
-0011 <span class="comment">%</span>
-0012 <span class="comment">% Find specific handles using 'Tag' or 'Name'</span>
-0013 <span class="comment">%</span>
-0014 <span class="comment">% fig = findobj(H, 'Name', 'Hyetograph');</span>
-0015 <span class="comment">% ax_streamflow = findobj(H, 'Tag', 'StreamflowAxis');</span>
-0016 <span class="comment">% ax_precipitation = findobj(H, 'Tag', 'PrecipitationAxis');</span>
-0017 <span class="comment">%</span>
-0018 <span class="comment">% See also</span>
-0019 
-0020 <span class="comment">% --------------- parse inputs</span>
-0021 p = bfra.deps.magicParser; <span class="comment">%#ok&lt;*NODEF,*USENS&gt;</span>
-0022 p.FunctionName = mfilename;
-0023 p.addRequired(<span class="string">'time'</span>, @(x)bfra.validation.isdatelike(x));
-0024 p.addRequired(<span class="string">'flow'</span>, @(x)bfra.validation.isnumericvector(x));
-0025 p.addRequired(<span class="string">'prec'</span>, @(x)bfra.validation.isnumericvector(x));
-0026 p.addOptional(<span class="string">'t1'</span>, min(time), @(x)bfra.validation.isdatelike(x));
-0027 p.addOptional(<span class="string">'t2'</span>, max(time), @(x)bfra.validation.isdatelike(x));
-0028 p.addParameter(<span class="string">'units'</span>, {<span class="string">'mm'</span>,<span class="string">'cm d-1'</span>}, @(x)bfra.validation.ischarlike(x));
-0029 <span class="comment">% p.addParameter('ax', gca, @(x)bfra.validation.isaxis(x)  );</span>
-0030 p.parseMagically(<span class="string">'caller'</span>);
-0031 
-0032 <span class="comment">% --------------- function code</span>
-0033 
-0034 <span class="comment">% initialize container for output handles</span>
-0035 H = gobjects(4,1); <span class="comment">% figure, ax1, plot1, plot2</span>
+0002 <span class="comment">% function H = hyetograph(time,flow,prec,t1,t2)</span>
+0003 <span class="comment">%HYETOGRAPH Plot a discharge rainfall hyetograph</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">%  H = hyetograph(time,flow,ppt) plots hyetograph using data in flow and ppt</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">%  H = hyetograph(time,flow,ppt,t1,t2) plots hyetograph using data in flow and</span>
+0008 <span class="comment">%  ppt for time period bounded by datetimes t1 and t2</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% Example, how to later access the plot objects</span>
+0011 <span class="comment">%  H = hyetograph(...);</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% Find specific handles using 'Tag' or 'Name'</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% fig = findobj(H, 'Name', 'Hyetograph');</span>
+0016 <span class="comment">% ax_streamflow = findobj(H, 'Tag', 'StreamflowAxis');</span>
+0017 <span class="comment">% ax_precipitation = findobj(H, 'Tag', 'PrecipitationAxis');</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% See also</span>
+0020 
+0021 <span class="comment">% if called with no input, open this file</span>
+0022 <span class="keyword">if</span> nargin == 0; open([mfilename(<span class="string">'fullpath'</span>),<span class="string">'.m'</span>]); <span class="keyword">return</span>; <span class="keyword">end</span>
+0023 
+0024 <span class="comment">% parse inputs</span>
+0025 
+0026 [time, flow, prec, t1, t2, units] = <a href="#_sub1" class="code" title="subfunction [time, flow, prec, t1, t2, units] = parseinputs(funcname, time, flow, ">parseinputs</a>(mfilename, time, flow, <span class="keyword">...</span>
+0027    prec, varargin{:});
+0028 
+0029 
+0030 <span class="comment">% initialize container for output handles</span>
+0031 <span class="keyword">if</span> bfra.util.isoctave
+0032    H = zeros(4,1);
+0033 <span class="keyword">else</span>
+0034    H = gobjects(4,1); <span class="comment">% figure, ax1, plot1, plot2</span>
+0035 <span class="keyword">end</span>
 0036 
-0037 <span class="comment">% % get the figure handle</span>
-0038 fig = gcf; 
-0039 fig.Name = <span class="string">'Hyetograph'</span>;
-0040 fig.Tag = <span class="string">'HyetographFigure'</span>;
-0041 <span class="comment">% fig.Position = [10,10,400,300];</span>
-0042 <span class="comment">% fig.Renderer = 'painters';</span>
-0043 
-0044 <span class="comment">% k = fig.Parent;</span>
-0045 <span class="comment">% k.Parent.Position = [360 198 400 300];</span>
-0046 
-0047 <span class="comment">% convert to columns</span>
-0048 time = time(:);
-0049 prec = prec(:);
-0050 flow = flow(:);
+0037 <span class="comment">% get the figure handle</span>
+0038 fig = gcf;
+0039 set(fig, <span class="string">'Name'</span>, <span class="string">'Hyetograph'</span>, <span class="string">'Tag'</span>, <span class="string">'HyetographFigure'</span>);
+0040 
+0041 <span class="comment">% convert to columns</span>
+0042 time = time(:);
+0043 prec = prec(:);
+0044 flow = flow(:);
+0045 
+0046 <span class="comment">% convert to datetime</span>
+0047 <span class="keyword">if</span> ~bfra.util.isoctave
+0048    <span class="keyword">if</span> ~isdatetime(time); time = datetime(time, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>); <span class="keyword">end</span>
+0049    <span class="keyword">if</span> ~isdatetime(t1); t1 = datetime(t1, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>); <span class="keyword">end</span>
+0050    <span class="keyword">if</span> ~isdatetime(t2); t2 = datetime(t2, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>); <span class="keyword">end</span>
 0051 
-0052 <span class="comment">% convert to datetime</span>
-0053 <span class="keyword">if</span> ~isdatetime(time); time = datetime(time,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
-0054 <span class="keyword">if</span> ~isdatetime(t1); t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
-0055 <span class="keyword">if</span> ~isdatetime(t2); t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
-0056 
-0057 <span class="comment">% trim to t1,t2 timespan</span>
-0058 prec = prec(isbetween(time,t1,t2));
-0059 flow = flow(isbetween(time,t1,t2));
-0060 time = time(isbetween(time,t1,t2));
+0052    <span class="comment">% trim to t1,t2 timespan</span>
+0053    prec = prec(isbetween(time, t1, t2));
+0054    flow = flow(isbetween(time, t1, t2));
+0055    time = time(isbetween(time, t1, t2));
+0056 <span class="keyword">else</span>
+0057    prec = prec(t1 &lt; time &amp; time &lt; t2);
+0058    flow = flow(t1 &lt; time &amp; time &lt; t2);
+0059    time = time(t1 &lt; time &amp; time &lt; t2);
+0060 <span class="keyword">end</span>
 0061 
 0062 <span class="comment">% process units</span>
 0063 units = bfra.util.siUnitsToTex(units);
 0064 
 0065 <span class="comment">% get default colors</span>
-0066 colors = get(0,<span class="string">'defaultaxescolororder'</span>);
+0066 colors = get(0, <span class="string">'defaultaxescolororder'</span>);
 0067 
 0068 <span class="comment">% Create plot</span>
-0069 yyaxis left;
-0070 h1 = plot(time,flow,<span class="string">'-o'</span>,<span class="string">'MarkerSize'</span>,4,<span class="string">'MarkerFaceColor'</span>,colors(1,:), <span class="keyword">...</span>
-0071    <span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>,<span class="string">'Tag'</span>,<span class="string">'StreamflowPlot'</span>);
-0072 ax = gca;
-0073 ax.Tag = <span class="string">'HyetographAxis'</span>;
-0074 
-0075 <span class="comment">% % With yyaxis, there is only one axis, so I don't track them separately</span>
-0076 <span class="comment">% ax1 = gca;</span>
-0077 <span class="comment">% ax1.Tag = 'StreamflowAxis';</span>
+0069 [ax, h1, h2] = plotyy(time, flow, time, prec, @plot, @bar); <span class="comment">%#ok&lt;*PLOTYY&gt;</span>
+0070 
+0071 <span class="keyword">if</span> bfra.util.isoctave
+0072    datetick(ax(1),<span class="string">'x'</span>,<span class="string">'mmm-yy'</span>,<span class="string">'keeplimits'</span>)
+0073    datetick(ax(2),<span class="string">'x'</span>,<span class="string">'mmm-yy'</span>,<span class="string">'keeplimits'</span>)
+0074 <span class="keyword">else</span>
+0075    datetick(ax(1),<span class="string">'x'</span>,<span class="string">'mmm-yy'</span>,<span class="string">'keepticks'</span>)
+0076    datetick(ax(2),<span class="string">'x'</span>,<span class="string">'mmm-yy'</span>,<span class="string">'keepticks'</span>)
+0077 <span class="keyword">end</span>
 0078 
-0079 <span class="comment">% Set the remaining axes properties</span>
-0080 set(ax,<span class="string">'XMinorGrid'</span>,<span class="string">'on'</span>,<span class="string">'YMinorGrid'</span>,<span class="string">'on'</span>);
-0081 grid(ax,<span class="string">'on'</span>);
-0082 
-0083 <span class="comment">% hacky way to make space so the precip bars do not obscure the streamflow</span>
-0084 <span class="comment">% ylim([ax.YLim(1),1.5*ax.YLim(2)]);</span>
-0085 
-0086 <span class="comment">% Create ylabel</span>
-0087 ylabel([<span class="string">'Streamflow ('</span> units{1} <span class="string">')'</span>],<span class="string">'Color'</span>,colors(1,:),<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>);
+0079 
+0080 <span class="comment">% Set line graph properties</span>
+0081 set(h1, <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerSize'</span>, 4, <span class="string">'MarkerFaceColor'</span>, <span class="keyword">...</span>
+0082    colors(1,:), <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>, <span class="string">'Tag'</span>, <span class="string">'StreamflowPlot'</span>);
+0083 set(ax(1), <span class="string">'YColor'</span>, <span class="string">'k'</span>, <span class="string">'XMinorGrid'</span>, <span class="string">'on'</span>, <span class="string">'YMinorGrid'</span>, <span class="keyword">...</span>
+0084    <span class="string">'on'</span>, <span class="string">'FontSize'</span>, 14, <span class="string">'Tag'</span>, <span class="string">'HyetographAxis'</span>);
+0085 ylabel(ax(1), [<span class="string">'Streamflow ('</span> units{1} <span class="string">')'</span>], <span class="string">'Color'</span>, colors(1,:), <span class="keyword">...</span>
+0086    <span class="string">'FontSize'</span>, 14, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0087 grid(ax(1), <span class="string">'on'</span>);
 0088 
-0089 <span class="comment">% Create second plot</span>
-0090 yyaxis right; <span class="comment">% varargin{:} goes on bar if needed</span>
-0091 h2 = bar(time,prec,<span class="string">'FaceColor'</span>,colors(2,:),<span class="string">'EdgeColor'</span>,<span class="string">'none'</span>,<span class="keyword">...</span>
-0092    <span class="string">'Tag'</span>,<span class="string">'PrecipitationPlot'</span>);
-0093 
-0094 <span class="comment">% % With yyaxis, there is only one axis, so I don't track them separately</span>
-0095 <span class="comment">% ax2 = gca;</span>
-0096 <span class="comment">% ax2.Tag = 'PrecipitationAxis';</span>
-0097 
-0098 <span class="comment">% Create ylabel</span>
-0099 ylabel([<span class="string">'Precipitation ('</span> units{2} <span class="string">')'</span>],<span class="string">'Color'</span>,colors(2,:),<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>);
-0100 axis(ax,<span class="string">'ij'</span>);
+0089 <span class="comment">% Set bar graph properties</span>
+0090 set(h2, <span class="string">'FaceColor'</span>, colors(2,:), <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>, <span class="string">'Tag'</span>, <span class="string">'PrecipitationPlot'</span>);
+0091 set(ax(2), <span class="string">'XTickLabel'</span>, [], <span class="string">'xaxislocation'</span>, <span class="string">'top'</span>, <span class="string">'YDir'</span>, <span class="string">'reverse'</span>, <span class="keyword">...</span>
+0092    <span class="string">'FontSize'</span>, 14);
+0093 ylabel(ax(2), [<span class="string">'Precipitation ('</span> units{2} <span class="string">')'</span>], <span class="string">'Color'</span>, colors(2,:), <span class="keyword">...</span>
+0094    <span class="string">'FontSize'</span>, 14, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0095 
+0096 <span class="comment">% Reduce the width to make room for the ylabel on the right</span>
+0097 set(ax(1),<span class="string">'Position'</span>, [0.13 0.13 0.72 0.8]);
+0098 set(ax(2),<span class="string">'Position'</span>, [0.13 0.13 0.72 0.8]);
+0099 
+0100 set(ax(2),<span class="string">'XLim'</span>,get(ax(1),<span class="string">'XLim'</span>),<span class="string">'XTick'</span>,get(ax(1),<span class="string">'XTick'</span>));
 0101 
-0102 <span class="comment">% return control to left axis</span>
-0103 yyaxis left
-0104 
-0105 <span class="comment">% Set the remaining axes properties</span>
-0106 <span class="comment">% set(ax,'Color','none','XAxisLocation','top','XTickLabel','');</span>
-0107 <span class="comment">% ylim([0,1.5*ax.YLim(2)]);</span>
+0102 <span class="comment">% Package output</span>
+0103 H(1) = fig;
+0104 H(2) = ax(1);
+0105 H(3) = h1;
+0106 H(4) = h2;
+0107 
 0108 
-0109 <span class="comment">% this should make the hyetograph and hydrograph not overlap</span>
-0110 
-0111 <span class="comment">% this shouldn't be needed with yyaxis functionality</span>
-0112 <span class="comment">% ax2.XTick = ax1.XTick;</span>
-0113 
-0114 <span class="comment">% Package output</span>
-0115 H(1) = fig;
-0116 H(2) = ax;
-0117 H(3) = h1;
-0118 H(4) = h2;
-0119 
-0120 <span class="comment">%% create space between discharge and precip bars</span>
-0121 
-0122 <span class="comment">% % method 1</span>
-0123 
-0124 <span class="comment">% Calculate the ratio of the precipitation maximum to the streamflow maximum</span>
-0125 <span class="comment">% precip_flow_ratio = max(prec) / max(flow);</span>
-0126 
-0127 <span class="comment">% Add extra space above the streamflow line based on the precip_flow_ratio</span>
-0128 <span class="comment">% ylim(ax, [ax.YLim(1), (1 + precip_flow_ratio) * ax.YLim(2)]);</span>
+0109 <a name="_sub1" href="#_subfunctions" class="code">function [time, flow, prec, t1, t2, units] = parseinputs(funcname, time, flow, </a><span class="keyword">...</span>
+0110    prec, varargin)
+0111 
+0112 p = inputParser;
+0113 p.FunctionName = funcname;
+0114 p.addRequired(<span class="string">'time'</span>, @(x) bfra.validation.isdatelike(x));
+0115 p.addRequired(<span class="string">'flow'</span>, @(x) bfra.validation.isnumericvector(x));
+0116 p.addRequired(<span class="string">'prec'</span>, @(x) bfra.validation.isnumericvector(x));
+0117 p.addOptional(<span class="string">'t1'</span>, NaT, @(x) bfra.validation.isdatelike(x));
+0118 p.addOptional(<span class="string">'t2'</span>, NaT, @(x) bfra.validation.isdatelike(x));
+0119 p.addParameter(<span class="string">'units'</span>, {<span class="string">'mm'</span>,<span class="string">'cm d-1'</span>}, @(x) bfra.validation.ischarlike(x));
+0120 
+0121 p.parse(time,flow,prec,varargin{:});
+0122 
+0123 time = p.Results.time;
+0124 flow = p.Results.flow;
+0125 prec = p.Results.prec;
+0126 t1 = p.Results.t1;
+0127 t2 = p.Results.t2;
+0128 units = p.Results.units;
 0129 
-0130 <span class="comment">% % method 2</span>
-0131 <span class="comment">% % I don't think this takes into consideration the axes in figure units</span>
-0132 <span class="comment">% % Loop through each time point and get overlap between precip bars and flow line</span>
-0133 <span class="comment">% max_overlap = 0;</span>
-0134 <span class="comment">% for n = 1:length(time)</span>
-0135 <span class="comment">%    overlap = prec(n) / ax.YLim(2) * flow(n);</span>
-0136 <span class="comment">%    if overlap &gt; max_overlap</span>
-0137 <span class="comment">%       max_overlap = overlap;</span>
-0138 <span class="comment">%    end</span>
-0139 <span class="comment">% end</span>
-0140 <span class="comment">% % Add extra space above the streamflow line based on the max_overlap</span>
-0141 <span class="comment">% ylim(ax, [ax.YLim(1), (1 + max_overlap) * ax.YLim(2)]);</span>
-0142 
-0143 <span class="comment">% % method 3</span>
-0144 
-0145 <span class="comment">% Keep current ylims to reset the labels after making space for the precip bars</span>
-0146 <span class="comment">% ylims = ylim</span>
-0147 <span class="comment">% pick up on this, idea is to get the ylims and labels here, then after setting</span>
-0148 <span class="comment">% ylim([0,1.5*ax.YLim(2)]), reset the ticks to the original ones.</span>
-0149 
-0150 <span class="comment">% ylim([ax.YLim(1),1.5*ax.YLim(2)]);</span>
-0151 
-0152 <span class="comment">%% this stuff was in the original version, shouldn't be needed with yyaxis</span>
-0153 
-0154 <span class="comment">% % make sure the top/bottom x-axes are linked</span>
-0155 <span class="comment">%     linkaxes([ax1 ax2],'x');</span>
-0156 <span class="comment">%     myaxistight([ax1 ax2],'x');</span>
-0157 
-0158 <span class="comment">% move the y lables</span>
-0159 <span class="comment">% ypos1                   =   AX(1).YLabel.Position;</span>
-0160 <span class="comment">% ypos2                   =   AX(2).YLabel.Position;</span>
-0161 <span class="comment">% ypos1(2)                =   ypos1(2)/1.8;</span>
-0162 <span class="comment">% ypos2(2)                =   ypos2(2)/1.8;</span>
-0163 <span class="comment">% AX(1).YLabel.Position   =   ypos1;</span>
-0164 <span class="comment">% AX(2).YLabel.Position   =   ypos2;</span>
-0165 
-0166 <span class="comment">%% below here is the original function</span>
-0167 
-0168 <span class="comment">% [AX,H1,H2] = plotyy(dates,flow,dates,ppt,'plot','bar',varargin{:});</span>
-0169 <span class="comment">%</span>
-0170 <span class="comment">% % Set bar graph properties</span>
-0171 <span class="comment">% set(get(AX(2),'Ylabel'),'String','Precipitation (mm)','FontSize',16, ...</span>
-0172 <span class="comment">%         'Color',get(H2,'FaceColor'));</span>
-0173 <span class="comment">% set(AX(2),'XTickLabel',[],'xaxislocation','top','YDir','reverse');</span>
-0174 <span class="comment">%</span>
-0175 <span class="comment">% % Set line graph properties</span>
-0176 <span class="comment">% set(AX(1),'XTickLabel', []);</span>
-0177 <span class="comment">% set(AX(1),'FontSize',16);</span>
-0178 <span class="comment">% set(AX(1),'YColor','k');</span>
-0179 <span class="comment">% set(get(AX(1),'Ylabel'),'String','Streamflow (mm)','FontSize',16,...</span>
-0180 <span class="comment">%     'Color',get(H1,'Color'));</span>
-0181 <span class="comment">% % Print Month and Year as Tick Label</span>
-0182 <span class="comment">% % datetick(AX(1),'x','mmm yyyy')</span>
-0183 <span class="comment">% % datetick('x','mm/yy');</span>
-0184 <span class="comment">%</span>
-0185 <span class="comment">% % Edit begin</span>
-0186 <span class="comment">% % make sure the hyetograph and hydrograph don't overlap</span>
-0187 <span class="comment">% % First make both axes 2x as long</span>
-0188 <span class="comment">% AX(1).YLim(2)   =   2*AX(1).YLim(2);</span>
-0189 <span class="comment">% AX(2).YLim(2)   =   2*AX(2).YLim(2);</span>
-0190 <span class="comment">%</span>
-0191 <span class="comment">% % ylim1       =   AX(1).YLim;</span>
-0192 <span class="comment">% % ylim2       =   AX(2).YLim;</span>
-0193 <span class="comment">% % ymax1       =   max(flow(:,1));</span>
-0194 <span class="comment">% % ymax2       =   max(ppt(:,1));</span>
-0195 <span class="comment">% % scale       =   ylim2(2)/ylim1(2); % ratio of ppt/flow axis</span>
-0196 <span class="comment">% %</span>
-0197 <span class="comment">% % if ymax2 &gt; ymax1</span>
-0198 <span class="comment">% % %     AX(2).YLim(2)   =   scale*(AX(2).YLim(2) + ymax1);</span>
-0199 <span class="comment">% %     AX(2).YLim(2)   =   AX(2).YLim(2) + (scale*ymax1);</span>
-0200 <span class="comment">% %     AX(1).YLim(2)   =   2*AX(1).YLim(2);</span>
-0201 <span class="comment">% % end</span>
-0202 <span class="comment">%</span>
-0203 <span class="comment">% % Edit end - 2x each axis seems to work</span>
-0204 <span class="comment">%</span>
-0205 <span class="comment">% % format x tick lables</span>
-0206 <span class="comment">% datetick('x','mmm-yyyy');</span>
-0207 <span class="comment">% % make sure the top/bottom x-axes are linked</span>
-0208 <span class="comment">% linkaxes([AX(2) AX(1)],'x');</span>
-0209 <span class="comment">% myaxistight(AX,'x');</span>
-0210 <span class="comment">% %</span>
-0211 <span class="comment">% grid on</span>
-0212 <span class="comment">% grid minor</span>
-0213 <span class="comment">%</span>
-0214 <span class="comment">% % move the y lables</span>
-0215 <span class="comment">% ypos1                   =   AX(1).YLabel.Position;</span>
-0216 <span class="comment">% ypos2                   =   AX(2).YLabel.Position;</span>
-0217 <span class="comment">% ypos1(2)                =   ypos1(2)/1.8;</span>
-0218 <span class="comment">% ypos2(2)                =   ypos2(2)/1.8;</span>
-0219 <span class="comment">% AX(1).YLabel.Position   =   ypos1;</span>
-0220 <span class="comment">% AX(2).YLabel.Position   =   ypos2;</span>
-0221</pre></div>
+0130 
+0131 <span class="comment">% =======================================</span>
+0132 <span class="comment">% Create plot</span>
+0133 <span class="comment">% yyaxis left;</span>
+0134 <span class="comment">% h1 = plot(time,flow,'-o','MarkerSize',4,'MarkerFaceColor',colors(1,:), ...</span>
+0135 <span class="comment">%    'MarkerEdgeColor','none','Tag','StreamflowPlot');</span>
+0136 <span class="comment">% ax = gca;</span>
+0137 <span class="comment">% set(ax,'Tag','HyetographAxis');</span>
+0138 <span class="comment">%</span>
+0139 <span class="comment">% % % With yyaxis, there is only one axis, so I don't track them separately</span>
+0140 <span class="comment">% % ax1 = gca;</span>
+0141 <span class="comment">% % ax1.Tag = 'StreamflowAxis';</span>
+0142 <span class="comment">%</span>
+0143 <span class="comment">% % Set the remaining axes properties</span>
+0144 <span class="comment">% set(ax,'XMinorGrid','on','YMinorGrid','on');</span>
+0145 <span class="comment">% grid(ax,'on');</span>
+0146 <span class="comment">%</span>
+0147 <span class="comment">% % hacky way to make space so the precip bars do not obscure the streamflow</span>
+0148 <span class="comment">% % ylim([ax.YLim(1),1.5*ax.YLim(2)]);</span>
+0149 <span class="comment">%</span>
+0150 <span class="comment">% % Create ylabel</span>
+0151 <span class="comment">% ylabel(['Streamflow (' units{1} ')'],'Color',colors(1,:),'Interpreter','tex');</span>
+0152 <span class="comment">%</span>
+0153 <span class="comment">% % Create second plot</span>
+0154 <span class="comment">% yyaxis right; % varargin{:} goes on bar if needed</span>
+0155 <span class="comment">% h2 = bar(time,prec,'FaceColor',colors(2,:),'EdgeColor','none',...</span>
+0156 <span class="comment">%    'Tag','PrecipitationPlot');</span>
+0157 <span class="comment">%</span>
+0158 <span class="comment">% % % With yyaxis, there is only one axis, so I don't track them separately</span>
+0159 <span class="comment">% % ax2 = gca;</span>
+0160 <span class="comment">% % ax2.Tag = 'PrecipitationAxis';</span>
+0161 <span class="comment">%</span>
+0162 <span class="comment">% % Create ylabel</span>
+0163 <span class="comment">% ylabel(['Precipitation (' units{2} ')'],'Color',colors(2,:),'Interpreter','tex');</span>
+0164 <span class="comment">% axis(ax,'ij');</span>
+0165 <span class="comment">%</span>
+0166 <span class="comment">% % return control to left axis</span>
+0167 <span class="comment">% yyaxis left</span>
+0168 <span class="comment">% =======================================</span>
+0169</pre></div>
 </body>
 </html>

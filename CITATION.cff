@@ -22,6 +22,8 @@ keywords:
   - hydrology
   - baseflow
   - groundwater
+  - storage
+  - permafrost
 license: BSD-3-Clause
 version: 0.1.0
 date-released: '2022-11-28'

@@ -109,83 +109,81 @@ This function is called by:
 0031 
 0032 <span class="comment">%-------------------------------------------------------------------------------</span>
 0033 
-0034 warning off
-0035 
-0036 <span class="comment">% fit a/b</span>
-0037 [Fit,ok] = bfra.fitab(q,dqdt,method,<span class="string">'fitopts'</span>,fitopts);
-0038 
-0039 <span class="comment">% check for fitting failure</span>
-0040 <span class="keyword">if</span> ok == false
-0041    K = <a href="#_sub1" class="code" title="subfunction K = setKnan(method,order,deriv,station,date,event,fit,K)">setKnan</a>(method,order,deriv,station,eventDate,eventTag,fitTag,K);
-0042    <span class="keyword">return</span>
-0043 <span class="keyword">end</span>
-0044 
-0045 <span class="comment">% compute derived values</span>
-0046 a     =  Fit.a;
-0047 b     =  Fit.b;
-0048 q     =  Fit.x;
-0049 
-0050 <span class="comment">% this equation is valid for all values of b</span>
-0051 tau   =  1/a*(median(q))^(1-b);   <span class="comment">% recession timescale [T]</span>
-0052 tauL  =  1/a*(max(q))^(1-b);
-0053 tauH  =  1/a*(min(q))^(1-b);
-0054 
-0055 <span class="comment">% event-scale storage range</span>
-0056 [Smin,Smax,dS] = bfra.aquiferstorage(a,b,min(q),max(q));
-0057 
-0058 
-0059 <span class="comment">% package output</span>
-0060 K(fitcount).a           = Fit.a; 
-0061 K(fitcount).b           = Fit.b;
-0062 K(fitcount).tau         = tau;
-0063 K(fitcount).aL          = Fit.aL;
-0064 K(fitcount).bL          = Fit.bL;
-0065 K(fitcount).tauL        = tauL;
-0066 K(fitcount).aH          = Fit.aH;
-0067 K(fitcount).bH          = Fit.bH;
-0068 K(fitcount).tauH        = tauH;
-0069 K(fitcount).rsq         = Fit.rsq;
-0070 K(fitcount).pval        = Fit.pvalue;
-0071 K(fitcount).N           = Fit.N;   
-0072 K(fitcount).Smin        = Smin;
-0073 K(fitcount).Smax        = Smax;
-0074 K(fitcount).dS          = dS;
-0075 K(fitcount).Qmin        = min(q);
-0076 K(fitcount).Qmax        = max(q);
-0077 K(fitcount).method      = method;
-0078 K(fitcount).order       = order;
-0079 K(fitcount).deriv       = deriv;
-0080 K(fitcount).station     = station;
-0081 K(fitcount).date        = eventdate;
-0082 K(fitcount).eventTag    = eventtag;
-0083 K(fitcount).fitTag      = fittag;
-0084 
-0085 
-0086 <span class="comment">% if all the data is nan, set K nan</span>
-0087 <a name="_sub1" href="#_subfunctions" class="code">function K = setKnan(method,order,deriv,station,date,event,fit,K)</a>
-0088 K(idx).a         = nan;
-0089 K(idx).b         = nan;
-0090 K(idx).tau       = nan;
-0091 K(idx).aL        = nan;
-0092 K(idx).bL        = nan;
-0093 K(idx).tauL      = nan;
-0094 K(idx).aH        = nan;
-0095 K(idx).bH        = nan;
-0096 K(idx).tauH      = nan;
-0097 K(idx).rsq       = nan;
-0098 K(idx).pval      = nan;
-0099 K(idx).N         = nan;
-0100 K(idx).Smin      = nan;
-0101 K(idx).Smax      = nan;
-0102 K(idx).dS        = nan;
-0103 K(idx).Qmin      = nan;
-0104 K(idx).Qmax      = nan;
-0105 K(idx).method    = method;
-0106 K(idx).order     = order;
-0107 K(idx).deriv     = deriv;
-0108 K(idx).station   = station;
-0109 K(idx).date      = date;
-0110 K(idx).eventTag  = event;
-0111 K(idx).fitTag    = fit;</pre></div>
+0034 <span class="comment">% fit a/b</span>
+0035 [Fit,ok] = bfra.fitab(q,dqdt,method,<span class="string">'fitopts'</span>,fitopts);
+0036 
+0037 <span class="comment">% check for fitting failure</span>
+0038 <span class="keyword">if</span> ok == false
+0039    K = <a href="#_sub1" class="code" title="subfunction K = setKnan(method,order,deriv,station,date,event,fit,K)">setKnan</a>(method,order,deriv,station,eventDate,eventTag,fitTag,K);
+0040    <span class="keyword">return</span>
+0041 <span class="keyword">end</span>
+0042 
+0043 <span class="comment">% compute derived values</span>
+0044 a     =  Fit.a;
+0045 b     =  Fit.b;
+0046 q     =  Fit.x;
+0047 
+0048 <span class="comment">% this equation is valid for all values of b</span>
+0049 tau   =  1/a*(median(q))^(1-b);   <span class="comment">% recession timescale [T]</span>
+0050 tauL  =  1/a*(max(q))^(1-b);
+0051 tauH  =  1/a*(min(q))^(1-b);
+0052 
+0053 <span class="comment">% event-scale storage range</span>
+0054 [Smin,Smax,dS] = bfra.aquiferstorage(a,b,min(q),max(q));
+0055 
+0056 
+0057 <span class="comment">% package output</span>
+0058 K(fitcount).a           = Fit.a; 
+0059 K(fitcount).b           = Fit.b;
+0060 K(fitcount).tau         = tau;
+0061 K(fitcount).aL          = Fit.aL;
+0062 K(fitcount).bL          = Fit.bL;
+0063 K(fitcount).tauL        = tauL;
+0064 K(fitcount).aH          = Fit.aH;
+0065 K(fitcount).bH          = Fit.bH;
+0066 K(fitcount).tauH        = tauH;
+0067 K(fitcount).rsq         = Fit.rsq;
+0068 K(fitcount).pval        = Fit.pvalue;
+0069 K(fitcount).N           = Fit.N;   
+0070 K(fitcount).Smin        = Smin;
+0071 K(fitcount).Smax        = Smax;
+0072 K(fitcount).dS          = dS;
+0073 K(fitcount).Qmin        = min(q);
+0074 K(fitcount).Qmax        = max(q);
+0075 K(fitcount).method      = method;
+0076 K(fitcount).order       = order;
+0077 K(fitcount).deriv       = deriv;
+0078 K(fitcount).station     = station;
+0079 K(fitcount).date        = eventdate;
+0080 K(fitcount).eventTag    = eventtag;
+0081 K(fitcount).fitTag      = fittag;
+0082 
+0083 
+0084 <span class="comment">% if all the data is nan, set K nan</span>
+0085 <a name="_sub1" href="#_subfunctions" class="code">function K = setKnan(method,order,deriv,station,date,event,fit,K)</a>
+0086 K(idx).a         = nan;
+0087 K(idx).b         = nan;
+0088 K(idx).tau       = nan;
+0089 K(idx).aL        = nan;
+0090 K(idx).bL        = nan;
+0091 K(idx).tauL      = nan;
+0092 K(idx).aH        = nan;
+0093 K(idx).bH        = nan;
+0094 K(idx).tauH      = nan;
+0095 K(idx).rsq       = nan;
+0096 K(idx).pval      = nan;
+0097 K(idx).N         = nan;
+0098 K(idx).Smin      = nan;
+0099 K(idx).Smax      = nan;
+0100 K(idx).dS        = nan;
+0101 K(idx).Qmin      = nan;
+0102 K(idx).Qmax      = nan;
+0103 K(idx).method    = method;
+0104 K(idx).order     = order;
+0105 K(idx).deriv     = deriv;
+0106 K(idx).station   = station;
+0107 K(idx).date      = date;
+0108 K(idx).eventTag  = event;
+0109 K(idx).fitTag    = fit;</pre></div>
 </body>
 </html>

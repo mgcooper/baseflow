@@ -77,7 +77,8 @@ This function is called by:
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="#_sub1" class="code">function cspec = buildCspec(cvar,cname,cmin,cmax)</a></li></ul>
+<li><a href="#_sub1" class="code">function cspec = buildCspec(cvar,cname,cmin,cmax)</a></li>
+<li><a href="#_sub2" class="code">function [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj,</a></li></ul>
 
 
 
@@ -118,348 +119,385 @@ This function is called by:
 0034 <span class="comment">% if called with no input, open this file</span>
 0035 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0036 
-0037 <span class="comment">%     NOTE: use geo!</span>
-0038 <span class="comment">%     NOTE: variable name of cvar</span>
-0039 
-0040 <span class="comment">% --------------- parse inputs</span>
-0041 p = bfra.deps.magicParser;
-0042 p.FunctionName = <span class="string">'mapbasins'</span>;
-0043 p.StructExpand = false;
-0044 
-0045 defaultvar = <span class="string">'perm_mean'</span>;
-0046 defaulttxt = <span class="string">'permafrost extent (%)'</span>;
-0047 defaultlatlims = [40 84]; <span class="comment">% [50 75]</span>
-0048 defaultlonlims = [-168 -40]; <span class="comment">% [-168 -60]</span>
-0049 
-0050 p.addRequired( <span class="string">'Basins'</span>,                     @(x)isstruct(x)   );
-0051 p.addParameter(<span class="string">'Meta'</span>,        <span class="string">''</span>,            @(x)istable(x)    );
-0052 p.addParameter(<span class="string">'facemapping'</span>, false,         @(x)islogical(x)  );
-0053 p.addParameter(<span class="string">'cvarname'</span>,    defaultvar,    @(x)ischar(x)     );
-0054 p.addParameter(<span class="string">'cbartxt'</span>,     defaulttxt,    @(x)ischar(x)     );
-0055 p.addParameter(<span class="string">'latlims'</span>,     defaultlatlims,@(x)isnumeric(x)  );
-0056 p.addParameter(<span class="string">'lonlims'</span>,     defaultlonlims,@(x)isnumeric(x)  );
-0057 p.addParameter(<span class="string">'proj'</span>,        <span class="string">'lambert'</span>,     @(x)ischar(x)     );
-0058 p.addParameter(<span class="string">'facealpha'</span>,   0.35,          @(x)isnumeric(x)  );
-0059 p.addParameter(<span class="string">'facelabels'</span>,  false,         @(x)islogical(x)  );
-0060 p.addParameter(<span class="string">'ax'</span>,          gobjects,      @(x)bfra.validation.isaxis(x));
+0037 
+0038 <span class="comment">% PARSE INPUTS</span>
+0039 [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, <span class="keyword">...</span>
+0040    facealpha, facelabels, cvar, usegeoshow, cbarinterpreter, cmap, climits] = <span class="keyword">...</span>
+0041    parseinputs(Basins, varargin{:});
+0042 
+0043 <span class="comment">% MAIN FUNCTION</span>
+0044 <span class="keyword">if</span> isstruct(Meta)
+0045    Meta = struct2table(Meta);
+0046 <span class="keyword">end</span>
+0047 
+0048 <span class="comment">% ensure that Basins and Meta contain the same basins and order</span>
+0049 <span class="keyword">if</span> ~isempty(Meta)
+0050    Meta = sortrows(Meta,<span class="string">'station'</span>);
+0051    [~,ii] = sort({Basins.Station});
+0052    Basins = Basins(ii(:));
+0053    Basins = Basins(ismember({Basins.Station},Meta.station));
+0054 <span class="keyword">end</span>
+0055 
+0056 <span class="comment">% world borders has more detail than the ak state</span>
+0057 borders = loadworldborders({<span class="string">'United States'</span>,<span class="string">'Canada'</span>},<span class="string">'merge'</span>);
+0058 
+0059 coastlat = [ borders.Lat ];
+0060 coastlon = [ borders.Lon ];
 0061 
-0062 p.parseMagically(<span class="string">'caller'</span>);
-0063 
-0064 <span class="keyword">if</span> facemapping == true
-0065    cvar = [Basins.(cvarname)];
-0066 <span class="keyword">end</span>
-0067 usegeoshow = false; <span class="comment">% need to add option or eliminate</span>
+0062 h.figure = figure(<span class="string">'Position'</span>,[1 1 1152 720]);
+0063 <span class="comment">% h.map  = worldmap(latlims,lonlims);</span>
+0064 <span class="comment">% h.map  = worldmap('North Pole');</span>
+0065 h.map    = axesm(<span class="string">'MapProjection'</span>,proj,<span class="string">'MapLatLimit'</span>,latlims,<span class="string">'MapLonLimit'</span>,lonlims);
+0066 h.coast  = plotm(coastlat,coastlon,<span class="string">'LineWidth'</span>,1,<span class="string">'Color'</span>,<span class="string">'k'</span>);
+0067 hold on;
 0068 
-0069 <span class="comment">% for lonlims, this owrks well for Alaska: [-170 -120]</span>
-0070 <span class="comment">%-------------------------------------------------------------------------------</span>
-0071 
-0072 <span class="keyword">if</span> isstruct(Meta)
-0073    Meta = struct2table(Meta);
-0074 <span class="keyword">end</span>
-0075 
-0076 <span class="comment">% ensure that Basins and Meta contain the same basins and order</span>
-0077 <span class="keyword">if</span> ~isempty(Meta)
-0078    Meta     = sortrows(Meta,<span class="string">'station'</span>);
-0079    [~,idx]  = sort({Basins.Station});
-0080    Basins   = Basins(idx(:));
-0081    Basins   = Basins(ismember({Basins.Station},Meta.station));
-0082 <span class="keyword">end</span>
-0083 
-0084 
-0085 <span class="comment">% world borders has more detail than the ak state</span>
-0086 borders = loadworldborders({<span class="string">'United States'</span>,<span class="string">'Canada'</span>},<span class="string">'merge'</span>);
-0087 
-0088 coastlat = [ borders.Lat ];
-0089 coastlon = [ borders.Lon ];
-0090 
-0091 h.figure = figure(<span class="string">'Position'</span>,[1 1 1152 720]);
-0092 <span class="comment">% h.map  = worldmap(latlims,lonlims);</span>
-0093 <span class="comment">% h.map  = worldmap('North Pole');</span>
-0094 h.map    = axesm(<span class="string">'MapProjection'</span>,proj,<span class="string">'MapLatLimit'</span>,latlims,<span class="string">'MapLonLimit'</span>,lonlims);
-0095 h.coast  = plotm(coastlat,coastlon,<span class="string">'LineWidth'</span>,1,<span class="string">'Color'</span>,<span class="string">'k'</span>);
-0096 hold on;
-0097 
-0098 
-0099 <span class="comment">% h.hworldmap     = worldmap('North America');</span>
-0100 <span class="comment">% h.hworldmap     = usamap('ak');</span>
-0101 <span class="comment">%h.hworldmap     = worldmap([45 90],[-58 -165]);</span>
-0102 <span class="comment">%h.hcoastlines   = plotm(borders.LAT,borders.LON,'LineWidth',1,'Color','k');</span>
-0103 
-0104 <span class="comment">% setm(h.hworldmap,'MapLatLimit',latlims)</span>
-0105 <span class="comment">% setm(h.hworldmap,'MapLonLimit',lonlims)</span>
-0106 
-0107 <span class="comment">%setm(h.hworldmap,'MapLatLimit',[45 72])</span>
-0108 <span class="comment">%setm(h.hworldmap,'MapLonLimit',[-168 -48])</span>
-0109 
-0110 <span class="keyword">if</span> facemapping == true
-0111    
-0112    <span class="comment">% remove nan ?</span>
-0113    
-0114    cmin = min(cvar(:));
-0115    cmax = max(cvar(:));
-0116    
-0117    <span class="keyword">if</span> usegeoshow == true
-0118       
-0119       cspec = <a href="#_sub1" class="code" title="subfunction cspec = buildCspec(cvar,cname,cmin,cmax)">buildCspec</a>(cvar,cmin,cmax);
-0120       
-0121       <span class="keyword">if</span> isfield(Basins,<span class="string">'Lat'</span>)
-0122          h.basins = geoshow(Basins,<span class="string">'SymbolSpec'</span>,cspec);
-0123       <span class="keyword">elseif</span> isfield(Basins,<span class="string">'X'</span>)
-0124          h.basins = mapshow(Basins,<span class="string">'SymbolSpec'</span>,cspec);
-0125       <span class="keyword">end</span>
-0126       
-0127    <span class="keyword">else</span>
-0128       <span class="comment">% nan goes last</span>
-0129       [cvar,idx] = sort(cvar);
-0130       Basins = Basins(idx); <span class="comment">% must sort or use basins(idx(n).lat in loop</span>
-0131       <span class="keyword">for</span> n = 1:numel(Basins)
-0132          latn  = [Basins(n).Lat];
-0133          lonn  = [Basins(n).Lon];
-0134          <span class="keyword">if</span> isnan(cvar(n)) || cvar(n) == 0
-0135             patchm(latn,lonn,<span class="string">'FaceVertexCData'</span>,[0.255 0.255 0.255],<span class="string">'FaceColor'</span>, <span class="keyword">...</span>
-0136                <span class="string">'flat'</span>,<span class="string">'FaceAlpha'</span>,0);
-0137          <span class="keyword">else</span>
-0138             patchm(latn,lonn,<span class="string">'FaceVertexCData'</span>,cvar(n),<span class="string">'FaceColor'</span>,<span class="string">'flat'</span>, <span class="keyword">...</span>
-0139                <span class="string">'FaceAlpha'</span>,facealpha);
-0140          <span class="keyword">end</span>
-0141       <span class="keyword">end</span>
-0142       ax = gca;
-0143       <span class="comment">% see notes on the patch sorting at end, but TLDR: the patchobjs are</span>
-0144       <span class="comment">% ordered opposite the structure meaning patchobjs(1) = Basins(end),</span>
-0145       <span class="comment">% patchobjs(2) = Basins(end-1), and so on. The flipud and sorting takes</span>
-0146       <span class="comment">% care of all of the details. For testing, it was easier to not sort</span>
-0147       <span class="comment">% Basins in the sortrows call below, but for labeling points, its needed.</span>
-0148       <span class="comment">% Converting back to struct is only needed for consistency with other</span>
-0149       <span class="comment">% parts of the code which assumes it is a struct.</span>
-0150       
-0151       Basins = flipud(struct2table(Basins));
-0152       [Basins,idx] = sortrows(Basins,<span class="string">'Area'</span>,<span class="string">'ascend'</span>);
-0153       Basins = table2struct(Basins);
-0154       
-0155       <span class="comment">% this was the sort method before I added the flipud to simplify the</span>
-0156       <span class="comment">% mapping from the Basins idx to the patchobjs idx.</span>
-0157       <span class="comment">% we get the mapping from the cvar sort above to the Area sort next</span>
-0158       <span class="comment">%[~,idx]     = sort([Basins.Area],'ascend');</span>
-0159       
-0160       <span class="comment">% right now, Basins are sorted from low to high cvar, so the index is</span>
-0161       <span class="comment">% 1:numel(cvar), and the patchobjs are numel(cvar):-1:1, which means we</span>
-0162       <span class="comment">% can use idx returned by sort on Basins.Area to reorder the patches</span>
-0163       lineobjs = findobj(ax.Children,<span class="string">'Type'</span>,<span class="string">'Line'</span>);
-0164       patchobjs = findobj(ax.Children,<span class="string">'Type'</span>,<span class="string">'patch'</span>);
-0165       
-0166       <span class="keyword">if</span> numel(patchobjs) ~= numel(Basins)
-0167          <span class="comment">% this occurs when the extent of the patches exceeds latlim/lonlim</span>
-0168          warning([<span class="string">'number of patch objects does not match number of basins'</span> newline<span class="keyword">...</span>
-0169             <span class="string">'colorbar will not be accurate'</span>])
-0170       <span class="keyword">else</span>
-0171          ax.Children = [patchobjs(idx);lineobjs];
-0172       <span class="keyword">end</span>
-0173       
-0174       <span class="comment">% this is not needed if we use 'ascend' to sort Area, but in other cases,</span>
-0175       <span class="comment">% flipping the patchobjs is needed when manipulating them.</span>
-0176       <span class="comment">%ax.Children = flipud([patchobjs(idx);lineobjs]);</span>
-0177    <span class="keyword">end</span>
+0069 <span class="comment">% OTHER METHODS</span>
+0070 <span class="comment">% h.hworldmap = worldmap('North America');</span>
+0071 <span class="comment">% h.hworldmap = usamap('ak');</span>
+0072 <span class="comment">% h.hworldmap = worldmap([45 90],[-58 -165]);</span>
+0073 <span class="comment">% h.hcoastlines = plotm(borders.LAT,borders.LON,'LineWidth',1,'Color','k');</span>
+0074 
+0075 <span class="comment">% setm(h.hworldmap,'MapLatLimit',latlims)</span>
+0076 <span class="comment">% setm(h.hworldmap,'MapLonLimit',lonlims)</span>
+0077 
+0078 <span class="comment">%setm(h.hworldmap,'MapLatLimit',[45 72])</span>
+0079 <span class="comment">%setm(h.hworldmap,'MapLonLimit',[-168 -48])</span>
+0080 
+0081 <span class="keyword">if</span> facemapping == true
+0082    
+0083    <span class="comment">% remove nan ?</span>
+0084    
+0085    cmin = min(cvar(:));
+0086    cmax = max(cvar(:));
+0087    
+0088    <span class="keyword">if</span> usegeoshow == true
+0089       
+0090       cspec = <a href="#_sub1" class="code" title="subfunction cspec = buildCspec(cvar,cname,cmin,cmax)">buildCspec</a>(cvar,cmin,cmax);
+0091       
+0092       <span class="keyword">if</span> isfield(Basins,<span class="string">'Lat'</span>)
+0093          h.basins = geoshow(Basins,<span class="string">'SymbolSpec'</span>,cspec);
+0094       <span class="keyword">elseif</span> isfield(Basins,<span class="string">'X'</span>)
+0095          h.basins = mapshow(Basins,<span class="string">'SymbolSpec'</span>,cspec);
+0096       <span class="keyword">end</span>
+0097       
+0098    <span class="keyword">else</span>
+0099       <span class="comment">% nan goes last</span>
+0100       [cvar,ii] = sort(cvar);
+0101       Basins = Basins(ii); <span class="comment">% must sort or use basins(idx(n).lat in loop</span>
+0102       <span class="keyword">for</span> n = 1:numel(Basins)
+0103          latn = [Basins(n).Lat];
+0104          lonn = [Basins(n).Lon];
+0105          <span class="keyword">if</span> isnan(cvar(n)) || cvar(n) == 0
+0106             patchm(latn,lonn,<span class="string">'FaceVertexCData'</span>,[0.255 0.255 0.255],<span class="string">'FaceColor'</span>, <span class="keyword">...</span>
+0107                <span class="string">'flat'</span>,<span class="string">'FaceAlpha'</span>,0);
+0108          <span class="keyword">else</span>
+0109             patchm(latn,lonn,<span class="string">'FaceVertexCData'</span>,cvar(n),<span class="string">'FaceColor'</span>,<span class="string">'flat'</span>, <span class="keyword">...</span>
+0110                <span class="string">'FaceAlpha'</span>,facealpha);
+0111          <span class="keyword">end</span>
+0112       <span class="keyword">end</span>
+0113       ax = gca;
+0114       <span class="comment">% see notes on the patch sorting at end, but TLDR: the patchobjs are</span>
+0115       <span class="comment">% ordered opposite the structure meaning patchobjs(1) = Basins(end),</span>
+0116       <span class="comment">% patchobjs(2) = Basins(end-1), and so on. The flipud and sorting takes</span>
+0117       <span class="comment">% care of all of the details. For testing, it was easier to not sort</span>
+0118       <span class="comment">% Basins in the sortrows call below, but for labeling points, its needed.</span>
+0119       <span class="comment">% Converting back to struct is only needed for consistency with other</span>
+0120       <span class="comment">% parts of the code which assumes it is a struct.</span>
+0121       
+0122       Basins = flipud(struct2table(Basins));
+0123       [Basins,ii] = sortrows(Basins,<span class="string">'Area'</span>,<span class="string">'ascend'</span>);
+0124       Basins = table2struct(Basins);
+0125       
+0126       <span class="comment">% this was the sort method before I added the flipud to simplify the</span>
+0127       <span class="comment">% mapping from the Basins idx to the patchobjs idx.</span>
+0128       <span class="comment">% we get the mapping from the cvar sort above to the Area sort next</span>
+0129       <span class="comment">%[~,idx]     = sort([Basins.Area],'ascend');</span>
+0130       
+0131       <span class="comment">% right now, Basins are sorted from low to high cvar, so the index is</span>
+0132       <span class="comment">% 1:numel(cvar), and the patchobjs are numel(cvar):-1:1, which means we</span>
+0133       <span class="comment">% can use idx returned by sort on Basins.Area to reorder the patches</span>
+0134       lineobjs = findobj(ax.Children,<span class="string">'Type'</span>,<span class="string">'Line'</span>);
+0135       patchobjs = findobj(ax.Children,<span class="string">'Type'</span>,<span class="string">'patch'</span>);
+0136       
+0137       <span class="keyword">if</span> numel(patchobjs) ~= numel(Basins)
+0138          <span class="comment">% this occurs when the extent of the patches exceeds latlim/lonlim</span>
+0139          warning([<span class="string">'number of patch objects does not match number of basins'</span> newline<span class="keyword">...</span>
+0140             <span class="string">'colorbar will not be accurate'</span>])
+0141       <span class="keyword">else</span>
+0142          ax.Children = [patchobjs(ii);lineobjs];
+0143       <span class="keyword">end</span>
+0144       
+0145       <span class="comment">% this is not needed if we use 'ascend' to sort Area, but in other cases,</span>
+0146       <span class="comment">% flipping the patchobjs is needed when manipulating them.</span>
+0147       <span class="comment">%ax.Children = flipud([patchobjs(idx);lineobjs]);</span>
+0148    <span class="keyword">end</span>
+0149    
+0150    <span class="comment">% make the colorbar</span>
+0151    <span class="keyword">if</span> ~isnan(cmap)
+0152       colormap(cmap);
+0153    <span class="keyword">end</span>
+0154    <span class="keyword">if</span> isnan(climits)
+0155       clim([cmin cmax])
+0156    <span class="keyword">else</span>
+0157       clim(climits)
+0158    <span class="keyword">end</span>
+0159    
+0160    <span class="comment">%------------------------------------------------------</span>
+0161    <span class="comment">% horizontal, south</span>
+0162    <span class="comment">% h.cbar = colorbar('Location','southoutside');</span>
+0163 
+0164    <span class="comment">% this works for permfrost &gt;50%</span>
+0165    <span class="comment">% h.cbar.Position = [0.356 0.12 0.387 0.0256];</span>
+0166    
+0167    <span class="comment">%set(get(h.cbar,'title'),'string',ctxt,           ...</span>
+0168    <span class="comment">%   'VerticalAlignment','baseline');</span>
+0169    <span class="comment">%------------------------------------------------------</span>
+0170    
+0171    h.cbar = discrete_colorbar(cvar,<span class="string">'nvals'</span>,10,<span class="string">'location'</span>,<span class="string">'east'</span>);
+0172   
+0173    <span class="comment">% this worked for the alaska domain</span>
+0174    <span class="comment">% h.cbar.Position = [0.7 0.3 0.02 0.4];</span>
+0175 
+0176    <span class="comment">% but in general, use this</span>
+0177    h.cbar = colorbar(<span class="string">'Location'</span>,<span class="string">'east'</span>);
 0178    
-0179    <span class="comment">% make the colorbar</span>
-0180    clim([cmin cmax])
-0181    
-0182    <span class="comment">%------------------------------------------------------</span>
-0183    <span class="comment">% horizontal, south</span>
-0184    <span class="comment">% h.cbar = colorbar('Location','southoutside');</span>
-0185 
-0186    <span class="comment">% this works for permfrost &gt;50%</span>
-0187    <span class="comment">% h.cbar.Position = [0.356 0.12 0.387 0.0256];</span>
+0179    h.cbar.AxisLocation = <span class="string">'in'</span>; 
+0180    h.cbar.Label.String = cbartxt;
+0181    h.cbar.Label.Interpreter = cbarinterpreter;
+0182 
+0183    <span class="comment">% for vertical cbar, we use Label not title</span>
+0184    <span class="comment">%set(get(h.cbar,'title'),'string',ctxt,           ...</span>
+0185    <span class="comment">%   'VerticalAlignment','baseline','HorizontalAlignment','left');</span>
+0186    
+0187 <span class="keyword">else</span>
 0188    
-0189    <span class="comment">%set(get(h.cbar,'title'),'string',ctxt,           ...</span>
-0190    <span class="comment">%   'VerticalAlignment','baseline');</span>
-0191    <span class="comment">%------------------------------------------------------</span>
+0189    <span class="comment">% plot the basin outlines</span>
+0190    [latn,lonn] = polyjoin({Basins.Lat},{Basins.Lon});
+0191    plotm(latn,lonn,<span class="string">'k'</span>,<span class="string">'LineWidth'</span>,1);
 0192    
-0193    h.cbar = discrete_colorbar(cvar,<span class="string">'nvals'</span>,10,<span class="string">'location'</span>,<span class="string">'east'</span>);
-0194   
-0195    <span class="comment">% this worked for the alaska domain</span>
-0196    <span class="comment">% h.cbar.Position = [0.7 0.3 0.02 0.4];</span>
-0197 
-0198    <span class="comment">% but in general, use this</span>
-0199    h.cbar = colorbar(<span class="string">'Location'</span>,<span class="string">'east'</span>);
+0193 <span class="comment">%    for n = 1:numel(Basins)</span>
+0194 <span class="comment">%       latn = [Basins(n).Lat];</span>
+0195 <span class="comment">%       lonn = [Basins(n).Lon];</span>
+0196 <span class="comment">%</span>
+0197 <span class="comment">%       % use patchm for consistency? or plotm for speed?</span>
+0198 <span class="comment">%       plotm(latn,lonn,'k');</span>
+0199 <span class="comment">%    end</span>
 0200    
-0201    h.cbar.AxisLocation = <span class="string">'in'</span>; 
-0202    h.cbar.Label.String = cbartxt;
-0203    
-0204    <span class="comment">% default text use tex, otherwise depends on whats passed in</span>
-0205    <span class="keyword">if</span> contains(p.UsingDefaults,<span class="string">'cbartxt'</span>)
-0206       <span class="comment">%h.cbar.Label.Interpreter = 'tex';</span>
-0207    <span class="keyword">else</span>
-0208       h.cbar.Label.Interpreter = <span class="string">'latex'</span>;
-0209    <span class="keyword">end</span>
-0210 
-0211    <span class="comment">% for vertical cbar, we use Label not title</span>
-0212    <span class="comment">%set(get(h.cbar,'title'),'string',ctxt,           ...</span>
-0213    <span class="comment">%   'VerticalAlignment','baseline','HorizontalAlignment','left');</span>
-0214    
-0215 <span class="keyword">else</span>
+0201 <span class="comment">% % I used this to confirm that the sorting by area after</span>
+0202 <span class="comment">%    figure; plot([Basins(13).Lon],[Basins(13).Lat]); hold on;</span>
+0203 <span class="comment">%    for n = 1:numel(Basins)</span>
+0204 <span class="comment">%       plot([Basins(n).Lon],[Basins(n).Lat]);</span>
+0205 <span class="comment">%       pause;</span>
+0206 <span class="comment">%    end</span>
+0207    
+0208 <span class="keyword">end</span>
+0209 
+0210 <span class="keyword">if</span> facelabels == true
+0211    
+0212    <span class="comment">% add text labels</span>
+0213    ltxt  = round([Basins.(cvarname)],2);
+0214    xpos  = nan(numel(ltxt),1);
+0215    ypos  = nan(numel(ltxt),1);
 0216    
-0217    <span class="comment">% plot the basin outlines</span>
-0218    [latn,lonn] = polyjoin({Basins.Lat},{Basins.Lon});
-0219    plotm(latn,lonn,<span class="string">'k'</span>,<span class="string">'LineWidth'</span>,1);
-0220    
-0221 <span class="comment">%    for n = 1:numel(Basins)</span>
-0222 <span class="comment">%       latn = [Basins(n).Lat];</span>
-0223 <span class="comment">%       lonn = [Basins(n).Lon];</span>
-0224 <span class="comment">%</span>
-0225 <span class="comment">%       % use patchm for consistency? or plotm for speed?</span>
-0226 <span class="comment">%       plotm(latn,lonn,'k');</span>
-0227 <span class="comment">%    end</span>
+0217    <span class="keyword">for</span> n = 1:numel(ltxt)
+0218       
+0219       <span class="keyword">if</span> ~isnan(ltxt(n))
+0220          xpos(n) = quantile([Basins(n).Lon],0.25);
+0221          ypos(n) = quantile([Basins(n).Lat],0.65);
+0222          <span class="comment">% blat = [Basins(n).Lat]; minlat = min(blat); maxlat = max(blat);</span>
+0223          <span class="comment">% blon = [Basins(n).Lon]; minlon = min(blon); maxlon = max(blon);</span>
+0224          <span class="comment">% xpos(n) = minlon + (maxlon-minlon)/10;</span>
+0225          <span class="comment">% ypos(n) = minlat + (maxlat-minlat)/5;</span>
+0226       <span class="keyword">end</span>
+0227    <span class="keyword">end</span>
 0228    
-0229 <span class="comment">% % I used this to confirm that the sorting by area after</span>
-0230 <span class="comment">%    figure; plot([Basins(13).Lon],[Basins(13).Lat]); hold on;</span>
-0231 <span class="comment">%    for n = 1:numel(Basins)</span>
-0232 <span class="comment">%       plot([Basins(n).Lon],[Basins(n).Lat]);</span>
-0233 <span class="comment">%       pause;</span>
-0234 <span class="comment">%    end</span>
-0235    
-0236 <span class="keyword">end</span>
-0237 
-0238 <span class="keyword">if</span> facelabels == true
-0239    
-0240    <span class="comment">% add text labels</span>
-0241    ltxt  = round([Basins.(cvarname)],2);
-0242    xpos  = nan(numel(ltxt),1);
-0243    ypos  = nan(numel(ltxt),1);
-0244    
-0245    <span class="keyword">for</span> n = 1:numel(ltxt)
-0246       
-0247       <span class="keyword">if</span> ~isnan(ltxt(n))
-0248          xpos(n) = quantile([Basins(n).Lon],0.25);
-0249          ypos(n) = quantile([Basins(n).Lat],0.65);
-0250          <span class="comment">% blat = [Basins(n).Lat]; minlat = min(blat); maxlat = max(blat);</span>
-0251          <span class="comment">% blon = [Basins(n).Lon]; minlon = min(blon); maxlon = max(blon);</span>
-0252          <span class="comment">% xpos(n) = minlon + (maxlon-minlon)/10;</span>
-0253          <span class="comment">% ypos(n) = minlat + (maxlat-minlat)/5;</span>
-0254       <span class="keyword">end</span>
-0255    <span class="keyword">end</span>
-0256    
-0257    <span class="comment">% jitter labels that overlap. get the total map x/y span in km</span>
-0258    xspan = (haversine([latlims(1),lonlims(1)],[latlims(1),lonlims(2)]) + <span class="keyword">...</span>
-0259       haversine([latlims(2),lonlims(2)],[latlims(1),lonlims(2)]))/2;
-0260    yspan = (haversine([latlims(1),lonlims(1)],[latlims(2),lonlims(1)]) + <span class="keyword">...</span>
-0261       haversine([latlims(1),lonlims(2)],[latlims(2),lonlims(2)]))/2;
-0262 
-0263    <span class="comment">% get dists between labels in km.</span>
-0264    dists = nan(numel(ltxt),1);
-0265    <span class="keyword">for</span> n = 1:numel(ltxt)
-0266       <span class="keyword">for</span> m = 1:numel(ltxt)
-0267          dists(m) = haversine([ypos(n),xpos(n)],[ypos(m),xpos(m)]);
-0268       <span class="keyword">end</span>
-0269       
-0270 <span class="comment">%       at this point I would need to jitter xpos(m),ypos(m) but i need to do it</span>
-0271 <span class="comment">%       systematically e.g. instead of using the quantiles above, need to use</span>
-0272 <span class="comment">%       opposite corners, but it will have to be iterative using while and</span>
-0273 <span class="comment">%       surely there's a better way but it's too coplicated for now</span>
-0274       reldists = dists./xspan;
-0275       notok =  find(reldists &lt; 0.025 &amp; reldists &gt; 0);
-0276       <span class="keyword">if</span> numel(notok) &gt; 0
-0277          xpos(n) = quantile([Basins(n).Lon],0.90);
-0278          ypos(n) = quantile([Basins(n).Lat],0.90);
-0279          <span class="keyword">for</span> m = 1:numel(notok)
-0280             xpos(notok(m)) = quantile([Basins(notok(m)).Lon],0.10);
-0281             ypos(notok(m)) = quantile([Basins(notok(m)).Lat],0.10);
-0282          <span class="keyword">end</span>
-0283       <span class="keyword">end</span>
-0284       <span class="comment">% [xpos(notok) ypos(notok)]</span>
-0285    <span class="keyword">end</span>
-0286    
-0287 
-0288    <span class="keyword">for</span> n = 1:numel(ltxt)
-0289 
-0290       <span class="keyword">if</span> ~isnan(ltxt(n))
-0291          textm(ypos(n),xpos(n),num2str(ltxt(n)),<span class="string">'FontSize'</span>,8, <span class="keyword">...</span>
-0292             <span class="string">'Color'</span>,[0.8500 0.3250 0.0980]);         
-0293 
-0294 <span class="comment">%       xpos = quantile([Basins(n).Lon],0.20);</span>
-0295 <span class="comment">%       ypos = quantile([Basins(n).Lat],0.70);</span>
-0296 <span class="comment">%       xpos = mean([Basins(n).Lon],'omitnan');</span>
-0297 <span class="comment">%       ypos = mean([Basins(n).Lat],'omitnan');</span>
-0298 <span class="comment">%       xpos = median([Basins(n).Lon],'omitnan');</span>
-0299 <span class="comment">%       ypos = median([Basins(n).Lat],'omitnan');</span>
-0300 <span class="comment">%       xpos = min([Basins(n).Lon]);</span>
-0301 <span class="comment">%       ypos = max([Basins(n).Lat]);</span>
-0302 
-0303       <span class="keyword">end</span>
-0304       
-0305    <span class="keyword">end</span>
-0306    
-0307 <span class="keyword">end</span>
-0308 
-0309 
-0310 <span class="comment">% Make the colorbar transparent % https://stackoverflow.com/questions/37423603/setting-alpha-of-colorbar-in-matlab-r2015b</span>
-0311 <span class="keyword">if</span> facemapping == true
-0312    drawnow;
-0313    <span class="keyword">if</span> facealpha&lt;0.5
-0314       alphaVal = min(1.0,facealpha + 0.20);
-0315    <span class="keyword">else</span>
-0316       alphaVal = facealpha;
-0317    <span class="keyword">end</span>
-0318    
-0319    cdata = h.cbar.Face.Texture.CData;
-0320    cdata(<span class="keyword">end</span>,:) = uint8(alphaVal * cdata(<span class="keyword">end</span>,:));
-0321    h.cbar.Face.Texture.ColorType = <span class="string">'truecoloralpha'</span>;
-0322    h.cbar.Face.Texture.CData = cdata;
-0323    drawnow
-0324 <span class="keyword">end</span>
-0325 
-0326 <span class="comment">% once finished:</span>
-0327 tightmap
-0328 
-0329 <span class="comment">% Make sure that the renderer doesn't revert your changes</span>
-0330 <span class="comment">% h.cbar.Face.ColorBinding = 'discrete';</span>
+0229    <span class="comment">% jitter labels that overlap. get the total map x/y span in km</span>
+0230    xspan = (haversine([latlims(1),lonlims(1)],[latlims(1),lonlims(2)]) + <span class="keyword">...</span>
+0231       haversine([latlims(2),lonlims(2)],[latlims(1),lonlims(2)]))/2;
+0232    yspan = (haversine([latlims(1),lonlims(1)],[latlims(2),lonlims(1)]) + <span class="keyword">...</span>
+0233       haversine([latlims(1),lonlims(2)],[latlims(2),lonlims(2)]))/2;
+0234 
+0235    <span class="comment">% get dists between labels in km.</span>
+0236    dists = nan(numel(ltxt),1);
+0237    <span class="keyword">for</span> n = 1:numel(ltxt)
+0238       <span class="keyword">for</span> m = 1:numel(ltxt)
+0239          dists(m) = haversine([ypos(n),xpos(n)],[ypos(m),xpos(m)]);
+0240       <span class="keyword">end</span>
+0241       
+0242 <span class="comment">%       at this point I would need to jitter xpos(m),ypos(m) but i need to do it</span>
+0243 <span class="comment">%       systematically e.g. instead of using the quantiles above, need to use</span>
+0244 <span class="comment">%       opposite corners, but it will have to be iterative using while and</span>
+0245 <span class="comment">%       surely there's a better way but it's too coplicated for now</span>
+0246       reldists = dists./xspan;
+0247       notok =  find(reldists &lt; 0.025 &amp; reldists &gt; 0);
+0248       <span class="keyword">if</span> numel(notok) &gt; 0
+0249          xpos(n) = quantile([Basins(n).Lon],0.90);
+0250          ypos(n) = quantile([Basins(n).Lat],0.90);
+0251          <span class="keyword">for</span> m = 1:numel(notok)
+0252             xpos(notok(m)) = quantile([Basins(notok(m)).Lon],0.10);
+0253             ypos(notok(m)) = quantile([Basins(notok(m)).Lat],0.10);
+0254          <span class="keyword">end</span>
+0255       <span class="keyword">end</span>
+0256       <span class="comment">% [xpos(notok) ypos(notok)]</span>
+0257    <span class="keyword">end</span>
+0258    
+0259 
+0260    <span class="keyword">for</span> n = 1:numel(ltxt)
+0261 
+0262       <span class="keyword">if</span> ~isnan(ltxt(n))
+0263          textm(ypos(n),xpos(n),num2str(ltxt(n)),<span class="string">'FontSize'</span>,8, <span class="keyword">...</span>
+0264             <span class="string">'Color'</span>,[0.8500 0.3250 0.0980]);         
+0265 
+0266 <span class="comment">%       xpos = quantile([Basins(n).Lon],0.20);</span>
+0267 <span class="comment">%       ypos = quantile([Basins(n).Lat],0.70);</span>
+0268 <span class="comment">%       xpos = mean([Basins(n).Lon],'omitnan');</span>
+0269 <span class="comment">%       ypos = mean([Basins(n).Lat],'omitnan');</span>
+0270 <span class="comment">%       xpos = median([Basins(n).Lon],'omitnan');</span>
+0271 <span class="comment">%       ypos = median([Basins(n).Lat],'omitnan');</span>
+0272 <span class="comment">%       xpos = min([Basins(n).Lon]);</span>
+0273 <span class="comment">%       ypos = max([Basins(n).Lat]);</span>
+0274 
+0275       <span class="keyword">end</span>
+0276       
+0277    <span class="keyword">end</span>
+0278    
+0279 <span class="keyword">end</span>
+0280 
+0281 
+0282 <span class="comment">% Make the colorbar transparent % https://stackoverflow.com/questions/37423603/setting-alpha-of-colorbar-in-matlab-r2015b</span>
+0283 <span class="keyword">if</span> facemapping == true
+0284    drawnow;
+0285    <span class="keyword">if</span> facealpha&lt;0.5
+0286       alphaVal = min(1.0,facealpha + 0.20);
+0287    <span class="keyword">else</span>
+0288       alphaVal = facealpha;
+0289    <span class="keyword">end</span>
+0290    
+0291    cdata = h.cbar.Face.Texture.CData;
+0292    cdata(<span class="keyword">end</span>,:) = uint8(alphaVal * cdata(<span class="keyword">end</span>,:));
+0293    h.cbar.Face.Texture.ColorType = <span class="string">'truecoloralpha'</span>;
+0294    h.cbar.Face.Texture.CData = cdata;
+0295    drawnow
+0296 <span class="keyword">end</span>
+0297 
+0298 <span class="comment">% once finished:</span>
+0299 tightmap
+0300 
+0301 <span class="comment">% Make sure that the renderer doesn't revert your changes</span>
+0302 <span class="comment">% h.cbar.Face.ColorBinding = 'discrete';</span>
+0303 
+0304 
+0305 <span class="comment">% % Now change the ColorBinding back</span>
+0306 <span class="comment">% h.cbar.Face.ColorBinding = 'interpolated';</span>
+0307 <span class="comment">%</span>
+0308 <span class="comment">% % Update the colormap to something new</span>
+0309 <span class="comment">% colormap(jet);</span>
+0310 <span class="comment">% drawnow</span>
+0311 <span class="comment">%</span>
+0312 <span class="comment">% % Set the alpha values again</span>
+0313 <span class="comment">% cdata = h.cbar.Face.Texture.CData;</span>
+0314 <span class="comment">% cdata(end,:) = uint8(alphaVal * cdata(end,:));</span>
+0315 <span class="comment">% h.cbar.Face.Texture.CData = cdata;</span>
+0316 <span class="comment">% drawnow</span>
+0317 
+0318 
+0319 <span class="comment">% this works well for N. Ameria</span>
+0320 <span class="comment">%h.cbar.Position = [0.356 0.0588 0.387 0.0256];</span>
+0321 
+0322 <span class="comment">% these worked before I changed LonLimit to what's above</span>
+0323 <span class="comment">%h.cbar.Position = [0.33 0.11755 0.38737 0.025641];</span>
+0324 
+0325 <span class="comment">% % I used this to figure out the position above by guess and chekc</span>
+0326 <span class="comment">%     h.cbar.Position(3)=0.5*h.cbar.Position(3);</span>
+0327 <span class="comment">%     h.cbar.Position(1)=1.5*h.cbar.Position(1);</span>
+0328 <span class="comment">%     h.cbar.Position(2)=0.5*h.cbar.Position(2);</span>
+0329 
+0330 <a name="_sub1" href="#_subfunctions" class="code">function cspec = buildCspec(cvar,cname,cmin,cmax)</a>
 0331 
-0332 
-0333 <span class="comment">% % Now change the ColorBinding back</span>
-0334 <span class="comment">% h.cbar.Face.ColorBinding = 'interpolated';</span>
-0335 <span class="comment">%</span>
-0336 <span class="comment">% % Update the colormap to something new</span>
-0337 <span class="comment">% colormap(jet);</span>
-0338 <span class="comment">% drawnow</span>
-0339 <span class="comment">%</span>
-0340 <span class="comment">% % Set the alpha values again</span>
-0341 <span class="comment">% cdata = h.cbar.Face.Texture.CData;</span>
-0342 <span class="comment">% cdata(end,:) = uint8(alphaVal * cdata(end,:));</span>
-0343 <span class="comment">% h.cbar.Face.Texture.CData = cdata;</span>
-0344 <span class="comment">% drawnow</span>
-0345 
-0346 
-0347 <span class="comment">% this works well for N. Ameria</span>
-0348 <span class="comment">%h.cbar.Position = [0.356 0.0588 0.387 0.0256];</span>
-0349 
-0350 <span class="comment">% these worked before I changed LonLimit to what's above</span>
-0351 <span class="comment">%h.cbar.Position = [0.33 0.11755 0.38737 0.025641];</span>
+0332 cmap = parula(numel(cvar));
+0333 cspec = makesymbolspec(<span class="string">'Polygon'</span>,{cname,[cmin cmax],  <span class="keyword">...</span>
+0334    <span class="string">'FaceColor'</span>,cmap,                                  <span class="keyword">...</span>
+0335    <span class="string">'FaceAlpha'</span>,0.95,                                  <span class="keyword">...</span>
+0336    <span class="string">'LineWidth'</span>,0.5,                                   <span class="keyword">...</span>
+0337    <span class="string">'EdgeColor'</span>,<span class="string">'k'</span>} );
+0338 
+0339 
+0340 <span class="comment">% % notes on patch ordering:</span>
+0341 <span class="comment">% the patchobjs are ordered opposite the structure meaning patchobjs(1) =</span>
+0342 <span class="comment">% Basins(end), patchobjs(2) = Basins(end-1), and so on, so we flipud</span>
+0343 <span class="comment">% Basins first, then we get the new sort index by Area, going from low to</span>
+0344 <span class="comment">% high Area, and therefore when we reorder ax.Children using idx it orders</span>
+0345 <span class="comment">% the patches from high to low area since the patch order is opposite (for</span>
+0346 <span class="comment">% checking, it's easier to not sort Basins in the next line, that way</span>
+0347 <span class="comment">% Basins with nan cvar are first, and you can step through a loop plotting</span>
+0348 <span class="comment">% each basin boundary and see which ones are white in teh cvar map, then</span>
+0349 <span class="comment">% (in my test case) the big yukon basin was originally on top and you can</span>
+0350 <span class="comment">% see how a smaller one gets plotted on top when they're reordered and</span>
+0351 <span class="comment">% that's why we get more colors.</span>
 0352 
-0353 <span class="comment">% % I used this to figure out the position above by guess and chekc</span>
-0354 <span class="comment">%     h.cbar.Position(3)=0.5*h.cbar.Position(3);</span>
-0355 <span class="comment">%     h.cbar.Position(1)=1.5*h.cbar.Position(1);</span>
-0356 <span class="comment">%     h.cbar.Position(2)=0.5*h.cbar.Position(2);</span>
+0353 <span class="comment">%% INPUT PARSER</span>
+0354 <a name="_sub2" href="#_subfunctions" class="code">function [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, </a><span class="keyword">...</span>
+0355    facealpha, facelabels, cvar, usegeoshow, cbarinterpreter, cmap, climits] = <span class="keyword">...</span>
+0356    parseinputs(Basins, varargin)
 0357 
-0358 <a name="_sub1" href="#_subfunctions" class="code">function cspec = buildCspec(cvar,cname,cmin,cmax)</a>
-0359 
-0360 cmap = parula(numel(cvar));
-0361 cspec = makesymbolspec(<span class="string">'Polygon'</span>,{cname,[cmin cmax],  <span class="keyword">...</span>
-0362    <span class="string">'FaceColor'</span>,cmap,                                  <span class="keyword">...</span>
-0363    <span class="string">'FaceAlpha'</span>,0.95,                                  <span class="keyword">...</span>
-0364    <span class="string">'LineWidth'</span>,0.5,                                   <span class="keyword">...</span>
-0365    <span class="string">'EdgeColor'</span>,<span class="string">'k'</span>} );
+0358 defaultvar = <span class="string">'perm_mean'</span>;
+0359 defaulttxt = <span class="string">'permafrost extent (%)'</span>;
+0360 defaultlatlims = [40 84];
+0361 defaultlonlims = [-168 -40];
+0362 
+0363 <span class="comment">% NOTE: for lonlims, this works well for Alaska: [-170 -120]</span>
+0364 <span class="comment">% NOTE: use geo!</span>
+0365 <span class="comment">% NOTE: variable name of cvar</span>
 0366 
-0367 
-0368 <span class="comment">% % notes on patch ordering:</span>
-0369 <span class="comment">% the patchobjs are ordered opposite the structure meaning patchobjs(1) =</span>
-0370 <span class="comment">% Basins(end), patchobjs(2) = Basins(end-1), and so on, so we flipud</span>
-0371 <span class="comment">% Basins first, then we get the new sort index by Area, going from low to</span>
-0372 <span class="comment">% high Area, and therefore when we reorder ax.Children using idx it orders</span>
-0373 <span class="comment">% the patches from high to low area since the patch order is opposite (for</span>
-0374 <span class="comment">% checking, it's easier to not sort Basins in the next line, that way</span>
-0375 <span class="comment">% Basins with nan cvar are first, and you can step through a loop plotting</span>
-0376 <span class="comment">% each basin boundary and see which ones are white in teh cvar map, then</span>
-0377 <span class="comment">% (in my test case) the big yukon basin was originally on top and you can</span>
-0378 <span class="comment">% see how a smaller one gets plotted on top when they're reordered and</span>
-0379 <span class="comment">% that's why we get more colors.</span></pre></div>
+0367 parser = inputParser;
+0368 parser.FunctionName = <span class="string">'bfra.mapbasins'</span>;
+0369 parser.StructExpand = true;
+0370 
+0371 parser.addRequired(<span class="string">'Basins'</span>, @isstruct);
+0372 parser.addParameter(<span class="string">'Meta'</span>, <span class="string">''</span>, @istable);
+0373 parser.addParameter(<span class="string">'facemapping'</span>, false, @islogical);
+0374 parser.addParameter(<span class="string">'cvarname'</span>, defaultvar, @ischar);
+0375 parser.addParameter(<span class="string">'cbartxt'</span>, defaulttxt, @ischar);
+0376 parser.addParameter(<span class="string">'climits'</span>, nan, @isnumeric);
+0377 parser.addParameter(<span class="string">'latlims'</span>, defaultlatlims, @isnumeric);
+0378 parser.addParameter(<span class="string">'lonlims'</span>, defaultlonlims, @isnumeric);
+0379 parser.addParameter(<span class="string">'colormap'</span>, parula, @isnumeric);
+0380 parser.addParameter(<span class="string">'facealpha'</span>, 0.35, @isnumeric);
+0381 parser.addParameter(<span class="string">'facelabels'</span>, false, @islogical);
+0382 parser.addParameter(<span class="string">'proj'</span>, <span class="string">'lambert'</span>, @ischar);
+0383 <span class="comment">% parser.addParameter('cbarinterpreter', 'tex', @ischar);</span>
+0384 
+0385 parser.parse(Basins, varargin{:});
+0386 
+0387 Basins = parser.Results.Basins;
+0388 Meta = parser.Results.Meta;
+0389 proj = parser.Results.proj;
+0390 cmap = parser.Results.colormap;
+0391 latlims = parser.Results.latlims;
+0392 lonlims = parser.Results.lonlims;
+0393 cbartxt = parser.Results.cbartxt;
+0394 climits = parser.Results.climits;
+0395 cvarname = parser.Results.cvarname;
+0396 facealpha = parser.Results.facealpha;
+0397 facelabels = parser.Results.facelabels;
+0398 facemapping = parser.Results.facemapping;
+0399 <span class="comment">% cbarinterpreter = parser.Results.cbarinterpreter;</span>
+0400 
+0401 cvar = [];
+0402 <span class="keyword">if</span> facemapping == true
+0403     cvar = [Basins.(cvarname)];
+0404 <span class="keyword">end</span>
+0405 usegeoshow = false;
+0406 
+0407 <span class="comment">% default text use tex, otherwise depends on whats passed in</span>
+0408 <span class="keyword">if</span> ismember(<span class="string">'cbartxt'</span>, parser.UsingDefaults)
+0409    cbarinterpreter = <span class="string">'tex'</span>;
+0410 <span class="keyword">else</span>
+0411    <span class="keyword">if</span> ismember(<span class="string">'$'</span>, cbartxt)
+0412       cbarinterpreter = <span class="string">'latex'</span>;
+0413    <span class="keyword">else</span>
+0414       cbarinterpreter = <span class="string">'tex'</span>;
+0415    <span class="keyword">end</span>
+0416 <span class="keyword">end</span></pre></div>
 </body>
 </html>

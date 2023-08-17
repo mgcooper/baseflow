@@ -1,4 +1,4 @@
-// the purpose of this would be to automatically update the citation info whenever a new release is published on zenodo without hving to manually update CITATION.cff or this file. 
+// the purpose of this is to automatically update the citation info whenever a new release is published on zenodo without manually updating CITATION.cff or this file. 
 // this file may or may not be better than CITATION.cff
 // see this for more info: https://help.zenodo.org
 // and this: https://developers.zenodo.org/#add-metadata-to-your-github-repository-release

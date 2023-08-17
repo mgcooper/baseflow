@@ -3,7 +3,7 @@
     xsi:noNamespaceSchemaLocation="optional">
     <?xml-stylesheet type="text/xsl"href="optional"?>
     <!-- info.xml file for the Baseflow Recession Analysis Toolbox -->
-    <!-- Version 1.0.0 -->
+    <!-- Version 0.1.0 -->
     <!-- Copyright (07-Nov-2022) (Matt Cooper).-->
     
     <!-- Supply the following six elements in the order specified -->

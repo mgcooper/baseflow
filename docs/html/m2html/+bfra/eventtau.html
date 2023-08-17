@@ -62,7 +62,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [K, Events, Fits, usefits, aggfunc] = parseinputs(K, Events, Fits, varargin)</a></li></ul>
 
 
 
@@ -88,124 +91,128 @@ This function is called by:
 0019 <span class="comment">%</span>
 0020 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0021 
-0022 <span class="comment">% if called with no input, open this file</span>
-0023 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0022 <span class="comment">% TODO: implement aggfunc option to compute an event-aggregate tau e.g. using</span>
+0023 <span class="comment">% the mean flow, median flow, max flow, or min flow</span>
 0024 
-0025 <span class="comment">% old syntax:</span>
-0026 <span class="comment">% function [tau,q,dqdt,tags,t,L,s,dq] = eventtau(K,Events,Fits,varargin)</span>
+0025 <span class="comment">% if called with no input, open this file</span>
+0026 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0027 
-0028 <span class="comment">%-------------------------------------------------------------------------------</span>
-0029 p              = inputParser;
-0030 p.StructExpand = false;
-0031 p.FunctionName = <span class="string">'eventtau'</span>;
-0032 
-0033 addRequired(p, <span class="string">'K'</span>,                 @(x)isstruct(x)   );
-0034 addRequired(p, <span class="string">'Events'</span>,            @(x)isstruct(x)   );
-0035 addRequired(p, <span class="string">'Fits'</span>,              @(x)isstruct(x)   );
-0036 addParameter(p,<span class="string">'usefits'</span>,  false,   @(x)islogical(x)  );
-0037 addParameter(p,<span class="string">'aggfunc'</span>,  <span class="string">'none'</span>,  @(x)ischar(x)     );
-0038 
-0039 parse(p,K,Events,Fits,varargin{:});
-0040 
-0041 usefits = p.Results.usefits;
-0042 aggfunc = p.Results.aggfunc;
-0043 <span class="comment">%-------------------------------------------------------------------------------</span>
-0044 
-0045 <span class="comment">% TODO: implement aggfunc option to compute an event-aggregate tau e.g. using</span>
-0046 <span class="comment">% the mean flow, median flow, max flow, or min flow</span>
+0028 <span class="comment">% PARSE INPUTS</span>
+0029 [K, Events, Fits, usefits, aggfunc] = <a href="#_sub1" class="code" title="subfunction [K, Events, Fits, usefits, aggfunc] = parseinputs(K, Events, Fits, varargin)">parseinputs</a>(K, Events, Fits, varargin{:});
+0030 
+0031 <span class="comment">% MAIN FUNCTION</span>
+0032 Taufnc = bfra.taufunc;
+0033 dqfnc = @(a,dqdt) -dqdt./a; <span class="comment">% must have derived this at some point</span>
+0034 Sfnc = @(a,b,q) (q.^(2-b))./(a*(2-b));
+0035 
+0036 <span class="keyword">if</span> isscalar(K)
+0037    Ktags    = K.eventTag;
+0038    a        = K.a;
+0039    b        = K.b;
+0040 <span class="keyword">else</span>
+0041    Ktags    = [K.eventTag];
+0042    a        = [K.a];
+0043    b        = [K.b];
+0044 <span class="keyword">end</span>
+0045 
+0046 numfits  = numel(a);            <span class="comment">% use K b/c some 'Events' don't get fit</span>
 0047 
-0048 dqfnc    = @(a,dqdt) -dqdt./a;   <span class="comment">% must have derived this at some point</span>
-0049 Taufnc   = bfra.taufunc;
-0050 Sfnc     = @(a,b,q) (q.^(2-b))./(a*(2-b));
-0051 
-0052 <span class="keyword">if</span> isscalar(K)
-0053    Ktags    = K.eventTag;
-0054    a        = K.a;
-0055    b        = K.b;
-0056 <span class="keyword">else</span>
-0057    Ktags    = [K.eventTag];
-0058    a        = [K.a];
-0059    b        = [K.b];
-0060 <span class="keyword">end</span>
-0061 
-0062 numfits  = numel(a);            <span class="comment">% use K b/c some 'Events' don't get fit</span>
-0063 
-0064 <span class="keyword">if</span> usefits == true
-0065    Q     = Fits.q;
-0066    dQdt  = Fits.dqdt;
-0067    Qtags = Fits.eventTags;
-0068 <span class="keyword">else</span>
-0069    Q     = Events.eventFlow;
-0070    dQdt  = Fits.dqdt;
-0071    Qtags = Events.eventTags;
-0072 
-0073 <span class="keyword">end</span>
-0074 
-0075 tau      = nan(size(Q));
-0076 q        = nan(size(Q));
-0077 dqdt     = nan(size(Q));
-0078 t        = nan(size(Q));
-0079 s        = nan(size(Q));
-0080 dq       = nan(size(Q));
-0081 L        = nan(numfits,1);
+0048 <span class="keyword">if</span> usefits == true
+0049    Q     = Fits.q;
+0050    dQdt  = Fits.dqdt;
+0051    Qtags = Fits.eventTags;
+0052 <span class="keyword">else</span>
+0053    Q     = Events.eventFlow;
+0054    dQdt  = Fits.dqdt;
+0055    Qtags = Events.eventTags;
+0056 
+0057 <span class="keyword">end</span>
+0058 
+0059 tau      = nan(size(Q));
+0060 q        = nan(size(Q));
+0061 dqdt     = nan(size(Q));
+0062 t        = nan(size(Q));
+0063 s        = nan(size(Q));
+0064 dq       = nan(size(Q));
+0065 L        = nan(numfits,1);
+0066 
+0067 <span class="comment">%</span>
+0068 qagg     = nan(numfits,1);
+0069 dqagg    = nan(numfits,1);
+0070 tauagg   = nan(numfits,1);
+0071 
+0072 <span class="keyword">for</span> m = 1:numfits
+0073    tag      = Ktags(m);
+0074    i        = Ktags == tag;   <span class="comment">% should just be m</span>
+0075    ii       = Qtags == tag;   <span class="comment">% Fits.eventTags == m;</span>
+0076    tau(ii)  = Taufnc(a(i),b(i),Q(ii));
+0077 
+0078 <span class="comment">% return fit q/dqdt for point cloud plot but use event q for tau</span>
+0079    iii       = Fits.eventTags == tag;
+0080    q(iii)    = Fits.q(iii);
+0081    dqdt(iii) = Fits.dqdt(iii);
 0082 
-0083 <span class="comment">%</span>
-0084 qagg     = nan(numfits,1);
-0085 dqagg    = nan(numfits,1);
-0086 tauagg   = nan(numfits,1);
-0087 
-0088 <span class="keyword">for</span> m = 1:numfits
-0089    tag      = Ktags(m);
-0090    i        = Ktags == tag;   <span class="comment">% should just be m</span>
-0091    ii       = Qtags == tag;   <span class="comment">% Fits.eventTags == m;</span>
-0092    tau(ii)  = Taufnc(a(i),b(i),Q(ii));
-0093 
-0094 <span class="comment">% return fit q/dqdt for point cloud plot but use event q for tau</span>
-0095    iii       = Fits.eventTags == tag;
-0096    q(iii)    = Fits.q(iii);
-0097    dqdt(iii) = Fits.dqdt(iii);
-0098 
-0099 
-0100    t(ii)    = 1:numel(Q(ii)); <span class="comment">% should just be 1:sum(ii)</span>
-0101    s(ii)    = abs(tau(ii)./(2-b(i)).*Q(ii));
-0102    dq(ii)   = dqfnc(a(i),dQdt(ii));
-0103    L(m)     = sum(ii); <span class="comment">% L is the length of each event</span>
-0104 
-0105    <span class="comment">% aggfunc</span>
-0106    <span class="keyword">switch</span> aggfunc
-0107       <span class="keyword">case</span> <span class="string">'none'</span>
-0108       <span class="keyword">case</span> <span class="string">'min'</span>
-0109          qagg(m)  = min(q(iii),[],<span class="string">'omitnan'</span>);
-0110          dqagg(m) = min(dqdt(iii),[],<span class="string">'omitnan'</span>);
-0111          tauagg(m) = min(tau(ii),[],<span class="string">'omitnan'</span>);
-0112       <span class="keyword">case</span> <span class="string">'max'</span>
-0113          qagg(m)  = max(q(iii),[],<span class="string">'omitnan'</span>);
-0114          dqagg(m) = max(dqdt(iii),[],<span class="string">'omitnan'</span>);
-0115          tauagg(m) = max(tau(ii),[],<span class="string">'omitnan'</span>);
-0116       <span class="keyword">case</span> <span class="string">'median'</span>
-0117          qagg(m)  = median(q(iii),<span class="string">'omitnan'</span>);
-0118          dqagg(m) = median(dqdt(iii),<span class="string">'omitnan'</span>);
-0119          tauagg(m) = median(tau(ii),<span class="string">'omitnan'</span>);
-0120       <span class="keyword">case</span> <span class="string">'mean'</span>
-0121          qagg(m)  = mean(q(iii),<span class="string">'omitnan'</span>);
-0122          dqagg(m) = mean(dqdt(iii),<span class="string">'omitnan'</span>);
-0123          tauagg(m) = mean(tau(ii),<span class="string">'omitnan'</span>);
-0124    <span class="keyword">end</span>
-0125    
-0126 <span class="keyword">end</span>
+0083 
+0084    t(ii)    = 1:numel(Q(ii)); <span class="comment">% should just be 1:sum(ii)</span>
+0085    s(ii)    = abs(tau(ii)./(2-b(i)).*Q(ii));
+0086    dq(ii)   = dqfnc(a(i),dQdt(ii));
+0087    L(m)     = sum(ii); <span class="comment">% L is the length of each event</span>
+0088 
+0089    <span class="comment">% aggfunc</span>
+0090    <span class="keyword">switch</span> aggfunc
+0091       <span class="keyword">case</span> <span class="string">'none'</span>
+0092       <span class="keyword">case</span> <span class="string">'min'</span>
+0093          qagg(m)  = min(q(iii),[],<span class="string">'omitnan'</span>);
+0094          dqagg(m) = min(dqdt(iii),[],<span class="string">'omitnan'</span>);
+0095          tauagg(m) = min(tau(ii),[],<span class="string">'omitnan'</span>);
+0096       <span class="keyword">case</span> <span class="string">'max'</span>
+0097          qagg(m)  = max(q(iii),[],<span class="string">'omitnan'</span>);
+0098          dqagg(m) = max(dqdt(iii),[],<span class="string">'omitnan'</span>);
+0099          tauagg(m) = max(tau(ii),[],<span class="string">'omitnan'</span>);
+0100       <span class="keyword">case</span> <span class="string">'median'</span>
+0101          qagg(m)  = median(q(iii),<span class="string">'omitnan'</span>);
+0102          dqagg(m) = median(dqdt(iii),<span class="string">'omitnan'</span>);
+0103          tauagg(m) = median(tau(ii),<span class="string">'omitnan'</span>);
+0104       <span class="keyword">case</span> <span class="string">'mean'</span>
+0105          qagg(m)  = mean(q(iii),<span class="string">'omitnan'</span>);
+0106          dqagg(m) = mean(dqdt(iii),<span class="string">'omitnan'</span>);
+0107          tauagg(m) = mean(tau(ii),<span class="string">'omitnan'</span>);
+0108    <span class="keyword">end</span>
+0109    
+0110 <span class="keyword">end</span>
+0111 
+0112 inan     = isnan(tau);
+0113 tau      = tau(~inan);
+0114 q        = q(~inan);
+0115 dqdt     = dqdt(~inan);
+0116 s        = s(~inan);
+0117 t        = t(~inan);
+0118 dq       = dq(~inan);
+0119 tags     = Qtags(~inan);
+0120 
+0121 aggvals.q = qagg;
+0122 aggvals.dqdt = dqagg;
+0123 aggvals.tau = tauagg;
+0124 
+0125 <span class="comment">%% INPUT PARSER</span>
+0126 <a name="_sub1" href="#_subfunctions" class="code">function [K, Events, Fits, usefits, aggfunc] = parseinputs(K, Events, Fits, varargin)</a>
 0127 
-0128 inan     = isnan(tau);
-0129 tau      = tau(~inan);
-0130 q        = q(~inan);
-0131 dqdt     = dqdt(~inan);
-0132 s        = s(~inan);
-0133 t        = t(~inan);
-0134 dq       = dq(~inan);
-0135 tags     = Qtags(~inan);
-0136 
-0137 aggvals.q = qagg;
-0138 aggvals.dqdt = dqagg;
-0139 aggvals.tau = tauagg;
-0140</pre></div>
+0128 parser = inputParser;
+0129 parser.StructExpand = false;
+0130 parser.FunctionName = <span class="string">'bfra.eventtau'</span>;
+0131 
+0132 parser.addRequired(<span class="string">'K'</span>, @isstruct);
+0133 parser.addRequired(<span class="string">'Events'</span>, @isstruct);
+0134 parser.addRequired(<span class="string">'Fits'</span>, @isstruct);
+0135 parser.addParameter(<span class="string">'usefits'</span>, false, @islogical);
+0136 parser.addParameter(<span class="string">'aggfunc'</span>, <span class="string">'none'</span>, @ischar);
+0137 
+0138 parser.parse(K, Events, Fits, varargin{:});
+0139 
+0140 K = parser.Results.K;
+0141 Fits = parser.Results.Fits;
+0142 Events = parser.Results.Events;
+0143 usefits = parser.Results.usefits;
+0144 aggfunc = parser.Results.aggfunc;</pre></div>
 </body>
 </html>

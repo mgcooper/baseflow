@@ -24,7 +24,7 @@
 <div class="box"><strong>PRINTTREND print trends computed from columns in table Data to the screen</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function [ddt,err] = printtrend(Data,varargin) </strong></div>
+<div class="box"><strong>function [ddt, err] = printtrend(Data, varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">PRINTTREND print trends computed from columns in table Data to the screen
@@ -50,12 +50,15 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)</a></li></ul>
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ddt,err] = printtrend(Data,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [ddt, err] = printtrend(Data, varargin)</a>
 0002 <span class="comment">%PRINTTREND print trends computed from columns in table Data to the screen</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">%  Syntax</span>
@@ -64,77 +67,81 @@ This function is called by:
 0007 <span class="comment">%</span>
 0008 <span class="comment">% See also</span>
 0009 
-0010 <span class="comment">%-------------------------------------------------------------------------------</span>
-0011 p = bfra.deps.magicParser;
-0012 p.StructExpand = true;  <span class="comment">% this has to be true to use autocomplete fieldname</span>
-0013 p.FunctionName = <span class="string">'printtrend'</span>;
-0014 
-0015 p.addRequired(    <span class="string">'Data'</span>,                    @(x)istimetable(x));
-0016 p.addParameter(   <span class="string">'var'</span>,            <span class="string">'Qb'</span>,    @(x)ischar(x));
-0017 p.addParameter(   <span class="string">'alpha'</span>,          0.05,    @(x)isnumeric(x));
-0018 p.addParameter(   <span class="string">'unitconversion'</span>, 1,       @(x)isnumeric(x));
-0019 p.addParameter(   <span class="string">'metric'</span>,         <span class="string">'CI'</span>,    @(x)ischar(x));
-0020 p.addParameter(   <span class="string">'method'</span>,         <span class="string">'ols'</span>,   @(x)ischar(x));
-0021 p.addParameter(   <span class="string">'quantile'</span>,       nan,     @(x)isnumeric(x));
-0022 
-0023 p.parseMagically(<span class="string">'caller'</span>);
-0024 
-0025 var   = p.Results.var;
-0026 cf    = p.Results.unitconversion;
-0027 alpha = p.Results.alpha;
-0028 qtl   = p.Results.quantile;
-0029 
-0030 <span class="comment">%-------------------------------------------------------------------------------</span>
-0031 <span class="comment">% create a regular time in years, works for both months and years</span>
-0032 
-0033 t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
-0034 dt = numel(t);
-0035 dat = Data.(var); <span class="comment">% cm/yr -&gt; cm/day</span>
-0036 
-0037 <span class="keyword">switch</span> method
-0038    <span class="keyword">case</span> <span class="string">'ols'</span>
-0039       mdl = fitlm(t,dat); 
-0040       ddt = mdl.Coefficients.Estimate(2);  <span class="comment">% cm/day/year</span>
-0041       CIs = coefCI(mdl,alpha);
-0042       err = CIs(2,2)-ddt;
-0043    <span class="keyword">case</span> <span class="string">'qtl'</span>
-0044       [ab,S] = bfra.deps.quantreg(t,dat,qtl,1,1000,alpha);
-0045       ddt = ab(2);
-0046       CIs = S.ci_boot';
-0047       err = CIs(2,2)-ddt;
-0048 <span class="keyword">end</span>
-0049 <span class="comment">% adjust the trend and error units using the conversion factor</span>
-0050 ddt = cf*ddt;
-0051 d = ddt*dt;
-0052 err = cf*err;
-0053 derr = err*dt;
-0054 errstr = num2str(round(100*(1-alpha)));
-0055 str = [<span class="string">'\nd'</span> var <span class="string">'/dt = %.3f '</span> char(177) <span class="string">' %.3f ('</span> errstr <span class="string">'%% CI) '</span>];
-0056 str = [str <span class="string">', d'</span> var <span class="string">' = %.3f '</span> char(177) <span class="string">' %.3f \n\n'</span>];
-0057 fprintf(str,ddt,err,d,derr);
-0058 
-0059 <span class="comment">%    if alpha == 0.05 || alpha == 0.95</span>
-0060 <span class="comment">%       metric   = 'CI';</span>
-0061 <span class="comment">%       err      = coefCI(mdl,alpha)*cf;</span>
-0062 <span class="comment">%       CI       = mdl.coefCI;                    % 95% CI's</span>
-0063 <span class="comment">%       CI       = CI(2,:);</span>
-0064 <span class="comment">%       CI2      = CI(2)-ddt;                     % CI half-width</span>
-0065 <span class="comment">%    elseif alpha == 0.32 || alpha == 0.68</span>
-0066 <span class="comment">%       metric = 'SE';</span>
-0067 <span class="comment">%       SE       = mdl.Coefficients.SE(2);        % standard error</span>
-0068 <span class="comment">%    else</span>
-0069 <span class="comment">%       metric = 'userdefined';</span>
-0070 <span class="comment">%    end</span>
-0071 <span class="comment">%</span>
-0072 <span class="comment">%    switch metric</span>
-0073 <span class="comment">%       case 'SE'</span>
-0074 <span class="comment">%          fprintf(['\n d' var '/dt = %.2f ' char(177) ' %.2f (68% CI) \n'],ddt,err);</span>
-0075 <span class="comment">%       case 'CI'</span>
-0076 <span class="comment">%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (95% CI) \n'],ddt*cf,CI2*cf);</span>
-0077 <span class="comment">%       case 'userdefined'</span>
-0078 <span class="comment">%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (' alpha '%CI) \n'],ddt*cf,CI2*cf);</span>
-0079 <span class="comment">%    end</span>
-0080 <span class="comment">%</span>
-0081 <span class="comment">%</span></pre></div>
+0010 <span class="comment">% PARSE INPUTS</span>
+0011 [Data, method, var, cf, alpha, qtl] = <a href="#_sub1" class="code" title="subfunction [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)">parseinputs</a>(Data, varargin{:});
+0012 
+0013 <span class="comment">% create a regular time in years, works for both months and years</span>
+0014 t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
+0015 dt = numel(t);
+0016 dat = Data.(var); <span class="comment">% cm/yr -&gt; cm/day</span>
+0017 
+0018 <span class="keyword">switch</span> method
+0019    <span class="keyword">case</span> <span class="string">'ols'</span>
+0020       mdl = fitlm(t,dat); 
+0021       ddt = mdl.Coefficients.Estimate(2);  <span class="comment">% cm/day/year</span>
+0022       CIs = coefCI(mdl,alpha);
+0023       err = CIs(2,2)-ddt;
+0024    <span class="keyword">case</span> <span class="string">'qtl'</span>
+0025       [ab,S] = bfra.deps.quantreg(t,dat,qtl,1,1000,alpha);
+0026       ddt = ab(2);
+0027       CIs = S.ci_boot';
+0028       err = CIs(2,2)-ddt;
+0029 <span class="keyword">end</span>
+0030 <span class="comment">% adjust the trend and error units using the conversion factor</span>
+0031 ddt = cf*ddt;
+0032 d = ddt*dt;
+0033 err = cf*err;
+0034 derr = err*dt;
+0035 errstr = num2str(round(100*(1-alpha)));
+0036 str = [<span class="string">'\nd'</span> var <span class="string">'/dt = %.3f '</span> char(177) <span class="string">' %.3f ('</span> errstr <span class="string">'%% CI) '</span>];
+0037 str = [str <span class="string">', d'</span> var <span class="string">' = %.3f '</span> char(177) <span class="string">' %.3f \n\n'</span>];
+0038 fprintf(str,ddt,err,d,derr);
+0039 
+0040 <span class="comment">%% PARSE INPUTS</span>
+0041 <a name="_sub1" href="#_subfunctions" class="code">function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)</a>
+0042 parser = inputParser;
+0043 parser.StructExpand = true; <span class="comment">% this has to be true to use autocomplete fieldname</span>
+0044 parser.FunctionName = <span class="string">'bfra.printtrend'</span>;
+0045 
+0046 parser.addRequired(<span class="string">'Data'</span>, @istimetable);
+0047 parser.addParameter(<span class="string">'var'</span>, <span class="string">'Qb'</span>, @ischar);
+0048 parser.addParameter(<span class="string">'alpha'</span>, 0.05, @isnumeric);
+0049 parser.addParameter(<span class="string">'metric'</span>, <span class="string">'CI'</span>, @ischar);
+0050 parser.addParameter(<span class="string">'method'</span>, <span class="string">'ols'</span>, @ischar);
+0051 parser.addParameter(<span class="string">'quantile'</span>, nan, @isnumeric);
+0052 parser.addParameter(<span class="string">'unitconversion'</span>, 1, @isnumeric);
+0053 
+0054 parser.parse(Data, varargin{:});
+0055 
+0056 cf = parser.Results.unitconversion;
+0057 var  = parser.Results.var;
+0058 qtl = parser.Results.quantile;
+0059 alpha = parser.Results.alpha;
+0060 method = parser.Results.method;
+0061 
+0062 <span class="comment">% no longer used:</span>
+0063 <span class="comment">% metric = parser.Results.metric;</span>
+0064 
+0065 <span class="comment">%    if alpha == 0.05 || alpha == 0.95</span>
+0066 <span class="comment">%       metric   = 'CI';</span>
+0067 <span class="comment">%       err      = coefCI(mdl,alpha)*cf;</span>
+0068 <span class="comment">%       CI       = mdl.coefCI;                    % 95% CI's</span>
+0069 <span class="comment">%       CI       = CI(2,:);</span>
+0070 <span class="comment">%       CI2      = CI(2)-ddt;                     % CI half-width</span>
+0071 <span class="comment">%    elseif alpha == 0.32 || alpha == 0.68</span>
+0072 <span class="comment">%       metric = 'SE';</span>
+0073 <span class="comment">%       SE       = mdl.Coefficients.SE(2);        % standard error</span>
+0074 <span class="comment">%    else</span>
+0075 <span class="comment">%       metric = 'userdefined';</span>
+0076 <span class="comment">%    end</span>
+0077 <span class="comment">%</span>
+0078 <span class="comment">%    switch metric</span>
+0079 <span class="comment">%       case 'SE'</span>
+0080 <span class="comment">%          fprintf(['\n d' var '/dt = %.2f ' char(177) ' %.2f (68% CI) \n'],ddt,err);</span>
+0081 <span class="comment">%       case 'CI'</span>
+0082 <span class="comment">%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (95% CI) \n'],ddt*cf,CI2*cf);</span>
+0083 <span class="comment">%       case 'userdefined'</span>
+0084 <span class="comment">%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (' alpha '%CI) \n'],ddt*cf,CI2*cf);</span>
+0085 <span class="comment">%    end</span></pre></div>
 </body>
 </html>

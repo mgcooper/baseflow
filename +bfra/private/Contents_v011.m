@@ -1,5 +1,5 @@
-% bfra/+BFRA
-% Version 1.0.0 17-Jan-2023
+% bfra/+bfra
+% Version 0.1.1 17-Jan-2023
 % 
 % Files
 %   alttrend            - compute the linear trend in active layer (aquifer) thickness

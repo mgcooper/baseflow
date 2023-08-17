@@ -75,7 +75,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] =</a></li></ul>
 
 
 
@@ -117,122 +120,139 @@ This function is called by:
 0035 <span class="comment">% if called with no input, open this file</span>
 0036 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0037 
-0038 <span class="comment">%-------------------------------------------------------------------------------</span>
-0039 p              = inputParser;
-0040 p.FunctionName = <span class="string">'eventfinder'</span>;
+0038 <span class="comment">% PARSE INPUTS</span>
+0039 [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = <span class="keyword">...</span>
+0040    parseinputs(t, q, r, mfilename, varargin{:});
 0041 
-0042 addRequired(p, <span class="string">'t'</span>,                  @(x) isnumeric(x) | isdatetime(x)     );
-0043 addRequired(p, <span class="string">'q'</span>,                  @(x) isnumeric(x) &amp; numel(x)==numel(t));
-0044 addRequired(p, <span class="string">'r'</span>,                  @(x) isnumeric(x)                     );
-0045 addParameter(p,<span class="string">'nmin'</span>,        4,     @(x) isnumeric(x) &amp; isscalar(x) &amp; x&gt;2 );
-0046 addParameter(p,<span class="string">'fmax'</span>,        2,     @(x) isnumeric(x) &amp; isscalar(x)       );
-0047 addParameter(p,<span class="string">'rmax'</span>,        2,     @(x) isnumeric(x) &amp; isscalar(x)       );
-0048 addParameter(p,<span class="string">'rmin'</span>,        0,     @(x) isnumeric(x) &amp; isscalar(x)       );
-0049 addParameter(p,<span class="string">'rmconvex'</span>,    false, @(x) islogical(x) &amp; isscalar(x)       );
-0050 addParameter(p,<span class="string">'rmnochange'</span>,  false, @(x) islogical(x) &amp; isscalar(x)       );
-0051 addParameter(p,<span class="string">'rmrain'</span>,      false, @(x) islogical(x) &amp; isscalar(x)       );
-0052 
-0053 parse(p,t,q,r,varargin{:});
-0054 
-0055 nmin        = p.Results.nmin;
-0056 fmax        = p.Results.fmax;
-0057 rmax        = p.Results.rmax;
-0058 rmin        = p.Results.rmin;
-0059 rmconvex    = p.Results.rmconvex;
-0060 rmnochange  = p.Results.rmnochange;
-0061 rmrain      = p.Results.rmrain;
-0062 
-0063 <span class="comment">% allow empty r i.e. input syntax eventfinder(t,q,[],...)</span>
-0064 <span class="keyword">if</span> isempty(r)
-0065    r = zeros(size(t));
-0066 <span class="keyword">end</span>
-0067 
-0068 <span class="comment">% convert to columns, in case this is not called from bfra.getevents</span>
-0069 t = t(:);
-0070 q = q(:);
-0071 r = r(:);
-0072 
-0073 <span class="comment">%-------------------------------------------------------------------------------</span>
-0074 
-0075 
-0076 iS = [1;find(diff(isnan(q))==-1)+1];       <span class="comment">% start non-nan segments</span>
-0077 iE = [find(diff(isnan(q))==1);length(q)];  <span class="comment">% end non-nan segments</span>
-0078 L  = iE-iS+1;                              <span class="comment">% segment lengths</span>
-0079 
-0080 <span class="comment">% initialize the combined events</span>
-0081 T = []; Q = []; R = []; Info = struct; iflag = false;
-0082 
-0083 <span class="keyword">for</span> n = 1:length(iS)
-0084    
-0085    <span class="keyword">if</span> L(n)&lt;nmin                       <span class="comment">% set nan if &lt;nmin</span>
-0086       [Tn,Qn,Rn,Infon] = bfra.util.setEventEmpty;
-0087    <span class="keyword">else</span>
-0088       tn = t(iS(n):iE(n));
-0089       qn = q(iS(n):iE(n));
-0090       rn = r(iS(n):iE(n));
-0091       
-0092       [Tn,Qn,Rn,Infon] = bfra.eventsplitter( <span class="keyword">...</span>
-0093          tn,qn,rn, <span class="keyword">...</span>
-0094          <span class="string">'nmin'</span>, nmin, <span class="keyword">...</span>
-0095          <span class="string">'fmax'</span>, fmax, <span class="keyword">...</span>
-0096          <span class="string">'rmax'</span>, rmax, <span class="keyword">...</span>
-0097          <span class="string">'rmin'</span>, rmin, <span class="keyword">...</span>
-0098          <span class="string">'rmrain'</span>, rmrain, <span class="keyword">...</span>
-0099          <span class="string">'rmconvex'</span>, rmconvex, <span class="keyword">...</span>
-0100          <span class="string">'rmnochange'</span>, rmnochange);
-0101    <span class="keyword">end</span>
-0102    
-0103    <span class="comment">% if no events were detected, Infon.istart will be empty</span>
-0104    <span class="keyword">if</span> all(isempty(Infon.istart)); <span class="keyword">continue</span>; <span class="keyword">else</span>
-0105       
-0106       <span class="comment">% iS is the start of the entire flow segment, but the indices in</span>
-0107       <span class="comment">% Info are relative to the event returned by segmentevents. here</span>
-0108       <span class="comment">% we add iS to these indices, except runlengths</span>
-0109       fields = fieldnames(Infon);
-0110       
-0111       <span class="keyword">if</span> numel(Infon.ikeep) &gt; 0
-0112          
-0113          <span class="keyword">for</span> m = 1:numel(fields)
-0114             Infon.(fields{m}) = Infon.(fields{m}) + iS(n) - 1;
-0115          <span class="keyword">end</span>
-0116          
-0117          <span class="comment">% add the first non-nan index and runlengths to Info</span>
-0118          <span class="comment">% Infon.ifirst = opts.ifirst;</span>
-0119          <span class="comment">% Infon.runlengths = Infon.istop - Infon.istart + 1;</span>
-0120       <span class="keyword">end</span>
-0121       
-0122       <span class="comment">% this is needed b/c 'info' has no fieldnames until first detected event</span>
-0123       <span class="keyword">if</span> iflag == false           <span class="comment">% no events detected yet</span>
-0124          T = Tn; Q = Qn; R = Rn; Info = Infon; iflag = true;
-0125          <span class="keyword">continue</span>
-0126       <span class="keyword">else</span>                        <span class="comment">% at least one detected event</span>
-0127          T = [T;Tn];
-0128          Q = [Q;Qn];
-0129          R = [R;Rn];
-0130          Info = bfra.util.catstructfields(1,Info,Infon);
-0131       <span class="keyword">end</span>
-0132    <span class="keyword">end</span>
-0133 <span class="keyword">end</span>
-0134 
-0135 <span class="comment">% if no events were returned, set events empty</span>
-0136 <span class="keyword">if</span> isempty(fieldnames(Info))
-0137    [T,Q,R,Info] = bfra.util.setEventEmpty;
-0138    
-0139 <span class="keyword">else</span> <span class="comment">% cycle through and remove empty events</span>
-0140    inan = false(size(T));
-0141    <span class="keyword">for</span> n = 1:numel(T)
-0142       <span class="keyword">if</span> isempty(T{n})
-0143          inan(n) = true;
-0144       <span class="keyword">end</span>
-0145    <span class="keyword">end</span>
-0146    T = T(~inan);
-0147    Q = Q(~inan);
-0148    R = R(~inan);
-0149    
-0150    Info.istart = Info.istart(~inan);
-0151    Info.istop  = Info.istop(~inan);
-0152    <span class="comment">% Info.runlengths = Info.runlengths(~inan);</span>
-0153    
-0154 <span class="keyword">end</span></pre></div>
+0042 
+0043 <span class="comment">% MAIN CODE</span>
+0044 iS = [1;find(diff(isnan(q))==-1)+1];       <span class="comment">% start non-nan segments</span>
+0045 iE = [find(diff(isnan(q))==1);length(q)];  <span class="comment">% end non-nan segments</span>
+0046 L  = iE-iS+1;                              <span class="comment">% segment lengths</span>
+0047 
+0048 <span class="comment">% initialize the combined events</span>
+0049 T = []; Q = []; R = []; Info = struct; iflag = false;
+0050 
+0051 <span class="keyword">for</span> n = 1:length(iS)
+0052    
+0053    <span class="keyword">if</span> L(n)&lt;nmin                       <span class="comment">% set nan if &lt;nmin</span>
+0054       [Tn,Qn,Rn,Infon] = bfra.util.setEventEmpty();
+0055    <span class="keyword">else</span>
+0056       tn = t(iS(n):iE(n));
+0057       qn = q(iS(n):iE(n));
+0058       rn = r(iS(n):iE(n));
+0059       
+0060       [Tn,Qn,Rn,Infon] = bfra.eventsplitter( <span class="keyword">...</span>
+0061          tn,qn,rn, <span class="keyword">...</span>
+0062          <span class="string">'nmin'</span>, nmin, <span class="keyword">...</span>
+0063          <span class="string">'fmax'</span>, fmax, <span class="keyword">...</span>
+0064          <span class="string">'rmax'</span>, rmax, <span class="keyword">...</span>
+0065          <span class="string">'rmin'</span>, rmin, <span class="keyword">...</span>
+0066          <span class="string">'rmrain'</span>, rmrain, <span class="keyword">...</span>
+0067          <span class="string">'rmconvex'</span>, rmconvex, <span class="keyword">...</span>
+0068          <span class="string">'rmnochange'</span>, rmnochange);
+0069    <span class="keyword">end</span>
+0070    
+0071    <span class="comment">% if no events were detected, Infon.istart will be empty</span>
+0072    <span class="keyword">if</span> all(isempty(Infon.istart)); <span class="keyword">continue</span>; <span class="keyword">else</span>
+0073       
+0074       <span class="comment">% iS is the start of the entire flow segment, but the indices in</span>
+0075       <span class="comment">% Info are relative to the event returned by segmentevents. here</span>
+0076       <span class="comment">% we add iS to these indices, except runlengths</span>
+0077       fields = fieldnames(Infon);
+0078       
+0079       <span class="keyword">if</span> numel(Infon.ikeep) &gt; 0
+0080          
+0081          <span class="keyword">for</span> m = 1:numel(fields)
+0082             Infon.(fields{m}) = Infon.(fields{m}) + iS(n) - 1;
+0083          <span class="keyword">end</span>
+0084          
+0085          <span class="comment">% add the first non-nan index and runlengths to Info</span>
+0086          <span class="comment">% Infon.ifirst = opts.ifirst;</span>
+0087          <span class="comment">% Infon.runlengths = Infon.istop - Infon.istart + 1;</span>
+0088       <span class="keyword">end</span>
+0089       
+0090       <span class="comment">% this is needed b/c 'info' has no fieldnames until first detected event</span>
+0091       <span class="keyword">if</span> iflag == false           <span class="comment">% no events detected yet</span>
+0092          T = Tn; Q = Qn; R = Rn; Info = Infon; iflag = true;
+0093          <span class="keyword">continue</span>
+0094       <span class="keyword">else</span>                        <span class="comment">% at least one detected event</span>
+0095          T = [T;Tn];
+0096          Q = [Q;Qn];
+0097          R = [R;Rn];
+0098          Info = bfra.util.catstructfields(1,Info,Infon);
+0099       <span class="keyword">end</span>
+0100    <span class="keyword">end</span>
+0101 <span class="keyword">end</span>
+0102 
+0103 <span class="comment">% if no events were returned, set events empty</span>
+0104 <span class="keyword">if</span> isempty(fieldnames(Info))
+0105    [T,Q,R,Info] = bfra.util.setEventEmpty();
+0106    
+0107 <span class="keyword">else</span> <span class="comment">% cycle through and remove empty events</span>
+0108    inan = false(size(T));
+0109    <span class="keyword">for</span> n = 1:numel(T)
+0110       <span class="keyword">if</span> isempty(T{n})
+0111          inan(n) = true;
+0112       <span class="keyword">end</span>
+0113    <span class="keyword">end</span>
+0114    T = T(~inan);
+0115    Q = Q(~inan);
+0116    R = R(~inan);
+0117    
+0118    Info.istart = Info.istart(~inan);
+0119    Info.istop  = Info.istop(~inan);
+0120    <span class="comment">% Info.runlengths = Info.runlengths(~inan);</span>
+0121 <span class="keyword">end</span>
+0122 
+0123 <span class="comment">%% INPUT PARSER</span>
+0124 
+0125 <a name="_sub1" href="#_subfunctions" class="code">function [t, q, r, nmin, fmax, rmax, rmin, rmconvex, rmnochange, rmrain] = </a><span class="keyword">...</span>
+0126    parseinputs(t, q, r, funcname, varargin)
+0127 
+0128 <span class="keyword">persistent</span> parser
+0129 <span class="keyword">if</span> isempty(parser)
+0130    parser = inputParser;
+0131    addRequired(parser, <span class="string">'t'</span>,                  @bfra.validation.isdatelike);
+0132    addRequired(parser, <span class="string">'q'</span>,                  @bfra.validation.isdoublevector);
+0133    addRequired(parser, <span class="string">'r'</span>,                  @isnumeric);
+0134    addParameter(parser,<span class="string">'nmin'</span>,        4,     @bfra.validation.isnumericscalar);
+0135    addParameter(parser,<span class="string">'fmax'</span>,        2,     @bfra.validation.isnumericscalar);
+0136    addParameter(parser,<span class="string">'rmax'</span>,        2,     @bfra.validation.isnumericscalar);
+0137    addParameter(parser,<span class="string">'rmin'</span>,        0,     @bfra.validation.isnumericscalar);
+0138    addParameter(parser,<span class="string">'rmconvex'</span>,    false, @bfra.validation.islogicalscalar);
+0139    addParameter(parser,<span class="string">'rmnochange'</span>,  false, @bfra.validation.islogicalscalar);
+0140    addParameter(parser,<span class="string">'rmrain'</span>,      false, @bfra.validation.islogicalscalar);
+0141 <span class="keyword">end</span>
+0142 parser.FunctionName = funcname;
+0143 parse(parser,t,q,r,varargin{:});
+0144 
+0145 nmin        = parser.Results.nmin;
+0146 fmax        = parser.Results.fmax;
+0147 rmax        = parser.Results.rmax;
+0148 rmin        = parser.Results.rmin;
+0149 rmconvex    = parser.Results.rmconvex;
+0150 rmnochange  = parser.Results.rmnochange;
+0151 rmrain      = parser.Results.rmrain;
+0152 
+0153 validateattributes(t, {<span class="string">'double'</span>},{<span class="string">'size'</span>, size(q)}, funcname,<span class="string">'t'</span>, 1)
+0154 validateattributes(nmin, {<span class="string">'double'</span>},{<span class="string">'&gt;'</span>, 2}, funcname,<span class="string">'nmin'</span>)
+0155 
+0156 <span class="comment">% allow empty r i.e. input syntax eventfinder(t,q,[],...)</span>
+0157 <span class="keyword">if</span> isempty(r)
+0158    r = zeros(size(t));
+0159 <span class="keyword">end</span>
+0160 
+0161 <span class="comment">% convert to columns, in case this is not called from bfra.getevents</span>
+0162 t = t(:);
+0163 q = q(:);
+0164 r = r(:);
+0165 
+0166 <span class="comment">% parser.Results includes all arguments, i.e., required, optional, and</span>
+0167 <span class="comment">% parameters, and orders the fields alphabetically, so its more trouble than its</span>
+0168 <span class="comment">% worth to use the simpler dealout syntax, which would require alphabetical</span>
+0169 <span class="comment">% assignment lists, but for reference:</span>
+0170 <span class="comment">% [fmax,nmin,q,r,rmax,rmconvex,rmin,rmnochange,rmrain,t] = ...</span>
+0171 <span class="comment">%    dealout(parser.Results);</span></pre></div>
 </body>
 </html>

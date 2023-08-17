@@ -24,7 +24,7 @@
 <div class="box"><strong>PREPFITS preps q and -dq/dt for event-scale fitting</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin) </strong></div>
+<div class="box"><strong>function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">PREPFITS preps q and -dq/dt for event-scale fitting
@@ -63,12 +63,15 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [q, dqdt, weights, mask] = parseinputs(q, dqdt, varargin)</a></li></ul>
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)</a>
 0002 <span class="comment">%PREPFITS preps q and -dq/dt for event-scale fitting</span>
 0003 <span class="comment">%</span>
 0004 <span class="comment">% Syntax</span>
@@ -89,49 +92,38 @@ This function is called by:
 0019 <span class="comment">%</span>
 0020 <span class="comment">%  See also: fitab</span>
 0021 
-0022 <span class="comment">%-------------------------------------------------------------------------------</span>
-0023 p              = inputParser;
-0024 p.FunctionName = <span class="string">'prepfits'</span>;
-0025 
-0026 addRequired(p,    <span class="string">'q'</span>,                           @(x)isnumeric(x)  );
-0027 addRequired(p,    <span class="string">'dqdt'</span>,                        @(x)isnumeric(x)  );
-0028 addParameter(p,   <span class="string">'weights'</span>,  ones(size(q)),    @(x)isnumeric(x)  );
-0029 addParameter(p,   <span class="string">'mask'</span>,     true(size(q)),    @(x)islogical(x)  );
-0030 
-0031 parse(p,q,dqdt,varargin{:});
-0032 
-0033 weights  = p.Results.weights;
-0034 mask     = p.Results.mask;
-0035 
-0036 <span class="comment">%-------------------------------------------------------------------------------</span>
+0022 <span class="comment">% PARSE INPUTS</span>
+0023 [q, dqdt, w, m] = <a href="#_sub1" class="code" title="subfunction [q, dqdt, weights, mask] = parseinputs(q, dqdt, varargin)">parseinputs</a>(q, dqdt, varargin{:});
+0024 
+0025 <span class="comment">% keep the negative dq/dt values</span>
+0026 keep = dqdt&lt;0;
+0027 x = abs(q(keep));
+0028 y = abs(dqdt(keep));
+0029 w = w(keep);
+0030 m = m(keep);
+0031 
+0032 <span class="comment">% convert the mask to weights</span>
+0033 w(m==false) = 0;
+0034 
+0035 [x, y, w] = bfra.util.prepCurveData(x, y, w);
+0036 [logx, logy, w] = bfra.util.prepCurveData(log(x), log(y), w);
 0037 
-0038 <span class="comment">% take the negative dq/dt values</span>
-0039 ok       = dqdt&lt;0;
-0040 x        = abs(q(ok));
-0041 y        = abs(dqdt(ok));
-0042 weights  = weights(ok);
-0043 mask     = mask(ok);
-0044 
-0045 <span class="comment">% convert the mask to weights</span>
-0046 weights(mask==false) = 0;
-0047 
-0048 logx  = log(x);
-0049 logy  = log(y);
+0038 <span class="comment">% failure check</span>
+0039 ok = numel(y)&gt;3;
+0040 
+0041 <span class="comment">%% parse inputs</span>
+0042 <a name="_sub1" href="#_subfunctions" class="code">function [q, dqdt, weights, mask] = parseinputs(q, dqdt, varargin)</a>
+0043 parser = inputParser;
+0044 parser.FunctionName = <span class="string">'bfra.prepfits'</span>;
+0045 
+0046 parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0047 parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
+0048 parser.addParameter(<span class="string">'weights'</span>, ones(size(q)), @isnumeric);
+0049 parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
 0050 
-0051 [  x,    <span class="keyword">...</span>
-0052    y,    <span class="keyword">...</span>
-0053    weights ]   = prepareCurveData( x, y, weights );
-0054 
-0055 
-0056 [  logx, <span class="keyword">...</span>
-0057    logy, <span class="keyword">...</span>
-0058    weights ]   = prepareCurveData(logx,logy,weights);
-0059 
-0060 
-0061 success = true;
-0062 <span class="keyword">if</span> numel(y)&lt;4 <span class="comment">% || numnodif &gt;4</span>
-0063    success = false;
-0064 <span class="keyword">end</span>
-0065</pre></div>
+0051 parser.parse(q, dqdt, varargin{:});
+0052 
+0053 weights = parser.Results.weights;
+0054 mask = parser.Results.mask;</pre></div>
 </body>
 </html>

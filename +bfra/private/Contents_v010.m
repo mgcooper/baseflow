@@ -1,4 +1,4 @@
-% bfra/+BFRA
+% bfra/+bfra
 % Version 0.1.0 04-Nov-2020
 % 
 % Files
