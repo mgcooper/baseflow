@@ -28,33 +28,33 @@
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">EVENTPHI estimate drainable porosity phi from individual recession events
- 
+
  Syntax
- 
+
      [phi,a] = eventphi(K,Fits,A,D,L,blate,varargin)
- 
+
  Description
- 
+
      Uses the method of Troch, Troch, and Brutsaert, 1993 to compute drainable
      porosity from early-time and late-time recession parameters and aquifer
      properties area A, depth D, and channel lenght L.
- 
+
  Required inputs
- 
-     K        table of a, b, tau, values for each event (output of fitevents) 
+
+     K        table of a, b, tau, values for each event (output of fitevents)
      Fits     structure containing the fitted q/dqdt timeseries (output of bfra.dqdt)
      A        basin area contributing to baseflow (L^2)
      D        saturated aquifer thickness (L)
      L        active stream length (L)
      blate    late-time b parameter in -dqdt = aq^b (dimensionless)
- 
+
  Optional name-value inputs
- 
+
      theta    effective slope of basin contributing area
      isflat   logical flag indicating horizontal or sloped aquifer solution
      soln1    optional early-time theoretical solution
      soln2    optional late-time theoretical solution
- 
+
  See also <a href="cloudphi.html" class="code" title="function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)">cloudphi</a>, <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, fitdistphi
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
@@ -74,7 +74,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [K, Fits, A, D, L, b2, earlyqtls, lateqtls, soln1, soln2] =</a></li></ul>
 
 
 
@@ -112,90 +115,105 @@ This function is called by:
 0031 <span class="comment">%</span>
 0032 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0033 
-0034 <span class="comment">% if called with no input, open this file</span>
+0034 <span class="comment">% If called with no input, open this file</span>
 0035 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0036 
-0037 <span class="comment">%-------------------------------------------------------------------------------</span>
-0038 p              = inputParser;
-0039 p.StructExpand = false;
-0040 p.FunctionName = <span class="string">'eventphi'</span>;
-0041 
-0042 addRequired(   p,<span class="string">'K'</span>,                        @(x)isstruct(x));
-0043 addRequired(   p,<span class="string">'Fits'</span>,                     @(x)isstruct(x));
-0044 addRequired(   p,<span class="string">'A'</span>,                        @(x)isnumeric(x));
-0045 addRequired(   p,<span class="string">'D'</span>,                        @(x)isnumeric(x));
-0046 addRequired(   p,<span class="string">'L'</span>,                        @(x)isnumeric(x));
-0047 addRequired(   p,<span class="string">'blate'</span>,                    @(x)isnumeric(x));
-0048 addParameter(  p,<span class="string">'method'</span>,    <span class="string">'envelope'</span>,    @(x)ischar(x));
-0049 addParameter(  p,<span class="string">'earlyqtls'</span>, [0.95 0.95],   @(x)isnumeric(x));
-0050 addParameter(  p,<span class="string">'lateqtls'</span>,  [0.5 0.5],     @(x)isnumeric(x));
-0051 addParameter(  p,<span class="string">'theta'</span>,     0,             @(x)isnumeric(x));
-0052 addParameter(  p,<span class="string">'isflat'</span>,    true,          @(x)islogical(x));
-0053 addParameter(  p,<span class="string">'soln1'</span>,     <span class="string">''</span>,            @(x)ischar(x));
-0054 addParameter(  p,<span class="string">'soln2'</span>,     <span class="string">''</span>,            @(x)ischar(x));
-0055 
-0056 parse(p,K,Fits,A,D,L,blate,varargin{:});
+0037 <span class="comment">% PARSE INPUTS</span>
+0038 [K, Fits, A, D, L, b2, earlyqtls, lateqtls, soln1, soln2] = parseinputs( <span class="keyword">...</span>
+0039    K, Fits, A, D, L, blate, varargin{:});
+0040 
+0041 <span class="comment">% warning off % commented out for octave, need msgid</span>
+0042 
+0043 <span class="comment">% take out the data and init the output</span>
+0044 b1          = 3;
+0045 q           = Fits.q;
+0046 dqdt        = Fits.dqdt;
+0047 fittags     = Fits.eventTags;
+0048 numevents   = numel(K.eventTag);
+0049 phi         = nan(numevents,1);
+0050 a           = nan(numevents,1);
+0051 
+0052 <span class="keyword">for</span> n = 1:numevents
+0053 
+0054    ifit     = fittags == K.eventTag(n);
+0055    thisq    = q(ifit);
+0056    thisdqdt = dqdt(ifit);
 0057 
-0058 method      = p.Results.method;
-0059 earlyqtls   = p.Results.earlyqtls;
-0060 lateqtls    = p.Results.lateqtls;
-0061 theta       = p.Results.theta;
-0062 isflat      = p.Results.isflat;
-0063 soln1       = p.Results.soln1;
-0064 soln2       = p.Results.soln2;
-0065 <span class="comment">%-------------------------------------------------------------------------------</span>
-0066 
-0067 warning off
-0068 
-0069 <span class="comment">% take out the data and init the output</span>
-0070 b1          = 3;
-0071 b2          = p.Results.blate; 
-0072 q           = Fits.q;
-0073 dqdt        = Fits.dqdt;
-0074 fittags     = Fits.eventTags;
-0075 numevents   = numel(K.eventTag);
-0076 phi         = nan(numevents,1);
-0077 a           = nan(numevents,1);
-0078 
-0079 <span class="keyword">for</span> n = 1:numevents
-0080    
-0081    ifit     = fittags == K.eventTag(n);
-0082    thisq    = q(ifit);
-0083    thisdqdt = dqdt(ifit);
-0084 
-0085    <span class="keyword">if</span> isempty(thisq) || isempty(thisdqdt)
-0086       <span class="keyword">continue</span>;
-0087    <span class="keyword">end</span>
-0088       
-0089    <span class="comment">% put a line of slope 3 and 1/1.5/bhat through the point cloud</span>
-0090    a1 = bfra.pointcloudintercept(thisq,thisdqdt,b1,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
-0091    a2 = bfra.pointcloudintercept(thisq,thisdqdt,b2,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,lateqtls);
+0058    <span class="keyword">if</span> isempty(thisq) || isempty(thisdqdt)
+0059       <span class="keyword">continue</span>;
+0060    <span class="keyword">end</span>
+0061 
+0062    <span class="comment">% put a line of slope 3 and 1/1.5/bhat through the point cloud</span>
+0063    a1 = bfra.pointcloudintercept(thisq, thisdqdt, b1, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0064       <span class="string">'refqtls'</span>, earlyqtls);
+0065    a2 = bfra.pointcloudintercept(thisq, thisdqdt, b2, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0066       <span class="string">'refqtls'</span>, lateqtls);
+0067 
+0068    <span class="comment">% choose appropriate solutions</span>
+0069    <span class="keyword">if</span> isempty(soln1) &amp;&amp; isempty(soln2)
+0070 
+0071       <span class="keyword">if</span> b2==1
+0072          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
+0073             <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS03'</span>);
+0074       <span class="keyword">elseif</span> b2==3/2
+0075          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
+0076             <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS04'</span>);
+0077       <span class="keyword">elseif</span> b2&gt;1 &amp;&amp; b2&lt;2
+0078          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
+0079             <span class="string">'soln1'</span>,<span class="string">'RS05'</span>,<span class="string">'soln2'</span>,<span class="string">'RS05'</span>);
+0080       <span class="keyword">else</span>
+0081          <span class="comment">% phi remains nan</span>
+0082       <span class="keyword">end</span>
+0083 
+0084       <span class="comment">% user-specified solutions</span>
+0085    <span class="keyword">else</span>
+0086       phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,             <span class="keyword">...</span>
+0087          <span class="string">'soln1'</span>,soln1,<span class="string">'soln2'</span>,soln2);
+0088    <span class="keyword">end</span>
+0089 
+0090    a(n) = a2;
+0091 <span class="keyword">end</span>
 0092 
-0093    <span class="comment">% choose appropriate solutions</span>
-0094    <span class="keyword">if</span> isempty(soln1) &amp;&amp; isempty(soln2)
-0095 
-0096       <span class="keyword">if</span> blate==1
-0097          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,          <span class="keyword">...</span>
-0098                                        <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS03'</span>);
-0099       <span class="keyword">elseif</span> blate==3/2
-0100          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,          <span class="keyword">...</span>
-0101                                        <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS04'</span>);
-0102       <span class="keyword">elseif</span> blate&gt;1 &amp;&amp; blate&lt;2
-0103          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,          <span class="keyword">...</span>
-0104                                        <span class="string">'soln1'</span>,<span class="string">'RS05'</span>,<span class="string">'soln2'</span>,<span class="string">'RS05'</span>);
-0105       <span class="keyword">else</span>
-0106          <span class="comment">% phi remains nan</span>
-0107       <span class="keyword">end</span>
-0108 
-0109    <span class="comment">% user-specified solutions</span>
-0110    <span class="keyword">else</span>
-0111       phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,             <span class="keyword">...</span>
-0112                                        <span class="string">'soln1'</span>,soln1,<span class="string">'soln2'</span>,soln2);
-0113    <span class="keyword">end</span>
-0114 
-0115    a(n) = a2;
-0116 <span class="keyword">end</span>
-0117 
-0118 warning on</pre></div>
+0093 <span class="comment">% warning on % commented out for octave, need msgid</span>
+0094 
+0095 <span class="comment">%% INPUT PARSER</span>
+0096 <a name="_sub1" href="#_subfunctions" class="code">function [K, Fits, A, D, L, b2, earlyqtls, lateqtls, soln1, soln2] = </a><span class="keyword">...</span>
+0097    parseinputs(K, Fits, A, D, L, b2, varargin)
+0098 
+0099 parser = inputParser;
+0100 parser.FunctionName = <span class="string">'bfra.eventphi'</span>;
+0101 parser.StructExpand = false;
+0102 
+0103 parser.addRequired(<span class="string">'K'</span>, @isstruct);
+0104 parser.addRequired(<span class="string">'Fits'</span>, @isstruct);
+0105 parser.addRequired(<span class="string">'A'</span>, @isnumeric);
+0106 parser.addRequired(<span class="string">'D'</span>, @isnumeric);
+0107 parser.addRequired(<span class="string">'L'</span>, @isnumeric);
+0108 parser.addRequired(<span class="string">'blate'</span>, @isnumeric);
+0109 parser.addParameter(<span class="string">'earlyqtls'</span>, [0.95 0.95], @isnumeric);
+0110 parser.addParameter(<span class="string">'lateqtls'</span>, [0.5 0.5], @isnumeric);
+0111 parser.addParameter(<span class="string">'soln1'</span>, <span class="string">''</span>, @ischar);
+0112 parser.addParameter(<span class="string">'soln2'</span>, <span class="string">''</span>, @ischar);
+0113 
+0114 parser.parse(K, Fits, A, D, L, b2, varargin{:});
+0115 
+0116 K = parser.Results.K;
+0117 A = parser.Results.A;
+0118 D = parser.Results.D;
+0119 L = parser.Results.L;
+0120 b2 = parser.Results.blate;
+0121 Fits = parser.Results.Fits;
+0122 soln1 = parser.Results.soln1;
+0123 soln2 = parser.Results.soln2;
+0124 lateqtls = parser.Results.lateqtls;
+0125 earlyqtls = parser.Results.earlyqtls;
+0126 
+0127 <span class="comment">% % No longer supported</span>
+0128 <span class="comment">% parser.addParameter('method', 'envelope', @ischar);</span>
+0129 <span class="comment">% parser.addParameter('theta', 0, @isnumeric);</span>
+0130 <span class="comment">% parser.addParameter('isflat', true, @islogical);</span>
+0131 <span class="comment">% theta = parser.Results.theta;</span>
+0132 <span class="comment">% method = parser.Results.method;</span>
+0133 <span class="comment">% isflat = parser.Results.isflat;</span></pre></div>
 </body>
 </html>

@@ -54,7 +54,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = parseinputs(</a></li></ul>
 
 
 
@@ -75,162 +78,174 @@ This function is called by:
 0014 <span class="comment">% if called with no input, open this file</span>
 0015 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0016 
-0017 <span class="comment">%------------------------------------------------------------------------------</span>
-0018 <span class="comment">% input parsing</span>
-0019 <span class="comment">%------------------------------------------------------------------------------</span>
-0020 p                 = inputParser;
-0021 p.FunctionName    = <span class="string">'bfra.expectedQ'</span>;
-0022 validopt          = @(x)any(validatestring(x,{<span class="string">'qtls'</span>,<span class="string">'plotfit'</span>}));
-0023 
-0024 addRequired(p,    <span class="string">'a'</span>,                    @(x)isnumeric(x)     );
-0025 addRequired(p,    <span class="string">'b'</span>,                    @(x)isnumeric(x)     );
-0026 addRequired(p,    <span class="string">'tau'</span>,                  @(x)isnumeric(x)     );
-0027 addRequired(p,    <span class="string">'q'</span>,                    @(x)isnumeric(x)     );
-0028 addRequired(p,    <span class="string">'dqdt'</span>,                 @(x)isnumeric(x)     );
-0029 addRequired(p,    <span class="string">'tau0'</span>,                 @(x)isnumeric(x)     );
-0030 addOptional(p,    <span class="string">'qtls'</span>,     <span class="string">''</span>,         validopt             );
-0031 addOptional(p,    <span class="string">'flow'</span>,     nan,        @(x)isnumeric(x)     );
-0032 addOptional(p,    <span class="string">'plotfit'</span>,  <span class="string">''</span>,         validopt             );
-0033 addParameter(p,   <span class="string">'mask'</span>,     false,      @(x)islogical(x)     );
-0034 
-0035 parse(p,a,b,tau,q,dqdt,tau0,varargin{:});
-0036 
-0037 qtls = p.Results.qtls;
-0038 flow = p.Results.flow;
-0039 mask = p.Results.mask;
-0040 plotfit = p.Results.plotfit;
-0041 
-0042 <span class="comment">%------------------------------------------------------------------------------</span>
-0043 
-0044 Qexp = (a*tau)^(1/(1-b));
-0045 Q0 = Qexp*(3-b)/(2-b);
+0017 <span class="comment">% PARSE INPUTS</span>
+0018 [a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = <a href="#_sub1" class="code" title="subfunction [a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = parseinputs( ">parseinputs</a>( <span class="keyword">...</span>
+0019    a, b, tau, q, dqdt, tau0, varargin{:}); <span class="comment">%#ok&lt;*ASGLU&gt;</span>
+0020 
+0021 <span class="comment">% MAIN FUNCTION</span>
+0022 Qexp = (a*tau)^(1/(1-b));
+0023 Q0 = Qexp*(3-b)/(2-b);
+0024 
+0025 <span class="keyword">if</span> strcmp(plotfit,<span class="string">'plotfit'</span>)
+0026    plotfit = true;
+0027 <span class="keyword">else</span>
+0028    plotfit = false;
+0029 <span class="keyword">end</span>
+0030 
+0031 <span class="keyword">if</span> ~isempty(qtls)
+0032    u = <span class="string">'m$^3$ d$^{-1}$'</span>;
+0033    fdc = bfra.fdcurve(flow(flow&gt;0),<span class="string">'refpoints'</span>,[Q0 Qexp],<span class="string">'units'</span>,u,<span class="string">'plotcurve'</span>,plotfit);
+0034    pQ0 = fdc.fref(1);
+0035    pQexp = fdc.fref(2);
+0036 <span class="keyword">else</span>
+0037    pQexp = nan;
+0038    pQ0 = nan;
+0039 <span class="keyword">end</span>
+0040 
+0041 <span class="comment">%% INPUT PARSER</span>
+0042 <a name="_sub1" href="#_subfunctions" class="code">function [a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = parseinputs( </a><span class="keyword">...</span>
+0043    a, b, tau, q, dqdt, tau0, varargin)
+0044 
+0045 validopt = @(x)any(validatestring(x,{<span class="string">'qtls'</span>,<span class="string">'plotfit'</span>}));
 0046 
-0047 <span class="keyword">if</span> strcmp(plotfit,<span class="string">'plotfit'</span>)
-0048    plotfit = true;
-0049 <span class="keyword">else</span>
-0050    plotfit = false;
-0051 <span class="keyword">end</span>
-0052 
-0053 <span class="keyword">if</span> ~isempty(qtls)
-0054    u = <span class="string">'m$^3$ d$^{-1}$'</span>;
-0055    fdc = bfra.fdcurve(flow(flow&gt;0),<span class="string">'refpoints'</span>,[Q0 Qexp],<span class="string">'units'</span>,u,<span class="string">'plotcurve'</span>,plotfit);
-0056    pQ0 = fdc.fref(1);
-0057    pQexp = fdc.fref(2);
-0058 <span class="keyword">else</span>
-0059    pQexp = nan;
-0060    pQ0 = nan;
-0061 <span class="keyword">end</span>
+0047 parser = inputParser;
+0048 parser.FunctionName = <span class="string">'bfra.expectedQ'</span>;
+0049 
+0050 parser.addRequired(<span class="string">'a'</span>, @isnumeric);
+0051 parser.addRequired(<span class="string">'b'</span>, @isnumeric);
+0052 parser.addRequired(<span class="string">'tau'</span>, @isnumeric);
+0053 parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0054 parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
+0055 parser.addRequired(<span class="string">'tau0'</span>, @isnumeric);
+0056 parser.addOptional(<span class="string">'qtls'</span>, <span class="string">''</span>, validopt);
+0057 parser.addOptional(<span class="string">'flow'</span>, nan, @isnumeric);
+0058 parser.addOptional(<span class="string">'plotfit'</span>, <span class="string">''</span>, validopt);
+0059 parser.addParameter(<span class="string">'mask'</span>, false, @islogical);
+0060 
+0061 parser.parse(a, b, tau, q, dqdt, tau0, varargin{:});
 0062 
-0063 <span class="comment">% % error propagation:</span>
-0064 <span class="comment">% % need Qexp/Q0 L/H</span>
-0065 <span class="comment">% Qexp     = GlobalFit.Qexp;</span>
-0066 <span class="comment">% sig_tau  = GlobalFit.BootFit.tau_sig;</span>
-0067 <span class="comment">% sig_b    = GlobalFit.BootFit.b_sig;</span>
-0068 <span class="comment">% sigQexp  = abs(Qexp/tauexp/(1-bhat)*sig_tau);</span>
-0069 <span class="comment">%</span>
-0070 <span class="comment">% % double check the Qexp uncertainty</span>
-0071 <span class="comment">% F        = @(X) (X(1)*X(2))^(1/(1-X(3))); % (a*tau)^(1/(1-b));</span>
-0072 <span class="comment">% X        = [ahat tauexp bhat];</span>
-0073 <span class="comment">% sigX     = [0 sig_tau sig_b];</span>
-0074 <span class="comment">% amat     = repmat(GlobalFit.a,numel(GlobalFit.reps.b),1);</span>
-0075 <span class="comment">% bmat     = GlobalFit.reps.b;</span>
-0076 <span class="comment">% taumat   = GlobalFit.reps.tau;</span>
-0077 <span class="comment">% Xmat     = [amat bmat taumat];</span>
-0078 <span class="comment">% corrX    = corr(Xmat);</span>
-0079 <span class="comment">% [sig,val] = propUncertCD(F,X,sigX,corrX);</span>
-0080 <span class="comment">%</span>
+0063 a = parser.Results.a;
+0064 b = parser.Results.b;
+0065 q = parser.Results.q;
+0066 tau = parser.Results.tau;
+0067 dqdt = parser.Results.dqdt;
+0068 tau0 = parser.Results.tau0;
+0069 qtls = parser.Results.qtls;
+0070 flow = parser.Results.flow;
+0071 mask = parser.Results.mask;
+0072 plotfit = parser.Results.plotfit;
+0073 
+0074 <span class="comment">%% error propagation notes</span>
+0075 <span class="comment">%</span>
+0076 <span class="comment">% % need Qexp/Q0 L/H</span>
+0077 <span class="comment">% Qexp     = GlobalFit.Qexp;</span>
+0078 <span class="comment">% sig_tau  = GlobalFit.BootFit.tau_sig;</span>
+0079 <span class="comment">% sig_b    = GlobalFit.BootFit.b_sig;</span>
+0080 <span class="comment">% sigQexp  = abs(Qexp/tauexp/(1-bhat)*sig_tau);</span>
 0081 <span class="comment">%</span>
-0082 <span class="comment">% syms asym tausym bsym</span>
-0083 <span class="comment">% Fsym     = (asym*tausym).^(1/(1-bsym));</span>
-0084 <span class="comment">% Xsym     = [asym tausym bsym];</span>
-0085 <span class="comment">% [sig,val] = propUncertSym(Fsym,Xsym,X,sigX,corrX);</span>
-0086 
-0087 
-0088 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
-0089 <span class="comment">% %  below here various ways of computing Q0/Qexp</span>
-0090 
-0091 <span class="comment">% Note: if ahat is computed using the point cloud and</span>
-0092 <span class="comment">% Qexp = (ahat*tau)^(1/(1-bhat)), then</span>
-0093 <span class="comment">% Q0 = Qexp(3-bhat)/(2-bhat) != ahat*tau0^(1/(1-bhat))</span>
-0094 <span class="comment">% BUT, Q0 isn't used anywhere else in the algorithm</span>
-0095 <span class="comment">%</span>
-0096 <span class="comment">% [Q0 Qexp] % 9.1069e+05   3.6818e+05</span>
-0097 <span class="comment">%</span>
-0098 <span class="comment">% plot([Q0 Q0],ylim,'Color','r')</span>
-0099 <span class="comment">% plot([Qexp Qexp],ylim,'Color','r')</span>
-0100 <span class="comment">%</span>
-0101 <span class="comment">% % given the Q0 just computed, does tau0 = Q0^(1-b2)/a2 = tau0? Nope</span>
-0102 <span class="comment">% % Q0^(1-b2)/a2 % these first two are equal</span>
-0103 <span class="comment">% % Q0^(1-b1)/a1</span>
-0104 <span class="comment">% % Q0^(1-b1)/a2 %</span>
-0105 <span class="comment">% % Q0^(1-b2)/a1</span>
-0106 <span class="comment">% % Q0 = a2*tau0)</span>
+0082 <span class="comment">% % double check the Qexp uncertainty</span>
+0083 <span class="comment">% F        = @(X) (X(1)*X(2))^(1/(1-X(3))); % (a*tau)^(1/(1-b));</span>
+0084 <span class="comment">% X        = [ahat tauexp bhat];</span>
+0085 <span class="comment">% sigX     = [0 sig_tau sig_b];</span>
+0086 <span class="comment">% amat     = repmat(GlobalFit.a,numel(GlobalFit.reps.b),1);</span>
+0087 <span class="comment">% bmat     = GlobalFit.reps.b;</span>
+0088 <span class="comment">% taumat   = GlobalFit.reps.tau;</span>
+0089 <span class="comment">% Xmat     = [amat bmat taumat];</span>
+0090 <span class="comment">% corrX    = corr(Xmat);</span>
+0091 <span class="comment">% [sig,val] = propUncertCD(F,X,sigX,corrX);</span>
+0092 <span class="comment">%</span>
+0093 <span class="comment">%</span>
+0094 <span class="comment">% syms asym tausym bsym</span>
+0095 <span class="comment">% Fsym     = (asym*tausym).^(1/(1-bsym));</span>
+0096 <span class="comment">% Xsym     = [asym tausym bsym];</span>
+0097 <span class="comment">% [sig,val] = propUncertSym(Fsym,Xsym,X,sigX,corrX);</span>
+0098 
+0099 
+0100 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0101 <span class="comment">% %  below here various ways of computing Q0/Qexp</span>
+0102 
+0103 <span class="comment">% Note: if ahat is computed using the point cloud and</span>
+0104 <span class="comment">% Qexp = (ahat*tau)^(1/(1-bhat)), then</span>
+0105 <span class="comment">% Q0 = Qexp(3-bhat)/(2-bhat) != ahat*tau0^(1/(1-bhat))</span>
+0106 <span class="comment">% BUT, Q0 isn't used anywhere else in the algorithm</span>
 0107 <span class="comment">%</span>
-0108 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a1 and b=b1</span>
-0109 <span class="comment">% % where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:</span>
-0110 <span class="comment">% b1    = 3;</span>
-0111 <span class="comment">% b2    = b;</span>
-0112 <span class="comment">% a1    = bfra.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);</span>
-0113 <span class="comment">% Q0    = (a1*tau0)^(1/(1-b1));</span>
-0114 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2); % could it be: Q0*(b1-2)/(3-b2);</span>
-0115 <span class="comment">%</span>
-0116 <span class="comment">% [Q0 Qexp] % 1.3211e+07    5.341e+06</span>
-0117 <span class="comment">% plot([Q0 Q0],ylim,'Color','b')</span>
-0118 <span class="comment">% plot([Qexp Qexp],ylim,'Color','b')</span>
+0108 <span class="comment">% [Q0 Qexp] % 9.1069e+05   3.6818e+05</span>
+0109 <span class="comment">%</span>
+0110 <span class="comment">% plot([Q0 Q0],ylim,'Color','r')</span>
+0111 <span class="comment">% plot([Qexp Qexp],ylim,'Color','r')</span>
+0112 <span class="comment">%</span>
+0113 <span class="comment">% % given the Q0 just computed, does tau0 = Q0^(1-b2)/a2 = tau0? Nope</span>
+0114 <span class="comment">% % Q0^(1-b2)/a2 % these first two are equal</span>
+0115 <span class="comment">% % Q0^(1-b1)/a1</span>
+0116 <span class="comment">% % Q0^(1-b1)/a2 %</span>
+0117 <span class="comment">% % Q0^(1-b2)/a1</span>
+0118 <span class="comment">% % Q0 = a2*tau0)</span>
 0119 <span class="comment">%</span>
-0120 <span class="comment">% % if we equate the early-time and late-time fits to get Q0</span>
-0121 <span class="comment">% b1 = 3;</span>
-0122 <span class="comment">% b2 = b;</span>
-0123 <span class="comment">% a1 = bfra.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);</span>
-0124 <span class="comment">% a2 = bfra.pointcloudintercept(q,dqdt,b2,'envelope','refqtls',[0.5 0.5],'mask',mask);</span>
-0125 <span class="comment">% Q0    = (a1/a2)^(1/(b2-b1));</span>
-0126 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2);</span>
+0120 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a1 and b=b1</span>
+0121 <span class="comment">% % where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:</span>
+0122 <span class="comment">% b1    = 3;</span>
+0123 <span class="comment">% b2    = b;</span>
+0124 <span class="comment">% a1    = bfra.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);</span>
+0125 <span class="comment">% Q0    = (a1*tau0)^(1/(1-b1));</span>
+0126 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2); % could it be: Q0*(b1-2)/(3-b2);</span>
 0127 <span class="comment">%</span>
 0128 <span class="comment">% [Q0 Qexp] % 1.3211e+07    5.341e+06</span>
-0129 <span class="comment">% plot([Q0 Q0],ylim,'Color','g')</span>
-0130 <span class="comment">% plot([Qexp Qexp],ylim,'Color','g')</span>
+0129 <span class="comment">% plot([Q0 Q0],ylim,'Color','b')</span>
+0130 <span class="comment">% plot([Qexp Qexp],ylim,'Color','b')</span>
 0131 <span class="comment">%</span>
-0132 <span class="comment">% % NOTE: this is the way I did it originally but this is the case where it can be</span>
-0133 <span class="comment">% % shown to only be true for b=3 therefore the version above is correct.</span>
-0134 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a2 and b=b2</span>
-0135 <span class="comment">% % where a2 and b2 are the late-time fits, then tau0 = Q0^(1-b2)/a2:</span>
-0136 <span class="comment">% Q0    = (a2*tau0)^(1/(1-b2));</span>
-0137 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2);</span>
-0138 <span class="comment">%</span>
-0139 <span class="comment">% [Q0 Qexp] % 2.7105e+06   1.0958e+06</span>
-0140 <span class="comment">% plot([Q0 Q0],ylim,'Color','k')</span>
-0141 <span class="comment">% plot([Qexp Qexp],ylim,'Color','k')</span>
-0142 <span class="comment">%</span>
-0143 <span class="comment">% % need to find where I documented the issue with the original method, but</span>
-0144 <span class="comment">% % working through it again, if you equate</span>
-0145 <span class="comment">% % (1) Q0    = (ahat*tau0)^(1/(1-bhat))</span>
-0146 <span class="comment">% % (2) Qexp  = (ahat*tau)^(1/(1-bhat))</span>
-0147 <span class="comment">% % (3) Qexp  = Q0*(2-bhat)/(3-bhat)</span>
-0148 <span class="comment">% % plug rhs of (1) into Q0 on rhs of (3) and equate that to (2)</span>
-0149 <span class="comment">% % (4) (ahat*tau0)^(1/(1-bhat))*(2-bhat)/(3-bhat) = (ahat*tau)^(1/(1-bhat))</span>
-0150 <span class="comment">% % (5) (tau0/tau)^(1/(1-bhat)) = (3-bhat)/(2-bhat)</span>
-0151 <span class="comment">% % (6) (tau0/tau) = (3-bhat)/(2-bhat)^(1-bhat)</span>
-0152 <span class="comment">% % (7) tau0 = tau*(3-bhat)/(2-bhat)^(1-bhat)</span>
-0153 <span class="comment">%</span>
-0154 <span class="comment">% % (6) implies that tau0/tau should equal ((3-b)/(2-b))^(1-b) = 0.748 ... very</span>
-0155 <span class="comment">% % close to the ratio I found examining the troch solutions whcih i interpret as</span>
-0156 <span class="comment">% % a discontinuity at b-3. It also implies we can get tau0 this way:</span>
-0157 <span class="comment">% % tau0 = tau*((3-b)/(2-b))^(1-b)</span>
-0158 <span class="comment">% % but that doesn't match tau0 from the pareto fit, so</span>
-0159 <span class="comment">%</span>
-0160 <span class="comment">% % BUT ... tau = tau0*(2-b)/(3-2*b) is correct</span>
-0161 <span class="comment">%</span>
-0162 <span class="comment">% % how about this one ...</span>
-0163 <span class="comment">% % Q0 = Qexp*((3-2*b)/(2-b))^(1/(1-b))</span>
-0164 <span class="comment">%</span>
-0165 <span class="comment">% % which implies:</span>
-0166 <span class="comment">% % Q0/Qexp = ((3-2*b1)/(2-b1))^(1/(1-b1)) = 7.36 ...</span>
-0167 <span class="comment">% % Qexp/Q0 = ((2-b)/(3-2*b))^(1/(1-b)) = 0.136 ... and 1-0.136 = 0.864 which is</span>
-0168 <span class="comment">% % in the numerator of the late time q outflow equation 8 of troch 1993</span>
-0169 <span class="comment">%</span>
-0170 <span class="comment">% % so 1 - Qexp/Q0 = 1 - ((2-b)/(3-2*b))^(1/(1-b)) = 0.864 ...</span>
+0132 <span class="comment">% % if we equate the early-time and late-time fits to get Q0</span>
+0133 <span class="comment">% b1 = 3;</span>
+0134 <span class="comment">% b2 = b;</span>
+0135 <span class="comment">% a1 = bfra.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);</span>
+0136 <span class="comment">% a2 = bfra.pointcloudintercept(q,dqdt,b2,'envelope','refqtls',[0.5 0.5],'mask',mask);</span>
+0137 <span class="comment">% Q0    = (a1/a2)^(1/(b2-b1));</span>
+0138 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2);</span>
+0139 <span class="comment">%</span>
+0140 <span class="comment">% [Q0 Qexp] % 1.3211e+07    5.341e+06</span>
+0141 <span class="comment">% plot([Q0 Q0],ylim,'Color','g')</span>
+0142 <span class="comment">% plot([Qexp Qexp],ylim,'Color','g')</span>
+0143 <span class="comment">%</span>
+0144 <span class="comment">% % NOTE: this is the way I did it originally but this is the case where it can be</span>
+0145 <span class="comment">% % shown to only be true for b=3 therefore the version above is correct.</span>
+0146 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a2 and b=b2</span>
+0147 <span class="comment">% % where a2 and b2 are the late-time fits, then tau0 = Q0^(1-b2)/a2:</span>
+0148 <span class="comment">% Q0    = (a2*tau0)^(1/(1-b2));</span>
+0149 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2);</span>
+0150 <span class="comment">%</span>
+0151 <span class="comment">% [Q0 Qexp] % 2.7105e+06   1.0958e+06</span>
+0152 <span class="comment">% plot([Q0 Q0],ylim,'Color','k')</span>
+0153 <span class="comment">% plot([Qexp Qexp],ylim,'Color','k')</span>
+0154 <span class="comment">%</span>
+0155 <span class="comment">% % need to find where I documented the issue with the original method, but</span>
+0156 <span class="comment">% % working through it again, if you equate</span>
+0157 <span class="comment">% % (1) Q0    = (ahat*tau0)^(1/(1-bhat))</span>
+0158 <span class="comment">% % (2) Qexp  = (ahat*tau)^(1/(1-bhat))</span>
+0159 <span class="comment">% % (3) Qexp  = Q0*(2-bhat)/(3-bhat)</span>
+0160 <span class="comment">% % plug rhs of (1) into Q0 on rhs of (3) and equate that to (2)</span>
+0161 <span class="comment">% % (4) (ahat*tau0)^(1/(1-bhat))*(2-bhat)/(3-bhat) = (ahat*tau)^(1/(1-bhat))</span>
+0162 <span class="comment">% % (5) (tau0/tau)^(1/(1-bhat)) = (3-bhat)/(2-bhat)</span>
+0163 <span class="comment">% % (6) (tau0/tau) = (3-bhat)/(2-bhat)^(1-bhat)</span>
+0164 <span class="comment">% % (7) tau0 = tau*(3-bhat)/(2-bhat)^(1-bhat)</span>
+0165 <span class="comment">%</span>
+0166 <span class="comment">% % (6) implies that tau0/tau should equal ((3-b)/(2-b))^(1-b) = 0.748 ... very</span>
+0167 <span class="comment">% % close to the ratio I found examining the troch solutions whcih i interpret as</span>
+0168 <span class="comment">% % a discontinuity at b-3. It also implies we can get tau0 this way:</span>
+0169 <span class="comment">% % tau0 = tau*((3-b)/(2-b))^(1-b)</span>
+0170 <span class="comment">% % but that doesn't match tau0 from the pareto fit, so</span>
 0171 <span class="comment">%</span>
-0172 <span class="comment">%</span>
-0173 <span class="comment">%</span></pre></div>
+0172 <span class="comment">% % BUT ... tau = tau0*(2-b)/(3-2*b) is correct</span>
+0173 <span class="comment">%</span>
+0174 <span class="comment">% % how about this one ...</span>
+0175 <span class="comment">% % Q0 = Qexp*((3-2*b)/(2-b))^(1/(1-b))</span>
+0176 <span class="comment">%</span>
+0177 <span class="comment">% % which implies:</span>
+0178 <span class="comment">% % Q0/Qexp = ((3-2*b1)/(2-b1))^(1/(1-b1)) = 7.36 ...</span>
+0179 <span class="comment">% % Qexp/Q0 = ((2-b)/(3-2*b))^(1/(1-b)) = 0.136 ... and 1-0.136 = 0.864 which is</span>
+0180 <span class="comment">% % in the numerator of the late time q outflow equation 8 of troch 1993</span>
+0181 <span class="comment">%</span>
+0182 <span class="comment">% % so 1 - Qexp/Q0 = 1 - ((2-b)/(3-2*b))^(1/(1-b)) = 0.864 ...</span>
+0183 <span class="comment">%</span>
+0184 <span class="comment">%</span>
+0185 <span class="comment">%</span></pre></div>
 </body>
 </html>

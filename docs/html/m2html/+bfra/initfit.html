@@ -33,7 +33,7 @@
  
      [N,q,dqdt,dq,dt,tq,rq,r2] = initfit(q,fittype)
  
- See also <a href="prepfits.html" class="code" title="function [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)">prepfits</a>
+ See also <a href="prepfits.html" class="code" title="function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)">prepfits</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -82,11 +82,12 @@ This function is called by:
 0023       dt    = nan(N,1);
 0024       rq    = nan(N,1);
 0025       r2    = nan(N,1);
-0026       tq    = NaT(N,1);
-0027 <span class="comment">%       tq    = NaT(N,1,'Format','dd-MMM-uuuu HH:mm:ss');</span>
-0028       
-0029    <span class="keyword">case</span> <span class="string">'eventab'</span>
-0030       
-0031 <span class="keyword">end</span></pre></div>
+0026       tq    = nan(N,1);
+0027 <span class="comment">%       tq    = NaT(N,1);</span>
+0028 <span class="comment">%       tq    = NaT(N,1,'Format','dd-MMM-uuuu HH:mm:ss');</span>
+0029       
+0030    <span class="keyword">case</span> <span class="string">'eventab'</span>
+0031       
+0032 <span class="keyword">end</span></pre></div>
 </body>
 </html>

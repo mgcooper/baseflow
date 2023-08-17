@@ -84,7 +84,10 @@ This function is called by:
 <!-- crossreference -->
 
 
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
+<li><a href="#_sub1" class="code">function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask,</a></li></ul>
 
 
 
@@ -135,79 +138,122 @@ This function is called by:
 0044 <span class="comment">% if called with no input, open this file</span>
 0045 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0046 
-0047 <span class="comment">%-------------------------------------------------------------------------------</span>
-0048 p                 = inputParser;
-0049 p.StructExpand    = false;
-0050 p.PartialMatching = true;
-0051 p.FunctionName    = <span class="string">'bfra.cloudphi'</span>;
-0052 
-0053 addRequired(p, <span class="string">'q'</span>,                       @(x)isnumeric(x)  );
-0054 addRequired(p, <span class="string">'dqdt'</span>,                    @(x)isnumeric(x)  );
-0055 addRequired(p, <span class="string">'blate'</span>,                   @(x)isnumeric(x)  );
-0056 addRequired(p, <span class="string">'A'</span>,                       @(x)isnumeric(x)  );
-0057 addRequired(p, <span class="string">'D'</span>,                       @(x)isnumeric(x)  );
-0058 addRequired(p, <span class="string">'L'</span>,                       @(x)isnumeric(x)  );
-0059 addRequired(p, <span class="string">'method'</span>,                  @(x)ischar(x)     );
-0060 addParameter(p,<span class="string">'earlyqtls'</span>,[0.95 0.95],   @(x)isnumeric(x)  );
-0061 addParameter(p,<span class="string">'lateqtls'</span>, [0.5 0.5],     @(x)isnumeric(x)  );
-0062 addParameter(p,<span class="string">'userab'</span>,   nan,           @(x)isnumeric(x)  );
-0063 addParameter(p,<span class="string">'mask'</span>,     true(size(q)), @(x)islogical(x)  );
-0064 addParameter(p,<span class="string">'theta'</span>,    0,             @(x)isnumeric(x)  );
-0065 addParameter(p,<span class="string">'isflat'</span>,   true,          @(x)islogical(x)  );
-0066 addParameter(p,<span class="string">'soln1'</span>,    <span class="string">'RS05'</span>,        @(x)ischar(x)     );
-0067 addParameter(p,<span class="string">'soln2'</span>,    <span class="string">'RS05'</span>,        @(x)ischar(x)     );
-0068 addParameter(p,<span class="string">'dispfit'</span>,  false,         @(x)islogical(x)  );
+0047 <span class="comment">% parse inputs</span>
+0048 [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, <span class="keyword">...</span>
+0049    theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, <span class="keyword">...</span>
+0050    A, D, L, method, varargin{:});
+0051 
+0052 <span class="comment">% note: the method used for ahat = pointcloudintercept should also be used here</span>
+0053 
+0054 <span class="comment">% the easiest way to get a1/a2 is pointcloudintercept. bfra.fitab could also be</span>
+0055 <span class="comment">% used but this function is intended to fit phi once b is known (or prescribed)</span>
+0056 
+0057 <span class="comment">% a1 = early-time a</span>
+0058 <span class="comment">% b1 = 3 (not involved)</span>
+0059 <span class="comment">% a2 = late-time a</span>
+0060 <span class="comment">% b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)</span>
+0061 
+0062 <span class="keyword">if</span> isnan(userab)
+0063    b2 = blate; 
+0064    a1 = bfra.pointcloudintercept(q,dqdt,3,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
+0065    a2 = bfra.pointcloudintercept(q,dqdt,b2,method,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
+0066 <span class="keyword">else</span>
+0067    
+0068 <span class="keyword">end</span>
 0069 
-0070 parse(p,q,dqdt,blate,A,D,L,method,varargin{:});
-0071 
-0072 earlyqtls   = p.Results.earlyqtls;
-0073 lateqtls    = p.Results.lateqtls;
-0074 userab      = p.Results.userab;
-0075 mask        = p.Results.mask;
-0076 theta       = p.Results.theta;
-0077 isflat      = p.Results.isflat;
-0078 soln1       = p.Results.soln1;
-0079 soln2       = p.Results.soln2;
-0080 dispfit     = p.Results.dispfit;
-0081 
-0082 <span class="comment">%-------------------------------------------------------------------------------</span>
-0083 
-0084 <span class="comment">% note: the method used for ahat = pointcloudintercept should also be used here</span>
-0085 
-0086 <span class="comment">% the easiest way to get a1/a2 is pointcloudintercept. bfra.fitab could also be</span>
-0087 <span class="comment">% used but this function is intended to fit phi once b is known (or prescribed)</span>
-0088 
-0089 <span class="comment">% a1 = early-time a</span>
-0090 <span class="comment">% b1 = 3 (not involved)</span>
-0091 <span class="comment">% a2 = late-time a</span>
-0092 <span class="comment">% b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)</span>
-0093 
-0094 <span class="keyword">if</span> isnan(userab)
-0095    b2 = blate; 
-0096    a1 = bfra.pointcloudintercept(q,dqdt,3,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
-0097    a2 = bfra.pointcloudintercept(q,dqdt,b2,method,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
-0098 <span class="keyword">else</span>
-0099    
-0100 <span class="keyword">end</span>
+0070 <span class="keyword">switch</span> b2
+0071    <span class="keyword">case</span> 1
+0072       phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
+0073                <span class="string">'soln2'</span>,<span class="string">'BS03'</span>,<span class="string">'dispfit'</span>,dispfit);
+0074    <span class="keyword">case</span> 3/2
+0075       phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
+0076                <span class="string">'soln2'</span>,<span class="string">'BS04'</span>,<span class="string">'dispfit'</span>,dispfit);
+0077    <span class="keyword">otherwise</span>
+0078       phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'RS05'</span>,  <span class="keyword">...</span>
+0079                <span class="string">'soln2'</span>,<span class="string">'RS05'</span>,<span class="string">'dispfit'</span>,dispfit);
+0080 <span class="keyword">end</span>
+0081 a = a2;
+0082 
+0083 <span class="comment">% make a dummy handle for the legend and print the value of phi</span>
+0084 bfra.pointcloudplot(q,dqdt,<span class="string">'blate'</span>,blate,<span class="string">'mask'</span>,mask,<span class="string">'reflines'</span>, <span class="keyword">...</span>
+0085    {<span class="string">'early'</span>,<span class="string">'userfit'</span>},<span class="string">'userab'</span>,[a2 blate],<span class="string">'reflabels'</span>,true);
+0086 hdum = plot(0,0,<span class="string">'Color'</span>,<span class="string">'none'</span>,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
+0087 
+0088 <span class="keyword">if</span> bfra.util.isoctave
+0089    txt = sprintf(<span class="string">'phi = %.2f'</span>,phi);
+0090    legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>,<span class="string">'box'</span>,<span class="string">'off'</span>);
+0091 <span class="keyword">else</span>
+0092    txt = sprintf(<span class="string">'$\\phi_{b=%.2f}=%.3f$'</span>,b2,phi);
+0093    legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>,<span class="string">'box'</span>,<span class="string">'off'</span>);
+0094 <span class="keyword">end</span>
+0095 
+0096 <span class="comment">%% input parser</span>
+0097 
+0098 <a name="_sub1" href="#_subfunctions" class="code">function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, </a><span class="keyword">...</span>
+0099    theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, <span class="keyword">...</span>
+0100    A, D, L, method, varargin)
 0101 
-0102 <span class="keyword">switch</span> b2
-0103    <span class="keyword">case</span> 1
-0104       phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
-0105                <span class="string">'soln2'</span>,<span class="string">'BS03'</span>,<span class="string">'dispfit'</span>,dispfit);
-0106    <span class="keyword">case</span> 3/2
-0107       phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
-0108                <span class="string">'soln2'</span>,<span class="string">'BS04'</span>,<span class="string">'dispfit'</span>,dispfit);
-0109    <span class="keyword">otherwise</span>
-0110       phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'RS05'</span>,  <span class="keyword">...</span>
-0111                <span class="string">'soln2'</span>,<span class="string">'RS05'</span>,<span class="string">'dispfit'</span>,dispfit);
-0112 <span class="keyword">end</span>
-0113 a = a2;
-0114 
-0115 <span class="comment">% make a dummy handle for the legend and print the value of phi</span>
-0116 bfra.pointcloudplot(q,dqdt,<span class="string">'blate'</span>,blate,<span class="string">'mask'</span>,mask,<span class="string">'reflines'</span>, <span class="keyword">...</span>
-0117    {<span class="string">'early'</span>,<span class="string">'userfit'</span>},<span class="string">'userab'</span>,[a2 blate],<span class="string">'reflabels'</span>,true);
-0118 hdum = plot(0,0,<span class="string">'Color'</span>,<span class="string">'none'</span>,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
-0119 txt = sprintf(<span class="string">'$\\phi_{b=%.2f}=%.3f$'</span>,b2,phi);
-0120 legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Location'</span>,<span class="string">'nw'</span>,<span class="string">'box'</span>,<span class="string">'off'</span>);</pre></div>
+0102 parser = inputParser;
+0103 parser.StructExpand = false;
+0104 parser.FunctionName = <span class="string">'bfra.cloudphi'</span>;
+0105 
+0106 addRequired(parser, <span class="string">'q'</span>, @isnumeric);
+0107 addRequired(parser, <span class="string">'dqdt'</span>, @isnumeric);
+0108 addRequired(parser, <span class="string">'blate'</span>, @isnumeric);
+0109 addRequired(parser, <span class="string">'A'</span>, @isnumeric);
+0110 addRequired(parser, <span class="string">'D'</span>, @isnumeric);
+0111 addRequired(parser, <span class="string">'L'</span>, @isnumeric);
+0112 addRequired(parser, <span class="string">'method'</span>, @ischar);
+0113 addParameter(parser,<span class="string">'earlyqtls'</span>,[0.95 0.95], @isnumeric);
+0114 addParameter(parser,<span class="string">'lateqtls'</span>, [0.5 0.5], @isnumeric);
+0115 addParameter(parser,<span class="string">'userab'</span>, nan, @isnumeric);
+0116 addParameter(parser,<span class="string">'mask'</span>, true(size(q)), @islogical);
+0117 addParameter(parser,<span class="string">'theta'</span>, 0, @isnumeric);
+0118 addParameter(parser,<span class="string">'isflat'</span>, true,  @islogical);
+0119 addParameter(parser,<span class="string">'soln1'</span>, <span class="string">'RS05'</span>, @ischar);
+0120 addParameter(parser,<span class="string">'soln2'</span>, <span class="string">'RS05'</span>, @ischar);
+0121 addParameter(parser,<span class="string">'dispfit'</span>, false, @islogical);
+0122 
+0123 parse(parser,q,dqdt,blate,A,D,L,method,varargin{:});
+0124 
+0125 earlyqtls   = parser.Results.earlyqtls;
+0126 lateqtls    = parser.Results.lateqtls;
+0127 userab      = parser.Results.userab;
+0128 mask        = parser.Results.mask;
+0129 theta       = parser.Results.theta;
+0130 isflat      = parser.Results.isflat;
+0131 soln1       = parser.Results.soln1;
+0132 soln2       = parser.Results.soln2;
+0133 dispfit     = parser.Results.dispfit;
+0134 
+0135 <span class="comment">%%</span>
+0136 <span class="comment">% found this in an older test version, need to integrate or delete</span>
+0137 <span class="comment">%</span>
+0138 <span class="comment">% if isflat</span>
+0139 <span class="comment">%    switch blate</span>
+0140 <span class="comment">%       case 1</span>
+0141 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
+0142 <span class="comment">%             'soln2','BS03','dispfit',dispfit);</span>
+0143 <span class="comment">%       case 3/2</span>
+0144 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
+0145 <span class="comment">%             'soln2','BS04','dispfit',dispfit);</span>
+0146 <span class="comment">%       otherwise</span>
+0147 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...</span>
+0148 <span class="comment">%             'soln2','RS05','dispfit',dispfit);</span>
+0149 <span class="comment">%    end</span>
+0150 <span class="comment">% else</span>
+0151 <span class="comment">%    switch blate</span>
+0152 <span class="comment">%       case 1</span>
+0153 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
+0154 <span class="comment">%             'soln2','BR94','dispfit',dispfit,'theta',theta);</span>
+0155 <span class="comment">%       case 3/2</span>
+0156 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
+0157 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
+0158 <span class="comment">%       otherwise</span>
+0159 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...</span>
+0160 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
+0161 <span class="comment">%    end</span>
+0162 <span class="comment">% end</span>
+0163 <span class="comment">% a = a2;</span></pre></div>
 </body>
 </html>

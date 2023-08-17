@@ -181,68 +181,70 @@ This function is called by:
 0068 
 0069 <span class="comment">%% set default bfra settings</span>
 0070 
-0071 p                 = inputParser;
-0072 p.FunctionName    = <span class="string">'bfra.setopts'</span>;
-0073 
-0074 p.addRequired(<span class="string">'funcname'</span>,@(x)ischar(x));
-0075 parse(p,funcname);
-0076 
-0077 <span class="keyword">switch</span> funcname
+0071 import bfra.validation.*
+0072 
+0073 p = inputParser;
+0074 p.FunctionName = <span class="string">'bfra.setopts'</span>;
+0075 
+0076 p.addRequired(<span class="string">'funcname'</span>, @ischar);
+0077 parse(p,funcname);
 0078 
-0079    <span class="comment">% event detection - input options for getevents</span>
-0080    <span class="keyword">case</span> <span class="string">'getevents'</span>
-0081 
-0082       addParameter(p,   <span class="string">'qmin'</span>,        1,          @(x) bfra.validation.isnumericscalar(x)  );
-0083       addParameter(p,   <span class="string">'nmin'</span>,        4,          @(x) bfra.validation.isnumericscalar(x)  );
-0084       addParameter(p,   <span class="string">'fmax'</span>,        1,          @(x) bfra.validation.isnumericscalar(x)  );
-0085       addParameter(p,   <span class="string">'rmax'</span>,        2,          @(x) bfra.validation.isnumericscalar(x)  );
-0086       addParameter(p,   <span class="string">'rmin'</span>,        1,          @(x) bfra.validation.isnumericscalar(x)  );
-0087       addParameter(p,   <span class="string">'cmax'</span>,        2,          @(x) bfra.validation.isnumericscalar(x)  );
-0088       addParameter(p,   <span class="string">'rmconvex'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)  );
-0089       addParameter(p,   <span class="string">'rmnochange'</span>,  true,       @(x) bfra.validation.islogicalscalar(x)  );
-0090       addParameter(p,   <span class="string">'rmrain'</span>,      true,       @(x) bfra.validation.islogicalscalar(x)  );
-0091       addParameter(p,   <span class="string">'pickevents'</span>,  false,      @(x) bfra.validation.islogicalscalar(x)  );
-0092       addParameter(p,   <span class="string">'plotevents'</span>,  false,      @(x) bfra.validation.islogicalscalar(x)  );
-0093       addParameter(p,   <span class="string">'asannual'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)  );
-0094 
-0095    <span class="comment">% event fits - input options for fitevents</span>
-0096    <span class="keyword">case</span> <span class="string">'fitevents'</span>
-0097 
-0098       addParameter(p,   <span class="string">'derivmethod'</span>, <span class="string">'ETS'</span>,      @(x) ischar(x)             );
-0099       addParameter(p,   <span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,      @(x) ischar(x)             );
-0100       addParameter(p,   <span class="string">'fitorder'</span>,    <span class="string">'free'</span>,     @(x) ischar(x)|isnumeric(x));
-0101       addParameter(p,   <span class="string">'pickfits'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)    );
-0102       addParameter(p,   <span class="string">'pickmethod'</span>,  <span class="string">'none'</span>,     @(x) ischar(x)             );
-0103       addParameter(p,   <span class="string">'plotfits'</span>,    false,      @(x) bfra.validation.islogicalscalar(x)    );
-0104       addParameter(p,   <span class="string">'saveplots'</span>,   false,      @(x) bfra.validation.islogicalscalar(x)    );
-0105       addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @(x) bfra.validation.isnumericscalar(x)    );
-0106       addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @(x) bfra.validation.isnumericscalar(x)    );
-0107       
-0108    <span class="comment">% global fit - input to bfra.globalfit</span>
-0109    <span class="keyword">case</span> <span class="string">'globalfit'</span>
-0110 
-0111       addParameter(p,   <span class="string">'drainagearea'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x)  );
-0112       addParameter(p,   <span class="string">'drainagedens'</span>,   0.8,           @(x)bfra.validation.isnumericscalar(x)  );
-0113       addParameter(p,   <span class="string">'aquiferdepth'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x)  );
-0114       addParameter(p,   <span class="string">'streamlength'</span>,   nan,           @(x)bfra.validation.isnumericscalar(x)  );
-0115       addParameter(p,   <span class="string">'aquiferslope'</span>,   0.0,           @(x)bfra.validation.isnumericscalar(x)  );
-0116       addParameter(p,   <span class="string">'aquiferbreadth'</span>, nan,           @(x)bfra.validation.isnumericscalar(x)  );
-0117       addParameter(p,   <span class="string">'drainableporos'</span>, 0.1,           @(x)bfra.validation.isnumericscalar(x)  );
-0118       addParameter(p,   <span class="string">'isflat'</span>,         true,          @(x)bfra.validation.islogicalscalar(x)  );
-0119       addParameter(p,   <span class="string">'plotfits'</span>,       false,         @(x)bfra.validation.islogicalscalar(x)  );
-0120       addParameter(p,   <span class="string">'bootfit'</span>,        false,         @(x)bfra.validation.islogicalscalar(x)  );
-0121       addParameter(p,   <span class="string">'nreps'</span>,          1000,          @(x)bfra.validation.isdoublescalar(x)   );
-0122       addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @(x)ischar(x)           );
-0123       addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @(x)bfra.validation.isnumericvector(x)  );
-0124       addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @(x)bfra.validation.isnumericvector(x)  );
-0125       addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @(x)bfra.validation.isnumericvector(x)  );
-0126 
-0127 <span class="keyword">end</span>
+0079 <span class="keyword">switch</span> funcname
+0080 
+0081    <span class="comment">% event detection - input options for getevents</span>
+0082    <span class="keyword">case</span> <span class="string">'getevents'</span>
+0083 
+0084       addParameter(p,   <span class="string">'qmin'</span>,        1,          @isnumericscalar );
+0085       addParameter(p,   <span class="string">'nmin'</span>,        4,          @isnumericscalar );
+0086       addParameter(p,   <span class="string">'fmax'</span>,        1,          @isnumericscalar );
+0087       addParameter(p,   <span class="string">'rmax'</span>,        2,          @isnumericscalar );
+0088       addParameter(p,   <span class="string">'rmin'</span>,        1,          @isnumericscalar );
+0089       addParameter(p,   <span class="string">'cmax'</span>,        2,          @isnumericscalar );
+0090       addParameter(p,   <span class="string">'rmconvex'</span>,    false,      @islogicalscalar );
+0091       addParameter(p,   <span class="string">'rmnochange'</span>,  true,       @islogicalscalar );
+0092       addParameter(p,   <span class="string">'rmrain'</span>,      true,       @islogicalscalar );
+0093       addParameter(p,   <span class="string">'pickevents'</span>,  false,      @islogicalscalar );
+0094       addParameter(p,   <span class="string">'plotevents'</span>,  false,      @islogicalscalar );
+0095       addParameter(p,   <span class="string">'asannual'</span>,    false,      @islogicalscalar );
+0096 
+0097    <span class="comment">% event fits - input options for fitevents</span>
+0098    <span class="keyword">case</span> <span class="string">'fitevents'</span>
+0099 
+0100       addParameter(p,   <span class="string">'derivmethod'</span>, <span class="string">'ETS'</span>,      @ischar           );
+0101       addParameter(p,   <span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,      @ischar           );
+0102       addParameter(p,   <span class="string">'fitorder'</span>,    nan,        @isnumericscalar  );
+0103       addParameter(p,   <span class="string">'pickfits'</span>,    false,      @islogicalscalar  );
+0104       addParameter(p,   <span class="string">'pickmethod'</span>,  <span class="string">'none'</span>,     @ischar           );
+0105       addParameter(p,   <span class="string">'plotfits'</span>,    false,      @islogicalscalar  );
+0106       addParameter(p,   <span class="string">'saveplots'</span>,   false,      @islogicalscalar  );
+0107       addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @isnumericscalar  );
+0108       addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @isnumericscalar  );
+0109       
+0110    <span class="comment">% global fit - input to bfra.globalfit</span>
+0111    <span class="keyword">case</span> <span class="string">'globalfit'</span>
+0112 
+0113       addParameter(p,   <span class="string">'drainagearea'</span>,   nan,           @isnumericscalar );
+0114       addParameter(p,   <span class="string">'drainagedens'</span>,   0.8,           @isnumericscalar );
+0115       addParameter(p,   <span class="string">'aquiferdepth'</span>,   nan,           @isnumericscalar );
+0116       addParameter(p,   <span class="string">'streamlength'</span>,   nan,           @isnumericscalar );
+0117       addParameter(p,   <span class="string">'aquiferslope'</span>,   0.0,           @isnumericscalar );
+0118       addParameter(p,   <span class="string">'aquiferbreadth'</span>, nan,           @isnumericscalar );
+0119       addParameter(p,   <span class="string">'drainableporos'</span>, 0.1,           @isnumericscalar );
+0120       addParameter(p,   <span class="string">'isflat'</span>,         true,          @islogicalscalar );
+0121       addParameter(p,   <span class="string">'plotfits'</span>,       false,         @islogicalscalar );
+0122       addParameter(p,   <span class="string">'bootfit'</span>,        false,         @islogicalscalar );
+0123       addParameter(p,   <span class="string">'nreps'</span>,          1000,          @isnumericscalar );
+0124       addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @ischar           );
+0125       addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @isnumericvector );
+0126       addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @isnumericvector );
+0127       addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @isnumericvector );
 0128 
-0129 parse(p,funcname,varargin{:});
+0129 <span class="keyword">end</span>
 0130 
-0131 opts = p.Results;
-0132 opts = rmfield(opts,<span class="string">'funcname'</span>);
-0133</pre></div>
+0131 parse(p,funcname,varargin{:});
+0132 
+0133 opts = p.Results;
+0134 opts = rmfield(opts,<span class="string">'funcname'</span>);
+0135</pre></div>
 </body>
 </html>

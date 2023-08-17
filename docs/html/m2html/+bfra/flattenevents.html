@@ -99,32 +99,33 @@ This function is called by:
 0029 nData    = Info.datalength;
 0030 q        = nan(nData,1);
 0031 r        = nan(nData,1);
-0032 t        = NaT(nData,1,<span class="string">'Format'</span>,<span class="string">'dd-MMM-uuuu HH:mm:ss'</span>);
-0033 tags     = nan(nData,1);
-0034 
-0035 eventCount = 0;                      <span class="comment">% initialize event counter</span>
-0036 
-0037 <span class="keyword">for</span> thisEvent = 1:nEvents
-0038 
-0039    eventQ = Q{thisEvent};
-0040    eventT = T{thisEvent};
-0041    eventR = R{thisEvent};
-0042 
-0043    <span class="comment">% if no flow was returned, continue</span>
-0044    <span class="keyword">if</span> all(isnan(eventQ)); <span class="keyword">continue</span>; <span class="keyword">else</span>
-0045       eventCount = eventCount+1;
-0046    <span class="keyword">end</span>
-0047 
-0048    <span class="comment">% get the start/end index on the year calendar</span>
-0049    si = Info.istart(thisEvent);
-0050    ei = Info.istop(thisEvent);
-0051 
-0052    <span class="comment">% collect all data for the point-cloud</span>
-0053    q(si:ei) = eventQ;
-0054    r(si:ei) = eventR;
-0055    t(si:ei) = eventT;   <span class="comment">% datenum(eventT);</span>
-0056    tags(si:ei) = eventCount; 
-0057 <span class="keyword">end</span>
-0058</pre></div>
+0032 <span class="comment">% t        = NaT(nData,1,'Format','dd-MMM-uuuu HH:mm:ss');</span>
+0033 t        = nan(nData,1);
+0034 tags     = nan(nData,1);
+0035 
+0036 eventCount = 0;                      <span class="comment">% initialize event counter</span>
+0037 
+0038 <span class="keyword">for</span> thisEvent = 1:nEvents
+0039 
+0040    eventQ = Q{thisEvent};
+0041    eventT = T{thisEvent};
+0042    eventR = R{thisEvent};
+0043 
+0044    <span class="comment">% if no flow was returned, continue</span>
+0045    <span class="keyword">if</span> all(isnan(eventQ)); <span class="keyword">continue</span>; <span class="keyword">else</span>
+0046       eventCount = eventCount+1;
+0047    <span class="keyword">end</span>
+0048 
+0049    <span class="comment">% get the start/end index on the year calendar</span>
+0050    si = Info.istart(thisEvent);
+0051    ei = Info.istop(thisEvent);
+0052 
+0053    <span class="comment">% collect all data for the point-cloud</span>
+0054    q(si:ei) = eventQ;
+0055    r(si:ei) = eventR;
+0056    t(si:ei) = eventT;   <span class="comment">% datenum(eventT);</span>
+0057    tags(si:ei) = eventCount; 
+0058 <span class="keyword">end</span>
+0059</pre></div>
 </body>
 </html>

@@ -2,11 +2,11 @@
 digraph m2html {
   basinlist -> basinlist;
   checkevent -> prepfits;
-  fitets -> fitab;
   loadbasins -> basinname;
   loadcalm -> basinname;
   loadflow -> basinname;
   loadghcnd -> basinname;
+  loadgrace -> basinname;
   loadmeta -> basinname;
   loadprops -> basinname;
   taufunc -> taufunc;
@@ -52,12 +52,14 @@ digraph m2html {
   getstring [URL="getstring.html"];
   globalfit [URL="globalfit.html"];
   gpfitb [URL="gpfitb.html"];
+  help [URL="help.html"];
   hyetograph [URL="hyetograph.html"];
   initfit [URL="initfit.html"];
   loadbasins [URL="loadbasins.html"];
   loadcalm [URL="loadcalm.html"];
   loadflow [URL="loadflow.html"];
   loadghcnd [URL="loadghcnd.html"];
+  loadgrace [URL="loadgrace.html"];
   loadmeta [URL="loadmeta.html"];
   loadprops [URL="loadprops.html"];
   mapbasins [URL="mapbasins.html"];
@@ -72,6 +74,7 @@ digraph m2html {
   prepfits [URL="prepfits.html"];
   printtrend [URL="printtrend.html"];
   setopts [URL="setopts.html"];
+  showdocs [URL="showdocs.html"];
   specialfunctions [URL="specialfunctions.html"];
   stationlist [URL="stationlist.html"];
   stationname [URL="stationname.html"];

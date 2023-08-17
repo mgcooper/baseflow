@@ -45,7 +45,7 @@
   stationname string as input to load data for that station.
  
  
-  See also bfra.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> bfra.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> bfra.loadgrace bfra.<a href="stationlist.html" class="code" title="function stations = stationlist">stationlist</a></pre></div>
+  See also bfra.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> bfra.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> bfra.<a href="loadgrace.html" class="code" title="function [Grace,Meta] = loadgrace(varargin)">loadgrace</a> bfra.<a href="stationlist.html" class="code" title="function stations = stationlist">stationlist</a></pre></div>
 
 
 <!-- crossreference -->
@@ -87,14 +87,13 @@ This function is called by:
 0018 <span class="comment">%</span>
 0019 <span class="comment">%</span>
 0020 <span class="comment">%  See also bfra.loadcalm bfra.loadflow bfra.loadgrace bfra.stationlist</span>
-0021 <span class="comment">%</span>
-0022 
-0023 p              = inputParser;
-0024 p.FunctionName = <span class="string">'bfra.stationname'</span>;
-0025 addRequired( p,<span class="string">'typenamehere'</span>);
-0026 parse(p,typenamehere);
-0027 station = p.Results.typenamehere;
-0028    
-0029</pre></div>
+0021 
+0022 p = inputParser;
+0023 p.FunctionName = <span class="string">'bfra.stationname'</span>;
+0024 addRequired( p,<span class="string">'typenamehere'</span>);
+0025 parse(p,typenamehere);
+0026 station = p.Results.typenamehere;
+0027    
+0028</pre></div>
 </body>
 </html>
