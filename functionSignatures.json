@@ -87,6 +87,17 @@
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
+   "bfra.completions":
+   {
+      "inputs": 
+      [
+         {"name":"funcname", "type":["choices=bfra.completions('completions')"]}
+      ],
+      "outputs":
+      [
+         {"name":"proplist", "type":["cell"]}
+      ]
+   },
    "bfra.conversions":
    {
       "inputs":
@@ -504,7 +515,7 @@
          {"name":"limit",     "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"method",    "kind": "namevalue", "type": ["char","choices={'clauset','hanel'}"]},
          {"name":"bootfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"nreps",     "kind":"namevalue",  "type": ["scalar","double"]},
+         {"name":"bootreps",  "kind":"namevalue",  "type": ["scalar","double"]},
          {"name":"plotfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
@@ -602,6 +613,17 @@
          {"name":"dqdt",      "kind": "required",  "type": ["vector","double"]},
          {"name":"weights",   "kind": "namevalue", "type": ["vector","double"]},
          {"name":"mask",      "kind": "namevalue", "type": ["logical"]}
+      ]
+   },
+   "bfra.privatefunction":
+   {
+      "inputs": 
+      [
+         {"name":"funcname", "type":["choices=bfra.completions('private')"]}
+      ],
+      "outputs":
+      [
+         {"name":"funchandle", "type":["function_handle"]}
       ]
    },
    "bfra.QtauString":

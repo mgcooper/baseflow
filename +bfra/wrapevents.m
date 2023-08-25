@@ -82,7 +82,7 @@ end
 % initialize output structure and output arrays
 Qsave = nan(size(Qmat));
 Rsave = nan(size(Qmat));
-tsave = NaT(size(Qmat)); % nan(size(Qmat)); % TEST
+tsave = nan(size(Qmat));
 Etags = nan(size(Qmat));
 Count = 0; % initialize event counter
 
@@ -130,7 +130,7 @@ for thisYear = 1:numyears      % events for this year at this gage
       % collect all data for the point-cloud
       Qsave( si:ei,thisYear ) = eventQ;
       Rsave( si:ei,thisYear ) = eventR;
-      tsave( si:ei,thisYear ) = eventT; % datenum(eventT); % TEST
+      tsave( si:ei,thisYear ) = eventT;
       Etags( si:ei,thisYear ) = Count;
    end
 
@@ -152,44 +152,16 @@ Events.eventTags = reshape(Etags, ndays*numyears, 1);
 
 %==========================================================================
 
-function [T,Q,R,numyears,timestep] = prepinput(T,Q,R)
-% PREPINPUT remove leap inds, determine timestep, determine number of years.
+function [T,Q,R,numyears] = prepinput(T,Q,R)
+% PREPINPUT remove leap inds and determine number of years.
 
-% NOTE: this is only needed for year-by-year analysis. findevents can be used on
-% a timeseries of any length, and could then be flattened and reshaped to match
-% some other calendar, rather than doing it first, as in getevents.
-
-% convert T to datetime
-if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
-
-% check if the input data includes leap inds
-hasleap = month(T)==2 & day(T)==29;
-
-% if the time is regular, we can get the timestep here
-if isregular(timetable(T,'RowTimes',T),'time')
-   timestep = T(2)-T(1);
-else
-   % if leap inds are already removed, the time won't be regular, so only
-   % warn if time includes leap inds
-   if any(hasleap)
-      warning('irregular calendar, results may be inconsistent')
-   end
-end
-
-if any(hasleap)
-   warning('removing leap inds');
-   T(hasleap) = []; Q(hasleap) = []; R(hasleap) = [];
-end
-
-% this is correct
+leapidx = month(T)==2 & day(T)==29;
+T(leapidx) = []; 
+Q(leapidx) = []; 
+R(leapidx) = [];
 numyears = numel(T)/365;
 
-% % both of these fail if water years are passed in   
-% numyears = numel(unique(year(T)));
-% 
-% firstyear   = year(T(1));
-% lastyear    = year(T(end));
-% numyears    = lastyear-firstyear+1;
+assert(numyears == round(numyears), 'complete annual timeseries required');
 
 %% INPUT PARSER
 function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
@@ -235,3 +207,6 @@ plotevents = parser.Results.plotevents;
 if isempty(R)
    R = zeros(size(Q));
 end
+
+% Convert datetime to double if datetime was passed in
+T = todatenum(T);

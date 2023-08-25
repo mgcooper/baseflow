@@ -48,11 +48,15 @@ h.yci = yci;
 function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)
 
 % create a regular time in years, works for both months and years
+y0 = year(tt(1)); % the first year (double) works for datetime and datenum
 if isdatetime(tt)
-   y0 = year(tt(1)); % the first year (double)
    t0 = datetime(y0,1,1); % start of the first year (datetime)
    tt = years( tt-tt(1)) + ( y0 + years( tt(1) - t0 ) );
+else
+   t0 = datenum([y0, 1, 1]); % start of the first year (datenum)
+   tt = (tt - t0) / datenum([0, 0, 365.25]) + y0; % conversion to decimal years
 end
+
 % see old method that checked for months at end
 
 % convert to anomalies if requested
@@ -366,7 +370,7 @@ parser.KeepUnmatched = true;
 
 dpos = [321 241 512 384]; % default figure size
 
-parser.addRequired('t',                   @isnumeric);
+parser.addRequired('t',                   @(x) isnumeric(x) || isdatetime(x));
 parser.addRequired('y',                   @isnumeric);
 parser.addParameter('units',        '',   @ischar);
 parser.addParameter('ylabeltext',   '',   @ischar);
