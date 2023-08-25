@@ -71,7 +71,7 @@ EventData = bfra.getevents(T,Q,R,opts.getevents);
 %
 % Step 2. Fit events
 
-[EventFits,FitsTable] = bfra.fitevents(EventData,opts.fitevents);
+[EventFits,FitResults] = bfra.fitevents(EventData,opts.fitevents);
 %
 % Step 3. Fit recession parameters _a_ and _b_
 %
@@ -101,7 +101,7 @@ EventData = bfra.getevents(T,Q,R,opts.getevents);
 %
 %
 
-GlobalFit = bfra.globalfit(FitsTable,EventData,EventFits,opts.globalfit);
+GlobalFit = bfra.globalfit(FitResults,EventData,EventFits,opts.globalfit);
 %%
 %% Check the fitted recession parameters
 %

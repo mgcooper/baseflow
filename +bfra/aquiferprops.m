@@ -231,7 +231,7 @@ Props.b1    = bearly;
 Props.a2    = alate;
 Props.b2    = blate;
 % Props.D2    = sqrt(Q0check/(3.448*k*L^2/A));    % undocumented
-Props.input = p.Results;
+Props.input = args;
 
 %% INPUT PARSER
 function [q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( ...

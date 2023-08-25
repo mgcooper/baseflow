@@ -7,7 +7,7 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
 %     FIT = bfra.GLOBALFIT(Results,Events,Fits,opts);
 %     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'plotfits',plotfits);
 %     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit);
-%     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit,'nreps',nreps);
+%     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit,'bootreps',nreps);
 %     FIT = bfra.GLOBALFIT(___,) 
 % 
 % Description
@@ -39,12 +39,14 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 % PARSE INPUTS
 %#ok<*ASGLU> 
-[Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, refqtls, ...
-   earlyqtls, lateqtls] = parseinputs(K, Events, Fits, mfilename, varargin{:});
+[Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, ...
+   refqtls, earlyqtls, lateqtls, isflat] = parseinputs( ...
+   Results, Events, Fits, mfilename, varargin{:});
 
 % Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
 [tau,q,dqdt,tags] = bfra.eventtau(Results,Events,Fits,'usefits',false);
-TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit,'nreps',nreps);
+TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit, ...
+   'bootreps',nreps,'limit',20);
 
 % Parameters needed for next steps
 bhat     = TauFit.b;
@@ -120,19 +122,20 @@ GlobalFit.pQexp = pQexp;
 GlobalFit.pQ0  = pQ0;
 
 %% INPUT PARSER
-function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, ...
-   refqtls, earlyqtls, lateqtls] = parseinputs(K, Events, Fits, funcname, varargin)
+function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod, ...
+   refqtls, earlyqtls, lateqtls, isflat] = parseinputs(K, Events, Fits, ...
+   funcname, varargin)
 
 parser = inputParser;
 parser.FunctionName = ['bfra.' funcname];
 parser.StructExpand = true;
 parser.PartialMatching = false;
 
-parser.addRequired('K', @isstruct);
+parser.addRequired('Results', @isstruct);
 parser.addRequired('Events', @isstruct);
 parser.addRequired('Fits', @isstruct);
 parser.addParameter('drainagearea', nan, @bfra.validation.isnumericscalar);
-parser.addParameter('drainagedens', 0.8, @bfra.validation.isnumericscalar);
+parser.addParameter('drainagedensity', 0.8, @bfra.validation.isnumericscalar);
 parser.addParameter('aquiferdepth', nan, @bfra.validation.isnumericscalar);
 parser.addParameter('streamlength', nan, @bfra.validation.isnumericscalar);
 parser.addParameter('aquiferslope', nan, @bfra.validation.isnumericscalar);
@@ -150,7 +153,7 @@ parser.addParameter('lateqtls', [0.50 0.50],  @bfra.validation.isnumericvector);
 parser.parse(K, Events, Fits, varargin{:});
 
 A           = parser.Results.drainagearea;      % basin area [m2]
-Dd          = parser.Results.drainagedens;      % drainage density [km-1]
+Dd          = parser.Results.drainagedensity;   % drainage density [km-1]
 D           = parser.Results.aquiferdepth;      % reference active layer thickness [m]
 L           = parser.Results.streamlength;      % effective stream network length [m]
 theta       = parser.Results.aquiferslope;      % aquifer slope [1]
@@ -158,11 +161,12 @@ B           = parser.Results.aquiferbreadth;    % aquifer breadth [m]
 phi         = parser.Results.drainableporosity; % drainable porosity [1]
 plotfits    = parser.Results.plotfits;
 bootfit     = parser.Results.bootfit;
-nreps       = parser.Results.bootreps;
+bootreps    = parser.Results.bootreps;
 phimethod   = parser.Results.phimethod;
 refqtls     = parser.Results.refqtls;
 earlyqtls   = parser.Results.earlyqtls;
 lateqtls    = parser.Results.lateqtls;
+isflat      = parser.Results.isflat;
 
 % if stream length and drainage density are both provided, check that they are
 % consistent with the provided area. note: Dd comes in as 1/km b/c that's how it

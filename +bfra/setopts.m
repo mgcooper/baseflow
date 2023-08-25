@@ -110,22 +110,21 @@ switch funcname
    % global fit - input to bfra.globalfit
    case 'globalfit'
 
-      addParameter(p,   'drainagearea',   nan,           @isnumericscalar );
-      addParameter(p,   'drainagedens',   0.8,           @isnumericscalar );
-      addParameter(p,   'aquiferdepth',   nan,           @isnumericscalar );
-      addParameter(p,   'streamlength',   nan,           @isnumericscalar );
-      addParameter(p,   'aquiferslope',   0.0,           @isnumericscalar );
-      addParameter(p,   'aquiferbreadth', nan,           @isnumericscalar );
-      addParameter(p,   'drainableporos', 0.1,           @isnumericscalar );
-      addParameter(p,   'isflat',         true,          @islogicalscalar );
-      addParameter(p,   'plotfits',       false,         @islogicalscalar );
-      addParameter(p,   'bootfit',        false,         @islogicalscalar );
-      addParameter(p,   'nreps',          1000,          @isnumericscalar );
-      addParameter(p,   'phimethod',      'pointcloud',  @ischar           );
+      addParameter(p,   'drainagearea',      nan,        @isnumericscalar );
+      addParameter(p,   'drainagedensity',   0.8,        @isnumericscalar );
+      addParameter(p,   'aquiferdepth',      nan,        @isnumericscalar );
+      addParameter(p,   'streamlength',      nan,        @isnumericscalar );
+      addParameter(p,   'aquiferslope',      0.0,        @isnumericscalar );
+      addParameter(p,   'aquiferbreadth',    nan,        @isnumericscalar );
+      addParameter(p,   'drainableporosity', 0.1,        @isnumericscalar );
+      addParameter(p,   'isflat',            true,       @islogicalscalar );
+      addParameter(p,   'plotfits',          false,      @islogicalscalar );
+      addParameter(p,   'bootfit',           false,      @islogicalscalar );
+      addParameter(p,   'bootreps',          1000,       @isnumericscalar );
+      addParameter(p,   'phimethod',      'pointcloud',  @ischar          );
       addParameter(p,   'refqtls',        [0.50 0.50],   @isnumericvector );
       addParameter(p,   'earlyqtls',      [0.95 0.95],   @isnumericvector );
       addParameter(p,   'lateqtls',       [0.50 0.50],   @isnumericvector );
-
 end
 
 parse(p,funcname,varargin{:});

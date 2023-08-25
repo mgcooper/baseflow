@@ -165,7 +165,7 @@ parser.addParameter('range', 1.01:0.01:25.01, @isnumeric);
 parser.addParameter('limit', [], @isnumeric);
 parser.addParameter('method', 'clauset', @ischar);
 parser.addParameter('bootfit', false, @islogical);
-parser.addParameter('nreps', 1000, @isnumeric);
+parser.addParameter('bootreps', 1000, @isnumeric);
 parser.addParameter('plotfit', false, @islogical);
 
 parser.parse(x, varargin{:});
@@ -175,7 +175,7 @@ range   = parser.Results.range;
 limit   = parser.Results.limit;
 method  = parser.Results.method;
 bootfit = parser.Results.bootfit;
-nreps   = parser.Results.nreps;
+nreps   = parser.Results.bootreps;
 plotfit = parser.Results.plotfit;
 
 

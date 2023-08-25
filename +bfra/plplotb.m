@@ -83,7 +83,7 @@ if bfra.util.isoctave
    ylabel(bfra.util.latex2tex(ytext),'Interpreter','tex'); 
    h.legend = legend({l1,l2},'interpreter','tex','location','southwest');
 else
-   xlabel(xtext);
+   xlabel(xtext,'Interpreter','latex');
    ylabel(ytext,'Interpreter','latex'); 
    h.legend = legend({l1,l2},'interpreter','latex','location','southwest');
 end
@@ -137,7 +137,7 @@ end
 bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
    'BaseAngle',90,'Length',8,'TipAngle',10)
 text(0.95*xarrw(1),yarrw(1),ta, ...
-   'HorizontalAlignment','right','FontSize',14)
+   'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 
 % % tauExp
 %----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ end
 bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
    'BaseAngle',90,'Length',8,'TipAngle',10)
 text(0.95*xarrw(1),yarrw(1),ta, ...
-   'HorizontalAlignment','right','FontSize',14)
+   'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 
 %% INPUT PARSER
 function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] = ...
