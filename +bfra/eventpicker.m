@@ -103,9 +103,6 @@ Info.runlengths = Info.runlengths(~inan);
 %% local functions
 function Events = eventSelector(t,q,r,qdot,Info)
 
-% convert t to datenum for easier arithmetic
-t = datenum(t);
-
 % pick the points
 h = eventPlotter(t,q,r,qdot,Info);  % plot the timeseries
 
@@ -310,3 +307,6 @@ r = parser.Results.r;
 nmin = parser.Results.nmin;
 Info = parser.Results.Info;
 assert(numel(q) == numel(t));
+
+% Convert datetime to double if datetime was passed in
+t = todatenum(t);

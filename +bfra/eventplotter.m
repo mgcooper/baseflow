@@ -179,6 +179,9 @@ eventTags = parser.Results.eventTags;
 assert(numel(Q) == numel(T))
 assert(numel(dqdt) == numel(T))
 
+% Convert datetime to double if datetime was passed in
+T = todatenum(T);
+
 % if ispublishing
 %    exportgraphics(gcf,'html/event_example.png','Resolution',400);
 % end

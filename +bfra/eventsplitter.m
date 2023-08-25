@@ -175,7 +175,7 @@ end
 
 % debug plot:
 if debug == true
-   figure; plot(t, q); hold on; plot(t, qS, 'g');
+   figure; plot(t, q); hold on; plot(t, qS, 'g'); datetick;
    scatter(t(ipos), q(ipos), 'filled')
    plot(t(imax), q(imax), 'x', 'MarkerSize', 20, 'Color', 'g')
    plot(t(imin), q(imin), 'x', 'MarkerSize', 20, 'Color', 'r')
@@ -231,6 +231,9 @@ rmin        = parser.Results.rmin;
 rmconvex    = parser.Results.rmconvex;
 rmnochange  = parser.Results.rmnochange;
 rmrain      = parser.Results.rmrain;
+
+% Convert datetime to double if datetime was passed in
+t = todatenum(t);
 
 validateattributes(t, {'double'},{'size', size(q)}, funcname,'t', 1)
 validateattributes(nmin, {'double'},{'>', 2}, funcname,'nmin', 4)

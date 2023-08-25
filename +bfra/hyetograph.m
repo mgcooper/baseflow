@@ -105,18 +105,18 @@ H(2) = ax(1);
 H(3) = h1;
 H(4) = h2;
 
-
+%%
 function [time, flow, prec, t1, t2, units] = parseinputs(funcname, time, flow, ...
    prec, varargin)
 
 p = inputParser;
 p.FunctionName = funcname;
-p.addRequired('time', @(x) bfra.validation.isdatelike(x));
-p.addRequired('flow', @(x) bfra.validation.isnumericvector(x));
-p.addRequired('prec', @(x) bfra.validation.isnumericvector(x));
-p.addOptional('t1', NaT, @(x) bfra.validation.isdatelike(x));
-p.addOptional('t2', NaT, @(x) bfra.validation.isdatelike(x));
-p.addParameter('units', {'mm','cm d-1'}, @(x) bfra.validation.ischarlike(x));
+p.addRequired('time', @bfra.validation.isdatelike);
+p.addRequired('flow', @bfra.validation.isnumericvector);
+p.addRequired('prec', @bfra.validation.isnumericvector);
+p.addOptional('t1', NaT, @bfra.validation.isdatelike);
+p.addOptional('t2', NaT, @bfra.validation.isdatelike);
+p.addParameter('units', {'mm','cm d-1'}, @bfra.validation.ischarlike);
 
 p.parse(time,flow,prec,varargin{:});
 
@@ -126,7 +126,6 @@ prec = p.Results.prec;
 t1 = p.Results.t1;
 t2 = p.Results.t2;
 units = p.Results.units;
-
 
 % =======================================
 % Create plot

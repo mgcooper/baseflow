@@ -43,7 +43,7 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 % PARSE INPUTS
-[vtsparam, etsparam, ctsmethod, pickmethod, fitmethod, plotfits, eventID] = ...
+[T, vtsparam, etsparam, ctsmethod, pickmethod, fitmethod, plotfits, eventID] = ...
    parseinputs(T,Q,R,derivmethod,mfilename,varargin{:});
 
 % MAIN FUNCTION
@@ -138,7 +138,7 @@ for m = 1:numPicks
 end
 
 %% INPUT PARSER
-function [vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = ...
+function [T,vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = ...
    parseinputs(T,Q,R,derivmethod,funcname,varargin)
 
 persistent parser
@@ -167,3 +167,6 @@ pickmethod  = parser.Results.pickmethod;
 fitmethod   = parser.Results.fitmethod;
 plotfits    = parser.Results.plotfits;
 eventID     = parser.Results.eventID;
+
+% Convert datetime to double if datetime was passed in
+T = todatenum(T);

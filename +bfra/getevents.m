@@ -176,6 +176,9 @@ pickevents = parser.Results.pickevents;
 plotevents = parser.Results.plotevents;
 asannual = parser.Results.asannual;
 
+% Convert datetime to double if datetime was passed in
+T = todatenum(T);
+
 % Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )
 validateattributes(T, {'double'}, {'size', size(Q)}, mfilename, 'T', 1)
 validateattributes(nmin, {'double'}, {'>', 2}, mfilename, 'nmin', 4)

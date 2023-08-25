@@ -78,9 +78,9 @@ h.f = figure('Position',[150 80 800 550]);
 % use subplot instead of tiledlayout
 h.t1 = bfra.util.subtight(3,2,[1 2],'style','fitted');
 
-h.h1a = plot(annualT,annualQ, '-o','Color',colors(1,:) ); hold on;
-h.h1b = plot(eventT,eventQ,   '-o','Color',colors(2,:) );
-% h.h1c = plot(eventT,eventq,   '-o','Color',col(3,:) );
+h.h1a = plot(annualT, annualQ, '-o', 'Color', colors(1, :) ); hold on;
+h.h1b = plot(eventT, eventQ,   '-o', 'Color', colors(2, :) );
+% h.h1c = plot(eventT, eventq,   '-o', 'Color', colors(3,:) );
 
 ylabel('$Q$ [m$^3$ d$^{-1}$]'); datetick(h.t1,'keepticks');
 
@@ -213,18 +213,17 @@ else
    c  = 1;
 end
 
-% if 
+% Convert datetime to double if datetime was passed in
+T = todatenum(T);
 
+% pull out the time/flow for the event
 eventT   = T(r);
 eventQ   = Q(r,c(1));
 eventq   = q(r,c(1));
-
 eventdq  = dqdt(r,c(1));
 eventr   = rain(r,c(1));
 
 % pull out the time/flow for the entire year
-if isdatetime(T); T = datenum(T); end
-
 dates    = datevec(eventT);
 eventyr  = dates(1,1);
 dates    = datevec(T);

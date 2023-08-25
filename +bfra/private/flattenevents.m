@@ -24,7 +24,7 @@ function [t,q,r,tags] = flattenevents(T,Q,R,Info)
 if nargin == 0; open(mfilename('fullpath')); return; end
 
 % Convert datetime to double if datetime was passed in
-T = todatetime(T);
+T = todatenum(T);
       
 % initialize output structure and output arrays
 nEvents  = numel(Info.istart);

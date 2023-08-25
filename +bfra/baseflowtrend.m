@@ -59,11 +59,11 @@ hb = bfra.trendplot(t,Qa,'anom',false,'units','cm/d/y','quan', ...
    'showfig',showfig,'alpha',0.05);
 dQadt = ha.trend.YData(:);  % mean flow trend
 dQbdt = hb.trend.YData(:);  % baseflow trend
-Qb = Qa-(dQadt-dQbdt);         % baseflow timeseries, cm/day
+Qb = Qa-(dQadt-dQbdt);      % baseflow timeseries, cm/day
 
 %% INPUT PARSER
 
-function [t, Q, A, method, pctl, showfig] = parseinputs(t,Q,A,varargin)
+function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)
 
 parser = inputParser;
 parser.FunctionName = 'bfra.baseflowtrend';
@@ -75,6 +75,9 @@ parser.addParameter('pctl', 0.25, @bfra.validation.isnumericscalar);
 parser.addParameter('showfig', false, @bfra.validation.islogicalscalar);
 parser.parse(t,Q,A,varargin{:});
 
-method   = parser.Results.method;
-pctl     = parser.Results.pctl;
-showfig  = parser.Results.showfig;
+% Convert datetime to double if datetime was passed in
+t = todatenum(t);
+
+method = parser.Results.method;
+prctle = parser.Results.pctl;
+showfig = parser.Results.showfig;
