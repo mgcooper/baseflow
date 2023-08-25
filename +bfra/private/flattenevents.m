@@ -23,13 +23,15 @@ function [t,q,r,tags] = flattenevents(T,Q,R,Info)
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end
 
+% Convert datetime to double if datetime was passed in
+T = todatetime(T);
       
 % initialize output structure and output arrays
 nEvents  = numel(Info.istart);
 nData    = Info.datalength;
 q        = nan(nData,1);
 r        = nan(nData,1);
-% t        = NaT(nData,1,'Format','dd-MMM-uuuu HH:mm:ss');
+% t      = NaT(nData,1,'Format','dd-MMM-uuuu HH:mm:ss');
 t        = nan(nData,1);
 tags     = nan(nData,1);
 
