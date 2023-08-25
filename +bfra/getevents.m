@@ -85,7 +85,7 @@ end
 
 
 if isempty(Q)||sum(~isnan(Q))<nmin % fast exit
-   [t,q,r,Info] = bfra.util.setEventEmpty();
+   [t,q,r,Info] = setEventEmpty();
 
 else
    % call eventfinder either way, then update if pickfits == true

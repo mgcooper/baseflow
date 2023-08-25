@@ -51,7 +51,7 @@ T = []; Q = []; R = []; Info = struct; iflag = false;
 for n = 1:length(iS)
    
    if L(n)<nmin                       % set nan if <nmin
-      [Tn,Qn,Rn,Infon] = bfra.util.setEventEmpty();
+      [Tn,Qn,Rn,Infon] = setEventEmpty();
    else
       tn = t(iS(n):iE(n));
       qn = q(iS(n):iE(n));
@@ -102,7 +102,7 @@ end
 
 % if no events were returned, set events empty
 if isempty(fieldnames(Info))
-   [T,Q,R,Info] = bfra.util.setEventEmpty();
+   [T,Q,R,Info] = setEventEmpty();
    
 else % cycle through and remove empty events
    inan = false(size(T));

@@ -32,14 +32,14 @@ sitename = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 % Plot one year of the streamflow and precipitation data using the |bfra.hyetograph|
 % function.
 
-t1 = datenum(datetime(1992,6,1)); %#ok<*DATNM>
-t2 = datenum(datetime(1992,12,1));
-H = bfra.hyetograph(T,Q,R,t1,t2,'units',{'m3 d-1','mm d-1'});
+t1 = datenum(datetime(1992, 6, 1)); %#ok<*DATNM>
+t2 = datenum(datetime(1992, 12, 1));
+H = bfra.hyetograph(T, Q, R, t1, t2, 'units', {'m3 d-1', 'mm d-1'});
 %%
 % Get the handle to the streamflow axis, then set the y-axis to log scale to
 % see the shape of the recession curve in more detail.
 
-set(findobj(H,'Tag','HyetographAxis'),'YScale','log');
+set(findobj(H, 'Tag', 'HyetographAxis'), 'YScale', 'log');
 %% Detecting recession events from timeseries of daily streamflow
 % The toolbox supports three main tasks: recession event detection, recession
 % event curve-fitting, and parameter estimation via distribution fitting. The
@@ -67,16 +67,16 @@ opts.fitevents = bfra.setopts('fitevents');
 % we use the point cloud method to fit these recession parameters.
 % Step 1. Get events
 
-EventData = bfra.getevents(T,Q,R,opts.getevents);
+EventData = bfra.getevents(T, Q, R, opts.getevents);
 % Step 2. Fit events
 
-[EventFits,FitsTable] = bfra.fitevents(EventData,opts.fitevents);
+[EventFits, FitsTable] = bfra.fitevents(EventData, opts.fitevents);
 % Step 3. Fit recession parameters _a_ and _b_
 % Pass the event discharge data $Q$ and recession rate $dQ/dt$ to bfra.fitab
 % with fitting method set to |nls| for "nonlinear least squares". Generate a point-cloud
 % plot by setting |plotfit| to |true|.
 
-abFit = bfra.fitab(EventFits.q,EventFits.dqdt,'nls','plotfit',true);
+abFit = bfra.fitab(EventFits.q, EventFits.dqdt, 'nls', 'plotfit', true);
 %% Check the fitted recession parameters
 % The recession parameters _a_ and _b_ in the recession equation $-dQ/dt = aQ^b$
 % are available in the |abFit| struct.
@@ -88,6 +88,6 @@ abFit.b
 % This is the same function used to format the legend in the point cloud plot
 % shown above.
 
-bfra.aQbString([abFit.a abFit.b],'printvalues',true)
+bfra.aQbString([abFit.a abFit.b], 'printvalues', true)
 %%
 % The fitted value _b=1.2_ indicates the reservoir is mildly non-linear.

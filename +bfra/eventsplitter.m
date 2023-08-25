@@ -170,7 +170,7 @@ if N > 0
    Info.istart     = is;
    Info.istop      = ie;
 else
-   [T,Q,R,Info] = bfra.util.setEventEmpty;
+   [T,Q,R,Info] = setEventEmpty;
 end
 
 % debug plot:

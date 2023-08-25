@@ -80,7 +80,7 @@ Q           = bfra.util.smoothflow(Q);          % smooth measurement noise
 % [Q,win]   = smoothdata(Q,'sgolay');  % smooth measurement noise
 
 if isempty(Q)||sum(~isnan(Q))<nmin % fast exit
-   [t,q,r,Info] = bfra.util.setEventEmpty;
+   [t,q,r,Info] = setEventEmpty;
 else
 
    % call eventfinder either way, then update if pickfits == true

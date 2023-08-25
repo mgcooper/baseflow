@@ -1,7 +1,7 @@
 function  [T,Q,R,Info] = setEventEmpty()
 %SETEVENTEMPTY set recession event to empty array in Events structure
 % 
-%  [T,Q,R,Info] = bfra.util.setEventEmpty()
+%  [T,Q,R,Info] = setEventEmpty()
 % 
 % See also: None
 

@@ -21,48 +21,48 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       function test_getstring(testCase,VarStr)
 
-      switch VarStr
-         case 'Q'
-            expectedStr = '$Q$';
-         case 'dQdt'
-            expectedStr = '$-\mathrm{d}Q/\mathrm{d}t$';
-         case 'aQb'
-            expectedStr = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
-      end
+         switch VarStr
+            case 'Q'
+               expectedStr = '$Q$';
+            case 'dQdt'
+               expectedStr = '$-\mathrm{d}Q/\mathrm{d}t$';
+            case 'aQb'
+               expectedStr = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
+         end
 
-      % Get actual result
-      strActual = bfra.getstring(VarStr);
+         % Get actual result
+         strActual = bfra.getstring(VarStr);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual(strActual,expectedStr)
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(strActual,expectedStr)
       end
 
       %-------------------------------------------
       %-------------------------------------------
       function test_getdqdt(testCase,DerivMethod)
 
-      % define the test data
-      a = 1e-2;
-      b = 1.5;
-      q0 = 1;
-      [q,~,t] = bfra.util.generateTestData(a,b,q0);
+         % define the test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 1;
+         [q,~,t] = bfra.util.generateTestData(a,b,q0);
 
-      % Calculate expected result for CTS method
-      dq = q-[nan; q(1:end-1)];
-      dt = (t(2)-t(1));
-      dqdtExpected = dq./dt;
+         % Calculate expected result for CTS method
+         dq = q-[nan; q(1:end-1)];
+         dt = (t(2)-t(1));
+         dqdtExpected = dq./dt;
 
-      % Get the actual result
-      [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
+         % Get the actual result
+         [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual(dqdtActual,dqdtExpected)
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(dqdtActual,dqdtExpected)
 
-      % for testing:
-      % DerivMethod = 'CTS';
-      % [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
-      % isequal(dqdtActual,dqdtExpected)
-      % scatterfit(dqdtActual,dqdtExpected)
+         % for testing:
+         % DerivMethod = 'CTS';
+         % [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
+         % isequal(dqdtActual,dqdtExpected)
+         % scatterfit(dqdtActual,dqdtExpected)
 
       end
 
@@ -70,48 +70,48 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       function test_fitab(testCase,RecessionExponent,FitMethod)
 
-      % define values to generate the test data
-      a = 1e-2;
-      q0 = 100;
-      t = 1:100;
-      b = RecessionExponent;
+         % define values to generate the test data
+         a = 1e-2;
+         q0 = 100;
+         t = 1:100;
+         b = RecessionExponent;
 
-      % for testing
-      % FitMethod = 'ols';
-      % b = 1.5;
-      % [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
-      % figure; loglog(q,-dqdt,'o')
-      % also useful to see this:
-      % bfra.Qnonlin(a,b,q0,t,true)
+         % for testing
+         % FitMethod = 'ols';
+         % b = 1.5;
+         % [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
+         % figure; loglog(q,-dqdt,'o')
+         % also useful to see this:
+         % bfra.Qnonlin(a,b,q0,t,true)
 
-      % f = bfra.fitab(q,dqdt,'mean'); ab = f.ab
-      % f = bfra.fitab(q,dqdt,'ols'); ab = f.ab
-      % f = bfra.fitab(q,dqdt,'nls'); ab = f.ab
-      % f = bfra.fitab(q,dqdt,'median'); ab = f.ab
+         % f = bfra.fitab(q,dqdt,'mean'); ab = f.ab
+         % f = bfra.fitab(q,dqdt,'ols'); ab = f.ab
+         % f = bfra.fitab(q,dqdt,'nls'); ab = f.ab
+         % f = bfra.fitab(q,dqdt,'median'); ab = f.ab
 
-      % generate the test data
-      [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
+         % generate the test data
+         [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
 
-      % fit the data
-      switch FitMethod
-         case {'mean','median'}
-            Fit = bfra.fitab(q,dqdt,FitMethod,'order',b);
-         otherwise
-            Fit = bfra.fitab(q,dqdt,FitMethod);
-      end
+         % fit the data
+         switch FitMethod
+            case {'mean','median'}
+               Fit = bfra.fitab(q,dqdt,FitMethod,'order',b);
+            otherwise
+               Fit = bfra.fitab(q,dqdt,FitMethod);
+         end
 
-      % Get the expected result
-      abExpected = [a;b];
+         % Get the expected result
+         abExpected = [a;b];
 
-      % Get the actual result
-      abActual = Fit.ab;
+         % Get the actual result
+         abActual = Fit.ab;
 
-      % for testing:
-      % f = bfra.fitab(q,dqdt,FitMethod); abActual = f.ab
-      % isequal(abActual,abExpected)
+         % for testing:
+         % f = bfra.fitab(q,dqdt,FitMethod); abActual = f.ab
+         % isequal(abActual,abExpected)
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual(abActual,abExpected,'RelTol',[0.01; 0.01])
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(abActual,abExpected,'RelTol',[0.01; 0.01])
 
       end
 
@@ -119,31 +119,31 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       function test_conversions(testCase,RecessionParameterNames)
 
-      switch RecessionParameterNames
-         case 'b'
-            b = 1.5;
-            nExpected = 0;
-            nActual = bfra.conversions(b,'b','n','isflat',true);
+         switch RecessionParameterNames
+            case 'b'
+               b = 1.5;
+               nExpected = 0;
+               nActual = bfra.conversions(b,'b','n','isflat',true);
 
-            % Verify that the actual result matches the expected result
-            testCase.verifyEqual(nActual,nExpected);
+               % Verify that the actual result matches the expected result
+               testCase.verifyEqual(nActual,nExpected);
 
-         case 'n'
-            n = -1;
-            bExpected = 1;
-            bActual = bfra.conversions(n,'n','b','isflat',true);
+            case 'n'
+               n = -1;
+               bExpected = 1;
+               bActual = bfra.conversions(n,'n','b','isflat',true);
 
-            % Verify that the actual result matches the expected result
-            testCase.verifyEqual(bActual,bExpected);
+               % Verify that the actual result matches the expected result
+               testCase.verifyEqual(bActual,bExpected);
 
-         case 'alpha'
-            alpha = 4.0;
-            bExpected = 1.25;
-            bActual = bfra.conversions(alpha,'alpha','b','isflat',true);
+            case 'alpha'
+               alpha = 4.0;
+               bExpected = 1.25;
+               bActual = bfra.conversions(alpha,'alpha','b','isflat',true);
 
-            % Verify that the actual result matches the expected result
-            testCase.verifyEqual(bActual,bExpected);
-      end
+               % Verify that the actual result matches the expected result
+               testCase.verifyEqual(bActual,bExpected);
+         end
 
       end
 
@@ -151,14 +151,14 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       function test_plfitb(testCase,PowerLawExponent)
 
-      % generate power-law distributed test data
-      x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
+         % generate power-law distributed test data
+         x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
 
-      % compute the fit
-      [bActual,alphaActual] = bfra.plfitb(x);
+         % compute the fit
+         [bActual,alphaActual] = bfra.plfitb(x);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual(PowerLawExponent,alphaActual,'AbsTol',0.1);
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(PowerLawExponent,alphaActual,'AbsTol',0.1);
 
       end
 
@@ -166,28 +166,28 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       function test_aquiferstorage(testCase,RecessionExponent)
 
-      % make test data
-      qmin = 1;
-      qmax = 100;
-      a = 1;
-      b = RecessionExponent;
+         % make test data
+         qmin = 1;
+         qmax = 100;
+         a = 1;
+         b = RecessionExponent;
 
-      % compute the expected result
-      switch RecessionExponent
-         case 1.0
-            SminExpected = 1/a*qmin;
-            SmaxExpected = 1/a*qmax;
+         % compute the expected result
+         switch RecessionExponent
+            case 1.0
+               SminExpected = 1/a*qmin;
+               SmaxExpected = 1/a*qmax;
 
-         case 1.5
-            SminExpected = 1/a/(2-b).*(qmin.^(2-b));
-            SmaxExpected = 1/a/(2-b).*(qmax.^(2-b));
-      end
+            case 1.5
+               SminExpected = 1/a/(2-b).*(qmin.^(2-b));
+               SmaxExpected = 1/a/(2-b).*(qmax.^(2-b));
+         end
 
-      % get the actual result
-      [SminActual,SmaxActual] = bfra.aquiferstorage(a,b,qmin,qmax);
+         % get the actual result
+         [SminActual,SmaxActual] = bfra.aquiferstorage(a,b,qmin,qmax);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual([SminExpected,SmaxExpected],[SminActual,SmaxActual]);
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual([SminExpected,SmaxExpected],[SminActual,SmaxActual]);
 
       end
 
@@ -195,146 +195,190 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       %-------------------------------------------
       function test_aquiferthickness(testCase,RecessionExponent,TauValue,PhiValue)
 
-      % note: this implicitly tests bfra.conversions
+         % note: this implicitly tests bfra.conversions
 
-      % make test data
-      Qb = 2;
-      b = RecessionExponent;
-      tau = TauValue;
-      phi = PhiValue;
+         % make test data
+         Qb = 2;
+         b = RecessionExponent;
+         tau = TauValue;
+         phi = PhiValue;
 
-      % compute the expected result
-      DExpected = tau/phi/(4-2*b)*Qb;
-      SExpected = DExpected*phi;
+         % compute the expected result
+         DExpected = tau/phi/(4-2*b)*Qb;
+         SExpected = DExpected*phi;
 
-      % get the actual result
-      [DActual,SActual] = bfra.aquiferthickness(b,tau,phi,Qb);
+         % get the actual result
+         [DActual,SActual] = bfra.aquiferthickness(b,tau,phi,Qb);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual([DExpected,SExpected],[DActual,SActual]);
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual([DExpected,SExpected],[DActual,SActual]);
 
       end
 
       %-------------------------------------------
       %-------------------------------------------
-      function test_eventfinder(testCase,MinEventDuration, RmConvex)
+      function test_eventfinder(testCase, MinEventDuration, RmConvex)
 
-      % MinEventDuration = 3;
-      % RmConvex = true;
-      
-      % this should work in general, as long as prec is used consistently
-      prec = 2; % precision, controls how large the test vectors are
-      dpi = 10^-prec;
+         % MinEventDuration = 9;
+         % RmConvex = true;
 
-      % generate synthetic data
-      t = -2*pi:dpi:2*pi;
-      q = 1 + sin(t);
+         % Generate synthetic data. prec controls how large the test vectors are
+         prec = 2; 
+         [t, q] = prepareEventData(testCase, prec); %#ok<*INUSD> 
+         [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex);
 
-      if RmConvex
-         % Find the points where the first derivative cos(t) is negative and the
-         % second derivative -sin(t) is positive.
-         idxconcave = find(cos(t) < 0 & (-sin(t)) > 0);
-         intervals = [find(diff(idxconcave) ~= 1)' numel(idxconcave)];
-         starts = [idxconcave(1); idxconcave(intervals(1:end-1) + 1)];
-         ends = idxconcave(intervals);
-         
-         % Inflection points where the second derivative equals zero
-         idxinflect = find(abs(-sin(t)) <= 10^-prec);
-         
-      else
-         % Find the maxima and minima (where d/dt sin(t) == 0)
-         idxminmax = find(round(cos(t),prec)==0);
-         starts = idxminmax(1:2:end); % +1 or +2 depending on eventfinder
-         ends = idxminmax(2:2:end); % -1 
-         
-         idxinflect = idxminmax;
-      end
-
-      % Define expected t and q
-      tExpected = cell(numel(starts), 1);
-      qExpected = cell(numel(starts), 1);
-      for n = 1:numel(starts)
-         tExpected{n, 1} = transpose(t(starts(n):ends(n)));
-         qExpected{n, 1} = transpose(q(starts(n):ends(n)));
-      end
-
-      % get the actual result
-      [tActual,qActual] = bfra.eventfinder(t,q,[],'nmin',MinEventDuration, ...
-         'fmax',0,'rmax',0,'rmin',0,'rmconvex',RmConvex,'rmnochange',false, ...
-         'rmrain',false);
-
-      % % Verify that the actual result matches the expected result to within a
-      % difference of up to two elements to account for the +/- 1 day criteria applied
-      % in the eventfinder filters.
-      for n = 1:numel(tActual)
-         [commonT, ia, ib] = intersect(tExpected{n}, tActual{n});
-         numdiff = length(tExpected{n}) + length(tActual{n}) - 2*length(commonT);
-
-         if numdiff <= 4
-            testCase.verifyEqual(tExpected{n}(ia), tActual{n}(ib));
-            testCase.verifyEqual(qExpected{n}(ia), qActual{n}(ib));
-
-            % texp = tExpected{n}(ia);
-            % qexp = qExpected{n}(ia);
-            % tact = tActual{n}(ib);
-            % qact = qActual{n}(ib);
-            % assertequal(tExpected{n}(ia), tActual{n}(ib));
-            % assertequal(qExpected{n}(ia), qActual{n}(ib));
-            
-            % figure; 
-            % plot(texp, qexp); hold on;
-            % plot(tact, qact, ':');
-            
-         else
-            error('Difference greater than 2 elements detected.');
+         % Define expected t and q
+         tExpected = cell(numel(starts), 1);
+         qExpected = cell(numel(starts), 1);
+         for n = 1:numel(starts)
+            tExpected{n, 1} = transpose(t(starts(n):ends(n)));
+            qExpected{n, 1} = transpose(q(starts(n):ends(n)));
          end
-      end
 
-      % for scripting:
-      % assertequal([tActual,qActual], [tExpected,qExpected])
+         % get the actual result
+         [tActual,qActual] = bfra.eventfinder(t,q,[],'nmin',MinEventDuration, ...
+            'fmax',0,'rmax',0,'rmin',0,'rmconvex',RmConvex,'rmnochange',false, ...
+            'rmrain',false);
 
-      % For a 1:1 comparison:
-      % testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
-
-      % Plot the result
-      if MinEventDuration == 3
-         % For now, use the first test value to determine whether to plot the
-         % result. TODO: add a method to plot in a subplot for each test
-         % parameter.
-         figure; plot(t,q); hold on;
-         plot(t(idxinflect), q(idxinflect), 'x', 'MarkerSize', 20, 'Color', 'r');
-         
+         % % Verify that the actual result matches the expected result to within a
+         % difference of up to two elements to account for the +/- 1 day criteria applied
+         % in the eventfinder filters.
          for n = 1:numel(tActual)
-            plot(tExpected{n}, qExpected{n}, 'LineWidth', 2, 'Color', 'k');
-            plot(tActual{n},qActual{n},':','Color', 'g');
+            [commonT, ia, ib] = intersect(tExpected{n}, tActual{n});
+            numdiff = length(tExpected{n}) + length(tActual{n}) - 2*length(commonT);
+
+            if numdiff <= 4
+               testCase.verifyEqual(tExpected{n}(ia), tActual{n}(ib));
+               testCase.verifyEqual(qExpected{n}(ia), qActual{n}(ib));
+
+               % texp = tExpected{n}(ia);
+               % qexp = qExpected{n}(ia);
+               % tact = tActual{n}(ib);
+               % qact = qActual{n}(ib);
+               % assertequal(tExpected{n}(ia), tActual{n}(ib));
+               % assertequal(qExpected{n}(ia), qActual{n}(ib));
+
+               % figure;
+               % plot(texp, qexp); hold on;
+               % plot(tact, qact, ':');
+
+            else
+               error('Difference greater than 2 elements detected.');
+            end
          end
-   
-         % Adjust legend and title based on rmconvex
-         if RmConvex
-            legend('Signal', 'Inflection Points',  ...
-               'True Concave Up Declining Flow', 'eventfinder');
-            title('test rmconvex')
-         else
-            legend('Signal', 'Inflection Points', ...
-               'True Declining Flow', 'eventfinder');
-            title('test eventfinder')
+
+         % for scripting:
+         % assertequal([tActual,qActual], [tExpected,qExpected])
+
+         % For a 1:1 comparison:
+         % testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
+
+         % Plot the result
+         if MinEventDuration == 3
+            % For now, use the first test value to determine whether to plot the
+            % result. TODO: add a method to plot in a subplot for each test
+            % parameter.
+            figure; plot(t,q); hold on;
+            plot(t(inflect), q(inflect), 'x', 'MarkerSize', 20, 'Color', 'r');
+
+            for n = 1:numel(tActual)
+               plot(tExpected{n}, qExpected{n}, 'LineWidth', 2, 'Color', 'k');
+               plot(tActual{n},qActual{n},':','Color', 'g');
+            end
+
+            % Adjust legend and title based on rmconvex
+            if RmConvex
+               legend('Signal', 'Inflection Points',  ...
+                  'True Concave Up Declining Flow', 'eventfinder');
+               title('test rmconvex')
+            else
+               legend('Signal', 'Inflection Points', ...
+                  'True Declining Flow', 'eventfinder');
+               title('test eventfinder')
+            end
          end
       end
 
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_MinEventDuration(testCase, MinEventDuration, RmConvex)
+
+         % Generate synthetic data. prec controls how large the test vectors are
+         prec = 2; 
+         [t, q] = prepareEventData(testCase, prec);
+         [starts, ends] = eventIndices(testCase, t, prec, RmConvex);
+
+         % test an event that is shorter than the MinEventDuration
+         idx = sort(randi(ends(1)-starts(1), MinEventDuration-1, 1));
+         t = t(starts(1)+idx);
+         q = q(starts(1)+idx);
+
+         tExpected = [];
+         qExpected = [];
+
+         % figure; plot(tExpected, qExpected, '-o')
+         [tActual,qActual] = bfra.eventfinder(t, q, [], 'nmin', ...
+            MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
+            RmConvex, 'rmnochange', false, 'rmrain', false);
+
+         testCase.verifyEqual(tExpected, tActual);
+         testCase.verifyEqual(qExpected, qActual);
+
+         % This does not error, it returns empty, so use the above test
+         % testCase.verifyError(@() bfra.eventfinder(t, q, [], 'nmin', ...
+         %  MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
+         %  RmConvex, 'rmnochange', false, 'rmrain', false));
       end
 
       %-------------------------------------------
       %-------------------------------------------
       function test_basinname(testCase,BasinName)
 
-      % get the basin name from the database
-      ActualName = bfra.basinname(BasinName);
+         % get the basin name from the database
+         ActualName = bfra.basinname(BasinName);
 
-      % Verify that the actual result matches the expected result
-      testCase.verifyEqual(BasinName,ActualName);
-
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(BasinName,ActualName);
       end
 
+   end
+
+   methods (Access = private) % Helper methods
+
+      function [t, q] = prepareEventData(testCase, prec) %#ok<*INUSD> 
+         % This function handles some common operations related to test data
+
+         if nargin < 2
+            prec = 2; % precision, controls how large the test vectors are
+         end
+         
+         % generate synthetic data
+         dpi = 10^-prec;
+         t = -2*pi:dpi:2*pi;
+         q = 1 + sin(t);
+      end
+
+      function [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex)
+
+         if RmConvex
+            % Find the points where the first derivative cos(t) is negative and the
+            % second derivative -sin(t) is positive.
+            idxconcave = find(cos(t) < 0 & (-sin(t)) > 0);
+            intervals = [find(diff(idxconcave) ~= 1)' numel(idxconcave)];
+            starts = [idxconcave(1); idxconcave(intervals(1:end-1) + 1)];
+            ends = idxconcave(intervals);
+
+            % Inflection points where the second derivative equals zero
+            inflect = find(abs(-sin(t)) <= 10^-prec);
+
+         else
+            % Find the maxima and minima (where d/dt sin(t) == 0)
+            idxminmax = find(round(cos(t),prec)==0);
+            starts = idxminmax(1:2:end); % +1 or +2 depending on eventfinder
+            ends = idxminmax(2:2:end); % -1
+            inflect = idxminmax;
+         end
+      end
    end
 end
 
