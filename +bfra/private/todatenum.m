@@ -6,7 +6,6 @@ function varargout = todatenum(varargin)
    end
 end
 
-
 function T = tryconvert(T)
    if isdatetime(T)
       if isoctave

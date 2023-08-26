@@ -40,7 +40,7 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 % MAIN FUNCTION
 x0 = x;
-[x,~] = bfra.util.prepCurveData(x,x);
+[x,~] = prepCurveData(x,x);
 x = x(x>0);
 if isnan(xmin)
    switch method

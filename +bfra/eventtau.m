@@ -29,29 +29,29 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 [K, Events, Fits, usefits, aggfunc] = parseinputs(K, Events, Fits, varargin{:});
 
 % MAIN FUNCTION
-Taufnc = bfra.taufunc;
+Sfnc = bfra.getfunction('SofabQ');
 dqfnc = @(a,dqdt) -dqdt./a; % must have derived this at some point
-Sfnc = @(a,b,q) (q.^(2-b))./(a*(2-b));
+taufnc = bfra.getfunction('tauofabQ');
 
 if isscalar(K)
-   Ktags    = K.eventTag;
-   a        = K.a;
-   b        = K.b;
+   Ktags = K.eventTag;
+   a = K.a;
+   b = K.b;
 else
-   Ktags    = [K.eventTag];
-   a        = [K.a];
-   b        = [K.b];
+   Ktags = [K.eventTag];
+   a = [K.a];
+   b = [K.b];
 end
 
-numfits  = numel(a);            % use K b/c some 'Events' don't get fit
+numfits = numel(a);  % use K b/c some 'Events' don't get fit
 
 if usefits == true
-   Q     = Fits.q;
-   dQdt  = Fits.dqdt;
+   Q = Fits.q;
+   dQdt = Fits.dqdt;
    Qtags = Fits.eventTags;
 else
-   Q     = Events.eventFlow;
-   dQdt  = Fits.dqdt;
+   Q = Events.eventFlow;
+   dQdt= Fits.dqdt;
    Qtags = Events.eventTags;
 
 end
@@ -73,7 +73,7 @@ for m = 1:numfits
    tag      = Ktags(m);
    i        = Ktags == tag;   % should just be m
    ii       = Qtags == tag;   % Fits.eventTags == m;
-   tau(ii)  = Taufnc(a(i),b(i),Q(ii));
+   tau(ii)  = taufnc(a(i),b(i),Q(ii));
 
 % return fit q/dqdt for point cloud plot but use event q for tau
    iii       = Fits.eventTags == tag;

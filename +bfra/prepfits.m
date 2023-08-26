@@ -3,7 +3,7 @@ function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)
 %
 % Syntax
 % 
-%  [x,y,logx,logy,weights,success] = prepfits(q,dqdt,varargin)
+%  [x,y,logx,logy,weights,success] = bfra.prepfits(q,dqdt,varargin)
 % 
 % Required inputs
 % 
@@ -32,8 +32,8 @@ m = m(keep);
 % convert the mask to weights
 w(m==false) = 0;
 
-[x, y, w] = bfra.util.prepCurveData(x, y, w);
-[logx, logy, w] = bfra.util.prepCurveData(log(x), log(y), w);
+[x, y, w] = prepCurveData(x, y, w);
+[logx, logy, w] = prepCurveData(log(x), log(y), w);
 
 % failure check
 ok = numel(y)>3;

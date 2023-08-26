@@ -22,7 +22,7 @@ switch method
       CIs = coefCI(mdl,alpha);
       err = CIs(2,2)-ddt;
    case 'qtl'
-      [ab,S] = bfra.deps.quantreg(t,dat,qtl,1,1000,alpha);
+      [ab,S] = quantreg(t,dat,qtl,1,1000,alpha);
       ddt = ab(2);
       CIs = S.ci_boot';
       err = CIs(2,2)-ddt;

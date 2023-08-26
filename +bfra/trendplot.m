@@ -107,12 +107,12 @@ for n = 1:ncols
 
             % not sure we want the setnan
             yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
-            yfit = bfra.util.setnan(yfit,[],inans);
+            yfit = setnan(yfit,[],inans);
 
          case 'ols'
 
             if isnan(alpha)
-               abfit(n,:) = bfra.util.olsfit(t,y(:,n));
+               abfit(n,:) = olsfit(t,y(:,n));
             else
 
                lmmdl = fitlm(t,y(:,n));
@@ -132,15 +132,15 @@ for n = 1:ncols
    else
       % only get conf levels if requested
       if isnan(alpha)
-         abfit(n,:) = bfra.deps.quantreg(t,y(:,n),qtl);
+         abfit(n,:) = quantreg(t,y(:,n),qtl);
       else
-         [abfit(n,:),S] = bfra.deps.quantreg(t,y(:,n),qtl,1,1000,alpha);
+         [abfit(n,:),S] = quantreg(t,y(:,n),qtl,1,1000,alpha);
          confi = S.ci_boot';
          error(n) = mean([abfit(n,2)-confi(2,1),confi(2,2)-abfit(n,2)]);
       end
 
       yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
-      yfit = bfra.util.setnan(yfit,[],inans);
+      yfit = setnan(yfit,[],inans);
    end
 end
 

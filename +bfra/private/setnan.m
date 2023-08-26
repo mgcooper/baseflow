@@ -1,22 +1,19 @@
 function [ DataOut ] = setnan(Data,varargin)
 %SETNAN sets logical indices in Data to nan
+%
+%  [ DataOut ] = setnan(Data) sets all values in Data nan
+% 
+%  [ DataOut ] = setnan(Data,nanval) sets values in Data that equal nanval nan
+% 
+%  [ DataOut ] = setnan(Data,[],naninds) sets naninds indices of Data nan
+% 
+% See also rmnan
 
 % TODO: support for structs and cells, also I might be able to simplify the
 % table parts using replacevars like in the new set all nan section
 
-%----------------------------------------------------------------------
-p = bfra.deps.magicParser;
-p.FunctionName = mfilename;
-
-p.addRequired( 'Data'                                 );
-p.addOptional( 'nanval',   nan,   @(x)isnumeric(x)    );
-p.addOptional( 'naninds',  false, @(x)islogical(x)    );
-
-p.parseMagically('caller');
-
-nanval   = p.Results.nanval;
-naninds  = p.Results.naninds;
-%----------------------------------------------------------------------
+% parse inputs
+[Data, nanval, naninds] = parseinputs(Data, mfilename, varargin{:});
 
 % Note: below I detect which columns are numeric but i don't convert
 % from cell to numeric so if a table is imported with mixed data and it
@@ -38,21 +35,26 @@ end
 
 % if a table was passed in, prep it for replacement
 if wastable
-   inumeric    = cellfun(@isnumeric,table2cell(Data(1,:)));
-   DataOut     = table2array(Data(:,inumeric));
-   props       = Data.Properties;
+   
+   inumeric = cellfun(@isnumeric,table2cell(Data(1,:)));
+   DataOut = table2array(Data(:,inumeric));
+   props = Data.Properties;
+   
 elseif wastimetable
-   Time        = Data.Time;
-   props       = Data.Properties;    % get props before converting
-   iTime       = Data.Properties.DimensionNames;
-   Data        = timetable2table(Data);
-   Data        = Data(:,2:end);      % remove time column
-   inumeric    = cellfun(@isnumeric,table2cell(Data(1,:)));
-   DataOut     = table2array(Data(:,inumeric));
+   
+   Time = Data.Time;
+   props = Data.Properties;    % get props before converting
+   iTime = Data.Properties.DimensionNames;
+   
+   Data = timetable2table(Data);
+   Data = Data(:,2:end);      % remove time column
+   
+   inumeric = cellfun(@isnumeric,table2cell(Data(1,:)));
+   DataOut = table2array(Data(:,inumeric));
    % i was gonna use iTime to remove the time column but only works if
    % it is always called 'Time'
 else
-   DataOut     = Data;
+   DataOut = Data;
 end
 
 % determine if nanval or naninds will be used, if the latter, assign naninds to
@@ -96,14 +98,14 @@ elseif useval == true
 end
 
 if wastable == true
-   Data(:,inumeric)  = array2table(DataOut);
-   DataOut           = Data;
+   Data(:,inumeric) = array2table(DataOut);
+   DataOut = Data;
 end
 
 if wastimetable == true
-   Data(:,inumeric)  = array2table(DataOut);
-   DataOut           = Data;
-   DataOut           = table2timetable(DataOut,'RowTimes',Time);
+   Data(:,inumeric) = array2table(DataOut);
+   DataOut = Data;
+   DataOut = table2timetable(DataOut,'RowTimes',Time);
    DataOut.Properties = props;
 end
 
@@ -118,3 +120,21 @@ end
 % else
 %    dataout(nanval) = nan;
 % end
+
+function [Data, nanval, naninds] = parseinputs(Data, funcname, varargin)
+
+% NOTE: to use the two optionals, when calling, must use [] for nanval if
+% naninds are passed in
+p = inputParser;
+p.FunctionName = funcname;
+p.addRequired( 'Data' );
+p.addOptional( 'nanval', nan, @isnumeric);
+p.addOptional( 'naninds', false, @islogical);
+% p.addOptional( 'nanval',   nan,   @(x) isnumeric(x) | islogical(x));
+% p.addParameter( 'nanval',   nan,   @isnumeric);
+% p.addParameter( 'naninds',  false, @islogical);
+p.parse(Data, varargin{:});
+
+Data = p.Results.Data;
+nanval = p.Results.nanval;
+naninds = p.Results.naninds;

@@ -72,15 +72,15 @@ Events.inputRain = R;
 
 % iF is the first non-nan index, to recover indices after removing nans
 numdata     = numel(T);
-Q(Q<qmin)   = nan;                              % set values < qmin nan
-Q           = bfra.util.setconstantnan(Q,rmax); % set constant non-nan values nan
-[T,Q,R,iF]  = bfra.util.rmleadingnans(T,Q,R);   % remove leading nans
-[T,Q,R]     = bfra.util.rmtrailingnans(T,Q,R);  % remove trailing nans
-Q           = bfra.util.fillnans(Q,fmax);       % gap fill missing values
+Q(Q<qmin)   = nan;                     % set values < qmin nan
+Q           = setconstantnan(Q,rmax);  % set constant non-nan values nan
+[T,Q,R,iF]  = rmleadingnans(T,Q,R);    % remove leading nans
+[T,Q,R]     = rmtrailingnans(T,Q,R);   % remove trailing nans
+Q           = fillnans(Q,fmax);        % gap fill missing values
 
 % smooth measurement noise
 if asannual
-   Q = bfra.util.smoothflow(Q);
+   Q = smoothflow(Q);
 end
 
 

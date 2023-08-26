@@ -95,7 +95,7 @@ for n = 1:length(iS)
          T = [T;Tn];
          Q = [Q;Qn];
          R = [R;Rn];
-         Info = bfra.util.catstructfields(1,Info,Infon);
+         Info = catstructfields(1,Info,Infon);
       end
    end
 end

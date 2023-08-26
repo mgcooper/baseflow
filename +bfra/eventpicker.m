@@ -61,8 +61,8 @@ for n = 1:numEvents
    
    % islineconvex might be too restrictive, but without it, ETS call to
    % exponential fit sometimes fails, and nonlinear fitting will fail
-   if bfra.util.islineconvex(qPick) || bfra.util.islineconvex(-diff(qPick))
-      numEvents=numEvents-1;
+   if islineconvex(qPick) || islineconvex(-diff(qPick))
+      numEvents = numEvents - 1;
       continue
    end
    
@@ -123,8 +123,8 @@ Qdot = cell(size(startPts));
 for n = 1:numPicks
    difStart = abs(t-startPts(n));
    difStop  = abs(t-endPts(n));
-   istart(n) = bfra.util.findmin(difStart,1,'first');
-   istop(n)  = bfra.util.findmin(difStop,1,'first');
+   istart(n) = findmin(difStart,1,'first');
+   istop(n)  = findmin(difStop,1,'first');
    
    t_n = t(istart(n):istop(n));
    q_n = q(istart(n):istop(n));

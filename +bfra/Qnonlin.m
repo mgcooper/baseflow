@@ -6,7 +6,7 @@ function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
 % 
 % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 % 
-% See also taufunc, getfunction, QtauString, QtString
+% See also: getfunction, QtauString, QtString
 
 % if called with no input, open this file
 if nargin == 0; open(mfilename('fullpath')); return; end

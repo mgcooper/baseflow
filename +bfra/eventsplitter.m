@@ -115,7 +115,7 @@ end
 % exclude sequences of two or more of (dq/dt = 0) (see setconstantnan)
 if rmnochange == true
    inoc = d2qdt; inoc(inoc ~= 0) = nan;
-   inoc = find(bfra.util.isminlength(inoc, rmax));
+   inoc = find(isminlength(inoc, rmax));
    ibad = [ibad; inoc];
 end
 
@@ -131,7 +131,7 @@ tfc(ibad) = false;            % set unuseable values false
 tfk(ibad) = nan;              % set unuseable values nan
 
 % find events >= min length
-[tfk,is,ie] = bfra.util.isminlength(tfk, nmin); 
+[tfk,is,ie] = isminlength(tfk, nmin); 
 eventlength = ie - is + 1; % event (run) lengths
 
 % pull out the events
@@ -149,7 +149,7 @@ for n = 1:N
       continue
    end
    qi = q(is(n):ie(n));
-   if bfra.util.islineconvex(qi) || bfra.util.islinepositive(qi)
+   if islineconvex(qi) || islinepositive(qi)
       N = N-1;
       continue
    end

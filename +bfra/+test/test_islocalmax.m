@@ -24,7 +24,7 @@ function setup(testCase)
    plot(t(s==1),A(s==1),'o', 'HandleVisibility', 'off')
    plot(t(s==-1),A(s==-1),'o', 'HandleVisibility', 'off')
    scatter(t(maxVals),A(maxVals), 100, 'filled', 'displayname', 'Peak')
-   datetick; title('test: bfra.util.islocalmax'); legend
+   datetick; title('test: islocalmax'); legend
 
    % Ignore repeated values.
    uniquePts = [pad; (A(2:end,:) ~= A(1:(end-1),:))];
@@ -58,6 +58,8 @@ end
 
 function test_peakfinder(testCase)
 
+   customislocalmax = bfra.privatefunction('islocalmax');
+   
    A = testCase.TestData.A;
    expectedPeakIndex = testCase.TestData.expectedPeakIndex;
    
@@ -66,7 +68,7 @@ function test_peakfinder(testCase)
       [~,i_findpeaks,~,p_findpeaks] = findpeaks(A);
    catch
    end
-   tf_custom = bfra.util.islocalmax(A);
+   tf_custom = customislocalmax(A);
    
    % get the index of the peak
    i_peakfinder = bfra.deps.peakfinder(A); %#ok<*NASGU> 

@@ -1,0 +1,25 @@
+{
+   "_schemaVersion": "1.0.0",
+   "fitets":
+   {
+      "inputs":
+      [
+         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["double","vector"]]},
+         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
+         {"name":"R",         "kind":"required",   "type":["vector","double"]},
+         {"name":"etsparam",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   },
+   "fitvts":
+   {
+      "inputs":
+      [
+         {"name":"T",         "kind":"required",   "type":[["datetime","vector"],["double","vector"]]},
+         {"name":"Q",         "kind":"required",   "type":["vector","double"]},
+         {"name":"R",         "kind":"required",   "type":["vector","double"]},
+         {"name":"vtsparam",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"plotfit",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+      ]
+   }
+}

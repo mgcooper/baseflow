@@ -38,28 +38,28 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 
 % INIT OUTPUT
-[hFits,Fits,Picks] = initOutput();
+[hFits, Fits, Picks] = initOutput();
 
 
 % Prep fits
-[~,~,logx,logy,weights,ok] = bfra.prepfits(q,dqdt,'weights',weights);
+[~, ~, logx, logy, weights, ok] = bfra.prepfits(q, dqdt, 'weights', weights);
 
 if ok == false
    return;
 end
 
 % Pick fits
-Picks = fitSelector(logx,logy,weights,pickmethod,rain);
+Picks = fitSelector(logx, logy, weights, pickmethod, rain);
 
 % Fit picks
-Fits = pickFitter(Picks,fitmethod);
+Fits = pickFitter(Picks, fitmethod);
 
 % plot the fits
-hFits = plotFits(Fits,Picks,fitmethod,ax,plotfits,         ...
-   showfig,blate,timestep,precision,labelplot);
+hFits = plotFits(Fits, Picks, fitmethod, ax, plotfits,         ...
+   showfig, blate, timestep, precision, labelplot);
 
 %% LOCAL FUNCTIONS
-function [hFits,Fits,Picks] = initOutput()
+function [hFits, Fits, Picks] = initOutput()
 
 % initialize output
 Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
@@ -81,8 +81,8 @@ switch pickmethod
    case 'auto'       % auto detect transition between early/late time
 
       % if called w/o output, it will generate a figure
-      chgpts = findchangepts(dqdt, 'MaxNumChanges', 2,'Statistic', ...
-         'linear', 'MinDistance', 2 );
+      chgpts = findchangepts(dqdt, 'MaxNumChanges', 2, 'Statistic', ...
+         'linear', 'MinDistance', 2);
       nPicks = numel(chgpts);
 
       % get the segment start/ends
@@ -90,15 +90,15 @@ switch pickmethod
       istop    = [ chgpts(1:nPicks); numel(q);        ];
 
       % exclude segments <4. these are always included in the event fit
-      rlengths = istop-istart+1;
-      ok       = rlengths>4;
+      rlengths = istop - istart + 1;
+      ok       = rlengths > 4;
       istart   = istart(ok);
       istop    = istop(ok);
 
    case 'manual'
 
       % pause helps with buggy ginput
-      pickFig     = eventPlotter(q,dqdt); pause(0.5);
+      pickFig     = eventPlotter(q, dqdt); pause(0.5);
       pickedPts   = bfra.deps.ginputc(); pause(0.5);
       startPts    = pickedPts(1:2:end);
       endPts      = pickedPts(2:2:end);
@@ -110,10 +110,10 @@ switch pickmethod
       istop  = nan(size(startPts));
 
       for n = 1:numel(startPts)
-         difStart = abs(q-startPts(n));
-         difStop = abs(q-endPts(n));
-         istart(n) = bfra.util.findmin(difStart,1,'first');
-         istop(n) = bfra.util.findmin(difStop,1,'first');
+         difStart = abs(q - startPts(n));
+         difStop = abs(q - endPts(n));
+         istart(n) = findmin(difStart, 1, 'first');
+         istop(n) = findmin(difStop, 1, 'first');
       end
 
 end
@@ -124,7 +124,7 @@ istop  = [istop; numel(q)];
 nPicks = numel(istart);
 
 if pickmethod ~= "none"
-   fprintf('%.f picks identified +event = %.f\n',nPicks-1,nPicks)
+   fprintf('%.f picks identified +event = %.f\n', nPicks-1, nPicks)
 end
 
 % cycle through the picks and pull out the data

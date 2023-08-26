@@ -270,7 +270,7 @@ logx = logx(weights>0);
 logy = logy(weights>0);
 
 % fit a,b using quantile regression
-[ab,s] = bfra.deps.quantreg(logx,logy,qtl,order,Nboot,1-alpha);
+[ab,s] = quantreg(logx,logy,qtl,order,Nboot,1-alpha);
 
 % transform a to linear space and package a/b
 ab = [exp(ab(1)); ab(2)];

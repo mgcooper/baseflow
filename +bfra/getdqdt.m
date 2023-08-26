@@ -51,15 +51,15 @@ switch derivmethod
 
    case 'VTS'  % variable time step
 
-      [q,dqdt,dt,tq,rq] = bfra.fitvts(T,Q,R,'vtsparam',vtsparam);
+      [q,dqdt,dt,tq,rq] = fitvts(T,Q,R,'vtsparam',vtsparam);
 
    case 'ETS'  % exponential timestep
 
-      [q,dqdt,dt,tq,rq] = bfra.fitets(T,Q,R,'etsparam',etsparam);
+      [q,dqdt,dt,tq,rq] = fitets(T,Q,R,'etsparam',etsparam);
 
    case 'CTS'  % constant time step
 
-      [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
+      [q,dqdt,dt,tq,rq] = fitcts(T,Q,R,ctsmethod);
 
 end
 

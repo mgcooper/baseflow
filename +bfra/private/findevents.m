@@ -68,18 +68,18 @@ plotevents  = p.Results.plotevents;
 
 % iF is the first non-nan index, to recover indices after removing nans
 numdata     = numel(T);
-Q(Q<qmin)   = nan;                              % set values < qmin nan
-Q           = bfra.util.setconstantnan(Q,rmax); % set constant non-nan values nan
-[T,Q,R,iF]  = bfra.util.rmleadingnans(T,Q,R);   % remove leading nans
-[T,Q,R]     = bfra.util.rmtrailingnans(T,Q,R);  % remove trailing nans
-Q           = bfra.util.fillnans(Q,fmax);       % gap fill missing values
-Q           = bfra.util.smoothflow(Q);          % smooth measurement noise
+Q(Q<qmin)   = nan;                     % set values < qmin nan
+Q           = setconstantnan(Q,rmax);  % set constant non-nan values nan
+[T,Q,R,iF]  = rmleadingnans(T,Q,R);    % remove leading nans
+[T,Q,R]     = rmtrailingnans(T,Q,R);   % remove trailing nans
+Q           = fillnans(Q,fmax);        % gap fill missing values
+Q           = smoothflow(Q);           % smooth measurement noise
 
 % % for reference, two other options I tested
-% [Q,win]   = smoothnoise(Q,'annual');  % smooth measurement noise
-% [Q,win]   = smoothdata(Q,'sgolay');  % smooth measurement noise
+% [Q, win] = smoothnoise(Q, 'annual');  % smooth measurement noise
+% [Q, win] = smoothdata(Q, 'sgolay');  % smooth measurement noise
 
-if isempty(Q)||sum(~isnan(Q))<nmin % fast exit
+if isempty(Q) || sum(~isnan(Q)) < nmin % fast exit
    [t,q,r,Info] = setEventEmpty;
 else
 

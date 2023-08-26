@@ -32,7 +32,7 @@ if nargin == 1
 end
 X = x;
 x = x(x>xmin)-xmin;
-[x,~] = bfra.util.prepCurveData(x,x);
+[x,~] = prepCurveData(x,x);
 
 % get k, klow, and khigh then convert to b
 Dist = fitdist(x,'GeneralizedPareto');
@@ -109,8 +109,8 @@ end
 if plotfit == true
 
    % fit a ccdf to the original data and the x-xmin data
-   [F,X] = bfra.util.ccdf(X);
-   [~,x] = bfra.util.ccdf(x);
+   [F,X] = ccdf(X);
+   [~,x] = ccdf(x);
 
    % either use x (ie x-xmin) w/theta=0 or x+xmin w/ theta=xmin
    F2 = gpcdf(x,kM,Dist.sigma,Dist.theta,'upper');
@@ -190,7 +190,7 @@ if plotfit == true
    % % test using plplot instead
    % aci = [alphaH alphaL];
    % x = X(X>0);
-   % [x,~] = bfra.util.prepCurveData(x,x);
+   % [x,~] = prepCurveData(x,x);
    % figure;
    % bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
 end
