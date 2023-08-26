@@ -25,30 +25,9 @@ function h=subtight(m,n,p,varargin)
 %       be defined. For default gap value use empty element- [].
 %
 % Usage example: h=subtightplot((2,3,1:2,[0.5,0.2])
-classes  = {'numeric','char'};
-atts     = {'nonempty'};
-valg     = @(x)validateattributes(x,classes,atts,'subtight','gap');
-valw     = @(x)validateattributes(x,classes,atts,'subtight','gap');
-valh     = @(x)validateattributes(x,classes,atts,'subtight','gap');
-parser   = bfra.deps.magicParser;
-parser.FunctionName = 'subplottight';
-parser.addRequired('m',@(x)isnumeric(x));
-parser.addRequired('n',@(x)isnumeric(x));
-parser.addRequired('p',@(x)isnumeric(x));
-parser.addParameter('gap',[0.06 0.06],valg);
-parser.addParameter('marw',[0.06 0.06],valw);
-parser.addParameter('marh',[0.06 0.06],valh);
-parser.addParameter('style','userdef',@(x)ischar(x));
-parser.addParameter('gapstyle','userdef',@(x)ischar(x));
-parser.addParameter('wstyle','userdef',@(x)ischar(x));
-parser.addParameter('hstyle','userdef',@(x)ischar(x));
 
-parser.parseMagically('caller');
-[gap,marw,marh] = parsemargins(gap,marw,marh,style,gapstyle,wstyle,hstyle);
-
-% % not inplemented:
-% % put unmatched stuff into a dummy varargin to pass to subplot
-% unmatched = parser.Unmatched;
+% parse inputs
+[m, n, p, gap, marw, marh] = parseinputs(m, n, p, mfilename, varargin{:});
 
 % below follows original subtightplot
 gap_vert   = gap(1);
@@ -93,6 +72,44 @@ pos_vec=[merged_left merged_bottom merged_width merged_height];
 h=subplot('Position',pos_vec);
 
 if (nargout < 1),  clear h;  end
+
+function [m, n, p, gap, marw, marh] = parseinputs(m, n, p, funcname, varargin);
+
+classes = {'numeric','char','string'};
+atts = {'nonempty'};
+valg = @(x)validateattributes(x,classes,atts,'subtight','gap');
+valw = @(x)validateattributes(x,classes,atts,'subtight','marw');
+valh = @(x)validateattributes(x,classes,atts,'subtight','marh');
+parser = inputParser;
+parser.FunctionName = funcname;
+parser.addRequired('m',@(x)isnumeric(x));
+parser.addRequired('n',@(x)isnumeric(x));
+parser.addRequired('p',@(x)isnumeric(x));
+parser.addParameter('gap',[0.06 0.06],valg);
+parser.addParameter('marw',[0.06 0.06],valw);
+parser.addParameter('marh',[0.06 0.06],valh);
+parser.addParameter('style','userdef',@(x)ischarlike(x));
+parser.addParameter('gapstyle','userdef',@(x)ischarlike(x));
+parser.addParameter('wstyle','userdef',@(x)ischarlike(x));
+parser.addParameter('hstyle','userdef',@(x)ischarlike(x));
+
+parser.parse(m,n,p,varargin{:});
+m = parser.Results.m;
+n = parser.Results.n;
+p = parser.Results.p;
+gap = parser.Results.gap;
+marw = parser.Results.marw;
+marh = parser.Results.marh;
+style = parser.Results.style;
+gapstyle = parser.Results.gapstyle;
+wstyle = parser.Results.wstyle;
+hstyle = parser.Results.hstyle;
+
+[gap, marw, marh] = parsemargins(gap, marw, marh, style, gapstyle, wstyle, hstyle);
+
+% % not inplemented:
+% % put unmatched stuff into a dummy varargin to pass to subplot
+% unmatched = parser.Unmatched;
 
 
 function [gap,marw,marh] = parsemargins(gap,marw,marh,sty,gapsty,wsty,hsty)
