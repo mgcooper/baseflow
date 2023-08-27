@@ -23,7 +23,7 @@ sitename = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 % Load streamflow data for the test basin into the workspace. In the sample
 % dataset, the variable |T| is _time_, |Q| is _discharge_, and |R| is _rainfall_.
 
-[T,Q,R] = bfra.test.testdata('example');
+[T,Q,R] = bfra.testdata('example');
 %%
 % The minimum required information for baseflow recession analysis is a timeseries
 % of streamflow. For aquifer property estimation, the surface area of the upstream
@@ -52,7 +52,7 @@ L = A*Dd/1000;       % active stream length
 opts.getevents = bfra.setopts('getevents');
 opts.fitevents = bfra.setopts('fitevents');
 opts.globalfit = bfra.setopts('globalfit','drainagearea',A,'streamlength',L, ...
-   'drainagedens',Dd,'isflat',true,'plotfits',true);
+   'drainagedensity',Dd,'isflat',true,'plotfits',true);
 %% Aquifer characterization workflow
 % The following steps demonstrate a typical workflow in aquifer characterization
 % analysis. The steps consist of getting a list of recession events, fitting the

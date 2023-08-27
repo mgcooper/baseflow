@@ -6,7 +6,7 @@ end
 function setup(testCase)
 
    % generate test data
-   [T,Q] = bfra.test.testdata("example");
+   [T,Q] = bfra.testdata("example");
    
    t = T(100:200);
    A = Q(100:200);
@@ -91,7 +91,7 @@ end
 % 
 % % generate test data
 % 
-% [T,Q,R] = bfra.test.testdata("example");
+% [T,Q,R] = bfra.testdata("example");
 % 
 % t = T(100:200);
 % A = Q(100:200);

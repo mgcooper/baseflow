@@ -27,7 +27,7 @@ sitename = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 % dataset, the variable |T| is _time_, |Q| is _discharge_, and |R| is
 % _rainfall_.
 
-[T,Q,R] = bfra.test.testdata('example');
+[T,Q,R] = bfra.testdata('example');
 %% Plot the input data
 % Plot one year of the streamflow and precipitation data using the |bfra.hyetograph|
 % function.
