@@ -24,22 +24,37 @@ yticks = get(ax,'YTick');
 % get the number of decades spanned by each axis and ensure 2 ticks for one
 % decade or max 5 ticks for >5 decades
 if isnumeric(ylims)
+   % Check for zeros. This may not work in general. Reset 0 to min value.
+   if ismember(0, ylims)
+      [~, ydata] = getplotdata(ax);
+      ylims = sort([min(ydata)/1.05 ylims(~ismember(ylims, 0))]);
+   end
    numdecy = log10(ylims(2))-log10(ylims(1));
    numticy = min(max(2,numdecy),5);
 end
 
 % repeat for xlims
 if isnumeric(xlims)
+   % Check for zeros. This may not work in general. Reset 0 to min value.
+   if ismember(0, xlims)
+      xdata = getplotdata(ax);
+      xlims = sort([min(xdata)/1.05 xlims(~ismember(xlims, 0))]);
+   end
    numdecx = log10(xlims(2))-log10(xlims(1));
    numticx = min(max(2,numdecx),5); % no idea if 5 is generally good
 end
 
 
-% need to check if get(ax,'XTickMode or get(ax,'XTickLabelMode is manual
+% need to check if get(ax,'XTickMode) or get(ax,'XTickLabelMode) is manual
 skipx = false;
 skipy = false;
-if strcmp(get(ax,'XTickMode'),'manual'); skipx = true; end
-if strcmp(get(ax,'YTickMode'),'manual'); skipy = true; end
+if strcmp(get(ax, 'XTickMode'), 'manual') && ~strcmp('x', opts.axset)
+   skipx = true;
+end
+if strcmp(get(ax,'YTickMode'),'manual') && ~strcmp('y', opts.axset)
+   skipy = true;
+end
+
 
 % Update Nov 2022: added numel(get(ax,'XTick) b/c I am pretty sure I am getting the
 % number of ticks and only resetting them if there are less than two. Also,
