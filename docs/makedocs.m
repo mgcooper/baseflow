@@ -1,24 +1,42 @@
 function makedocs(varargin)
-%MAKEDOCS publish bfra_gettingStarted.m as index.html for GitPages
+%MAKEDOCS publish GettingStarted.m as index.html for GitPages
 
 % Note: the repo is configured to publish from docs/ and the default action
 % publishes index.html using jekyll. For custom builds, use a .nojekyll file
 
-% three options: publish example docs, function docs, or build docsearch db
-opts = bfra.util.optionParser({'examples','functions','docsearch'},varargin(:));
+% Publish options: 
+% docs pages
+% demos
+% function docs
+% re-build docsearch database
 
-% set paths 
+% Parse optional arguments
+validopts = {'docpages', 'demos', 'functions', 'docsearch', 'testrun'};
+narginchk(1, numel(validopts))
+
+% Convert to a struct array of logical flags
+opts = cell2struct(num2cell(cellfun(@(arg) ismember(arg, varargin), ...
+   validopts)), validopts, 2);
+
+% Set paths to this folder and the toolbox base path
 thispath = fileparts(mfilename('fullpath'));
 basepath = fileparts(thispath);
 
-testrun = false;
-if testrun == true
+% Test run option publishes to an ignored testbed/ folder
+if opts.testrun == true
    docspath = fullfile(basepath, 'testbed', 'docs');
+   if ~isfolder(docspath)
+      error('testbed/docs folder does not exist')
+   end
 else
    docspath = thispath;
 end
 
-% nest m2html stuff in html/ to easily distinguish it from matlab publish stuff
+% Path to live script demos
+demopath = fullfile(basepath, 'demos');
+
+% Path to save the html files. Nest m2html/ in html/ to distinguish it from
+% matlab publish stuff  
 htmlpath = fullfile(docspath, 'html');
 m2htmlpath = fullfile(htmlpath, 'm2html');
 
@@ -29,6 +47,23 @@ mpubopts = struct( ...
    'useNewFigure', false ...
    );
 
+%% publish live scripts as demo html files and octave-compatible mfiles
+
+if opts.demos
+   filelist = dir(fullfile(demopath, '*.mlx'));
+   
+   for n = 1:numel(filelist)
+      demofile = fullfile(filelist(n).folder, filelist(n).name);
+      [~, filename] = fileparts(demofile);
+      htmlfile = fullfile(htmlpath, [filename '.html']);
+      
+      export(demofile, htmlfile);
+   end
+   
+   % To convert to m-files, use convertlivescripts
+   convertlivescripts
+end
+
 %% build a doc search database
  
 if opts.docsearch == true
@@ -37,7 +72,7 @@ end
 
 %% publish the example documentation using publish
 
-if opts.examples == true
+if opts.docpages == true
    
    % publish the standard docs using matlab's publish
    publish(fullfile(docspath, 'bfra_welcome.m'), mpubopts);

@@ -143,22 +143,22 @@ if isempty(parser)
    parser.PartialMatching = false;
    parser.CaseSensitive = true;
 
-   parser.addRequired('T', @bfra.validation.isdatelike);
+   parser.addRequired('T', @isdatelike);
    parser.addRequired('Q', @isnumeric);
    parser.addRequired('R', @isnumeric);
 
-   parser.addParameter('qmin', 1, @bfra.validation.isnumericscalar);
-   parser.addParameter('nmin', 4, @bfra.validation.isnumericscalar);
-   parser.addParameter('fmax', 2, @bfra.validation.isnumericscalar);
-   parser.addParameter('rmax', 2, @bfra.validation.isnumericscalar);
-   parser.addParameter('rmin', 0, @bfra.validation.isnumericscalar);
-   parser.addParameter('cmax', 2, @bfra.validation.isnumericscalar);
-   parser.addParameter('rmconvex', false, @bfra.validation.islogicalscalar);
-   parser.addParameter('rmnochange', false, @bfra.validation.islogicalscalar);
-   parser.addParameter('rmrain', false, @bfra.validation.islogicalscalar);
-   parser.addParameter('pickevents', false, @bfra.validation.islogicalscalar);
-   parser.addParameter('plotevents', false, @bfra.validation.islogicalscalar);
-   parser.addParameter('asannual', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('qmin', 1, @isnumericscalar);
+   parser.addParameter('nmin', 4, @isnumericscalar);
+   parser.addParameter('fmax', 2, @isnumericscalar);
+   parser.addParameter('rmax', 2, @isnumericscalar);
+   parser.addParameter('rmin', 0, @isnumericscalar);
+   parser.addParameter('cmax', 2, @isnumericscalar);
+   parser.addParameter('rmconvex', false, @islogicalscalar);
+   parser.addParameter('rmnochange', false, @islogicalscalar);
+   parser.addParameter('rmrain', false, @islogicalscalar);
+   parser.addParameter('pickevents', false, @islogicalscalar);
+   parser.addParameter('plotevents', false, @islogicalscalar);
+   parser.addParameter('asannual', false, @islogicalscalar);
 end
 parser.FunctionName = ['bfra.' mfilename];
 parser.parse(T, Q, R, varargin{:});

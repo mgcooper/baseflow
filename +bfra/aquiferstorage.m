@@ -1,5 +1,5 @@
 function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
-% AQUIFERSTORAGE estimate aquifer storage 
+% AQUIFERSTORAGE Estimate aquifer storage from recession event parameters.
 % 
 % Syntax
 % 

@@ -1,4 +1,22 @@
-classdef ParameterizedTestBfra < matlab.unittest.TestCase
+classdef TestBaseflow < matlab.unittest.TestCase
+   %TESTBASEFLOW Test the baseflow toolbox.
+   % 
+   % TestBaseflow contains a set of parameterized unit tests:
+   %     1) an equality test for a string variable
+   %     2) an equality test for a database lookup (basin-name) variable
+   %     3) an equality test for a derivative calculation 
+   %     4) an equality test for event curve-fitting using nonlinear regression
+   %     5) an equality test for parameter conversions
+   %     6) an equality test for power law distribution fitting
+   %     7) an equality test for aquifer storage estimation
+   %     8) an equality test for aquifer thickness estimation
+   %
+   % Notes:
+   %     A) A negative test verifies that the code errors/fails in an
+   %        expected way (e.g., the code gives the right error for a
+   %        specific bad input)
+   % 
+   % See also: 
 
    properties (TestParameter)
       SetupOption = {'install','uninstall','dependencies','addpath','savepath','rmpath','delpath'};
@@ -37,6 +55,18 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          testCase.verifyEqual(strActual,expectedStr)
       end
 
+      
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_basinname(testCase,BasinName)
+
+         % get the basin name from the database
+         ActualName = bfra.basinname(BasinName);
+
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(BasinName,ActualName);
+      end
+      
       %-------------------------------------------
       %-------------------------------------------
       function test_getdqdt(testCase,DerivMethod)
@@ -45,7 +75,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          a = 1e-2;
          b = 1.5;
          q0 = 1;
-         [q,~,t] = bfra.util.generateTestData(a,b,q0);
+         [t, q] = bfra.generateTestData(a,b,q0);
 
          % Calculate expected result for CTS method
          dq = q-[nan; q(1:end-1)];
@@ -79,7 +109,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          % for testing
          % FitMethod = 'ols';
          % b = 1.5;
-         % [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
+         % [~,q,dqdt] = bfra.generateTestData(a,b,q0,t);
          % figure; loglog(q,-dqdt,'o')
          % also useful to see this:
          % bfra.Qnonlin(a,b,q0,t,true)
@@ -90,7 +120,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          % f = bfra.fitab(q,dqdt,'median'); ab = f.ab
 
          % generate the test data
-         [q,dqdt] = bfra.util.generateTestData(a,b,q0,t);
+         [~,q,dqdt] = bfra.generateTestData(a,b,q0,t);
 
          % fit the data
          switch FitMethod
@@ -223,8 +253,8 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          % RmConvex = true;
 
          % Generate synthetic data. prec controls how large the test vectors are
-         prec = 2; 
-         [t, q] = prepareEventData(testCase, prec); %#ok<*INUSD> 
+         prec = 2;
+         [t, q] = prepareEventData(testCase, prec); %#ok<*INUSD>
          [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex);
 
          % Define expected t and q
@@ -304,7 +334,7 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
       function test_MinEventDuration(testCase, MinEventDuration, RmConvex)
 
          % Generate synthetic data. prec controls how large the test vectors are
-         prec = 2; 
+         prec = 2;
          [t, q] = prepareEventData(testCase, prec);
          [starts, ends] = eventIndices(testCase, t, prec, RmConvex);
 
@@ -330,28 +360,17 @@ classdef ParameterizedTestBfra < matlab.unittest.TestCase
          %  RmConvex, 'rmnochange', false, 'rmrain', false));
       end
 
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_basinname(testCase,BasinName)
-
-         % get the basin name from the database
-         ActualName = bfra.basinname(BasinName);
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual(BasinName,ActualName);
-      end
-
    end
 
    methods (Access = private) % Helper methods
 
-      function [t, q] = prepareEventData(testCase, prec) %#ok<*INUSD> 
+      function [t, q] = prepareEventData(testCase, prec) %#ok<*INUSD>
          % This function handles some common operations related to test data
 
          if nargin < 2
             prec = 2; % precision, controls how large the test vectors are
          end
-         
+
          % generate synthetic data
          dpi = 10^-prec;
          t = -2*pi:dpi:2*pi;

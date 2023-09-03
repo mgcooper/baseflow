@@ -68,8 +68,6 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 %% set default bfra settings
 
-import bfra.validation.*
-
 p = inputParser;
 p.FunctionName = 'bfra.setopts';
 

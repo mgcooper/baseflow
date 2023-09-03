@@ -145,16 +145,16 @@ persistent parser
 if isempty(parser)
    parser = inputParser;
    parser.CaseSensitive = true;
-   parser.addRequired('T', @bfra.validation.isdatelike);
-   parser.addRequired('Q', @bfra.validation.isnumericvector);
+   parser.addRequired('T', @isdatelike);
+   parser.addRequired('Q', @isnumericvector);
    parser.addRequired('R', @isnumeric);
    parser.addRequired('derivmethod', @ischar);
    parser.addParameter('pickmethod', 'none', @ischar);
    parser.addParameter('fitmethod', 'nls', @ischar);
    parser.addParameter('ctsmethod', 'B1', @ischar);
-   parser.addParameter('vtsparam', 1, @bfra.validation.isnumericscalar);
-   parser.addParameter('etsparam', 0.2, @bfra.validation.isnumericscalar);
-   parser.addParameter('plotfits', false, @bfra.validation.islogicalscalar);
+   parser.addParameter('vtsparam', 1, @isnumericscalar);
+   parser.addParameter('etsparam', 0.2, @isnumericscalar);
+   parser.addParameter('plotfits', false, @islogicalscalar);
    parser.addParameter('eventID', 'none', @ischar);
 end
 parser.FunctionName = funcname;

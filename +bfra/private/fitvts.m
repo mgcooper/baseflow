@@ -4,8 +4,8 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
    %  Syntax
    %
    %     VTS = fitvts(T,Q,R)
-   %     VTS = fitvts(___,'vtsparam',vtsparam)
-   %     VTS = fitvts(___,'plotfit',plotfit)
+   %     VTS = fitvts(_,'vtsparam',vtsparam)
+   %     VTS = fitvts(_,'plotfit',plotfit)
    %
    % Required inputs
    %

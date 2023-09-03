@@ -30,9 +30,9 @@ end
 
 if dim == 2
    % compute mean, stderr, ci, etc
-   [SE,CI,PM,mu,sigma] = bfra.util.stderr(table2array(Data),'alpha',alpha); 
+   [SE,CI,PM,mu,sigma] = stderror(table2array(Data),'alpha',alpha); 
 elseif dim == 1
-   [SE,CI,PM,mu,sigma] = bfra.util.stderr(transpose(table2array(Data)),'alpha',alpha); 
+   [SE,CI,PM,mu,sigma] = stderror(transpose(table2array(Data)),'alpha',alpha); 
 end
    
 CIL = CI(:,1); CIH = CI(:,2);

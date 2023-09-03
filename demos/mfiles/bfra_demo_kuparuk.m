@@ -49,7 +49,7 @@ load('data/annualdata.mat','Data');
 % Set the algorithm options. Here we use a combination of default options and 
 % site-specific options.
 
-opts.getevents = bfra.setopts('getevents');
+opts.getevents = bfra.setopts('getevents', 'asannual', true);
 opts.fitevents = bfra.setopts('fitevents');
 opts.globalfit = bfra.setopts('globalfit','drainagearea',A,'aquiferdepth',D, ...
    'streamlength',L,'drainagedensity',Dd,'bootfit',bootfit,'bootreps',nreps, ...
@@ -58,7 +58,7 @@ opts.globalfit = bfra.setopts('globalfit','drainagearea',A,'aquiferdepth',D, ...
 % Get all recession events and then fit them
 
 if fitevents == true
-   [Events] = bfra.wrapevents(T,Q,R,opts.getevents); 
+   [Events, Info] = bfra.wrapevents(T,Q,R,opts.getevents); 
    [Fits,K] = bfra.fitevents(Events,opts.fitevents);
    
    if savedata == true
@@ -115,9 +115,9 @@ DataG = DataC(find(year(DataC.Time)==2002):end,:);
 % Plot the alt trend
 
 if plotfigs == true
-   bfra.util.plotalttrend(Data.Time,Data.Db,Data.sigDb);
-   bfra.util.plotalttrend(DataC.Time,DataC.Db,DataC.sigDb,DataC.Dc,DataC.sigDc);
-   bfra.util.plotalttrend(DataG.Time,DataG.Db,DataG.sigDb,DataG.Dc,DataG.sigDc);
+   bfra.plotaquifertrend(Data.Time,Data.Db,Data.sigDb);
+   bfra.plotaquifertrend(DataC.Time,DataC.Db,DataC.sigDb,DataC.Dc,DataC.sigDc);
+   bfra.plotaquifertrend(DataG.Time,DataG.Db,DataG.sigDb,DataG.Dc,DataG.sigDc);
 end
 %% 
 % Save the data

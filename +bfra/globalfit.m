@@ -44,9 +44,9 @@ if nargin == 0; open(mfilename('fullpath')); return; end
    Results, Events, Fits, mfilename, varargin{:});
 
 % Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
-[tau,q,dqdt,tags] = bfra.eventtau(Results,Events,Fits,'usefits',false);
-TauFit = bfra.plfitb(tau,'plotfit',plotfits,'bootfit',bootfit, ...
-   'bootreps',nreps,'limit',20);
+[tau, q, dqdt, tags] = bfra.eventtau(Results, Events, Fits, 'usefits', false);
+TauFit = bfra.plfitb(tau, 'plotfit', plotfits, 'bootfit', bootfit, ...
+   'bootreps', nreps, 'limit', 20);
 
 % Parameters needed for next steps
 bhat     = TauFit.b;
@@ -57,31 +57,31 @@ tauexp   = TauFit.tau;
 itau     = TauFit.taumask;
 
 % Fit a
-[ahat,ahatLH,xbar,ybar] = bfra.pointcloudintercept(q,dqdt,bhat,'envelope',  ...
-   'refqtls',refqtls,'mask',itau,'bci',[bhatL bhatH]);
+[ahat, ahatLH, xbar, ybar] = bfra.pointcloudintercept(q, dqdt, bhat, ...
+   'envelope', 'refqtls', refqtls, 'mask', itau, 'bci', [bhatL bhatH]);
                         
 % Fit Q0 and Qhat
-[Qexp,Q0,pQexp,pQ0] = bfra.expectedQ(ahat,bhat,tauexp,q,dqdt,tau0, ...
-   'qtls',Q,'mask',itau);
+[Qexp, Q0, pQexp, pQ0] = bfra.expectedQ(ahat, bhat, tauexp, q, dqdt, tau0, ...
+   'qtls', Q, 'mask', itau);
 
 % Fit phi
 switch phimethod
    case 'distfit'
-      phid = bfra.eventphi(Results,Fits,A,D,L,bhat,'lateqtls',lateqtls, ...
-         'earlyqtls',earlyqtls);
-      phi = bfra.fitphidist(phid,'mean','cdf',plotfits);
+      phid = bfra.eventphi(Results, Fits, A, D, L, bhat, ...
+         'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
+      phi = bfra.fitphidist(phid, 'mean', 'cdf', plotfits);
       
    case 'pointcloud'
-      phi = bfra.cloudphi(q,dqdt,bhat,A,D,L,'envelope','lateqtls',refqtls, ...
-         'earlyqtls',earlyqtls,'mask',itau);
+      phi = bfra.cloudphi(q, dqdt, bhat, A, D, L, 'envelope', ...
+         'lateqtls', refqtls, 'earlyqtls', earlyqtls, 'mask', itau);
       
    case 'phicombo'
-      phi1 = bfra.eventphi(Results,Fits,A,D,L,1,'lateqtls',lateqtls, ...
-         'earlyqtls',earlyqtls);
-      phi2 = bfra.eventphi(Results,Fits,A,D,L,3/2,'lateqtls',lateqtls, ...
-         'earlyqtls',earlyqtls);
-      phid = vertcat(phi1,phi2); phid(phid>1) = nan; phid(phid<0) = nan;
-      phi = bfra.fitphidist(phid,'mean','cdf',plotfits);
+      phi1 = bfra.eventphi(Results, Fits, A, D, L, 1, ...
+         'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
+      phi2 = bfra.eventphi(Results, Fits, A, D, L, 3/2, ...
+         'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
+      phid = vertcat(phi1, phi2); phid(phid>1) = nan; phid(phid<0) = nan;
+      phi = bfra.fitphidist(phid, 'mean', 'cdf', plotfits);
 end
 
 % % Fit k
@@ -134,21 +134,21 @@ parser.PartialMatching = false;
 parser.addRequired('Results', @isstruct);
 parser.addRequired('Events', @isstruct);
 parser.addRequired('Fits', @isstruct);
-parser.addParameter('drainagearea', nan, @bfra.validation.isnumericscalar);
-parser.addParameter('drainagedensity', 0.8, @bfra.validation.isnumericscalar);
-parser.addParameter('aquiferdepth', nan, @bfra.validation.isnumericscalar);
-parser.addParameter('streamlength', nan, @bfra.validation.isnumericscalar);
-parser.addParameter('aquiferslope', nan, @bfra.validation.isnumericscalar);
-parser.addParameter('aquiferbreadth', nan, @bfra.validation.isnumericscalar);
-parser.addParameter('drainableporosity', 0.1, @bfra.validation.isnumericscalar);
-parser.addParameter('isflat', true, @bfra.validation.islogicalscalar);
-parser.addParameter('plotfits', false, @bfra.validation.islogicalscalar);
-parser.addParameter('bootfit', false, @bfra.validation.islogicalscalar);
-parser.addParameter('bootreps', 1000, @bfra.validation.isdoublescalar);
-parser.addParameter('phimethod', 'pointcloud', @bfra.validation.ischarlike);
-parser.addParameter('refqtls', [0.50 0.50],  @bfra.validation.isnumericvector);
-parser.addParameter('earlyqtls', [0.95 0.95],  @bfra.validation.isnumericvector);
-parser.addParameter('lateqtls', [0.50 0.50],  @bfra.validation.isnumericvector);
+parser.addParameter('drainagearea', nan, @isnumericscalar);
+parser.addParameter('drainagedensity', 0.8, @isnumericscalar);
+parser.addParameter('aquiferdepth', nan, @isnumericscalar);
+parser.addParameter('streamlength', nan, @isnumericscalar);
+parser.addParameter('aquiferslope', nan, @isnumericscalar);
+parser.addParameter('aquiferbreadth', nan, @isnumericscalar);
+parser.addParameter('drainableporosity', 0.1, @isnumericscalar);
+parser.addParameter('isflat', true, @islogicalscalar);
+parser.addParameter('plotfits', false, @islogicalscalar);
+parser.addParameter('bootfit', false, @islogicalscalar);
+parser.addParameter('bootreps', 1000, @isdoublescalar);
+parser.addParameter('phimethod', 'pointcloud', @ischarlike);
+parser.addParameter('refqtls', [0.50 0.50],  @isnumericvector);
+parser.addParameter('earlyqtls', [0.95 0.95],  @isnumericvector);
+parser.addParameter('lateqtls', [0.50 0.50],  @isnumericvector);
 
 parser.parse(K, Events, Fits, varargin{:});
 

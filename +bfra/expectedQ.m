@@ -1,5 +1,5 @@
 function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
-%EXPECTEDQ compute the expected value of baseflow
+%EXPECTEDQ Compute the expected value of baseflow.
 % 
 % Syntax
 % 

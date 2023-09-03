@@ -1,11 +1,27 @@
 function help(docname)
-%HELP open toolbox help page in help browser
+%HELP Open toolbox html help document in the MATLAB Help browser.
 % 
-% bfra.help(FUNCNAME) opens the documentation for function FUNCNAME in the
-% matlab help browser. FUNCNAME can also be the name of an example / demo or any
-% other file in the docs/html folder.
+% bfra.help() opens the baseflow toolbox help pages in the MATLAB help browser.
 % 
-% See also: 
+% bfra.help(DOCNAME) opens the documentation file DOCNAME.HTML in the matlab
+% help browser. DOCNAME can be the name of a function, an example/demo, or any
+% other file with an .html extension in the docs/ folder or any subfolder of
+% docs/.
+% 
+% % Example: Open the function documentation for bfra.getevents.
+% 
+% bfra.help('getevents')
+% 
+% See also: privatefunction, completions, showdemo
 
-% Need to build function signatures for this
-web(docname) % docname should point to an html help file
+if usejava('desktop')
+   % might need this, if web does not do the appropriate error checking.
+   % also see 'demo', 'showdemo', and 'open'
+end
+
+if nargin < 1
+   docname = 'bfra_welcome';
+end
+
+% Not sure if there is any benefit to 'web' vs 'showdemo' vs 'demo'
+web(docspath(docname)) % docname should point to an html help file

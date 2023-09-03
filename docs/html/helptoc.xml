@@ -37,8 +37,8 @@
       <!-- User Guide (mgc: changed to Examples) comes next -->
       <tocitem target="bfra_examples_contents.html" image="HelpIcon.USER_GUIDE">
                   Examples
-         <tocitem target="bfra_example_1.html">Estimate recession constants: Point cloud</tocitem>
-         <tocitem target="bfra_example_2.html">Estimate recession constants: Pareto Distribution method</tocitem>
+         <tocitem target="bfra_demo_1.html">Estimate recession constants: Point cloud</tocitem>
+         <tocitem target="bfra_demo_2.html">Estimate recession constants: Pareto Distribution method</tocitem>
          <tocitem target="bfra_kuparuk.html">Estimate saturated aquifer thickness trends using baseflow recession analysis</tocitem>
       </tocitem>
       

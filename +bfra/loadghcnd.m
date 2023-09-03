@@ -141,8 +141,8 @@ p = inputParser;
 p.FunctionName = 'bfra.loadghcnd';
 
 p.addRequired('basinname', @ischar);
-p.addParameter('t1', NaT, @bfra.validation.isdatelike);
-p.addParameter('t2', NaT, @bfra.validation.isdatelike);
+p.addParameter('t1', NaT, @isdatelike);
+p.addParameter('t2', NaT, @isdatelike);
 p.addParameter('units', NaN, @ischar);
 p.addParameter('gapfill', false, @islogical);
 

@@ -76,11 +76,11 @@ end
 xtext = '$x$';
 ytext = ['$p(' varsym '\ge x)$'];
 
-if bfra.util.isoctave
-   l1 = bfra.util.latex2tex(l1);
+if isoctave
+   l1 = latex2tex(l1);
    l2 = sprintf('MLE fit (b=%.2f [%.2f,%.2f] 95%% CI)',b,bL,bH);
-   xlabel(bfra.util.latex2tex(xtext),'Interpreter','tex'); 
-   ylabel(bfra.util.latex2tex(ytext),'Interpreter','tex'); 
+   xlabel(latex2tex(xtext),'Interpreter','tex'); 
+   ylabel(latex2tex(ytext),'Interpreter','tex'); 
    h.legend = legend({l1,l2},'interpreter','tex','location','southwest');
 else
    xlabel(xtext,'Interpreter','latex');
@@ -114,7 +114,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
 %ADDLABELS add an arrow pointing to tau0 and tau_exp
 
 % 'arrow' is not octave compatible afaik
-if bfra.util.isoctave
+if isoctave
    return 
 end
 
@@ -183,7 +183,7 @@ parser.addParameter('xminci', nan, @isnumeric);
 parser.addParameter('varsym', '\tau', @ischar);
 parser.addParameter('trimline', false, @islogical);
 parser.addParameter('labelplot', true, @islogical);
-parser.addParameter('ax', gca, @(x)bfra.validation.isaxis(x));
+parser.addParameter('ax', gca, @isaxis);
 
 parser.parse(x, xmin, alpha, varargin{:});
 

@@ -28,7 +28,7 @@ p.KeepUnmatched = true;
 addParameter( p,'sparsefill', false, @(x)islogical(x) );
 addParameter( p,'markersize', 10, @(x)isnumeric(x) );
 addParameter( p,'fillspacing', nan, @(x)isscalar(x) );
-addParameter( p,'suppliedaxes', gca, @(x)any(bfra.validation.isaxis(x)));
+addParameter( p,'suppliedaxes', gca, @(x)any(isaxis));
 addParameter( p,'suppliedline', nan, @(x)isobject(x) );
 
 parse(p,varargin{:});
@@ -150,7 +150,7 @@ for m = 1:numaxes
       % markerColor = thisLine.MarkerEdgeColor;
 
       % errorbar doesn't have 'MarkerIndices'
-      if bfra.validation.iserrorbar(thisLine)
+      if iserrorbar(thisLine)
          set(thisLine, ...
             'MarkerSize',           markersize,       ...
             'Color',                markerColor,      ...

@@ -73,7 +73,7 @@ function [Fits,Results] = fitevents(Events,varargin)
    savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
 
    % manage warnings
-   if bfra.util.isoctave == true
+   if isoctave
       %warning('off','Octave:invalid-fun-call');
       warning('off','Octave:nearly-singular-matrix');
    else
@@ -145,7 +145,7 @@ function [Fits,Results] = fitevents(Events,varargin)
 
 
    % TURN WARNINGS BACK ON
-   if bfra.util.isoctave == true
+   if isoctave
       warning('on','Octave:nearly-singular-matrix');
    else
       warning('on','MATLAB:rankDeficientMatrix');
@@ -268,7 +268,6 @@ function [derivmethod, fitmethod, fitorder, pickfits, pickmethod, ...
       plotfits, saveplots, etsparam, vtsparam, fitopts] = parseinputs( ...
       Events, funcname, varargin)
 
-   import bfra.validation.*
    persistent parser
    if isempty(parser)
       parser = inputParser;

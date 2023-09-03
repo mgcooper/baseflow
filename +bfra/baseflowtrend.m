@@ -1,15 +1,16 @@
 function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
-%BASEFLOWTREND compute baseflow expected value and rate of change
-%
+%BASEFLOWTREND Estimate baseflow trend from annual streamflow timeseries.
+%  
 % Syntax
 %
-%     [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
+%     [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A)
 %
 % Description
 %
-%     [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A) computes annual values of
+%     [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A) Computes annual values of
 %     baseflow Qb, the linear trend in annual baseflow dQbdt, annual streamflow
-%     anomalies Qa, and the linear trend in annual streamflow anomalies dQadt.
+%     anomalies Qa, and the linear trend in annual streamflow anomalies dQadt,
+%     using quantile regression on the annual streamflow timeseries.
 %
 % Required inputs
 %
@@ -41,9 +42,8 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 % MAIN FUNCTION
 
-[Q,t] = bfra.util.padtimeseries(Q,t,datenum(year(t(1)),1,1), ...
-   datenum(year(t(end)),12,31),1); %#ok<*DATNM>
-[Q,t] = bfra.util.rmleapinds(Q,t);
+[Q,t] = padtimeseries(Q,t,datenum(year(t(1)),1,1), datenum(year(t(end)),12,31),1); %#ok<*DATNM>
+[Q,t] = rmleapinds(Q,t);
 
 % convert the flow from m3/d posted daily to cm/d posted annually
 if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end
@@ -67,12 +67,12 @@ function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)
 
 parser = inputParser;
 parser.FunctionName = 'bfra.baseflowtrend';
-parser.addRequired('t', @bfra.validation.isdatelike);
-parser.addRequired('Q', @bfra.validation.isnumericvector);
-parser.addRequired('A', @bfra.validation.isnumericscalar);
-parser.addParameter('method', 'ols', @bfra.validation.ischarlike);
-parser.addParameter('pctl', 0.25, @bfra.validation.isnumericscalar);
-parser.addParameter('showfig', false, @bfra.validation.islogicalscalar);
+parser.addRequired('t', @isdatelike);
+parser.addRequired('Q', @isnumericvector);
+parser.addRequired('A', @isnumericscalar);
+parser.addParameter('method', 'ols', @ischarlike);
+parser.addParameter('pctl', 0.25, @isnumericscalar);
+parser.addParameter('showfig', false, @islogicalscalar);
 parser.parse(t,Q,A,varargin{:});
 
 % Convert datetime to double if datetime was passed in

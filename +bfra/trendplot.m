@@ -125,7 +125,7 @@ for n = 1:ncols
                % [B,CI] = regress(y(:,n),[ones(size(t)) t],alpha);
                % CB(:,1)= CI(1,1)+CI(2,1)*t;
                % CB(:,2)= CI(1,2)+CI(2,2)*t;
-               % CB = bfra.util.anomaly(CB); % convert to anomalies?
+               % CB = anomaly(CB); % convert to anomalies?
 
             end
       end
@@ -171,7 +171,7 @@ end
 function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
 
 % if an axis was provided, use it, otherwise make a new figure
-if not(bfra.validation.isaxis(useax))
+if not(isaxis(useax))
    if showfig == true
       h.figure = figure('Position',figpos);
    else
@@ -287,7 +287,7 @@ end
 
 h.trend = plot(h.ax,t,yfit,'-','Color',h.plot.Color,  ...
    'LineWidth',1,'HandleVisibility','off');
-bfra.util.formatPlotMarkers;
+formatPlotMarkers();
 
 
 %  DRAW LEGEND
@@ -382,7 +382,7 @@ parser.addParameter('alpha',        0.05, @isnumeric);
 parser.addParameter('anomalies',    true, @islogical);
 parser.addParameter('quantile',     nan,  @isnumeric);
 parser.addParameter('figpos',       dpos, @isnumeric);
-parser.addParameter('useax',        nan,  @bfra.validation.isaxis);
+parser.addParameter('useax',        nan,  @isaxis);
 parser.addParameter('showfig',      true, @islogical);
 parser.addParameter('errorbars',    false,@islogical);
 parser.addParameter('errorbounds',  false,@islogical);
@@ -392,14 +392,6 @@ parser.addParameter('precision',    nan,  @isnumeric);
 
 parser.parse(t, y, varargin{:});
 opts = parser.Results;
-vargs = unmatched2varargin(parser.Unmatched);
-
-% Update aug 2023, not sure about this, vargs is passed to the plotTrend
-% subfunction which passes it to plot as varagin{:} style, but here
-% namedargs2cell converts all values in the parser to a cell array, which isn't
-% right, so maybe it was supposed to be parser2varargin
-% vargs = namedargs2cell(parser.Results);
-% vargs = parser2varargin(parser, {'t', 'y'}, 'usingdefaults');
-% vargs = parser2varargin(parser, {'t', 'y'}, 'notusingdefaults');
+vargs = namedargs2cell(parser.Unmatched);
 
 

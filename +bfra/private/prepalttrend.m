@@ -19,11 +19,10 @@ if nargin == 0; open(mfilename('fullpath')); return; end
 
 % PARSE INPUTS
 [Calm, T, Q, Qb, Sb, Db, sigDb, removenans] = parseinputs(Calm, T, Q, Qb, ...
-   Sb, Db, sigDb, varargin{:});
+   Sb, Db, sigDb, mfilename, varargin{:});
 
 % MAIN FUNCTION
-[Q,T] = bfra.util.padtimeseries(Q,T,datenum(year(T(1)), 1, 1), ...
-   datenum(year(T(end)), 12, 31), 1);
+[Q,T] = padtimeseries(Q,T,datenum(year(T(1)), 1, 1), datenum(year(T(end)), 12, 31), 1);
 Data = timetable(Q, 'RowTimes', T);
 Data = retime(Data, 'regular', 'mean', 'TimeStep', calyears(1));
 
@@ -63,18 +62,18 @@ end
 
 %% INPUT PARSER
 function [Calm, T, Q, Qb, Sb, Db, sigDb, removenans] = parseinputs( ...
-   Calm, T, Q, Qb, Sb, Db, sigDb, varargin)
+   Calm, T, Q, Qb, Sb, Db, sigDb, mfilename, varargin)
 
 parser = inputParser;
-parser.FunctionName = 'bfra.util.prepalttrend';
-parser.addRequired('Calm', @bfra.validation.istablelike);
-parser.addRequired('T', @bfra.validation.isdatelike);
-parser.addRequired('Q', @bfra.validation.isnumericvector);
-parser.addRequired('Qb', @bfra.validation.isnumericvector);
-parser.addRequired('Sb', @bfra.validation.isnumericvector);
-parser.addRequired('Db', @bfra.validation.isnumericvector);
-parser.addRequired('sigDb', @bfra.validation.isnumericvector);
-parser.addParameter('rmnan', true, @bfra.validation.islogicalscalar);
+parser.FunctionName = mfilename;
+parser.addRequired('Calm', @istablelike);
+parser.addRequired('T', @isdatelike);
+parser.addRequired('Q', @isnumericvector);
+parser.addRequired('Qb', @isnumericvector);
+parser.addRequired('Sb', @isnumericvector);
+parser.addRequired('Db', @isnumericvector);
+parser.addRequired('sigDb', @isnumericvector);
+parser.addParameter('rmnan', true, @islogicalscalar);
 
 parser.parse(Calm, T, Q, Qb, Sb, Db, sigDb, varargin{:});
 removenans = parser.Results.rmnan;

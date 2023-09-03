@@ -85,7 +85,7 @@ bfra.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
    {'early','userfit'},'userab',[a2 blate],'reflabels',true);
 hdum = plot(0,0,'Color','none','HandleVisibility','off');
 
-if bfra.util.isoctave
+if isoctave
    txt = sprintf('phi = %.2f',phi);
    legend(hdum,txt,'Interpreter','tex','Location','northwest','box','off');
 else

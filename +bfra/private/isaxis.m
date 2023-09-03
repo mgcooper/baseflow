@@ -1,6 +1,6 @@
 function tf = isaxis(ax)
 %ISAXIS logical check if axis object
-if bfra.util.isoctave
+if isoctave
    tf = isaxes(ax);
 else
    tf = isa(ax,'matlab.graphics.axis.Axes');

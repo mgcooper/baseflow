@@ -36,7 +36,7 @@ end
 
 % convert time in days to years
 if ~isdatetime(T); T = datetime(T,'ConvertFrom','datenum'); end
-[~,T] = bfra.util.padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), ...
+[~,T] = padtimeseries(nan(size(T)),T,datenum(year(T(1)),1,1), ...
    datenum(year(T(end)),12,31),1);
 T = transpose(year(mean(reshape(T,365,numel(T)/365))));
 
@@ -79,9 +79,9 @@ phi2  = PhiFit.phidist(:,2);
 phi   = (phi1+phi2)./2;
 
 % correlation between b and phi, using the two phi dist's b=1 and b=3/2:
-rho_phi12 = bfra.util.nancorr(phi1,phi2);
-rho_phib1 = bfra.util.nancorr(Np1,phi1);
-rho_phib2 = bfra.util.nancorr(Np1,phi2);
+rho_phi12 = nancorr(phi1,phi2);
+rho_phib1 = nancorr(Np1,phi1);
+rho_phib2 = nancorr(Np1,phi2);
 cov_phib1 = cov(Np1,phi1,'omitrows');
 cov_phib2 = cov(Np1,phi2,'omitrows');
 

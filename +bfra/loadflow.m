@@ -158,7 +158,7 @@ Time  = datetime(Data.Year,Data.Month,Data.Day);
 Q     = Data.Value;
 Data  = timetable(Time,Q);
 Data  = retime(Data,'daily','fillwithmissing');
-Data  = bfra.util.rmleapinds(Data);
+Data  = rmleapinds(Data);
 Q     = Data.Q;
 Time  = Data.Time;
 
@@ -178,8 +178,8 @@ parser.FunctionName = 'bfra.loadflow';
 parser.PartialMatching = true;
 
 parser.addRequired('basinname', @ischar);
-parser.addParameter('t1', NaT, @bfra.validation.isdatelike);
-parser.addParameter('t2', NaT, @bfra.validation.isdatelike);
+parser.addParameter('t1', NaT, @isdatelike);
+parser.addParameter('t2', NaT, @isdatelike);
 parser.addParameter('units', NaN, @ischar);
 parser.addParameter('gapfill', false, @islogical);
 parser.addParameter('addvar', false, @ischar);

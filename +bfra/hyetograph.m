@@ -1,6 +1,5 @@
 function H = hyetograph(time, flow, prec, varargin)
-   % function H = hyetograph(time,flow,prec,t1,t2)
-   %HYETOGRAPH Plot a discharge rainfall hyetograph
+   %HYETOGRAPH Plot a discharge rainfall hyetograph.
    %
    %  H = hyetograph(time,flow,ppt) plots hyetograph using data in flow and ppt
    %
@@ -27,7 +26,7 @@ function H = hyetograph(time, flow, prec, varargin)
 
 
    % initialize container for output handles
-   if bfra.util.isoctave
+   if isoctave
       H = zeros(4,1);
    else
       H = gobjects(4,1); % figure, ax1, plot1, plot2
@@ -42,7 +41,7 @@ function H = hyetograph(time, flow, prec, varargin)
    flow = flow(:);
 
    % convert to datetime
-   if ~bfra.util.isoctave
+   if ~isoctave
       if ~isdatetime(time); time = datetime(time, 'ConvertFrom', 'datenum'); end
       if ~isdatetime(t1); t1 = datetime(t1, 'ConvertFrom', 'datenum'); end
       if ~isdatetime(t2); t2 = datetime(t2, 'ConvertFrom', 'datenum'); end
@@ -58,7 +57,7 @@ function H = hyetograph(time, flow, prec, varargin)
    end
 
    % process units
-   units = bfra.util.siUnitsToTex(units);
+   units = siUnitsToTex(units);
 
    % get default colors
    colors = get(0, 'defaultaxescolororder');
@@ -66,16 +65,13 @@ function H = hyetograph(time, flow, prec, varargin)
    % Create plot
    [ax, h1, h2] = plotyy(time, flow, time, prec, @plot, @bar); %#ok<*PLOTYY>
 
-   bfra.util.setlogticks(ax(1), 'axset', 'y');
-
-   if bfra.util.isoctave
+   if isoctave
       datetick(ax(1),'x','mmm-yy','keeplimits')
       datetick(ax(2),'x','mmm-yy','keeplimits')
    else
       datetick(ax(1),'x','mmm-yy','keepticks')
       datetick(ax(2),'x','mmm-yy','keepticks')
    end
-
 
    % Set line graph properties
    set(h1, 'LineStyle', '-', 'Marker', 'o', 'MarkerSize', 4, 'MarkerFaceColor', ...
@@ -104,6 +100,37 @@ function H = hyetograph(time, flow, prec, varargin)
    H(2) = ax(1);
    H(3) = h1;
    H(4) = h2;
+   
+   % Set up listener to trigger setlogticks if YScale is set to 'log'
+   addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerLogScale(s, e, ax(1)));
+   
+   % Set up listener to trigger interpreter if labels are updated
+   addlistener(ax(1), 'YLabel', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));
+
+   % Set up listener to trigger interpreter if labels are updated so the
+   % interpreter is set to 'tex' if isoctave() returns true, and 'latex'
+   % otherwise. 
+   % addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));
+   
+   % this is the example syntax from octave, not sure if its helpful
+   %addlistener(gcf, "position", {@my_listener, "my string"})
+end
+
+% Listener function to handle YScale change
+function triggerLogScale(~, ~, ax)
+  if strcmp(get(ax, 'YScale'), 'log')
+    setlogticks(ax, 'axset', 'y');
+  end
+end
+
+% Listener function to handle Interpreter change
+function triggerInterpreter(~, ~, ax)
+   labelHandle = get(ax, 'YLabel');
+   interpreterSetting = get(labelHandle, 'Interpreter');
+
+   if isoctave() && strcmp(interpreterSetting, 'latex')
+      set(labelHandle, 'Interpreter', 'tex');
+   end
 end
 
 %% Input Parser
@@ -120,17 +147,18 @@ function [time, flow, prec, t1, t2, units, fig] = parseinputs(funcname, ...
       varargin = varargin(~tf);
    else
       fig = gcf;
-      ax = gca;
    end
+   
+   set(fig, 'Position', [0 0 700 400]);
 
    parser = inputParser;
    parser.FunctionName = funcname;
-   parser.addRequired('time', @bfra.validation.isdatelike);
-   parser.addRequired('flow', @bfra.validation.isnumericvector);
-   parser.addRequired('prec', @bfra.validation.isnumericvector);
-   parser.addOptional('t1', NaT, @bfra.validation.isdatelike);
-   parser.addOptional('t2', NaT, @bfra.validation.isdatelike);
-   parser.addParameter('units', {'mm','cm d-1'}, @bfra.validation.ischarlike);
+   parser.addRequired('time', @isdatelike);
+   parser.addRequired('flow', @isnumericvector);
+   parser.addRequired('prec', @isnumericvector);
+   parser.addOptional('t1', NaT, @isdatelike);
+   parser.addOptional('t2', NaT, @isdatelike);
+   parser.addParameter('units', {'mm','cm d-1'}, @ischarlike);
 
    parser.parse(time,flow,prec,varargin{:});
 
@@ -140,6 +168,8 @@ function [time, flow, prec, t1, t2, units, fig] = parseinputs(funcname, ...
    t1 = parser.Results.t1;
    t2 = parser.Results.t2;
    units = parser.Results.units;
+   
+   time = todatenum(time);
 end
 
 % =======================================

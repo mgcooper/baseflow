@@ -197,7 +197,7 @@ q50 = quantile(q,0.5);
 
 % make the figure
 h.fig = figure('Position',[1 1 1152 720]);
-h.sp1 = bfra.util.subtight(2,1,1,'style','fitted');
+h.sp1 = subtight(2,1,1,'style','fitted');
 h.ax1 = gca;
 h.s1a = scatter(t(posidx),q(posidx),sz,'filled'); hold on;
 h.s1b = scatter(t(negidx),q(negidx),sz,'filled'); datetick;
@@ -235,7 +235,7 @@ end
 % plot -dq/dt in log
 dqdt = -dqdt;
 
-h.sp2 = bfra.util.subtight(2,1,2,'style','fitted');
+h.sp2 = subtight(2,1,2,'style','fitted');
 h.ax2 = gca;
 h.s2a = scatter(t(posidx),dqdt(posidx),sz,'filled'); hold on;
 h.s2b = scatter(t(negidx),dqdt(negidx),sz,'filled');
@@ -294,10 +294,10 @@ parser = inputParser;
 parser.FunctionName = 'bfra.eventpicker';
 parser.StructExpand = false; % for 'Info' input
 
-parser.addRequired('t', @bfra.validation.isdatelike);
+parser.addRequired('t', @isdatelike);
 parser.addRequired('q', @isnumeric);
 parser.addRequired('r', @isnumeric);
-parser.addRequired('nmin', @bfra.validation.isnumericscalar);
+parser.addRequired('nmin', @isnumericscalar);
 parser.addRequired('Info', @isstruct);
 parser.parse(t, q, r, nmin, Info);
 

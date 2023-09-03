@@ -116,7 +116,7 @@ if plotline == true
 
    % reset the x,ylims
    set(ax,'XLim',xlims,'YLim',ylims,'TickLabelInterpreter','tex')
-   bfra.util.setlogticks(ax);
+   setlogticks(ax);
 
    if labels == true
       addlabels(a,b,refline)
@@ -165,7 +165,7 @@ switch refline
          ta = sprintf('$b=%.2f$',b);
       end
 
-      if ~bfra.util.isoctave
+      if ~isoctave
          bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
             'BaseAngle',90,'Length',8,'TipAngle',10);
          text(1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
@@ -190,7 +190,7 @@ switch refline
       % 1.07   not sure but this was
       % 0.98   used this in the final point cloud plot
 
-      bfra.util.rotatedLogLogText(xtxt,ytxt,'upper envelope',rtxt,axpos,'FontSize',11);
+      rotatedLogLogText(xtxt,ytxt,'upper envelope',rtxt,axpos,'FontSize',11);
 
    case 'lowerenvelope'
       % for now, add this after the fact
@@ -219,7 +219,7 @@ parser.addParameter('plotline', true, @islogical);
 parser.addParameter('linecolor', [0 0 0], @isnumeric);
 parser.addParameter('precision', 1, @isnumeric); % default = 1 m3/s
 parser.addParameter('timestep', 1, @isnumeric); % default = 1 day
-parser.addParameter('ax', bfra.util.emptyaxes, @bfra.validation.isaxis);
+parser.addParameter('ax', emptyaxes(), @isaxis);
 
 parser.parse(x, y, varargin{:});
 

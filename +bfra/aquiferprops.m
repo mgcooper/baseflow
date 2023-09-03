@@ -1,5 +1,5 @@
 function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
-%AQUIFERPROPS estimate aquifer properties
+%AQUIFERPROPS Estimate aquifer depth, hydraulic conductivity, and porosity.
 % 
 % Syntax
 % 

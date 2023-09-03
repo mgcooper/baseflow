@@ -1,5 +1,5 @@
 function fdc = fdcurve(flow,varargin)
-%FDCURVE Flow duration curve
+%FDCURVE Compute a flow duration curve from streamflow timeseries.
 %
 %     fdc = fdcurve(flow,varargin)
 %

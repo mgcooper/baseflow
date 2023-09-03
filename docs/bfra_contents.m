@@ -18,7 +18,7 @@
 % 
 % A list of toolbox functions is included below. For extended documentation, see the <m2html/function_index.html Function Index>.
 % 
-% * |alttrend|           - compute the linear trend in active layer (aquifer) thickness
+% * |aquifertrend|       - compute the linear trend in saturated aquifer thickness
 % * |aQbString|          - return a formatted string for equation aQ^b
 % * |aquiferprops|       - estimate aquifer properties
 % * |aquiferstorage|     - estimate aquifer storage 
@@ -89,6 +89,6 @@
 % Utility functions (not documented)
 % 
 % * |generateTestData|   - generate test data for baseflow recession analysis
-% * |plotalttrend|       - plot the active layer thickness trend
+% * |plotalttrend|       - plot the saturated aquifer thickness trend
 % * |setEventEmpty|      - set recessoin event empty in Events structure
 % * |version|            - return the version number for the bfra toolbox

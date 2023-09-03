@@ -76,7 +76,7 @@ p.addParameter('cbartitle', '', @ischar);
 p.addParameter('latlims', [50 75], @isnumeric);
 p.addParameter('lonlims', [-168 -60], @isnumeric);
 p.addParameter('projstr', 'lambert', @ischar);
-p.addParameter('ax', gca, @bfra.validation.isaxis);
+p.addParameter('ax', gca, @isaxis);
 p.parse(lat, lon, varargin{:});
 
 lat = p.Results.lat;

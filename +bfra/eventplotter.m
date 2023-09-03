@@ -99,7 +99,7 @@ f = figure('Units','inches','Position',[1,1,8.5,5],'Visible','on');
 for m = 1:3
 
 %    nexttile;
-   h.subplot(m) = bfra.util.subtight(3,1,m,'style','fitted');
+   h.subplot(m) = subtight(3,1,m,'style','fitted');
    h.ax(m) = gca; hold on;
 
    for n = 1:numel(plotfields)
@@ -156,13 +156,13 @@ parser.FunctionName = 'bfra.eventplotter';
 
 N = numel(Info.istart);
 
-parser.addRequired('T', @bfra.validation.isdatelike);
+parser.addRequired('T', @isdatelike);
 parser.addRequired('Q', @isnumeric);
 parser.addRequired('R', @isnumeric);
 parser.addRequired('Info', @isstruct);
-parser.addOptional('eventTags', 1:N, @bfra.validation.isnumericvector);
-parser.addParameter('plotneg', false, @bfra.validation.islogicalscalar);
-parser.addParameter('plotevents', false, @bfra.validation.islogicalscalar);
+parser.addOptional('eventTags', 1:N, @isnumericvector);
+parser.addParameter('plotneg', false, @islogicalscalar);
+parser.addParameter('plotevents', false, @islogicalscalar);
 parser.addParameter('dqdt', bfra.deps.derivative(Q), @isnumeric);
 
 parser.parse(T, Q, R, Info, varargin{:});

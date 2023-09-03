@@ -100,12 +100,12 @@ c1 = c1/c1expr
 %% 
 % Find the pdf
 
-Qtc_pdf = c1.*Q
+Qtc_pdf  = c1.*Q
 % Derive the characteristic drainage timescale, $t_c$
 % Define the $t_c$ integrand, which is the scalar multiple of the pdf and the 
 % independent variable time
 
-dtc_dt = Qtc_pdf.*t
+dtc_dt   = Qtc_pdf.*t
 %% 
 % Integrate $\frac{dt_c}{dt}$ to find the mean lifetime aka the characteristic 
 % timescale $t_c$

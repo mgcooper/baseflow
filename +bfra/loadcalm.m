@@ -87,7 +87,7 @@ switch aggfunc
       
    case 'avg'
       % 'avg' might as well return PM. previously 'bfra'
-      Calm = bfra.util.timetablereduce(Calm);
+      Calm = timetablereduce(Calm);
       Calm = Calm(:,{'mu','PM'});
       Calm = renamevars(Calm,{'mu','PM'},{'Dc','sigDc'});
       return
@@ -168,7 +168,7 @@ switch aggfunc
       if plottrends == true 
          figure; plot(Calm.Time,alldata,'-o'); hold on;
          plot(Calm.Time,mean(alldata,2,'omitnan')); set(gca,'ColorOrderIndex',1)
-         plot(Calm.Time,tseries); bfra.util.formatPlotMarkers;
+         plot(Calm.Time,tseries); formatPlotMarkers();
          legend(Trends.Properties.VariableNames(1:end-1),'Location','best');
          
          % this was in the aggregateCalmData temporary function i deleted
@@ -199,7 +199,7 @@ end
 % within that buffer, whcih would also be useful for finding rain stations
 
 % % make a shapefile
-% [SE,CI,PM,mu,sigma] = bfra.util.stderror(transpose(table2array(Data)));
+% [SE,CI,PM,mu,sigma] = stderror(transpose(table2array(Data)));
 % 
 % S = MetaCalm(Points.inpolyb,:);
 % S.avg = mu;
@@ -283,15 +283,15 @@ validopts = @(x) any(validatestring(x,{'current','archive'}));
 parser = inputParser;
 parser.FunctionName = 'bfra.loadcalm';
 
-addRequired(parser, 'basinname', @bfra.validation.ischarlike);
+addRequired(parser, 'basinname', @ischarlike);
 addOptional(parser, 'version', 'current', validopts);
-addParameter(parser,'t1', NaT, @bfra.validation.isdatelike);
-addParameter(parser,'t2', NaT, @bfra.validation.isdatelike);
-addParameter(parser,'aggfunc', 'none', @bfra.validation.ischarlike);
-addParameter(parser,'minlength', 10, @bfra.validation.isnumericscalar);
-addParameter(parser,'mincoverage', 0.8, @bfra.validation.isnumericscalar);
-addParameter(parser,'minoverlap', 0.5, @bfra.validation.isnumericscalar);
-addParameter(parser,'maxdiff', 0.5, @bfra.validation.isnumericscalar);
+addParameter(parser,'t1', NaT, @isdatelike);
+addParameter(parser,'t2', NaT, @isdatelike);
+addParameter(parser,'aggfunc', 'none', @ischarlike);
+addParameter(parser,'minlength', 10, @isnumericscalar);
+addParameter(parser,'mincoverage', 0.8, @isnumericscalar);
+addParameter(parser,'minoverlap', 0.5, @isnumericscalar);
+addParameter(parser,'maxdiff', 0.5, @isnumericscalar);
 
 parse(parser,basinname,varargin{:});
 

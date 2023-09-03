@@ -1,5 +1,5 @@
 function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
-%AQUIFERTHICKNESS estimate aquifer thickness
+%AQUIFERTHICKNESS Estimate aquifer thickness from recession event parameters.
 % 
 % Syntax
 % 

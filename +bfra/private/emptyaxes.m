@@ -1,8 +1,8 @@
 function ax = emptyaxes
 
-if bfra.util.isoctave
+if isoctave
    ax = [];
-%    ax = get(gcf, "currentaxes");
+   % ax = get(gcf, "currentaxes");
 else
    ax = gobjects(0);
 end

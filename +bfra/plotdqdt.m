@@ -318,7 +318,7 @@ end
 h = plotrain(h,rain,x,y);
 
 % I added this so rain is in the legend
-if isfield(h,'hrain') && bfra.validation.isaxis(h.hrain)
+if isfield(h,'hrain') && isaxis(h.hrain)
    ltext = [ltext 'rain'];
    h.leg = legend( [h.plots{:} h.hrain(1)],ltext, ...
       'Location','best','Interpreter','latex', ...

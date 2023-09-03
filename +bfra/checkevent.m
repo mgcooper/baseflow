@@ -76,7 +76,7 @@ h.f = figure('Position',[150 80 800 550]);
 %nexttile([1 2]);
 
 % use subplot instead of tiledlayout
-h.t1 = bfra.util.subtight(3,2,[1 2],'style','fitted');
+h.t1 = subtight(3,2,[1 2],'style','fitted');
 
 h.h1a = plot(annualT, annualQ, '-o', 'Color', colors(1, :) ); hold on;
 h.h1b = plot(eventT, eventQ,   '-o', 'Color', colors(2, :) );
@@ -104,7 +104,7 @@ h.leg1   = legend('$Q$ (observed)','$Q$ (event)','rain','Interpreter','latex');
 
 % plot observed flow and fitted flow vs time (panel 2)
 %nexttile(3);
-h.t2 = bfra.util.subtight(3,2,3,'style','fitted');
+h.t2 = subtight(3,2,3,'style','fitted');
 
 h.h2a = plot(eventT,eventq,'-o', 'Color', colors(1,:) ); hold on;
 h.h2b = plot(tfit,qfit,  ':',  'Color', colors(2,:),'LineWidth',3);
@@ -134,7 +134,7 @@ grid off
 
 % plot observed dQdt and fitted dQdt vs Q  (panel 3)
 % nexttile(5);
-h.t3  = bfra.util.subtight(3,2,5,'style','fitted');
+h.t3  = subtight(3,2,5,'style','fitted');
 
 h.h3a = plot(eventT,-eventdqdt,'-o', 'Color',colors(1,:)); hold on;
 h.h3b = plot(tfit,-dqfit,    ':',  'Color',colors(2,:),'LineWidth',3);
@@ -159,7 +159,7 @@ grid off
 % bfra_dQdt plot
 
 %h.t4 = nexttile([2 1]);
-h.t4 = bfra.util.subtight(3,2,[4 6],'style','fitted');
+h.t4 = subtight(3,2,[4 6],'style','fitted');
 
 if all(isnan(eventq))
    return   
@@ -177,7 +177,7 @@ else
    
    if fixb
       plot(qfit0,-dqfit0,'--');
-      ltxt = [aQbstr0 ' (r2 = ' bfra.util.printnum(rsq0,2) ')'];
+      ltxt = [aQbstr0 ' (r2 = ' printnum(rsq0,2) ')'];
       h2.legend.String{end} = ltxt;
    end
    
@@ -299,7 +299,7 @@ parser.addRequired('r', @isnumeric);
 parser.addRequired('alltags', @isnumeric);
 parser.addRequired('eventtag', @isnumeric);
 parser.addParameter('order', nan, @isnumeric);
-parser.addParameter('ax', gca, @bfra.validation.isaxis);
+parser.addParameter('ax', gca, @isaxis);
 
 parser.parse(T, Q, q, dqdt, r, alltags, eventtag, varargin{:});
 

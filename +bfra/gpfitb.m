@@ -1,5 +1,5 @@
 function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
-%GPFITB fit Generalized Pareto Distribution to recession parameter tau
+%GPFITB Fit Generalized Pareto Distribution to recession parameter tau.
 %
 % Syntax
 % 
@@ -127,7 +127,7 @@ if plotfit == true
       % plot the ccdf and histogram subplot
       figure('Position',[147   170   831   418]);
 
-      s1 = bfra.util.subtight(1,2,1, ...
+      s1 = subtight(1,2,1, ...
          'wstyle','fitted','hstyle','loose','gapstyle','fitted');
 
    else
@@ -161,7 +161,7 @@ if plotfit == true
 
    if makesubplot == true
 
-      s2 = bfra.util.subtight(1,2,2, ...
+      s2 = subtight(1,2,2, ...
          'wstyle','fitted','hstyle','loose','gapstyle','fitted');
       % [~,~,~,h.histfit] = loghist(X,'dist','GeneralizedPareto','theta',xmin);
 
@@ -178,8 +178,8 @@ if plotfit == true
       childs = h.ff.mainAxis.Children;
       childs(2).FaceAlpha = 0;
 
-      bfra.util.setlogticks(s1);
-      bfra.util.setlogticks(s2);
+      setlogticks(s1);
+      setlogticks(s2);
    end
 
 

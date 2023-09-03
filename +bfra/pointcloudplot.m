@@ -41,7 +41,7 @@ if nargin == 0; open(mfilename('fullpath')); return; end
    addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin{:});
 
 % create the figure / axes
-if not(bfra.validation.isaxis(ax)) || isempty(ax)
+if not(isaxis(ax)) || isempty(ax)
    fig = figure('Position',[380 200 550 510]); 
    ax = gca;
 else
@@ -50,7 +50,7 @@ end
 
 % plot the data
 h0 = loglog(ax,q,-dqdt,'o'); 
-bfra.util.formatPlotMarkers('markersize',6);
+formatPlotMarkers('markersize',6);
 hold on; grid off;
 
 % add circles around the t>tau0 values if requested
@@ -70,7 +70,7 @@ xlim([xlims(1)*.9 xlims(2)*1.1]);
 % xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
 
 % set xylabels and init containers for reflines
-if bfra.util.isoctave
+if isoctave
    xlabel('Q (m^3 d^{-1})','FontSize',14, 'Interpreter', 'tex');
    ylabel('-dQ/dt (m^3 d^{-2})','FontSize',14, 'Interpreter', 'tex');
    
@@ -209,7 +209,7 @@ if addlegend == true
       l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
          'AutoUpdate','off');
       
-%    if bfra.util.isoctave
+%    if isoctave
 %       ltxt = strrep(ltxt,'$','');
 %       l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
 %          'AutoUpdate','off');
@@ -281,7 +281,7 @@ parser.FunctionName = 'bfra.pointcloudplot';
  parser.addParameter('addlegend', true, @islogical);
  parser.addParameter('usertext', '', @ischar);
  parser.addParameter('rain', nan, @isnumeric);
- parser.addParameter('ax', bfra.util.emptyaxes, @(x)bfra.validation.isaxis(x));
+ parser.addParameter('ax', emptyaxes(), @isaxis);
 
  parser.parse(q, dqdt, varargin{:});
 

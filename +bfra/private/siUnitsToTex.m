@@ -37,7 +37,7 @@ for i = 1:numel(units)
    % Replace positive powers with LaTeX-style exponents
    unit = regexprep(unit, '(\d+)', '^{$1}');
 
-   if bfra.util.isoctave
+   if isoctave
       tex_labels{i} = unit;
    else
       % Convert the unit to TeX format

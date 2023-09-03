@@ -52,7 +52,7 @@ debug = false;
 
 % get a 3-day smoothed timeseries to control false positive convexity
 if inoctave
-   qS = bfra.util.nanmovmean(q,3);
+   qS = nanmovmean(q,3);
 else
    qS = movmean(q, 3, 'omitnan');
 end
@@ -211,16 +211,16 @@ persistent parser
 if isempty(parser)
    parser = inputParser;
    parser.FunctionName = funcname;
-   addRequired(parser, 't',                  @bfra.validation.isdatelike);
-   addRequired(parser, 'q',                  @bfra.validation.isdoublevector);
+   addRequired(parser, 't',                  @isdatelike);
+   addRequired(parser, 'q',                  @isdoublevector);
    addRequired(parser, 'r',                  @isnumeric);
-   addParameter(parser,'nmin',        4,     @bfra.validation.isnumericscalar);
-   addParameter(parser,'fmax',        2,     @bfra.validation.isnumericscalar);
-   addParameter(parser,'rmax',        2,     @bfra.validation.isnumericscalar);
-   addParameter(parser,'rmin',        0,     @bfra.validation.isnumericscalar);
-   addParameter(parser,'rmconvex',    false, @bfra.validation.islogicalscalar);
-   addParameter(parser,'rmnochange',  false, @bfra.validation.islogicalscalar);
-   addParameter(parser,'rmrain',      false, @bfra.validation.islogicalscalar);
+   addParameter(parser,'nmin',        4,     @isnumericscalar);
+   addParameter(parser,'fmax',        2,     @isnumericscalar);
+   addParameter(parser,'rmax',        2,     @isnumericscalar);
+   addParameter(parser,'rmin',        0,     @isnumericscalar);
+   addParameter(parser,'rmconvex',    false, @islogicalscalar);
+   addParameter(parser,'rmnochange',  false, @islogicalscalar);
+   addParameter(parser,'rmrain',      false, @islogicalscalar);
 end
 parse(parser,t,q,r,varargin{:});
 

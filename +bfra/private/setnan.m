@@ -7,10 +7,7 @@ function [ DataOut ] = setnan(Data,varargin)
 % 
 %  [ DataOut ] = setnan(Data,[],naninds) sets naninds indices of Data nan
 % 
-% See also rmnan
-
-% TODO: support for structs and cells, also I might be able to simplify the
-% table parts using replacevars like in the new set all nan section
+% See also: rmnan, replacevars
 
 % parse inputs
 [Data, nanval, naninds] = parseinputs(Data, mfilename, varargin{:});
@@ -27,7 +24,7 @@ wastimetable = istimetable(Data);   % was a timetable
 if nargin == 1
    DataOut = nan(size(Data));
    if wastable || wastimetable
-      DataOut = bfra.util.replacevars(Data,Data.Properties.VariableNames,DataOut);
+      DataOut = replacevars(Data, Data.Properties.VariableNames, DataOut);
       return
    end
 end
@@ -36,8 +33,8 @@ end
 % if a table was passed in, prep it for replacement
 if wastable
    
-   inumeric = cellfun(@isnumeric,table2cell(Data(1,:)));
-   DataOut = table2array(Data(:,inumeric));
+   inumeric = cellfun(@isnumeric, table2cell(Data(1, :)));
+   DataOut = table2array(Data(:, inumeric));
    props = Data.Properties;
    
 elseif wastimetable
@@ -47,10 +44,10 @@ elseif wastimetable
    iTime = Data.Properties.DimensionNames;
    
    Data = timetable2table(Data);
-   Data = Data(:,2:end);      % remove time column
+   Data = Data(:, 2:end);      % remove time column
    
-   inumeric = cellfun(@isnumeric,table2cell(Data(1,:)));
-   DataOut = table2array(Data(:,inumeric));
+   inumeric = cellfun(@isnumeric, table2cell(Data(1, :)));
+   DataOut = table2array(Data(:, inumeric));
    % i was gonna use iTime to remove the time column but only works if
    % it is always called 'Time'
 else
@@ -83,11 +80,11 @@ if useinds == true
    if numel(DataOut)==numel(nanval) 
       DataOut(nanval) = nan;
       
-   elseif size(DataOut,1) == size(nanval,1) && size(DataOut,2) ~= size(nanval,2)
-      DataOut(nanval,:) = nan;
+   elseif (size(DataOut, 1) == size(nanval, 1)) && (size(DataOut, 2) ~= size(nanval, 2))
+      DataOut(nanval, :) = nan;
       
-   elseif size(DataOut,2) == size(nanval,2) && size(DataOut,1) ~= size(nanval,1)
-      DataOut(:,nanval) = nan;   
+   elseif (size(DataOut, 2) == size(nanval, 2)) && (size(DataOut, 1) ~= size(nanval, 1))
+      DataOut(:, nanval) = nan;   
    end
    
 elseif useval == true
@@ -98,14 +95,14 @@ elseif useval == true
 end
 
 if wastable == true
-   Data(:,inumeric) = array2table(DataOut);
+   Data(:, inumeric) = array2table(DataOut);
    DataOut = Data;
 end
 
 if wastimetable == true
-   Data(:,inumeric) = array2table(DataOut);
+   Data(:, inumeric) = array2table(DataOut);
    DataOut = Data;
-   DataOut = table2timetable(DataOut,'RowTimes',Time);
+   DataOut = table2timetable(DataOut, 'RowTimes', Time);
    DataOut.Properties = props;
 end
 

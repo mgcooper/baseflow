@@ -1,20 +1,20 @@
-function h = plotalttrend(t,Db,sigDb,varargin)
-   %PLOTALTTREND plot the active layer thickness trend
+function h = plotaquifertrend(t,Db,sigDb,varargin)
+   %PLOTAQUIFERTREND Plot the saturated aquifer thickness trend.
    %
    % Syntax
    %
-   %     h = plotalttrend(t,Db,sigDb,varargin)
+   %     h = plotaquifertrend(t,Db,sigDb,varargin)
    %
    % Description
    %
-   %     h = plotalttrend(t,Db,sigDb) plots annual values of active layer
+   %     h = plotaquifertrend(t,Db,sigDb) plots annual values of active layer
    %     thickness from baseflow recession analysis Db with errorbars
    %     representing estimation uncertainty sigDb and the linear trendline.
    %
-   %     h = plotalttrend(t,Db,sigDb,Dc,sigDc) also plots annual values of
+   %     h = plotaquifertrend(t,Db,sigDb,Dc,sigDc) also plots annual values of
    %     measured active layer thickness Dc and measurement uncertainty sigDc.
    %
-   % See also prepalttrend
+   % See also: prepalttrend
 
 
    %-------------- if called with no input, open this file
@@ -151,7 +151,6 @@ function h = plotflowperiod(t, Db, sigDb, method)
    % xlims = xlim; ylims = ylim; box off; grid on;
    % plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);
    % plot([xlims(1) xlims(2)],[ylims(2) ylims(2)],'k','LineWidth',1);
-
 end
 
 % --------------- plot calm period
@@ -251,11 +250,10 @@ function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);
    %    mfilename, ...
    %    'OptionalArguments',    {'Dc','sigDc','Dg'}, ...
    %    'OptionalDefaults',     {nan(size(Db)), nan(size(Db)), nan(size(Db))}, ...
-   %    'OptionalValidations',  {@(x)isnumeric(x), @(x)isnumeric(x), @(x)isnumeric(x)}, ...
+   %    'OptionalValidations',  {@isnumeric, @isnumeric, @isnumeric}, ...
    %    'ParameterArguments',   {'ax', 'method'}, ...
    %    'ParameterDefaults',    {gca, 'ols'}, ...
-   %    'ParameterValidations', {@(x) bfra.validation.isaxis(x), @(x) ischar(x)} ...
+   %    'ParameterValidations', {@isaxis, @ischar} ...
    %    );
    % p.parseMagically('caller');
-
 end

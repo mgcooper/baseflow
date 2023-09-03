@@ -129,7 +129,7 @@ if showfit == true
    %             'HeadStyle','plain','HeadLength',4,   ...
    %             'HeadWidth',2,'LineWidth',1,'Interpreter','latex');
 
-   if bfra.util.isoctave
+   if isoctave
       h.legend = legend(ltxt,'Location','east','Interpreter','latex');
    end
    h.legend.Position(2) = 0.68*h.legend.Position(2);

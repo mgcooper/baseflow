@@ -1,4 +1,4 @@
-% test bfra.util.islocalmax
+% test bfra/private/islocalmax.m
 function tests = test_islocalmax
     tests = functiontests(localfunctions);
 end
@@ -6,7 +6,7 @@ end
 function setup(testCase)
 
    % generate test data
-   [T,Q] = bfra.testdata("example");
+   [T,Q] = bfra.loadExampleData();
    
    t = T(100:200);
    A = Q(100:200);
@@ -76,7 +76,7 @@ function test_peakfinder(testCase)
    i_bfracustom = find(tf_custom);
 
    % compare peak locations
-   msg = 'bfra.util.islocalmax failed to identify the peak correctly';
+   msg = 'bfra/private/islocalmax failed to identify the peak correctly';
    testCase.verifyEqual(expectedPeakIndex, i_bfracustom, msg);
 
    %    assert(isequal(i_peakfinder, i_islocalmax, i_bfracustom))
@@ -87,11 +87,11 @@ end
 
 % Below here is script-based test
 
-% % test bfra.util.islocalmax
+% % test bfra/private/islocalmax.m
 % 
 % % generate test data
 % 
-% [T,Q,R] = bfra.testdata("example");
+% [T,Q,R] = bfra.loadExampleData();
 % 
 % t = T(100:200);
 % A = Q(100:200);
@@ -109,7 +109,7 @@ end
 % plot(t(s==1),A(s==1),'o', 'HandleVisibility', 'off')
 % plot(t(s==-1),A(s==-1),'o', 'HandleVisibility', 'off')
 % scatter(t(maxVals),A(maxVals), 100, 'filled', 'displayname', 'Peak')
-% datetick; title('test: bfra.util.islocalmax'); legend
+% datetick; title('test: bfra/private/islocalmax'); legend
 % 
 % % Ignore repeated values.
 % uniquePts = [pad; (A(2:end,:) ~= A(1:(end-1),:))];
@@ -135,7 +135,7 @@ end
 %    [~,i_findpeaks,~,p_findpeaks] = findpeaks(A);
 % catch
 % end
-% tf_custom = bfra.util.islocalmax(A);
+% tf_custom = customislocalmax(A);
 % 
 % % get the index of the peak
 % i_peakfinder = bfra.deps.peakfinder(A);
