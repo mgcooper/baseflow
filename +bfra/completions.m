@@ -16,9 +16,7 @@ switch lower(funcname)
       proplist = strrep({tmp.name}, '.html', '');
       
    case 'open'
-      tmp = dir( ...
-         ... fullfile(basepath(), '+bfra', '**/*.m'));
-         fullfile(basepath(), '+bfra', '*.m')); % restrict to +bfra files
+      tmp = dir(fullfile(basepath(), '+bfra', '*.m')); % restrict to +bfra files
       proplist = strrep({tmp.name}, '.m', '');
       
    case 'private'

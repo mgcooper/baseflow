@@ -131,47 +131,32 @@ tfc(ibad) = false;            % set unuseable values false
 tfk(ibad) = nan;              % set unuseable values nan
 
 % find events >= min length
-[tfk,is,ie] = isminlength(tfk, nmin); 
+[tfk,is,ie] = isminlength(tfk, nmin);
 eventlength = ie - is + 1; % event (run) lengths
 
-% pull out the events
-N = numel(is);
-T = cell(N, 1);
-Q = cell(N, 1);
-R = cell(N, 1);
-
-% apply min length filter and keep remaining events
-for n = 1:N
-
-   % if event length < min length, ignore it
-   if eventlength(n) < nmin
-      N = N-1;
-      continue
+% Remove events shorter than nmin and concave increasing flows
+keep = eventlength >= nmin;
+for n = 1:numel(is)
+   if islineconvex(q(is(n):ie(n))) || islinepositive(q(is(n):ie(n)))
+      keep(n) = false;
    end
-   qi = q(is(n):ie(n));
-   if islineconvex(qi) || islinepositive(qi)
-      N = N-1;
-      continue
-   end
-
-   T{n} = t(is(n):ie(n));
-   Q{n} = q(is(n):ie(n));
-   R{n} = r(is(n):ie(n));
-
 end
+is = is(keep);
+ie = ie(keep);
+
+% pull out the events
+T = arrayfun(@(s, e) t(s:e), is, ie, 'Uniform', false);
+Q = arrayfun(@(s, e) q(s:e), is, ie, 'Uniform', false);
+R = arrayfun(@(s, e) r(s:e), is, ie, 'Uniform', false);
 
 % return events that passed the nmin filter
-if N > 0
-   Info.imaxima    = imax;
-   Info.iminima    = imin;
-   Info.iconvex    = icon;
-   Info.icandidate = find(tfc);
-   Info.ikeep      = find(tfk);
-   Info.istart     = is;
-   Info.istop      = ie;
-else
-   [T,Q,R,Info] = setEventEmpty;
-end
+Info.imaxima    = imax;
+Info.iminima    = imin;
+Info.iconvex    = icon;
+Info.icandidate = find(tfc);
+Info.ikeep      = find(tfk);
+Info.istart     = is;
+Info.istop      = ie;
 
 % debug plot:
 if debug == true
