@@ -1,2 +1,3 @@
 function tf = islogicalvector(x)
-tf = islogical(x) && isvector(x);
+   tf = islogical(x) && isvector(x);
+end

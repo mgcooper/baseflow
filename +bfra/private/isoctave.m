@@ -10,4 +10,3 @@ function tf = isoctave()
   tf = cacheval;
   
 end
-

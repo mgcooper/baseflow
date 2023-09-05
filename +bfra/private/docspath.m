@@ -11,3 +11,4 @@ function fullpath = docspath(docname, varargin)
       fullpath = fullfile(basepath(), ...
          'docs', 'html', 'm2html', '+bfra', [docname '.html']);
    end
+end

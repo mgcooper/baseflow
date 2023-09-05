@@ -1,2 +1,3 @@
-function tbpath = getinstallationpath()
-tbpath = getpref('baseflow','install_directory');
+function tbpath = getinstallpath()
+   tbpath = getpref('baseflow','install_directory');
+end

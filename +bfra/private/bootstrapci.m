@@ -76,7 +76,7 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
    % Test for slope significance. The null hyp is that the mean is zero. If the
    % mean is not zero, the slope is significant, reject the null (h=1).
    b_samp = abboot(:,1); % slope is the first column (flipped in output)
-   [h, p] = ztest(b_samp,0,std(b_samp));
+   [h, ~] = ztest(b_samp,0,std(b_samp));
 
    % Plot the resampled slopes
    % figure; histogram(b_samp);
