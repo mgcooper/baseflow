@@ -107,7 +107,7 @@ function [T,Q,R,Info] = eventsplitter(t,q,r,varargin)
    % also exclude 3 days before/after and combine with ibad
    if rmrain == true
       irain = find(r > rmin);
-      irain = unique(irain +  -3:3); 
+      irain = unique(irain +  [-3 -2 -1 0 1 2 3]);
       irain = irain(ismember(irain, icon2));
       ibad  = [ibad; irain(:)];
    end
