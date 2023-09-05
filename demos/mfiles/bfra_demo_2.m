@@ -15,9 +15,7 @@
 %% Preparing data for recession analysis
 % Start with a clean workspace, then set the sitename. 
 
-clearvars
-close all
-clc
+clearvars -except testCase demoFiles
 %% 
 % Use tab-completion to set the argument to the |basinname| function.
 
@@ -54,8 +52,9 @@ opts.fitevents = bfra.setopts('fitevents');
 % 
 % Set options for |globalfit.|
 
-opts.globalfit = bfra.setopts('globalfit', 'drainagearea', A, 'streamlength', L, ...
-   'drainagedensity', Dd, 'aquiferdepth', D, 'isflat', true, 'plotfits', true);
+opts.globalfit = bfra.setopts('globalfit', ...
+   'drainagearea', A, 'streamlength', L, 'drainagedensity', Dd, ...
+   'aquiferdepth', D, 'isflat', true, 'plotfits', true);
 %% Recession analysis workflow
 % The following steps demonstrate a typical workflow in baseflow recession analysis. 
 % The steps consist of getting a list of recession events, fitting the recession 

@@ -15,9 +15,7 @@
 %% Prepare data for recession analysis
 % Start with a clean workspace. 
 
-clearvars
-close all
-clc
+clearvars -except testCase demoFiles
 %% 
 % Use tab-completion to set the argument to the |basinname| function.
 

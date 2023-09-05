@@ -20,10 +20,8 @@
 % functions. Use tab-completion to set the argument to the |basinname| function.
 % 
 % Start with a clean workspace, then set the sitename. 
+clearvars -except testCase demoFiles
 
-clearvars
-close all
-clc
 %% 
 % Use tab-completion to set the argument to the |basinname| function.
 

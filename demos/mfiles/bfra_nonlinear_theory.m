@@ -82,9 +82,7 @@
 % state variable.
 % Define the symbolic variables and their properties
 
-clearvars
-close all
-clc
+clearvars -except testCase demoFiles
 
 syms a b Q Q0 t c1; assume([a b Q Q0 t c1],'clear')
 sympref('FloatingPointOutput',false);

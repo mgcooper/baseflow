@@ -17,9 +17,7 @@
 % NOTE: this script assumes it is being run in the folder that contains the 
 % data/ folder 
 
-clearvars
-close all
-clc
+clearvars -except testCase demoFiles
 %% 
 % Set the main options
 
@@ -51,9 +49,9 @@ load('data/annualdata.mat','Data');
 
 opts.getevents = bfra.setopts('getevents', 'asannual', true);
 opts.fitevents = bfra.setopts('fitevents');
-opts.globalfit = bfra.setopts('globalfit','drainagearea',A,'aquiferdepth',D, ...
-   'streamlength',L,'drainagedensity',Dd,'bootfit',bootfit,'bootreps',nreps, ...
-   'plotfits',true);
+opts.globalfit = bfra.setopts('globalfit', ...
+   'drainagearea', A, 'aquiferdepth', D, 'drainagedensity', Dd, ...
+   'streamlength', L, 'bootfit', bootfit, 'bootreps',nreps, 'plotfits',true);
 %% 
 % Get all recession events and then fit them
 
