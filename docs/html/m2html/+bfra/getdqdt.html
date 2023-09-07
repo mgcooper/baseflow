@@ -4,7 +4,7 @@
 <head>
   <title>Description of getdqdt</title>
   <meta name="keywords" content="getdqdt">
-  <meta name="description" content="GETDQDT Numerical estimation of the time derivative of discharge dQ/dt">
+  <meta name="description" content="GETDQDT Numerical estimation of the time derivative of discharge dQ/dt.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>GETDQDT Numerical estimation of the time derivative of discharge dQ/dt</strong></div>
+<div class="box"><strong>GETDQDT Numerical estimation of the time derivative of discharge dQ/dt.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">GETDQDT Numerical estimation of the time derivative of discharge dQ/dt
+<div class="fragment"><pre class="comment">GETDQDT Numerical estimation of the time derivative of discharge dQ/dt.
 
  Syntax
 
@@ -39,27 +39,28 @@
 
  Description
 
-     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt using
-     variable time stepping, exponential time stepping, or one of six standard
-     numerical derivatives given in Thomas et al. 2015, Table 2. The method is
-     passed in as the argument derivmethod with type char.
+     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt
+     using variable time stepping, exponential time stepping, or one of six
+     standard numerical derivatives given in Thomas et al. 2015, Table 2.
+     The method is passed in as the argument derivmethod with type char.
 
  Required inputs
 
-     T     =  time (days)
-     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
-     R     =  rainfall (L T^-1, assumed to be mm d-1)
-     derivmethod = method to compute numerical derivative dQ/dt. Options are
-     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
+     T: time (days)
+     Q: discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
+     R: rainfall (L T^-1, assumed to be mm d-1)
+     derivmethod: method to compute numerical derivative dQ/dt. Options
+     are: 'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'.
+     Default: ETS.
 
  Optional name-value inputs
 
-     etsparam =  scalar double, parameter that controls window size in ETS method
-     vtsparam =  scalar double, parameter that controls window size in VTS method
-     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
-     plotfit  =  logical, scalar, indicates whether to plot the fit
+     etsparam: scalar double, parameter that controls window size in ETS method
+     vtsparam: scalar double, parameter that controls window size in VTS method
+     fitab: logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
+     plotfit: logical, scalar, indicates whether to plot the fit
 
- See also fitdqdt
+ See also: fitdqdt
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -69,7 +70,8 @@
 
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
-</ul>
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
 
 
 This function is called by:
@@ -82,179 +84,182 @@ This function is called by:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
 <li><a href="#_sub1" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a></li>
-<li><a href="#_sub2" class="code">function [vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] =</a></li></ul>
+<li><a href="#_sub2" class="code">function [T,vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] =</a></li></ul>
 
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)</a>
-0002 <span class="comment">%GETDQDT Numerical estimation of the time derivative of discharge dQ/dt</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)</span>
-0007 <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)</span>
-0008 <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitmethod',fitmethod)</span>
-0009 <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)</span>
-0010 <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)</span>
-0011 <span class="comment">%</span>
-0012 <span class="comment">% Description</span>
-0013 <span class="comment">%</span>
-0014 <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt using</span>
-0015 <span class="comment">%     variable time stepping, exponential time stepping, or one of six standard</span>
-0016 <span class="comment">%     numerical derivatives given in Thomas et al. 2015, Table 2. The method is</span>
-0017 <span class="comment">%     passed in as the argument derivmethod with type char.</span>
-0018 <span class="comment">%</span>
-0019 <span class="comment">% Required inputs</span>
-0020 <span class="comment">%</span>
-0021 <span class="comment">%     T     =  time (days)</span>
-0022 <span class="comment">%     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)</span>
-0023 <span class="comment">%     R     =  rainfall (L T^-1, assumed to be mm d-1)</span>
-0024 <span class="comment">%     derivmethod = method to compute numerical derivative dQ/dt. Options are</span>
-0025 <span class="comment">%     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS</span>
-0026 <span class="comment">%</span>
-0027 <span class="comment">% Optional name-value inputs</span>
-0028 <span class="comment">%</span>
-0029 <span class="comment">%     etsparam =  scalar double, parameter that controls window size in ETS method</span>
-0030 <span class="comment">%     vtsparam =  scalar double, parameter that controls window size in VTS method</span>
-0031 <span class="comment">%     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb</span>
-0032 <span class="comment">%     plotfit  =  logical, scalar, indicates whether to plot the fit</span>
-0033 <span class="comment">%</span>
-0034 <span class="comment">% See also fitdqdt</span>
-0035 <span class="comment">%</span>
-0036 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0037 
-0038 <span class="comment">% Tip: this accepts pre-selected events, not raw timeseries. Use</span>
-0039 <span class="comment">% bfra.findevents to pick Events, then bfra.getdqdt to fit the events.</span>
-0040 <span class="comment">% This is a wrapper for multi-year, final analysis.</span>
-0041 
-0042 <span class="comment">% if called with no input, open this file</span>
-0043 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0044 
-0045 <span class="comment">% PARSE INPUTS</span>
-0046 [vtsparam, etsparam, ctsmethod, pickmethod, fitmethod, plotfits, eventID] = <span class="keyword">...</span>
-0047    parseinputs(T,Q,R,derivmethod,mfilename,varargin{:});
-0048 
-0049 <span class="comment">% MAIN FUNCTION</span>
-0050 <span class="keyword">switch</span> derivmethod
-0051 
-0052    <span class="keyword">case</span> <span class="string">'VTS'</span>  <span class="comment">% variable time step</span>
-0053 
-0054       [q,dqdt,dt,tq,rq] = bfra.fitvts(T,Q,R,<span class="string">'vtsparam'</span>,vtsparam);
-0055 
-0056    <span class="keyword">case</span> <span class="string">'ETS'</span>  <span class="comment">% exponential timestep</span>
-0057 
-0058       [q,dqdt,dt,tq,rq] = bfra.fitets(T,Q,R,<span class="string">'etsparam'</span>,etsparam);
-0059 
-0060    <span class="keyword">case</span> <span class="string">'CTS'</span>  <span class="comment">% constant time step</span>
-0061 
-0062       [q,dqdt,dt,tq,rq] = bfra.fitcts(T,Q,R,ctsmethod);
-0063 
-0064 <span class="keyword">end</span>
+0002    <span class="comment">%GETDQDT Numerical estimation of the time derivative of discharge dQ/dt.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)</span>
+0007    <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)</span>
+0008    <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitmethod',fitmethod)</span>
+0009    <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)</span>
+0010    <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">% Description</span>
+0013    <span class="comment">%</span>
+0014    <span class="comment">%     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt</span>
+0015    <span class="comment">%     using variable time stepping, exponential time stepping, or one of six</span>
+0016    <span class="comment">%     standard numerical derivatives given in Thomas et al. 2015, Table 2.</span>
+0017    <span class="comment">%     The method is passed in as the argument derivmethod with type char.</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">% Required inputs</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">%     T: time (days)</span>
+0022    <span class="comment">%     Q: discharge (L T^-1, assumed to be m d-1 or m^3 d-1)</span>
+0023    <span class="comment">%     R: rainfall (L T^-1, assumed to be mm d-1)</span>
+0024    <span class="comment">%     derivmethod: method to compute numerical derivative dQ/dt. Options</span>
+0025    <span class="comment">%     are: 'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'.</span>
+0026    <span class="comment">%     Default: ETS.</span>
+0027    <span class="comment">%</span>
+0028    <span class="comment">% Optional name-value inputs</span>
+0029    <span class="comment">%</span>
+0030    <span class="comment">%     etsparam: scalar double, parameter that controls window size in ETS method</span>
+0031    <span class="comment">%     vtsparam: scalar double, parameter that controls window size in VTS method</span>
+0032    <span class="comment">%     fitab: logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb</span>
+0033    <span class="comment">%     plotfit: logical, scalar, indicates whether to plot the fit</span>
+0034    <span class="comment">%</span>
+0035    <span class="comment">% See also: fitdqdt</span>
+0036    <span class="comment">%</span>
+0037    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0038 
+0039    <span class="comment">% Tip: this accepts pre-selected events, not raw timeseries. Use</span>
+0040    <span class="comment">% bfra.findevents to pick Events, then bfra.getdqdt to fit the events.</span>
+0041    <span class="comment">% This is a wrapper for multi-year, final analysis.</span>
+0042 
+0043    <span class="comment">% if called with no input, open this file</span>
+0044    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0045 
+0046    <span class="comment">% PARSE INPUTS</span>
+0047    [T, vtsparam, etsparam, ctsmethod, pickmethod, fitmethod, plotfits, eventID] = <span class="keyword">...</span>
+0048       parseinputs(T,Q,R,derivmethod,mfilename,varargin{:});
+0049 
+0050    <span class="comment">% MAIN FUNCTION</span>
+0051    <span class="keyword">switch</span> derivmethod
+0052 
+0053       <span class="keyword">case</span> <span class="string">'VTS'</span>  <span class="comment">% variable time step</span>
+0054 
+0055          [q,dqdt,dt,tq,rq] = fitvts(T,Q,R,<span class="string">'vtsparam'</span>,vtsparam);
+0056 
+0057       <span class="keyword">case</span> <span class="string">'ETS'</span>  <span class="comment">% exponential timestep</span>
+0058 
+0059          [q,dqdt,dt,tq,rq] = fitets(T,Q,R,<span class="string">'etsparam'</span>,etsparam);
+0060 
+0061       <span class="keyword">case</span> <span class="string">'CTS'</span>  <span class="comment">% constant time step</span>
+0062 
+0063          [q,dqdt,dt,tq,rq] = fitcts(T,Q,R,ctsmethod);
+0064    <span class="keyword">end</span>
 0065 
-0066 <span class="comment">% this is where islineconvex and/or islinepositive to q and/or dqdt would be to</span>
-0067 <span class="comment">% catch all cases regardless of fit method, but if the fitxxx functions are</span>
-0068 <span class="comment">% called outside of this function, those cases wouldn't be caught, so either</span>
-0069 <span class="comment">% move those functions to private/ or add checks to them.</span>
+0066    <span class="comment">% this is where islineconvex and/or islinepositive to q and/or dqdt would be to</span>
+0067    <span class="comment">% catch all cases regardless of fit method, but if the fitxxx functions are</span>
+0068    <span class="comment">% called outside of this function, those cases wouldn't be caught, so either</span>
+0069    <span class="comment">% move those functions to private/ or add checks to them.</span>
 0070 
-0071 
-0072 <span class="comment">% this is the case where dQ/dt and q are returned without fitting a/b</span>
-0073 <span class="keyword">if</span> strcmp(fitmethod,<span class="string">'none'</span>) || strcmp(pickmethod,<span class="string">'none'</span>)
-0074    varargout{1} = nan;
-0075    varargout{2} = nan;
-0076    <span class="keyword">return</span>
-0077 <span class="keyword">else</span>
-0078 
-0079    <span class="comment">% if pickmethod = &quot;none&quot;, we don't need anything else so we could stop here, but</span>
-0080    <span class="comment">% fitSelector will repackage the event as a cell array which is consistent with</span>
-0081    <span class="comment">% the case where pickmethod ~= &quot;none&quot; which are the options to subdivide events</span>
-0082    <span class="comment">% into segments, for example early-time and late-time. It also returns Info</span>
-0083    <span class="comment">% which is needed to parse sub-event picks.</span>
-0084 
-0085    [hFits,Picks] = bfra.plotdqdt(q,dqdt,<span class="string">'fitmethod'</span>,fitmethod,<span class="string">'pickmethod'</span>,<span class="keyword">...</span>
-0086       pickmethod,<span class="string">'plotfits'</span>,plotfits,<span class="string">'eventID'</span>,eventID,<span class="string">'rain'</span>,rq);
+0071    <span class="comment">% this is the case where dQ/dt and q are returned without fitting a/b</span>
+0072    <span class="keyword">if</span> strcmp(fitmethod,<span class="string">'none'</span>) || strcmp(pickmethod,<span class="string">'none'</span>)
+0073       varargout{1} = nan;
+0074       varargout{2} = nan;
+0075       <span class="keyword">return</span>
+0076    <span class="keyword">else</span>
+0077       <span class="comment">% if pickmethod = &quot;none&quot;, we don't need anything else so we could stop here, but</span>
+0078       <span class="comment">% fitSelector will repackage the event as a cell array which is consistent with</span>
+0079       <span class="comment">% the case where pickmethod ~= &quot;none&quot; which are the options to subdivide events</span>
+0080       <span class="comment">% into segments, for example early-time and late-time. It also returns Info</span>
+0081       <span class="comment">% which is needed to parse sub-event picks.</span>
+0082 
+0083       [hFits,Picks] = bfra.plotdqdt(q,dqdt,<span class="string">'fitmethod'</span>,fitmethod,<span class="string">'pickmethod'</span>,<span class="keyword">...</span>
+0084          pickmethod,<span class="string">'plotfits'</span>,plotfits,<span class="string">'eventID'</span>,eventID,<span class="string">'rain'</span>,rq);
+0085 
+0086       [q,dqdt,dt,tq,rq,Info] = <a href="#_sub1" class="code" title="subfunction [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)">packagefits</a>(Picks,q,dqdt,dt,tq,R);
 0087 
-0088    [q,dqdt,dt,tq,rq,Info] = <a href="#_sub1" class="code" title="subfunction [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)">packagefits</a>(Picks,q,dqdt,dt,tq,R);
-0089 
-0090    varargout{1} = Info;
-0091    varargout{2} = hFits;
-0092 <span class="keyword">end</span>
-0093 
-0094 
-0095 <span class="comment">% PACKAGEFITS</span>
-0096 <a name="_sub1" href="#_subfunctions" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a>
-0097 
-0098 <span class="comment">% this unpacks the Picks structure and repackages the T,Q,dQdt for each picked</span>
-0099 <span class="comment">% fit as individual cell arrays. I am not sure why I don't just do:</span>
-0100 <span class="comment">% Q = Picks.Q;</span>
-0101 <span class="comment">% dQdt = Picks.dQdt;</span>
-0102 <span class="comment">% and so on. But, Picks does not include T, and maybe I wanted to distinguish</span>
-0103 <span class="comment">% the og T,Q from the ets/vts fit t,q.</span>
-0104 <span class="comment">% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function</span>
-0105 <span class="comment">% abve, I confirmed that things work up to this point meaning I can still</span>
-0106 <span class="comment">% select events in plotdqdt and they get sent here, but I think the way i deal</span>
-0107 <span class="comment">% wtih retiming in ETS now throws off the istart/stop, so will need to figure</span>
-0108 <span class="comment">% out if it's being done correctly if I use manual or auto picking.</span>
-0109 
-0110 
-0111 <span class="comment">% if no events are found, return nan</span>
-0112 <span class="keyword">if</span> ~iscell(Picks.Q) &amp;&amp; isnan(Picks.Q)
-0113    T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; <span class="keyword">return</span>
-0114 <span class="keyword">end</span>
-0115 
-0116 numPicks = numel(Picks.Q);
-0117 T = cell(numPicks,1);
-0118 Q = cell(numPicks,1);
-0119 R = cell(numPicks,1);
-0120 dT = cell(numPicks,1);
-0121 dQdT = cell(numPicks,1);
+0088       varargout{1} = Info;
+0089       varargout{2} = hFits;
+0090    <span class="keyword">end</span>
+0091 <span class="keyword">end</span>
+0092 
+0093 <span class="comment">% PACKAGEFITS</span>
+0094 <a name="_sub1" href="#_subfunctions" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a>
+0095 
+0096    <span class="comment">% this unpacks the Picks structure and repackages the T,Q,dQdt for each picked</span>
+0097    <span class="comment">% fit as individual cell arrays. I am not sure why I don't just do:</span>
+0098    <span class="comment">% Q = Picks.Q;</span>
+0099    <span class="comment">% dQdt = Picks.dQdt;</span>
+0100    <span class="comment">% and so on. But, Picks does not include T, and maybe I wanted to distinguish</span>
+0101    <span class="comment">% the og T,Q from the ets/vts fit t,q.</span>
+0102    <span class="comment">% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function</span>
+0103    <span class="comment">% abve, I confirmed that things work up to this point meaning I can still</span>
+0104    <span class="comment">% select events in plotdqdt and they get sent here, but I think the way i deal</span>
+0105    <span class="comment">% wtih retiming in ETS now throws off the istart/stop, so will need to figure</span>
+0106    <span class="comment">% out if it's being done correctly if I use manual or auto picking.</span>
+0107 
+0108 
+0109    <span class="comment">% if no events are found, return nan</span>
+0110    <span class="keyword">if</span> ~iscell(Picks.Q) &amp;&amp; isnan(Picks.Q)
+0111       T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; <span class="keyword">return</span>
+0112    <span class="keyword">end</span>
+0113 
+0114    numPicks = numel(Picks.Q);
+0115    T = cell(numPicks,1);
+0116    Q = cell(numPicks,1);
+0117    R = cell(numPicks,1);
+0118    dT = cell(numPicks,1);
+0119    dQdT = cell(numPicks,1);
+0120 
+0121    <span class="keyword">for</span> m = 1:numPicks
 0122 
-0123 <span class="keyword">for</span> m = 1:numPicks
-0124 
-0125    istart = Picks.istart(m);
-0126    istop = Picks.istop(m);
-0127 
-0128    <span class="comment">% previously these were put into Fits structure but I</span>
-0129    Q{m} = q(istart:istop);
-0130    dQdT{m} = dqdt(istart:istop);
-0131    dT{m} = dt(istart:istop);
-0132    T{m} = tq(istart:istop);
-0133    R = rq(istart:istop);
-0134 
-0135    Info.istart(m) = istart;
-0136    Info.istop(m) = istop;
-0137    Info.runlengths(m) = Picks.runlengths(m);
-0138 <span class="keyword">end</span>
-0139 
-0140 <span class="comment">%% INPUT PARSER</span>
-0141 <a name="_sub2" href="#_subfunctions" class="code">function [vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = </a><span class="keyword">...</span>
-0142    parseinputs(T,Q,R,derivmethod,funcname,varargin)
-0143 
-0144 <span class="keyword">persistent</span> parser
-0145 <span class="keyword">if</span> isempty(parser)
-0146    parser = inputParser;
-0147    parser.CaseSensitive = true;
-0148    parser.addRequired(<span class="string">'T'</span>, @bfra.validation.isdatelike);
-0149    parser.addRequired(<span class="string">'Q'</span>, @bfra.validation.isnumericvector);
-0150    parser.addRequired(<span class="string">'R'</span>, @isnumeric);
-0151    parser.addRequired(<span class="string">'derivmethod'</span>, @ischar);
-0152    parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>, @ischar);
-0153    parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>, @ischar);
-0154    parser.addParameter(<span class="string">'ctsmethod'</span>, <span class="string">'B1'</span>, @ischar);
-0155    parser.addParameter(<span class="string">'vtsparam'</span>, 1, @bfra.validation.isnumericscalar);
-0156    parser.addParameter(<span class="string">'etsparam'</span>, 0.2, @bfra.validation.isnumericscalar);
-0157    parser.addParameter(<span class="string">'plotfits'</span>, false, @bfra.validation.islogicalscalar);
-0158    parser.addParameter(<span class="string">'eventID'</span>, <span class="string">'none'</span>, @ischar);
-0159 <span class="keyword">end</span>
-0160 parser.FunctionName = funcname;
-0161 parser.parse(T,Q,R,derivmethod,varargin{:});
-0162 
-0163 vtsparam    = parser.Results.vtsparam;
-0164 etsparam    = parser.Results.etsparam;
-0165 ctsmethod   = parser.Results.ctsmethod;
-0166 pickmethod  = parser.Results.pickmethod;
-0167 fitmethod   = parser.Results.fitmethod;
-0168 plotfits    = parser.Results.plotfits;
-0169 eventID     = parser.Results.eventID;</pre></div>
+0123       istart = Picks.istart(m);
+0124       istop = Picks.istop(m);
+0125 
+0126       <span class="comment">% previously these were put into Fits structure but I</span>
+0127       Q{m} = q(istart:istop);
+0128       dQdT{m} = dqdt(istart:istop);
+0129       dT{m} = dt(istart:istop);
+0130       T{m} = tq(istart:istop);
+0131       R = rq(istart:istop);
+0132 
+0133       Info.istart(m) = istart;
+0134       Info.istop(m) = istop;
+0135       Info.runlengths(m) = Picks.runlengths(m);
+0136    <span class="keyword">end</span>
+0137 <span class="keyword">end</span>
+0138 
+0139 <span class="comment">%% INPUT PARSER</span>
+0140 <a name="_sub2" href="#_subfunctions" class="code">function [T,vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = </a><span class="keyword">...</span>
+0141       parseinputs(T,Q,R,derivmethod,funcname,varargin)
+0142 
+0143    <span class="keyword">persistent</span> parser
+0144    <span class="keyword">if</span> isempty(parser)
+0145       parser = inputParser;
+0146       parser.CaseSensitive = true;
+0147       parser.addRequired(<span class="string">'T'</span>, @isdatelike);
+0148       parser.addRequired(<span class="string">'Q'</span>, @isnumericvector);
+0149       parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0150       parser.addRequired(<span class="string">'derivmethod'</span>, @ischar);
+0151       parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>, @ischar);
+0152       parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>, @ischar);
+0153       parser.addParameter(<span class="string">'ctsmethod'</span>, <span class="string">'B1'</span>, @ischar);
+0154       parser.addParameter(<span class="string">'vtsparam'</span>, 1, @isnumericscalar);
+0155       parser.addParameter(<span class="string">'etsparam'</span>, 0.2, @isnumericscalar);
+0156       parser.addParameter(<span class="string">'plotfits'</span>, false, @islogicalscalar);
+0157       parser.addParameter(<span class="string">'eventID'</span>, <span class="string">'none'</span>, @ischar);
+0158    <span class="keyword">end</span>
+0159    parser.FunctionName = funcname;
+0160    parser.parse(T,Q,R,derivmethod,varargin{:});
+0161 
+0162    vtsparam    = parser.Results.vtsparam;
+0163    etsparam    = parser.Results.etsparam;
+0164    ctsmethod   = parser.Results.ctsmethod;
+0165    pickmethod  = parser.Results.pickmethod;
+0166    fitmethod   = parser.Results.fitmethod;
+0167    plotfits    = parser.Results.plotfits;
+0168    eventID     = parser.Results.eventID;
+0169 
+0170    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0171    T = todatenum(T);
+0172 <span class="keyword">end</span></pre></div>
 </body>
 </html>

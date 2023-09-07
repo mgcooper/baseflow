@@ -7,13 +7,13 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    %
    % Optional inputs
    %
-   %     one input:      array [a,b]
-   %     two input:      array [a,b], scalar Q0
+   %     one input: array [a,b]
+   %     two input: array [a,b], scalar Q0
    %
    % Output
    %
-   %     aQbstr:         formatted latex string for equation dQdt = aQb
-   %     Qtstr:          formatted latex string for equation Q(t) = f(a,b,Q0)
+   %     aQbstr: formatted latex string for equation dQdt = aQb
+   %     Qtstr: formatted latex string for equation Q(t) = f(a,b,Q0)
    %
    % Example
    %
@@ -27,8 +27,8 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    % [~, Qtstr] = bfra.aQbString([a, b], 1000, "printvalues",true)
    % 
    % % Compare with sprintf
-   % aexp    = floor(log10(a));
-   % abase   = a*10^-aexp;
+   % aexp = floor(log10(a));
+   % abase = a*10^-aexp;
    % sprintf('-dQ/dt = %.f$e^{%.f}Q^{%.2f}$',abase,aexp,2);
    %
    % % small number
@@ -36,19 +36,15 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    % bfra.aQbString([a, b], "printvalues",true)
    %
    % % Compare with sprintf
-   % aexp    = floor(log10(a));
-   % abase   = a*10^-aexp;
+   % aexp = floor(log10(a));
+   % abase = a*10^-aexp;
    % sprintf('-dQ/dt = %.f$e^{%.f}Q^{%.2f}$',abase,aexp,2);
    %
-   % See also getstring
+   % See also: getstring
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
-
-   % if called with no input, open this file
-   % if nargin == 0; open(mfilename('fullpath')); return; end
-
+   
    % TODO: merge this with bfra.strings. See note below about $ after = sign.
-
 
    % parse inputs
    [ab, Q0, printvalues] = parseinputs(varargin{:});
@@ -67,9 +63,7 @@ function [aQbstr,Qtstr] = aQbString(varargin)
       else
          Qtstr = sprintf('$Q = [%d^{-(b-1)}+at(b-1)]^{-1/(b-1)} (b=%.2f)$',Q0,ab(2));
       end
-
    else
-
       aQbstr = '-d$Q$/d$t = aQ^b$';
       Qtstr = '$Q = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';
    end
@@ -80,6 +74,7 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    end
 end
 
+%% INPUT PARSER
 function [ab, Q0, printvalues] = parseinputs(varargin)
    p = inputParser;
    p.FunctionName = 'bfra.aQbString';

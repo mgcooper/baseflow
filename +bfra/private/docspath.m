@@ -1,5 +1,5 @@
 function fullpath = docspath(docname, varargin)
-   
+   %DOCSPATH Return toolbox docs path.
    if isfile(fullfile(basepath(), 'docs', 'html', [docname '.html']))
       % help pages documentation
       fullpath = fullfile(basepath(), 'docs', 'html', [docname '.html']);

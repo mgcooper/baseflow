@@ -1,5 +1,7 @@
 function hhh=hline(y,linetype,label)
-% function h=hline(y, linetype, label)
+%HLINE Draw a horizontal line on the current axes at specified location.
+% 
+%  h = hline(y, linetype, label)
 % 
 % Draws a horizontal line on the current axes at the location specified by
 % 'y'.  Optional arguments are 'linetype' (default is 'r:') and 'label', 
@@ -31,6 +33,8 @@ function hhh=hline(y,linetype,label)
 % By Brandon Kuczenski for Kensington Labs.
 % brandon_kuczenski@kensingtonlabs.com
 % 8 November 2001
+% 
+% See also: vline
 
 % LICENSE
 % 

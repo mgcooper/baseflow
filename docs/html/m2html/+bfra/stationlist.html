@@ -4,7 +4,7 @@
 <head>
   <title>Description of stationlist</title>
   <meta name="keywords" content="stationlist">
-  <meta name="description" content="STATIONLIST return list of stations from the bfra basin database">
+  <meta name="description" content="STATIONLIST Return list of stations from the bfra basin database.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,16 +21,16 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>STATIONLIST return list of stations from the bfra basin database</strong></div>
+<div class="box"><strong>STATIONLIST Return list of stations from the bfra basin database.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function stations = stationlist </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">STATIONLIST return list of stations from the bfra basin database
- 
- 
- See also <a href="stationname.html" class="code" title="function station = stationname(typenamehere)">stationname</a></pre></div>
+<div class="fragment"><pre class="comment">STATIONLIST Return list of stations from the bfra basin database.
+
+
+ See also: <a href="stationname.html" class="code" title="function station = stationname(typenamehere)">stationname</a></pre></div>
 
 
 <!-- crossreference -->
@@ -53,13 +53,14 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function stations = stationlist</a>
-0002 <span class="comment">%STATIONLIST return list of stations from the bfra basin database</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">%</span>
-0005 <span class="comment">% See also stationname</span>
+0002    <span class="comment">%STATIONLIST Return list of stations from the bfra basin database.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">%</span>
+0005    <span class="comment">% See also: stationname</span>
 0006 
-0007 <span class="comment">% load(fullfile(fileparts([mfilename '.m']),'stationlist.mat'),'stations');</span>
-0008 load <span class="string">'stationlist.mat'</span> <span class="string">'stations'</span>;
-0009 stations = [<span class="string">'ALL_BASINS'</span>; stations];</pre></div>
+0007    <span class="comment">% load(fullfile(fileparts([mfilename '.m']),'stationlist.mat'),'stations');</span>
+0008    load <span class="string">'stationlist.mat'</span> <span class="string">'stations'</span>;
+0009    stations = [<span class="string">'ALL_BASINS'</span>; stations];
+0010 <span class="keyword">end</span></pre></div>
 </body>
 </html>

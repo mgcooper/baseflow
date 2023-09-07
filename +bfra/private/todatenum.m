@@ -1,4 +1,5 @@
 function varargout = todatenum(varargin)
+   %TODATENUM Convert input to datenum.
 
    varargout = cell(1, numel(varargin));
    for n = 1:numel(varargin)

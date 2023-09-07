@@ -62,8 +62,8 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
 
    sz = 20; % this controls the size of the scatter symbols
 
-   % Find increasing/decreasing values. Do this here so the indices are relative to
-   % the same T,Q vectors as the Info indices.
+   % Find increasing/decreasing values. Do this here so the indices are relative
+   % to the same T,Q vectors as the Info indices.
    Info.ipositive = find(dqdt > 0);
    Info.inegative = find(dqdt < 0);
 
@@ -167,7 +167,6 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
    h.h1 = h1;
    h.h2 = h2;
    h.h3 = h3;
-
 end
 
 %% INPUT PARSER

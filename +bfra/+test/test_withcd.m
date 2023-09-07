@@ -1,4 +1,5 @@
 function test_withcd
+   %TEST_WITHCD Test withcd.
    tests = functiontests(localfunctions);
 end
 

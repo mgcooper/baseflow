@@ -1,14 +1,15 @@
 function report = dependencies(funcname,option)
-   % DEPENDENCIES generate a list of function and product dependencies for function
+   % DEPENDENCIES Generate function and product dependencies for function.
    %
    %  Input
    %     funcname = char of any function name
    %
    %  Output
-   %     funclist = table with column of all functions that input funcname depends
-   %     on, the functions that each of those depends on, and the products that
-   %     each of those depends on
+   %     funclist = table with column of all functions that input funcname
+   %     depends on, the functions that each of those depends on, and the
+   %     products that each of those depends on.
    %
+   % See also: Setup
 
    % use this to generate a list of all functions in the package, then cycle over
    % all of them and find the dependencies
@@ -188,12 +189,3 @@ function report = resolvedependencies(funclist,funcname)
    %    {'function_name','function_dependencies','product_dependencies'});
 
 end
-
-
-
-
-
-
-
-
-

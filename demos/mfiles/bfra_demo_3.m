@@ -1,4 +1,4 @@
-%% Aquifer property estimation: introduction
+%% Aquifer property estimation: Introduction
 %% Introduction
 % This example demonstrates how to detect recession events, and then estimate 
 % recession parameters _a_ and _b_ using the hybrid Pareto distribution-"point 
@@ -15,7 +15,9 @@
 %% Prepare data for recession analysis
 % Start with a clean workspace. 
 
-clearvars -except testCase demoFiles
+clearvars
+close all
+clc
 %% 
 % Use tab-completion to set the argument to the |basinname| function.
 

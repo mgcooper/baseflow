@@ -4,7 +4,7 @@
 <head>
   <title>Description of loadghcnd</title>
   <meta name="keywords" content="loadghcnd">
-  <meta name="description" content="LOADGHCND reads in a global hydroclimatology network database file">
+  <meta name="description" content="LOADGHCND Read in a global hydroclimatology network database file.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>LOADGHCND reads in a global hydroclimatology network database file</strong></div>
+<div class="box"><strong>LOADGHCND Read in a global hydroclimatology network database file.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function GHCN = loadghcnd(basinname,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment"> LOADGHCND reads in a global hydroclimatology network database file
+<div class="fragment"><pre class="comment"> LOADGHCND Read in a global hydroclimatology network database file.
 
  Syntax
 
@@ -35,20 +35,20 @@
 
  Description
 
-     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network data
-     table for basin basinname.
+     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network
+     data table for basin basinname.
 
      GHCN = loadghcnd(___,'t1',t1,'t2',t2) returns Global Hydroclimatology
      Network data table for the time period bounded by datetimes t1 and t2.
 
      GHCN = loadghcnd(___,'units',units) converts data in GHCN from the
-     standard units mm/d to user-specified units. Options are available using
-     tab-completion.
+     standard units mm/d to user-specified units. Options are available
+     using tab-completion.
 
      GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an
      auto-regressive fit to annual data values.
 
- See also <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, <a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>, loadbounds
+ See also: <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, <a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>, loadbounds
 
  Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</pre></div>
 
@@ -59,7 +59,8 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li></ul>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the bfra basin database.</li>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
 
 
 This function is called by:
@@ -77,199 +78,198 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function GHCN = loadghcnd(basinname,varargin)</a>
-0002 <span class="comment">% LOADGHCND reads in a global hydroclimatology network database file</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     GHCN = loadghcnd(basinname,varargin)</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% Description</span>
-0009 <span class="comment">%</span>
-0010 <span class="comment">%     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network data</span>
-0011 <span class="comment">%     table for basin basinname.</span>
-0012 <span class="comment">%</span>
-0013 <span class="comment">%     GHCN = loadghcnd(___,'t1',t1,'t2',t2) returns Global Hydroclimatology</span>
-0014 <span class="comment">%     Network data table for the time period bounded by datetimes t1 and t2.</span>
-0015 <span class="comment">%</span>
-0016 <span class="comment">%     GHCN = loadghcnd(___,'units',units) converts data in GHCN from the</span>
-0017 <span class="comment">%     standard units mm/d to user-specified units. Options are available using</span>
-0018 <span class="comment">%     tab-completion.</span>
-0019 <span class="comment">%</span>
-0020 <span class="comment">%     GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an</span>
-0021 <span class="comment">%     auto-regressive fit to annual data values.</span>
-0022 <span class="comment">%</span>
-0023 <span class="comment">% See also loadflow, loadcalm, loadbounds</span>
-0024 <span class="comment">%</span>
-0025 <span class="comment">% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</span>
+0002    <span class="comment">% LOADGHCND Read in a global hydroclimatology network database file.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     GHCN = loadghcnd(basinname,varargin)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     GHCN = loadghcnd(basinname) returns Global Hydroclimatology Network</span>
+0011    <span class="comment">%     data table for basin basinname.</span>
+0012    <span class="comment">%</span>
+0013    <span class="comment">%     GHCN = loadghcnd(___,'t1',t1,'t2',t2) returns Global Hydroclimatology</span>
+0014    <span class="comment">%     Network data table for the time period bounded by datetimes t1 and t2.</span>
+0015    <span class="comment">%</span>
+0016    <span class="comment">%     GHCN = loadghcnd(___,'units',units) converts data in GHCN from the</span>
+0017    <span class="comment">%     standard units mm/d to user-specified units. Options are available</span>
+0018    <span class="comment">%     using tab-completion.</span>
+0019    <span class="comment">%</span>
+0020    <span class="comment">%     GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an</span>
+0021    <span class="comment">%     auto-regressive fit to annual data values.</span>
+0022    <span class="comment">%</span>
+0023    <span class="comment">% See also: loadflow, loadcalm, loadbounds</span>
+0024    <span class="comment">%</span>
+0025    <span class="comment">% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</span>
 0026 
-0027 <span class="comment">% if called with no input, open this file</span>
-0028 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0027    <span class="comment">% if called with no input, open this file</span>
+0028    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0029 
-0030 <span class="comment">% fast exit if toolbox not configured for data</span>
-0031 <span class="keyword">if</span> ~isenv(<span class="string">'BASEFLOW_DATA_PATH'</span>)
-0032    error(<span class="string">'BASEFLOW_DATA_PATH environment variable not set'</span>)
-0033 <span class="keyword">end</span>
+0030    <span class="comment">% fast exit if toolbox not configured for data</span>
+0031    <span class="keyword">if</span> ~isenv(<span class="string">'BASEFLOW_DATA_PATH'</span>)
+0032       error(<span class="string">'BASEFLOW_DATA_PATH environment variable not set'</span>)
+0033    <span class="keyword">end</span>
 0034 
-0035 <span class="comment">% PARSE INPUTS</span>
-0036 [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, t1, t2, units, gapfill] = <a href="#_sub1" class="code" title="subfunction [basinname, t1, t2, units, gapfill] = parseinputs(basinname, varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
+0035    <span class="comment">% PARSE INPUTS</span>
+0036    [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, t1, t2, units, gapfill] = <a href="#_sub1" class="code" title="subfunction [basinname, t1, t2, units, gapfill] = parseinputs(basinname, varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
 0037 
-0038 <span class="comment">% to get this to a full fledged function, i could use lat,lon + radius</span>
-0039 <span class="comment">% and query the ghcdn metadata to find stations</span>
+0038    <span class="comment">% to get this to a full fledged function, i could use lat,lon + radius</span>
+0039    <span class="comment">% and query the ghcdn metadata to find stations</span>
 0040 
-0041 <span class="comment">% check for categorical station name</span>
-0042 <span class="keyword">if</span> iscategorical(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <span class="keyword">end</span>
+0041    <span class="comment">% check for categorical station name</span>
+0042    <span class="keyword">if</span> iscategorical(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = char(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>); <span class="keyword">end</span>
 0043 
-0044 <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'KUPARUK R NR DEADHORSE AK'</span>) == false
-0045    error(<span class="string">'only functional for Kuparuk at present'</span>)
-0046 <span class="keyword">end</span>
+0044    <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'KUPARUK R NR DEADHORSE AK'</span>) == false
+0045       error(<span class="string">'only functional for Kuparuk at present'</span>)
+0046    <span class="keyword">end</span>
 0047 
-0048 <span class="comment">% this replaces the commented stuff above</span>
-0049 GHCN = readGHCND(<span class="string">'station'</span>,<span class="string">'USC00505136'</span>);
-0050 GHCN = retime(GHCN,<span class="string">'daily'</span>,<span class="string">'fillwithmissing'</span>);
+0048    <span class="comment">% this replaces the commented stuff above</span>
+0049    GHCN = readGHCND(<span class="string">'station'</span>,<span class="string">'USC00505136'</span>);
+0050    GHCN = retime(GHCN,<span class="string">'daily'</span>,<span class="string">'fillwithmissing'</span>);
 0051 
-0052 <span class="comment">% trim the data to the requested time period</span>
-0053 <span class="keyword">if</span> isnat(t1)
-0054    si = find(~isnan(GHCN.PRCP),1,<span class="string">'first'</span>);
-0055    ei = find(~isnan(GHCN.PRCP),1,<span class="string">'last'</span>);
-0056    iok = si:ei;
-0057 <span class="keyword">else</span>
-0058    iok = isbetween(GHCN.Time,t1,t2);
-0059 <span class="keyword">end</span>
-0060 <span class="comment">% the t1/t2 method might remove the need for padding/trimming</span>
-0061 GHCN = GHCN(iok,:);
+0052    <span class="comment">% trim the data to the requested time period</span>
+0053    <span class="keyword">if</span> isnat(t1)
+0054       si = find(~isnan(GHCN.PRCP),1,<span class="string">'first'</span>);
+0055       ei = find(~isnan(GHCN.PRCP),1,<span class="string">'last'</span>);
+0056       iok = si:ei;
+0057    <span class="keyword">else</span>
+0058       iok = isbetween(GHCN.Time,t1,t2);
+0059    <span class="keyword">end</span>
+0060    <span class="comment">% the t1/t2 method might remove the need for padding/trimming</span>
+0061    GHCN = GHCN(iok,:);
 0062 
-0063 <span class="comment">% the iok thing means we don't need to trimtimetable, but still need to pad</span>
-0064 <span class="keyword">if</span> GHCN.Time(1)&gt;t1 || GHCN.Time(end)&lt;t2
-0065    Time = t1:caldays(1):t2;
-0066    GHCN = retime(GHCN,Time,<span class="string">'fillwithmissing'</span>);
-0067 <span class="keyword">end</span>
+0063    <span class="comment">% the iok thing means we don't need to trimtimetable, but still need to pad</span>
+0064    <span class="keyword">if</span> GHCN.Time(1)&gt;t1 || GHCN.Time(end)&lt;t2
+0065       Time = t1:caldays(1):t2;
+0066       GHCN = retime(GHCN,Time,<span class="string">'fillwithmissing'</span>);
+0067    <span class="keyword">end</span>
 0068 
-0069 ileap = month(GHCN.Time) == 2 &amp; day(GHCN.Time) == 29;
-0070 GHCN(ileap,:) = [];
+0069    ileap = month(GHCN.Time) == 2 &amp; day(GHCN.Time) == 29;
+0070    GHCN(ileap,:) = [];
 0071 
-0072 <span class="comment">% % first i made Rain with the new method, then saved it as keep:</span>
-0073 <span class="comment">% figure; scatter(GHCN.PRCP,keep.PRCP./10,'filled'); addOnetoOne;</span>
+0072    <span class="comment">% % first i made Rain with the new method, then saved it as keep:</span>
+0073    <span class="comment">% figure; scatter(GHCN.PRCP,keep.PRCP./10,'filled'); addOnetoOne;</span>
 0074 
-0075 <span class="keyword">if</span> gapfill == true
-0076    numyears = height(GHCN)/365;
-0077    prcp = transpose(reshape(GHCN.PRCP,365,numyears));
-0078    <span class="keyword">try</span>
-0079       prcp = fillgaps(prcp);
-0080    <span class="keyword">catch</span> ME
-0081       <span class="comment">% check for signal processing toolbox checkout error</span>
-0082       <span class="keyword">if</span> strcmp(ME.identifier,<span class="string">'MATLAB:license:checkouterror'</span>)
+0075    <span class="keyword">if</span> gapfill == true
+0076       numyears = height(GHCN)/365;
+0077       prcp = transpose(reshape(GHCN.PRCP,365,numyears));
+0078       <span class="keyword">try</span>
+0079          prcp = fillgaps(prcp);
+0080       <span class="keyword">catch</span> ME
+0081          <span class="comment">% check for signal processing toolbox checkout error</span>
+0082          <span class="keyword">if</span> strcmp(ME.identifier,<span class="string">'MATLAB:license:checkouterror'</span>)
 0083 
-0084          <span class="comment">% set nan to zero. it probably isn't justified to use any gap</span>
-0085          <span class="comment">% filling method without nearby station or model data,</span>
-0086          <span class="comment">% inclduing the ar gapfilling above, but for now, set zero</span>
-0087          prcp(isnan(prcp)) = 0;
-0088          <span class="comment">% rain = fillmissing(rain);</span>
-0089       <span class="keyword">end</span>
-0090    <span class="keyword">end</span>
-0091    prcp = reshape(transpose(prcp),numyears*365,1);
-0092    drop = prcp&lt;0;
-0093    prcp(drop) = 0;
-0094    GHCN.PRCP = prcp;
-0095 <span class="keyword">end</span>
+0084             <span class="comment">% set nan to zero. it probably isn't justified to use any gap</span>
+0085             <span class="comment">% filling method without nearby station or model data,</span>
+0086             <span class="comment">% inclduing the ar gapfilling above, but for now, set zero</span>
+0087             prcp(isnan(prcp)) = 0;
+0088             <span class="comment">% rain = fillmissing(rain);</span>
+0089          <span class="keyword">end</span>
+0090       <span class="keyword">end</span>
+0091       prcp = reshape(transpose(prcp),numyears*365,1);
+0092       drop = prcp&lt;0;
+0093       prcp(drop) = 0;
+0094       GHCN.PRCP = prcp;
+0095    <span class="keyword">end</span>
 0096 
-0097 <span class="comment">% rain comes in as mm/day</span>
-0098 <span class="comment">% GHCN.PRCP = GHCN.PRCP./10.*ddperyy;</span>
+0097    <span class="comment">% rain comes in as mm/day</span>
+0098    <span class="comment">% GHCN.PRCP = GHCN.PRCP./10.*ddperyy;</span>
 0099 
-0100 <span class="keyword">if</span> ~isnan(units)
-0101    <span class="comment">% aream2 = Meta.darea.*1e6;</span>
-0102    vars  = {<span class="string">'PRCP'</span>,<span class="string">'SNOW'</span>,<span class="string">'SNWD'</span>};
-0103    <span class="keyword">for</span> n = 1:numel(vars)
+0100    <span class="keyword">if</span> ~isnan(units)
+0101       <span class="comment">% aream2 = Meta.darea.*1e6;</span>
+0102       vars  = {<span class="string">'PRCP'</span>,<span class="string">'SNOW'</span>,<span class="string">'SNWD'</span>};
+0103       <span class="keyword">for</span> n = 1:numel(vars)
 0104 
-0105       <span class="keyword">switch</span> units
-0106          <span class="keyword">case</span> <span class="string">'mm/d'</span>
-0107             <span class="comment">% do nothing</span>
-0108          <span class="keyword">case</span> <span class="string">'cm/d'</span>
-0109             GHCN.(vars{n}) = GHCN.(vars{n})./10;
-0110          <span class="keyword">case</span> <span class="string">'m/d'</span>
-0111             GHCN.(vars{n}) = GHCN.(vars{n})./1000;
-0112          <span class="keyword">case</span> <span class="string">'mm/y'</span>
-0113             GHCN.(vars{n}) = GHCN.(vars{n}).*365.25;
-0114          <span class="keyword">case</span> <span class="string">'cm/y'</span>
-0115             GHCN.(vars{n}) = GHCN.(vars{n})./10.*365.25;
-0116          <span class="keyword">case</span> <span class="string">'m/y'</span>
-0117             GHCN.(vars{n}) = GHCN.(vars{n})./1000.*365.25;
-0118          <span class="keyword">case</span> <span class="string">'m3/d'</span>
+0105          <span class="keyword">switch</span> units
+0106             <span class="keyword">case</span> <span class="string">'mm/d'</span>
+0107                <span class="comment">% do nothing</span>
+0108             <span class="keyword">case</span> <span class="string">'cm/d'</span>
+0109                GHCN.(vars{n}) = GHCN.(vars{n})./10;
+0110             <span class="keyword">case</span> <span class="string">'m/d'</span>
+0111                GHCN.(vars{n}) = GHCN.(vars{n})./1000;
+0112             <span class="keyword">case</span> <span class="string">'mm/y'</span>
+0113                GHCN.(vars{n}) = GHCN.(vars{n}).*365.25;
+0114             <span class="keyword">case</span> <span class="string">'cm/y'</span>
+0115                GHCN.(vars{n}) = GHCN.(vars{n})./10.*365.25;
+0116             <span class="keyword">case</span> <span class="string">'m/y'</span>
+0117                GHCN.(vars{n}) = GHCN.(vars{n})./1000.*365.25;
+0118             <span class="keyword">case</span> <span class="string">'m3/d'</span>
 0119 
-0120          <span class="keyword">case</span> <span class="string">'m3/y'</span>
+0120             <span class="keyword">case</span> <span class="string">'m3/y'</span>
 0121 
-0122          <span class="keyword">case</span> <span class="string">'km3/y'</span>
-0123       <span class="keyword">end</span>
-0124    <span class="keyword">end</span>
+0122             <span class="keyword">case</span> <span class="string">'km3/y'</span>
+0123          <span class="keyword">end</span>
+0124       <span class="keyword">end</span>
 0125 
-0126    units = {units};
-0127 
-0128    <span class="keyword">for</span> n = 1:numel(vars)
-0129       idx = find(strcmp(GHCN.Properties.VariableNames,vars{n}));
-0130       GHCN.Properties.VariableUnits(idx) = units;
-0131    <span class="keyword">end</span>
-0132 
-0133 <span class="keyword">else</span>
-0134    units = {<span class="string">'mm/d'</span>};
-0135 <span class="keyword">end</span>
-0136 
-0137 <span class="comment">%% INPUT PARSER</span>
-0138 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, t1, t2, units, gapfill] = parseinputs(basinname, varargin)</a>
-0139 
-0140 p = inputParser;
-0141 p.FunctionName = <span class="string">'bfra.loadghcnd'</span>;
-0142 
-0143 p.addRequired(<span class="string">'basinname'</span>, @ischar);
-0144 p.addParameter(<span class="string">'t1'</span>, NaT, @bfra.validation.isdatelike);
-0145 p.addParameter(<span class="string">'t2'</span>, NaT, @bfra.validation.isdatelike);
-0146 p.addParameter(<span class="string">'units'</span>, NaN, @ischar);
-0147 p.addParameter(<span class="string">'gapfill'</span>, false, @islogical);
-0148 
-0149 p.parse(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
-0150 
-0151 <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = p.Results.basinname;
-0152 gapfill = p.Results.gapfill;
-0153 units = p.Results.units;
-0154 t1 = p.Results.t1;
-0155 t2 = p.Results.t2;
-0156 
-0157 <span class="keyword">if</span> ~isdatetime(t1)
-0158    t1 = datetime(t1, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>);
-0159    t2 = datetime(t2, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>);
+0126       units = {units};
+0127       <span class="keyword">for</span> n = 1:numel(vars)
+0128          idx = find(strcmp(GHCN.Properties.VariableNames,vars{n}));
+0129          GHCN.Properties.VariableUnits(idx) = units;
+0130       <span class="keyword">end</span>
+0131    <span class="keyword">else</span>
+0132       units = {<span class="string">'mm/d'</span>};
+0133    <span class="keyword">end</span>
+0134 <span class="keyword">end</span>
+0135 
+0136 <span class="comment">%% INPUT PARSER</span>
+0137 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, t1, t2, units, gapfill] = parseinputs(basinname, varargin)</a>
+0138 
+0139    p = inputParser;
+0140    p.FunctionName = <span class="string">'bfra.loadghcnd'</span>;
+0141 
+0142    p.addRequired(<span class="string">'basinname'</span>, @ischar);
+0143    p.addParameter(<span class="string">'t1'</span>, NaT, @isdatelike);
+0144    p.addParameter(<span class="string">'t2'</span>, NaT, @isdatelike);
+0145    p.addParameter(<span class="string">'units'</span>, NaN, @ischar);
+0146    p.addParameter(<span class="string">'gapfill'</span>, false, @islogical);
+0147 
+0148    p.parse(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
+0149 
+0150    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = p.Results.basinname;
+0151    gapfill = p.Results.gapfill;
+0152    units = p.Results.units;
+0153    t1 = p.Results.t1;
+0154    t2 = p.Results.t2;
+0155 
+0156    <span class="keyword">if</span> ~isdatetime(t1)
+0157       t1 = datetime(t1, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>);
+0158       t2 = datetime(t2, <span class="string">'ConvertFrom'</span>, <span class="string">'datenum'</span>);
+0159    <span class="keyword">end</span>
 0160 <span class="keyword">end</span>
-0161 
-0162 <span class="comment">% % readGHCND sets the units so only reset if converted</span>
-0163 <span class="comment">%    % flow is in m3/s, so set that here</span>
-0164 <span class="comment">%    for n = 1:numel(vars)</span>
-0165 <span class="comment">%       idx = find(strcmp(GHCN.Properties.VariableNames,vars{n}));</span>
-0166 <span class="comment">%       GHCN.Properties.VariableUnits(idx) = units;</span>
-0167 <span class="comment">%    end</span>
-0168 
-0169 <span class="comment">% % to check pre-post gap fill</span>
-0170 <span class="comment">%  figure; plot(GHCN.Time,GHCN.PRCP); hold on; plot(GHCN.Time,GHCN./10.*365.25,':');</span>
-0171 
-0172 <span class="comment">% % these were in read_flow script to check but don't work anymore</span>
-0173 <span class="comment">% % these check post retime, pre synch</span>
-0174 <span class="comment">% [RainM.PRCP(1) mean(GHCN.PRCP(1:28))] % feb is first month</span>
-0175 <span class="comment">% [RainM.PRCP(end) mean(GHCN.PRCP(end-30:end))]</span>
-0176 
-0177 <span class="comment">% check again</span>
-0178 <span class="comment">% [RainA.PRCP(1) mean(RainM.PRCP(1:12))]</span>
-0179 <span class="comment">% [RainA.PRCP(end) mean(RainM.PRCP(end-11:end))]</span>
+0161 <span class="comment">% % readGHCND sets the units so only reset if converted</span>
+0162 <span class="comment">%    % flow is in m3/s, so set that here</span>
+0163 <span class="comment">%    for n = 1:numel(vars)</span>
+0164 <span class="comment">%       idx = find(strcmp(GHCN.Properties.VariableNames,vars{n}));</span>
+0165 <span class="comment">%       GHCN.Properties.VariableUnits(idx) = units;</span>
+0166 <span class="comment">%    end</span>
+0167 
+0168 <span class="comment">% % to check pre-post gap fill</span>
+0169 <span class="comment">%  figure; plot(GHCN.Time,GHCN.PRCP); hold on; plot(GHCN.Time,GHCN./10.*365.25,':');</span>
+0170 
+0171 <span class="comment">% % these were in read_flow script to check but don't work anymore</span>
+0172 <span class="comment">% % these check post retime, pre synch</span>
+0173 <span class="comment">% [RainM.PRCP(1) mean(GHCN.PRCP(1:28))] % feb is first month</span>
+0174 <span class="comment">% [RainM.PRCP(end) mean(GHCN.PRCP(end-30:end))]</span>
+0175 
+0176 <span class="comment">% check again</span>
+0177 <span class="comment">% [RainA.PRCP(1) mean(RainM.PRCP(1:12))]</span>
+0178 <span class="comment">% [RainA.PRCP(end) mean(RainM.PRCP(end-11:end))]</span>
+0179 
 0180 
-0181 
-0182 <span class="comment">% % old method:</span>
-0183 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
-0184 <span class="comment">%    % load the rain data</span>
-0185 <span class="comment">%    pathrain    = '/Users/coop558/mydata/interface/weather/matfiles/';</span>
-0186 <span class="comment">%    filerain    =  [pathrain 'kuparukMetDataGHCND'];</span>
-0187 <span class="comment">%    load(filerain,'data');</span>
-0188 <span class="comment">%</span>
-0189 <span class="comment">%    % for now this will only work with Kupariuk</span>
-0190 <span class="comment">%    Rain        = data.KUPARUK; clear data;</span>
-0191 <span class="comment">%    Rain        = renamevars(Rain,'PRCP_mm_','rain');</span>
-0192 <span class="comment">%    rmvars      = {'PRCP_measurement_flag','PRCP_quality_flag','PRCP_source_flag'};</span>
-0193 <span class="comment">%    Rain        = removevars(Rain,rmvars);</span>
-0194 <span class="comment">%    Rain        = retime(Rain,'daily','fillwithmissing');</span>
-0195 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span></pre></div>
+0181 <span class="comment">% % old method:</span>
+0182 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span>
+0183 <span class="comment">%    % load the rain data</span>
+0184 <span class="comment">%    pathrain    = '/Users/coop558/mydata/interface/weather/matfiles/';</span>
+0185 <span class="comment">%    filerain    =  [pathrain 'kuparukMetDataGHCND'];</span>
+0186 <span class="comment">%    load(filerain,'data');</span>
+0187 <span class="comment">%</span>
+0188 <span class="comment">%    % for now this will only work with Kupariuk</span>
+0189 <span class="comment">%    Rain        = data.KUPARUK; clear data;</span>
+0190 <span class="comment">%    Rain        = renamevars(Rain,'PRCP_mm_','rain');</span>
+0191 <span class="comment">%    rmvars      = {'PRCP_measurement_flag','PRCP_quality_flag','PRCP_source_flag'};</span>
+0192 <span class="comment">%    Rain        = removevars(Rain,rmvars);</span>
+0193 <span class="comment">%    Rain        = retime(Rain,'daily','fillwithmissing');</span>
+0194 <span class="comment">% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %</span></pre></div>
 </body>
 </html>

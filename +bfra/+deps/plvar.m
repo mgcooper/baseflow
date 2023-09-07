@@ -1,5 +1,6 @@
 function [alpha,xmin,n,bof]=plvar(x,varargin)
-% PLVAR estimates the uncertainty in the estimated power-law parameters.
+%PLVAR Estimate the uncertainty in the estimated power-law parameters.
+%    
 %    Source: http://www.santafe.edu/~aaronc/powerlaws/
 % 
 %    PLVAR(x) takes a vector of observations x and returns estimated

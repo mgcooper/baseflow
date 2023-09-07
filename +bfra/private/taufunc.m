@@ -1,5 +1,5 @@
 function [taufunc,tau] = taufunc(a,b,Q)
-   %TAUFUNC returns inline function for tau or the value of tau
+   %TAUFUNC Return inline function for tau or the value of tau.
    %
    %  [taufunc,tau] = taufunc(a,b,Q)
    %

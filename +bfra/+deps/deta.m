@@ -1,6 +1,7 @@
 function [f] = deta(z,k)
-%DETA   Calculates Dirichlet functions of the form
+%DETA Calculate Dirichlet functions of the form f = sum((-1)^n/(k*n+1)^z).
 %
+%  DETA Calculates Dirichlet functions of the form:
 %       f = sum((-1)^n/(k*n+1)^z)
 %
 %       over the entire complex plane
@@ -21,9 +22,7 @@ function [f] = deta(z,k)
 %       Requires a complex Gamma routine.
 %       Tested under version 5.3.1
 %  
-%see also:  Zeta, Eta, Lambda, Betad
-%see also:  sym/zeta.m
-%see also:  mhelp zeta
+% See also:  Zeta, Eta, Lambda, Betad, sym/zeta.m
 
 %Andrew Odlyzko has Riemann Zeta critical line zeros listed on:
 %http://www.research.att.com/~amo/zeta_tables/index.html
