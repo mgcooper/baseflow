@@ -88,13 +88,14 @@ function makedocs(varargin)
       % publish the standard docs using matlab's publish
       publish(fullfile(docspath, 'bfra_welcome.m'), mpubopts);
       publish(fullfile(docspath, 'bfra_gettingStarted.m'), mpubopts);
-      publish(fullfile(docspath, 'bfra_contents.m'), mpubopts);
+      % publish(fullfile(docspath, 'bfra_contents.m'), mpubopts);
       publish(fullfile(docspath, 'bfra_theory_contents.m'), mpubopts);
       publish(fullfile(docspath, 'bfra_examples_contents.m'), mpubopts);
 
-      % for github actions the landing page must be saved as index.html
+      % for github actions the landing page must be saved as docs/index.html
+      % where docs/ is at the top-level.
       copyfile(fullfile(htmlpath, 'bfra_gettingStarted.html'), ...
-         fullfile(docspath, 'index.html'));
+         fullfile(fileparts(basepath), 'docs', 'index.html'));
 
       % not sure if other files can also be supported, if so:
       % copyfile('html/bfra_demo.html','bfra_demo.html');
