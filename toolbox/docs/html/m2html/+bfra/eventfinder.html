@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of eventfinder</title>
+  <meta name="keywords" content="eventfinder">
+  <meta name="description" content="EVENTFINDER find recession events using hydrograph and rainfall timeseries.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventfinder.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>eventfinder
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>EVENTFINDER find recession events using hydrograph and rainfall timeseries.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [T, Q, R, Info] = eventfinder(t, q, r, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">EVENTFINDER find recession events using hydrograph and rainfall timeseries.
+
+ Syntax
+
+     [T,Q,R,Info] = eventfinder(t,q,r)
+     [T,Q,R,Info] = eventfinder(t,q,r,opts)
+     [T,Q,R,Info] = eventfinder(_, 'qmin', qmin)
+     [T,Q,R,Info] = eventfinder(_, 'nmin', nmin)
+     [T,Q,R,Info] = eventfinder(_, 'fmax', fmax)
+     [T,Q,R,Info] = eventfinder(_, 'rmax', rmax)
+     [T,Q,R,Info] = eventfinder(_, 'rmin', rmin)
+     [T,Q,R,Info] = eventfinder(_, 'rmrain', true)
+     [T,Q,R,Info] = eventfinder(_, 'rmconvex', true)
+     [T,Q,R,Info] = eventfinder(_, 'rmnochange', false)
+
+ Description
+
+     [T,Q,R,Info] = eventfinder(t,q,r) Detects periods of declining flow on
+     hydrographs defined by inputs time 't', discharge 'q', and rainfall
+     'r'. Use optional inputs to set parameters that determine how events
+     are identified.
+
+ Required inputs
+
+     t           time
+     q           flow (m3/time)
+     r           rain (mm/time)
+
+ Optional name-value inputs
+
+     opts        (optional) structure containing the following fields:
+     qmin        minimum flow magnitude
+     nmin        minimum event length
+     fmax        maximum # of missing values gap-filled
+     rmax        maximum run of sequential constant values
+     rmin        minimum rainfall required to censor flow (mm/day?)
+     cmax        maximum run of sequential constant values
+     rmconvex    remove convex derivatives
+     rmnochange  remove consecutive constant derivates
+     rmrain      remove rainfall
+
+ See also <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, eventsplitter, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>, <a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [T, Q, R, Info] = eventsplitter(t, q, r, opts)</a></li>
+<li><a href="#_sub2" class="code">function tf = islocalmax(X)</a></li>
+<li><a href="#_sub3" class="code">function tf = islocalmin(X)</a></li>
+<li><a href="#_sub4" class="code">function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [T, Q, R, Info] = eventfinder(t, q, r, varargin)</a>
+0002    <span class="comment">%EVENTFINDER find recession events using hydrograph and rainfall timeseries.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [T,Q,R,Info] = eventfinder(t,q,r)</span>
+0007    <span class="comment">%     [T,Q,R,Info] = eventfinder(t,q,r,opts)</span>
+0008    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'qmin', qmin)</span>
+0009    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'nmin', nmin)</span>
+0010    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'fmax', fmax)</span>
+0011    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'rmax', rmax)</span>
+0012    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'rmin', rmin)</span>
+0013    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'rmrain', true)</span>
+0014    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'rmconvex', true)</span>
+0015    <span class="comment">%     [T,Q,R,Info] = eventfinder(_, 'rmnochange', false)</span>
+0016    <span class="comment">%</span>
+0017    <span class="comment">% Description</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">%     [T,Q,R,Info] = eventfinder(t,q,r) Detects periods of declining flow on</span>
+0020    <span class="comment">%     hydrographs defined by inputs time 't', discharge 'q', and rainfall</span>
+0021    <span class="comment">%     'r'. Use optional inputs to set parameters that determine how events</span>
+0022    <span class="comment">%     are identified.</span>
+0023    <span class="comment">%</span>
+0024    <span class="comment">% Required inputs</span>
+0025    <span class="comment">%</span>
+0026    <span class="comment">%     t           time</span>
+0027    <span class="comment">%     q           flow (m3/time)</span>
+0028    <span class="comment">%     r           rain (mm/time)</span>
+0029    <span class="comment">%</span>
+0030    <span class="comment">% Optional name-value inputs</span>
+0031    <span class="comment">%</span>
+0032    <span class="comment">%     opts        (optional) structure containing the following fields:</span>
+0033    <span class="comment">%     qmin        minimum flow magnitude</span>
+0034    <span class="comment">%     nmin        minimum event length</span>
+0035    <span class="comment">%     fmax        maximum # of missing values gap-filled</span>
+0036    <span class="comment">%     rmax        maximum run of sequential constant values</span>
+0037    <span class="comment">%     rmin        minimum rainfall required to censor flow (mm/day?)</span>
+0038    <span class="comment">%     cmax        maximum run of sequential constant values</span>
+0039    <span class="comment">%     rmconvex    remove convex derivatives</span>
+0040    <span class="comment">%     rmnochange  remove consecutive constant derivates</span>
+0041    <span class="comment">%     rmrain      remove rainfall</span>
+0042    <span class="comment">%</span>
+0043    <span class="comment">% See also getevents, eventsplitter, eventpicker, eventplotter</span>
+0044    <span class="comment">%</span>
+0045    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0046 
+0047    <span class="comment">% if called with no input, open this file</span>
+0048    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0049 
+0050    <span class="comment">% PARSE INPUTS</span>
+0051    [t, q, r, opts] = <a href="#_sub4" class="code" title="subfunction [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)">parseinputs</a>(t, q, r, mfilename, varargin{:});
+0052 
+0053    <span class="comment">% MAIN CODE</span>
+0054    [iS, iE] = nonnansegments(q, opts.nmin);
+0055 
+0056    [T, Q, R, Info] = arrayfun(@(s, e) <span class="keyword">...</span>
+0057       <a href="#_sub1" class="code" title="subfunction [T, Q, R, Info] = eventsplitter(t, q, r, opts)">eventsplitter</a>(t(s:e), q(s:e), r(s:e), opts), iS, iE, <span class="string">'Uniform'</span>, false);
+0058 
+0059    <span class="keyword">if</span> isempty(T)
+0060       [T, Q, R, Info] = setEventEmpty();
+0061       <span class="keyword">return</span>
+0062    <span class="keyword">end</span>
+0063 
+0064    <span class="comment">% iS is the start of the entire flow segment, but the indices in Info are</span>
+0065    <span class="comment">% relative to the event returned by eventsplitter. Add iS to these indices,</span>
+0066    fields = fieldnames(Info{1});
+0067    <span class="keyword">for</span> n = 1:numel(Info)
+0068       <span class="keyword">for</span> m = 1:numel(fields)
+0069          Info{n}.(fields{m}) = Info{n}.(fields{m}) + iS(n) - 1;
+0070       <span class="keyword">end</span>
+0071    <span class="keyword">end</span>
+0072    [T, Q, R] = deal(vertcat(T{:}), vertcat(Q{:}), vertcat(R{:}));
+0073    Info = catstructfields(1, Info{:});
+0074 <span class="keyword">end</span>
+0075 
+0076 <a name="_sub1" href="#_subfunctions" class="code">function [T, Q, R, Info] = eventsplitter(t, q, r, opts)</a>
+0077    <span class="comment">%eventsplitter Split detected recession events into segments for fitting.</span>
+0078    <span class="comment">%</span>
+0079    <span class="comment">% Syntax</span>
+0080    <span class="comment">%</span>
+0081    <span class="comment">%     [T,Q,R,Info] = eventsplitter(t,q,r,opts)</span>
+0082    <span class="comment">%</span>
+0083    <span class="comment">% Description</span>
+0084    <span class="comment">%</span>
+0085    <span class="comment">%     Split recession events detected by eventfinder into individual segments</span>
+0086    <span class="comment">%     ready to fit with bfra.fitab or bfra.fitevents. For example, if an</span>
+0087    <span class="comment">%     event is interrupted by rainfall or if rainfall is detected from convex</span>
+0088    <span class="comment">%     dq/dt, the event can be split into separate segments thought to</span>
+0089    <span class="comment">%     represent uninterrupted baseflow. Follows recommendations in Dralle et</span>
+0090    <span class="comment">%     al. 2017.</span>
+0091    <span class="comment">%</span>
+0092    <span class="comment">% Required inputs</span>
+0093    <span class="comment">%</span>
+0094    <span class="comment">%     t           time</span>
+0095    <span class="comment">%     q           flow (m3/time)</span>
+0096    <span class="comment">%     r           rain (mm/time)</span>
+0097    <span class="comment">%     opts        structure containing the following fields:</span>
+0098    <span class="comment">%     nmin        minimum event length</span>
+0099    <span class="comment">%     fmax        maximum # of missing values gap-filled</span>
+0100    <span class="comment">%     rmax        maximum run of sequential constant values</span>
+0101    <span class="comment">%     rmin        minimum rainfall required to censor flow (mm/day?)</span>
+0102    <span class="comment">%     rmconvex    remove convex derivatives</span>
+0103    <span class="comment">%     rmnochange  remove consecutive constant derivates</span>
+0104    <span class="comment">%     rmrain      remove rainfall</span>
+0105    <span class="comment">%</span>
+0106    <span class="comment">% See also getevents, eventfinder, eventpicker, eventplotter</span>
+0107 
+0108    <span class="keyword">persistent</span> inoctave
+0109    <span class="keyword">if</span> isempty(inoctave); inoctave = exist(&quot;OCTAVE_VERSION&quot;, &quot;builtin&quot;)&gt;0;
+0110    <span class="keyword">end</span>
+0111 
+0112    <span class="comment">% if nmin is set to 0 (and maybe if it is set to 1) this method will fail</span>
+0113    <span class="comment">% because runlength returns 1 for consecutive nan values, see isminlength.</span>
+0114 
+0115    <span class="comment">% Get a 3-day smoothed timeseries to control false positive convexity</span>
+0116    <span class="keyword">if</span> inoctave
+0117       qS = nanmovmean(q,3);
+0118    <span class="keyword">else</span>
+0119       qS = movmean(q, 3, <span class="string">'omitnan'</span>);
+0120    <span class="keyword">end</span>
+0121 
+0122    <span class="comment">% First and second differences of the discharge and the smoothed discharge</span>
+0123    dqdt = [0; diff(q)];
+0124    dqdtS = [0; diff(qS)];
+0125    d2qdt = [0; diff(dqdt)];
+0126    d2qdtS = [0; diff(dqdtS)];
+0127 
+0128    <span class="comment">% Part 1: find data to be excluded (run the filters)</span>
+0129 
+0130    <span class="comment">% filters: positive dq/dt, peaks +1 day, convex +1 day, and minima -1 day</span>
+0131    ipos = find(dqdt &gt; 0); <span class="comment">% increasing flow (positive dq/dt)</span>
+0132    imax = find(<a href="#_sub2" class="code" title="subfunction tf = islocalmax(X)">islocalmax</a>(q)); <span class="comment">% local maxima</span>
+0133    imin = find(<a href="#_sub3" class="code" title="subfunction tf = islocalmin(X)">islocalmin</a>(q)); <span class="comment">% local minima</span>
+0134    icon = find(<a href="#_sub2" class="code" title="subfunction tf = islocalmax(X)">islocalmax</a>(dqdt) &amp; <a href="#_sub2" class="code" title="subfunction tf = islocalmax(X)">islocalmax</a>(dqdtS)) + 1;  <span class="comment">% convex + 1 day</span>
+0135 
+0136    <span class="comment">% This also finds the transitions from convex up to concave up</span>
+0137    <span class="comment">% icon = find( (islocalmax(dqdt) &amp; islocalmax(dqdtS)) | ...</span>
+0138    <span class="comment">%   (islocalmin(dqdt) &amp; islocalmin(dqdtS)) ) + 1;  % convex + 1 day</span>
+0139 
+0140    <span class="comment">% Dralle: keep if dq/dt&lt;0 AND d2q/dt2&gt;0 (concave up) in BOTH the raw and</span>
+0141    <span class="comment">% smoothed data, i.e. exclude if both raw AND smoothed data are convex</span>
+0142    icon2 = find(d2qdt &lt;= 0 &amp; d2qdtS &lt;= 0) - 1;
+0143    icon2 = icon2(icon2 &gt; 0);
+0144 
+0145    <span class="comment">% icon always occurs on peaks and one day prior, remove them from icon,</span>
+0146    <span class="comment">% the peak will remain in imax, and one day prior in ipos</span>
+0147    icon = icon(~ismember((icon), imax));
+0148 
+0149    <span class="comment">% if the first (last) point is a local max (min), add them here</span>
+0150    <span class="keyword">if</span> q(2) &lt; q(1)
+0151       imax = [1; imax];
+0152    <span class="keyword">end</span>
+0153    <span class="keyword">if</span> q(end) &lt; q(end-1)
+0154       imin = [imin; length(q)];
+0155    <span class="keyword">end</span>
+0156 
+0157    <span class="comment">% Part 2: exclude the data (apply the filters)</span>
+0158    ibad = [ipos; imax; imax+1; imin];
+0159 
+0160    <span class="comment">% remove the convex points if requested</span>
+0161    <span class="keyword">if</span> opts.rmconvex == true
+0162       ibad = [ibad; icon];
+0163       <span class="keyword">if</span> opts.rmrain == false
+0164          ibad = [ibad; icon2]; <span class="comment">% substitute for lack of rain data</span>
+0165       <span class="keyword">end</span>
+0166    <span class="keyword">end</span>
+0167 
+0168    <span class="comment">% exclude days with rain &gt; rmin and convex recession</span>
+0169    <span class="comment">% also exclude 3 days before/after and combine with ibad</span>
+0170    <span class="keyword">if</span> opts.rmrain == true
+0171       irain = find(r &gt; opts.rmin);
+0172       irain = unique(irain + [-3 -2 -1 0 1 2 3]);
+0173       irain = irain(ismember(irain, icon2));
+0174       ibad  = [ibad; irain(:)];
+0175    <span class="keyword">end</span>
+0176 
+0177    <span class="comment">% exclude sequences of two or more of (dq/dt = 0) (see setconstantnan)</span>
+0178    <span class="keyword">if</span> opts.rmnochange == true
+0179       inoc = d2qdt; inoc(inoc ~= 0) = nan;
+0180       inoc = find(isminlength(inoc, opts.rmax));
+0181       ibad = [ibad; inoc];
+0182    <span class="keyword">end</span>
+0183 
+0184    <span class="comment">% take the unique indices and exclude 0 and &gt;numel(q)</span>
+0185    ibad = unique(ibad);
+0186    ibad(ibad &lt;= 0) = [];
+0187    ibad(ibad &gt; numel(q)) = [];
+0188 
+0189    <span class="comment">% Part 3: extract each valid recession event</span>
+0190    tfc = true(size(q));          <span class="comment">% initialize candidates true</span>
+0191    tfk = ones(size(q));          <span class="comment">% initialize keeper run lengths</span>
+0192    tfc(ibad) = false;            <span class="comment">% set unuseable values false</span>
+0193    tfk(ibad) = nan;              <span class="comment">% set unuseable values nan</span>
+0194 
+0195    <span class="comment">% find events &gt;= min length</span>
+0196    [tfk,is,ie] = isminlength(tfk, opts.nmin);
+0197    eventlength = ie - is + 1; <span class="comment">% event (run) lengths</span>
+0198 
+0199    <span class="comment">% Remove events shorter than nmin and concave increasing flows</span>
+0200    keep = eventlength &gt;= opts.nmin;
+0201    <span class="keyword">for</span> n = 1:numel(is)
+0202       <span class="keyword">if</span> islineconvex(q(is(n):ie(n))) || islinepositive(q(is(n):ie(n)))
+0203          keep(n) = false;
+0204       <span class="keyword">end</span>
+0205    <span class="keyword">end</span>
+0206    is = is(keep);
+0207    ie = ie(keep);
+0208 
+0209    <span class="comment">% pull out the events</span>
+0210    T = arrayfun(@(s, e) t(s:e), is, ie, <span class="string">'Uniform'</span>, false);
+0211    Q = arrayfun(@(s, e) q(s:e), is, ie, <span class="string">'Uniform'</span>, false);
+0212    R = arrayfun(@(s, e) r(s:e), is, ie, <span class="string">'Uniform'</span>, false);
+0213 
+0214    <span class="comment">% return events that passed the nmin filter</span>
+0215    Info.imaxima    = imax;
+0216    Info.iminima    = imin;
+0217    Info.iconvex    = icon;
+0218    Info.icandidate = find(tfc);
+0219    Info.ikeep      = find(tfk);
+0220    Info.istart     = is;
+0221    Info.istop      = ie;
+0222 
+0223    <span class="comment">% debug plot:</span>
+0224    debug = false;
+0225    <span class="keyword">if</span> debug == true
+0226       figure; plot(t, q); hold on; plot(t, qS, <span class="string">'g'</span>); datetick;
+0227       scatter(t(ipos), q(ipos), <span class="string">'filled'</span>)
+0228       plot(t(imax), q(imax), <span class="string">'x'</span>, <span class="string">'MarkerSize'</span>, 20, <span class="string">'Color'</span>, <span class="string">'g'</span>)
+0229       plot(t(imin), q(imin), <span class="string">'x'</span>, <span class="string">'MarkerSize'</span>, 20, <span class="string">'Color'</span>, <span class="string">'r'</span>)
+0230       plot(t(icon), q(icon), <span class="string">'o'</span>, <span class="string">'MarkerSize'</span>, 20, <span class="string">'Color'</span>, <span class="string">'m'</span>)
+0231       plot(t(icon2), q(icon2), <span class="string">'.'</span>, <span class="string">'Color'</span>, <span class="string">'k'</span>)
+0232       plot(t(ibad), q(ibad), <span class="string">'.'</span>, <span class="string">'Color'</span>, <span class="string">'r'</span>)
+0233 
+0234       <span class="comment">% highlight a particular event</span>
+0235       <span class="comment">% scatter(t(is(n):ie(n)),q(is(n):ie(n)),'y','filled')</span>
+0236 
+0237       <span class="comment">% plot q vs -dqdt</span>
+0238       <span class="comment">% figure; hold on;</span>
+0239       <span class="comment">% for n = 1:numel(Q)</span>
+0240       <span class="comment">%    loglog(Q{iplot},-derivative(Q{iplot}))</span>
+0241       <span class="comment">%    title(num2str(n)); pause; clf</span>
+0242       <span class="comment">% end</span>
+0243    <span class="keyword">end</span>
+0244 
+0245 <span class="keyword">end</span>
+0246 
+0247 <a name="_sub2" href="#_subfunctions" class="code">function tf = islocalmax(X)</a>
+0248    tf = false(size(X));
+0249    tf(bfra.deps.peakfinder(X,0,0,1,false)) = true;
+0250 <span class="keyword">end</span>
+0251 
+0252 <a name="_sub3" href="#_subfunctions" class="code">function tf = islocalmin(X)</a>
+0253    tf = false(size(X));
+0254    tf(bfra.deps.peakfinder(X,0,0,-1,false)) = true;
+0255 <span class="keyword">end</span>
+0256 
+0257 <span class="comment">%% INPUT PARSER</span>
+0258 <a name="_sub4" href="#_subfunctions" class="code">function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)</a>
+0259 
+0260    <span class="keyword">persistent</span> parser
+0261    <span class="keyword">if</span> isempty(parser)
+0262       parser = inputParser;
+0263       addRequired(parser, <span class="string">'t'</span>,                  @isdatelike);
+0264       addRequired(parser, <span class="string">'q'</span>,                  @isdoublevector);
+0265       addRequired(parser, <span class="string">'r'</span>,                  @isnumeric);
+0266       addParameter(parser,<span class="string">'nmin'</span>,        4,     @isnumericscalar);
+0267       addParameter(parser,<span class="string">'fmax'</span>,        2,     @isnumericscalar);
+0268       addParameter(parser,<span class="string">'rmax'</span>,        2,     @isnumericscalar);
+0269       addParameter(parser,<span class="string">'rmin'</span>,        0,     @isnumericscalar);
+0270       addParameter(parser,<span class="string">'rmconvex'</span>,    false, @islogicalscalar);
+0271       addParameter(parser,<span class="string">'rmnochange'</span>,  false, @islogicalscalar);
+0272       addParameter(parser,<span class="string">'rmrain'</span>,      false, @islogicalscalar);
+0273    <span class="keyword">end</span>
+0274    parser.FunctionName = funcname;
+0275    parse(parser,t,q,r,varargin{:});
+0276    
+0277    <span class="comment">% Return the options structure</span>
+0278    opts = parser.Results;
+0279 
+0280    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0281    t = todatenum(t);
+0282    validateattributes(t, {<span class="string">'double'</span>}, {<span class="string">'size'</span>, size(q)}, funcname, <span class="string">'t'</span>, 1)
+0283    validateattributes(opts.nmin, {<span class="string">'double'</span>}, {<span class="string">'&gt;'</span>, 2}, funcname, <span class="string">'nmin'</span>)
+0284 
+0285    <span class="comment">% Allow empty r i.e. input syntax eventfinder(t,q,[],...)</span>
+0286    <span class="keyword">if</span> isempty(r)
+0287       r = zeros(size(t));
+0288    <span class="keyword">end</span>
+0289 
+0290    <span class="comment">% Convert to columns, in case this is not called from bfra.getevents</span>
+0291    [t, q, r] = deal(t(:), q(:), r(:));
+0292 <span class="keyword">end</span></pre></div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of version</title>
+  <meta name="keywords" content="version">
+  <meta name="description" content="VERSION return the version number for the baseflow toolbox">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; version.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>version
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>VERSION return the version number for the baseflow toolbox</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function varargout = version() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">VERSION return the version number for the baseflow toolbox
+
+  v = version()
+
+ See also:</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="loadbasins.html" class="code" title="function [Basins,Meta,Poly] = loadbasins(basinname,varargin)">loadbasins</a>	LOADBASINS Load boundary object for basin specified by basinname.</li>
+<li><a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>	LOADCALM Load CALM ALT data for a basin in the Bounds struct.</li>
+<li><a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>	LOADMETA Load metadata for basin indicated by basinname.</li>
+<li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>	LOADPROPS Load basin properties from metadata table.</li></ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function varargout = version()</a>
+0002    <span class="comment">%VERSION return the version number for the baseflow toolbox</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">%  v = version()</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">% See also:</span>
+0007    v = <span class="string">'0.1.0'</span>;
+0008 
+0009    <span class="keyword">if</span> nargout == 1
+0010       varargout{1} = v;
+0011    <span class="keyword">else</span>
+0012       disp(v);
+0013    <span class="keyword">end</span>
+0014 
+0015    home
+0016    disp(<span class="string">' _______                        ___  __                     '</span>)
+0017    disp(<span class="string">'|   _   \.---.-..-----..-----..''  _||  |.-----..--.--.--.  '</span>)
+0018    disp(<span class="string">'|.  v1  /|  _  ||__ --||  -__||   _||  ||  _  ||  |  |  |   '</span>)
+0019    disp(<span class="string">'|.  _   \|___._||_____||_____||__|  |__||_____||________|   '</span>)
+0020    disp(<span class="string">'|:  00   \              ____        ______      ______      '</span>)
+0021    disp(<span class="string">'|::.. .  /   .--.--.   |_   |      |      |    |      |     '</span>)
+0022    disp(<span class="string">'`-------''    |  |  |__  _|  |_  __ |  --  | __ |  --  |    '</span>)
+0023    disp(<span class="string">'              \___/|__||______||__||______||__||______|     '</span>)
+0024    
+0025 <span class="keyword">end</span></pre></div>
+</body>
+</html>

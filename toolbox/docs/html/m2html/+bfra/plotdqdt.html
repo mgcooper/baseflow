@@ -1,0 +1,579 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plotdqdt</title>
+  <meta name="keywords" content="plotdqdt">
+  <meta name="description" content="PLOTDQDT Plot the log-log q vs dq/dt point-cloud">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; plotdqdt.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>plotdqdt
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PLOTDQDT Plot the log-log q vs dq/dt point-cloud</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PLOTDQDT Plot the log-log q vs dq/dt point-cloud
+
+ Syntax
+
+     [hFits,Picks,Fits] = bfra.plotdqdt(q,dqdt)
+     [hFits,Picks,Fits] = bfra.plotdqdt(_,'fitmethod',fitmethod)
+     [hFits,Picks,Fits] = bfra.plotdqdt(_,'pickmethod',pickmethod)
+     [hFits,Picks,Fits] = bfra.plotdqdt(_,'weights',weights)
+     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)
+
+ Required inputs
+
+     q     =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+     dqdt  =  discharge rate of change (L T^-2)
+
+ Optional name-value inputs
+
+
+ See also: <a href="getdqdt.html" class="code" title="function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)">getdqdt</a>, fitdqdt</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [hFits, Fits, Picks] = initOutput()</a></li>
+<li><a href="#_sub2" class="code">function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)</a></li>
+<li><a href="#_sub3" class="code">function Fits = pickFitter(Picks,fitmethod)</a></li>
+<li><a href="#_sub4" class="code">function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,</a></li>
+<li><a href="#_sub5" class="code">function addlabels(h)</a></li>
+<li><a href="#_sub6" class="code">function h = plotrain(h,rain,x,y)</a></li>
+<li><a href="#_sub7" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos)</a></li>
+<li><a href="#_sub8" class="code">function pickFig = eventPlotter(q,dqdt)</a></li>
+<li><a href="#_sub9" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a></li>
+<li><a href="#_sub10" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights,</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)</a>
+0002    <span class="comment">%PLOTDQDT Plot the log-log q vs dq/dt point-cloud</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [hFits,Picks,Fits] = bfra.plotdqdt(q,dqdt)</span>
+0007    <span class="comment">%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'fitmethod',fitmethod)</span>
+0008    <span class="comment">%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'pickmethod',pickmethod)</span>
+0009    <span class="comment">%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'weights',weights)</span>
+0010    <span class="comment">%     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">% Required inputs</span>
+0013    <span class="comment">%</span>
+0014    <span class="comment">%     q     =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)</span>
+0015    <span class="comment">%     dqdt  =  discharge rate of change (L T^-2)</span>
+0016    <span class="comment">%</span>
+0017    <span class="comment">% Optional name-value inputs</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">%</span>
+0020    <span class="comment">% See also: getdqdt, fitdqdt</span>
+0021 
+0022    <span class="comment">% NOTE: now that pickFitter calls bfra.fitab, this function does everything</span>
+0023    <span class="comment">% that an official workflow would do, i think, and therefore should be</span>
+0024    <span class="comment">% renamed eventually (except it doesn't pick events)</span>
+0025 
+0026    <span class="comment">% NOTE: rain is optional b/c at this point, events are picked</span>
+0027 
+0028    <span class="comment">% NOTE: this is only called from getdqdt, and only if 'pickmethod' is something</span>
+0029    <span class="comment">% other than 'none'.</span>
+0030 
+0031    <span class="comment">% if called with no input, open this file</span>
+0032    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0033 
+0034    <span class="comment">% PARSE INPUTS</span>
+0035    [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, rain, ax, <span class="keyword">...</span>
+0036       blate, precision, timestep, eventID, labelplot] = parseinputs( <span class="keyword">...</span>
+0037       q, dqdt, mfilename, varargin{:});
+0038 
+0039    <span class="comment">% INIT OUTPUT</span>
+0040    [hFits, Fits, Picks] = <a href="#_sub1" class="code" title="subfunction [hFits, Fits, Picks] = initOutput()">initOutput</a>();
+0041 
+0042    <span class="comment">% Prep fits</span>
+0043    [~, ~, logx, logy, weights, ok] = bfra.prepfits(q, dqdt, <span class="string">'weights'</span>, weights);
+0044 
+0045    <span class="keyword">if</span> ok == false
+0046       <span class="keyword">return</span>;
+0047    <span class="keyword">end</span>
+0048 
+0049    <span class="comment">% Pick fits</span>
+0050    Picks = <a href="#_sub2" class="code" title="subfunction Picks = fitSelector(q,dqdt,weights,pickmethod,rain)">fitSelector</a>(logx, logy, weights, pickmethod, rain);
+0051 
+0052    <span class="comment">% Fit picks</span>
+0053    Fits = <a href="#_sub3" class="code" title="subfunction Fits = pickFitter(Picks,fitmethod)">pickFitter</a>(Picks, fitmethod);
+0054 
+0055    <span class="comment">% plot the fits</span>
+0056    hFits = <a href="#_sub4" class="code" title="subfunction h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ">plotFits</a>(Fits, Picks, fitmethod, ax, plotfits,         <span class="keyword">...</span>
+0057       showfig, blate, timestep, precision, labelplot);
+0058 <span class="keyword">end</span>
+0059 
+0060 <span class="comment">%% LOCAL FUNCTIONS</span>
+0061 <a name="_sub1" href="#_subfunctions" class="code">function [hFits, Fits, Picks] = initOutput()</a>
+0062    <span class="comment">% initialize output</span>
+0063    Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
+0064    Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
+0065    Picks.nPicks = nan; hFits = nan;
+0066 <span class="keyword">end</span>
+0067 
+0068 <span class="comment">% SELECT FITS</span>
+0069 <a name="_sub2" href="#_subfunctions" class="code">function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)</a>
+0070 
+0071    <span class="keyword">switch</span> pickmethod
+0072       <span class="keyword">case</span> <span class="string">'none'</span>  <span class="comment">% do nothing (use the entire event)</span>
+0073          istart = [];
+0074          istop = [];
+0075          
+0076       <span class="keyword">case</span> <span class="string">'auto'</span> <span class="comment">% auto detect transition between early/late time</span>
+0077 
+0078          <span class="comment">% if called w/o output, it will generate a figure</span>
+0079          chgpts = findchangepts(dqdt, <span class="string">'MaxNumChanges'</span>, 2, <span class="string">'Statistic'</span>, <span class="keyword">...</span>
+0080             <span class="string">'linear'</span>, <span class="string">'MinDistance'</span>, 2);
+0081          nPicks = numel(chgpts);
+0082 
+0083          <span class="comment">% get the segment start/ends</span>
+0084          istart   = [ 1;                chgpts(1:nPicks) ];
+0085          istop    = [ chgpts(1:nPicks); numel(q);        ];
+0086 
+0087          <span class="comment">% exclude segments &lt;4. these are always included in the event fit</span>
+0088          rlengths = istop - istart + 1;
+0089          ok       = rlengths &gt; 4;
+0090          istart   = istart(ok);
+0091          istop    = istop(ok);
+0092 
+0093       <span class="keyword">case</span> <span class="string">'manual'</span>
+0094 
+0095          <span class="comment">% pause helps with buggy ginput</span>
+0096          pickFig     = <a href="#_sub8" class="code" title="subfunction pickFig = eventPlotter(q,dqdt)">eventPlotter</a>(q, dqdt); pause(0.5);
+0097          pickedPts   = bfra.deps.ginputc(); pause(0.5);
+0098          startPts    = pickedPts(1:2:end);
+0099          endPts      = pickedPts(2:2:end);
+0100 
+0101          close(pickFig);
+0102 
+0103          <span class="comment">% for manual, need to find the indices</span>
+0104          istart = nan(size(startPts));
+0105          istop  = nan(size(startPts));
+0106 
+0107          <span class="keyword">for</span> n = 1:numel(startPts)
+0108             difStart = abs(q - startPts(n));
+0109             difStop = abs(q - endPts(n));
+0110             istart(n) = findmin(difStart, 1, <span class="string">'first'</span>);
+0111             istop(n) = findmin(difStop, 1, <span class="string">'first'</span>);
+0112          <span class="keyword">end</span>
+0113    <span class="keyword">end</span>
+0114 
+0115    <span class="comment">% add the full-event to the start/stop indices</span>
+0116    istart = [istart; 1];
+0117    istop  = [istop; numel(q)];
+0118    nPicks = numel(istart);
+0119 
+0120    <span class="keyword">if</span> pickmethod ~= &quot;none&quot;
+0121       fprintf(<span class="string">'%.f picks identified +event = %.f\n'</span>, nPicks-1, nPicks)
+0122    <span class="keyword">end</span>
+0123 
+0124    <span class="comment">% cycle through the picks and pull out the data</span>
+0125    Picks.Q           = cell(  nPicks,1 );
+0126    Picks.dQdt        = cell(  nPicks,1 );
+0127    Picks.Weights     = cell(  nPicks,1 );
+0128    Picks.Rain        = cell(  nPicks,1 );
+0129 
+0130    <span class="comment">% find the indices of the picked points on the q,dqdt data arrays</span>
+0131    <span class="keyword">for</span> n = 1:nPicks
+0132       Picks.Q{n}        = q(        istart(n):istop(n)   );
+0133       Picks.dQdt{n}     = dqdt(     istart(n):istop(n)   );
+0134       Picks.Weights{n}  = weights(  istart(n):istop(n)   );
+0135       Picks.Rain{n}     = rain(     istart(n):istop(n)   );
+0136    <span class="keyword">end</span>
+0137 
+0138    Picks.nPicks        = nPicks;
+0139    Picks.istart        = istart;
+0140    Picks.istop         = istop;
+0141    Picks.runlengths    = istop-istart+1;
+0142 <span class="keyword">end</span>
+0143 
+0144 <span class="comment">% FIT PICKS</span>
+0145 <a name="_sub3" href="#_subfunctions" class="code">function Fits = pickFitter(Picks,fitmethod)</a>
+0146 
+0147    <span class="keyword">for</span> n = 1:Picks.nPicks
+0148 
+0149       logq = Picks.Q{n};
+0150       logdqdt = Picks.dQdt{n};
+0151       weights = Picks.Weights{n};
+0152       
+0153       q = exp(logq);
+0154       dqdt = -exp(logdqdt);
+0155 
+0156       <span class="keyword">switch</span> fitmethod
+0157 
+0158          <span class="keyword">case</span> {<span class="string">'ols'</span>,<span class="string">'qtl'</span>,<span class="string">'nls'</span>,<span class="string">'mle'</span>}
+0159             Fit = bfra.fitab(q,dqdt,<span class="string">'nls'</span>);
+0160          <span class="keyword">case</span> <span class="string">'comp'</span>
+0161             FitO = bfra.fitab(q,dqdt,<span class="string">'ols'</span>,<span class="string">'weights'</span>,weights);
+0162             FitQ = bfra.fitab(q,dqdt,<span class="string">'qtl'</span>,<span class="string">'weights'</span>,weights);
+0163             FitN = bfra.fitab(q,dqdt,<span class="string">'nls'</span>,<span class="string">'weights'</span>,weights);
+0164 
+0165             Fits.abqtl(n,:) = FitO.ab;
+0166             Fits.abnls(n,:) = FitN.ab;
+0167             Fits.abqtl(n,:) = FitQ.ab;
+0168       <span class="keyword">end</span>
+0169 
+0170       Fits.ab(n,:) = Fit.ab;
+0171       Fits.xplot(n,:) = linspace(0.75*min(q),max(q)*1.25,50);
+0172       Fits.yplot(n,:) = Fits.ab(n,1).*Fits.xplot(n,:).^Fits.ab(n,2);
+0173    <span class="keyword">end</span>
+0174    Fits.nFits = Picks.nPicks;
+0175 <span class="keyword">end</span>
+0176 
+0177 <span class="comment">% PLOT FITS</span>
+0178 <a name="_sub4" href="#_subfunctions" class="code">function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    </a><span class="keyword">...</span>
+0179       showfig,blate,timestep,precision,labelplot)
+0180 
+0181    <span class="keyword">if</span> plotfits == true
+0182       <span class="keyword">if</span> showfig == true
+0183 
+0184          <span class="keyword">if</span> strcmp(ax,<span class="string">'none'</span>)
+0185             <span class="comment">% changed this to make a figure instead</span>
+0186             <span class="comment">%ax = gca;</span>
+0187             figure(<span class="string">'Position'</span>,[1 1 658  576]);
+0188             ax = gca;
+0189          <span class="keyword">end</span> <span class="comment">% else, useax was passed in</span>
+0190 
+0191       <span class="keyword">else</span>
+0192          figure(<span class="string">'Position'</span>,[1 1 658  576],<span class="string">'visible'</span>,<span class="string">'off'</span>);
+0193          ax = gca;
+0194       <span class="keyword">end</span>
+0195       h.ax = ax;
+0196    <span class="keyword">else</span>
+0197       h = []; <span class="keyword">return</span>;
+0198    <span class="keyword">end</span>
+0199    c  =  [
+0200       0        0.447    0.741;
+0201       0.85     0.325    0.098;
+0202       0.929    0.694    0.125;
+0203       0.494    0.184    0.556;
+0204       0.466    0.674    0.188;
+0205       0.301    0.745    0.933;
+0206       0.635    0.078    0.184  ];
+0207 
+0208 
+0209    nFits = Fits.nFits;
+0210    nPlot = max(nFits,1); <span class="comment">% max(nFits-1,1);</span>
+0211    ltext = repmat({<span class="string">''</span>},nPlot,1);
+0212 
+0213    <span class="comment">% this converts the entire event back to linear space</span>
+0214    x = exp(Picks.Q{end});
+0215    y = exp(Picks.dQdt{end});
+0216    rain = Picks.Rain{end};
+0217    hold on;
+0218 
+0219    <span class="comment">% plot the entire event and get ax lims before setting log scale</span>
+0220    h.scatter = plot(h.ax, x, y, <span class="string">'o'</span>, <span class="string">'MarkerSize'</span>, 8, <span class="keyword">...</span>
+0221       <span class="string">'MarkerFaceColor'</span>, c(1,:), <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>);
+0222 
+0223    <span class="keyword">for</span> n = 1:nPlot
+0224 
+0225       <span class="comment">% 'comp' not implemented, this is a template</span>
+0226       <span class="keyword">if</span> strcmp(fitmethod,<span class="string">'comp'</span>)
+0227          abnls = Fits.abnls(n,:);
+0228          xplot = Fits.xplot(n,:);
+0229          yplot = abnls(1).*xplot.^abnls(2);
+0230 
+0231          h.plots{n} = plot(h.ax,xplot,yplot,<span class="string">':'</span>,<span class="string">'Color'</span>,c(n+1,:));
+0232          ltext{n} = bfra.aQbString(abnls,<span class="string">'printvalues'</span>,true);
+0233 
+0234       <span class="keyword">else</span>
+0235          <span class="comment">% if Fits.ab(n,2)&lt;0; continue; end</span>
+0236          xplot = Fits.xplot(n,:);
+0237          yplot = Fits.yplot(n,:);
+0238          <span class="keyword">if</span> nPlot == 1
+0239             <span class="comment">% if only one plot, use black dots</span>
+0240             h.plots{n} = plot(h.ax,xplot,yplot,<span class="string">':'</span>,<span class="string">'Color'</span>,<span class="string">'k'</span>);
+0241          <span class="keyword">else</span>
+0242             <span class="comment">% otherwise cycle through the colors</span>
+0243             h.plots{n} = plot(h.ax,xplot,yplot,<span class="string">':'</span>,<span class="string">'Color'</span>,c(n+1,:));
+0244          <span class="keyword">end</span>
+0245          ltext{n} = bfra.aQbString(Fits.ab(n,:),<span class="string">'printvalues'</span>,true);
+0246       <span class="keyword">end</span>
+0247    <span class="keyword">end</span>
+0248 
+0249    <span class="comment">% remove empty legend text</span>
+0250    ltext = ltext(~ismember(ltext,<span class="string">''</span>));
+0251 
+0252    <span class="comment">% % I moved this up so the lines plot on top, might have wanted it here for</span>
+0253    <span class="comment">% the case where we plot multiple events</span>
+0254    <span class="comment">%    % plot the entire event and get ax lims before setting log scale</span>
+0255    <span class="comment">%    h.scatter   = plot(h.ax,x,y,'o', 'MarkerSize',        8,             ...</span>
+0256    <span class="comment">%                                     'MarkerFaceColor',   c(1,:),        ...</span>
+0257    <span class="comment">%                                     'MarkerEdgeColor',   'none'         );</span>
+0258 
+0259    axis tight; axis square;
+0260    h.ax.XScale = <span class="string">'log'</span>;
+0261    h.ax.YScale = <span class="string">'log'</span>;
+0262 
+0263    <span class="comment">% set AutoUpdate,'off' if adding back the text along the line</span>
+0264    <span class="comment">%    h.leg       = legend([h.plots{:}],ltext,'Location','best',      ...</span>
+0265    <span class="comment">%                   'Interpreter','latex','AutoUpdate','off');</span>
+0266 
+0267    xlabel(bfra.strings(<span class="string">'Q'</span>,<span class="string">'units'</span>,true));
+0268    ylabel(bfra.strings(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true));
+0269 
+0270    xlimkeep = get(gca,<span class="string">'XLim'</span>);
+0271    ylimkeep = get(gca,<span class="string">'YLim'</span>);
+0272 
+0273    <span class="comment">% % no longer used, 'earlytime' and 'latetime' reflines instead</span>
+0274    <span class="comment">%    if isnan(refpoints)</span>
+0275    <span class="comment">%       refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl</span>
+0276    <span class="comment">%    end</span>
+0277 
+0278    [hUpper,abUpper] = bfra.plotrefline(x,y, <span class="keyword">...</span>
+0279       <span class="string">'refline'</span>,  <span class="string">'upperenvelope'</span>,  <span class="keyword">...</span>
+0280       <span class="string">'timestep'</span>, timestep );
+0281 
+0282    [hLower,abLower]  = bfra.plotrefline(x,y, <span class="keyword">...</span>
+0283       <span class="string">'refline'</span>,  <span class="string">'lowerenvelope'</span>,  <span class="keyword">...</span>
+0284       <span class="string">'precision'</span>,precision );
+0285 
+0286    [hLate,abLate] = bfra.plotrefline(x,y, <span class="keyword">...</span>
+0287       <span class="string">'refline'</span>, <span class="string">'latetime'</span>, <span class="keyword">...</span>
+0288       <span class="string">'refslope'</span>, blate );
+0289 
+0290    [hEarly,abEarly] = bfra.plotrefline(x,y, <span class="keyword">...</span>
+0291       <span class="string">'refline'</span>, <span class="string">'earlytime'</span> );
+0292 
+0293    <span class="comment">% add the ref-point a/b values</span>
+0294    h.aEarly = abEarly(1);
+0295    h.bEarly = abEarly(2);
+0296    h.aLate  = abLate(1);
+0297    h.bLate  = abLate(2);
+0298 
+0299    <span class="comment">% make the ylimits span the minimum dq/dt to the upper envelope at max Q</span>
+0300    <span class="keyword">if</span> timestep &gt;= 1
+0301       ylowlim = min(0.8*abLower(1),min(ylimkeep));
+0302       yupplim = abUpper(1)*max(xlimkeep)^abUpper(2);
+0303 
+0304       set(gca,<span class="string">'YLim'</span>,[ylowlim yupplim]);
+0305    <span class="keyword">end</span>
+0306 
+0307    h = <a href="#_sub6" class="code" title="subfunction h = plotrain(h,rain,x,y)">plotrain</a>(h,rain,x,y);
+0308 
+0309    <span class="comment">% I added this so rain is in the legend</span>
+0310    <span class="keyword">if</span> isfield(h,<span class="string">'hrain'</span>) &amp;&amp; isaxis(h.hrain)
+0311       ltext = [ltext <span class="string">'rain'</span>];
+0312       h.leg = legend( [h.plots{:} h.hrain(1)],ltext, <span class="keyword">...</span>
+0313          <span class="string">'Location'</span>,<span class="string">'best'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>, <span class="keyword">...</span>
+0314          <span class="string">'FontSize'</span>,11,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0315    <span class="keyword">else</span>
+0316       h.leg = legend( [h.plots{:} hUpper],ltext, <span class="keyword">...</span>
+0317          <span class="string">'Location'</span>,<span class="string">'best'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>, <span class="keyword">...</span>
+0318          <span class="string">'FontSize'</span>,11,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0319    <span class="keyword">end</span>
+0320 
+0321    <span class="comment">% ff = figformat('labelinterpreter','latex','linelinewidth',2,   ...</span>
+0322    <span class="comment">%    'suppliedline',h.plots{1},'legendlocation',     ...</span>
+0323    <span class="comment">%    'northwest');</span>
+0324    <span class="comment">% h.ff = ff;</span>
+0325 
+0326    grid off;
+0327 
+0328    <span class="comment">% fprintf('%.f picks selected to plot\n',numel(ltext))</span>
+0329    <span class="keyword">if</span> labelplot == true
+0330       <a href="#_sub5" class="code" title="subfunction addlabels(h)">addlabels</a>(h)
+0331    <span class="keyword">end</span>
+0332 
+0333    <span class="comment">% axpos = bfra.deps.plotboxpos(gca); % only works with correct axes position</span>
+0334    <span class="comment">% xtext = exp(mean(log(xlimkeep)));</span>
+0335    <span class="comment">% addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);</span>
+0336    <span class="comment">% addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);</span>
+0337    <span class="comment">% addRotatedText(1*xtext,axb(aMax,1*xtext,bMax),'upper envelope',1.5,axpos);</span>
+0338 <span class="keyword">end</span>
+0339 
+0340 <a name="_sub5" href="#_subfunctions" class="code">function addlabels(h)</a>
+0341 
+0342    ya = 50;
+0343    xa = (ya/h.aLate)^(1/h.bLate);
+0344    xa = [xa xa*3];
+0345    ya = [ya ya];
+0346    ta = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>,h.bLate);
+0347 
+0348    bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
+0349       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0350    text(1.05*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>)
+0351 
+0352    xa = (ya(1)/h.aEarly)^(1/h.bEarly);
+0353    xa = [xa xa*3];
+0354    ta = sprintf(<span class="string">'$b=%.0f$'</span>,h.bEarly);
+0355 
+0356    bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
+0357       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0358    text(1.05*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>)
+0359 <span class="keyword">end</span>
+0360 
+0361 
+0362 <a name="_sub6" href="#_subfunctions" class="code">function h = plotrain(h,rain,x,y)</a>
+0363 
+0364    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
+0365    <span class="comment">% the plotted circles</span>
+0366    <span class="keyword">if</span> sum(rain)==0
+0367       h.hrain = nan;
+0368    <span class="keyword">else</span>
+0369 
+0370       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
+0371       <span class="comment">%sz    = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
+0372       <span class="comment">%scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
+0373 
+0374       <span class="comment">% this mimics the way scatter scales the circles</span>
+0375       s = h.scatter.MarkerSize + sqrt(pi.*(rain(rain&gt;0)).^2);
+0376       x = x(rain&gt;0);
+0377       y = y(rain&gt;0);
+0378 
+0379       hold on;
+0380       <span class="keyword">for</span> n = 1:numel(s)
+0381          h.hrain(n) = plot(x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,s(n), <span class="keyword">...</span>
+0382             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
+0383       <span class="keyword">end</span>
+0384    <span class="keyword">end</span>
+0385 <span class="keyword">end</span>
+0386 
+0387 <a name="_sub7" href="#_subfunctions" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos)</a>
+0388 
+0389    <span class="comment">% https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib</span>
+0390 
+0391    <span class="comment">% to add text, need the slope in figure space</span>
+0392    xlims = xlim;
+0393    ylims = ylim;
+0394    xfact = axpos(1)/(log(xlims(2))-log(xlims(1)));
+0395    yfact = axpos(2)/(log(ylims(2))-log(ylims(1)));   <span class="comment">% slope adjustment</span>
+0396    atext = slope*atand(yfact/xfact);           <span class="comment">% adjust angle</span>
+0397 
+0398    text( xtxt,ytxt,txt,                   <span class="keyword">...</span>
+0399       <span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,     <span class="keyword">...</span>
+0400       <span class="string">'VerticalAlignment'</span>, <span class="string">'bottom'</span>,      <span class="keyword">...</span>
+0401       <span class="string">'FontSize'</span>,12,                      <span class="keyword">...</span>
+0402       <span class="string">'rotation'</span>,atext);
+0403 <span class="keyword">end</span>
+0404 
+0405 <span class="comment">% PLOT EVENT</span>
+0406 <a name="_sub8" href="#_subfunctions" class="code">function pickFig = eventPlotter(q,dqdt)</a>
+0407    pickFig = figure;
+0408    scatter(q,dqdt,36,[0,0.447,0.741],<span class="string">'filled'</span>);
+0409 <span class="keyword">end</span>
+0410 
+0411 <span class="comment">% DETECT TRANSITION</span>
+0412 <a name="_sub9" href="#_subfunctions" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a>
+0413 
+0414    nPicks   = numel(istart);
+0415    rlengths = istop-istart+1;
+0416 
+0417    <span class="keyword">if</span> nPicks == 3
+0418       <span class="comment">% if rlengths(1)&gt;rlengths(2) &amp;&amp; rlengths(3)&gt;rlengths(2)</span>
+0419 
+0420       q1    = q(istart(1):istop(1));
+0421       q2    = q(istart(2):istop(2));
+0422       q3    = q(istart(3):istop(3));
+0423       dq1   = dqdt(istart(1):istop(1));
+0424       dq2   = dqdt(istart(2):istop(2));
+0425       dq3   = dqdt(istart(3):istop(3));
+0426       ab1   = bfra.wols(log(q1),log(-dq1));
+0427       ab2   = bfra.wols(log(q2),log(-dq2));
+0428       ab3   = bfra.wols(log(q3),log(-dq3));
+0429 
+0430       <span class="comment">% three cases we want to :</span>
+0431       <span class="comment">% 1: a flat period between two recessions</span>
+0432       <span class="comment">% 2: a flat period followed by another one then a recession</span>
+0433       <span class="comment">% 2: a recession followed by two flat periods</span>
+0434 
+0435       <span class="keyword">if</span> ab1(2)&gt;1 &amp;&amp; ab2(2)&lt;1 &amp;&amp; ab3(2)&gt;1
+0436          istart(2)   = [];
+0437          istop(2)    = [];
+0438       <span class="keyword">end</span>
+0439       <span class="comment">%end</span>
+0440    <span class="keyword">end</span>
+0441 <span class="keyword">end</span>
+0442 
+0443 <span class="comment">%% INPUT PARSER</span>
+0444 <a name="_sub10" href="#_subfunctions" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, </a><span class="keyword">...</span>
+0445       rain, ax, blate, precision, timestep, eventID, labelplot] = parseinputs(<span class="keyword">...</span>
+0446       q, dqdt, mfilename, varargin)
+0447 
+0448    parser = inputParser;
+0449    parser.FunctionName = [<span class="string">'bfra.'</span> mfilename];
+0450    parser.CaseSensitive = false;
+0451 
+0452    validateattributes(q, {<span class="string">'numeric'</span>},{<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'q'</span>);
+0453    validateattributes(dqdt, {<span class="string">'numeric'</span>},{<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'dqdt'</span>);
+0454    validateattributes(<span class="string">'fitmethod'</span>, {<span class="string">'char'</span>,<span class="string">'string'</span>},{<span class="string">'scalartext'</span>}, mfilename);
+0455    validateattributes(<span class="string">'pickmethod'</span>, {<span class="string">'char'</span>,<span class="string">'string'</span>},{<span class="string">'scalartext'</span>}, mfilename);
+0456    validateattributes(<span class="string">'plotfits'</span>, {<span class="string">'logical'</span>},{<span class="string">'scalar'</span>}, mfilename);
+0457    validateattributes(<span class="string">'weights'</span>, {<span class="string">'numeric'</span>},{<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
+0458    validateattributes(<span class="string">'ax'</span>, {<span class="string">'matlab.graphics.axis.Axes'</span>,<span class="string">'char'</span>},{<span class="string">'scalar'</span>}, mfilename);
+0459    validateattributes(<span class="string">'timestep'</span>, {<span class="string">'numeric'</span>,<span class="string">'duration'</span>}, mfilename);
+0460    validateattributes(<span class="string">'precision'</span>, {<span class="string">'numeric'</span>}, mfilename);
+0461    validateattributes(<span class="string">'blate'</span>, {<span class="string">'numeric'</span>},{<span class="string">'real'</span>,<span class="string">'scalar'</span>}, mfilename);
+0462    validateattributes(<span class="string">'rain'</span>, {<span class="string">'numeric'</span>},{<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
+0463 
+0464    parser.addRequired(<span class="string">'q'</span>);
+0465    parser.addRequired(<span class="string">'dqdt'</span>);
+0466    parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>);
+0467    parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>);
+0468    parser.addParameter(<span class="string">'plotfits'</span>, true);
+0469    parser.addParameter(<span class="string">'showfig'</span>, true, @islogical);
+0470    parser.addParameter(<span class="string">'weights'</span>, ones(size(q)));
+0471    parser.addParameter(<span class="string">'rain'</span>, zeros(size(q)));
+0472    parser.addParameter(<span class="string">'ax'</span>, <span class="string">'none'</span>);
+0473    parser.addParameter(<span class="string">'blate'</span>, 1.0);
+0474    parser.addParameter(<span class="string">'precision'</span>, 1);
+0475    parser.addParameter(<span class="string">'timestep'</span>, 1);
+0476    parser.addParameter(<span class="string">'eventID'</span>, <span class="string">''</span>, @ischar);
+0477    parser.addParameter(<span class="string">'labelplot'</span>, true, @islogical);
+0478 
+0479    parser.parse(q, dqdt, varargin{:});
+0480 
+0481    q = parser.Results.q;
+0482    ax = parser.Results.ax;
+0483    dqdt = parser.Results.dqdt;
+0484    rain = parser.Results.rain;
+0485    blate = parser.Results.blate;
+0486    showfig = parser.Results.showfig;
+0487    weights = parser.Results.weights;
+0488    eventID = parser.Results.eventID;
+0489    timestep = parser.Results.timestep;
+0490    plotfits = parser.Results.plotfits;
+0491    labelplot = parser.Results.labelplot;
+0492    precision = parser.Results.precision;
+0493    fitmethod = parser.Results.fitmethod;
+0494    pickmethod = parser.Results.pickmethod;
+0495 <span class="keyword">end</span></pre></div>
+</body>
+</html>

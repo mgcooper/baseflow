@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of phifitensemble</title>
+  <meta name="keywords" content="phifitensemble">
+  <meta name="description" content="PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; phifitensemble.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>phifitensemble
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.
+
+ Syntax
+
+     PhiFit =
+     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) 
+
+ Description
+
+     PhiFit =
+     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) fits
+     an ensemble of drainable porosity values using the event-scale
+     recession data in structs Results and Fits returned by bfra.fitevents.
+     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute
+     drainable porosity from early-time and late-time recession parameters
+     and aquifer properties area A, depth D, and channel lenght L.
+
+ See also: <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, <a href="eventphi.html" class="code" title="function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)">eventphi</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)</a>
+0002    <span class="comment">%PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     PhiFit =</span>
+0007    <span class="comment">%     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)</span>
+0008    <span class="comment">%</span>
+0009    <span class="comment">% Description</span>
+0010    <span class="comment">%</span>
+0011    <span class="comment">%     PhiFit =</span>
+0012    <span class="comment">%     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) fits</span>
+0013    <span class="comment">%     an ensemble of drainable porosity values using the event-scale</span>
+0014    <span class="comment">%     recession data in structs Results and Fits returned by bfra.fitevents.</span>
+0015    <span class="comment">%     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute</span>
+0016    <span class="comment">%     drainable porosity from early-time and late-time recession parameters</span>
+0017    <span class="comment">%     and aquifer properties area A, depth D, and channel lenght L.</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">% See also: fitphi, eventphi</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0022 
+0023    <span class="comment">% if called with no input, open this file</span>
+0024    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0025 
+0026    <span class="comment">% phid = bfra.eventphi(Results,Fits,A,D,[],bhat);</span>
+0027    <span class="comment">% phi = bfra.fitphidist(phid,'mean','cdf');</span>
+0028 
+0029    phidist(:,1) = bfra.eventphi( <span class="keyword">...</span>
+0030       Results,Fits,A,D,L,1,<span class="string">'lateqtls'</span>,lateqtls,<span class="string">'earlyqtls'</span>,earlyqtls);
+0031 
+0032    phidist(:,2) = bfra.eventphi( <span class="keyword">...</span>
+0033       Results,Fits,A,D,L,1.5,<span class="string">'lateqtls'</span>,lateqtls,<span class="string">'earlyqtls'</span>,earlyqtls);
+0034 
+0035    phidist(:,3) = bfra.eventphi( <span class="keyword">...</span>
+0036       Results,Fits,A,D,L,bhat,<span class="string">'lateqtls'</span>,lateqtls,<span class="string">'earlyqtls'</span>,earlyqtls);
+0037 
+0038    phidist(phidist&gt;1.0) = nan;
+0039    phidist(phidist&lt;0.0) = nan;
+0040    phicombo = vertcat(phidist(:,1),phidist(:,2));
+0041 
+0042    <span class="comment">% plot the fits</span>
+0043    [PD(1),h1] = bfra.fitphidist(phidist(:,1),<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
+0044    [PD(2),h2] = bfra.fitphidist(phidist(:,2),<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
+0045    [PD(3),h3] = bfra.fitphidist(phidist(:,3),<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
+0046    [PD(4),h4] = bfra.fitphidist(phicombo,<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
+0047 
+0048    <span class="comment">% put the mean and standard errors in an array</span>
+0049    mu = [h1.mu; h2.mu; h3.mu; h4.mu];
+0050    pm = [h1.pm; h2.pm; h3.pm; h4.pm];
+0051 
+0052    PhiFit.phidist = phidist;
+0053    PhiFit.phi12   = phicombo;
+0054    PhiFit.PD      = PD;
+0055    PhiFit.mu      = mu;
+0056    PhiFit.pm      = pm;
+0057 
+0058    <span class="comment">% [F1,h1]  = bfra.fitphidist(phi1,'PD','cdf');</span>
+0059    <span class="comment">% [F2,h2]  = bfra.fitphidist(phi2,'PD','cdf');</span>
+0060    <span class="comment">% [F3,h3]  = bfra.fitphidist(phi3,'PD','cdf');</span>
+0061    <span class="comment">% [F4,h4]  = bfra.fitphidist(phi4,'PD','cdf');</span>
+0062    <span class="comment">% [F,h]    = bfra.fitphidist([phi1;phi2],'PD','cdf');</span>
+0063 <span class="keyword">end</span></pre></div>
+</body>
+</html>

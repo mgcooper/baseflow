@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of basinname</title>
+  <meta name="keywords" content="basinname">
+  <meta name="description" content="BASINNAME Return string 'basin' from the bfra basin database.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; basinname.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>basinname
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>BASINNAME Return string 'basin' from the bfra basin database.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function basin = basinname(typenamehere) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment"> BASINNAME Return string 'basin' from the bfra basin database.
+
+ Syntax
+
+     basin = basinname(typenamehere)
+
+ Description
+
+     basin = bfra.basinname(&lt;tab complete basin name&gt;), returns the basin
+     name string as it exists in the bfra basin database
+
+     basin = bfra.basinname('ALL_BASINS'), returns string all 'ALL_BASINS'
+     which can be passed into other functions that require the 'basinname'
+     keyword argument to return data for all basins. Note: this option does
+     not returns all of the basinnames
+
+     The 'basinname' keyword is passed into other functions that require the
+     basinname string as input to load data for that basin.
+
+
+ See also: bfra.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> bfra.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> bfra.<a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a> bfra.<a href="stationlist.html" class="code" title="function stations = stationlist">stationlist</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="loadbasins.html" class="code" title="function [Basins,Meta,Poly] = loadbasins(basinname,varargin)">loadbasins</a>	LOADBASINS Load boundary object for basin specified by basinname.</li>
+<li><a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>	LOADCALM Load CALM ALT data for a basin in the Bounds struct.</li>
+<li><a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>	LOADFLOW Load timeseries of streamflow and metadata for basin.</li>
+<li><a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>	LOADGHCND Read in a global hydroclimatology network database file.</li>
+<li><a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a>	LOADGRACE Load grace data for basin in baseflow basin database.</li>
+<li><a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>	LOADMETA Load metadata for basin indicated by basinname.</li>
+<li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>	LOADPROPS Load basin properties from metadata table.</li></ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function basin = basinname(typenamehere)</a>
+0002    <span class="comment">% BASINNAME Return string 'basin' from the bfra basin database.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     basin = basinname(typenamehere)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     basin = bfra.basinname(&lt;tab complete basin name&gt;), returns the basin</span>
+0011    <span class="comment">%     name string as it exists in the bfra basin database</span>
+0012    <span class="comment">%</span>
+0013    <span class="comment">%     basin = bfra.basinname('ALL_BASINS'), returns string all 'ALL_BASINS'</span>
+0014    <span class="comment">%     which can be passed into other functions that require the 'basinname'</span>
+0015    <span class="comment">%     keyword argument to return data for all basins. Note: this option does</span>
+0016    <span class="comment">%     not returns all of the basinnames</span>
+0017    <span class="comment">%</span>
+0018    <span class="comment">%     The 'basinname' keyword is passed into other functions that require the</span>
+0019    <span class="comment">%     basinname string as input to load data for that basin.</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">%</span>
+0022    <span class="comment">% See also: bfra.loadcalm bfra.loadflow bfra.loadgrace bfra.stationlist</span>
+0023    <span class="comment">%</span>
+0024    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0025 
+0026    <span class="comment">% if called with no input, open this file</span>
+0027    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0028 
+0029    <span class="comment">% Todo: 'ALL_BASINS' should return all of the basin names, see bfra.stationlist</span>
+0030    <span class="comment">% which appends 'ALL_BASINS' to the stationlist for use with loaddata functions</span>
+0031 
+0032    p = inputParser;
+0033    p.FunctionName = <span class="string">'bfra.basinname'</span>;
+0034    addRequired(p,<span class="string">'typenamehere'</span>);
+0035    parse(p,typenamehere);
+0036    basin = p.Results.typenamehere;
+0037 <span class="keyword">end</span></pre></div>
+</body>
+</html>

@@ -6,7 +6,7 @@ name: Tests
 on:
   # Triggers the workflow on push or pull requests for the specified branch
   push:
-    branches: [ main dev joss ]
+    branches: [ main dev ]
   pull_request:
     branches: [ main dev ]
 
@@ -35,9 +35,9 @@ jobs:
       - name: Run tests and generate artifacts
         uses: matlab-actions/run-tests@v1
         with:
-          source-folder: +bfra
+          source-folder: toolbox
           # select-by-tag: Unit
-          select-by-folder: +bfra/+test
+          select-by-folder: tests
           test-results-junit: test-results/results.xml
           code-coverage-cobertura: test-results/coverage.xml # mgc put them in one folder
           # code-coverage-cobertura: code-coverage/coverage.xml
