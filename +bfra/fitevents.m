@@ -1,5 +1,5 @@
 function [Fits,Results] = fitevents(Events,varargin)
-   %FITEVENTS wrapper around getdqdt and fitdqdt functions to fit all events
+   %FITEVENTS Wrapper around getdqdt and fitdqdt functions to fit all events.
    %
    % Syntax
    %

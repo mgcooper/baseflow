@@ -5,14 +5,17 @@
 % bfra toolbox. To explore the toolbox functions in more detail, see the
 % <m2html/function_index.html Function Index>.
 % 
-% * <bfra_example_1.html *Estimate recession constants: Point cloud*> shows how
+% * <bfra_demo_1.html *Estimate recession constants: Point cloud*> shows how
 % to detect recession events from a timeseries of observed streamflow discharge
 % and estimate recession constants using the point cloud method. 
-% * <bfra_example_2.html *Estimate recession constants: Pareto distribution*>
+% * <bfra_demo_2.html *Estimate recession constants: Pareto distribution*>
 % shows how to detect recession events from a timeseries of observed streamflow
 % discharge and estimate recession constants using a hybrid point-cloud and
 % Pareto distribution fitting method.
-% * <bfra_kuparuk.html *Estimate saturated aquifer thickness trends using
+% * <bfra_demo_3.html *Aquifer property estimation: Introduction*>
+% shows how to estimate aquifer properties from curve fits to baseflow recession
+% events.
+% * <bfra_demo_kuparuk.html *Estimate saturated aquifer thickness trends using
 % baseflow recession analysis*> shows how to detect recession events from a
 % timeseries of observed streamflow discharge and estimate recession constants
 % using a hybrid point-cloud and Pareto distribution fitting method, and then

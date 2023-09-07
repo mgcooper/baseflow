@@ -1,5 +1,5 @@
 function tf = isoctave()
-%ISOCTAVE return TF = true if the environment is Octave.
+%ISOCTAVE return true if the environment is Octave.
 
   persistent cacheval;  % speeds up repeated calls
 

@@ -1,93 +1,94 @@
 function fdc = fdcurve(flow,varargin)
-%FDCURVE Compute a flow duration curve from streamflow timeseries.
-%
-%     fdc = fdcurve(flow,varargin)
-%
-% See also
+   %FDCURVE Compute a flow duration curve from streamflow timeseries.
+   %
+   %     fdc = fdcurve(flow,varargin)
+   %
+   % See also: hyetograph
 
-% if called with no input, open this file
-if nargin == 0; open(mfilename('fullpath')); return; end
+   % if called with no input, open this file
+   if nargin == 0; open(mfilename('fullpath')); return; end
 
-% parse inputs
-[axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin{:});
+   % parse inputs
+   [axscale, units, refpoints, plotfit] = parseinputs(flow, varargin{:});
 
-% main function
+   % main function
 
-N = length(flow);
-M = 1:N;
-x = sort(flow,'descend');
-f = 1-M./(N+1);
+   N = length(flow);
+   M = 1:N;
+   x = sort(flow,'descend');
+   f = 1-M./(N+1);
 
-% if requested, compute reference point values
-xref = nan(numel(refpoints,1));
-fref = nan(numel(refpoints,1));
-if ~isnan(refpoints)
-   for n = 1:numel(refpoints)
-      iref = find(x>=refpoints(n),1,'last');
-      xref(n) = x(iref);
-      fref(n) = f(iref);
-   end
-end
-
-% plot the curve if requested
-if plotcurve == true
-   figure;
-   switch axscale
-      case 'loglog'
-         h.fdc = loglog(100.*f,x); ax = gca;
-      case 'semilogy'
-         h.fdc = semilogy(100.*f,x); ax = gca;
-      case 'semilogx'
-         h.fdc = semilogx(100.*f,x); ax = gca;
-      case 'linear'
-         h.fdc = plot(100.*f,x); ax = gca;
-   end
-
-   % if requested, add a refpoint line
+   % if requested, compute reference point values
+   xref = nan(numel(refpoints,1));
+   fref = nan(numel(refpoints,1));
    if ~isnan(refpoints)
-      hold on;
       for n = 1:numel(refpoints)
-         xplot = [min(xlim) 100*fref(n) 100*fref(n) 100*fref(n)];
-         yplot = [xref(n) xref(n) min(ylim) xref(n)];
-         h.ref(n) = plot(xplot,yplot,'Color',[0.85 0.325 0.098],'LineWidth',1);
+         iref = find(x>=refpoints(n),1,'last');
+         xref(n) = x(iref);
+         fref(n) = f(iref);
       end
    end
 
-   ylabel(['$x$ [' units ']']);
-   xlabel 'flow exceedence probability, $P(Q\ge x)$'
+   % plot the curve if requested
+   if plotfit == true
+      figure;
+      switch axscale
+         case 'loglog'
+            h.fdc = loglog(100.*f,x); ax = gca;
+         case 'semilogy'
+            h.fdc = semilogy(100.*f,x); ax = gca;
+         case 'semilogx'
+            h.fdc = semilogx(100.*f,x); ax = gca;
+         case 'linear'
+            h.fdc = plot(100.*f,x); ax = gca;
+      end
 
-   ax.YAxis.TickLabels = compose('%g',ax.YAxis.TickValues);
-   ax.XAxis.TickLabels = compose('$%g\\%%$',ax.XAxis.TickValues);
+      % if requested, add a refpoint line
+      if ~isnan(refpoints)
+         hold on;
+         for n = 1:numel(refpoints)
+            xplot = [min(xlim) 100*fref(n) 100*fref(n) 100*fref(n)];
+            yplot = [xref(n) xref(n) min(ylim) xref(n)];
+            h.ref(n) = plot(xplot,yplot,'Color',[0.85 0.325 0.098],'LineWidth',1);
+         end
+      end
 
-   % since i manually set the ticklabels, i think this is necessary
-   % otherwise if the figure is resized, matlab will make new ticks
-   set(gca,'XTickMode','manual','YTickMode','manual');
+      ylabel(['$x$ [' units ']']);
+      xlabel 'flow exceedence probability, $P(Q\ge x)$'
 
-   fdc.h = h;
+      ax.YAxis.TickLabels = compose('%g',ax.YAxis.TickValues);
+      ax.XAxis.TickLabels = compose('$%g\\%%$',ax.XAxis.TickValues);
+
+      % since i manually set the ticklabels, i think this is necessary
+      % otherwise if the figure is resized, matlab will make new ticks
+      set(gca,'XTickMode','manual','YTickMode','manual');
+
+      fdc.h = h;
+   end
+
+   % package output
+   fdc.f = f;
+   fdc.x = x;
+   fdc.xref = xref;
+   fdc.fref = fref;
 end
 
-% package output
-fdc.f = f;
-fdc.x = x;
-fdc.xref = xref;
-fdc.fref = fref;
+function [axscale, units, refpoints, plotfit] = parseinputs(flow, varargin)
 
-function [axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin)
+   p = inputParser;
+   p.FunctionName = 'bfra.fdcurve';
+   p.addRequired( 'flow', @isnumeric);
+   p.addParameter('axscale', 'semilogy', @ischar);
+   p.addParameter('units', '', @ischar);
+   p.addParameter('refpoints', nan, @isnumeric);
+   p.addParameter('plotfit', true, @islogical);
+   p.parse(flow, varargin{:});
 
-p = inputParser;
-p.FunctionName = 'bfra.fdcurve';
-p.addRequired( 'flow', @isnumeric);
-p.addParameter('axscale', 'semilogy', @ischar);
-p.addParameter('units', '', @ischar);
-p.addParameter('refpoints', nan, @isnumeric);
-p.addParameter('plotcurve', true, @islogical);
-p.parse(flow, varargin{:});
-
-refpoints = p.Results.refpoints;
-plotcurve= p.Results.plotcurve;
-axscale = p.Results.axscale;
-units = p.Results.units;
-
+   refpoints = p.Results.refpoints;
+   plotfit= p.Results.plotfit;
+   axscale = p.Results.axscale;
+   units = p.Results.units;
+end
 
 % function [F,x] = ecdfpot(x,xmin,alpha,sigma)
 %

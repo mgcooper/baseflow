@@ -1,4 +1,4 @@
-%TEST_TODATENUM test ../private/todatenum
+%TEST_TODATENUM Test bfra/private/todatenum.
 
 % Define test data
 T = datetime(1,1,1);

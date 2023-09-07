@@ -1,4 +1,5 @@
 function q = setrainnan(q,r,rmin)
+   %SETRAINNAN Set rain data exceeding threshold RMIN nan.
    irain = find(r > rmin);
    irain = unique([irain; irain+1; irain-1]);
    irain = irain(irain > 0); 

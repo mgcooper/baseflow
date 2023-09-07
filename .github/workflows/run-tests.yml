@@ -6,7 +6,7 @@ name: Tests
 on:
   # Triggers the workflow on push or pull requests for the specified branch
   push:
-    branches: [ main dev joss ]
+    branches: [ main dev ]
   pull_request:
     branches: [ main dev ]
 

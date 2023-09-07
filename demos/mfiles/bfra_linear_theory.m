@@ -76,7 +76,9 @@
 % is discharge $Q$.
 % Define the symbolic variables and their properties
 
-clearvars -except testCase demoFiles
+clearvars
+close all
+clc
 
 syms c1 a Q Q0 Qmin Qmax t; assume([a c1 Q Q0 Qmin Qmax t],'clear')
 sympref('FloatingPointOutput',false);

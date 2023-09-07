@@ -28,20 +28,20 @@
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">CHARACTERISTICTIME compute the characteristic e-folding time for baseflow
- 
+
  Syntax
- 
+
      [tc,tfunc] = characteristicTime(a,b,Q0)
- 
+
  Description
- 
+
      [tc,tfunc] = characteristicTime(a,b,Q0) returns the characteristic time
-     tc for baseflow to reach 1/e of its initial value. tfunc is an anonymous
-     function for the characteristic time scale. Works for both linear and
-     non-linear models. Note, for linear models, tc is equivalent to
-     characteristic drainage timescale tau. For non-linear models, tc is not
-     equivalent to tau.
- 
+     tc for baseflow to reach 1/e of its initial value. tfunc is an
+     anonymous function for the characteristic time scale. Works for both
+     linear and non-linear models. Note, for linear models, tc is equivalent
+     to characteristic drainage timescale tau. For non-linear models, tc is
+     not equivalent to tau.
+
   See also
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
@@ -52,7 +52,8 @@
 
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
-</ul>
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
 
 
 This function is called by:
@@ -67,41 +68,42 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [tc,tfunc] = characteristicTime(a,b,Q0)</a>
-0002 <span class="comment">%CHARACTERISTICTIME compute the characteristic e-folding time for baseflow</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     [tc,tfunc] = characteristicTime(a,b,Q0)</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% Description</span>
-0009 <span class="comment">%</span>
-0010 <span class="comment">%     [tc,tfunc] = characteristicTime(a,b,Q0) returns the characteristic time</span>
-0011 <span class="comment">%     tc for baseflow to reach 1/e of its initial value. tfunc is an anonymous</span>
-0012 <span class="comment">%     function for the characteristic time scale. Works for both linear and</span>
-0013 <span class="comment">%     non-linear models. Note, for linear models, tc is equivalent to</span>
-0014 <span class="comment">%     characteristic drainage timescale tau. For non-linear models, tc is not</span>
-0015 <span class="comment">%     equivalent to tau.</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">%  See also</span>
-0018 <span class="comment">%</span>
-0019 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0002    <span class="comment">%CHARACTERISTICTIME compute the characteristic e-folding time for baseflow</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [tc,tfunc] = characteristicTime(a,b,Q0)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     [tc,tfunc] = characteristicTime(a,b,Q0) returns the characteristic time</span>
+0011    <span class="comment">%     tc for baseflow to reach 1/e of its initial value. tfunc is an</span>
+0012    <span class="comment">%     anonymous function for the characteristic time scale. Works for both</span>
+0013    <span class="comment">%     linear and non-linear models. Note, for linear models, tc is equivalent</span>
+0014    <span class="comment">%     to characteristic drainage timescale tau. For non-linear models, tc is</span>
+0015    <span class="comment">%     not equivalent to tau.</span>
+0016    <span class="comment">%</span>
+0017    <span class="comment">%  See also</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0020 
-0021 <span class="comment">% if called with no input, open this file</span>
-0022 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0021    <span class="comment">% if called with no input, open this file</span>
+0022    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0023 
-0024 <span class="comment">% this is set up to return the function handle if no arguments are</span>
-0025 <span class="comment">% passed in, or return a value for tc if a,b,Q0 are passed in</span>
-0026 <span class="keyword">if</span> nargin == 0
-0027    tc      = @(a,b,Q0) (Q0.^(1-b).*(exp(b-1)-1))./(a.*(b-1));
-0028    tfunc   = tc;
-0029 <span class="keyword">else</span>
-0030    <span class="keyword">if</span> b == 1
-0031       tfunc   = @(a) 1./a;
-0032       tc      = tfunc(a);
-0033    <span class="keyword">else</span>
-0034       tfunc   = @(a,b,Q0) (Q0.^(1-b).*(exp(b-1)-1))./(a.*(b-1));
-0035       tc      = tfunc(a,b,Q0);
-0036    <span class="keyword">end</span>
-0037 <span class="keyword">end</span></pre></div>
+0024    <span class="comment">% this is set up to return the function handle if no arguments are</span>
+0025    <span class="comment">% passed in, or return a value for tc if a,b,Q0 are passed in</span>
+0026    <span class="keyword">if</span> nargin == 0
+0027       tc = @(a,b,Q0) (Q0.^(1-b).*(exp(b-1)-1))./(a.*(b-1));
+0028       tfunc = tc;
+0029    <span class="keyword">else</span>
+0030       <span class="keyword">if</span> b == 1
+0031          tfunc = @(a) 1./a;
+0032          tc = tfunc(a);
+0033       <span class="keyword">else</span>
+0034          tfunc = @(a,b,Q0) (Q0.^(1-b).*(exp(b-1)-1))./(a.*(b-1));
+0035          tc = tfunc(a,b,Q0);
+0036       <span class="keyword">end</span>
+0037    <span class="keyword">end</span>
+0038 <span class="keyword">end</span></pre></div>
 </body>
 </html>

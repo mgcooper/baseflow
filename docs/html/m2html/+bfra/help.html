@@ -4,7 +4,7 @@
 <head>
   <title>Description of help</title>
   <meta name="keywords" content="help">
-  <meta name="description" content="Need to build function signatures for this">
+  <meta name="description" content="HELP Open toolbox html help document in the MATLAB Help browser.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,27 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>Need to build function signatures for this</strong></div>
+<div class="box"><strong>HELP Open toolbox html help document in the MATLAB Help browser.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function help(docname) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment"> Need to build function signatures for this</pre></div>
+<div class="fragment"><pre class="comment">HELP Open toolbox html help document in the MATLAB Help browser.
+
+ bfra.help() opens the baseflow toolbox help pages in the MATLAB help
+ browser.
+
+ bfra.help(DOCNAME) opens the documentation file DOCNAME.HTML in the matlab
+ help browser. DOCNAME can be the name of a function, an example/demo, or
+ any other file with an .html extension in the docs/ folder or any subfolder
+ of docs/.
+
+ % Example: Open the function documentation for bfra.getevents.
+
+ bfra.help('getevents')
+
+ See also: <a href="privatefunction.html" class="code" title="function funcHandle = privatefunction(funcName)">privatefunction</a>, <a href="completions.html" class="code" title="function proplist = completions(funcname)">completions</a>, showdemo</pre></div>
 
 
 <!-- crossreference -->
@@ -50,8 +64,33 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function help(docname)</a>
-0002 
-0003 <span class="comment">% Need to build function signatures for this</span>
-0004 web(docname)</pre></div>
+0002    <span class="comment">%HELP Open toolbox html help document in the MATLAB Help browser.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% bfra.help() opens the baseflow toolbox help pages in the MATLAB help</span>
+0005    <span class="comment">% browser.</span>
+0006    <span class="comment">%</span>
+0007    <span class="comment">% bfra.help(DOCNAME) opens the documentation file DOCNAME.HTML in the matlab</span>
+0008    <span class="comment">% help browser. DOCNAME can be the name of a function, an example/demo, or</span>
+0009    <span class="comment">% any other file with an .html extension in the docs/ folder or any subfolder</span>
+0010    <span class="comment">% of docs/.</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">% % Example: Open the function documentation for bfra.getevents.</span>
+0013    <span class="comment">%</span>
+0014    <span class="comment">% bfra.help('getevents')</span>
+0015    <span class="comment">%</span>
+0016    <span class="comment">% See also: privatefunction, completions, showdemo</span>
+0017 
+0018    <span class="keyword">if</span> usejava(<span class="string">'desktop'</span>)
+0019       <span class="comment">% might need this, if web does not do the appropriate error checking.</span>
+0020       <span class="comment">% also see 'demo', 'showdemo', and 'open'</span>
+0021    <span class="keyword">end</span>
+0022 
+0023    <span class="keyword">if</span> nargin &lt; 1
+0024       docname = <span class="string">'bfra_welcome'</span>;
+0025    <span class="keyword">end</span>
+0026 
+0027    <span class="comment">% Not sure if there is any benefit to 'web' vs 'showdemo' vs 'demo'</span>
+0028    web(docspath(docname)) <span class="comment">% docname should point to an html help file</span>
+0029 <span class="keyword">end</span></pre></div>
 </body>
 </html>

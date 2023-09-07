@@ -1,5 +1,6 @@
 function Dvec = movingslope(vec,supportlength,modelorder,dt)
-% movingslope: estimate local slope for a sequence of points, using a sliding window
+%MOVINGSLOPE Estimate local slope from point sequence using a sliding window.
+% 
 % usage: Dvec = movingslope(vec)
 % usage: Dvec = movingslope(vec,supportlength)
 % usage: Dvec = movingslope(vec,supportlength,modelorder)

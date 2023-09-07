@@ -4,7 +4,7 @@
 <head>
   <title>Description of loadprops</title>
   <meta name="keywords" content="loadprops">
-  <meta name="description" content="LOADPROPS load basin properties from metadata table">
+  <meta name="description" content="LOADPROPS Load basin properties from metadata table.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>LOADPROPS load basin properties from metadata table</strong></div>
+<div class="box"><strong>LOADPROPS Load basin properties from metadata table.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function [Dd,A,L,D] = loadprops(basinname, varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">LOADPROPS load basin properties from metadata table
+<div class="fragment"><pre class="comment">LOADPROPS Load basin properties from metadata table.
 
  Syntax
 
@@ -39,7 +39,7 @@
      basinname, Dd is drainage density in 1/km, A is area in m2, L is stream
      length in m, and D is aquifer thickness in meters
 
- See also <a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>, loadbounds
+ See also: <a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>, loadbounds
 
  Matt Cooper, 03-Dec-2022, https://github.com/mgcooper</pre></div>
 
@@ -50,7 +50,9 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME return string 'basin' from the bfra basin database</li></ul>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the bfra basin database.</li>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li>
+<li><a href="version.html" class="code" title="function varargout = version()">version</a>	VERSION return the version number for the baseflow toolbox</li></ul>
 
 
 This function is called by:
@@ -68,58 +70,56 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Dd,A,L,D] = loadprops(basinname, varargin)</a>
-0002 <span class="comment">%LOADPROPS load basin properties from metadata table</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     [Dd,A,L,D] = loadprops(basinname, varargin)</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% Description</span>
-0009 <span class="comment">%</span>
-0010 <span class="comment">%     [Dd,A,L,D] = LOADPROPS(basinname) loads properties for basin with name</span>
-0011 <span class="comment">%     basinname, Dd is drainage density in 1/km, A is area in m2, L is stream</span>
-0012 <span class="comment">%     length in m, and D is aquifer thickness in meters</span>
-0013 <span class="comment">%</span>
-0014 <span class="comment">% See also loadmeta, loadbounds</span>
-0015 <span class="comment">%</span>
-0016 <span class="comment">% Matt Cooper, 03-Dec-2022, https://github.com/mgcooper</span>
+0002    <span class="comment">%LOADPROPS Load basin properties from metadata table.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [Dd,A,L,D] = loadprops(basinname, varargin)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     [Dd,A,L,D] = LOADPROPS(basinname) loads properties for basin with name</span>
+0011    <span class="comment">%     basinname, Dd is drainage density in 1/km, A is area in m2, L is stream</span>
+0012    <span class="comment">%     length in m, and D is aquifer thickness in meters</span>
+0013    <span class="comment">%</span>
+0014    <span class="comment">% See also: loadmeta, loadbounds</span>
+0015    <span class="comment">%</span>
+0016    <span class="comment">% Matt Cooper, 03-Dec-2022, https://github.com/mgcooper</span>
 0017 
 0018 
-0019 <span class="comment">% if called with no input, open this file</span>
-0020 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0019    <span class="comment">% if called with no input, open this file</span>
+0020    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0021 
-0022 <span class="comment">% fast exit if toolbox not configured for data</span>
-0023 <span class="keyword">if</span> ~isenv(<span class="string">'BASEFLOW_DATA_PATH'</span>)
-0024    error(<span class="string">'BASEFLOW_DATA_PATH environment variable not set'</span>)
-0025 <span class="keyword">end</span>
+0022    <span class="comment">% fast exit if toolbox not configured for data</span>
+0023    <span class="keyword">if</span> ~isenv(<span class="string">'BASEFLOW_DATA_PATH'</span>)
+0024       error(<span class="string">'BASEFLOW_DATA_PATH environment variable not set'</span>)
+0025    <span class="keyword">end</span>
 0026 
-0027 <span class="comment">% PARSE INPUTS</span>
-0028 [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, version] = <a href="#_sub1" class="code" title="subfunction [basinname, version] = parseinputs(basinname, varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
+0027    <span class="comment">% PARSE INPUTS</span>
+0028    [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, <a href="version.html" class="code" title="function varargout = version()">version</a>] = <a href="#_sub1" class="code" title="subfunction [basinname, version] = parseinputs(basinname, varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
 0029 
-0030 <span class="comment">% load the metadata</span>
-0031 Meta = bfra.loadmeta(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, version);
-0032 A  = Meta.area_m2;
-0033 Dd = 1000*Meta.Dd;
-0034 D  = 0.5;
-0035 L  = A*Dd/1000;
-0036 
-0037 <span class="keyword">end</span>
-0038 
-0039 <span class="comment">%% INPUT PARSER</span>
-0040 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, version] = parseinputs(basinname, varargin)</a>
-0041 
-0042 validopts = @(x) any(validatestring(x, {<span class="string">'current'</span>, <span class="string">'archive'</span>}));
-0043 
-0044 parser = inputParser;
-0045 parser.FunctionName = <span class="string">'bfra.loadprops'</span>;
-0046 parser.addRequired(<span class="string">'basinname'</span>, @ischar);
-0047 parser.addOptional(<span class="string">'version'</span>, <span class="string">'current'</span>, validopts);
-0048 parser.parse(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
-0049 
-0050 <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = parser.Results.basinname;
-0051 version = parser.Results.version;
-0052 
-0053 <span class="keyword">end</span>
-0054</pre></div>
+0030    <span class="comment">% load the metadata</span>
+0031    Meta = bfra.loadmeta(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, <a href="version.html" class="code" title="function varargout = version()">version</a>);
+0032    A  = Meta.area_m2;
+0033    Dd = 1000*Meta.Dd;
+0034    D  = 0.5;
+0035    L  = A*Dd/1000;
+0036 <span class="keyword">end</span>
+0037 
+0038 <span class="comment">%% INPUT PARSER</span>
+0039 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, version] = parseinputs(basinname, varargin)</a>
+0040 
+0041    validopts = @(x) any(validatestring(x, {<span class="string">'current'</span>, <span class="string">'archive'</span>}));
+0042 
+0043    parser = inputParser;
+0044    parser.FunctionName = <span class="string">'bfra.loadprops'</span>;
+0045    parser.addRequired(<span class="string">'basinname'</span>, @ischar);
+0046    parser.addOptional(<span class="string">'version'</span>, <span class="string">'current'</span>, validopts);
+0047    parser.parse(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, varargin{:});
+0048 
+0049    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = parser.Results.basinname;
+0050    <a href="version.html" class="code" title="function varargout = version()">version</a> = parser.Results.version;
+0051 <span class="keyword">end</span>
+0052</pre></div>
 </body>
 </html>

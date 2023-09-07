@@ -1,5 +1,5 @@
 function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
-   %QNONLIN plots the theoretical discharge predicted by a/b values
+   %QNONLIN Plot the theoretical discharge predicted by a/b values.
    %
    % [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t) plots a theoretical discharge predicted
    % by a/b values for Q = (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));

@@ -1,5 +1,5 @@
 function result = runtests(varargin)
-%runtests Run all tests in the bfra.test package
+%runtests Run all tests in the bfra.test package.
 
 % Import necessary classes
 import matlab.unittest.TestSuite

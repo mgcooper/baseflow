@@ -1,10 +1,13 @@
 function ab = tsregr(x,y)
-% TSREGR Theil-Sen estimator.
+%TSREGR Theil-Sen estimator.
+%    
 %    [B0, B1] = TSREGR(X,Y) calculates straight line coefficients
 %       Y = B0 + B1*X
 %    for N data points {X,Y} using the Theil-Sen estimator.
 %
 % Joe Henning - Fall 2011
+% 
+% See also: ktaub
 
 % LICENSE
 % 

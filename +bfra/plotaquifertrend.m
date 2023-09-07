@@ -16,29 +16,25 @@ function h = plotaquifertrend(t,Db,sigDb,varargin)
    %
    % See also: prepalttrend
 
-
-   %-------------- if called with no input, open this file
+   % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-
-   %-------------- parse inputs
+   % parse inputs
    [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin{:});
 
-
-   %-------------- call the subfunction
+   % call the subfunction
    if all(isnan(Dc)) && all(isnan(Dg))
       h = plotflowperiod(t, Db, sigDb, method);
-      
+
    elseif all(isnan(Dg))
       h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method);
-      
+
    else
       h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method);
    end
-
 end
 
-% --------------- plot grace period
+%% plot grace period
 function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
 
    if all(isempty(Dg))
@@ -54,9 +50,10 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
    % p1 plot needs 'reference',Dc where Dc is 1990-2020
    % p1 plot needs 'reference',Db where Db is 1990-2020
 
-   f = figure('Units','centimeters','Position',[5 5 23 19*3/4]); 
+   f = figure('Position', [0 0 700 400]);
+   % f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    ax = gca;
-   
+
    p1 = bfra.trendplot(t,Dc,'units','cm a$^{-1}$','leg',ctxt,'use',ax, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDc,'reference',Dc, ...
       'method',method);
@@ -110,7 +107,7 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
 
 end
 
-% --------------- plot streamflow period
+%% plot streamflow period
 function h = plotflowperiod(t, Db, sigDb, method)
 
    if all(isempty(Db))
@@ -122,7 +119,8 @@ function h = plotflowperiod(t, Db, sigDb, method)
 
    % this plots 1983-2020, no grace, no calm
    % f = figure('Position',[156    45   856   580]);
-   f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
+   %f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
+   f = figure('Position', [0 0 700 400]);
    p = bfra.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDb,'method',method);
 
@@ -153,7 +151,7 @@ function h = plotflowperiod(t, Db, sigDb, method)
    % plot([xlims(1) xlims(2)],[ylims(2) ylims(2)],'k','LineWidth',1);
 end
 
-% --------------- plot calm period
+%% plot calm period
 function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
 
    if all(isempty(Dc))
@@ -171,7 +169,8 @@ function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
 
    % this plots 1990-2020, no grace
    % f = figure('Position',[156    45   856   580]);
-   f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
+   %f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
+   f = figure('Position', [0 0 700 400]);
    p1 = bfra.trendplot(t,Dc,'units','cm/yr','leg',ctxt,'use',gca, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDc,'method',method);
    p2 = bfra.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
@@ -229,7 +228,7 @@ function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
    % plot(x1,D2-mean(D2),'Color',dc(2,:),'LineWidth',0.75,'HandleVisibility','off')
 end
 
-% --------------- parse inputs
+%% parse inputs
 function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);
 
    parser = inputParser;

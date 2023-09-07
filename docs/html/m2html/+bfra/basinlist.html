@@ -28,18 +28,18 @@
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">BASINLIST load the list of basins in the bfra database
- 
+
  Syntax
- 
+
      basins = basinlist
- 
+
  Description
- 
-     basins = basinlist returns a cellstr array of basin names for each basin
-     in the bfra database. The basinlist is used to facilitate auto-completion
-     in various other functions, but also provides users with a reference list
-     of available data.
- 
+
+     basins = basinlist returns a cellstr array of basin names for each
+     basin in the bfra database. The basinlist is used to facilitate
+     auto-completion in various other functions, but also provides users
+     with a reference list of available data.
+
  See also bfra/functionSignatures.json, <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
@@ -67,24 +67,25 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function basins = basinlist</a>
-0002 <span class="comment">%BASINLIST load the list of basins in the bfra database</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     basins = basinlist</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% Description</span>
-0009 <span class="comment">%</span>
-0010 <span class="comment">%     basins = basinlist returns a cellstr array of basin names for each basin</span>
-0011 <span class="comment">%     in the bfra database. The basinlist is used to facilitate auto-completion</span>
-0012 <span class="comment">%     in various other functions, but also provides users with a reference list</span>
-0013 <span class="comment">%     of available data.</span>
-0014 <span class="comment">%</span>
-0015 <span class="comment">% See also bfra/functionSignatures.json, basinname</span>
-0016 <span class="comment">%</span>
-0017 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0002    <span class="comment">%BASINLIST load the list of basins in the bfra database</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     basins = basinlist</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     basins = basinlist returns a cellstr array of basin names for each</span>
+0011    <span class="comment">%     basin in the bfra database. The basinlist is used to facilitate</span>
+0012    <span class="comment">%     auto-completion in various other functions, but also provides users</span>
+0013    <span class="comment">%     with a reference list of available data.</span>
+0014    <span class="comment">%</span>
+0015    <span class="comment">% See also bfra/functionSignatures.json, basinname</span>
+0016    <span class="comment">%</span>
+0017    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0018 
-0019 load <a href="basinlist.html" class="code" title="function basins = basinlist">basinlist</a> basins
-0020 basins = transpose([<span class="string">'ALL_BASINS'</span>, basins]);</pre></div>
+0019    load <a href="basinlist.html" class="code" title="function basins = basinlist">basinlist</a> basins
+0020    basins = transpose([<span class="string">'ALL_BASINS'</span>, basins]);
+0021 <span class="keyword">end</span></pre></div>
 </body>
 </html>

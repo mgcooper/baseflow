@@ -1,5 +1,6 @@
 function [alpha,xmin,L,D,n,dat]=plfit(x, varargin)
-% PLFIT fits a power-law distributional model to data.
+%PLFIT Fit a power-law distributional model to data.
+%    
 %    Source: http://www.santafe.edu/~aaronc/powerlaws/
 %
 %    PLFIT(x) estimates x_min and alpha according to the goodness-of-fit

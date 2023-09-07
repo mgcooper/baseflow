@@ -1,5 +1,5 @@
 function [Events, Info] = wrapevents(T,Q,R,varargin)
-   %ANNUALEVENTS Detect recession events on an annual calendar basis.
+   %WRAPEVENTS Detect recession events on an annual calendar basis.
    %
    % This function is a wrapper around bfra.getevents to detect recession events
    % on an annual basis, passing one year of a multi-year timeseries of T, Q,

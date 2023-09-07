@@ -4,7 +4,7 @@
 <head>
   <title>Description of aquiferprops</title>
   <meta name="keywords" content="aquiferprops">
-  <meta name="description" content="AQUIFERPROPS estimate aquifer properties">
+  <meta name="description" content="AQUIFERPROPS Estimate aquifer depth, hydraulic conductivity, and porosity.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,57 +21,57 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>AQUIFERPROPS estimate aquifer properties</strong></div>
+<div class="box"><strong>AQUIFERPROPS Estimate aquifer depth, hydraulic conductivity, and porosity.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">AQUIFERPROPS estimate aquifer properties
- 
+<div class="fragment"><pre class="comment">AQUIFERPROPS Estimate aquifer depth, hydraulic conductivity, and porosity.
+
  Syntax
- 
+
      Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
- 
- Description 
- 
+
+ Description
+
      Estimate aquifer properties hydraulic conductivity k, depth D, and
-     critical baseflow Q0 
- 
+     critical baseflow Q0
+
  Required inputs
- 
+
   q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
   dqdt        =  discharge rate of change (L T^-2)
   alate       =  late-time a parameter in -dqdt = aq^b ()
   blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
-  soln        =  string indicating late-time theoretical solution. 'BS04' or 'RS05'
+  soln        =  string indicating late-time solution. 'BS04' or 'RS05'.
   phi         =  drainable porosity (L/L)
   A           =  basin area contributing to baseflow (L^2)
   L           =  active stream length (L)
- 
+
  Optional name-value inputs
- 
+
   earlyqtls   =  reference quantiles that together define a pivot point
-                 through which the straight line must pass (early time fit)
-  lateqtls    =  reference quantiles that together define a pivot point
-                 through which the straight line must pass (late time fit)
-  mask        =  logical mask to exclude data
-  Dd          =  drainage density. if provided, the relationship L=Dd*A will be
-                 used to compute L instead of the input L value
+                 through which the straight line must pass (early time fit).
+  lateqtls    =  reference quantiles that together define a pivot point.
+                 through which the straight line must pass (late time fit).
+  mask        =  logical mask to exclude data.
+  Dd          =  drainage density. if provided, the relationship L=Dd*A will
+                 be used to compute L instead of the input L value.
   D           =  saturated aquifer thickness (L)
   Q0          =  critical baseflow (L T^-1)
   plotfit     =  logical scalar indicating whether to plot the fit
- 
+
  The optional Q0 value is undocumented, but if provided, it can be used to
  compare the solution obtained using the Q0 estimated in this function with
  what would be obtained using the provided Q0.
- 
+
  The optional D parameter becomes required if soln = &quot;RS05&quot;, i.e., Rupp and
  Selker, 2005. This is essentially undocumented as well. The core method
- implemented by this function is soln = &quot;BS04&quot;, that is, Boussinesq, 1904. See
- bfra.fitphi for detail on all available solutions. 
- 
- See also <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>
+ implemented by this function is soln = &quot;BS04&quot;, that is, Boussinesq, 1904.
+ See bfra.fitphi for detail on all available solutions.
+
+ See also: <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, <a href="globalfit.html" class="code" title="function GlobalFit = globalfit(Results,Events,Fits,varargin)">globalfit</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
@@ -79,22 +79,23 @@
 
  This follows the method in Troch et al. 1993, which assumes D is unknown
  and the goal is to estimate k and Q0 to get D. Here, only Q0 uses the
- intersection of the early- and late-time lines, k is from late-time a. Troch
- uses a1/b1 = late time and a2/b2 = early time, whereas <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a> uses the
- opposite. The notes below follow Troch's paper so a1/b1 == late time, but the
- implementation uses early/late for clarity
+ intersection of the early- and late-time lines, k is from late-time a.
+ Troch uses a1/b1 = late time and a2/b2 = early time, whereas <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a> uses
+ the opposite. The notes below follow Troch's paper so a1/b1 == late time,
+ but the implementation uses early/late for clarity
 
- bfra_fitphi assumes D is known and eliminates k to get phi by setting early-
- and late-time equations equal. Q0 is not involved in that approach.
+ bfra_fitphi assumes D is known and eliminates k to get phi by setting
+ early- and late-time equations equal. Q0 is not involved in that approach.
 
  It should be possible to modify this using the <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a> method by settting
  early- and late-time equal to eliminate phi.
 
- the steps / theory are:
+ The steps / theory are:
+
  1. Equation 8 provides late time q expression (hillslope outflow)
      (8) q = 0.862 * k * D^2 / (B * (1 + 1.115*k*D/(f*B^2)*t )^2)
 
- 2. Equation 9 provides late time average water table thickness - obtained by
+ 2. Equation 9 provides late time average water table thickness obtained by
  integrating the inverse incomplete beta function phi(x/B) from 0-&gt;B = 0.773
      (9) hbar = 0.773 * D / (1 + 1.115*k*D/(f*B^2)*t )
 
@@ -108,53 +109,51 @@
  5. repeat step 4 for early time, by setting t=0 in Eq 8 (step 1)
      (12) Q0 = 3.450 * k * D^2 * Dd * L
 
- 6. set a1*Q^b1 = a2*Q^b2 and solve for Q - the intersection of the early- and
- late-time -dQ/dt lines on the point cloud - this is Q0
+ 6. set a1*Q^b1 = a2*Q^b2 and solve for Q - the intersection of the early-
+ and late-time -dQ/dt lines on the point cloud - this is Q0
 
  7. estimate a1/b1 (late time) and a2/b2 (early time) on the point cloud
 
  8. estimate Q0 from the intersection of early-and late-time curves (formal
- equation not shown, but should be: Q = (a1/a2)^(1/(b2-b1)) = (a2/a1)^(1/(b1-b2))
+ equation not shown, but should be:
+ Q = (a1/a2)^(1/(b2-b1)) = (a2/a1)^(1/(b1-b2))
 
- 9. estimate k from equation 15a (late-time a1) using known L/A/f (f=porosity)
- NOTE: paper says use equation 16a (early-time a2) and 13, but clearly 13 is
- supposed to be 12, and since 16a includes D which is supposed to be solved for
- in the next step, i am nearly certain 15a should be used (both equations step
- back one)
+ 9. estimate k from equation 15a (late-time a1) using known L/A/f
+ (f=porosity) NOTE: paper says use equation 16a (early-time a2) and 13, but
+ clearly 13 is supposed to be 12, and since 16a includes D which is supposed
+ to be solved for in the next step, i am nearly certain 15a should be used
+ (both equations step back one)
 
  10. estimate D from k and known A/L/Dd using equation 12 (step 5)
 
   Important notes
  -----------------
- Troch found k was 25-100 times larger than laboratory measurements and argued
- that this k is a catchment effective value which includes macropore flow,
- channel flow, etc.
+ Troch found k was 25-100 times larger than laboratory measurements and
+ argued that this k is a catchment effective value which includes macropore
+ flow, channel flow, etc.
 
- This method needs a late-time solution that does not depend on aquifer depth
- in order to get k without assuming D, so that k can be used with Q0 to get D.
- if a late-time solution that depends on D is used, then you can still get k,
- but you cannot get D
+ This method needs a late-time solution that does not depend on aquifer
+ depth in order to get k without assuming D, so that k can be used with Q0
+ to get D. if a late-time solution that depends on D is used, then you can
+ still get k, but you cannot get D
 
- changing L changes k but does not change D b/c it cancels
- increasing a32 will increase k and decrease D
- decreasing a32 will decrease k and increase D
- changing a3 will not change k but will change Q0 and therefore D
- increasing a3 will decrease Q0 and decrease D
- decreasing a3 will increase Q0 and increase D
- changing any value of a/b will change Q0 and therefore D
+ Changing L changes k but does not change D b/c it cancels increasing a32
+ will increase k and decrease D decreasing a32 will decrease k and increase
+ D changing a3 will not change k but will change Q0 and therefore D
+ increasing a3 will decrease Q0 and decrease D decreasing a3 will increase
+ Q0 and increase D changing any value of a/b will change Q0 and therefore D
 
- takeaway: the most important thing is the placement of a3.
- change L to change k
- change a3 to change D (or a32, but thats more constrained by tau mask)
- change a3 or a32 to change Q0, and thereby D
- using early time soln for k increases k which decreases D, but the BS04 soln
- for k appears much more sensitive to this choice than RS05. The only
- difference b/w the BS04 and RS05 early-time solution is the numerator which is
- fixed to 1.113 for BS04 but is fR1 for RS05.
+ Takeaway: the most important thing is the placement of a3. change L to
+ change k change a3 to change D (or a32, but thats more constrained by tau
+ mask) change a3 or a32 to change Q0, and thereby D using early time soln
+ for k increases k which decreases D, but the BS04 soln for k appears much
+ more sensitive to this choice than RS05. The only difference b/w the BS04
+ and RS05 early-time solution is the numerator which is fixed to 1.113 for
+ BS04 but is fR1 for RS05.
 
  TODO move 'soln' before or after phi, accept opts.<a href="globalfit.html" class="code" title="function GlobalFit = globalfit(Results,Events,Fits,varargin)">globalfit</a> for A,D,L, and
- possibly phi, try to combine with <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a> for two paths - either D is known or
- phi is known</pre></div>
+ possibly phi, try to combine with <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a> for two paths - either D is known
+ or phi is known</pre></div>
 
 
 <!-- crossreference -->
@@ -162,7 +161,8 @@
 
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
-</ul>
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
 
 
 This function is called by:
@@ -180,280 +180,279 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)</a>
-0002 <span class="comment">%AQUIFERPROPS estimate aquifer properties</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% Description</span>
-0009 <span class="comment">%</span>
-0010 <span class="comment">%     Estimate aquifer properties hydraulic conductivity k, depth D, and</span>
-0011 <span class="comment">%     critical baseflow Q0</span>
-0012 <span class="comment">%</span>
-0013 <span class="comment">% Required inputs</span>
-0014 <span class="comment">%</span>
-0015 <span class="comment">%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)</span>
-0016 <span class="comment">%  dqdt        =  discharge rate of change (L T^-2)</span>
-0017 <span class="comment">%  alate       =  late-time a parameter in -dqdt = aq^b ()</span>
-0018 <span class="comment">%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)</span>
-0019 <span class="comment">%  soln        =  string indicating late-time theoretical solution. 'BS04' or 'RS05'</span>
-0020 <span class="comment">%  phi         =  drainable porosity (L/L)</span>
-0021 <span class="comment">%  A           =  basin area contributing to baseflow (L^2)</span>
-0022 <span class="comment">%  L           =  active stream length (L)</span>
-0023 <span class="comment">%</span>
-0024 <span class="comment">% Optional name-value inputs</span>
-0025 <span class="comment">%</span>
-0026 <span class="comment">%  earlyqtls   =  reference quantiles that together define a pivot point</span>
-0027 <span class="comment">%                 through which the straight line must pass (early time fit)</span>
-0028 <span class="comment">%  lateqtls    =  reference quantiles that together define a pivot point</span>
-0029 <span class="comment">%                 through which the straight line must pass (late time fit)</span>
-0030 <span class="comment">%  mask        =  logical mask to exclude data</span>
-0031 <span class="comment">%  Dd          =  drainage density. if provided, the relationship L=Dd*A will be</span>
-0032 <span class="comment">%                 used to compute L instead of the input L value</span>
-0033 <span class="comment">%  D           =  saturated aquifer thickness (L)</span>
-0034 <span class="comment">%  Q0          =  critical baseflow (L T^-1)</span>
-0035 <span class="comment">%  plotfit     =  logical scalar indicating whether to plot the fit</span>
-0036 <span class="comment">%</span>
-0037 <span class="comment">% The optional Q0 value is undocumented, but if provided, it can be used to</span>
-0038 <span class="comment">% compare the solution obtained using the Q0 estimated in this function with</span>
-0039 <span class="comment">% what would be obtained using the provided Q0.</span>
-0040 <span class="comment">%</span>
-0041 <span class="comment">% The optional D parameter becomes required if soln = &quot;RS05&quot;, i.e., Rupp and</span>
-0042 <span class="comment">% Selker, 2005. This is essentially undocumented as well. The core method</span>
-0043 <span class="comment">% implemented by this function is soln = &quot;BS04&quot;, that is, Boussinesq, 1904. See</span>
-0044 <span class="comment">% bfra.fitphi for detail on all available solutions.</span>
-0045 <span class="comment">%</span>
-0046 <span class="comment">% See also fitphi</span>
-0047 <span class="comment">%</span>
-0048 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0049 <span class="comment">%</span>
-0050 <span class="comment">% Extended Notes</span>
-0051 <span class="comment">%</span>
-0052 <span class="comment">% This follows the method in Troch et al. 1993, which assumes D is unknown</span>
-0053 <span class="comment">% and the goal is to estimate k and Q0 to get D. Here, only Q0 uses the</span>
-0054 <span class="comment">% intersection of the early- and late-time lines, k is from late-time a. Troch</span>
-0055 <span class="comment">% uses a1/b1 = late time and a2/b2 = early time, whereas fitphi uses the</span>
-0056 <span class="comment">% opposite. The notes below follow Troch's paper so a1/b1 == late time, but the</span>
-0057 <span class="comment">% implementation uses early/late for clarity</span>
-0058 <span class="comment">%</span>
-0059 <span class="comment">% bfra_fitphi assumes D is known and eliminates k to get phi by setting early-</span>
-0060 <span class="comment">% and late-time equations equal. Q0 is not involved in that approach.</span>
-0061 <span class="comment">%</span>
-0062 <span class="comment">% It should be possible to modify this using the fitphi method by settting</span>
-0063 <span class="comment">% early- and late-time equal to eliminate phi.</span>
-0064 <span class="comment">%</span>
-0065 <span class="comment">% the steps / theory are:</span>
-0066 <span class="comment">% 1. Equation 8 provides late time q expression (hillslope outflow)</span>
-0067 <span class="comment">%     (8) q = 0.862 * k * D^2 / (B * (1 + 1.115*k*D/(f*B^2)*t )^2)</span>
-0068 <span class="comment">%</span>
-0069 <span class="comment">% 2. Equation 9 provides late time average water table thickness - obtained by</span>
-0070 <span class="comment">% integrating the inverse incomplete beta function phi(x/B) from 0-&gt;B = 0.773</span>
-0071 <span class="comment">%     (9) hbar = 0.773 * D / (1 + 1.115*k*D/(f*B^2)*t )</span>
-0072 <span class="comment">%</span>
-0073 <span class="comment">% 3. Sub 9 into 8 to get an expression for q in terms of hbar rather than D</span>
-0074 <span class="comment">% (note that hbar changes wrt time so q varies with time)</span>
-0075 <span class="comment">%     (10) q = 1.443 * k/B * hbar^2</span>
-0076 <span class="comment">%</span>
-0077 <span class="comment">% 4. integrate 10 along L to get basin outflow, sub Dd for L/A</span>
-0078 <span class="comment">%     (11) Q = 5.772*k*hbar^2*Dd*L</span>
-0079 <span class="comment">%</span>
-0080 <span class="comment">% 5. repeat step 4 for early time, by setting t=0 in Eq 8 (step 1)</span>
-0081 <span class="comment">%     (12) Q0 = 3.450 * k * D^2 * Dd * L</span>
-0082 <span class="comment">%</span>
-0083 <span class="comment">% 6. set a1*Q^b1 = a2*Q^b2 and solve for Q - the intersection of the early- and</span>
-0084 <span class="comment">% late-time -dQ/dt lines on the point cloud - this is Q0</span>
-0085 <span class="comment">%</span>
-0086 <span class="comment">% 7. estimate a1/b1 (late time) and a2/b2 (early time) on the point cloud</span>
-0087 <span class="comment">%</span>
-0088 <span class="comment">% 8. estimate Q0 from the intersection of early-and late-time curves (formal</span>
-0089 <span class="comment">% equation not shown, but should be: Q = (a1/a2)^(1/(b2-b1)) = (a2/a1)^(1/(b1-b2))</span>
-0090 <span class="comment">%</span>
-0091 <span class="comment">% 9. estimate k from equation 15a (late-time a1) using known L/A/f (f=porosity)</span>
-0092 <span class="comment">% NOTE: paper says use equation 16a (early-time a2) and 13, but clearly 13 is</span>
-0093 <span class="comment">% supposed to be 12, and since 16a includes D which is supposed to be solved for</span>
-0094 <span class="comment">% in the next step, i am nearly certain 15a should be used (both equations step</span>
-0095 <span class="comment">% back one)</span>
-0096 <span class="comment">%</span>
-0097 <span class="comment">% 10. estimate D from k and known A/L/Dd using equation 12 (step 5)</span>
-0098 <span class="comment">%</span>
-0099 <span class="comment">%  Important notes</span>
-0100 <span class="comment">% -----------------</span>
-0101 <span class="comment">% Troch found k was 25-100 times larger than laboratory measurements and argued</span>
-0102 <span class="comment">% that this k is a catchment effective value which includes macropore flow,</span>
-0103 <span class="comment">% channel flow, etc.</span>
-0104 <span class="comment">%</span>
-0105 <span class="comment">% This method needs a late-time solution that does not depend on aquifer depth</span>
-0106 <span class="comment">% in order to get k without assuming D, so that k can be used with Q0 to get D.</span>
-0107 <span class="comment">% if a late-time solution that depends on D is used, then you can still get k,</span>
-0108 <span class="comment">% but you cannot get D</span>
-0109 <span class="comment">%</span>
-0110 <span class="comment">% changing L changes k but does not change D b/c it cancels</span>
-0111 <span class="comment">% increasing a32 will increase k and decrease D</span>
-0112 <span class="comment">% decreasing a32 will decrease k and increase D</span>
-0113 <span class="comment">% changing a3 will not change k but will change Q0 and therefore D</span>
-0114 <span class="comment">% increasing a3 will decrease Q0 and decrease D</span>
-0115 <span class="comment">% decreasing a3 will increase Q0 and increase D</span>
-0116 <span class="comment">% changing any value of a/b will change Q0 and therefore D</span>
-0117 <span class="comment">%</span>
-0118 <span class="comment">% takeaway: the most important thing is the placement of a3.</span>
-0119 <span class="comment">% change L to change k</span>
-0120 <span class="comment">% change a3 to change D (or a32, but thats more constrained by tau mask)</span>
-0121 <span class="comment">% change a3 or a32 to change Q0, and thereby D</span>
-0122 <span class="comment">% using early time soln for k increases k which decreases D, but the BS04 soln</span>
-0123 <span class="comment">% for k appears much more sensitive to this choice than RS05. The only</span>
-0124 <span class="comment">% difference b/w the BS04 and RS05 early-time solution is the numerator which is</span>
-0125 <span class="comment">% fixed to 1.113 for BS04 but is fR1 for RS05.</span>
-0126 <span class="comment">%</span>
-0127 <span class="comment">% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and</span>
-0128 <span class="comment">% possibly phi, try to combine with fitphi for two paths - either D is known or</span>
-0129 <span class="comment">% phi is known</span>
-0130 
-0131 <span class="comment">% if called with no input, open this file</span>
-0132 <span class="keyword">if</span> nargin == 0; open(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0133 
-0134 <span class="comment">% PARSE INPUTS</span>
-0135 [q, dqdt, alate, blate, soln, phi, A, L, D, args] = <a href="#_sub1" class="code" title="subfunction [q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( ">parseinputs</a>( <span class="keyword">...</span>
-0136    q, dqdt, alate, blate, soln, phi, A, L, varargin{:});
-0137 
-0138 <span class="comment">% check if Dd was provided; if so, adjust L</span>
-0139 <span class="keyword">if</span> ~isnan(args.Dd)
-0140    L = args.Dd/1000*A; <span class="comment">% 1/m * m^2 = m</span>
-0141 <span class="keyword">end</span>
-0142 
-0143 <span class="comment">% check if Q0 was provided, if so, save it</span>
-0144 <span class="keyword">if</span> ~isnan(args.Q0)
-0145    Q0check = args.Q0;
-0146 <span class="keyword">else</span>
-0147    Q0check = nan;
-0148 <span class="keyword">end</span>
-0149 
-0150 <span class="comment">% Step 7: compute the early- and late-time intercepts</span>
-0151 bearly = 3;
-0152 aearly = bfra.pointcloudintercept(q, dqdt, bearly, <span class="string">'envelope'</span>, <span class="keyword">...</span>
-0153    <span class="string">'refqtls'</span>, args.earlyqtls);
-0154 
-0155 <span class="comment">% late-time intercept either Boussinesq 1904 or Rupp and Selker, 2005</span>
-0156 <span class="keyword">switch</span> soln
-0157    <span class="keyword">case</span> <span class="string">'BS04'</span>
-0158       blate = 3/2;
-0159       alate = bfra.pointcloudintercept(q, dqdt, blate, <span class="string">'envelope'</span>, <span class="keyword">...</span>
-0160          <span class="string">'refqtls'</span>, args.lateqtls, <span class="string">'mask'</span>, args.mask);
-0161    <span class="keyword">case</span> <span class="string">'RS05'</span>
-0162       alate = bfra.pointcloudintercept(q, dqdt, blate, <span class="string">'envelope'</span>, <span class="keyword">...</span>
-0163          <span class="string">'refqtls'</span>, args.lateqtls, <span class="string">'mask'</span>, args.mask);
-0164 <span class="keyword">end</span>
-0165 
-0166 <span class="comment">% Step 8: upper bound Q, where b=3 and b=bhat intersect (m3/d)</span>
-0167 Q0 = (aearly/alate)^(1/(blate-bearly));
-0168 
-0169 <span class="comment">% Step 9: hydraulic conductivity using the late time soln (m/d)</span>
-0170 <span class="keyword">switch</span> soln
-0171    <span class="keyword">case</span> <span class="string">'BS04'</span>
-0172       
-0173       <span class="comment">% method 1: phi is known, D is not</span>
-0174       <span class="comment">% --------------------------------</span>
-0175       
-0176       <span class="comment">% late time</span>
-0177       clate    = 4.804*L/A^(3/2);
-0178       k        = (alate*phi/clate)^2;  <span class="comment">% *100/86400 m/d -&gt; cm/s</span>
-0179       
-0180       <span class="comment">% early time</span>
-0181       <span class="comment">% cearly = 1.133/(D^3*L^2);</span>
-0182       <span class="comment">% k      = cearly/(aearly*phi);  % same as RS05</span>
-0183       
-0184       <span class="comment">% method 2: D is known, phi is not</span>
-0185       <span class="comment">% (equates early and late time to eliminate phi)</span>
-0186       <span class="comment">% -----------------------------------------------</span>
-0187       <span class="comment">% k   = ((cearly/aearly)*(alate/clate))^(2/3);</span>
-0188       
-0189    <span class="keyword">case</span> <span class="string">'RS05'</span>
-0190       
-0191       <span class="comment">% method 1: phi is known, D is not</span>
-0192       <span class="comment">% --------------------------------</span>
-0193       
-0194       <span class="comment">% late time:</span>
-0195       n     = bfra.conversions(blate,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,true);
-0196       fR2   = bfra.specialfunctions(<span class="string">'fR2'</span>,n);
-0197       clate = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
-0198       k     = (alate*phi/clate)^(n+2);
-0199       
-0200       <span class="comment">% early time:</span>
-0201       <span class="comment">% fR1      = bfra_specialfunctions('fR1',n);</span>
-0202       <span class="comment">% cearly   = fR1/(D^3*L^2);</span>
-0203       <span class="comment">% k        = cearly/(aearly*phi);</span>
-0204       
-0205       <span class="comment">% method 2: D is known, phi is not</span>
-0206       <span class="comment">% (equates early and late time to eliminate phi)</span>
-0207       <span class="comment">% -----------------------------------------------</span>
-0208       <span class="comment">% k   = ((cearly/clate)*(alate/aearly))^((n+2)/(n+3));</span>
-0209       
-0210       <span class="comment">% Note: once clate/cearly are known, the expressions for k are identical</span>
-0211       <span class="comment">% for both early and late time for RS05 and BS04, but I keep them inside</span>
-0212       <span class="comment">% the switch block b/c we only use the late-time solution right now, and</span>
-0213       <span class="comment">% it's a bit clearer to keep them separate. Note this applies to method 1</span>
-0214       <span class="comment">% and method 2. The reason is because for b=3/2, n=0, so the exponenets on</span>
-0215       <span class="comment">% the RS05 solutions equal the one for BS04 (the solutions are equivalent</span>
-0216       <span class="comment">% at b=3/2).</span>
-0217 <span class="keyword">end</span>
-0218 
-0219 <span class="comment">% Step 10: aquifer depth (m)</span>
-0220 D = sqrt(Q0/(3.448*k*L^2/A)); <span class="comment">% sqrt(Q0/(3.448*k*Dd*L)) % if using Dd</span>
-0221 
-0222 <span class="comment">% Undocumented internal check.</span>
-0223 Dcheck = sqrt(Q0check/(3.448*k*L^2/A));
-0224                                     
-0225 <span class="comment">% package the output</span>
-0226 Props.k     = k*100/86400; <span class="comment">% m/d -&gt; cm/s</span>
-0227 Props.D     = D;           <span class="comment">% m</span>
-0228 Props.Q0    = Q0/86400;    <span class="comment">% m3/d -&gt; m3/s</span>
-0229 Props.a1    = aearly;
-0230 Props.b1    = bearly;
-0231 Props.a2    = alate;
-0232 Props.b2    = blate;
-0233 <span class="comment">% Props.D2    = sqrt(Q0check/(3.448*k*L^2/A));    % undocumented</span>
-0234 Props.input = p.Results;
+0002    <span class="comment">%AQUIFERPROPS Estimate aquifer depth, hydraulic conductivity, and porosity.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     Estimate aquifer properties hydraulic conductivity k, depth D, and</span>
+0011    <span class="comment">%     critical baseflow Q0</span>
+0012    <span class="comment">%</span>
+0013    <span class="comment">% Required inputs</span>
+0014    <span class="comment">%</span>
+0015    <span class="comment">%  q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)</span>
+0016    <span class="comment">%  dqdt        =  discharge rate of change (L T^-2)</span>
+0017    <span class="comment">%  alate       =  late-time a parameter in -dqdt = aq^b ()</span>
+0018    <span class="comment">%  blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)</span>
+0019    <span class="comment">%  soln        =  string indicating late-time solution. 'BS04' or 'RS05'.</span>
+0020    <span class="comment">%  phi         =  drainable porosity (L/L)</span>
+0021    <span class="comment">%  A           =  basin area contributing to baseflow (L^2)</span>
+0022    <span class="comment">%  L           =  active stream length (L)</span>
+0023    <span class="comment">%</span>
+0024    <span class="comment">% Optional name-value inputs</span>
+0025    <span class="comment">%</span>
+0026    <span class="comment">%  earlyqtls   =  reference quantiles that together define a pivot point</span>
+0027    <span class="comment">%                 through which the straight line must pass (early time fit).</span>
+0028    <span class="comment">%  lateqtls    =  reference quantiles that together define a pivot point.</span>
+0029    <span class="comment">%                 through which the straight line must pass (late time fit).</span>
+0030    <span class="comment">%  mask        =  logical mask to exclude data.</span>
+0031    <span class="comment">%  Dd          =  drainage density. if provided, the relationship L=Dd*A will</span>
+0032    <span class="comment">%                 be used to compute L instead of the input L value.</span>
+0033    <span class="comment">%  D           =  saturated aquifer thickness (L)</span>
+0034    <span class="comment">%  Q0          =  critical baseflow (L T^-1)</span>
+0035    <span class="comment">%  plotfit     =  logical scalar indicating whether to plot the fit</span>
+0036    <span class="comment">%</span>
+0037    <span class="comment">% The optional Q0 value is undocumented, but if provided, it can be used to</span>
+0038    <span class="comment">% compare the solution obtained using the Q0 estimated in this function with</span>
+0039    <span class="comment">% what would be obtained using the provided Q0.</span>
+0040    <span class="comment">%</span>
+0041    <span class="comment">% The optional D parameter becomes required if soln = &quot;RS05&quot;, i.e., Rupp and</span>
+0042    <span class="comment">% Selker, 2005. This is essentially undocumented as well. The core method</span>
+0043    <span class="comment">% implemented by this function is soln = &quot;BS04&quot;, that is, Boussinesq, 1904.</span>
+0044    <span class="comment">% See bfra.fitphi for detail on all available solutions.</span>
+0045    <span class="comment">%</span>
+0046    <span class="comment">% See also: fitphi, globalfit</span>
+0047    <span class="comment">%</span>
+0048    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0049    <span class="comment">%</span>
+0050    <span class="comment">% Extended Notes</span>
+0051    <span class="comment">%</span>
+0052    <span class="comment">% This follows the method in Troch et al. 1993, which assumes D is unknown</span>
+0053    <span class="comment">% and the goal is to estimate k and Q0 to get D. Here, only Q0 uses the</span>
+0054    <span class="comment">% intersection of the early- and late-time lines, k is from late-time a.</span>
+0055    <span class="comment">% Troch uses a1/b1 = late time and a2/b2 = early time, whereas fitphi uses</span>
+0056    <span class="comment">% the opposite. The notes below follow Troch's paper so a1/b1 == late time,</span>
+0057    <span class="comment">% but the implementation uses early/late for clarity</span>
+0058    <span class="comment">%</span>
+0059    <span class="comment">% bfra_fitphi assumes D is known and eliminates k to get phi by setting</span>
+0060    <span class="comment">% early- and late-time equations equal. Q0 is not involved in that approach.</span>
+0061    <span class="comment">%</span>
+0062    <span class="comment">% It should be possible to modify this using the fitphi method by settting</span>
+0063    <span class="comment">% early- and late-time equal to eliminate phi.</span>
+0064    <span class="comment">%</span>
+0065    <span class="comment">% The steps / theory are:</span>
+0066    <span class="comment">%</span>
+0067    <span class="comment">% 1. Equation 8 provides late time q expression (hillslope outflow)</span>
+0068    <span class="comment">%     (8) q = 0.862 * k * D^2 / (B * (1 + 1.115*k*D/(f*B^2)*t )^2)</span>
+0069    <span class="comment">%</span>
+0070    <span class="comment">% 2. Equation 9 provides late time average water table thickness obtained by</span>
+0071    <span class="comment">% integrating the inverse incomplete beta function phi(x/B) from 0-&gt;B = 0.773</span>
+0072    <span class="comment">%     (9) hbar = 0.773 * D / (1 + 1.115*k*D/(f*B^2)*t )</span>
+0073    <span class="comment">%</span>
+0074    <span class="comment">% 3. Sub 9 into 8 to get an expression for q in terms of hbar rather than D</span>
+0075    <span class="comment">% (note that hbar changes wrt time so q varies with time)</span>
+0076    <span class="comment">%     (10) q = 1.443 * k/B * hbar^2</span>
+0077    <span class="comment">%</span>
+0078    <span class="comment">% 4. integrate 10 along L to get basin outflow, sub Dd for L/A</span>
+0079    <span class="comment">%     (11) Q = 5.772*k*hbar^2*Dd*L</span>
+0080    <span class="comment">%</span>
+0081    <span class="comment">% 5. repeat step 4 for early time, by setting t=0 in Eq 8 (step 1)</span>
+0082    <span class="comment">%     (12) Q0 = 3.450 * k * D^2 * Dd * L</span>
+0083    <span class="comment">%</span>
+0084    <span class="comment">% 6. set a1*Q^b1 = a2*Q^b2 and solve for Q - the intersection of the early-</span>
+0085    <span class="comment">% and late-time -dQ/dt lines on the point cloud - this is Q0</span>
+0086    <span class="comment">%</span>
+0087    <span class="comment">% 7. estimate a1/b1 (late time) and a2/b2 (early time) on the point cloud</span>
+0088    <span class="comment">%</span>
+0089    <span class="comment">% 8. estimate Q0 from the intersection of early-and late-time curves (formal</span>
+0090    <span class="comment">% equation not shown, but should be:</span>
+0091    <span class="comment">% Q = (a1/a2)^(1/(b2-b1)) = (a2/a1)^(1/(b1-b2))</span>
+0092    <span class="comment">%</span>
+0093    <span class="comment">% 9. estimate k from equation 15a (late-time a1) using known L/A/f</span>
+0094    <span class="comment">% (f=porosity) NOTE: paper says use equation 16a (early-time a2) and 13, but</span>
+0095    <span class="comment">% clearly 13 is supposed to be 12, and since 16a includes D which is supposed</span>
+0096    <span class="comment">% to be solved for in the next step, i am nearly certain 15a should be used</span>
+0097    <span class="comment">% (both equations step back one)</span>
+0098    <span class="comment">%</span>
+0099    <span class="comment">% 10. estimate D from k and known A/L/Dd using equation 12 (step 5)</span>
+0100    <span class="comment">%</span>
+0101    <span class="comment">%  Important notes</span>
+0102    <span class="comment">% -----------------</span>
+0103    <span class="comment">% Troch found k was 25-100 times larger than laboratory measurements and</span>
+0104    <span class="comment">% argued that this k is a catchment effective value which includes macropore</span>
+0105    <span class="comment">% flow, channel flow, etc.</span>
+0106    <span class="comment">%</span>
+0107    <span class="comment">% This method needs a late-time solution that does not depend on aquifer</span>
+0108    <span class="comment">% depth in order to get k without assuming D, so that k can be used with Q0</span>
+0109    <span class="comment">% to get D. if a late-time solution that depends on D is used, then you can</span>
+0110    <span class="comment">% still get k, but you cannot get D</span>
+0111    <span class="comment">%</span>
+0112    <span class="comment">% Changing L changes k but does not change D b/c it cancels increasing a32</span>
+0113    <span class="comment">% will increase k and decrease D decreasing a32 will decrease k and increase</span>
+0114    <span class="comment">% D changing a3 will not change k but will change Q0 and therefore D</span>
+0115    <span class="comment">% increasing a3 will decrease Q0 and decrease D decreasing a3 will increase</span>
+0116    <span class="comment">% Q0 and increase D changing any value of a/b will change Q0 and therefore D</span>
+0117    <span class="comment">%</span>
+0118    <span class="comment">% Takeaway: the most important thing is the placement of a3. change L to</span>
+0119    <span class="comment">% change k change a3 to change D (or a32, but thats more constrained by tau</span>
+0120    <span class="comment">% mask) change a3 or a32 to change Q0, and thereby D using early time soln</span>
+0121    <span class="comment">% for k increases k which decreases D, but the BS04 soln for k appears much</span>
+0122    <span class="comment">% more sensitive to this choice than RS05. The only difference b/w the BS04</span>
+0123    <span class="comment">% and RS05 early-time solution is the numerator which is fixed to 1.113 for</span>
+0124    <span class="comment">% BS04 but is fR1 for RS05.</span>
+0125    <span class="comment">%</span>
+0126    <span class="comment">% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and</span>
+0127    <span class="comment">% possibly phi, try to combine with fitphi for two paths - either D is known</span>
+0128    <span class="comment">% or phi is known</span>
+0129 
+0130    <span class="comment">% if called with no input, open this file</span>
+0131    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0132 
+0133    <span class="comment">% PARSE INPUTS</span>
+0134    [q, dqdt, alate, blate, soln, phi, A, L, D, args] = <a href="#_sub1" class="code" title="subfunction [q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( ">parseinputs</a>( <span class="keyword">...</span>
+0135       q, dqdt, alate, blate, soln, phi, A, L, varargin{:});
+0136 
+0137    <span class="comment">% check if Dd was provided; if so, adjust L</span>
+0138    <span class="keyword">if</span> ~isnan(args.Dd)
+0139       L = args.Dd/1000*A; <span class="comment">% 1/m * m^2 = m</span>
+0140    <span class="keyword">end</span>
+0141 
+0142    <span class="comment">% check if Q0 was provided, if so, save it</span>
+0143    <span class="keyword">if</span> ~isnan(args.Q0)
+0144       Q0check = args.Q0;
+0145    <span class="keyword">else</span>
+0146       Q0check = nan;
+0147    <span class="keyword">end</span>
+0148 
+0149    <span class="comment">% Step 7: compute the early- and late-time intercepts</span>
+0150    bearly = 3;
+0151    aearly = bfra.pointcloudintercept(q, dqdt, bearly, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0152       <span class="string">'refqtls'</span>, args.earlyqtls);
+0153 
+0154    <span class="comment">% late-time intercept either Boussinesq 1904 or Rupp and Selker, 2005</span>
+0155    <span class="keyword">switch</span> soln
+0156       <span class="keyword">case</span> <span class="string">'BS04'</span>
+0157          blate = 3/2;
+0158          alate = bfra.pointcloudintercept(q, dqdt, blate, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0159             <span class="string">'refqtls'</span>, args.lateqtls, <span class="string">'mask'</span>, args.mask);
+0160       <span class="keyword">case</span> <span class="string">'RS05'</span>
+0161          alate = bfra.pointcloudintercept(q, dqdt, blate, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0162             <span class="string">'refqtls'</span>, args.lateqtls, <span class="string">'mask'</span>, args.mask);
+0163    <span class="keyword">end</span>
+0164 
+0165    <span class="comment">% Step 8: upper bound Q, where b=3 and b=bhat intersect (m3/d)</span>
+0166    Q0 = (aearly/alate)^(1/(blate-bearly));
+0167 
+0168    <span class="comment">% Step 9: hydraulic conductivity using the late time soln (m/d)</span>
+0169    <span class="keyword">switch</span> soln
+0170       <span class="keyword">case</span> <span class="string">'BS04'</span>
+0171 
+0172          <span class="comment">% method 1: phi is known, D is not</span>
+0173          <span class="comment">% --------------------------------</span>
+0174 
+0175          <span class="comment">% late time</span>
+0176          clate    = 4.804*L/A^(3/2);
+0177          k        = (alate*phi/clate)^2;  <span class="comment">% *100/86400 m/d -&gt; cm/s</span>
+0178 
+0179          <span class="comment">% early time</span>
+0180          <span class="comment">% cearly = 1.133/(D^3*L^2);</span>
+0181          <span class="comment">% k      = cearly/(aearly*phi);  % same as RS05</span>
+0182 
+0183          <span class="comment">% method 2: D is known, phi is not</span>
+0184          <span class="comment">% (equates early and late time to eliminate phi)</span>
+0185          <span class="comment">% -----------------------------------------------</span>
+0186          <span class="comment">% k   = ((cearly/aearly)*(alate/clate))^(2/3);</span>
+0187 
+0188       <span class="keyword">case</span> <span class="string">'RS05'</span>
+0189 
+0190          <span class="comment">% method 1: phi is known, D is not</span>
+0191          <span class="comment">% --------------------------------</span>
+0192 
+0193          <span class="comment">% late time:</span>
+0194          n     = bfra.conversions(blate,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,true);
+0195          fR2   = bfra.specialfunctions(<span class="string">'fR2'</span>,n);
+0196          clate = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
+0197          k     = (alate*phi/clate)^(n+2);
+0198 
+0199          <span class="comment">% early time:</span>
+0200          <span class="comment">% fR1      = bfra_specialfunctions('fR1',n);</span>
+0201          <span class="comment">% cearly   = fR1/(D^3*L^2);</span>
+0202          <span class="comment">% k        = cearly/(aearly*phi);</span>
+0203 
+0204          <span class="comment">% method 2: D is known, phi is not</span>
+0205          <span class="comment">% (equates early and late time to eliminate phi)</span>
+0206          <span class="comment">% -----------------------------------------------</span>
+0207          <span class="comment">% k   = ((cearly/clate)*(alate/aearly))^((n+2)/(n+3));</span>
+0208 
+0209          <span class="comment">% Note: once clate/cearly are known, the expressions for k are</span>
+0210          <span class="comment">% identical for both early and late time for RS05 and BS04, but I keep</span>
+0211          <span class="comment">% them inside the switch block b/c we only use the late-time solution</span>
+0212          <span class="comment">% right now, and it's a bit clearer to keep them separate. Note this</span>
+0213          <span class="comment">% applies to method 1 and method 2. The reason is because for b=3/2,</span>
+0214          <span class="comment">% n=0, so the exponenets on the RS05 solutions equal the one for BS04</span>
+0215          <span class="comment">% (the solutions are equivalent at b=3/2).</span>
+0216    <span class="keyword">end</span>
+0217 
+0218    <span class="comment">% Step 10: aquifer depth (m)</span>
+0219    D = sqrt(Q0/(3.448*k*L^2/A)); <span class="comment">% sqrt(Q0/(3.448*k*Dd*L)) % if using Dd</span>
+0220 
+0221    <span class="comment">% Undocumented internal check.</span>
+0222    Dcheck = sqrt(Q0check/(3.448*k*L^2/A));
+0223 
+0224    <span class="comment">% package the output</span>
+0225    Props.k     = k*100/86400; <span class="comment">% m/d -&gt; cm/s</span>
+0226    Props.D     = D;           <span class="comment">% m</span>
+0227    Props.Q0    = Q0/86400;    <span class="comment">% m3/d -&gt; m3/s</span>
+0228    Props.a1    = aearly;
+0229    Props.b1    = bearly;
+0230    Props.a2    = alate;
+0231    Props.b2    = blate;
+0232    <span class="comment">% Props.D2    = sqrt(Q0check/(3.448*k*L^2/A));    % undocumented</span>
+0233    Props.input = args;
+0234 <span class="keyword">end</span>
 0235 
 0236 <span class="comment">%% INPUT PARSER</span>
 0237 <a name="_sub1" href="#_subfunctions" class="code">function [q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( </a><span class="keyword">...</span>
-0238    q, dqdt, alate, blate, soln, phi, A, L, varargin)
+0238       q, dqdt, alate, blate, soln, phi, A, L, varargin)
 0239 
-0240 parser = inputParser;
-0241 parser.FunctionName = <span class="string">'bfra.aquiferprops'</span>;
+0240    parser = inputParser;
+0241    parser.FunctionName = <span class="string">'bfra.aquiferprops'</span>;
 0242 
-0243 parser.addRequired(<span class="string">'q'</span>, @isnumeric);
-0244 parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
-0245 parser.addRequired(<span class="string">'alate'</span>, @isnumeric);
-0246 parser.addRequired(<span class="string">'blate'</span>, @isnumeric);
-0247 parser.addRequired(<span class="string">'soln'</span>, @ischar);
-0248 parser.addRequired(<span class="string">'phi'</span>, @isnumeric);
-0249 parser.addRequired(<span class="string">'A'</span>, @isnumeric);
-0250 parser.addRequired(<span class="string">'L'</span>, @isnumeric);
-0251 parser.addParameter(<span class="string">'Dd'</span>, nan, @isnumeric);
-0252 parser.addParameter(<span class="string">'D'</span>, nan, @isnumeric);
-0253 parser.addParameter(<span class="string">'Q0'</span>, nan, @isnumeric);
-0254 parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
-0255 parser.addParameter(<span class="string">'plotfit'</span>, false, @islogical);
-0256 parser.addParameter(<span class="string">'lateqtls'</span>, [0.5 0.5], @isnumeric);
-0257 parser.addParameter(<span class="string">'earlyqtls'</span>, [0.95 0.95], @isnumeric);
+0243    parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0244    parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
+0245    parser.addRequired(<span class="string">'alate'</span>, @isnumeric);
+0246    parser.addRequired(<span class="string">'blate'</span>, @isnumeric);
+0247    parser.addRequired(<span class="string">'soln'</span>, @ischar);
+0248    parser.addRequired(<span class="string">'phi'</span>, @isnumeric);
+0249    parser.addRequired(<span class="string">'A'</span>, @isnumeric);
+0250    parser.addRequired(<span class="string">'L'</span>, @isnumeric);
+0251    parser.addParameter(<span class="string">'Dd'</span>, nan, @isnumeric);
+0252    parser.addParameter(<span class="string">'D'</span>, nan, @isnumeric);
+0253    parser.addParameter(<span class="string">'Q0'</span>, nan, @isnumeric);
+0254    parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
+0255    parser.addParameter(<span class="string">'plotfit'</span>, false, @islogical);
+0256    parser.addParameter(<span class="string">'lateqtls'</span>, [0.5 0.5], @isnumeric);
+0257    parser.addParameter(<span class="string">'earlyqtls'</span>, [0.95 0.95], @isnumeric);
 0258 
-0259 parser.parse(q, dqdt, alate, blate, soln, phi, A, L, varargin{:});
+0259    parser.parse(q, dqdt, alate, blate, soln, phi, A, L, varargin{:});
 0260 
-0261 args = parser.Results;
-0262 q = parser.Results.q;
-0263 A = parser.Results.A;
-0264 L = parser.Results.L;
-0265 D = parser.Results.D;
-0266 phi = parser.Results.phi;
-0267 soln = parser.Results.soln;
-0268 dqdt = parser.Results.dqdt;
-0269 alate = parser.Results.alate;
-0270 blate = parser.Results.blate;
+0261    args = parser.Results;
+0262    q = parser.Results.q;
+0263    A = parser.Results.A;
+0264    L = parser.Results.L;
+0265    D = parser.Results.D;
+0266    phi = parser.Results.phi;
+0267    soln = parser.Results.soln;
+0268    dqdt = parser.Results.dqdt;
+0269    alate = parser.Results.alate;
+0270    blate = parser.Results.blate;
 0271 
-0272 <span class="keyword">if</span> strcmp(soln, <span class="string">'RS05'</span>) &amp;&amp; isnan(D)
-0273    error(<span class="string">'soln method RS05 requires optional input D'</span>)
-0274 <span class="keyword">end</span>
-0275 
-0276</pre></div>
+0272    <span class="keyword">if</span> strcmp(soln, <span class="string">'RS05'</span>) &amp;&amp; isnan(D)
+0273       error(<span class="string">'soln method RS05 requires optional input D'</span>)
+0274    <span class="keyword">end</span>
+0275 <span class="keyword">end</span></pre></div>
 </body>
 </html>

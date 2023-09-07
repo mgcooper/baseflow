@@ -1,5 +1,5 @@
 function [T,Q,R,numyears,timestep] = preparecalendar(T,Q,R)
-   % PREPINPUT remove leap inds, determine timestep, determine number of years.
+   %PREPARECALENDAR Prepare time calendar.
 
    % This was the original check in getevents, then moved to wrapevents, but it's
    % not necessary there so I simplified it and moved it here for future conversion

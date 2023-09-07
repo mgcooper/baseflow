@@ -1,9 +1,9 @@
 function [f] = zeta(z)
-%ZETA  Riemann Zeta function
+%ZETA Riemann Zeta function
 %
-%usage: f = zeta(z)
+% usage: f = zeta(z)
 %
-%tested on version 5.3.1
+% tested on version 5.3.1
 %
 %      This program calculates the Riemann Zeta function
 %      for the elements of Z using the Dirichlet deta function.
@@ -13,8 +13,7 @@ function [f] = zeta(z)
 %      infinite number of zeros for z=1/2+i*y
 %
 %
-%see also: Eta, Deta, Lambda, Betad, Bern, Euler
-%see also: mhelp zeta
+% See also: Eta, Deta, Lambda, Betad, Bern, Euler
 
 %Paul Godfrey
 %pgodfrey@conexant.com

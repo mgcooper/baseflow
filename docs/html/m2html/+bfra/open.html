@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of open</title>
+  <meta name="keywords" content="open">
+  <meta name="description" content="OPEN Open package namespace function file in the MATLAB Editor.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; open.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>open
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>OPEN Open package namespace function file in the MATLAB Editor.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function open(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">OPEN Open package namespace function file in the MATLAB Editor.</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="QtString.html" class="code" title="function [Qtstr,aQbstr] = QtString(varargin)">QtString</a>	QTSTRING Return latex-formatted string for Q(t) function.</li>
+<li><a href="QtauString.html" class="code" title="function [Qtaustr,aQbstr] = QtauString(varargin)">QtauString</a>	QTAUSTRING Return latex-formatted string for Q(tau) function.</li>
+<li><a href="aquiferprops.html" class="code" title="function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)">aquiferprops</a>	AQUIFERPROPS Estimate aquifer depth, hydraulic conductivity, and porosity.</li>
+<li><a href="aquiferstorage.html" class="code" title="function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)">aquiferstorage</a>	AQUIFERSTORAGE Estimate aquifer storage from recession event parameters.</li>
+<li><a href="aquiferthickness.html" class="code" title="function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)">aquiferthickness</a>	AQUIFERTHICKNESS Estimate aquifer thickness from recession event parameters.</li>
+<li><a href="aquifertrend.html" class="code" title="function [D,dDdt,dDadt,C] = aquifertrend(tau,phi,N,Qb,dQbdt)">aquifertrend</a>	AQUIFERTREND Estimate the linear trend in saturated aquifer thickness.</li>
+<li><a href="baseflowtrend.html" class="code" title="function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)">baseflowtrend</a>	BASEFLOWTREND Estimate baseflow trend from annual streamflow timeseries.</li>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the bfra basin database.</li>
+<li><a href="characteristicTime.html" class="code" title="function [tc,tfunc] = characteristicTime(a,b,Q0)">characteristicTime</a>	CHARACTERISTICTIME compute the characteristic e-folding time for baseflow</li>
+<li><a href="checkevent.html" class="code" title="function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)">checkevent</a>	CHECKEVENT plot detected recession event and fitted values</li>
+<li><a href="cloudphi.html" class="code" title="function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)">cloudphi</a>	CLOUDPHI Estimate drainable porosity phi from the point cloud.</li>
+<li><a href="conversions.html" class="code" title="function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)">conversions</a>	CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname</li>
+<li><a href="dependencies.html" class="code" title="function report = dependencies(funcname,option)">dependencies</a>	DEPENDENCIES Generate function and product dependencies for function.</li>
+<li><a href="dndtuncertainty.html" class="code" title="function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits,GlobalFit, opts, varargin)">dndtuncertainty</a>	DNDTUNCERTAINTY Compute combined uncertainty of the dn/dt trend estimate.</li>
+<li><a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>	EVENTFINDER find recession events using hydrograph and rainfall timeseries.</li>
+<li><a href="eventphi.html" class="code" title="function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)">eventphi</a>	EVENTPHI estimate drainable porosity phi from individual recession events</li>
+<li><a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>	EVENTPICKER Automated or user-guided recession event selection.</li>
+<li><a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>	EVENTPLOTTER plot recession events detected by eventfinder</li>
+<li><a href="eventtau.html" class="code" title="function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)">eventtau</a>	EVENTTAU Compute drainage timescale tau from event-scale parameters a and b.</li>
+<li><a href="expectedQ.html" class="code" title="function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)">expectedQ</a>	EXPECTEDQ Compute the expected value of baseflow.</li>
+<li><a href="fdcurve.html" class="code" title="function fdc = fdcurve(flow,varargin)">fdcurve</a>	FDCURVE Compute a flow duration curve from streamflow timeseries.</li>
+<li><a href="fitab.html" class="code" title="function [Fit,ok] = fitab(q,dqdt,method,varargin)">fitab</a>	FITAB fit event-scale recession equation -dq/dt = aQ^b</li>
+<li><a href="fitevents.html" class="code" title="function [Fits,Results] = fitevents(Events,varargin)">fitevents</a>	FITEVENTS Wrapper around getdqdt and fitdqdt functions to fit all events.</li>
+<li><a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>	FITPHI Estimate drainable porosity using early- and late-time solutions.</li>
+<li><a href="fitphidist.html" class="code" title="function [Fit,h] = fitphidist(phi,varargin)">fitphidist</a>	FITPHIDIST fit drainable porosity (phi) values with a Beta distribution</li>
+<li><a href="getdqdt.html" class="code" title="function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)">getdqdt</a>	GETDQDT Numerical estimation of the time derivative of discharge dQ/dt.</li>
+<li><a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>	GETEVENTS Get recession events from daily hydrograph timeseries T, Q, and R.</li>
+<li><a href="getfunction.html" class="code" title="function Fnc = getfunction(funcname)">getfunction</a>	GETFUNCTION get function handle from the bfra function library</li>
+<li><a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>	GETSTRING Get latex-formatted string for equations in the baseflow library.</li>
+<li><a href="globalfit.html" class="code" title="function GlobalFit = globalfit(Results,Events,Fits,varargin)">globalfit</a>	GLOBALFIT Fit global parameters using all event-scale recession fits.</li>
+<li><a href="gpfitb.html" class="code" title="function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)">gpfitb</a>	GPFITB Fit Generalized Pareto Distribution to recession parameter tau.</li>
+<li><a href="hyetograph.html" class="code" title="function H = hyetograph(time, flow, prec, varargin)">hyetograph</a>	HYETOGRAPH Plot a discharge rainfall hyetograph.</li>
+<li><a href="loadbasins.html" class="code" title="function [Basins,Meta,Poly] = loadbasins(basinname,varargin)">loadbasins</a>	LOADBASINS Load boundary object for basin specified by basinname.</li>
+<li><a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>	LOADCALM Load CALM ALT data for a basin in the Bounds struct.</li>
+<li><a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>	LOADFLOW Load timeseries of streamflow and metadata for basin.</li>
+<li><a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>	LOADGHCND Read in a global hydroclimatology network database file.</li>
+<li><a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a>	LOADGRACE Load grace data for basin in baseflow basin database.</li>
+<li><a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>	LOADMETA Load metadata for basin indicated by basinname.</li>
+<li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>	LOADPROPS Load basin properties from metadata table.</li>
+<li><a href="mapbasins.html" class="code" title="function h = mapbasins(Basins,varargin)">mapbasins</a>	MAPBASINS Map basin boundaries and color their faces by an attribute.</li>
+<li><a href="mapgages.html" class="code" title="function h = mapgages(lat,lon,varargin)">mapgages</a>	MAPGAGES map a set of gage locations and color their faces by an attribute</li>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li>
+<li><a href="phifitensemble.html" class="code" title="function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)">phifitensemble</a>	PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</li>
+<li><a href="plfitb.html" class="code" title="function varargout = plfitb(x,varargin)">plfitb</a>	PLFITB fit an unbounded Pareto Distribution to recession parameter tau</li>
+<li><a href="plotaquifertrend.html" class="code" title="function h = plotaquifertrend(t,Db,sigDb,varargin)">plotaquifertrend</a>	PLOTAQUIFERTREND Plot the saturated aquifer thickness trend.</li>
+<li><a href="plotdqdt.html" class="code" title="function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)">plotdqdt</a>	PLOTDQDT Plot the log-log q vs dq/dt point-cloud</li>
+<li><a href="plotrefline.html" class="code" title="function [href,ab] = plotrefline(x,y,varargin)">plotrefline</a>	PLOTREFLINE Add a reference line to a point cloud plot.</li>
+<li><a href="plplotb.html" class="code" title="function h = plplotb(x,xmin,alpha,varargin)">plplotb</a>	PLPLOTB Plot the power law fit to the P(tau) pareto distribution.</li>
+<li><a href="pointcloudintercept.html" class="code" title="function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)">pointcloudintercept</a>	POINTCLOUDINTERCEPT Estimate parameter 'a' from the point cloud intercept.</li>
+<li><a href="pointcloudplot.html" class="code" title="function out = pointcloudplot(q,dqdt,varargin)">pointcloudplot</a>	POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.</li>
+<li><a href="setopts.html" class="code" title="function opts = setopts(funcname,varargin)">setopts</a>	SETOPTS Set algorithm options for functions getevents, fitevents, globalfit.</li>
+<li><a href="specialfunctions.html" class="code" title="function varargout = specialfunctions(funcname,varargin)">specialfunctions</a>	SPECIALFUNCTIONS Special function ibarary required for recession analysis.</li>
+<li><a href="wrapevents.html" class="code" title="function [Events, Info] = wrapevents(T,Q,R,varargin)">wrapevents</a>	WRAPEVENTS Detect recession events on an annual calendar basis.</li></ul>
+<!-- crossreference -->
+
+
+
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function open(varargin)</a>
+0002    <span class="comment">%OPEN Open package namespace function file in the MATLAB Editor.</span>
+0003    narginchk(1,1)
+0004    funcname = validatestring(varargin{1}, bfra.completions(<span class="string">'open'</span>));
+0005    <a href="open.html" class="code" title="function open(varargin)">open</a>([<span class="string">'bfra.'</span> funcname])
+0006    
+0007    <span class="comment">% note, this would also work to open help pages, if it is desirable to</span>
+0008    <span class="comment">% collapse the two functions into one. But see bfra.completions for where I</span>
+0009    <span class="comment">% restrict the available options for this function to top-level +bfra/</span>
+0010    <span class="comment">% function files</span>
+0011    <span class="comment">% bfra.help(funcname)</span>
+0012 <span class="keyword">end</span></pre></div>
+</body>
+</html>

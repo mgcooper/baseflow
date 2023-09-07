@@ -4,7 +4,7 @@
 <head>
   <title>Description of generateTestData</title>
   <meta name="keywords" content="generateTestData">
-  <meta name="description" content="GENERATETESTDATA generate test data for baseflow recession analysis">
+  <meta name="description" content="GENERATETESTDATA Generate test data for baseflow recession analysis.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,25 +21,25 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>GENERATETESTDATA generate test data for baseflow recession analysis</strong></div>
+<div class="box"><strong>GENERATETESTDATA Generate test data for baseflow recession analysis.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function [q,dqdt,t] = generateTestData(a,b,q0,t) </strong></div>
+<div class="box"><strong>function [t, q, dqdt] = generateTestData(a, b, q0, t) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">GENERATETESTDATA generate test data for baseflow recession analysis
- 
+<div class="fragment"><pre class="comment">GENERATETESTDATA Generate test data for baseflow recession analysis.
+
  Syntax
- 
-     [q,dqdt,t] = generateTestData(a,b,q0,t)
- 
+
+     [t, q, dqdt] = generateTestData(a, b, q0, t)
+
  Description
- 
-     [q,dqdt,t] = bfra.generateTestData(a,b,Q0,t) generates timeseries of
-     discharge Q, first derivative of discharge dQdt, and time t for parameter
-     values a,b, and initial discharge Q0
- 
- See also bfra.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>
+
+     [t, q, dqdt] = bfra.generateTestData(a, b, Q0, t) generates timeseries
+     of discharge Q, first derivative of discharge dQdt, and time t for
+     parameter values a, b, and initial discharge Q0.
+
+ See also: bfra.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -63,57 +63,57 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [q,dqdt,t] = generateTestData(a,b,q0,t)</a>
-0002 <span class="comment">%GENERATETESTDATA generate test data for baseflow recession analysis</span>
-0003 <span class="comment">%</span>
-0004 <span class="comment">% Syntax</span>
-0005 <span class="comment">%</span>
-0006 <span class="comment">%     [q,dqdt,t] = generateTestData(a,b,q0,t)</span>
-0007 <span class="comment">%</span>
-0008 <span class="comment">% Description</span>
-0009 <span class="comment">%</span>
-0010 <span class="comment">%     [q,dqdt,t] = bfra.generateTestData(a,b,Q0,t) generates timeseries of</span>
-0011 <span class="comment">%     discharge Q, first derivative of discharge dQdt, and time t for parameter</span>
-0012 <span class="comment">%     values a,b, and initial discharge Q0</span>
-0013 <span class="comment">%</span>
-0014 <span class="comment">% See also bfra.Qnonlin</span>
-0015 <span class="comment">%</span>
-0016 <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [t, q, dqdt] = generateTestData(a, b, q0, t)</a>
+0002    <span class="comment">%GENERATETESTDATA Generate test data for baseflow recession analysis.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [t, q, dqdt] = generateTestData(a, b, q0, t)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     [t, q, dqdt] = bfra.generateTestData(a, b, Q0, t) generates timeseries</span>
+0011    <span class="comment">%     of discharge Q, first derivative of discharge dQdt, and time t for</span>
+0012    <span class="comment">%     parameter values a, b, and initial discharge Q0.</span>
+0013    <span class="comment">%</span>
+0014    <span class="comment">% See also: bfra.Qnonlin</span>
+0015    <span class="comment">%</span>
+0016    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0017 
-0018 <span class="comment">% if called with no input, open this file</span>
-0019 <span class="comment">% if nargin == 0; open(mfilename('fullpath')); return; end</span>
+0018    <span class="comment">% if called with no input, open this file</span>
+0019    <span class="comment">% if nargin == 0; open(mfilename('fullpath')); return; end</span>
 0020 
-0021 <span class="comment">% default Q0 and time</span>
-0022 <span class="keyword">switch</span> nargin
-0023    <span class="keyword">case</span> 0
-0024       a = 1e-2;
-0025       b = 1.5;
-0026       q0 = 100;
-0027       t = 1:100;
-0028    <span class="keyword">case</span> 1 <span class="comment">% assume b is provided, and swap a for b</span>
-0029       b = a;
-0030       a = 1e-2;
-0031       q0 = 100;
-0032       t = 1:100;
-0033    <span class="keyword">case</span> 2
-0034       q0 = 100;
-0035       t = 1:100;
-0036    <span class="keyword">case</span> 3
-0037       t = 1:100;
-0038 <span class="keyword">end</span>
+0021    <span class="comment">% default Q0 and time</span>
+0022    <span class="keyword">switch</span> nargin
+0023       <span class="keyword">case</span> 0
+0024          a = 1e-2;
+0025          b = 1.5;
+0026          q0 = 100;
+0027          t = 1:100;
+0028       <span class="keyword">case</span> 1 <span class="comment">% assume b is provided, and swap a for b</span>
+0029          b = a;
+0030          a = 1e-2;
+0031          q0 = 100;
+0032          t = 1:100;
+0033       <span class="keyword">case</span> 2
+0034          q0 = 100;
+0035          t = 1:100;
+0036       <span class="keyword">case</span> 3
+0037          t = 1:100;
+0038    <span class="keyword">end</span>
 0039 
-0040 t = t(:);
+0040    t = t(:);
 0041 
-0042 <span class="keyword">switch</span> b
-0043    <span class="keyword">case</span> 1
-0044       q = q0.*exp(-a.*t);
-0045       dqdt = -a.*q;
-0046       <span class="comment">%q = (q(1:end)+q(2:end-1))./2;</span>
-0047       <span class="comment">%dqdt = diff(q);</span>
-0048    <span class="keyword">otherwise</span>
-0049       [q,dqdt,t] = bfra.Qnonlin(a,b,q0,t,false); <span class="comment">% false = don't make fig</span>
-0050 <span class="keyword">end</span>
-0051 
+0042    <span class="keyword">switch</span> b
+0043       <span class="keyword">case</span> 1
+0044          q = q0.*exp(-a.*t);
+0045          dqdt = -a.*q;
+0046          <span class="comment">%q = (q(1:end)+q(2:end-1))./2;</span>
+0047          <span class="comment">%dqdt = diff(q);</span>
+0048       <span class="keyword">otherwise</span>
+0049          [q,dqdt,t] = bfra.Qnonlin(a,b,q0,t,false); <span class="comment">% false = don't make fig</span>
+0050    <span class="keyword">end</span>
+0051 <span class="keyword">end</span>
 0052 
 0053 <span class="comment">% % this was in bfra.test suite ParameterizedTestBfra. I am not certain why the</span>
 0054 <span class="comment">% data falls off, could be the noise I add, or could be the lack of a negative</span>

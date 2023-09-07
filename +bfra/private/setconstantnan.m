@@ -1,4 +1,5 @@
 function q = setconstantnan(q,rmax)
+   %SETCONSTANTNAN Set constant-valued runlengths exceeding RMAX nan.
 
    % note: if n=1, then all values will be set nan, so set n = 2
    if rmax==1

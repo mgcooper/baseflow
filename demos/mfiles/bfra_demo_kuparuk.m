@@ -3,7 +3,7 @@
 % et al. 2023, <https://doi.org/10.1029/2022WR033154 Detecting Permafrost Active 
 % Layer Thickness Change From Nonlinear Baseflow Recession>. 
 % 
-% Some notes about the software:
+% Notes for users:
 %% 
 % * Detecting recession events is reasonably fast but fitting events is slow
 % * Computing uncertainties is very slow (bootstrap fit)
@@ -17,7 +17,9 @@
 % NOTE: this script assumes it is being run in the folder that contains the 
 % data/ folder 
 
-clearvars -except testCase demoFiles
+clearvars
+close all
+clc
 %% 
 % Set the main options
 
@@ -25,12 +27,12 @@ savedata    = false;
 sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1990,1,1);   % start at 1990 for CALM
 t2          = datetime(2020,12,31);
-fitevents   = true;                 % if true, run fitevents, otherwise load saved Fits
-fitglobal   = true;                 % if true, run globalfit, otherwise load saved GlobalFit
-plotfigs    = true;                 % if true, globalfit will produce figures
-bootfit     = false;                % if true, uncertainties are computed by bootstrap resampling (very slow)
-nreps       = 1000;                 % number of bootstrap samples
-fname       = 'data/Events.mat';    % this is the filename used to save all data including Events, Fits, and GlobalFit
+fitevents   = true; % if true, run fitevents, otherwise load saved Fits
+fitglobal   = true; % if true, run globalfit, otherwise load saved GlobalFit
+plotfigs    = true; % if true, globalfit will produce figures
+bootfit     = false; % if true, bootstrap uncertainties (very slow)
+nreps       = 1000; % number of bootstrap samples
+fname       = 'data/Events.mat'; % filename to save Events, Fits, and GlobalFit
 %% 
 % Set the basin geomorphological parameters
 
@@ -50,8 +52,9 @@ load('data/annualdata.mat','Data');
 opts.getevents = bfra.setopts('getevents', 'asannual', true);
 opts.fitevents = bfra.setopts('fitevents');
 opts.globalfit = bfra.setopts('globalfit', ...
-   'drainagearea', A, 'aquiferdepth', D, 'drainagedensity', Dd, ...
-   'streamlength', L, 'bootfit', bootfit, 'bootreps',nreps, 'plotfits',true);
+   'drainagearea',A,'aquiferdepth',D, ...
+   'streamlength',L,'drainagedensity',Dd, ...
+   'bootfit',bootfit,'bootreps',nreps, 'plotfits',true);
 %% 
 % Get all recession events and then fit them
 
@@ -91,13 +94,18 @@ pQexp    = GlobalFit.pQexp;
 %% 
 % Compute baseflow and aquifer thickness trends
 
-[Qb,~,Qa,~,hb] = bfra.baseflowtrend(T,Q,A,'pctl',pQexp,'showfig',false); % cm/d/y
-[Db,Sb] = bfra.aquiferthickness(bhat,tauexp,phihat,Qb,true); % cm/yr
-Qb = Qb.*365.25;  % convert from cm/d/yr to cm/yr/yr
+[Qb,~,Qa,~,hb] = bfra.baseflowtrend(T, Q, A, ...
+   'pctl', pQexp, 'showfig', false); % cm/d/y
+
+[Db,Sb] = bfra.aquiferthickness( ...
+   bhat, tauexp, phihat, Qb, true); % cm/yr
+
+Qb = Qb.*365.25; % convert from cm/d/yr to cm/yr/yr
 %% 
 % Compute the combined uncertainty
 
-sig_dndt = bfra.dndtuncertainty(T,Qb,K,Fits,GlobalFit,opts.globalfit,0.05);
+sig_dndt = bfra.dndtuncertainty( ...
+   T, Qb, K, Fits, GlobalFit, opts.globalfit, 0.05);
 %% 
 % Add the baseflow recession analysis timeseries to the annual Data table, 
 
@@ -113,13 +121,18 @@ DataG = DataC(find(year(DataC.Time)==2002):end,:);
 % Plot the alt trend
 
 if plotfigs == true
-   bfra.plotaquifertrend(Data.Time,Data.Db,Data.sigDb);
-   bfra.plotaquifertrend(DataC.Time,DataC.Db,DataC.sigDb,DataC.Dc,DataC.sigDc);
-   bfra.plotaquifertrend(DataG.Time,DataG.Db,DataG.sigDb,DataG.Dc,DataG.sigDc);
+   bfra.plotaquifertrend(Data.Time, Data.Db, Data.sigDb);
+   
+   bfra.plotaquifertrend(DataC.Time, DataC.Db, DataC.sigDb, ...
+      DataC.Dc, DataC.sigDc);
+   
+   bfra.plotaquifertrend(DataG.Time, DataG.Db, DataG.sigDb, ...
+      DataG.Dc, DataG.sigDc);
 end
 %% 
 % Save the data
 
 if savedata == true
-   save(fname,'Events','Fits','K','GlobalFit','Data','DataC','DataG','opts');
+   save(fname, ...
+      'Events','Fits','K','GlobalFit','Data','DataC','DataG','opts');
 end

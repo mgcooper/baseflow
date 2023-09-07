@@ -1,4 +1,5 @@
 function varargout = getplotdata(varargin)
+   %GETPLOTDATA Get data in current plot.
 
    if nargin == 0
       ax = gca;

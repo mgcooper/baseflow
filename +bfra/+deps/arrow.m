@@ -1,5 +1,5 @@
 function [h,yy,zz] = arrow(varargin)
-% ARROW  Draw a line with an arrowhead.
+%ARROW  Draw a line with an arrowhead.
 %
 %  ARROW(Start,Stop) draws a line with an arrow from Start to Stop (points
 %        should be vectors of length 2 or 3, or matrices with 2 or 3
