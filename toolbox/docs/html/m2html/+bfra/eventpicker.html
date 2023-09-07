@@ -1,0 +1,392 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of eventpicker</title>
+  <meta name="keywords" content="eventpicker">
+  <meta name="description" content="EVENTPICKER Automated or user-guided recession event selection.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventpicker.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>eventpicker
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>EVENTPICKER Automated or user-guided recession event selection.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">EVENTPICKER Automated or user-guided recession event selection.
+
+ Syntax
+
+     [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
+
+ Description
+
+     [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info) selects recession events
+     from input hydrograph with time 't', discharge 'q', and rain 'r'. Use
+     optional inputs to set parameters that determine how events are
+     identified and
+
+ Required inputs
+
+     t        time
+     q        flow (m3/time)
+     r        rain (mm/time)
+     nmin     minimum event length
+
+ See also: <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, findevents, <a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>, eventsplitter, <a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function Events = eventSelector(t,q,r,qdot,Info)</a></li>
+<li><a href="#_sub2" class="code">function h = eventPlotter(t,q,r,dqdt,Info)</a></li>
+<li><a href="#_sub3" class="code">function Events = updateEventPlot(Events,h)</a></li>
+<li><a href="#_sub4" class="code">function [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)</a>
+0002    <span class="comment">%EVENTPICKER Automated or user-guided recession event selection.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info) selects recession events</span>
+0011    <span class="comment">%     from input hydrograph with time 't', discharge 'q', and rain 'r'. Use</span>
+0012    <span class="comment">%     optional inputs to set parameters that determine how events are</span>
+0013    <span class="comment">%     identified and</span>
+0014    <span class="comment">%</span>
+0015    <span class="comment">% Required inputs</span>
+0016    <span class="comment">%</span>
+0017    <span class="comment">%     t        time</span>
+0018    <span class="comment">%     q        flow (m3/time)</span>
+0019    <span class="comment">%     r        rain (mm/time)</span>
+0020    <span class="comment">%     nmin     minimum event length</span>
+0021    <span class="comment">%</span>
+0022    <span class="comment">% See also: getevents, findevents, eventfinder, eventsplitter, eventplotter</span>
+0023    <span class="comment">%</span>
+0024    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0025 
+0026    <span class="comment">% if called with no input, open this file</span>
+0027    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0028 
+0029    <span class="comment">% TODO: compare subfunction eventPlotter here to bfra.eventplotter and to</span>
+0030    <span class="comment">% versions in dev-bk. Cursory glance - eventPlotter includes option to plot</span>
+0031    <span class="comment">% rain, but does not include 3rd subplot of d2q/dt in bfra.eventplotter</span>
+0032 
+0033    <span class="comment">% PARSE INPUTS</span>
+0034    [t, q, r, nmin, Info] = <a href="#_sub4" class="code" title="subfunction [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)">parseinputs</a>(t, q, r, nmin, Info);
+0035 
+0036    <span class="comment">% compute the first derivative</span>
+0037    qdot = bfra.deps.derivative(q);
+0038 
+0039    <span class="comment">% pick the events</span>
+0040    Events = <a href="#_sub1" class="code" title="subfunction Events = eventSelector(t,q,r,qdot,Info)">eventSelector</a>(t,q,r,qdot,Info);
+0041    numEvents = numel(Events.inputTime);
+0042 
+0043    <span class="comment">% apply quality control filters to the picked events</span>
+0044    Q = cell(numEvents,1);
+0045    T = cell(numEvents,1);
+0046    R = cell(numEvents,1);
+0047    Qdot = cell(numEvents,1);
+0048 
+0049    <span class="comment">% Note: this pulls T,Q,Q2 out of Events. Could change to send back Events</span>
+0050    <span class="keyword">for</span> n = 1:numEvents
+0051 
+0052       qPick = Events.Q{n};
+0053       tPick = Events.T{n};
+0054       rPick = Events.R{n};
+0055       qdotPick = Events.Qdot{n};
+0056 
+0057       rl = Events.runlengths(n);
+0058 
+0059       <span class="comment">% if the event is shorter than the min event criteria, skip it</span>
+0060       <span class="keyword">if</span> rl&lt;nmin; numEvents = numEvents-1; <span class="keyword">continue</span>; <span class="keyword">end</span>
+0061 
+0062       <span class="comment">% islineconvex might be too restrictive, but without it, ETS call to</span>
+0063       <span class="comment">% exponential fit sometimes fails, and nonlinear fitting will fail</span>
+0064       <span class="keyword">if</span> islineconvex(qPick) || islineconvex(-diff(qPick))
+0065          numEvents = numEvents - 1;
+0066          <span class="keyword">continue</span>
+0067       <span class="keyword">end</span>
+0068 
+0069       <span class="comment">% otherwise, keep the pick</span>
+0070       Q{n} = qPick;
+0071       T{n} = tPick;
+0072       R{n} = rPick;
+0073       Qdot{n} = qdotPick;
+0074    <span class="keyword">end</span>
+0075 
+0076    <span class="comment">% remove empty events</span>
+0077    inan = false(size(T));
+0078    <span class="keyword">for</span> n = 1:numel(T)
+0079       <span class="keyword">if</span> isempty(T{n})
+0080          inan(n) = true;
+0081       <span class="keyword">end</span>
+0082    <span class="keyword">end</span>
+0083 
+0084    T = T(~inan);
+0085    Q = Q(~inan);
+0086    R = R(~inan);
+0087    Qdot = Qdot(~inan);
+0088 
+0089    <span class="comment">% replace the start/stop/runlengths with the picked ones</span>
+0090    Info.istart = Events.istart;
+0091    Info.istop = Events.istop;
+0092    Info.runlengths = Events.runlengths;
+0093    Info.hEvents = Events.h;
+0094 
+0095    Info.istart = Info.istart(~inan);
+0096    Info.istop = Info.istop(~inan);
+0097    Info.runlengths = Info.runlengths(~inan);
+0098 
+0099    <span class="comment">% close all</span>
+0100    <span class="comment">% f = f(isgraphics(f)); close(f);</span>
+0101 <span class="keyword">end</span>
+0102 
+0103 <span class="comment">%% local functions</span>
+0104 <a name="_sub1" href="#_subfunctions" class="code">function Events = eventSelector(t,q,r,qdot,Info)</a>
+0105 
+0106    <span class="comment">% pick the points</span>
+0107    h = <a href="#_sub2" class="code" title="subfunction h = eventPlotter(t,q,r,dqdt,Info)">eventPlotter</a>(t,q,r,qdot,Info);  <span class="comment">% plot the timeseries</span>
+0108 
+0109    pickedPts = bfra.deps.ginputc();
+0110    startPts = pickedPts(1:2:end);
+0111    endPts = pickedPts(2:2:end);
+0112    numPicks = numel(startPts);
+0113 
+0114    <span class="comment">% initialize output</span>
+0115    istart = nan(size(startPts));
+0116    istop  = nan(size(startPts));
+0117    rlengs = nan(size(startPts));
+0118    T = cell(size(startPts));
+0119    Q = cell(size(startPts));
+0120    R = cell(size(startPts));
+0121    Qdot = cell(size(startPts));
+0122 
+0123    <span class="keyword">for</span> n = 1:numPicks
+0124       difStart = abs(t-startPts(n));
+0125       difStop  = abs(t-endPts(n));
+0126       istart(n) = findmin(difStart,1,<span class="string">'first'</span>);
+0127       istop(n)  = findmin(difStop,1,<span class="string">'first'</span>);
+0128 
+0129       t_n = t(istart(n):istop(n));
+0130       q_n = q(istart(n):istop(n));
+0131       r_n = r(istart(n):istop(n));
+0132       d_n = qdot(istart(n):istop(n));
+0133       t_n = t_n(d_n~=0);
+0134       q_n = q_n(d_n~=0);
+0135       r_n = r_n(d_n~=0);
+0136       d_n = d_n(d_n~=0);
+0137 
+0138       T{n} = t_n;
+0139       Q{n} = q_n;
+0140       R{n} = r_n;
+0141       Qdot{n} = d_n;
+0142       rlengs(n) = numel(q_n);
+0143    <span class="keyword">end</span>
+0144 
+0145    Events.T = T;
+0146    Events.Q = Q;
+0147    Events.R = R;
+0148    Events.Qdot = Qdot;
+0149    Events.nEvents = numPicks;
+0150    Events.istart = istart + Info.ifirst - 1;
+0151    Events.istop = istop + Info.ifirst - 1;
+0152    Events.runlengths = rlengs;
+0153 
+0154    <span class="comment">% some of the information in Info is relevant to the entire timeseries:</span>
+0155    <span class="comment">% imaxima</span>
+0156    <span class="comment">% iminima</span>
+0157    <span class="comment">% iconvex</span>
+0158    <span class="comment">% icandidate</span>
+0159    <span class="comment">% ikeep</span>
+0160    <span class="comment">% ifirst</span>
+0161 
+0162    <span class="comment">% some pertains to the automated selected events</span>
+0163    <span class="comment">% istart</span>
+0164    <span class="comment">% istop</span>
+0165    <span class="comment">% runlengths</span>
+0166 
+0167    <span class="comment">% so we need to add a new field for picked events with:</span>
+0168    <span class="comment">% istart</span>
+0169    <span class="comment">% istop</span>
+0170    <span class="comment">% runlengths</span>
+0171 
+0172    <span class="comment">% add the picked events to the plot</span>
+0173    Events = <a href="#_sub3" class="code" title="subfunction Events = updateEventPlot(Events,h)">updateEventPlot</a>(Events,h);
+0174 <span class="keyword">end</span>
+0175 
+0176 <a name="_sub2" href="#_subfunctions" class="code">function h = eventPlotter(t,q,r,dqdt,Info)</a>
+0177 
+0178    <span class="comment">% stripped down version of bfra.plotevents with ginput picking added</span>
+0179 
+0180    <span class="keyword">if</span> isempty(Info.istart)
+0181       disp(<span class="string">'no valid events'</span>)
+0182    <span class="keyword">end</span>
+0183 
+0184    h.Info = Info;
+0185    ifirst = Info.ifirst(1);
+0186    ikeep = Info.ikeep   - ifirst + 1;
+0187    imax = Info.imaxima - ifirst + 1;
+0188    imin = Info.iminima - ifirst + 1;
+0189    icon = Info.iconvex - ifirst + 1;
+0190 
+0191    posidx = dqdt&gt;=0;
+0192    negidx = dqdt&lt;0;
+0193    sz = 20;
+0194 
+0195    <span class="comment">% new - add 50th percentil</span>
+0196    q50 = quantile(q,0.5);
+0197 
+0198    <span class="comment">% make the figure</span>
+0199    h.fig = figure(<span class="string">'Position'</span>,[1 1 1152 720]);
+0200    h.sp1 = subtight(2,1,1,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0201    h.ax1 = gca;
+0202    h.s1a = scatter(t(posidx),q(posidx),sz,<span class="string">'filled'</span>); hold on;
+0203    h.s1b = scatter(t(negidx),q(negidx),sz,<span class="string">'filled'</span>); datetick;
+0204    h.s1c = scatter(t(imax),q(imax),sz*2,<span class="string">'filled'</span>);
+0205    h.s1d = scatter(t(imin),q(imin),sz*2,<span class="string">'filled'</span>);
+0206    h.s1e = scatter(t(icon),q(icon),sz,<span class="string">'filled'</span>);
+0207    h.s1f = scatter(t(ikeep),q(ikeep),sz*2.5,<span class="string">'filled'</span>);
+0208 
+0209    h.s1g = bfra.deps.hline(q50,<span class="string">':'</span>);
+0210 
+0211    dates = datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0212 
+0213    title(year(dates(1)))
+0214    set(gca,<span class="string">'YScale'</span>,<span class="string">'log'</span>);
+0215 
+0216    h.l1 = legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>, <span class="keyword">...</span>
+0217       <span class="string">'keep'</span>,<span class="string">'keep (check)'</span>);
+0218 
+0219    ylabel(<span class="string">'Q'</span>);
+0220 
+0221    <span class="comment">% add rain</span>
+0222    <span class="keyword">if</span> sum(r)&gt;0
+0223       ax = gca;
+0224       yyaxis right
+0225       h.h1rain = bar(t,r,0.2, <span class="string">'FaceColor'</span>, [0.85 0.325 0.098], <span class="keyword">...</span>
+0226          <span class="string">'FaceAlpha'</span>, 0.5, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0227 
+0228       ylabel(<span class="string">'rain (mm)'</span>,<span class="string">'Color'</span>,[0.85 0.325 0.098]);
+0229       set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
+0230       datetick; axis(ax,<span class="string">'ij'</span>);
+0231    <span class="keyword">end</span>
+0232 
+0233 
+0234    <span class="comment">% plot -dq/dt in log</span>
+0235    dqdt = -dqdt;
+0236 
+0237    h.sp2 = subtight(2,1,2,<span class="string">'style'</span>,<span class="string">'fitted'</span>);
+0238    h.ax2 = gca;
+0239    h.s2a = scatter(t(posidx),dqdt(posidx),sz,<span class="string">'filled'</span>); hold on;
+0240    h.s2b = scatter(t(negidx),dqdt(negidx),sz,<span class="string">'filled'</span>);
+0241    h.s2c = scatter(t(imax),dqdt(imax),sz*2,<span class="string">'filled'</span>);
+0242    h.s2d = scatter(t(imin),dqdt(imin),sz*2,<span class="string">'filled'</span>);
+0243    h.s2e = scatter(t(icon),dqdt(icon),sz,<span class="string">'filled'</span>);
+0244    h.s2f = scatter(t(ikeep),dqdt(ikeep),sz*2.5,<span class="string">'filled'</span>);
+0245    h.hl2 = bfra.deps.hline(0,<span class="string">'k-'</span>); h.hl2.LineWidth = 1;
+0246    h.l2 = legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>, <span class="keyword">...</span>
+0247       <span class="string">'keep'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0248    ylabel(<span class="string">'dQ/dt'</span>);
+0249    datetick
+0250    set(gca,<span class="string">'YScale'</span>,<span class="string">'log'</span>);
+0251 
+0252    h.l1.Location = <span class="string">'best'</span>;
+0253    h.l2.Location = <span class="string">'best'</span>;
+0254 
+0255    <span class="comment">% add rain</span>
+0256    <span class="keyword">if</span> sum(r)&gt;0
+0257       ax = gca;
+0258       yyaxis right
+0259       h.h2rain = bar(t, r, 0.2, <span class="string">'FaceColor'</span>, [0.85 0.325 0.098], <span class="keyword">...</span>
+0260          <span class="string">'FaceAlpha'</span>, 0.5, <span class="string">'EdgeColor'</span>, <span class="string">'none'</span>);
+0261 
+0262       ylabel(<span class="string">'rain (mm)'</span>,<span class="string">'Color'</span>,[0.85 0.325 0.098]);
+0263       set(gca,<span class="string">'YColor'</span>,<span class="string">'k'</span>)
+0264       datetick; axis(ax,<span class="string">'ij'</span>);
+0265    <span class="keyword">end</span>
+0266 <span class="keyword">end</span>
+0267 
+0268 <a name="_sub3" href="#_subfunctions" class="code">function Events = updateEventPlot(Events,h)</a>
+0269 
+0270    <span class="comment">% add the picked events to the plot</span>
+0271    <span class="keyword">for</span> n = 1:Events.nEvents
+0272 
+0273       scatter(h.ax1,Events.T{n},Events.Q{n},60,<span class="string">'m'</span>);
+0274       scatter(h.ax2,Events.T{n},Events.Qdot{n},60,<span class="string">'m'</span>);
+0275       text(h.ax1,min(Events.T{n}),max(Events.Q{n}),[<span class="string">'Event '</span> num2str(n)]);
+0276 
+0277       <span class="keyword">if</span> n == 1
+0278          h.l1.String{end} = <span class="string">'picked'</span>;
+0279          h.l2.String{end+1} = <span class="string">'picked'</span>;
+0280       <span class="keyword">else</span>
+0281          h.l1.AutoUpdate = <span class="string">'off'</span>;
+0282          h.l2.AutoUpdate = <span class="string">'off'</span>;
+0283       <span class="keyword">end</span>
+0284    <span class="keyword">end</span>
+0285    Events.h = h;
+0286 <span class="keyword">end</span>
+0287 
+0288 <span class="comment">%% INPUT PARSER</span>
+0289 <a name="_sub4" href="#_subfunctions" class="code">function [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)</a>
+0290 
+0291    parser = inputParser;
+0292    parser.FunctionName = <span class="string">'bfra.eventpicker'</span>;
+0293    parser.StructExpand = false; <span class="comment">% for 'Info' input</span>
+0294    parser.addRequired(<span class="string">'t'</span>, @isdatelike);
+0295    parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0296    parser.addRequired(<span class="string">'r'</span>, @isnumeric);
+0297    parser.addRequired(<span class="string">'nmin'</span>, @isnumericscalar);
+0298    parser.addRequired(<span class="string">'Info'</span>, @isstruct);
+0299    parser.parse(t, q, r, nmin, Info);
+0300 
+0301    t = parser.Results.t;
+0302    q = parser.Results.q;
+0303    r = parser.Results.r;
+0304    nmin = parser.Results.nmin;
+0305    Info = parser.Results.Info;
+0306    assert(numel(q) == numel(t));
+0307 
+0308    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0309    t = todatenum(t);
+0310 <span class="keyword">end</span></pre></div>
+</body>
+</html>

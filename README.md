@@ -20,12 +20,12 @@ Requires Statistics, Optimization, Struct, and Tablicious packages.
 
 - Clone this repo **or** use [`mpm`](http://mobeets.github.io/mpm/) in your Matlab terminal:
   - `mpm install baseflow`
-- cd into the toolbox top-level directory.
+- cd into the `toolbox` directory.
 - Run `Setup.m`:
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc` for recommended startup options.
-- Unit tests are located in `+bfra/+test`, they can be run in a matlab session by typing `bfra.test.runtests` at the command window and pressing enter.
+- Unit tests are located in `tests/`, they can be run in a matlab session by typing `runtests()` at the command window and pressing enter. For verbose output and/or to enter debug mode on errors, type `runtests('debug')`.
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).  
@@ -37,11 +37,12 @@ Toolbox functions are located in the `+bfra` namespace package folder. To see a 
 
 Toolbox documentation and examples are also available in the Matlab help browser. To get started, in your Matlab command window:
 
-- Type `doc baseflow` to open the documentation in the help browser.
+- Type `bfra.help()` to open the toolbox documentation in the help browser.
+- Type `bfra.help('function_name')` to open documentation for a specific function.
 - Type `doc bfra` or try `doc +bfra` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch bfra`.
 
-In addition to the toolbox documentation and examples provided in the Matlab help browser, there are several notebooks in `demos/`. The notebook `bfra_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Several other notebooks in the `demos` folder demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with Octave.
+In addition to the toolbox documentation and examples provided in the Matlab help browser, there are several notebooks in `demos/`. The notebook `bfra_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Several other notebooks in the `demos` folder demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
 
 ## Contribute
 
@@ -143,7 +144,7 @@ Limitations when running in Octave:
 - Graphics object functions do not work in Octave, including those that use `gobjects`.
 - Latex interpreter is not supported in Octave.
 
-Work is ongoing to patch these incompatibilities. See `bfra.util.isoctave` to patch errors.
+Work is ongoing to patch these incompatibilities. See `+bfra/private/isoctave` to patch errors.
 
 When running in Octave, be careful with blanket `warning on` or `warning off` commands. Octave ships with about a dozen warning states off, listed below. If they are turned on by a `warning on` command, there will be endless warning messages. If this happens, type `warning` in the commandwindow to confirm if the following warnings are off. If so, simply restart Octave to reset them, or reset them manually.
 
