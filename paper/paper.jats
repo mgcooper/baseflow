@@ -87,16 +87,17 @@ a Creative Commons Attribution 4.0 International License (CC BY
   technique used in hydrologic science to infer aquifer properties from
   streamflow
   (<xref alt="Brutsaert &amp; Nieber, 1977" rid="ref-brutsaert_1977_WRR" ref-type="bibr">Brutsaert
-  &amp; Nieber, 1977</xref>). Leveraging widely-available streamflow
-  data, the toolbox can be used to estimate aquifer properties such as
-  hydraulic conductivity and drainable porosity over the modern
-  instrumental stream gage record. The toolbox is intended for analysis
-  of measured streamflow values recorded on a daily timestep, and is
-  tailored for shallow, unconfined riparian aquifers that discharge
-  groundwater laterally into adjacent streams. Additionally,
-  <monospace>baseflow</monospace> can analyze the collective behavior of
-  individual hillslope aquifers constituting hydrologic catchments,
-  known as “watersheds”, from a nonlinear dynamical systems perspective
+  &amp; Nieber, 1977</xref>). By leveraging widely-available streamflow
+  data, <monospace>baseflow</monospace> can be used to estimate aquifer
+  properties such as hydraulic conductivity and drainable porosity over
+  the modern instrumental stream gage record. The toolbox is intended
+  for analysis of measured streamflow values recorded on a daily
+  timestep, and is tailored for shallow, unconfined riparian aquifers
+  that discharge groundwater laterally into adjacent streams.
+  Additionally, <monospace>baseflow</monospace> can analyze the
+  collective behavior of individual hillslope aquifers constituting
+  hydrologic catchments, known as “watersheds”, from a nonlinear
+  dynamical systems perspective
   (<xref alt="Kirchner, 2009" rid="ref-kirchner_2009_WRR" ref-type="bibr">Kirchner,
   2009</xref>). The toolbox incorporates recent advances in baseflow
   recession analysis
@@ -112,8 +113,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
 <sec id="statement-of-need">
   <title>Statement of need</title>
   <p>Baseflow is a vital component of streamflow sourced exclusively
-  from aquifer discharge, rather than rainfall, surface water, or
-  managed reservoir release
+  from aquifer discharge, rather than surface sources such as rainfall,
+  lake drainage, or managed reservoir release
   (<xref alt="Hall, 1968" rid="ref-hall_1968_WRR" ref-type="bibr">Hall,
   1968</xref>). Baseflow essentially reflects the delayed release of
   groundwater storage into streams, and sustains water availability
@@ -226,7 +227,25 @@ a Creative Commons Attribution 4.0 International License (CC BY
   <tex-math><![CDATA[b]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>b</mml:mi></mml:math></alternatives></inline-formula>
   determine the shape of the recession curve
-  (<xref alt="[fig:figure_1]" rid="figU003Afigure_1">[fig:figure_1]</xref>).</p>
+  (<xref alt="[fig:figure_1]" rid="figU003Afigure_1">[fig:figure_1]</xref>).
+  Several well-known solutions to the one-dimensional lateral
+  groundwater flow equation for unconfined aquifers can be written in
+  the same form as
+  <xref alt="Equation 1" rid="eqU003AaQb">Equation 1</xref>. Parameters
+  <inline-formula><alternatives>
+  <tex-math><![CDATA[a]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>a</mml:mi></mml:math></alternatives></inline-formula>
+  and <inline-formula><alternatives>
+  <tex-math><![CDATA[b]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>b</mml:mi></mml:math></alternatives></inline-formula>
+  can be regarded as lumped coefficients from which various aquifer
+  properties can be recovered
+  (<xref alt="Brutsaert &amp; Nieber, 1977" rid="ref-brutsaert_1977_WRR" ref-type="bibr">Brutsaert
+  &amp; Nieber, 1977</xref>;
+  <xref alt="Rupp &amp; Selker, 2006b" rid="ref-rupp_2006_WRR" ref-type="bibr">Rupp
+  &amp; Selker, 2006b</xref>;
+  <xref alt="Troch et al., 1993" rid="ref-troch_1993_WRR" ref-type="bibr">Troch
+  et al., 1993</xref>).</p>
   <p>Two MATLAB-based toolboxes for baseflow recession analysis are
   available to our knowledge. The <monospace>HYDRORECESSION</monospace>
   (<xref alt="Arciniega-Esparza et al., 2017" rid="ref-arciniega-esparza_2017_CU0026G" ref-type="bibr">Arciniega-Esparza
