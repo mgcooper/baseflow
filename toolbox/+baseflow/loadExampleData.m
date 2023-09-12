@@ -1,7 +1,7 @@
 function [T, Q, R] = loadExampleData()
    %LOADEXAMPLEDATA Load toolbox example data.
 
-   datapath = basepath('data');
+   datapath = fullfile(baseflow.internal.basepath(), 'data');
 
    if isoctave
       load(fullfile(datapath, 'dailyflow_octave.mat'), 'T', 'Q', 'R');

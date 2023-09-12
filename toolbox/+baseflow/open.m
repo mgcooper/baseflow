@@ -1,7 +1,7 @@
 function open(varargin)
    %OPEN Open package namespace function file in the MATLAB Editor.
    narginchk(1,1)
-   funcname = validatestring(varargin{1}, bfra.completions('open'));
+   funcname = validatestring(varargin{1}, bfra.internal.completions('open'));
    open(['bfra.' funcname])
    
    % note, this would also work to open help pages, if it is desirable to

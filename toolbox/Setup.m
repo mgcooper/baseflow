@@ -344,7 +344,7 @@ function msg = checkdependencies(varargin)
 
    % get all unique dependencies
    funcname = fullfile(thispath,'docs','bfra_demo.m');
-   report = bfra.dependencies(funcname,'check');
+   report = bfra.internal.dependencies(funcname,'check');
    % report = bfra.dependencies('docs/bfra_demo.m','check');
    msg.function_dependencies = report.function_dependencies;
    msg.missing_dependencies = report.missing_dependencies;

@@ -5,5 +5,4 @@ function projpath = basepath(varargin)
    if nargin == 1
       projpath = fullfile(projpath, varargin{:});
    end
-
 end

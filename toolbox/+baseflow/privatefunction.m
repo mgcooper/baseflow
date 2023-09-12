@@ -8,10 +8,10 @@ function funcHandle = privatefunction(funcName)
    % PRIVATEFUNCTION uses completions.m to generate a list of
    % available private functions for tab-completion and input validation.
    % 
-   % See also: completions
+   % See also: baseflow.internal.completions
    
-   funcName = validatestring(funcName, bfra.completions('private'), ...
-      mfilename, 'FUNCNAME', 1);
+   funcName = validatestring(funcName, ...
+      baseflow.internal.completions('private'), mfilename, 'FUNCNAME', 1);
    
    funcHandle = str2func(funcName);
    

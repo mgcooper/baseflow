@@ -34,22 +34,22 @@
 % Need help? To see a list of toolbox functions, at the command window type: 
 %%
 % 
-%   doc +bfra
+%   doc +baseflow
 %
 %% 
 % To see the complete toolbox documentation in the MATLAB Help browser, type:
 %%
 % 
-%   bfra.help()
+%   baseflow.help()
 %
 %% 
 % To see the documentation for a specific function, type: 
 %%
 % 
-%   bfra.help('function_name')
+%   baseflow.help('function_name')
 %
 %% 
-% where |function_name| is the name of a toolbox function. For example, |bfra.help('getevents')| 
+% where |function_name| is the name of a toolbox function. For example, |baseflow.help('getevents')| 
 % opens the help page for |getevents| in the Help browser. Use tab-completion 
 % to see the full menu of documented toolbox functions.
 % 
@@ -67,14 +67,14 @@
 % These features are exposed to the user by three APIs (high-level matlab functions 
 % that simplify toolbox use):
 %% 
-% # |bfra.getevents| Detect recession events from daily streamflow timeseries.
-% # |bfra.fitevents| Curve-fit all events detected by |getevents|.
-% # |bfra.globalfit| Distribution-fit all parameters estimated with |fitevents|.
+% # |baseflow.getevents| Detect recession events from daily streamflow timeseries.
+% # |baseflow.fitevents| Curve-fit all events detected by |getevents|.
+% # |baseflow.globalfit| Distribution-fit all parameters estimated with |fitevents|.
 %% 
 % The toolbox supports two user-interfaces for passing inputs to these APIs: 
 %% 
 % # Name-value parameter pairs passed directly to the functions.
-% # An options struct created by |bfra.setopts()|.
+% # An options struct created by |baseflow.setopts()|.
 %% 
 % Both of these user-interfaces are demonstrated in the example live-scripts 
 % in the |demos| folder. 
@@ -153,14 +153,14 @@
 % * |eventfinder| The algorithm called by |getevents| to detect recession events.
 % * |eventpicker| Pick events manually, rather than automatically using |eventfinder|.
 % * |eventplotter| Plot recession events detected by |eventfinder| or |eventpicker|
-% * |getdqdt| Estimate the rate of change of discharge _dQ/dt_ prior to curve 
+% * |getdqdt| Estimate the rate of change of discharge $dQ/dt$ prior to curve 
 % fitting using one of several numerical differentiation options.
 % * |fitets| Apply the exponential time step method to estimate the numerical 
-% derivative _dQ/dt._
+% derivative $dQ/dt$.
 % * |fitcts| Apply the constant time step method to estimate the numerical derivative 
-% _dQ/dt._
+% $dQ/dt$.
 % * |fitvts| Apply the variable time step method to estimate the numerical derivative 
-% _dQ/dt._
+% $dQ/dt$.
 %% 
 % Functions that support aquifer-property estimation:
 %% 
@@ -229,18 +229,16 @@
 % * |generateTestData| Generate test data. 
 %% Toolbox Structure
 % All user accessible and documented functions in this toolbox are defined inside 
-% the |+bfra| namespace package. This avoids naming conflicts with built-in or 
-% user-defined matlab functions. Functions inside |+bfra/private| are available 
-% only to functions in the parent |+bfra/| folder and are not meant to be called 
-% by users. Functions inside |+bfra/+test| are primarily developer-focused but 
-% are accessible to users to run unit tests if desired. Functions inside the +bfra/+deps 
-% folder are third-party dependencies and are not meant to be called by the user.
+% the |+baseflow| namespace package. This avoids naming conflicts with built-in 
+% or user-defined matlab functions. Functions inside |+baseflow/private| are available 
+% only to functions in the parent |+baseflow| folder and are not meant to be called 
+% by users. Functions inside the +baseflow/+deps folder are third-party dependencies 
+% and are not meant to be called by users.
 %%
 % 
-%  +bfra/ - The package, with all documented, user accessible functions.
+%  +baseflow/ - The package, with all documented, user accessible functions.
 %     +deps/ - Third-party functions called by package functions.
 %     +sym/ - Symbolic functions accessible to users.
-%     +test/ - Test functions accessible to users.
 %     private/ - Undocumented private methods not accessible to users.
 %  data/ - Example datasets.
 %  demos/ - Example live scripts.

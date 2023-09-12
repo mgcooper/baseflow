@@ -20,10 +20,11 @@ function help(docname)
       % also see 'demo', 'showdemo', and 'open'
    end
 
+   % docname should point to an html help file
    if nargin < 1
       docname = 'bfra_welcome';
    end
-
+   
    % Not sure if there is any benefit to 'web' vs 'showdemo' vs 'demo'
-   web(docspath(docname)) % docname should point to an html help file
+   web(baseflow.internal.docpath(docname)) 
 end

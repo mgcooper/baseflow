@@ -4,22 +4,23 @@ function proplist = completions(funcname)
 
       case 'completions'
 
-         % To generate a completions list of all functions in +bfra folder:
-         % tmp = dir(fullfile(basepath(), '+bfra', '*.m'));
+         % To generate a completions list of all functions in +baseflow folder:
+         % tmp = dir(fullfile(baseflow.internal.basepath(), '+baseflow', '*.m'));
          % proplist = strrep({tmp.name}, '.m', '');
 
          % To hard-code them using all members of the case set below:
          proplist = {'help', 'open', 'private'};
 
       case 'help'
-         tmp = dir(fullfile(basepath(), 'docs', '**/*.html'));
+         tmp = dir(fullfile(baseflow.internal.basepath(), 'docs', '**/*.html'));
          proplist = strrep({tmp.name}, '.html', '');
 
       case 'open'
-         tmp = dir(fullfile(basepath(), '+bfra', '*.m')); % restrict to +bfra files
+         % restrict to +baseflow files
+         tmp = dir(fullfile(baseflow.internal.basepath(), '+baseflow', '*.m'));
          proplist = strrep({tmp.name}, '.m', '');
 
       case 'private'
-         tmp = dir(fullfile(basepath(), '+bfra', 'private', '*.m'));
+         tmp = dir(fullfile(baseflow.internal.basepath(), '+baseflow', 'private', '*.m'));
          proplist = strrep({tmp.name}, '.m', '');
    end

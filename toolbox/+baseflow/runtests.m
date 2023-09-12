@@ -14,7 +14,8 @@ function result = runtests(varargin)
    import matlab.unittest.plugins.StopOnFailuresPlugin
    
    % Create a test suite from the tests/ folder
-   suite = TestSuite.fromFolder(fullfile(fileparts(basepath()), 'tests'));
+   suite = TestSuite.fromFolder( ...
+      fullfile(fileparts(baseflow.internal.basepath()), 'tests'));
 
    if nargin < 1
       % Run parameterized test suite

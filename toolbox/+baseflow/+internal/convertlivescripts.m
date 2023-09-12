@@ -21,8 +21,7 @@ function convertlivescripts(varargin)
          mfilename, 'OPT', 1);
    end
 
-   basepath = fileparts(fileparts(mfilename('fullpath')));
-   demopath = fullfile(basepath, 'demos');
+   demopath = baseflow.internal.demopath();
    mfilepath = fullfile(demopath, 'mfiles');
    livescripts = dir(fullfile(demopath, '*.mlx'));
 
