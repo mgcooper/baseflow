@@ -238,6 +238,7 @@
 % 
 %  +baseflow/ - The package, with all documented, user accessible functions.
 %     +deps/ - Third-party functions called by package functions.
+%     +internal/ - Internal toolbox functions.
 %     +sym/ - Symbolic functions accessible to users.
 %     private/ - Undocumented private methods not accessible to users.
 %  data/ - Example datasets.

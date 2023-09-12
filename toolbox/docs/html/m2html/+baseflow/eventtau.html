@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventtau.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; eventtau.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>eventtau
 </h1>
@@ -35,11 +35,11 @@
 
  Description
 
-     tau = bfra.eventtau(Results, Events, Fits) computes drainage timescale
+     tau = baseflow.eventtau(Results, Events, Fits) computes drainage timescale
      tau from event-scale parameters a,b, and flow Q using the structures K,
-     Events, and Fits produced with bfra.getevents and bfra.fitevents
+     Events, and Fits produced with baseflow.getevents and baseflow.fitevents
 
-     tau = bfra.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values
+     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values
      to event-scale values using an aggregation function. Options are 'min',
      'max', 'mean', 'median'.
 
@@ -80,11 +80,11 @@ This function is called by:
 0007    <span class="comment">%</span>
 0008    <span class="comment">% Description</span>
 0009    <span class="comment">%</span>
-0010    <span class="comment">%     tau = bfra.eventtau(Results, Events, Fits) computes drainage timescale</span>
+0010    <span class="comment">%     tau = baseflow.eventtau(Results, Events, Fits) computes drainage timescale</span>
 0011    <span class="comment">%     tau from event-scale parameters a,b, and flow Q using the structures K,</span>
-0012    <span class="comment">%     Events, and Fits produced with bfra.getevents and bfra.fitevents</span>
+0012    <span class="comment">%     Events, and Fits produced with baseflow.getevents and baseflow.fitevents</span>
 0013    <span class="comment">%</span>
-0014    <span class="comment">%     tau = bfra.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values</span>
+0014    <span class="comment">%     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values</span>
 0015    <span class="comment">%     to event-scale values using an aggregation function. Options are 'min',</span>
 0016    <span class="comment">%     'max', 'mean', 'median'.</span>
 0017    <span class="comment">%</span>
@@ -103,9 +103,9 @@ This function is called by:
 0030       Results, Events, Fits, varargin{:});
 0031 
 0032    <span class="comment">% MAIN FUNCTION</span>
-0033    Sfnc = bfra.getfunction(<span class="string">'SofabQ'</span>);
+0033    Sfnc = baseflow.getfunction(<span class="string">'SofabQ'</span>);
 0034    dqfnc = @(a,dqdt) -dqdt./a; <span class="comment">% must have derived this at some point</span>
-0035    taufnc = bfra.getfunction(<span class="string">'tauofabQ'</span>);
+0035    taufnc = baseflow.getfunction(<span class="string">'tauofabQ'</span>);
 0036 
 0037    <span class="keyword">if</span> isscalar(Results)
 0038       etags = Results.eventTag;
@@ -201,7 +201,7 @@ This function is called by:
 0128 
 0129    parser = inputParser;
 0130    parser.StructExpand = false;
-0131    parser.FunctionName = <span class="string">'bfra.eventtau'</span>;
+0131    parser.FunctionName = <span class="string">'baseflow.eventtau'</span>;
 0132 
 0133    parser.addRequired(<span class="string">'Results'</span>, @isstruct);
 0134    parser.addRequired(<span class="string">'Events'</span>, @isstruct);

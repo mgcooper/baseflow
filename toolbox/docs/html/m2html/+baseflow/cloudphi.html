@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; cloudphi.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; cloudphi.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>cloudphi
 </h1>
@@ -150,7 +150,7 @@ This function is called by:
 0052       theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, <span class="keyword">...</span>
 0053       A, D, L, method, varargin{:});
 0054 
-0055    <span class="comment">% the easiest way to get a1/a2 is pointcloudintercept. bfra.fitab could also</span>
+0055    <span class="comment">% the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could also</span>
 0056    <span class="comment">% be used but this function is intended to fit phi once b is known (or</span>
 0057    <span class="comment">% prescribed)</span>
 0058 
@@ -161,27 +161,27 @@ This function is called by:
 0063 
 0064    <span class="keyword">if</span> isnan(userab)
 0065       b2 = blate;
-0066       a1 = bfra.pointcloudintercept(q,dqdt,3,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
-0067       a2 = bfra.pointcloudintercept(q,dqdt,b2,method,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
+0066       a1 = baseflow.pointcloudintercept(q,dqdt,3,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
+0067       a2 = baseflow.pointcloudintercept(q,dqdt,b2,method,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
 0068    <span class="keyword">else</span>
 0069 
 0070    <span class="keyword">end</span>
 0071 
 0072    <span class="keyword">switch</span> b2
 0073       <span class="keyword">case</span> 1
-0074          phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
+0074          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
 0075             <span class="string">'soln2'</span>,<span class="string">'BS03'</span>,<span class="string">'dispfit'</span>,dispfit);
 0076       <span class="keyword">case</span> 3/2
-0077          phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
+0077          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
 0078             <span class="string">'soln2'</span>,<span class="string">'BS04'</span>,<span class="string">'dispfit'</span>,dispfit);
 0079       <span class="keyword">otherwise</span>
-0080          phi = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'RS05'</span>,  <span class="keyword">...</span>
+0080          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'RS05'</span>,  <span class="keyword">...</span>
 0081             <span class="string">'soln2'</span>,<span class="string">'RS05'</span>,<span class="string">'dispfit'</span>,dispfit);
 0082    <span class="keyword">end</span>
 0083    a = a2;
 0084 
 0085    <span class="comment">% make a dummy handle for the legend and print the value of phi</span>
-0086    bfra.pointcloudplot(q,dqdt,<span class="string">'blate'</span>,blate,<span class="string">'mask'</span>,mask,<span class="string">'reflines'</span>, <span class="keyword">...</span>
+0086    baseflow.pointcloudplot(q,dqdt,<span class="string">'blate'</span>,blate,<span class="string">'mask'</span>,mask,<span class="string">'reflines'</span>, <span class="keyword">...</span>
 0087       {<span class="string">'early'</span>,<span class="string">'userfit'</span>},<span class="string">'userab'</span>,[a2 blate],<span class="string">'reflabels'</span>,true);
 0088    hdum = plot(0,0,<span class="string">'Color'</span>,<span class="string">'none'</span>,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
 0089 
@@ -201,7 +201,7 @@ This function is called by:
 0103 
 0104    parser = inputParser;
 0105    parser.StructExpand = false;
-0106    parser.FunctionName = <span class="string">'bfra.cloudphi'</span>;
+0106    parser.FunctionName = <span class="string">'baseflow.cloudphi'</span>;
 0107 
 0108    addRequired(parser, <span class="string">'q'</span>, @isnumeric);
 0109    addRequired(parser, <span class="string">'dqdt'</span>, @isnumeric);
@@ -239,25 +239,25 @@ This function is called by:
 0141 <span class="comment">% if isflat</span>
 0142 <span class="comment">%    switch blate</span>
 0143 <span class="comment">%       case 1</span>
-0144 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
+0144 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
 0145 <span class="comment">%             'soln2','BS03','dispfit',dispfit);</span>
 0146 <span class="comment">%       case 3/2</span>
-0147 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
+0147 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
 0148 <span class="comment">%             'soln2','BS04','dispfit',dispfit);</span>
 0149 <span class="comment">%       otherwise</span>
-0150 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...</span>
+0150 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...</span>
 0151 <span class="comment">%             'soln2','RS05','dispfit',dispfit);</span>
 0152 <span class="comment">%    end</span>
 0153 <span class="comment">% else</span>
 0154 <span class="comment">%    switch blate</span>
 0155 <span class="comment">%       case 1</span>
-0156 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
+0156 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
 0157 <span class="comment">%             'soln2','BR94','dispfit',dispfit,'theta',theta);</span>
 0158 <span class="comment">%       case 3/2</span>
-0159 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
+0159 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
 0160 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
 0161 <span class="comment">%       otherwise</span>
-0162 <span class="comment">%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...</span>
+0162 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...</span>
 0163 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
 0164 <span class="comment">%    end</span>
 0165 <span class="comment">% end</span>

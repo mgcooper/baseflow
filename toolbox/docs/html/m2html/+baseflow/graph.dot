@@ -14,7 +14,6 @@ digraph m2html {
   checkevent -> prepfits;
   cloudphi -> open;
   conversions -> open;
-  dependencies -> open;
   dndtuncertainty -> open;
   eventfinder -> open;
   eventphi -> open;
@@ -36,10 +35,8 @@ digraph m2html {
   hyetograph -> open;
   loadbasins -> basinname;
   loadbasins -> open;
-  loadbasins -> version;
   loadcalm -> basinname;
   loadcalm -> open;
-  loadcalm -> version;
   loadflow -> basinname;
   loadflow -> open;
   loadghcnd -> basinname;
@@ -48,10 +45,8 @@ digraph m2html {
   loadgrace -> open;
   loadmeta -> basinname;
   loadmeta -> open;
-  loadmeta -> version;
   loadprops -> basinname;
   loadprops -> open;
-  loadprops -> version;
   mapbasins -> open;
   mapgages -> open;
   open -> open;
@@ -82,9 +77,7 @@ digraph m2html {
   characteristicTime [URL="characteristicTime.html"];
   checkevent [URL="checkevent.html"];
   cloudphi [URL="cloudphi.html"];
-  completions [URL="completions.html"];
   conversions [URL="conversions.html"];
-  dependencies [URL="dependencies.html"];
   dndtuncertainty [URL="dndtuncertainty.html"];
   eventfinder [URL="eventfinder.html"];
   eventphi [URL="eventphi.html"];
@@ -135,6 +128,5 @@ digraph m2html {
   stationlist [URL="stationlist.html"];
   stationname [URL="stationname.html"];
   trendplot [URL="trendplot.html"];
-  version [URL="version.html"];
   wrapevents [URL="wrapevents.html"];
 }

@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; open.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; open.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>open
 </h1>
@@ -49,12 +49,11 @@ This function is called by:
 <li><a href="aquiferthickness.html" class="code" title="function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)">aquiferthickness</a>	AQUIFERTHICKNESS Estimate aquifer thickness from recession event parameters.</li>
 <li><a href="aquifertrend.html" class="code" title="function [D,dDdt,dDadt,C] = aquifertrend(tau,phi,N,Qb,dQbdt)">aquifertrend</a>	AQUIFERTREND Estimate the linear trend in saturated aquifer thickness.</li>
 <li><a href="baseflowtrend.html" class="code" title="function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)">baseflowtrend</a>	BASEFLOWTREND Estimate baseflow trend from annual streamflow timeseries.</li>
-<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the bfra basin database.</li>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the baseflow basin database.</li>
 <li><a href="characteristicTime.html" class="code" title="function [tc,tfunc] = characteristicTime(a,b,Q0)">characteristicTime</a>	CHARACTERISTICTIME compute the characteristic e-folding time for baseflow</li>
 <li><a href="checkevent.html" class="code" title="function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)">checkevent</a>	CHECKEVENT plot detected recession event and fitted values</li>
 <li><a href="cloudphi.html" class="code" title="function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)">cloudphi</a>	CLOUDPHI Estimate drainable porosity phi from the point cloud.</li>
 <li><a href="conversions.html" class="code" title="function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)">conversions</a>	CONVERSIONS convert inputvalue of inputvarname to the value of outputvarname</li>
-<li><a href="dependencies.html" class="code" title="function report = dependencies(funcname,option)">dependencies</a>	DEPENDENCIES Generate function and product dependencies for function.</li>
 <li><a href="dndtuncertainty.html" class="code" title="function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits,GlobalFit, opts, varargin)">dndtuncertainty</a>	DNDTUNCERTAINTY Compute combined uncertainty of the dn/dt trend estimate.</li>
 <li><a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>	EVENTFINDER find recession events using hydrograph and rainfall timeseries.</li>
 <li><a href="eventphi.html" class="code" title="function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)">eventphi</a>	EVENTPHI estimate drainable porosity phi from individual recession events</li>
@@ -69,7 +68,7 @@ This function is called by:
 <li><a href="fitphidist.html" class="code" title="function [Fit,h] = fitphidist(phi,varargin)">fitphidist</a>	FITPHIDIST fit drainable porosity (phi) values with a Beta distribution</li>
 <li><a href="getdqdt.html" class="code" title="function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)">getdqdt</a>	GETDQDT Numerical estimation of the time derivative of discharge dQ/dt.</li>
 <li><a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>	GETEVENTS Get recession events from daily hydrograph timeseries T, Q, and R.</li>
-<li><a href="getfunction.html" class="code" title="function Fnc = getfunction(funcname)">getfunction</a>	GETFUNCTION get function handle from the bfra function library</li>
+<li><a href="getfunction.html" class="code" title="function Fnc = getfunction(funcname)">getfunction</a>	GETFUNCTION get function handle from the baseflow function library</li>
 <li><a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>	GETSTRING Get latex-formatted string for equations in the baseflow library.</li>
 <li><a href="globalfit.html" class="code" title="function GlobalFit = globalfit(Results,Events,Fits,varargin)">globalfit</a>	GLOBALFIT Fit global parameters using all event-scale recession fits.</li>
 <li><a href="gpfitb.html" class="code" title="function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)">gpfitb</a>	GPFITB Fit Generalized Pareto Distribution to recession parameter tau.</li>
@@ -106,14 +105,14 @@ This function is called by:
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function open(varargin)</a>
 0002    <span class="comment">%OPEN Open package namespace function file in the MATLAB Editor.</span>
 0003    narginchk(1,1)
-0004    funcname = validatestring(varargin{1}, bfra.completions(<span class="string">'open'</span>));
-0005    <a href="open.html" class="code" title="function open(varargin)">open</a>([<span class="string">'bfra.'</span> funcname])
+0004    funcname = validatestring(varargin{1}, baseflow.internal.completions(<span class="string">'open'</span>));
+0005    <a href="open.html" class="code" title="function open(varargin)">open</a>([<span class="string">'baseflow.'</span> funcname])
 0006    
 0007    <span class="comment">% note, this would also work to open help pages, if it is desirable to</span>
-0008    <span class="comment">% collapse the two functions into one. But see bfra.completions for where I</span>
-0009    <span class="comment">% restrict the available options for this function to top-level +bfra/</span>
+0008    <span class="comment">% collapse the two functions into one. But see baseflow.completions for where I</span>
+0009    <span class="comment">% restrict the available options for this function to top-level +baseflow/</span>
 0010    <span class="comment">% function files</span>
-0011    <span class="comment">% bfra.help(funcname)</span>
+0011    <span class="comment">% baseflow.help(funcname)</span>
 0012 <span class="keyword">end</span></pre></div>
 </body>
 </html>

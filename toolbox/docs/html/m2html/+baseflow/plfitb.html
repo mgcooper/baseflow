@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; plfitb.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; plfitb.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>plfitb
 </h1>
@@ -131,19 +131,19 @@ This function is called by:
 0045    <span class="keyword">if</span> isnan(xmin)
 0046       <span class="keyword">switch</span> method
 0047          <span class="keyword">case</span> <span class="string">'clauset'</span>
-0048             [alpha,xmin,L,D] = bfra.deps.plfit(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
+0048             [alpha,xmin,L,D] = baseflow.deps.plfit(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
 0049             <span class="keyword">if</span> bootfit == true
 0050                BootFit = <a href="#_sub1" class="code" title="subfunction Fit = plbootfit(x,range,limit,nreps)">plbootfit</a>(x,range,limit,nreps);
 0051             <span class="keyword">end</span>
 0052             <span class="comment">% Undocumented feature, requires r_plfit function, not in toolbox.</span>
 0053          <span class="keyword">case</span> <span class="string">'hanel'</span>
-0054             [~,xmin] = bfra.deps.plfit(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
+0054             [~,xmin] = baseflow.deps.plfit(x,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
 0055             [alpha,xmin,L,D] = r_plfit(x,<span class="string">'rangemin'</span>,xmin,<span class="string">'alpha_min'</span>,  <span class="keyword">...</span>
 0056                range(1),<span class="string">'alpha_max'</span>,range(end));
 0057             <span class="comment">% if I had some max value to consider, I could pass 'rangemax'</span>
 0058       <span class="keyword">end</span>
 0059    <span class="keyword">else</span>
-0060       [alpha,~,L,D] = bfra.deps.plfit(x,<span class="string">'xmin'</span>,xmin,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
+0060       [alpha,~,L,D] = baseflow.deps.plfit(x,<span class="string">'xmin'</span>,xmin,<span class="string">'range'</span>,range,<span class="string">'limit'</span>,limit);
 0061    <span class="keyword">end</span>
 0062 
 0063    Fit.x       = x0; <span class="comment">% keep the input data</span>
@@ -188,132 +188,128 @@ This function is called by:
 0102       xmin = Fit.tau0;
 0103       aci = [Fit.alpha_H Fit.alpha_L];
 0104       xci = [Fit.tau0_L Fit.tau0_H];
-0105       <span class="comment">% for publishing:</span>
-0106       <span class="comment">% figure('Position',[0 0 300 200]); ax = gca;</span>
-0107       figure; ax = gca;
-0108       bfra.plplotb(x,xmin,alpha,<span class="string">'trimline'</span>,true,<span class="string">'alphaci'</span>,aci,<span class="string">'xminci'</span>,xci,<span class="string">'ax'</span>,ax);
-0109       <span class="comment">% snapnow;</span>
-0110    <span class="keyword">end</span>
-0111 
-0112    <span class="keyword">switch</span> nargout
-0113       <span class="keyword">case</span> 1
-0114          varargout{1} = Fit;
-0115       <span class="keyword">case</span> 2
-0116          varargout{1} = 1+1/alpha;
-0117          varargout{2} = alpha;
-0118       <span class="keyword">case</span> 3
-0119          varargout{1} = b;
-0120          varargout{2} = 1+1/alpha;
-0121          varargout{3} = xmin;
-0122    <span class="keyword">end</span>
-0123 
-0124    <span class="comment">% NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should</span>
-0125    <span class="comment">% be about 0.01-0.02. This is indeed the case for the data I have tested</span>
-0126    <span class="comment">% from the Kuparuk (the error was about 0.03, but alpha was about 3.12). See</span>
-0127    <span class="comment">% Figure 10 in Clauset et al. 2009.</span>
-0128 <span class="keyword">end</span>
-0129 
-0130 <span class="comment">%% LOCAL FUNCTIONS</span>
-0131 
-0132 <span class="comment">% bootstrap confidence intervals</span>
-0133 <a name="_sub1" href="#_subfunctions" class="code">function Fit = plbootfit(x,range,limit,nreps)</a>
+0105       baseflow.plplotb(x,xmin,alpha,<span class="string">'trimline'</span>,true,<span class="string">'alphaci'</span>,aci,<span class="string">'xminci'</span>,xci);
+0106    <span class="keyword">end</span>
+0107 
+0108    <span class="keyword">switch</span> nargout
+0109       <span class="keyword">case</span> 1
+0110          varargout{1} = Fit;
+0111       <span class="keyword">case</span> 2
+0112          varargout{1} = 1+1/alpha;
+0113          varargout{2} = alpha;
+0114       <span class="keyword">case</span> 3
+0115          varargout{1} = b;
+0116          varargout{2} = 1+1/alpha;
+0117          varargout{3} = xmin;
+0118    <span class="keyword">end</span>
+0119 
+0120    <span class="comment">% NOTE: for alpha ~= 3, and 1000 reps, abs(BootFit.alpha-Fit.alpha) should</span>
+0121    <span class="comment">% be about 0.01-0.02. This is indeed the case for the data I have tested</span>
+0122    <span class="comment">% from the Kuparuk (the error was about 0.03, but alpha was about 3.12). See</span>
+0123    <span class="comment">% Figure 10 in Clauset et al. 2009.</span>
+0124 <span class="keyword">end</span>
+0125 
+0126 <span class="comment">%% LOCAL FUNCTIONS</span>
+0127 
+0128 <span class="comment">% bootstrap confidence intervals</span>
+0129 <a name="_sub1" href="#_subfunctions" class="code">function Fit = plbootfit(x,range,limit,nreps)</a>
+0130 
+0131    <span class="comment">%[alpha,xmin,L,D] = baseflow.deps.plfit(x,'range',range,'limit',limit);</span>
+0132    [~,~,~,repsmat] = baseflow.deps.plvar( <span class="keyword">...</span>
+0133       x, <span class="string">'range'</span>, range, <span class="string">'limit'</span>, limit, <span class="string">'reps'</span>, nreps, <span class="string">'silent'</span>);
 0134 
-0135    <span class="comment">%[alpha,xmin,L,D] = bfra.deps.plfit(x,'range',range,'limit',limit);</span>
-0136    [~,~,~,repsmat] = bfra.deps.plvar( <span class="keyword">...</span>
-0137       x, <span class="string">'range'</span>, range, <span class="string">'limit'</span>, limit, <span class="string">'reps'</span>, nreps, <span class="string">'silent'</span>);
-0138 
-0139    vars        = {<span class="string">'tau0'</span>,<span class="string">'alpha'</span>,<span class="string">'b'</span>,<span class="string">'tau'</span>,<span class="string">'ntail'</span>};
-0140    reps.ntail  = repsmat(:,1);
-0141    reps.tau0   = repsmat(:,2);
-0142    reps.alpha  = repsmat(:,3);
-0143    reps.b      = bfra.conversions(reps.alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>);
-0144    reps.tau    = reps.tau0.*(2-reps.b)./(3-2.*reps.b);
-0145 
-0146    <span class="keyword">for</span> n = 1:numel(vars)
-0147       var = vars{n};
-0148       Fit.(var) = mean(reps.(var));
-0149       Fit.([var <span class="string">'_sig'</span>]) = std(reps.(var));
-0150       Fit.([var <span class="string">'_L'</span>]) = mean(reps.(var)) - 1.96*std(reps.(var));
-0151       Fit.([var <span class="string">'_H'</span>]) = mean(reps.(var)) + 1.96*std(reps.(var));
-0152    <span class="keyword">end</span>
-0153 
-0154    Fit.reps = reps;
-0155    <span class="comment">% replaced this with ntail</span>
-0156    <span class="comment">% Fit.numtau  = numel(x(x&gt;Fit.tau0_avg));</span>
-0157 <span class="keyword">end</span>
-0158 
-0159 <span class="comment">%% INPUT PARSER</span>
-0160 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, range, limit, method, bootfit, nreps, plotfit] = </a><span class="keyword">...</span>
-0161       parseinputs(x, varargin)
-0162    parser = inputParser;
-0163    parser.FunctionName = <span class="string">'bfra.plfitb'</span>;
-0164 
-0165    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
-0166    parser.addParameter(<span class="string">'xmin'</span>, nan, @isnumeric);
-0167    parser.addParameter(<span class="string">'range'</span>, 1.01:0.01:25.01, @isnumeric);
-0168    parser.addParameter(<span class="string">'limit'</span>, [], @isnumeric);
-0169    parser.addParameter(<span class="string">'method'</span>, <span class="string">'clauset'</span>, @ischar);
-0170    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogical);
-0171    parser.addParameter(<span class="string">'bootreps'</span>, 1000, @isnumeric);
-0172    parser.addParameter(<span class="string">'plotfit'</span>, false, @islogical);
-0173 
-0174    parser.parse(x, varargin{:});
-0175 
-0176    xmin    = parser.Results.xmin;
-0177    range   = parser.Results.range;
-0178    limit   = parser.Results.limit;
-0179    method  = parser.Results.method;
-0180    bootfit = parser.Results.bootfit;
-0181    nreps   = parser.Results.bootreps;
-0182    plotfit = parser.Results.plotfit;
-0183 <span class="keyword">end</span>
-0184 
-0185 <span class="comment">%% extra</span>
-0186 <span class="comment">% As a rough check on the sampling distribution of the parameter</span>
-0187 <span class="comment">% estimators, we can look at histograms of the bootstrap replicates.</span>
-0188 <span class="comment">% figure; subplot(1,3,1);</span>
-0189 <span class="comment">% histogram(reps.b);</span>
-0190 <span class="comment">% title('Bootstrap estimates of $b$');</span>
-0191 <span class="comment">% subplot(1,3,2);</span>
-0192 <span class="comment">% histogram(reps.tau0);</span>
-0193 <span class="comment">% title('Bootstrap estimates of $\tau_0$');</span>
-0194 <span class="comment">% subplot(1,3,3);</span>
-0195 <span class="comment">% histogram(reps.alpha);</span>
-0196 <span class="comment">% title('Bootstrap estimates of $\alpha$');</span>
-0197 
-0198 <span class="comment">%    % it is incorrect to apply the standard formula so don't use this</span>
-0199 <span class="comment">%    for n = 1:numel(vars)</span>
-0200 <span class="comment">%       var = vars{n};</span>
-0201 <span class="comment">%       [SE,CI,~,mu,sig] = stderror(reps.(var));</span>
-0202 <span class="comment">%       Fit.([var '_avg']) = mu;</span>
-0203 <span class="comment">%       Fit.([var '_L']) = CI(1);</span>
-0204 <span class="comment">%       Fit.([var '_H']) = CI(2);</span>
-0205 <span class="comment">%       Fit.([var '_sig']) = sig;</span>
-0206 <span class="comment">%       Fit.([var '_SE']) = SE;</span>
-0207 <span class="comment">%    end</span>
-0208 
-0209 
-0210 <span class="comment">% % this might still be a good approach, just need to figure out how to get the</span>
-0211 <span class="comment">% stdv of xmin</span>
-0212 <span class="comment">% function Fit = bootstrap_alpha(x,range,limit)</span>
-0213 <span class="comment">%</span>
-0214 <span class="comment">%    % first get xmin, bootstrap won't change this</span>
-0215 <span class="comment">%    [~,xmin] = bfra.deps.plfit(x,'range',range,'limit',limit);</span>
-0216 <span class="comment">%</span>
-0217 <span class="comment">%    % now bootstrap alpha</span>
-0218 <span class="comment">%    reps  = bootstrp(1000,@(x,xmin)plfit(x,'xmin',xmin),x,xmin);</span>
-0219 <span class="comment">%</span>
-0220 <span class="comment">%    Fit.alpha = mean(reps);</span>
-0221 <span class="comment">%    Fit.tau0 = xmin;</span>
-0222 <span class="comment">%    Fit.alpha_sig = std(reps);</span>
-0223 <span class="comment">%    %Fit.tau0_sig % this is why we use plbootfit b/c it returns xmin_sig</span>
-0224 <span class="comment">%    Fit.reps = reps;</span>
-0225 <span class="comment">%</span>
-0226 <span class="comment">%    % see the appendix</span>
-0227 <span class="comment">%    % N = numel(reps)</span>
-0228 <span class="comment">%    % alphatrue = (1 + alpha*(N-1))/N</span>
-0229 <span class="comment">%    % alphasig = N*(alphatrue-1)/((N-1)*sqrt(N-2))</span>
-0230 <span class="comment">%    % N*(alpha-1)/((N-1)*sqrt(N-2))</span>
-0231 <span class="comment">% end</span></pre></div>
+0135    vars        = {<span class="string">'tau0'</span>,<span class="string">'alpha'</span>,<span class="string">'b'</span>,<span class="string">'tau'</span>,<span class="string">'ntail'</span>};
+0136    reps.ntail  = repsmat(:,1);
+0137    reps.tau0   = repsmat(:,2);
+0138    reps.alpha  = repsmat(:,3);
+0139    reps.b      = baseflow.conversions(reps.alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0140    reps.tau    = reps.tau0.*(2-reps.b)./(3-2.*reps.b);
+0141 
+0142    <span class="keyword">for</span> n = 1:numel(vars)
+0143       var = vars{n};
+0144       Fit.(var) = mean(reps.(var));
+0145       Fit.([var <span class="string">'_sig'</span>]) = std(reps.(var));
+0146       Fit.([var <span class="string">'_L'</span>]) = mean(reps.(var)) - 1.96*std(reps.(var));
+0147       Fit.([var <span class="string">'_H'</span>]) = mean(reps.(var)) + 1.96*std(reps.(var));
+0148    <span class="keyword">end</span>
+0149 
+0150    Fit.reps = reps;
+0151    <span class="comment">% replaced this with ntail</span>
+0152    <span class="comment">% Fit.numtau  = numel(x(x&gt;Fit.tau0_avg));</span>
+0153 <span class="keyword">end</span>
+0154 
+0155 <span class="comment">%% INPUT PARSER</span>
+0156 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, range, limit, method, bootfit, nreps, plotfit] = </a><span class="keyword">...</span>
+0157       parseinputs(x, varargin)
+0158    parser = inputParser;
+0159    parser.FunctionName = <span class="string">'baseflow.plfitb'</span>;
+0160 
+0161    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
+0162    parser.addParameter(<span class="string">'xmin'</span>, nan, @isnumeric);
+0163    parser.addParameter(<span class="string">'range'</span>, 1.01:0.01:25.01, @isnumeric);
+0164    parser.addParameter(<span class="string">'limit'</span>, [], @isnumeric);
+0165    parser.addParameter(<span class="string">'method'</span>, <span class="string">'clauset'</span>, @ischar);
+0166    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogical);
+0167    parser.addParameter(<span class="string">'bootreps'</span>, 1000, @isnumeric);
+0168    parser.addParameter(<span class="string">'plotfit'</span>, false, @islogical);
+0169 
+0170    parser.parse(x, varargin{:});
+0171 
+0172    xmin    = parser.Results.xmin;
+0173    range   = parser.Results.range;
+0174    limit   = parser.Results.limit;
+0175    method  = parser.Results.method;
+0176    bootfit = parser.Results.bootfit;
+0177    nreps   = parser.Results.bootreps;
+0178    plotfit = parser.Results.plotfit;
+0179 <span class="keyword">end</span>
+0180 
+0181 <span class="comment">%% extra</span>
+0182 <span class="comment">% As a rough check on the sampling distribution of the parameter</span>
+0183 <span class="comment">% estimators, we can look at histograms of the bootstrap replicates.</span>
+0184 <span class="comment">% figure; subplot(1,3,1);</span>
+0185 <span class="comment">% histogram(reps.b);</span>
+0186 <span class="comment">% title('Bootstrap estimates of $b$');</span>
+0187 <span class="comment">% subplot(1,3,2);</span>
+0188 <span class="comment">% histogram(reps.tau0);</span>
+0189 <span class="comment">% title('Bootstrap estimates of $\tau_0$');</span>
+0190 <span class="comment">% subplot(1,3,3);</span>
+0191 <span class="comment">% histogram(reps.alpha);</span>
+0192 <span class="comment">% title('Bootstrap estimates of $\alpha$');</span>
+0193 
+0194 <span class="comment">%    % it is incorrect to apply the standard formula so don't use this</span>
+0195 <span class="comment">%    for n = 1:numel(vars)</span>
+0196 <span class="comment">%       var = vars{n};</span>
+0197 <span class="comment">%       [SE,CI,~,mu,sig] = stderror(reps.(var));</span>
+0198 <span class="comment">%       Fit.([var '_avg']) = mu;</span>
+0199 <span class="comment">%       Fit.([var '_L']) = CI(1);</span>
+0200 <span class="comment">%       Fit.([var '_H']) = CI(2);</span>
+0201 <span class="comment">%       Fit.([var '_sig']) = sig;</span>
+0202 <span class="comment">%       Fit.([var '_SE']) = SE;</span>
+0203 <span class="comment">%    end</span>
+0204 
+0205 
+0206 <span class="comment">% % this might still be a good approach, just need to figure out how to get the</span>
+0207 <span class="comment">% stdv of xmin</span>
+0208 <span class="comment">% function Fit = bootstrap_alpha(x,range,limit)</span>
+0209 <span class="comment">%</span>
+0210 <span class="comment">%    % first get xmin, bootstrap won't change this</span>
+0211 <span class="comment">%    [~,xmin] = baseflow.deps.plfit(x,'range',range,'limit',limit);</span>
+0212 <span class="comment">%</span>
+0213 <span class="comment">%    % now bootstrap alpha</span>
+0214 <span class="comment">%    reps  = bootstrp(1000,@(x,xmin)plfit(x,'xmin',xmin),x,xmin);</span>
+0215 <span class="comment">%</span>
+0216 <span class="comment">%    Fit.alpha = mean(reps);</span>
+0217 <span class="comment">%    Fit.tau0 = xmin;</span>
+0218 <span class="comment">%    Fit.alpha_sig = std(reps);</span>
+0219 <span class="comment">%    %Fit.tau0_sig % this is why we use plbootfit b/c it returns xmin_sig</span>
+0220 <span class="comment">%    Fit.reps = reps;</span>
+0221 <span class="comment">%</span>
+0222 <span class="comment">%    % see the appendix</span>
+0223 <span class="comment">%    % N = numel(reps)</span>
+0224 <span class="comment">%    % alphatrue = (1 + alpha*(N-1))/N</span>
+0225 <span class="comment">%    % alphasig = N*(alphatrue-1)/((N-1)*sqrt(N-2))</span>
+0226 <span class="comment">%    % N*(alpha-1)/((N-1)*sqrt(N-2))</span>
+0227 <span class="comment">% end</span></pre></div>
 </body>
 </html>

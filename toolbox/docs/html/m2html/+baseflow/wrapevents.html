@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; wrapevents.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; wrapevents.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>wrapevents
 </h1>
@@ -29,7 +29,7 @@
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">WRAPEVENTS Detect recession events on an annual calendar basis.
 
- This function is a wrapper around bfra.getevents to detect recession events
+ This function is a wrapper around baseflow.getevents to detect recession events
  on an annual basis, passing one year of a multi-year timeseries of T, Q,
  and R at a time to eventfinder, rather than passing the entire timeseries
  to eventfinder. The main difference is that when one year of data is used
@@ -94,7 +94,7 @@ This function is called by:
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Events, Info] = wrapevents(T,Q,R,varargin)</a>
 0002    <span class="comment">%WRAPEVENTS Detect recession events on an annual calendar basis.</span>
 0003    <span class="comment">%</span>
-0004    <span class="comment">% This function is a wrapper around bfra.getevents to detect recession events</span>
+0004    <span class="comment">% This function is a wrapper around baseflow.getevents to detect recession events</span>
 0005    <span class="comment">% on an annual basis, passing one year of a multi-year timeseries of T, Q,</span>
 0006    <span class="comment">% and R at a time to eventfinder, rather than passing the entire timeseries</span>
 0007    <span class="comment">% to eventfinder. The main difference is that when one year of data is used</span>
@@ -178,7 +178,7 @@ This function is called by:
 0085       thisYearRain = Rmat(:,thisYear);
 0086 
 0087       <span class="comment">% Detect events for this year</span>
-0088       [thisYearEvents,thisYearInfo] = bfra.getevents( <span class="keyword">...</span>
+0088       [thisYearEvents,thisYearInfo] = baseflow.getevents( <span class="keyword">...</span>
 0089          thisYearTime, thisYearFlow, thisYearRain, opts);
 0090 
 0091       <span class="comment">% For each event, compute q, dqdt and fit a,b</span>
@@ -207,7 +207,7 @@ This function is called by:
 0114 
 0115       <span class="comment">% pause to look at the fits</span>
 0116       <span class="keyword">if</span> opts.plotevents == true
-0117          hEvents = bfra.eventplotter(thisYearTime, thisYearFlow, <span class="keyword">...</span>
+0117          hEvents = baseflow.eventplotter(thisYearTime, thisYearFlow, <span class="keyword">...</span>
 0118             thisYearRain, thisYearInfo, <span class="string">'plotevents'</span>, true, <span class="keyword">...</span>
 0119             <span class="string">'eventTags'</span>, 1);
 0120          
@@ -265,7 +265,7 @@ This function is called by:
 0172 <a name="_sub3" href="#_subfunctions" class="code">function [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)</a>
 0173 
 0174    parser = inputParser;
-0175    parser.FunctionName = [<span class="string">'bfra.'</span> mfilename];
+0175    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
 0176    parser.StructExpand = true;
 0177 
 0178    parser.addRequired(<span class="string">'T'</span>, @(x) isnumeric(x) | isdatetime(x));

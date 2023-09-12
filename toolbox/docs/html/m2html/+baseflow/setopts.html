@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; setopts.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; setopts.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>setopts
 </h1>
@@ -180,10 +180,10 @@ This function is called by:
 0066    <span class="comment">% if called with no input, open this file</span>
 0067    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0068 
-0069    <span class="comment">%% set default bfra settings</span>
+0069    <span class="comment">%% set default baseflow settings</span>
 0070 
 0071    p = inputParser;
-0072    p.FunctionName = <span class="string">'bfra.setopts'</span>;
+0072    p.FunctionName = <span class="string">'baseflow.setopts'</span>;
 0073 
 0074    p.addRequired(<span class="string">'funcname'</span>, @ischar);
 0075    parse(p,funcname);
@@ -219,7 +219,7 @@ This function is called by:
 0105          addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @isnumericscalar  );
 0106          addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @isnumericscalar  );
 0107 
-0108          <span class="comment">% global fit - input to bfra.globalfit</span>
+0108          <span class="comment">% global fit - input to baseflow.globalfit</span>
 0109       <span class="keyword">case</span> <span class="string">'globalfit'</span>
 0110 
 0111          addParameter(p,   <span class="string">'drainagearea'</span>,      nan,        @isnumericscalar );

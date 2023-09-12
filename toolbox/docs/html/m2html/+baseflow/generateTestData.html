@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; generateTestData.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; generateTestData.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>generateTestData
 </h1>
@@ -35,11 +35,11 @@
 
  Description
 
-     [t, q, dqdt] = bfra.generateTestData(a, b, Q0, t) generates timeseries
+     [t, q, dqdt] = baseflow.generateTestData(a, b, Q0, t) generates timeseries
      of discharge Q, first derivative of discharge dQdt, and time t for
      parameter values a, b, and initial discharge Q0.
 
- See also: bfra.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>
+ See also: baseflow.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -72,11 +72,11 @@ This function is called by:
 0007    <span class="comment">%</span>
 0008    <span class="comment">% Description</span>
 0009    <span class="comment">%</span>
-0010    <span class="comment">%     [t, q, dqdt] = bfra.generateTestData(a, b, Q0, t) generates timeseries</span>
+0010    <span class="comment">%     [t, q, dqdt] = baseflow.generateTestData(a, b, Q0, t) generates timeseries</span>
 0011    <span class="comment">%     of discharge Q, first derivative of discharge dQdt, and time t for</span>
 0012    <span class="comment">%     parameter values a, b, and initial discharge Q0.</span>
 0013    <span class="comment">%</span>
-0014    <span class="comment">% See also: bfra.Qnonlin</span>
+0014    <span class="comment">% See also: baseflow.Qnonlin</span>
 0015    <span class="comment">%</span>
 0016    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0017 
@@ -111,11 +111,11 @@ This function is called by:
 0046          <span class="comment">%q = (q(1:end)+q(2:end-1))./2;</span>
 0047          <span class="comment">%dqdt = diff(q);</span>
 0048       <span class="keyword">otherwise</span>
-0049          [q,dqdt,t] = bfra.Qnonlin(a,b,q0,t,false); <span class="comment">% false = don't make fig</span>
+0049          [q,dqdt,t] = baseflow.Qnonlin(a,b,q0,t,false); <span class="comment">% false = don't make fig</span>
 0050    <span class="keyword">end</span>
 0051 <span class="keyword">end</span>
 0052 
-0053 <span class="comment">% % this was in bfra.test suite ParameterizedTestBfra. I am not certain why the</span>
+0053 <span class="comment">% % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why the</span>
 0054 <span class="comment">% data falls off, could be the noise I add, or could be the lack of a negative</span>
 0055 <span class="comment">% sign on in genCurveData</span>
 0056 <span class="comment">% for a linear model (exponential), Q = Q0*exp(-at), meaning</span>
@@ -133,7 +133,7 @@ This function is called by:
 0068 <span class="comment">% q = data.y;</span>
 0069 <span class="comment">% dqdt = -data.x;</span>
 0070 <span class="comment">% figure; loglog(-dqdt,q,'o')</span>
-0071 <span class="comment">% [x,y,logx,logy] = bfra.prepfits(q,dqdt);</span>
-0072 <span class="comment">% Fit = bfra.fitab(logx,logy,'nls');</span></pre></div>
+0071 <span class="comment">% [x,y,logx,logy] = baseflow.prepfits(q,dqdt);</span>
+0072 <span class="comment">% Fit = baseflow.fitab(logx,logy,'nls');</span></pre></div>
 </body>
 </html>

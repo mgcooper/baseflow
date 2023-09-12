@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; getstring.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; getstring.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>getstring
 </h1>
@@ -79,7 +79,7 @@
      str = getstring('Q', 'units', true)
      % Returns: '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'
 
- See also bfra.<a href="aQbString.html" class="code" title="function [aQbstr,Qtstr] = aQbString(varargin)">aQbString</a>
+ See also baseflow.<a href="aQbString.html" class="code" title="function [aQbstr,Qtstr] = aQbString(varargin)">aQbString</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -162,7 +162,7 @@ This function is called by:
 0051    <span class="comment">%     str = getstring('Q', 'units', true)</span>
 0052    <span class="comment">%     % Returns: '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'</span>
 0053    <span class="comment">%</span>
-0054    <span class="comment">% See also bfra.aQbString</span>
+0054    <span class="comment">% See also baseflow.aQbString</span>
 0055    <span class="comment">%</span>
 0056    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0057 
@@ -274,7 +274,7 @@ This function is called by:
 0163 <span class="comment">%% Input Parser</span>
 0164 <a name="_sub3" href="#_subfunctions" class="code">function [request, units, interpreter] = parseinputs(request, varargin)</a>
 0165    parser = inputParser;
-0166    parser.FunctionName = <span class="string">'bfra.getstring'</span>;
+0166    parser.FunctionName = <span class="string">'baseflow.getstring'</span>;
 0167    parser.CaseSensitive = false;
 0168    parser.addRequired(<span class="string">'request'</span>, @ischar);
 0169    parser.addParameter(<span class="string">'units'</span>, false, @islogical);

@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventfinder.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; eventfinder.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>eventfinder
 </h1>
@@ -184,7 +184,7 @@ This function is called by:
 0083    <span class="comment">% Description</span>
 0084    <span class="comment">%</span>
 0085    <span class="comment">%     Split recession events detected by eventfinder into individual segments</span>
-0086    <span class="comment">%     ready to fit with bfra.fitab or bfra.fitevents. For example, if an</span>
+0086    <span class="comment">%     ready to fit with baseflow.fitab or baseflow.fitevents. For example, if an</span>
 0087    <span class="comment">%     event is interrupted by rainfall or if rainfall is detected from convex</span>
 0088    <span class="comment">%     dq/dt, the event can be split into separate segments thought to</span>
 0089    <span class="comment">%     represent uninterrupted baseflow. Follows recommendations in Dralle et</span>
@@ -347,12 +347,12 @@ This function is called by:
 0246 
 0247 <a name="_sub2" href="#_subfunctions" class="code">function tf = islocalmax(X)</a>
 0248    tf = false(size(X));
-0249    tf(bfra.deps.peakfinder(X,0,0,1,false)) = true;
+0249    tf(baseflow.deps.peakfinder(X,0,0,1,false)) = true;
 0250 <span class="keyword">end</span>
 0251 
 0252 <a name="_sub3" href="#_subfunctions" class="code">function tf = islocalmin(X)</a>
 0253    tf = false(size(X));
-0254    tf(bfra.deps.peakfinder(X,0,0,-1,false)) = true;
+0254    tf(baseflow.deps.peakfinder(X,0,0,-1,false)) = true;
 0255 <span class="keyword">end</span>
 0256 
 0257 <span class="comment">%% INPUT PARSER</span>
@@ -388,7 +388,7 @@ This function is called by:
 0287       r = zeros(size(t));
 0288    <span class="keyword">end</span>
 0289 
-0290    <span class="comment">% Convert to columns, in case this is not called from bfra.getevents</span>
+0290    <span class="comment">% Convert to columns, in case this is not called from baseflow.getevents</span>
 0291    [t, q, r] = deal(t(:), q(:), r(:));
 0292 <span class="keyword">end</span></pre></div>
 </body>

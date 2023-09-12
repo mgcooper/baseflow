@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; getevents.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; getevents.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>getevents
 </h1>
@@ -57,7 +57,7 @@
      into the Events structure.
 
      EVENTS = GETEVENTS(_, OPTS) Uses user-defined options in struct OPTS.
-     Use bfra.setopts to set default OPTS struct and custom optional values.
+     Use baseflow.setopts to set default OPTS struct and custom optional values.
 
      [EVENTS, INFO] = GETEVENTS(_) Also returns struct INFO which contains
      the indices of the identified local maxima, minima, convex points,
@@ -156,7 +156,7 @@ This function is called by:
 0029    <span class="comment">%     into the Events structure.</span>
 0030    <span class="comment">%</span>
 0031    <span class="comment">%     EVENTS = GETEVENTS(_, OPTS) Uses user-defined options in struct OPTS.</span>
-0032    <span class="comment">%     Use bfra.setopts to set default OPTS struct and custom optional values.</span>
+0032    <span class="comment">%     Use baseflow.setopts to set default OPTS struct and custom optional values.</span>
 0033    <span class="comment">%</span>
 0034    <span class="comment">%     [EVENTS, INFO] = GETEVENTS(_) Also returns struct INFO which contains</span>
 0035    <span class="comment">%     the indices of the identified local maxima, minima, convex points,</span>
@@ -233,7 +233,7 @@ This function is called by:
 0106       [t,q,r,Info] = setEventEmpty();
 0107    <span class="keyword">else</span>
 0108       <span class="comment">% call eventfinder either way, then update if pickfits == true</span>
-0109       [t,q,r,Info] = bfra.eventfinder(T,Q,R, <span class="keyword">...</span>
+0109       [t,q,r,Info] = baseflow.eventfinder(T,Q,R, <span class="keyword">...</span>
 0110          <span class="string">'nmin'</span>,        nmin,          <span class="keyword">...</span>
 0111          <span class="string">'fmax'</span>,        fmax,          <span class="keyword">...</span>
 0112          <span class="string">'rmax'</span>,        rmax,          <span class="keyword">...</span>
@@ -248,9 +248,9 @@ This function is called by:
 0121       <span class="comment">% within an eventfinder event, but only Info.istart is used in the</span>
 0122       <span class="comment">% main algorithm so it is sufficient at this point</span>
 0123       <span class="keyword">if</span> pickevents == true
-0124          [t,q,r,Info] = bfra.eventpicker(T,Q,R,nmin,Info);
+0124          [t,q,r,Info] = baseflow.eventpicker(T,Q,R,nmin,Info);
 0125       <span class="keyword">elseif</span> plotevents == true
-0126          <span class="comment">% Info.hEvents = bfra.eventplotter(T,Q,R,Info,'plotevents',plotevents);</span>
+0126          <span class="comment">% Info.hEvents = baseflow.eventplotter(T,Q,R,Info,'plotevents',plotevents);</span>
 0127       <span class="keyword">end</span>
 0128    <span class="keyword">end</span>
 0129 
@@ -305,7 +305,7 @@ This function is called by:
 0178       parser.addParameter(<span class="string">'plotevents'</span>, false, @islogicalscalar);
 0179       parser.addParameter(<span class="string">'asannual'</span>, false, @islogicalscalar);
 0180    <span class="keyword">end</span>
-0181    parser.FunctionName = [<span class="string">'bfra.'</span> mfilename];
+0181    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
 0182    parser.parse(T, Q, R, varargin{:});
 0183 
 0184    qmin = parser.Results.qmin;

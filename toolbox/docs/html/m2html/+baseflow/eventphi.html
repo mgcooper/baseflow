@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventphi.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; eventphi.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>eventphi
 </h1>
@@ -46,7 +46,7 @@
  Required inputs
 
      Results  Table of a, b, tau, values for each event (output of fitevents)
-     Fits     Struct containing the fitted q/dqdt timeseries (output of bfra.dqdt)
+     Fits     Struct containing the fitted q/dqdt timeseries (output of baseflow.dqdt)
      A        Numeric scalar, basin area contributing to baseflow (L^2)
      D        Numeric scalar, saturated aquifer thickness (L)
      L        Numeric scalar, active stream length (L)
@@ -112,7 +112,7 @@ This function is called by:
 0018    <span class="comment">% Required inputs</span>
 0019    <span class="comment">%</span>
 0020    <span class="comment">%     Results  Table of a, b, tau, values for each event (output of fitevents)</span>
-0021    <span class="comment">%     Fits     Struct containing the fitted q/dqdt timeseries (output of bfra.dqdt)</span>
+0021    <span class="comment">%     Fits     Struct containing the fitted q/dqdt timeseries (output of baseflow.dqdt)</span>
 0022    <span class="comment">%     A        Numeric scalar, basin area contributing to baseflow (L^2)</span>
 0023    <span class="comment">%     D        Numeric scalar, saturated aquifer thickness (L)</span>
 0024    <span class="comment">%     L        Numeric scalar, active stream length (L)</span>
@@ -165,29 +165,29 @@ This function is called by:
 0071       <span class="keyword">end</span>
 0072 
 0073       <span class="comment">% Put a line of slope 3 and 1/1.5/bhat through the point cloud</span>
-0074       a1 = bfra.pointcloudintercept(thisq, thisdqdt, b1, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0074       a1 = baseflow.pointcloudintercept(thisq, thisdqdt, b1, <span class="string">'envelope'</span>, <span class="keyword">...</span>
 0075          <span class="string">'refqtls'</span>, earlyqtls);
-0076       a2 = bfra.pointcloudintercept(thisq, thisdqdt, b2, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0076       a2 = baseflow.pointcloudintercept(thisq, thisdqdt, b2, <span class="string">'envelope'</span>, <span class="keyword">...</span>
 0077          <span class="string">'refqtls'</span>, lateqtls);
 0078 
 0079       <span class="comment">% Choose appropriate solutions</span>
 0080       <span class="keyword">if</span> isempty(soln1) &amp;&amp; isempty(soln2)
 0081 
 0082          <span class="keyword">if</span> b2 == 1
-0083             phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
+0083             phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
 0084                <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS03'</span>);
 0085          <span class="keyword">elseif</span> b2 == 3/2
-0086             phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
+0086             phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
 0087                <span class="string">'soln1'</span>,<span class="string">'PK62'</span>,<span class="string">'soln2'</span>,<span class="string">'BS04'</span>);
 0088          <span class="keyword">elseif</span> b2&gt;1 &amp;&amp; b2&lt;2
-0089             phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
+0089             phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true, <span class="keyword">...</span>
 0090                <span class="string">'soln1'</span>,<span class="string">'RS05'</span>,<span class="string">'soln2'</span>,<span class="string">'RS05'</span>);
 0091          <span class="keyword">else</span>
 0092             <span class="comment">% phi remains nan</span>
 0093          <span class="keyword">end</span>
 0094          <span class="comment">% user-specified solutions</span>
 0095       <span class="keyword">else</span>
-0096          phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,             <span class="keyword">...</span>
+0096          phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,true,             <span class="keyword">...</span>
 0097             <span class="string">'soln1'</span>,soln1,<span class="string">'soln2'</span>,soln2);
 0098       <span class="keyword">end</span>
 0099       a(n) = a2;
@@ -200,7 +200,7 @@ This function is called by:
 0106       parseinputs(Results, Fits, A, D, L, b2, varargin)
 0107 
 0108    parser = inputParser;
-0109    parser.FunctionName = <span class="string">'bfra.eventphi'</span>;
+0109    parser.FunctionName = <span class="string">'baseflow.eventphi'</span>;
 0110    parser.StructExpand = false;
 0111    parser.addRequired(<span class="string">'Results'</span>, @isstruct);
 0112    parser.addRequired(<span class="string">'Fits'</span>, @isstruct);

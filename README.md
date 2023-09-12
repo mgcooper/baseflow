@@ -25,7 +25,7 @@ Requires Statistics, Optimization, Struct, and Tablicious packages.
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc` for recommended startup options.
-- Unit tests are located in `tests/`. From the top-level folder, they can be run in a matlab session by typing `runtests('tests')` at the command window and pressing enter. For verbose output and/or to enter debug mode on errors, type `runtests('tests', 'debug', true)`. From any folder, they can be run using the toolbox convenience function `baseflow.runtests()` or `baseflow.runtests('debug')`.
+- Unit tests are located in `tests/`. From the top-level folder, they can be run in a matlab session by typing `runtests('tests')` at the command window and pressing enter. For verbose output and/or to enter debug mode on errors, type `runtests('tests', 'debug', true)`. 
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).  

@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitab.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; fitab.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>fitab
 </h1>
@@ -169,7 +169,7 @@ This function is called by:
 0058       q, dqdt, method, mfilename, varargin{:});
 0059 
 0060    <span class="comment">% PREP FITS</span>
-0061    [x, y, logx, logy, weights, ok] = bfra.prepfits( <span class="keyword">...</span>
+0061    [x, y, logx, logy, weights, ok] = baseflow.prepfits( <span class="keyword">...</span>
 0062       q, dqdt, <span class="string">'weights'</span>, weights, <span class="string">'mask'</span>, mask);
 0063 
 0064    <span class="comment">% FAST EXIT</span>
@@ -211,7 +211,7 @@ This function is called by:
 0100    <span class="keyword">end</span>
 0101 
 0102    <span class="keyword">if</span> plotfit == true
-0103       Fit.h = bfra.pointcloudplot(q,dqdt,<span class="string">'reflines'</span>,{<span class="string">'userfit'</span>}, <span class="keyword">...</span>
+0103       Fit.h = baseflow.pointcloudplot(q,dqdt,<span class="string">'reflines'</span>,{<span class="string">'userfit'</span>}, <span class="keyword">...</span>
 0104          <span class="string">'userab'</span>,ab,<span class="string">'mask'</span>,mask,<span class="string">'usertext'</span>,method);
 0105    <span class="keyword">end</span>
 0106 
@@ -465,7 +465,7 @@ This function is called by:
 0354    Fit.bL = ci(2,1);
 0355    Fit.bH = ci(2,2);
 0356 
-0357    Fit.rsq = bfra.deps.rsquare(y,ab(1).*x.^ab(2));
+0357    Fit.rsq = baseflow.deps.rsquare(y,ab(1).*x.^ab(2));
 0358    Fit.pvalue = nan;
 0359    Fit.N = numel(y);
 0360    Fit.x = x;
@@ -503,7 +503,7 @@ This function is called by:
 0392    <span class="comment">%ab = nlinfit(q,dqdt,fnc,ab0,opts,'Weights',weights);</span>
 0393 
 0394    <span class="comment">% initialize r2</span>
-0395    rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+0395    rsq0 = baseflow.deps.rsquare(y,ab0(1).*x.^ab0(2));
 0396    rsq = rsq0;
 0397 
 0398    <span class="comment">% 'nlinfit' function options</span>
@@ -538,7 +538,7 @@ This function is called by:
 0427    ab1ok = true;
 0428    <span class="keyword">try</span>
 0429       [ab1,R1,~,C1] = nlinfit(x,y,fnc,ab0,opts1); <span class="comment">% R=resids,C=error variance</span>
-0430       rsq1 = bfra.deps.rsquare(y,ab1(1).*x.^ab1(2));
+0430       rsq1 = baseflow.deps.rsquare(y,ab1(1).*x.^ab1(2));
 0431 
 0432    <span class="keyword">catch</span> ME
 0433 
@@ -565,7 +565,7 @@ This function is called by:
 0454       <span class="keyword">try</span>
 0455          f3 = fit(x,y,ftype,opts3);
 0456          ab3 = coeffvalues(f3);
-0457          rsq3 = bfra.deps.rsquare(y,ab3(1).*x.^ab3(2));
+0457          rsq3 = baseflow.deps.rsquare(y,ab3(1).*x.^ab3(2));
 0458 
 0459       <span class="keyword">catch</span> ME
 0460 
@@ -596,7 +596,7 @@ This function is called by:
 0485       ab2ok = true;
 0486       <span class="keyword">try</span>
 0487          [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-0488          rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+0488          rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 0489 
 0490       <span class="keyword">catch</span> ME
 0491 
@@ -619,7 +619,7 @@ This function is called by:
 0508          ab4ok = true;
 0509          <span class="keyword">try</span>
 0510             f4 = fit(x,y,ftype,opts4); ab4 = coeffvalues(f4);
-0511             rsq4 = bfra.deps.rsquare(y,ab4(1).*x.^ab4(2));
+0511             rsq4 = baseflow.deps.rsquare(y,ab4(1).*x.^ab4(2));
 0512 
 0513          <span class="keyword">catch</span> ME
 0514             <span class="keyword">if</span> (strcmp(ME.identifier,<span class="string">'curvefit:fit:infComputed'</span>))
@@ -693,7 +693,7 @@ This function is called by:
 0582    ab0 = [exp(ab0(1)), ab0(2)];
 0583 
 0584    <span class="comment">% initialize r2</span>
-0585    rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+0585    rsq0 = baseflow.deps.rsquare(y,ab0(1).*x.^ab0(2));
 0586    rsq = rsq0;
 0587 
 0588    <span class="comment">% 'nlinfit' function options</span>
@@ -712,7 +712,7 @@ This function is called by:
 0601    ab2ok = true;
 0602    <span class="keyword">try</span>
 0603       [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-0604       rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+0604       rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 0605 
 0606    <span class="keyword">catch</span> ME
 0607 
@@ -827,7 +827,7 @@ This function is called by:
 0716       mask = true(size(q));
 0717    <span class="keyword">end</span>
 0718 
-0719    <span class="comment">% NOTE: fitopts is not implemented, but see bfra.Fit, where it could be used</span>
+0719    <span class="comment">% NOTE: fitopts is not implemented, but see baseflow.Fit, where it could be used</span>
 0720    <span class="comment">% to simplify calling this function from wrapper functions. Using the</span>
 0721    <span class="comment">% unmatched method, it can be used to pass in arbitrary fitopts accepted</span>
 0722    <span class="comment">% by any function but requires that the user know what to pass in.</span>

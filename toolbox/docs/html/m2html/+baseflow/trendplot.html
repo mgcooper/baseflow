@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; trendplot.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; trendplot.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>trendplot
 </h1>
@@ -163,10 +163,10 @@ This function is called by:
 0098 
 0099                <span class="comment">% only get conf levels if requested</span>
 0100                <span class="keyword">if</span> isnan(alpha)
-0101                   abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
+0101                   abfit(n,:) = baseflow.deps.tsregr(t,y(:,n));
 0102                <span class="keyword">else</span>
-0103                   abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
-0104                   outab = bfra.deps.ktaub([t,y(:,n)], alpha, false);
+0103                   abfit(n,:) = baseflow.deps.tsregr(t,y(:,n));
+0104                   outab = baseflow.deps.ktaub([t,y(:,n)], alpha, false);
 0105                   confi = [outab.CIlower, outab.CIupper];
 0106                   error(n) = mean([abfit(n,2)-confi(1),confi(2)-abfit(n,2)]);
 0107                <span class="keyword">end</span>

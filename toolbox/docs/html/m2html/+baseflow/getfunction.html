@@ -4,7 +4,7 @@
 <head>
   <title>Description of getfunction</title>
   <meta name="keywords" content="getfunction">
-  <meta name="description" content="GETFUNCTION get function handle from the bfra function library">
+  <meta name="description" content="GETFUNCTION get function handle from the baseflow function library">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -12,22 +12,22 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; getfunction.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; getfunction.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>getfunction
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>GETFUNCTION get function handle from the bfra function library</strong></div>
+<div class="box"><strong>GETFUNCTION get function handle from the baseflow function library</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function Fnc = getfunction(funcname) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">GETFUNCTION get function handle from the bfra function library
+<div class="fragment"><pre class="comment">GETFUNCTION get function handle from the baseflow function library
 
  Syntax
 
@@ -35,15 +35,15 @@
 
  Description
 
-     Fnc = bfra.getfunction('SofabQ') returns anonymous function handle for
+     Fnc = baseflow.getfunction('SofabQ') returns anonymous function handle for
      storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)
 
-     Fnc = bfra.getfunction('expectedQ') returns anonymous function handle
+     Fnc = baseflow.getfunction('expectedQ') returns anonymous function handle
      for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)
 
      Use tab-completion to see full list of options
 
- See also: bfra.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>
+ See also: baseflow.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -69,7 +69,7 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Fnc = getfunction(funcname)</a>
-0002    <span class="comment">%GETFUNCTION get function handle from the bfra function library</span>
+0002    <span class="comment">%GETFUNCTION get function handle from the baseflow function library</span>
 0003    <span class="comment">%</span>
 0004    <span class="comment">% Syntax</span>
 0005    <span class="comment">%</span>
@@ -77,15 +77,15 @@ This function is called by:
 0007    <span class="comment">%</span>
 0008    <span class="comment">% Description</span>
 0009    <span class="comment">%</span>
-0010    <span class="comment">%     Fnc = bfra.getfunction('SofabQ') returns anonymous function handle for</span>
+0010    <span class="comment">%     Fnc = baseflow.getfunction('SofabQ') returns anonymous function handle for</span>
 0011    <span class="comment">%     storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)</span>
 0012    <span class="comment">%</span>
-0013    <span class="comment">%     Fnc = bfra.getfunction('expectedQ') returns anonymous function handle</span>
+0013    <span class="comment">%     Fnc = baseflow.getfunction('expectedQ') returns anonymous function handle</span>
 0014    <span class="comment">%     for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)</span>
 0015    <span class="comment">%</span>
 0016    <span class="comment">%     Use tab-completion to see full list of options</span>
 0017    <span class="comment">%</span>
-0018    <span class="comment">% See also: bfra.getstring</span>
+0018    <span class="comment">% See also: baseflow.getstring</span>
 0019    <span class="comment">%</span>
 0020    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0021 

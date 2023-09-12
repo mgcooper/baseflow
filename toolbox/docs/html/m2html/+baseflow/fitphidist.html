@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitphidist.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; fitphidist.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>fitphidist
 </h1>
@@ -31,20 +31,20 @@
 
  Syntax
 
-     FIT = bfra.FITPHIDIST(phi);
-     FIT = bfra.FITPHIDIST(___,plottype);
-     FIT = bfra.FITPHIDIST(___,outputtype);
+     FIT = baseflow.FITPHIDIST(phi);
+     FIT = baseflow.FITPHIDIST(___,plottype);
+     FIT = baseflow.FITPHIDIST(___,outputtype);
 
  Description
 
-     Fit = bfra.fitphidist(phi) returns probability distribution object
+     Fit = baseflow.fitphidist(phi) returns probability distribution object
      'Fit' which is a Beta Distribution fit to the input data in phi
 
-     Fit = bfra.fitphidist(phi,outputtype) returns a Beta Distribution fit
+     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution fit
      to the input data in phi. 'outputtype' is 'PD', 'mean', 'median', or
      'std', where default 'PD' is the Probability Distribution object.
 
-     Fit = bfra.fitphidist(__,plottype) returns any of the prior options
+     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options
      plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default
      is 'none'.
 
@@ -83,20 +83,20 @@ This function is called by:
 0003    <span class="comment">%</span>
 0004    <span class="comment">% Syntax</span>
 0005    <span class="comment">%</span>
-0006    <span class="comment">%     FIT = bfra.FITPHIDIST(phi);</span>
-0007    <span class="comment">%     FIT = bfra.FITPHIDIST(___,plottype);</span>
-0008    <span class="comment">%     FIT = bfra.FITPHIDIST(___,outputtype);</span>
+0006    <span class="comment">%     FIT = baseflow.FITPHIDIST(phi);</span>
+0007    <span class="comment">%     FIT = baseflow.FITPHIDIST(___,plottype);</span>
+0008    <span class="comment">%     FIT = baseflow.FITPHIDIST(___,outputtype);</span>
 0009    <span class="comment">%</span>
 0010    <span class="comment">% Description</span>
 0011    <span class="comment">%</span>
-0012    <span class="comment">%     Fit = bfra.fitphidist(phi) returns probability distribution object</span>
+0012    <span class="comment">%     Fit = baseflow.fitphidist(phi) returns probability distribution object</span>
 0013    <span class="comment">%     'Fit' which is a Beta Distribution fit to the input data in phi</span>
 0014    <span class="comment">%</span>
-0015    <span class="comment">%     Fit = bfra.fitphidist(phi,outputtype) returns a Beta Distribution fit</span>
+0015    <span class="comment">%     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution fit</span>
 0016    <span class="comment">%     to the input data in phi. 'outputtype' is 'PD', 'mean', 'median', or</span>
 0017    <span class="comment">%     'std', where default 'PD' is the Probability Distribution object.</span>
 0018    <span class="comment">%</span>
-0019    <span class="comment">%     Fit = bfra.fitphidist(__,plottype) returns any of the prior options</span>
+0019    <span class="comment">%     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options</span>
 0020    <span class="comment">%     plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default</span>
 0021    <span class="comment">%     is 'none'.</span>
 0022    <span class="comment">%</span>
@@ -193,7 +193,7 @@ This function is called by:
 0113 
 0114       xarrow = [PD.mean 1.3*PD.mean];
 0115       yarrow = [PD.cdf(PD.mean) PD.cdf(PD.mean)];
-0116       bfra.deps.arrow([xarrow(1),yarrow(1)],[xarrow(2),yarrow(2)], <span class="keyword">...</span>
+0116       baseflow.deps.arrow([xarrow(1),yarrow(1)],[xarrow(2),yarrow(2)], <span class="keyword">...</span>
 0117          <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
 0118       text(0.95*xarrow(1),yarrow(1),arrowtxt,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
 0119 
@@ -252,7 +252,7 @@ This function is called by:
 0172    validplottype = @(x) any(validatestring(x,{<span class="string">'cdf'</span>,<span class="string">'pdf'</span>,<span class="string">'probplot'</span>}));
 0173 
 0174    parser = inputParser;
-0175    parser.FunctionName = <span class="string">'bfra.fitphidist'</span>;
+0175    parser.FunctionName = <span class="string">'baseflow.fitphidist'</span>;
 0176    parser.addRequired(<span class="string">'phi'</span>, @isvector);
 0177    parser.addOptional(<span class="string">'outputtype'</span>, <span class="string">'PD'</span>, validoutput);
 0178    parser.addOptional(<span class="string">'plottype'</span>, <span class="string">'none'</span>, validplottype);

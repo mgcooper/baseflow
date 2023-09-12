@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; conversions.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; conversions.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>conversions
 </h1>
@@ -46,11 +46,11 @@
  Example
 
      b = 1.5;
-     n = bfra.conversions(b,'b','n')
+     n = baseflow.conversions(b,'b','n')
         n = 0
 
 
- See also bfra.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>
+ See also baseflow.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -100,11 +100,11 @@ This function is called by:
 0018    <span class="comment">% Example</span>
 0019    <span class="comment">%</span>
 0020    <span class="comment">%     b = 1.5;</span>
-0021    <span class="comment">%     n = bfra.conversions(b,'b','n')</span>
+0021    <span class="comment">%     n = baseflow.conversions(b,'b','n')</span>
 0022    <span class="comment">%        n = 0</span>
 0023    <span class="comment">%</span>
 0024    <span class="comment">%</span>
-0025    <span class="comment">% See also bfra.getstring</span>
+0025    <span class="comment">% See also baseflow.getstring</span>
 0026    <span class="comment">%</span>
 0027    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0028 
@@ -242,7 +242,7 @@ This function is called by:
 0160    validvarnames = {<span class="string">'b'</span>, <span class="string">'alpha'</span>, <span class="string">'beta'</span>, <span class="string">'gamma'</span>, <span class="string">'d'</span>, <span class="string">'k'</span>, <span class="string">'n'</span>, <span class="string">'N'</span>, <span class="string">'Nstar'</span>};
 0161 
 0162    parser = inputParser;
-0163    parser.FunctionName = <span class="string">'bfra.conversions'</span>;
+0163    parser.FunctionName = <span class="string">'baseflow.conversions'</span>;
 0164 
 0165    parser.addRequired(<span class="string">'inputvalue'</span>, @isnumeric);
 0166    parser.addRequired(<span class="string">'inputvarname'</span>, @(x) ~isempty(validatestring(x, validvarnames)));

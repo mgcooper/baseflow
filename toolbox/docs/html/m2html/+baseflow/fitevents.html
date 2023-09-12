@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitevents.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; fitevents.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>fitevents
 </h1>
@@ -36,14 +36,14 @@
  Description
 
      [Fits,Results] = fitevents(Events) fits all recession events in Events
-     (output of bfra.getevents) using default algorithm options.
+     (output of baseflow.getevents) using default algorithm options.
 
      [Fits,Results] = fitevents(Events,opts) uses user-supplied
-     algorithm options in struct opts. See bfra.setopts to set options.
+     algorithm options in struct opts. See baseflow.setopts to set options.
 
  Required inputs
 
-     Events: output of bfra.getevents (flow comes in as m3 d-1 posted daily)
+     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted daily)
 
  Outputs
 
@@ -96,14 +96,14 @@ This function is called by:
 0008    <span class="comment">% Description</span>
 0009    <span class="comment">%</span>
 0010    <span class="comment">%     [Fits,Results] = fitevents(Events) fits all recession events in Events</span>
-0011    <span class="comment">%     (output of bfra.getevents) using default algorithm options.</span>
+0011    <span class="comment">%     (output of baseflow.getevents) using default algorithm options.</span>
 0012    <span class="comment">%</span>
 0013    <span class="comment">%     [Fits,Results] = fitevents(Events,opts) uses user-supplied</span>
-0014    <span class="comment">%     algorithm options in struct opts. See bfra.setopts to set options.</span>
+0014    <span class="comment">%     algorithm options in struct opts. See baseflow.setopts to set options.</span>
 0015    <span class="comment">%</span>
 0016    <span class="comment">% Required inputs</span>
 0017    <span class="comment">%</span>
-0018    <span class="comment">%     Events: output of bfra.getevents (flow comes in as m3 d-1 posted daily)</span>
+0018    <span class="comment">%     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted daily)</span>
 0019    <span class="comment">%</span>
 0020    <span class="comment">% Outputs</span>
 0021    <span class="comment">%</span>
@@ -169,7 +169,7 @@ This function is called by:
 0081       warning(<span class="string">'off'</span>,<span class="string">'stats:nlinfit:IterationLimitExceeded'</span>);
 0082       warning(<span class="string">'off'</span>,<span class="string">'stats:nlinfit:ModelConstantWRTParam'</span>);
 0083       warning(<span class="string">'off'</span>,<span class="string">'stats:nlinfit:IllConditionedJacobian'</span>);
-0084       warning(<span class="string">'off'</span>,<span class="string">'bfra:deps:rsquare:NegativeRsquared'</span>);
+0084       warning(<span class="string">'off'</span>,<span class="string">'baseflow:deps:rsquare:NegativeRsquared'</span>);
 0085    <span class="keyword">end</span>
 0086 
 0087    debugflag = false;
@@ -190,7 +190,7 @@ This function is called by:
 0102 
 0103       <span class="comment">% get the q, dq/dt estimates (H = Hat)</span>
 0104 
-0105       [qH,dH,dtH,tH] = bfra.getdqdt(eventT, eventQ, eventR, derivmethod,   <span class="keyword">...</span>
+0105       [qH,dH,dtH,tH] = baseflow.getdqdt(eventT, eventQ, eventR, derivmethod,   <span class="keyword">...</span>
 0106          <span class="string">'pickmethod'</span>, pickmethod, <span class="string">'fitmethod'</span>, fitmethod, <span class="string">'etsparam'</span>, <span class="keyword">...</span>
 0107          etsparam, <span class="string">'vtsparam'</span>, vtsparam);
 0108 
@@ -215,7 +215,7 @@ This function is called by:
 0127          <span class="keyword">if</span> ok == false
 0128             <span class="keyword">continue</span>
 0129          <span class="keyword">else</span>
-0130             [iFit, ok] = bfra.fitab(q, dqdt, fitmethod, <span class="string">'fitopts'</span>, fitopts);
+0130             [iFit, ok] = baseflow.fitab(q, dqdt, fitmethod, <span class="string">'fitopts'</span>, fitopts);
 0131          <span class="keyword">end</span>
 0132 
 0133          [Fits, Results, nFits] = <a href="#_sub2" class="code" title="subfunction [Fits, K, fitcount] = saveFit(T, q, dqdt, dt, tq, derivmethod, ">saveFit</a>(eventTime, q, dqdt, dt, tq, <span class="keyword">...</span>
@@ -240,7 +240,7 @@ This function is called by:
 0152       warning(<span class="string">'on'</span>,<span class="string">'stats:nlinfit:IterationLimitExceeded'</span>);
 0153       warning(<span class="string">'on'</span>,<span class="string">'stats:nlinfit:ModelConstantWRTParam'</span>);
 0154       warning(<span class="string">'on'</span>,<span class="string">'stats:nlinfit:IllConditionedJacobian'</span>);
-0155       warning(<span class="string">'on'</span>,<span class="string">'bfra:deps:rsquare:NegativeRsquared'</span>);
+0155       warning(<span class="string">'on'</span>,<span class="string">'baseflow:deps:rsquare:NegativeRsquared'</span>);
 0156    <span class="keyword">end</span>
 0157 <span class="keyword">end</span>
 0158 

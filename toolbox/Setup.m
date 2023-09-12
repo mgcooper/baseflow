@@ -270,7 +270,7 @@ function msg = inittoolboxprefs(varargin)
    if ispref('baseflow')
       rmpref('baseflow');
    end
-   addpref('baseflow', 'version', baseflow.version)
+   addpref('baseflow', 'version', baseflow.internal.version())
    % note: 'pathdef_filename' removed from prefs
    if inoctave == true
       prefs = {'installed','install_directory','octave_install', ...

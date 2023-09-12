@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fitphi.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; fitphi.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>fitphi
 </h1>
@@ -242,7 +242,7 @@ This function is called by:
 0108             <span class="comment">% sloped, late-time b = 1-2 (heterogeneous soils)</span>
 0109             <span class="comment">% note: if b = 3/2, n = 1, which means homogeneous soils</span>
 0110 
-0111             n = bfra.conversions(b2,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,false);
+0111             n = baseflow.conversions(b2,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,false);
 0112 
 0113             <span class="comment">% a1 = 1.133/(k*phi*D^3*L^2*cos(theta))</span>
 0114             n1 = n+1;
@@ -293,9 +293,9 @@ This function is called by:
 0159 
 0160             <span class="comment">% flat, late-time b = 3/2-2  (heterogeneous soils)</span>
 0161 
-0162             n = bfra.conversions(b2,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,true);
-0163             fR1 = bfra.specialfunctions(<span class="string">'fR1'</span>,n);
-0164             fR2 = bfra.specialfunctions(<span class="string">'fR2'</span>,n);
+0162             n = baseflow.conversions(b2,<span class="string">'b'</span>,<span class="string">'n'</span>,<span class="string">'isflat'</span>,true);
+0163             fR1 = baseflow.specialfunctions(<span class="string">'fR1'</span>,n);
+0164             fR2 = baseflow.specialfunctions(<span class="string">'fR2'</span>,n);
 0165 
 0166             n1 = n+1;
 0167             n2 = n+2;
@@ -494,7 +494,7 @@ This function is called by:
 0360 
 0361    parser = inputParser;
 0362    parser.StructExpand = false;
-0363    parser.FunctionName = <span class="string">'bfra.fitphi'</span>;
+0363    parser.FunctionName = <span class="string">'baseflow.fitphi'</span>;
 0364 
 0365    parser.addRequired(<span class="string">'a1'</span>, @isnumeric);
 0366    parser.addRequired(<span class="string">'a2'</span>, @isnumeric);

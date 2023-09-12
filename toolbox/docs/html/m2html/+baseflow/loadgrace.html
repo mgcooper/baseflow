@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; loadgrace.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; loadgrace.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>loadgrace
 </h1>
@@ -31,7 +31,7 @@
 
  Grace data should be in cm/timestep
 
- See also: bfra.<a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>, bfra.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, bfra.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a></pre></div>
+ See also: baseflow.<a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>, baseflow.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, baseflow.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a></pre></div>
 
 
 <!-- crossreference -->
@@ -40,7 +40,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the bfra basin database.</li>
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the baseflow basin database.</li>
 <li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
 
 
@@ -63,7 +63,7 @@ This function is called by:
 0003    <span class="comment">%</span>
 0004    <span class="comment">% Grace data should be in cm/timestep</span>
 0005    <span class="comment">%</span>
-0006    <span class="comment">% See also: bfra.loadghcnd, bfra.loadflow, bfra.loadcalm</span>
+0006    <span class="comment">% See also: baseflow.loadghcnd, baseflow.loadflow, baseflow.loadcalm</span>
 0007 
 0008    <span class="comment">% if called with no input, open this file</span>
 0009    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
@@ -149,7 +149,7 @@ This function is called by:
 0089 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, t1, t2, regularize] = parseinputs(varargin)</a>
 0090 
 0091    parser = inputParser;
-0092    parser.FunctionName = <span class="string">'bfra.loadgrace'</span>;
+0092    parser.FunctionName = <span class="string">'baseflow.loadgrace'</span>;
 0093    parser.addOptional(<span class="string">'basinname'</span>,<span class="string">'all'</span>,@ischar);
 0094    parser.addParameter(<span class="string">'t1'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
 0095    parser.addParameter(<span class="string">'t2'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));

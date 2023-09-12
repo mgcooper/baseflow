@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; fdcurve.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; fdcurve.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>fdcurve
 </h1>
@@ -52,7 +52,7 @@ This function is called by:
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="#_sub1" class="code">function [axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin)</a></li></ul>
+<li><a href="#_sub1" class="code">function [axscale, units, refpoints, plotfit] = parseinputs(flow, varargin)</a></li></ul>
 
 
 
@@ -68,7 +68,7 @@ This function is called by:
 0009    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0010 
 0011    <span class="comment">% parse inputs</span>
-0012    [axscale, units, refpoints, plotcurve] = <a href="#_sub1" class="code" title="subfunction [axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin)">parseinputs</a>(flow, varargin{:});
+0012    [axscale, units, refpoints, plotfit] = <a href="#_sub1" class="code" title="subfunction [axscale, units, refpoints, plotfit] = parseinputs(flow, varargin)">parseinputs</a>(flow, varargin{:});
 0013 
 0014    <span class="comment">% main function</span>
 0015 
@@ -89,7 +89,7 @@ This function is called by:
 0030    <span class="keyword">end</span>
 0031 
 0032    <span class="comment">% plot the curve if requested</span>
-0033    <span class="keyword">if</span> plotcurve == true
+0033    <span class="keyword">if</span> plotfit == true
 0034       figure;
 0035       <span class="keyword">switch</span> axscale
 0036          <span class="keyword">case</span> <span class="string">'loglog'</span>
@@ -132,19 +132,19 @@ This function is called by:
 0073    fdc.fref = fref;
 0074 <span class="keyword">end</span>
 0075 
-0076 <a name="_sub1" href="#_subfunctions" class="code">function [axscale, units, refpoints, plotcurve] = parseinputs(flow, varargin)</a>
+0076 <a name="_sub1" href="#_subfunctions" class="code">function [axscale, units, refpoints, plotfit] = parseinputs(flow, varargin)</a>
 0077 
 0078    p = inputParser;
-0079    p.FunctionName = <span class="string">'bfra.fdcurve'</span>;
+0079    p.FunctionName = <span class="string">'baseflow.fdcurve'</span>;
 0080    p.addRequired( <span class="string">'flow'</span>, @isnumeric);
 0081    p.addParameter(<span class="string">'axscale'</span>, <span class="string">'semilogy'</span>, @ischar);
 0082    p.addParameter(<span class="string">'units'</span>, <span class="string">''</span>, @ischar);
 0083    p.addParameter(<span class="string">'refpoints'</span>, nan, @isnumeric);
-0084    p.addParameter(<span class="string">'plotcurve'</span>, true, @islogical);
+0084    p.addParameter(<span class="string">'plotfit'</span>, true, @islogical);
 0085    p.parse(flow, varargin{:});
 0086 
 0087    refpoints = p.Results.refpoints;
-0088    plotcurve= p.Results.plotcurve;
+0088    plotfit= p.Results.plotfit;
 0089    axscale = p.Results.axscale;
 0090    units = p.Results.units;
 0091 <span class="keyword">end</span>

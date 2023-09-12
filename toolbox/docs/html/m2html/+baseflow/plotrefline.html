@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; plotrefline.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; plotrefline.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>plotrefline
 </h1>
@@ -117,7 +117,7 @@ This function is called by:
 0031    <span class="comment">%</span>
 0032    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0033 
-0034    <span class="comment">% NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y</span>
+0034    <span class="comment">% NOTE: y comes in as -dq/dt, send it to baseflow.fitab as -y, and to refline as y</span>
 0035 
 0036    <span class="comment">% if called with no input, open this file</span>
 0037    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
@@ -128,7 +128,7 @@ This function is called by:
 0042 
 0043    <span class="comment">% need options for how/if to apply the mask - e.g., we might want to show the</span>
 0044    <span class="comment">% 'bestfit' to all data, and use the mask for late-time fit. also keep in mind</span>
-0045    <span class="comment">% bfra.eventphi calls this. mask is default true in parsing.</span>
+0045    <span class="comment">% baseflow.eventphi calls this. mask is default true in parsing.</span>
 0046 
 0047    <span class="comment">% use this to find the equation of the line</span>
 0048    axb = @(a,x,b) a.*x.^b;
@@ -152,29 +152,29 @@ This function is called by:
 0066          b = 0;                           <span class="comment">% slope = 0 unless stage precision is known</span>
 0067          a = precision*3600*24/timestep;  <span class="comment">% 1 m3/s converted to m3/timestep with timestep in days</span>
 0068       <span class="keyword">case</span> <span class="string">'linear'</span>
-0069          F = bfra.fitab(x(mask), -y(mask), <span class="string">'ols'</span>, <span class="string">'order'</span>, 1);
+0069          F = baseflow.fitab(x(mask), -y(mask), <span class="string">'ols'</span>, <span class="string">'order'</span>, 1);
 0070          a = F.ab(1);
 0071          b = F.ab(2);
 0072       <span class="keyword">case</span> <span class="string">'bestfit'</span>
-0073          F = bfra.fitab(x(mask), -y(mask), <span class="string">'nls'</span>);
+0073          F = baseflow.fitab(x(mask), -y(mask), <span class="string">'nls'</span>);
 0074          a = F.ab(1);
 0075          b = F.ab(2);
 0076       <span class="keyword">case</span> <span class="string">'userfit'</span>
 0077          a = userab(1);
 0078          b = userab(2);
 0079       <span class="keyword">case</span> <span class="string">'envelope'</span>
-0080          F = bfra.fitab(x(mask), -y(mask), <span class="keyword">...</span>
+0080          F = baseflow.fitab(x(mask), -y(mask), <span class="keyword">...</span>
 0081             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, refqtls, <span class="string">'order'</span>, refslope);
 0082          a = F.ab(1);
 0083          b = F.ab(2);
 0084       <span class="keyword">case</span> <span class="string">'earlytime'</span>
 0085          <span class="keyword">if</span> refslope == 1; refslope = 3; <span class="keyword">end</span>
-0086          F = bfra.fitab(x, -y, <span class="keyword">...</span>
+0086          F = baseflow.fitab(x, -y, <span class="keyword">...</span>
 0087             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, [0.95 0.95], <span class="string">'order'</span>, refslope);
 0088          a = F.ab(1);
 0089          b = F.ab(2);
 0090       <span class="keyword">case</span> <span class="string">'latetime'</span>
-0091          F = bfra.fitab(x(mask), -y(mask), <span class="keyword">...</span>
+0091          F = baseflow.fitab(x(mask), -y(mask), <span class="keyword">...</span>
 0092             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, [0.5 0.5], <span class="string">'order'</span>, refslope);
 0093          a = F.ab(1);
 0094          b = F.ab(2);
@@ -252,7 +252,7 @@ This function is called by:
 0166          <span class="keyword">end</span>
 0167 
 0168          <span class="keyword">if</span> ~isoctave
-0169             bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
+0169             baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
 0170                <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10);
 0171             text(1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
 0172                <span class="string">'fontsize'</span>,13,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
@@ -260,7 +260,7 @@ This function is called by:
 0174 
 0175       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
 0176 
-0177          axpos = bfra.deps.plotboxpos(gca); <span class="comment">% only works with correct axes position</span>
+0177          axpos = baseflow.deps.plotboxpos(gca); <span class="comment">% only works with correct axes position</span>
 0178          <span class="comment">% xtxt = exp(mean(log(xlim)));</span>
 0179 
 0180          xlims = log10(xlim);
@@ -269,7 +269,7 @@ This function is called by:
 0183          rtxt = 0.98;
 0184 
 0185          <span class="comment">% some values of rtxt that work for different types of plots</span>
-0186          <span class="comment">% 5.1    bfra_checkevent2 figure (I used 5.22 in the final fig)</span>
+0186          <span class="comment">% 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)</span>
 0187          <span class="comment">% 0.22   not sure (note said 0.22 works with tiledlayout)</span>
 0188          <span class="comment">% 3.8    not sure (note said i think 3.8 works with subplot)</span>
 0189          <span class="comment">% 0.86   the standard point cloud plot (standard figure size)</span>
@@ -291,7 +291,7 @@ This function is called by:
 0205 <a name="_sub2" href="#_subfunctions" class="code">function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, </a><span class="keyword">...</span>
 0206       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
 0207    parser = inputParser;
-0208    parser.FunctionName = <span class="string">'bfra.plotrefline'</span>;
+0208    parser.FunctionName = <span class="string">'baseflow.plotrefline'</span>;
 0209 
 0210    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
 0211    parser.addRequired(<span class="string">'y'</span>, @isnumeric);

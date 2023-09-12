@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; eventpicker.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; eventpicker.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>eventpicker
 </h1>
@@ -106,15 +106,15 @@ This function is called by:
 0026    <span class="comment">% if called with no input, open this file</span>
 0027    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0028 
-0029    <span class="comment">% TODO: compare subfunction eventPlotter here to bfra.eventplotter and to</span>
+0029    <span class="comment">% TODO: compare subfunction eventPlotter here to baseflow.eventplotter and to</span>
 0030    <span class="comment">% versions in dev-bk. Cursory glance - eventPlotter includes option to plot</span>
-0031    <span class="comment">% rain, but does not include 3rd subplot of d2q/dt in bfra.eventplotter</span>
+0031    <span class="comment">% rain, but does not include 3rd subplot of d2q/dt in baseflow.eventplotter</span>
 0032 
 0033    <span class="comment">% PARSE INPUTS</span>
 0034    [t, q, r, nmin, Info] = <a href="#_sub4" class="code" title="subfunction [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)">parseinputs</a>(t, q, r, nmin, Info);
 0035 
 0036    <span class="comment">% compute the first derivative</span>
-0037    qdot = bfra.deps.derivative(q);
+0037    qdot = baseflow.deps.derivative(q);
 0038 
 0039    <span class="comment">% pick the events</span>
 0040    Events = <a href="#_sub1" class="code" title="subfunction Events = eventSelector(t,q,r,qdot,Info)">eventSelector</a>(t,q,r,qdot,Info);
@@ -186,7 +186,7 @@ This function is called by:
 0106    <span class="comment">% pick the points</span>
 0107    h = <a href="#_sub2" class="code" title="subfunction h = eventPlotter(t,q,r,dqdt,Info)">eventPlotter</a>(t,q,r,qdot,Info);  <span class="comment">% plot the timeseries</span>
 0108 
-0109    pickedPts = bfra.deps.ginputc();
+0109    pickedPts = baseflow.deps.ginputc();
 0110    startPts = pickedPts(1:2:end);
 0111    endPts = pickedPts(2:2:end);
 0112    numPicks = numel(startPts);
@@ -255,7 +255,7 @@ This function is called by:
 0175 
 0176 <a name="_sub2" href="#_subfunctions" class="code">function h = eventPlotter(t,q,r,dqdt,Info)</a>
 0177 
-0178    <span class="comment">% stripped down version of bfra.plotevents with ginput picking added</span>
+0178    <span class="comment">% stripped down version of baseflow.plotevents with ginput picking added</span>
 0179 
 0180    <span class="keyword">if</span> isempty(Info.istart)
 0181       disp(<span class="string">'no valid events'</span>)
@@ -286,7 +286,7 @@ This function is called by:
 0206    h.s1e = scatter(t(icon),q(icon),sz,<span class="string">'filled'</span>);
 0207    h.s1f = scatter(t(ikeep),q(ikeep),sz*2.5,<span class="string">'filled'</span>);
 0208 
-0209    h.s1g = bfra.deps.hline(q50,<span class="string">':'</span>);
+0209    h.s1g = baseflow.deps.hline(q50,<span class="string">':'</span>);
 0210 
 0211    dates = datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
 0212 
@@ -322,7 +322,7 @@ This function is called by:
 0242    h.s2d = scatter(t(imin),dqdt(imin),sz*2,<span class="string">'filled'</span>);
 0243    h.s2e = scatter(t(icon),dqdt(icon),sz,<span class="string">'filled'</span>);
 0244    h.s2f = scatter(t(ikeep),dqdt(ikeep),sz*2.5,<span class="string">'filled'</span>);
-0245    h.hl2 = bfra.deps.hline(0,<span class="string">'k-'</span>); h.hl2.LineWidth = 1;
+0245    h.hl2 = baseflow.deps.hline(0,<span class="string">'k-'</span>); h.hl2.LineWidth = 1;
 0246    h.l2 = legend(<span class="string">'increasing'</span>,<span class="string">'decreasing'</span>,<span class="string">'maxima'</span>,<span class="string">'minima'</span>,<span class="string">'convex'</span>, <span class="keyword">...</span>
 0247       <span class="string">'keep'</span>,<span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
 0248    ylabel(<span class="string">'dQ/dt'</span>);
@@ -369,7 +369,7 @@ This function is called by:
 0289 <a name="_sub4" href="#_subfunctions" class="code">function [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)</a>
 0290 
 0291    parser = inputParser;
-0292    parser.FunctionName = <span class="string">'bfra.eventpicker'</span>;
+0292    parser.FunctionName = <span class="string">'baseflow.eventpicker'</span>;
 0293    parser.StructExpand = false; <span class="comment">% for 'Info' input</span>
 0294    parser.addRequired(<span class="string">'t'</span>, @isdatelike);
 0295    parser.addRequired(<span class="string">'q'</span>, @isnumeric);

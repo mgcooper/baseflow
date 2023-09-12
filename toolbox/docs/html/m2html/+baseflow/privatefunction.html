@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; privatefunction.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; privatefunction.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>privatefunction
 </h1>
@@ -36,7 +36,7 @@
  PRIVATEFUNCTION uses completions.m to generate a list of
  available private functions for tab-completion and input validation.
  
- See also: <a href="completions.html" class="code" title="function proplist = completions(funcname)">completions</a></pre></div>
+ See also: baseflow.internal.completions</pre></div>
 
 
 <!-- crossreference -->
@@ -68,10 +68,10 @@ This function is called by:
 0008    <span class="comment">% PRIVATEFUNCTION uses completions.m to generate a list of</span>
 0009    <span class="comment">% available private functions for tab-completion and input validation.</span>
 0010    <span class="comment">%</span>
-0011    <span class="comment">% See also: completions</span>
+0011    <span class="comment">% See also: baseflow.internal.completions</span>
 0012    
-0013    funcName = validatestring(funcName, bfra.completions(<span class="string">'private'</span>), <span class="keyword">...</span>
-0014       mfilename, <span class="string">'FUNCNAME'</span>, 1);
+0013    funcName = validatestring(funcName, <span class="keyword">...</span>
+0014       baseflow.internal.completions(<span class="string">'private'</span>), mfilename, <span class="string">'FUNCNAME'</span>, 1);
 0015    
 0016    funcHandle = str2func(funcName);
 0017    

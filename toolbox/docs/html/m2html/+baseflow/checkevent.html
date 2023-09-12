@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; checkevent.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; checkevent.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>checkevent
 </h1>
@@ -229,7 +229,7 @@ This function is called by:
 0147    <span class="keyword">if</span> all(isnan(eventq))
 0148       <span class="keyword">return</span>
 0149    <span class="keyword">else</span>
-0150       h2 = bfra.pointcloudplot(eventq, eventdqdt, <span class="string">'ax'</span>, h.t4, <span class="string">'reflines'</span>, <span class="keyword">...</span>
+0150       h2 = baseflow.pointcloudplot(eventq, eventdqdt, <span class="string">'ax'</span>, h.t4, <span class="string">'reflines'</span>, <span class="keyword">...</span>
 0151          {<span class="string">'lowerenvelope'</span>,<span class="string">'upperenvelope'</span>,<span class="string">'early'</span>,<span class="string">'late'</span>,<span class="string">'bestfit'</span>}, <span class="keyword">...</span>
 0152          <span class="string">'reflabels'</span>, false, <span class="string">'rain'</span>, eventr, <span class="string">'addlegend'</span>, true);
 0153 
@@ -252,7 +252,7 @@ This function is called by:
 0170       set(h.h3a,<span class="string">'MarkerFaceColor'</span>,colors(1,:),<span class="string">'MarkerEdgeColor'</span>,<span class="string">'none'</span>);
 0171 
 0172       <span class="comment">% --------------- see all events for this year</span>
-0173       <span class="comment">% bfra_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');</span>
+0173       <span class="comment">% baseflow_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');</span>
 0174 
 0175       <span class="comment">% h.ax2a.XLim = h.ax1a.XLim;</span>
 0176 
@@ -303,22 +303,22 @@ This function is called by:
 0221       dqfit0 = nan;Qtstr0 = <span class="string">'nan'</span>;aQbstr0 = <span class="string">'nan'</span>;rsq0 = nan;
 0222       <span class="keyword">return</span>
 0223    <span class="keyword">end</span>
-0224    Fit = bfra.fitab(eventq,eventdqdt,<span class="string">'nls'</span>);
+0224    Fit = baseflow.fitab(eventq,eventdqdt,<span class="string">'nls'</span>);
 0225    ab = Fit.ab;
 0226    Q0 = eventq(find(~isnan(eventq),1,<span class="string">'first'</span>));
 0227    tfit = eventT(~isnan(eventq));
 0228 
 0229    <span class="comment">% predicted Q from non-lin free</span>
-0230    [qfit,dqfit] = bfra.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
-0231    [Qtstr,aQbstr] = bfra.QtauString(ab,<span class="string">'printvalues'</span>,true);
+0230    [qfit,dqfit] = baseflow.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
+0231    [Qtstr,aQbstr] = baseflow.QtauString(ab,<span class="string">'printvalues'</span>,true);
 0232 
 0233    <span class="comment">% if requested, fit with a fixed b value and get predicted Q and dQ/dt</span>
 0234    <span class="keyword">if</span> fixb == true
-0235       Fit = bfra.fitab(eventq,eventdqdt,<span class="string">'mean'</span>,<span class="string">'order'</span>,order);
+0235       Fit = baseflow.fitab(eventq,eventdqdt,<span class="string">'mean'</span>,<span class="string">'order'</span>,order);
 0236       ab0 = Fit.ab;
 0237       rsq0 = Fit.rsq;
-0238       [qfit0,dqfit0] = bfra.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
-0239       [Qtstr0,aQbstr0] = bfra.QtauString(ab0,<span class="string">'printvalues'</span>,true);
+0238       [qfit0,dqfit0] = baseflow.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
+0239       [Qtstr0,aQbstr0] = baseflow.QtauString(ab0,<span class="string">'printvalues'</span>,true);
 0240    <span class="keyword">else</span>
 0241       ab0 = nan;
 0242       rsq0 = nan;
@@ -345,7 +345,7 @@ This function is called by:
 0263       T, Q, q, dqdt, r, alltags, eventtag, varargin)
 0264 
 0265    parser = inputParser;
-0266    parser.FunctionName = <span class="string">'bfra.checkevent'</span>;
+0266    parser.FunctionName = <span class="string">'baseflow.checkevent'</span>;
 0267    parser.addRequired(<span class="string">'T'</span>, @(x) isnumeric(x) | isdatetime(x));
 0268    parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
 0269    parser.addRequired(<span class="string">'q'</span>, @isnumeric);
@@ -397,7 +397,7 @@ This function is called by:
 0315 <span class="comment">%     figure; plot(qfit,dqfit,'-o'); legend('fit function');</span>
 0316 <span class="comment">%     figure; plot(q,-dqtst,'-o'); legend('fit test');</span>
 0317 
-0318 <span class="comment">%abl = bfra_quickfit(q,dqdt,'lin');</span>
-0319 <span class="comment">%[q,dqdt] = bfra_Qlin(a,b,Q0,t)</span></pre></div>
+0318 <span class="comment">%abl = baseflow_quickfit(q,dqdt,'lin');</span>
+0319 <span class="comment">%[q,dqdt] = baseflow_Qlin(a,b,Q0,t)</span></pre></div>
 </body>
 </html>

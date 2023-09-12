@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; baseflowtrend.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; baseflowtrend.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>baseflowtrend
 </h1>
@@ -139,10 +139,10 @@ This function is called by:
 0051    Qa = transpose(mean(reshape(Q,365,numel(Q)/365),<span class="string">'omitnan'</span>)).*(100/A);
 0052 
 0053    <span class="comment">% regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually</span>
-0054    ha = bfra.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>, <span class="keyword">...</span>
+0054    ha = baseflow.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>, <span class="keyword">...</span>
 0055       <span class="string">'title'</span>,<span class="string">'mean flow'</span>,<span class="string">'leg'</span>,<span class="string">'mean flow regression'</span>,<span class="string">'showfig'</span>, <span class="keyword">...</span>
 0056       showfig,<span class="string">'method'</span>,method);
-0057    hb = bfra.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>,<span class="string">'quan'</span>, <span class="keyword">...</span>
+0057    hb = baseflow.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>,<span class="string">'quan'</span>, <span class="keyword">...</span>
 0058       pctl,<span class="string">'title'</span>,<span class="string">'baseflow'</span>,<span class="string">'leg'</span>,<span class="string">'baseflow regression'</span>,<span class="keyword">...</span>
 0059       <span class="string">'showfig'</span>,showfig,<span class="string">'alpha'</span>,0.05);
 0060    dQadt = ha.trend.YData(:);  <span class="comment">% mean flow trend</span>
@@ -154,7 +154,7 @@ This function is called by:
 0066 <a name="_sub1" href="#_subfunctions" class="code">function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)</a>
 0067 
 0068    parser = inputParser;
-0069    parser.FunctionName = <span class="string">'bfra.baseflowtrend'</span>;
+0069    parser.FunctionName = <span class="string">'baseflow.baseflowtrend'</span>;
 0070    parser.addRequired(<span class="string">'t'</span>, @isdatelike);
 0071    parser.addRequired(<span class="string">'Q'</span>, @isnumericvector);
 0072    parser.addRequired(<span class="string">'A'</span>, @isnumericscalar);

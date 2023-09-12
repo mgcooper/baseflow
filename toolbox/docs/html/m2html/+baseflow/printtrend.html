@@ -12,10 +12,10 @@
 </head>
 <body>
 <a name="_top"></a>
-<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+bfra</a> &gt; printtrend.m</div>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; printtrend.m</div>
 
 <!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
-<td align="right"><a href="function_index.html">Index for +bfra&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
 
 <h1>printtrend
 </h1>
@@ -102,7 +102,7 @@ This function is called by:
 0042 <a name="_sub1" href="#_subfunctions" class="code">function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)</a>
 0043    parser = inputParser;
 0044    parser.StructExpand = true; <span class="comment">% this has to be true to use autocomplete fieldname</span>
-0045    parser.FunctionName = <span class="string">'bfra.printtrend'</span>;
+0045    parser.FunctionName = <span class="string">'baseflow.printtrend'</span>;
 0046    parser.addRequired(<span class="string">'Data'</span>, @istimetable);
 0047    parser.addParameter(<span class="string">'var'</span>, <span class="string">'Qb'</span>, @ischar);
 0048    parser.addParameter(<span class="string">'alpha'</span>, 0.05, @isnumeric);
