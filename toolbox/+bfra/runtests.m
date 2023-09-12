@@ -4,6 +4,7 @@ function result = runtests(varargin)
    %  result = runtests() Runs all tests.
    %  result = runtests('debug') Runs all tests in verbose / debug mode.
    %
+   % See also: runtests, runperf, testsuite
 
    % Import necessary classes
    import matlab.unittest.TestSuite
@@ -11,12 +12,9 @@ function result = runtests(varargin)
    import matlab.unittest.Verbosity
    import matlab.unittest.plugins.DiagnosticsValidationPlugin
    import matlab.unittest.plugins.StopOnFailuresPlugin
-
-   % Get the full path to the project folder
-   [thispath, ~, ~] = fileparts(mfilename('fullpath'));
    
    % Create a test suite from the tests/ folder
-   suite = TestSuite.fromFolder(fullfile(thispath, 'tests'));
+   suite = TestSuite.fromFolder(fullfile(fileparts(basepath()), 'tests'));
 
    if nargin < 1
       % Run parameterized test suite

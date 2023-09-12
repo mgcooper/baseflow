@@ -5,7 +5,7 @@ function [t, q, r, ei] = rmtrailingnans(t, q, r)
       r = nan(size(q));
    end
 
-   tf = flipud(logical(cumprod(isnan(flipud(q))))); % trailing nans
+   tf = flipud(logical(cumprod(isnan(flipud(q(:)))))); % trailing nans
    ei = find(tf == false, 1, 'last'); % last non-nan indici
 
    t(tf) = [];
