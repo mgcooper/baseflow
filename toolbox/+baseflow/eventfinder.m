@@ -83,7 +83,7 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    % Description
    %
    %     Split recession events detected by eventfinder into individual segments
-   %     ready to fit with bfra.fitab or bfra.fitevents. For example, if an
+   %     ready to fit with baseflow.fitab or baseflow.fitevents. For example, if an
    %     event is interrupted by rainfall or if rainfall is detected from convex
    %     dq/dt, the event can be split into separate segments thought to
    %     represent uninterrupted baseflow. Follows recommendations in Dralle et
@@ -246,12 +246,12 @@ end
 
 function tf = islocalmax(X)
    tf = false(size(X));
-   tf(bfra.deps.peakfinder(X,0,0,1,false)) = true;
+   tf(baseflow.deps.peakfinder(X,0,0,1,false)) = true;
 end
 
 function tf = islocalmin(X)
    tf = false(size(X));
-   tf(bfra.deps.peakfinder(X,0,0,-1,false)) = true;
+   tf(baseflow.deps.peakfinder(X,0,0,-1,false)) = true;
 end
 
 %% INPUT PARSER
@@ -287,6 +287,6 @@ function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)
       r = zeros(size(t));
    end
 
-   % Convert to columns, in case this is not called from bfra.getevents
+   % Convert to columns, in case this is not called from baseflow.getevents
    [t, q, r] = deal(t(:), q(:), r(:));
 end

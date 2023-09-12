@@ -25,7 +25,7 @@ Requires Statistics, Optimization, Struct, and Tablicious packages.
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc` for recommended startup options.
-- Unit tests are located in `tests/`. From the top-level folder, they can be run in a matlab session by typing `runtests('tests')` at the command window and pressing enter. For verbose output and/or to enter debug mode on errors, type `runtests('tests', 'debug', true)`. From any folder, they can be run using the toolbox convenience function `bfra.runtests()` or `bfra.runtests('debug')`.
+- Unit tests are located in `tests/`. From the top-level folder, they can be run in a matlab session by typing `runtests('tests')` at the command window and pressing enter. For verbose output and/or to enter debug mode on errors, type `runtests('tests', 'debug', true)`. From any folder, they can be run using the toolbox convenience function `baseflow.runtests()` or `baseflow.runtests('debug')`.
 - To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).  
@@ -33,16 +33,16 @@ For Octave compatibility, see [Octave](#octave).
 
 ## Get started
 
-Toolbox functions are located in the `+bfra` namespace package folder. To see a list of toolbox functions, type `help +bfra` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help bfra.function_name` at the command line then press enter.
+Toolbox functions are located in the `+baseflow` namespace folder. To see a list of toolbox functions, type `help +baseflow` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help baseflow.function_name` at the command line then press enter.
 
 Toolbox documentation and examples are also available in the Matlab help browser. To get started, in your Matlab command window:
 
-- Type `bfra.help()` to open the toolbox documentation in the help browser.
-- Type `bfra.help('function_name')` to open documentation for a specific function.
-- Type `doc bfra` or try `doc +bfra` to see the package contents in the help browser.
-- If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch bfra`.
+- Type `baseflow.help()` to open the toolbox documentation in the help browser.
+- Type `baseflow.help('function_name')` to open documentation for a specific function.
+- Type `doc baseflow` or try `doc +baseflow` to see the package contents in the help browser.
+- If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch baseflow`.
 
-In addition to the toolbox documentation and examples provided in the Matlab help browser, there are several notebooks in `demos/`. The notebook `bfra_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Several other notebooks in the `demos` folder demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
+In addition to the toolbox documentation and examples provided in the Matlab help browser, there are several notebooks in `demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Several other notebooks in the `demos` folder demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
 
 ## Contribute
 
@@ -68,14 +68,14 @@ If you find this software useful, please consider citing the software release in
 
 ## Configuration
 
-Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example, using the `startup.m` file. However, the `+bfra` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup.
+Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example, using the `startup.m` file. However, the `+baseflow` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup.
 
 For extended use of the toolbox, the convenience function `Setup.m` includes options to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
 
 - Running `Setup('install')` does the following:
   - Toolbox paths are added to the search path (not persistent between sessions).
   - Default toolbox preferences are added to a new user preferences group `baseflow` (persistent between sessions).
-  <!-- - Dependencies are checked using `bfra.util.dependencies` to determine if the required files are on the search path. -->
+  <!-- - Dependencies are checked using `baseflow.internal.dependencies` to determine if the required files are on the search path. -->
 - Note that `Setup` does not modify `userpath`, does not call `savepath`, and never modifies the root-level `pathdef.m` file. It only calls `addpath` and `rmpath` to put the toolbox on the user search path.
 - In subsequent sessions, toolbox paths can be managed like so:
   - `Setup('addpath')` or simply `Setup` with no arguments adds the toolbox to the search path for the current session.
@@ -98,11 +98,11 @@ See `Setup.m` for additional configuration options -->
 
 ## Package namespace
 
-The `baseflow` toolbox uses the package namespace prefix `+bfra`, short for **b**ase**f**low **r**ecession **a**nalysis. Package functions are accessed using dot notation: `bfra.<function name>`. If dot notation is used, the package does not need to be imported. The package is imported implicitly by the `+` prefix on the directory name, as long as the **toolbox** (not package) directory is on the matlab search path (i.e., the parent folder containing the `+bfra` package directory needs to be on the Matlab search path).
+The `baseflow` toolbox uses the package namespace `+baseflow`. Package functions are accessed using dot notation: `baseflow.<function name>`. If dot notation is used, the package does not need to be imported. The package is imported implicitly by the `+` prefix on the directory name, as long as the **toolbox** (not package) directory is on the matlab search path (i.e., the parent folder containing the `+baseflow` package directory needs to be on the Matlab search path).
 
-If desired, package functions can be imported into a workspace using `import bfra.<function name>`. Subsequent calls to the imported function can then omit the package prefix. The entire package can be imported using `import bfra.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
+If desired, package functions can be imported into a workspace using `import baseflow.<function name>`. Subsequent calls to the imported function can then omit the package prefix. The entire package can be imported using `import baseflow.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
 
-<!-- If any other `+bfra` packages exist on the search path, functions in all packages share the `+bfra` namespace, similar to a [python namespace package](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/) -->
+<!-- If any other `+baseflow` packages exist on the search path, functions in all packages share the `+baseflow` namespace, similar to a [python namespace package](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/) -->
 
 ## Octave
 
@@ -144,7 +144,7 @@ Limitations when running in Octave:
 - Graphics object functions do not work in Octave, including those that use `gobjects`.
 - Latex interpreter is not supported in Octave.
 
-Work is ongoing to patch these incompatibilities. See `+bfra/private/isoctave` to patch errors.
+Work is ongoing to patch these incompatibilities. See `+baseflow/private/isoctave` to patch errors.
 
 When running in Octave, be careful with blanket `warning on` or `warning off` commands. Octave ships with about a dozen warning states off, listed below. If they are turned on by a `warning on` command, there will be endless warning messages. If this happens, type `warning` in the commandwindow to confirm if the following warnings are off. If so, simply restart Octave to reset them, or reset them manually.
 
@@ -167,8 +167,6 @@ When running in Octave, be careful with blanket `warning on` or `warning off` co
 ## Acknowledgement
 
 The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project funded this work through the United States Department of Energy, Office of Science, Biological and Environmental Research (BER) Regional and Global Model Analysis (RGMA) program. Awarded under contract grant #  89233218CNA000001 to Triad National Security, LLC (“Triad”).
-
-<!-- `doc bfra` brings up the Contents pane in a small help box rather than the extended documentation in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". Alternatively, try `docsearch bfra` to bring up the search results in the help browser. This is a known issue that may occur if the version of Matlab used to generate the documentation differs from the version running locally. -->
 
 <!-- ```shell
 git clone https://github.com/mgcooper/baseflow.git baseflow

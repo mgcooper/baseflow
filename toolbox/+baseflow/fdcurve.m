@@ -76,7 +76,7 @@ end
 function [axscale, units, refpoints, plotfit] = parseinputs(flow, varargin)
 
    p = inputParser;
-   p.FunctionName = 'bfra.fdcurve';
+   p.FunctionName = 'baseflow.fdcurve';
    p.addRequired( 'flow', @isnumeric);
    p.addParameter('axscale', 'semilogy', @ischar);
    p.addParameter('units', '', @ischar);

@@ -13,12 +13,12 @@ function makedocs(varargin)
    % See also: 
 
    % Parse optional arguments
-   validopts = {'docpages', 'demos', 'functions', 'docsearch', 'testrun'};
+   validopts = {'docpages', 'demos', 'functions', 'docsearch'};
    narginchk(0, numel(validopts))
 
    % If no input, build all docs
    if nargin == 0
-      varargin = validopts(1:4);
+      varargin = validopts;
    end
 
    % Convert to a struct array of logical flags

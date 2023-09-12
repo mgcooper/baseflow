@@ -7,11 +7,11 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
    %
    % Description
    %
-   %     tau = bfra.eventtau(Results, Events, Fits) computes drainage timescale
+   %     tau = baseflow.eventtau(Results, Events, Fits) computes drainage timescale
    %     tau from event-scale parameters a,b, and flow Q using the structures K,
-   %     Events, and Fits produced with bfra.getevents and bfra.fitevents
+   %     Events, and Fits produced with baseflow.getevents and baseflow.fitevents
    %
-   %     tau = bfra.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values
+   %     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values
    %     to event-scale values using an aggregation function. Options are 'min',
    %     'max', 'mean', 'median'.
    %
@@ -30,9 +30,9 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
       Results, Events, Fits, varargin{:});
 
    % MAIN FUNCTION
-   Sfnc = bfra.getfunction('SofabQ');
+   Sfnc = baseflow.getfunction('SofabQ');
    dqfnc = @(a,dqdt) -dqdt./a; % must have derived this at some point
-   taufnc = bfra.getfunction('tauofabQ');
+   taufnc = baseflow.getfunction('tauofabQ');
 
    if isscalar(Results)
       etags = Results.eventTag;
@@ -128,7 +128,7 @@ function [Results, Events, Fits, usefits, aggfunc] = parseinputs( ...
 
    parser = inputParser;
    parser.StructExpand = false;
-   parser.FunctionName = 'bfra.eventtau';
+   parser.FunctionName = 'baseflow.eventtau';
 
    parser.addRequired('Results', @isstruct);
    parser.addRequired('Events', @isstruct);

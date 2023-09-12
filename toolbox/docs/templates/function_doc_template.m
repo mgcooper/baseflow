@@ -1,5 +1,5 @@
-%% |bfrafunction| documentation 
-% The |bfrafunction| function ...
+%% |baseflowfunction| documentation 
+% The |baseflowfunction| function ...
 % 
 % <Contents.html Back to Baseflow Recession Analysis Toolbox Contents>.
 %% Syntax 

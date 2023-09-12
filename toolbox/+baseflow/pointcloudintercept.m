@@ -100,7 +100,7 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
          % here xbar/ybar are identical to 'envelope'. use this to show that ahat
          % returned by this function is identical to the case where a0 is returned
          % by this function usine method 'envelope' and then passed to the a(a0...)
-         % function from bfra.getfunction('aofa0')
+         % function from baseflow.getfunction('aofa0')
          % xbar = quantile(q(mask),qtls(1),'Method','approximate');
          % ybar = quantile(-dqdt(mask),qtls(2),'Method','approximate');
    end
@@ -144,7 +144,7 @@ end
 function [q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] = ...
       parseinputs(q, dqdt, bhat, method, varargin)
    parser = inputParser;
-   parser.FunctionName = 'bfra.pointcloudintercept';
+   parser.FunctionName = 'baseflow.pointcloudintercept';
 
    parser.addRequired('q', @isnumeric);
    parser.addRequired('dqdt', @isnumeric);

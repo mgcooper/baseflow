@@ -9,7 +9,7 @@ function [t,q,r,tags] = flattenevents(T,Q,R,Info)
    %
    %     [t,q,r,tags] = flattenevents(T,Q,R,Info) returns lists of time, t,
    %     discharge, q, rainfall, r, and event-tags, tags from input cell arrays
-   %     T,Q,R output from bfra.eventfinder
+   %     T,Q,R output from baseflow.eventfinder
    %
    % Required inputs
    %

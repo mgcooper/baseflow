@@ -3,11 +3,11 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    %
    % Syntax
    %
-   %     [hFits,Picks,Fits] = bfra.plotdqdt(q,dqdt)
-   %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'fitmethod',fitmethod)
-   %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'pickmethod',pickmethod)
-   %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'weights',weights)
-   %     [hFits,Picks,Fits] = bfra.plotdqdt(_,'useax',axis_object)
+   %     [hFits,Picks,Fits] = baseflow.plotdqdt(q,dqdt)
+   %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'fitmethod',fitmethod)
+   %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'pickmethod',pickmethod)
+   %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'weights',weights)
+   %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'useax',axis_object)
    %
    % Required inputs
    %
@@ -19,7 +19,7 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    %
    % See also: getdqdt, fitdqdt
 
-   % NOTE: now that pickFitter calls bfra.fitab, this function does everything
+   % NOTE: now that pickFitter calls baseflow.fitab, this function does everything
    % that an official workflow would do, i think, and therefore should be
    % renamed eventually (except it doesn't pick events)
 
@@ -40,7 +40,7 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    [hFits, Fits, Picks] = initOutput();
 
    % Prep fits
-   [~, ~, logx, logy, weights, ok] = bfra.prepfits(q, dqdt, 'weights', weights);
+   [~, ~, logx, logy, weights, ok] = baseflow.prepfits(q, dqdt, 'weights', weights);
 
    if ok == false
       return;
@@ -94,7 +94,7 @@ function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)
 
          % pause helps with buggy ginput
          pickFig     = eventPlotter(q, dqdt); pause(0.5);
-         pickedPts   = bfra.deps.ginputc(); pause(0.5);
+         pickedPts   = baseflow.deps.ginputc(); pause(0.5);
          startPts    = pickedPts(1:2:end);
          endPts      = pickedPts(2:2:end);
 
@@ -156,11 +156,11 @@ function Fits = pickFitter(Picks,fitmethod)
       switch fitmethod
 
          case {'ols','qtl','nls','mle'}
-            Fit = bfra.fitab(q,dqdt,'nls');
+            Fit = baseflow.fitab(q,dqdt,'nls');
          case 'comp'
-            FitO = bfra.fitab(q,dqdt,'ols','weights',weights);
-            FitQ = bfra.fitab(q,dqdt,'qtl','weights',weights);
-            FitN = bfra.fitab(q,dqdt,'nls','weights',weights);
+            FitO = baseflow.fitab(q,dqdt,'ols','weights',weights);
+            FitQ = baseflow.fitab(q,dqdt,'qtl','weights',weights);
+            FitN = baseflow.fitab(q,dqdt,'nls','weights',weights);
 
             Fits.abqtl(n,:) = FitO.ab;
             Fits.abnls(n,:) = FitN.ab;
@@ -229,7 +229,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
          yplot = abnls(1).*xplot.^abnls(2);
 
          h.plots{n} = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
-         ltext{n} = bfra.aQbString(abnls,'printvalues',true);
+         ltext{n} = baseflow.aQbString(abnls,'printvalues',true);
 
       else
          % if Fits.ab(n,2)<0; continue; end
@@ -242,7 +242,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
             % otherwise cycle through the colors
             h.plots{n} = plot(h.ax,xplot,yplot,':','Color',c(n+1,:));
          end
-         ltext{n} = bfra.aQbString(Fits.ab(n,:),'printvalues',true);
+         ltext{n} = baseflow.aQbString(Fits.ab(n,:),'printvalues',true);
       end
    end
 
@@ -264,8 +264,8 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
    %    h.leg       = legend([h.plots{:}],ltext,'Location','best',      ...
    %                   'Interpreter','latex','AutoUpdate','off');
 
-   xlabel(bfra.strings('Q','units',true));
-   ylabel(bfra.strings('dQdt','units',true));
+   xlabel(baseflow.strings('Q','units',true));
+   ylabel(baseflow.strings('dQdt','units',true));
 
    xlimkeep = get(gca,'XLim');
    ylimkeep = get(gca,'YLim');
@@ -275,19 +275,19 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
    %       refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl
    %    end
 
-   [hUpper,abUpper] = bfra.plotrefline(x,y, ...
+   [hUpper,abUpper] = baseflow.plotrefline(x,y, ...
       'refline',  'upperenvelope',  ...
       'timestep', timestep );
 
-   [hLower,abLower]  = bfra.plotrefline(x,y, ...
+   [hLower,abLower]  = baseflow.plotrefline(x,y, ...
       'refline',  'lowerenvelope',  ...
       'precision',precision );
 
-   [hLate,abLate] = bfra.plotrefline(x,y, ...
+   [hLate,abLate] = baseflow.plotrefline(x,y, ...
       'refline', 'latetime', ...
       'refslope', blate );
 
-   [hEarly,abEarly] = bfra.plotrefline(x,y, ...
+   [hEarly,abEarly] = baseflow.plotrefline(x,y, ...
       'refline', 'earlytime' );
 
    % add the ref-point a/b values
@@ -330,7 +330,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
       addlabels(h)
    end
 
-   % axpos = bfra.deps.plotboxpos(gca); % only works with correct axes position
+   % axpos = baseflow.deps.plotboxpos(gca); % only works with correct axes position
    % xtext = exp(mean(log(xlimkeep)));
    % addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);
    % addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);
@@ -345,7 +345,7 @@ function addlabels(h)
    ya = [ya ya];
    ta = sprintf('$b=%.2f$ ($\\hat{b}$)',h.bLate);
 
-   bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
+   baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
       'BaseAngle',90,'Length',8,'TipAngle',10)
    text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
 
@@ -353,7 +353,7 @@ function addlabels(h)
    xa = [xa xa*3];
    ta = sprintf('$b=%.0f$',h.bEarly);
 
-   bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
+   baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
       'BaseAngle',90,'Length',8,'TipAngle',10)
    text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
 end
@@ -423,9 +423,9 @@ function [istart, istop] = detectTransition(q,dqdt,istart,istop)
       dq1   = dqdt(istart(1):istop(1));
       dq2   = dqdt(istart(2):istop(2));
       dq3   = dqdt(istart(3):istop(3));
-      ab1   = bfra.wols(log(q1),log(-dq1));
-      ab2   = bfra.wols(log(q2),log(-dq2));
-      ab3   = bfra.wols(log(q3),log(-dq3));
+      ab1   = baseflow.wols(log(q1),log(-dq1));
+      ab2   = baseflow.wols(log(q2),log(-dq2));
+      ab3   = baseflow.wols(log(q3),log(-dq3));
 
       % three cases we want to :
       % 1: a flat period between two recessions
@@ -446,7 +446,7 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
       q, dqdt, mfilename, varargin)
 
    parser = inputParser;
-   parser.FunctionName = ['bfra.' mfilename];
+   parser.FunctionName = ['baseflow.' mfilename];
    parser.CaseSensitive = false;
 
    validateattributes(q, {'numeric'},{'real','column'}, mfilename, 'q');

@@ -216,8 +216,8 @@ switch f_dattype
 
       if plotdiag == true
          figure; plot(xmins,dat); hold on;
-         %bfra.deps.hline(dat(find(xmins>=12,1,'first')))
-         bfra.deps.hline(dat(find(xmins>=xmin,1,'first')))
+         %baseflow.deps.hline(dat(find(xmins>=12,1,'first')))
+         baseflow.deps.hline(dat(find(xmins>=xmin,1,'first')))
          xlabel('xmin'); ylabel('K-S stat');
       end
 
@@ -227,7 +227,7 @@ switch f_dattype
       if isempty(vec)
          vec  = (1.50:0.01:3.50);    % covers range of most practical
       end                             % scaling parameters
-      zvec = bfra.deps.zeta(vec);
+      zvec = baseflow.deps.zeta(vec);
 
       xmins = unique(x);
       xmins = xmins(1:end-1);

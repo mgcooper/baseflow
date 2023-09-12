@@ -6,7 +6,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    ab0 = [exp(ab0(1)), ab0(2)];
 
    % initialize r2
-   rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+   rsq0 = baseflow.deps.rsquare(y,ab0(1).*x.^ab0(2));
    rsq = rsq0;
 
    % 'nlinfit' function options
@@ -25,7 +25,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    ab2ok = true;
    try
       [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-      rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+      rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 
    catch ME
 

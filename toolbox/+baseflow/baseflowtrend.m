@@ -51,10 +51,10 @@ function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
    Qa = transpose(mean(reshape(Q,365,numel(Q)/365),'omitnan')).*(100/A);
 
    % regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually
-   ha = bfra.trendplot(t,Qa,'anom',false,'units','cm/d/y', ...
+   ha = baseflow.trendplot(t,Qa,'anom',false,'units','cm/d/y', ...
       'title','mean flow','leg','mean flow regression','showfig', ...
       showfig,'method',method);
-   hb = bfra.trendplot(t,Qa,'anom',false,'units','cm/d/y','quan', ...
+   hb = baseflow.trendplot(t,Qa,'anom',false,'units','cm/d/y','quan', ...
       pctl,'title','baseflow','leg','baseflow regression',...
       'showfig',showfig,'alpha',0.05);
    dQadt = ha.trend.YData(:);  % mean flow trend
@@ -66,7 +66,7 @@ end
 function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.baseflowtrend';
+   parser.FunctionName = 'baseflow.baseflowtrend';
    parser.addRequired('t', @isdatelike);
    parser.addRequired('Q', @isnumericvector);
    parser.addRequired('A', @isnumericscalar);

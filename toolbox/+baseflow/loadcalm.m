@@ -38,7 +38,7 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
    if ~istable(basinname) && basinname == "ALL_BASINS"
       MetaBasin = basinname;
    else
-      MetaBasin = bfra.loadmeta(basinname,version);
+      MetaBasin = baseflow.loadmeta(basinname,version);
    end
 
    % load the calm data
@@ -90,7 +90,7 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
          return
 
       case 'avg'
-         % 'avg' might as well return PM. previously 'bfra'
+         % 'avg' might as well return PM. previously 'baseflow'
          Calm = timetablereduce(Calm);
          Calm = Calm(:,{'mu','PM'});
          Calm = renamevars(Calm,{'mu','PM'},{'Dc','sigDc'});
@@ -179,7 +179,7 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
             legend(Trends.Properties.VariableNames(1:end-1),'Location','best');
 
             % this was in the aggregateCalmData temporary function i deleted
-            bfra.trendplot(Data.Time,Data.mu,'useax',gca, ...
+            baseflow.trendplot(Data.Time,Data.mu,'useax',gca, ...
                'errorbars',true,'yerr',Data.sigma);
          end
 
@@ -197,7 +197,7 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
 
          % ok = abs(slopes(1:end-1)-slopes(iref))./slopes(iref) < maxdiff;
    end
-   % there was a note about using this to make a function bfra.writeshapefile but
+   % there was a note about using this to make a function baseflow.writeshapefile but
    % it could also be used to find calm sites within a given boundary on the fly,
    % e.g. if I want to expand my search programatically using this function, I
    % could pass in the basin shapefile and a buffer tolerance and find all sites
@@ -284,7 +284,7 @@ function [basinname, version, t1, t2, aggfunc, minlength, mincoverage, ...
    validopts = @(x) any(validatestring(x,{'current','archive'}));
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.loadcalm';
+   parser.FunctionName = 'baseflow.loadcalm';
    parser.addRequired('basinname', @ischarlike);
    parser.addOptional('version', 'current', validopts);
    parser.addParameter('t1', NaT, @isdatelike);

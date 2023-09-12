@@ -3,24 +3,24 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    %
    % Syntax
    %
-   %     FIT = bfra.GLOBALFIT(Results,Events,Fits);
-   %     FIT = bfra.GLOBALFIT(Results,Events,Fits,opts);
-   %     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'plotfits',plotfits);
-   %     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit);
-   %     FIT = bfra.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit,'bootreps',nreps);
-   %     FIT = bfra.GLOBALFIT(___,)
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits);
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,opts);
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,Meta,'plotfits',plotfits);
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit);
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit,'bootreps',nreps);
+   %     FIT = baseflow.GLOBALFIT(___,)
    %
    % Description
    %
-   %     FIT = bfra.GLOBALFIT(Results,Events,Fits) uses the event-scale recession
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits) uses the event-scale recession
    %     analysis parameters saved in results table Results and fitted data saved
-   %     in Fits (both outputs of bfra.fitevents) and the event-scale data saved in
-   %     Events (output of bfra.getevents) and computes 'global' parameters tau,
+   %     in Fits (both outputs of baseflow.fitevents) and the event-scale data saved in
+   %     Events (output of baseflow.getevents) and computes 'global' parameters tau,
    %     tau0, phi, bhat, ahat, Qexp, and Q0.
    %
    % Required inputs
    %
-   %     Results, Events, Fits are outputs of bfra.getevents and bfra.fitevents
+   %     Results, Events, Fits are outputs of baseflow.getevents and baseflow.fitevents
    %     opts is a struct containing fields area, D0, and L (see below)
    %
    % See also: setopts, getevents, fitevents, fitphi, eventphi, eventtau
@@ -43,9 +43,9 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
       Results, Events, Fits, mfilename, varargin{:});
 
    % Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
-   [tau, q, dqdt, tags] = bfra.eventtau(Results, Events, Fits, 'usefits', false);
+   [tau, q, dqdt, tags] = baseflow.eventtau(Results, Events, Fits, 'usefits', false);
    
-   TauFit = bfra.plfitb(tau, 'plotfit', plotfits, 'bootfit', bootfit, ...
+   TauFit = baseflow.plfitb(tau, 'plotfit', plotfits, 'bootfit', bootfit, ...
       'bootreps', nreps, 'limit', 20);
 
    % Parameters needed for next steps
@@ -57,35 +57,35 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    itau     = TauFit.taumask;
 
    % Fit a
-   [ahat, ahatLH, xbar, ybar] = bfra.pointcloudintercept(q, dqdt, bhat, ...
+   [ahat, ahatLH, xbar, ybar] = baseflow.pointcloudintercept(q, dqdt, bhat, ...
       'envelope', 'refqtls', refqtls, 'mask', itau, 'bci', [bhatL bhatH]);
 
    % Fit Q0 and Qhat
-   [Qexp, Q0, pQexp, pQ0] = bfra.expectedQ(ahat, bhat, tauexp, q, dqdt, tau0, ...
+   [Qexp, Q0, pQexp, pQ0] = baseflow.expectedQ(ahat, bhat, tauexp, q, dqdt, tau0, ...
       'qtls', Q, 'mask', itau);
 
    % Fit phi
    switch phimethod
       case 'distfit'
-         phid = bfra.eventphi(Results, Fits, A, D, L, bhat, ...
+         phid = baseflow.eventphi(Results, Fits, A, D, L, bhat, ...
             'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
-         phi = bfra.fitphidist(phid, 'mean', 'cdf', plotfits);
+         phi = baseflow.fitphidist(phid, 'mean', 'cdf', plotfits);
 
       case 'pointcloud'
-         phi = bfra.cloudphi(q, dqdt, bhat, A, D, L, 'envelope', ...
+         phi = baseflow.cloudphi(q, dqdt, bhat, A, D, L, 'envelope', ...
             'lateqtls', refqtls, 'earlyqtls', earlyqtls, 'mask', itau);
 
       case 'phicombo'
-         phi1 = bfra.eventphi(Results, Fits, A, D, L, 1, ...
+         phi1 = baseflow.eventphi(Results, Fits, A, D, L, 1, ...
             'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
-         phi2 = bfra.eventphi(Results, Fits, A, D, L, 3/2, ...
+         phi2 = baseflow.eventphi(Results, Fits, A, D, L, 3/2, ...
             'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
          phid = vertcat(phi1, phi2); phid(phid>1) = nan; phid(phid<0) = nan;
-         phi = bfra.fitphidist(phid, 'mean', 'cdf', plotfits);
+         phi = baseflow.fitphidist(phid, 'mean', 'cdf', plotfits);
    end
 
    % % Fit k
-   % [k,Q0_2,D_2] = bfra.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...
+   % [k,Q0_2,D_2] = baseflow.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...
    %    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);
    % Q0    = Qexp*(3-b)/(2-b);
 
@@ -98,7 +98,7 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    % % plot the pointcloud if requested
    % if plotfits == true
    %
-   %    h = bfra.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
+   %    h = baseflow.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...
    %    'reflines',{'early','late','userfit'},'reflabels',true, ...
    %    'userab',[ahat bhat],'addlegend',true);
    %    h.legend.AutoUpdate = 'off';
@@ -128,7 +128,7 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod,
       funcname, varargin)
 
    parser = inputParser;
-   parser.FunctionName = ['bfra.' funcname];
+   parser.FunctionName = ['baseflow.' funcname];
    parser.StructExpand = true;
    parser.PartialMatching = false;
 

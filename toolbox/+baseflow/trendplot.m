@@ -98,10 +98,10 @@ function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)
 
                % only get conf levels if requested
                if isnan(alpha)
-                  abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
+                  abfit(n,:) = baseflow.deps.tsregr(t,y(:,n));
                else
-                  abfit(n,:) = bfra.deps.tsregr(t,y(:,n));
-                  outab = bfra.deps.ktaub([t,y(:,n)], alpha, false);
+                  abfit(n,:) = baseflow.deps.tsregr(t,y(:,n));
+                  outab = baseflow.deps.ktaub([t,y(:,n)], alpha, false);
                   confi = [outab.CIlower, outab.CIupper];
                   error(n) = mean([abfit(n,2)-confi(1),confi(2)-abfit(n,2)]);
                end

@@ -97,7 +97,7 @@ else
       % out the warning for now because this function is called from fitab which
       % is called from various functions, until warnings are managed in one
       % central location I am leaving this commented out. 
-      % warning('bfra:deps:rsquare:NegativeRsquared','Consider adding a constant term to your model');
+      % warning('baseflow:deps:rsquare:NegativeRsquared','Consider adding a constant term to your model');
       %r2 = 0;
    end
 end

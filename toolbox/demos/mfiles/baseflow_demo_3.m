@@ -21,12 +21,12 @@ clc
 %% 
 % Use tab-completion to set the argument to the |basinname| function.
 
-sitename = bfra.basinname('KUPARUK R NR DEADHORSE AK'); %#ok<*NASGU> 
+sitename = baseflow.basinname('KUPARUK R NR DEADHORSE AK'); %#ok<*NASGU> 
 %% 
 % Load streamflow data for the test basin into the workspace. In the sample 
 % dataset, the variable |T| is _time_, |Q| is _discharge_, and |R| is _rainfall_.
 
-[T, Q, R] = bfra.loadExampleData();
+[T, Q, R] = baseflow.loadExampleData();
 %% 
 % The minimum required information for baseflow recession analysis is a timeseries 
 % of streamflow. For aquifer property estimation, the surface area of the upstream 
@@ -50,9 +50,9 @@ L = A*Dd/1000;       % active stream length
 % 
 % Set the algorithm options.
 
-opts.getevents = bfra.setopts('getevents');
-opts.fitevents = bfra.setopts('fitevents');
-opts.globalfit = bfra.setopts('globalfit', ...
+opts.getevents = baseflow.setopts('getevents');
+opts.fitevents = baseflow.setopts('fitevents');
+opts.globalfit = baseflow.setopts('globalfit', ...
    'drainagearea', A, 'drainagedensity', Dd, ...
    'streamlength', L, 'isflat', true, 'plotfits', true);
 %% Aquifer characterization workflow
@@ -63,18 +63,18 @@ opts.globalfit = bfra.setopts('globalfit', ...
 % and hydraulic conducivity $k$.
 % Step 1. Get events
 
-EventData = bfra.getevents(T, Q, R, opts.getevents);
+EventData = baseflow.getevents(T, Q, R, opts.getevents);
 % Step 2. Fit events
 
-[EventFits, FitsTable] = bfra.fitevents(EventData, opts.fitevents);
+[EventFits, FitsTable] = baseflow.fitevents(EventData, opts.fitevents);
 % Step 3. Fit recession parameters _a_ and _b_
-% Pass the event discharge data $Q$ and recession rate $dQ/dt$ to bfra.fitab 
+% Pass the event discharge data $Q$ and recession rate $dQ/dt$ to |baseflow.fitab| 
 % with fitting method set to |nls| for "nonlinear least squares". Generate a point-cloud 
 % plot by setting |plotfit| to |true|. 
 
 q = EventFits.q;
 dqdt = EventFits.dqdt;
-abfit = bfra.fitab(q, dqdt, 'nls', 'plotfit', true);
+abfit = baseflow.fitab(q, dqdt, 'nls', 'plotfit', true);
 ahat = abfit.a;
 bhat = abfit.b;
 % Step 4. Estimate aquifer properties
@@ -83,7 +83,7 @@ bhat = abfit.b;
 % aquifer properties. In this example, we use the "BS04" method which designates 
 % the "Boussinesq, 1904" non-linear late-time solution. 
 
-Props = bfra.aquiferprops(q, dqdt, ahat, bhat, 'BS04', 0.033, A, L);
+Props = baseflow.aquiferprops(q, dqdt, ahat, bhat, 'BS04', 0.033, A, L);
 %% 
 % The aquifer properties returned in the |Props| struct include the following:
 % 
@@ -107,7 +107,7 @@ Props = bfra.aquiferprops(q, dqdt, ahat, bhat, 'BS04', 0.033, A, L);
 % to the groundwater flow equation, and the late-time solution. 
 % 
 % The parameters _a_ and _b_ in the late-time solution are estimated by curve 
-% fitting individual events using |bfra.fitevents| and then estimating a population 
+% fitting individual events using |baseflow.fitevents| and then estimating a population 
 % average. The parameter _b_ in the early-time solution has a known theoretical 
 % value of 3, and the parameter _a_ in the early-time solution is estimated by 
 % fitting a line of slope _b_=3 through the early-time point cloud. 
@@ -153,7 +153,7 @@ Props = bfra.aquiferprops(q, dqdt, ahat, bhat, 'BS04', 0.033, A, L);
 % the line such that ~5% of the _Q_ and _-dQ/dt_ values fall below it. 
 
 D = 0.5; 
-phi = bfra.cloudphi(q,dqdt,bhat,A,D,L,'brutsaert','lateqtls',...
+phi = baseflow.cloudphi(q,dqdt,bhat,A,D,L,'brutsaert','lateqtls',...
    opts.globalfit.lateqtls,'earlyqtls',opts.globalfit.earlyqtls);
 %% 
 % The value obtained for $\phi$ is ~0.03-0.04, similar to values obtained in 
@@ -161,7 +161,7 @@ phi = bfra.cloudphi(q,dqdt,bhat,A,D,L,'brutsaert','lateqtls',...
 % function instead of the assumed value 0.01, we obtain different estimates of 
 % _k_ and _D_.
 
-Props = bfra.aquiferprops(q, dqdt, ahat, bhat, 'RS05', phi, ...
+Props = baseflow.aquiferprops(q, dqdt, ahat, bhat, 'RS05', phi, ...
    A, L, 'D', 0.5);
 
 Props.D

@@ -68,7 +68,7 @@ function [lat, lon, cvar, cbartitle, latlims, lonlims] = parseinputs( ...
       lat, lon, varargin)
 
    p = inputParser;
-   p.FunctionName = 'bfra.mapgages';
+   p.FunctionName = 'baseflow.mapgages';
    p.addRequired('lat', @isnumeric);
    p.addRequired('lon', @isnumeric);
    p.addParameter('cvar', nan, @isnumeric);

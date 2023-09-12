@@ -2,7 +2,7 @@ function Data = getFitsData(Fits,eventTag)
    %GETFITSDATA Get data from Fits for event number eventTag.
    %
    %  Data = getFitsData(Fits,eventTag) returns the data in Fits struct
-   %  returned by bfra.fitevents for event tagged by EVENTTAG.
+   %  returned by baseflow.fitevents for event tagged by EVENTTAG.
    %
    % See also: getEventsData
 

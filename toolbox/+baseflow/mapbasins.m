@@ -24,7 +24,7 @@ function h = mapbasins(Basins,varargin)
    %
    % Example
    %
-   %     h  = bfra.mapbasins(basins,'varname','perm_mean','cbartitle',    ...
+   %     h  = baseflow.mapbasins(basins,'varname','perm_mean','cbartitle',    ...
    %         'permafrost extent (%)','latlims',[65 80],'lonlims',[-168 -60]);
    %
    % See also: mapgages, loadbounds
@@ -364,7 +364,7 @@ function [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, 
    % NOTE: variable name of cvar
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.mapbasins';
+   parser.FunctionName = 'baseflow.mapbasins';
    parser.StructExpand = true;
 
    parser.addRequired('Basins', @isstruct);

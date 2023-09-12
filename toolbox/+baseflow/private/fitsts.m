@@ -16,7 +16,7 @@ function [q,dqdt,dt,tq,rq,dq] = fitsts(T,Q,R,varargin)
          %     % ord         = opts.spn.order;
          %       ord         = 3;
          %       nbreaks     = 2+fix(length(T)/4);
-         %       breaks      = bfra.splinebreaks(T,Q,nbreaks,ord);
+         %       breaks      = baseflow.splinebreaks(T,Q,nbreaks,ord);
          %       pspline     = splinefit(T,Q,breaks,ord);  % piecewise cubic
          %       dspline     = fnder(pspline,1); % ppdiff(p_spline,1) works too
          %       Qspline     = ppval(pspline,T);
@@ -34,7 +34,7 @@ function [q,dqdt,dt,tq,rq,dq] = fitsts(T,Q,R,varargin)
          %
          %       ord         = spnorder;
          %       %nbreaks    = 2+fix(length(T1)/4);
-         %       %breaks     = unique(bfra.splinebreaks(T1,Q1,nbreaks,ord));
+         %       %breaks     = unique(baseflow.splinebreaks(T1,Q1,nbreaks,ord));
          %       pslm        = slmengine(T,Q,'degree',ord-1,'interiorknots',   ...
          %                      'free','knots',100);
          %       dQslm       = slmeval(T,pslm,1);    % differentiate

@@ -55,7 +55,7 @@ end
 function [basinname, version] = parseinputs(basinname, varargin)
    validopts = @(x)any(validatestring(x,{'current','archive'}));
    parser = inputParser;
-   parser.FunctionName = 'bfra.loadmeta';
+   parser.FunctionName = 'baseflow.loadmeta';
    parser.addRequired('basinname', @ischar);
    parser.addOptional('version', 'current', validopts);
    parser.parse(basinname,varargin{:});

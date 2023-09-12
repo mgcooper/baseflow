@@ -1,9 +1,9 @@
-%TEST_TODATENUM Test bfra/private/todatenum.
+%TEST_TODATENUM Test baseflow/private/todatenum.
 
 % Define test data
 T = datetime(1,1,1);
 
-todatenum = bfra.privatefunction('todatenum');
+todatenum = baseflow.privatefunction('todatenum');
 
 %% Test function accuracy with one input
 

@@ -66,10 +66,10 @@ function opts = setopts(funcname,varargin)
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-   %% set default bfra settings
+   %% set default baseflow settings
 
    p = inputParser;
-   p.FunctionName = 'bfra.setopts';
+   p.FunctionName = 'baseflow.setopts';
 
    p.addRequired('funcname', @ischar);
    parse(p,funcname);
@@ -105,7 +105,7 @@ function opts = setopts(funcname,varargin)
          addParameter(p,   'etsparam',    0.2,        @isnumericscalar  );
          addParameter(p,   'vtsparam',    1.0,        @isnumericscalar  );
 
-         % global fit - input to bfra.globalfit
+         % global fit - input to baseflow.globalfit
       case 'globalfit'
 
          addParameter(p,   'drainagearea',      nan,        @isnumericscalar );

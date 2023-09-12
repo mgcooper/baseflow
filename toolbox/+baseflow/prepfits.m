@@ -3,7 +3,7 @@ function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)
    %
    % Syntax
    %
-   %  [x,y,logx,logy,weights,success] = bfra.prepfits(q,dqdt,varargin)
+   %  [x,y,logx,logy,weights,success] = baseflow.prepfits(q,dqdt,varargin)
    %
    % Required inputs
    %
@@ -42,7 +42,7 @@ end
 %% parse inputs
 function [q, dqdt, weights, mask] = parseinputs(q, dqdt, varargin)
    parser = inputParser;
-   parser.FunctionName = 'bfra.prepfits';
+   parser.FunctionName = 'baseflow.prepfits';
 
    parser.addRequired('q', @isnumeric);
    parser.addRequired('dqdt', @isnumeric);

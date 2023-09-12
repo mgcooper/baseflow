@@ -10,7 +10,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    %ab = nlinfit(q,dqdt,fnc,ab0,opts,'Weights',weights);
 
    % initialize r2
-   rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+   rsq0 = baseflow.deps.rsquare(y,ab0(1).*x.^ab0(2));
    rsq = rsq0;
 
    % 'nlinfit' function options
@@ -45,7 +45,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    ab1ok = true;
    try
       [ab1,R1,~,C1] = nlinfit(x,y,fnc,ab0,opts1); % R=resids,C=error variance
-      rsq1 = bfra.deps.rsquare(y,ab1(1).*x.^ab1(2));
+      rsq1 = baseflow.deps.rsquare(y,ab1(1).*x.^ab1(2));
 
    catch ME
 
@@ -72,7 +72,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
       try
          f3 = fit(x,y,ftype,opts3);
          ab3 = coeffvalues(f3);
-         rsq3 = bfra.deps.rsquare(y,ab3(1).*x.^ab3(2));
+         rsq3 = baseflow.deps.rsquare(y,ab3(1).*x.^ab3(2));
 
       catch ME
 
@@ -103,7 +103,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
       ab2ok = true;
       try
          [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-         rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+         rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 
       catch ME
 
@@ -127,7 +127,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
          ab4ok = true;
          try
             f4 = fit(x,y,ftype,opts4); ab4 = coeffvalues(f4);
-            rsq4 = bfra.deps.rsquare(y,ab4(1).*x.^ab4(2));
+            rsq4 = baseflow.deps.rsquare(y,ab4(1).*x.^ab4(2));
 
          catch ME
 

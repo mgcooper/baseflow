@@ -1,5 +1,5 @@
 function stations = stationlist
-   %STATIONLIST Return list of stations from the bfra basin database.
+   %STATIONLIST Return list of stations from the baseflow basin database.
    %
    %
    % See also: stationname

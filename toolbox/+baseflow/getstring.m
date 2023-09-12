@@ -51,7 +51,7 @@ function str = getstring(request, varargin)
    %     str = getstring('Q', 'units', true)
    %     % Returns: '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'
    %
-   % See also bfra.aQbString
+   % See also baseflow.aQbString
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
@@ -163,7 +163,7 @@ end
 %% Input Parser
 function [request, units, interpreter] = parseinputs(request, varargin)
    parser = inputParser;
-   parser.FunctionName = 'bfra.getstring';
+   parser.FunctionName = 'baseflow.getstring';
    parser.CaseSensitive = false;
    parser.addRequired('request', @ischar);
    parser.addParameter('units', false, @islogical);

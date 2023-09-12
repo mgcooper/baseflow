@@ -26,15 +26,15 @@ function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-   % TODO: compare subfunction eventPlotter here to bfra.eventplotter and to
+   % TODO: compare subfunction eventPlotter here to baseflow.eventplotter and to
    % versions in dev-bk. Cursory glance - eventPlotter includes option to plot
-   % rain, but does not include 3rd subplot of d2q/dt in bfra.eventplotter
+   % rain, but does not include 3rd subplot of d2q/dt in baseflow.eventplotter
 
    % PARSE INPUTS
    [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info);
 
    % compute the first derivative
-   qdot = bfra.deps.derivative(q);
+   qdot = baseflow.deps.derivative(q);
 
    % pick the events
    Events = eventSelector(t,q,r,qdot,Info);
@@ -106,7 +106,7 @@ function Events = eventSelector(t,q,r,qdot,Info)
    % pick the points
    h = eventPlotter(t,q,r,qdot,Info);  % plot the timeseries
 
-   pickedPts = bfra.deps.ginputc();
+   pickedPts = baseflow.deps.ginputc();
    startPts = pickedPts(1:2:end);
    endPts = pickedPts(2:2:end);
    numPicks = numel(startPts);
@@ -175,7 +175,7 @@ end
 
 function h = eventPlotter(t,q,r,dqdt,Info)
 
-   % stripped down version of bfra.plotevents with ginput picking added
+   % stripped down version of baseflow.plotevents with ginput picking added
 
    if isempty(Info.istart)
       disp('no valid events')
@@ -206,7 +206,7 @@ function h = eventPlotter(t,q,r,dqdt,Info)
    h.s1e = scatter(t(icon),q(icon),sz,'filled');
    h.s1f = scatter(t(ikeep),q(ikeep),sz*2.5,'filled');
 
-   h.s1g = bfra.deps.hline(q50,':');
+   h.s1g = baseflow.deps.hline(q50,':');
 
    dates = datetime(t,'ConvertFrom','datenum');
 
@@ -242,7 +242,7 @@ function h = eventPlotter(t,q,r,dqdt,Info)
    h.s2d = scatter(t(imin),dqdt(imin),sz*2,'filled');
    h.s2e = scatter(t(icon),dqdt(icon),sz,'filled');
    h.s2f = scatter(t(ikeep),dqdt(ikeep),sz*2.5,'filled');
-   h.hl2 = bfra.deps.hline(0,'k-'); h.hl2.LineWidth = 1;
+   h.hl2 = baseflow.deps.hline(0,'k-'); h.hl2.LineWidth = 1;
    h.l2 = legend('increasing','decreasing','maxima','minima','convex', ...
       'keep','AutoUpdate','off');
    ylabel('dQ/dt');
@@ -289,7 +289,7 @@ end
 function [t, q, r, nmin, Info] = parseinputs(t, q, r, nmin, Info)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.eventpicker';
+   parser.FunctionName = 'baseflow.eventpicker';
    parser.StructExpand = false; % for 'Info' input
    parser.addRequired('t', @isdatelike);
    parser.addRequired('q', @isnumeric);

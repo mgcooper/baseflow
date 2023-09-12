@@ -28,9 +28,9 @@ function [Qtstr,aQbstr] = QtString(varargin)
       end
 
    else
-      % this is same as bfra.getstring
-      aQbstr = bfra.getstring('aQb');
-      Qtstr = bfra.getstring('Q(t)');
+      % this is same as baseflow.getstring
+      aQbstr = baseflow.getstring('aQb');
+      Qtstr = baseflow.getstring('Q(t)');
    end
 end
 
@@ -38,7 +38,7 @@ end
 function [ab, Q0, printvalues] = parseinputs(mfilename, varargin)
 
    parser = inputParser;
-   parser.FunctionName = ['bfra.' mfilename];
+   parser.FunctionName = ['baseflow.' mfilename];
    parser.addOptional('ab', [], @isnumeric);
    parser.addOptional('Q0', [], @isnumeric);
    parser.addParameter('printvalues', false, @islogical);

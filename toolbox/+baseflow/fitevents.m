@@ -8,14 +8,14 @@ function [Fits,Results] = fitevents(Events,varargin)
    % Description
    %
    %     [Fits,Results] = fitevents(Events) fits all recession events in Events
-   %     (output of bfra.getevents) using default algorithm options.
+   %     (output of baseflow.getevents) using default algorithm options.
    %
    %     [Fits,Results] = fitevents(Events,opts) uses user-supplied
-   %     algorithm options in struct opts. See bfra.setopts to set options.
+   %     algorithm options in struct opts. See baseflow.setopts to set options.
    %
    % Required inputs
    %
-   %     Events: output of bfra.getevents (flow comes in as m3 d-1 posted daily)
+   %     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted daily)
    %
    % Outputs
    %
@@ -81,7 +81,7 @@ function [Fits,Results] = fitevents(Events,varargin)
       warning('off','stats:nlinfit:IterationLimitExceeded');
       warning('off','stats:nlinfit:ModelConstantWRTParam');
       warning('off','stats:nlinfit:IllConditionedJacobian');
-      warning('off','bfra:deps:rsquare:NegativeRsquared');
+      warning('off','baseflow:deps:rsquare:NegativeRsquared');
    end
 
    debugflag = false;
@@ -102,7 +102,7 @@ function [Fits,Results] = fitevents(Events,varargin)
 
       % get the q, dq/dt estimates (H = Hat)
 
-      [qH,dH,dtH,tH] = bfra.getdqdt(eventT, eventQ, eventR, derivmethod,   ...
+      [qH,dH,dtH,tH] = baseflow.getdqdt(eventT, eventQ, eventR, derivmethod,   ...
          'pickmethod', pickmethod, 'fitmethod', fitmethod, 'etsparam', ...
          etsparam, 'vtsparam', vtsparam);
 
@@ -127,7 +127,7 @@ function [Fits,Results] = fitevents(Events,varargin)
          if ok == false
             continue
          else
-            [iFit, ok] = bfra.fitab(q, dqdt, fitmethod, 'fitopts', fitopts);
+            [iFit, ok] = baseflow.fitab(q, dqdt, fitmethod, 'fitopts', fitopts);
          end
 
          [Fits, Results, nFits] = saveFit(eventTime, q, dqdt, dt, tq, ...
@@ -152,7 +152,7 @@ function [Fits,Results] = fitevents(Events,varargin)
       warning('on','stats:nlinfit:IterationLimitExceeded');
       warning('on','stats:nlinfit:ModelConstantWRTParam');
       warning('on','stats:nlinfit:IllConditionedJacobian');
-      warning('on','bfra:deps:rsquare:NegativeRsquared');
+      warning('on','baseflow:deps:rsquare:NegativeRsquared');
    end
 end
 

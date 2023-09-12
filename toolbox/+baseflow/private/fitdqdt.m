@@ -3,11 +3,11 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
    %
    %  Syntax
    %
-   %     [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(T,Q,R,derivmethod)
-   %     [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(_,'fitwindow',fitwindow)
-   %     [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(_,'fitwindow',fitmethod)
-   %     [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(_,'pickmethod',pickmethod)
-   %     [q,dqdt,dt,tq,rq,r] = bfra.fitdqdt(_,'ax',axis_object)
+   %     [q,dqdt,dt,tq,rq,r] = baseflow.fitdqdt(T,Q,R,derivmethod)
+   %     [q,dqdt,dt,tq,rq,r] = baseflow.fitdqdt(_,'fitwindow',fitwindow)
+   %     [q,dqdt,dt,tq,rq,r] = baseflow.fitdqdt(_,'fitwindow',fitmethod)
+   %     [q,dqdt,dt,tq,rq,r] = baseflow.fitdqdt(_,'pickmethod',pickmethod)
+   %     [q,dqdt,dt,tq,rq,r] = baseflow.fitdqdt(_,'ax',axis_object)
    %
    % Description
    %

@@ -119,7 +119,7 @@ function [ab,stats]=quantreg(x,y,tau,order,Nboot,alpha)
       %       ab = fliplr(ab');
 
       % noticed ab flipped incorrectly when calling two outputs from
-      % bfra_get_Qmin, so i think the fliplr is incorrect
+      % baseflow_get_Qmin, so i think the fliplr is incorrect
       ab = fliplr(ab');
    end
 

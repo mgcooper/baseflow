@@ -1,5 +1,5 @@
 %% Citing BFRA 
-% <<bfra_diagram.jpg>>
+% <<baseflow_diagram.jpg>>
 % 
 % The Baseflow Recession Analysis Toolbox was developed by Matt Cooper
 % (matt.cooper@pnnl.gov). 

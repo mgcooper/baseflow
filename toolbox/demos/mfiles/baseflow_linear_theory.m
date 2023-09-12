@@ -100,12 +100,12 @@ c1 = c1/c1expr
 %% 
 % Find the pdf
 
-Qtc_pdf  = c1.*Q
+Qtc_pdf = c1.*Q
 % Derive the characteristic drainage timescale, $t_c$
 % Define the $t_c$ integrand, which is the scalar multiple of the pdf and the 
 % independent variable time
 
-dtc_dt   = Qtc_pdf.*t
+dtc_dt = Qtc_pdf.*t
 %% 
 % Integrate $\frac{dt_c}{dt}$ to find the mean lifetime aka the characteristic 
 % timescale $t_c$
@@ -120,28 +120,20 @@ dQc_dt = Q(t).*Qtc_pdf
 
 Qc = int(dQc_dt,t,0,inf)
 %% Verification
-% Compare the results with the symbolic function bfra.sym.expectedvalue
+% Compare the results with the symbolic function baseflow.sym.expectedvalue
 %% 
 % Define the limits of integration and call the function
 
 tlowerIntegralLimit = 0;
 tupperIntegralLimit = Inf;
-[tc,Qexp] = bfra.sym.expectedvalue(Q,t,tlowerIntegralLimit,tupperIntegralLimit)
+[tc,Qexp] = baseflow.sym.expectedvalue(Q,t,tlowerIntegralLimit,tupperIntegralLimit)
 %% 
 % See what happens when an upper limit is defined, equivalent to a lower limit 
 % on streamflow
 
 syms tmax positive 
 
-[tc,Qexp] = bfra.sym.expectedvalue(Q,t,0,tmax)
+[tc,Qexp] = baseflow.sym.expectedvalue(Q,t,0,tmax)
 %% 
 % The implications of lower- and upper-limits to the pdf will become more apparent 
 % in the non-linear analysis.
-% 
-% 
-% 
-% 
-% 
-% 
-% 
-%

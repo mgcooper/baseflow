@@ -13,7 +13,7 @@ function report = dependencies(funcname,option)
 
    % use this to generate a list of all functions in the package, then cycle over
    % all of them and find the dependencies
-   % funcpath = fileparts(which('bfra.fitab'));
+   % funcpath = fileparts(which('baseflow.fitab'));
    % funclist = getlist(funcpath,'.m');
 
    % if called with no input, open this file
@@ -27,10 +27,10 @@ function report = dependencies(funcname,option)
 
    % use this to test a particular function
    % if nargin == 0
-   % funcname = 'bfra_demo.mlx';
-   % funcname = 'bfra_gettingStarted.m';
-   % funcname = 'bfra.fitab';
-   % funcname = 'bfra_kuparuk.m';
+   % funcname = 'baseflow_demo.mlx';
+   % funcname = 'baseflow_gettingStarted.m';
+   % funcname = 'baseflow.fitab';
+   % funcname = 'baseflow_kuparuk.m';
    % end
 
    % this loads the saved dependencies.mat file and checks against util/
@@ -63,7 +63,7 @@ function report = getdependencyreport(funclist,prodlist,funcname)
    % get a list of dependencies that are not toolbox functions, i.e. those that
    % need to be included in util/
    % report = funclist;
-   skip = {'+bfra',funcname,'ExtractNameVal','Cupid'};
+   skip = {'+baseflow',funcname,'ExtractNameVal','Cupid'};
    keep = true(numel(funclist),1);
    for n = 1:numel(funclist)
       keep(n) = ~ismember(funclist{n},skip);
@@ -74,7 +74,7 @@ function report = getdependencyreport(funclist,prodlist,funcname)
 end
 
 function report = dependencycheck
-   load(fullfile(getinstallpath(), '+bfra', 'private', 'dependencies.mat'), 'report')
+   load(fullfile(getinstallpath(), '+baseflow', 'private', 'dependencies.mat'), 'report')
    deps = report.function_dependencies;
    deps = deps(~isfile(fullfile(getinstallpath(), 'util', deps)));
    deps = deps(~isfolder(strrep(fullfile(getinstallpath(), 'util', deps),'.m','')));
@@ -94,7 +94,7 @@ function report = getmissingdependencies(funclist,funcname)
    % Also remove the 'cupid' toolbox and 'ExtractNameVal' functions that get
    % picked up as dependent but are not. What remains after this is functions that
    % are either in util/ or need to be moved there.
-   skip = {'+bfra',funcname,'ExtractNameVal','Cupid'};
+   skip = {'+baseflow',funcname,'ExtractNameVal','Cupid'};
    keep = true(numel(missing),1);
    for n = 1:numel(missing)
       keep(n) = ~ismember(missing{n},skip);
@@ -102,7 +102,7 @@ function report = getmissingdependencies(funclist,funcname)
    missing = missing(keep);
 
    % now remove ones that are in util.
-   skip = {'bfra/util'};
+   skip = {'baseflow/util'};
    keep = true(numel(missing),1);
    for n = 1:numel(missing)
       keep(n) = ~ismember(missing{n},skip);
@@ -110,14 +110,14 @@ function report = getmissingdependencies(funclist,funcname)
    missing = missing(keep);
 
    % % since I use addpath(...,'-end'), the dependency check finds functions in my
-   % main function folder not the ones in bfra/util.
+   % main function folder not the ones in baseflow/util.
    % % now check if funclist ismember paths to versions elsewhere that are in util .
    % % what remains are missing.
    keep = true(numel(missing),1);
    for n = 1:numel(missing)
       [~,funcname] = fileparts(missing{n});
       allfuncs = which(funcname,'-all');
-      if any(ismember(allfuncs,fullfile('bfra','util',funcname)))
+      if any(ismember(allfuncs,fullfile('baseflow','util',funcname)))
          keep(n) = false;
       end
    end
@@ -162,7 +162,7 @@ function report = resolvedependencies(funclist,funcname)
    % behavior in the toolbox but the core functionality should
 
    %%
-   % if the commented loop in bfra.dependencies.m is used, this is required
+   % if the commented loop in baseflow.dependencies.m is used, this is required
    % dependentFunctions = unique(vertcat(allDependencies.function_dependencies{:}));
 
    % % nearly certain it isn't necessary to cycle over all functions, I may have

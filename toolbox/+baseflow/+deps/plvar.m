@@ -226,7 +226,7 @@ switch f_dattype
         if isempty(vec)
             vec  = (1.50:0.01:3.50);    % covers range of most practical 
         end                             % scaling parameters
-        zvec = bfra.deps.zeta(vec);
+        zvec = baseflow.deps.zeta(vec);
 
         for B=1:size(bof,1)
             y = x(ceil(N*rand(N,1)));   % bootstrap resample

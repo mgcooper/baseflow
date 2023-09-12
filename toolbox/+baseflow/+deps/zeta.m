@@ -51,7 +51,7 @@ function [f] = zeta(z)
 zz=2.^z;
 k = zz./(zz-2);
 
-f=k.*bfra.deps.deta(z,1);
+f=k.*baseflow.deps.deta(z,1);
 
 p=find(z==1);
 if ~isempty(p)

@@ -42,7 +42,7 @@ end
 function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)
    parser = inputParser;
    parser.StructExpand = true; % this has to be true to use autocomplete fieldname
-   parser.FunctionName = 'bfra.printtrend';
+   parser.FunctionName = 'baseflow.printtrend';
    parser.addRequired('Data', @istimetable);
    parser.addParameter('var', 'Qb', @ischar);
    parser.addParameter('alpha', 0.05, @isnumeric);

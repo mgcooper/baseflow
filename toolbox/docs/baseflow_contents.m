@@ -4,15 +4,15 @@
 % 
 %% *Getting Started*
 % 
-% See <bfra_gettingStarted.html Getting Started> for help setting up the toolbox.
+% See <baseflow_gettingStarted.html Getting Started> for help setting up the toolbox.
 % 
 %% *User Guide*
 % 
-% See the <bfra_demo.html Examples> for an introduction to using the toolbox.
+% See the <baseflow_demo.html Examples> for an introduction to using the toolbox.
 % 
 %% *Tutorials*
 % 
-% See the <bfra_theory_contents.html Tutorials> for an introduction to the underlying theoretical basis of the baseflow toolbox.
+% See the <baseflow_theory_contents.html Tutorials> for an introduction to the underlying theoretical basis of the baseflow toolbox.
 % 
 %% *Functions*
 % 
@@ -24,8 +24,8 @@
 % * |aquiferstorage|     - estimate aquifer storage 
 % * |aquiferthickness|   - estimate aquifer thickness
 % * |baseflowtrend|      - compute baseflow expected value and rate of change
-% * |basinlist|          - load the list of basins in the bfra database
-% * |basinname|          - return string 'basin' from the bfra basin database
+% * |basinlist|          - load the list of basins in the baseflow database
+% * |basinname|          - return string 'basin' from the baseflow basin database
 % * |characteristicTime| - compute the characteristic e-folding time for baseflow
 % * |checkevent|         - plot detected recession event and fitted values
 % * |cloudphi|           - estimate drainable porosity phi from the point cloud
@@ -52,11 +52,11 @@
 % * |getevents|          - get individual recession events from daily timeseries T, Q, and R.
 % * |getEventsData|      - get data from Events for event number eventTag
 % * |getFitsData|        - get data from Fits for event number eventTag
-% * |getstring|          - get latex-formatted string for equations in the bfra library
-% * |getfunction|        - get function handle from the bfra function library
+% * |getstring|          - get latex-formatted string for equations in the baseflow library
+% * |getfunction|        - get function handle from the baseflow function library
 % * |globalfit|          - fit global parameters using all individual event-scale recession data
 % * |gpfitb|             - fit Generalized Pareto Distribution to recession parameter tau
-% * |initfit|            - initialize arrays for common fitting routines in the bfra toolbox
+% * |initfit|            - initialize arrays for common fitting routines in the baseflow toolbox
 % * |loadbasins|         - loadbasins load boundary object for basin specified by basinname
 % * |loadcalm|           - loads calm ALT data for a basin in the Bounds struct
 % * |loadflow|           - load timeseries of streamflow and metadata for basin
@@ -79,16 +79,16 @@
 % * |QtauString|         - returns latex-formatted string for Q(tau) function
 % * |QtString|           - returns latex-formatted string for Q(t) function
 % * |setopts|            - set algorithm options for functions getevents, fitevents, and globalfit
-% * |stationlist|        - return list of stations from the bfra basin database
-% * |stationname|        - return string 'station' from the bfra basin database
+% * |stationlist|        - return list of stations from the baseflow basin database
+% * |stationname|        - return string 'station' from the baseflow basin database
 % * |specialfunctions|   - libarary of special functions required for recession analysis
 % * |taufunc|            - returns inline function for tau or the value of tau
-% * |wrapevents|         - wrapper around bfra.getevents to get recession all recession events
-% * |wrapfits|           - estimate recession coefficients (wrapper around bfra.fitab)
+% * |wrapevents|         - wrapper around baseflow.getevents to get recession all recession events
+% * |wrapfits|           - estimate recession coefficients (wrapper around baseflow.fitab)
 % 
 % Utility functions (not documented)
 % 
 % * |generateTestData|   - generate test data for baseflow recession analysis
 % * |plotalttrend|       - plot the saturated aquifer thickness trend
 % * |setEventEmpty|      - set recessoin event empty in Events structure
-% * |version|            - return the version number for the bfra toolbox
+% * |version|            - return the version number for the baseflow toolbox

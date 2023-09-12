@@ -147,7 +147,7 @@ function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)
    if all(isnan(eventq))
       return
    else
-      h2 = bfra.pointcloudplot(eventq, eventdqdt, 'ax', h.t4, 'reflines', ...
+      h2 = baseflow.pointcloudplot(eventq, eventdqdt, 'ax', h.t4, 'reflines', ...
          {'lowerenvelope','upperenvelope','early','late','bestfit'}, ...
          'reflabels', false, 'rain', eventr, 'addlegend', true);
 
@@ -170,7 +170,7 @@ function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)
       set(h.h3a,'MarkerFaceColor',colors(1,:),'MarkerEdgeColor','none');
 
       % --------------- see all events for this year
-      % bfra_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');
+      % baseflow_plotevents(Tt,Qq,min(Qq)/200,6,1,'neg');
 
       % h.ax2a.XLim = h.ax1a.XLim;
 
@@ -221,22 +221,22 @@ function [tfit, qfit, dqfit, Qtstr, aQbstr, qfit0, dqfit0, Qtstr0, ...
       dqfit0 = nan;Qtstr0 = 'nan';aQbstr0 = 'nan';rsq0 = nan;
       return
    end
-   Fit = bfra.fitab(eventq,eventdqdt,'nls');
+   Fit = baseflow.fitab(eventq,eventdqdt,'nls');
    ab = Fit.ab;
    Q0 = eventq(find(~isnan(eventq),1,'first'));
    tfit = eventT(~isnan(eventq));
 
    % predicted Q from non-lin free
-   [qfit,dqfit] = bfra.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
-   [Qtstr,aQbstr] = bfra.QtauString(ab,'printvalues',true);
+   [qfit,dqfit] = baseflow.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
+   [Qtstr,aQbstr] = baseflow.QtauString(ab,'printvalues',true);
 
    % if requested, fit with a fixed b value and get predicted Q and dQ/dt
    if fixb == true
-      Fit = bfra.fitab(eventq,eventdqdt,'mean','order',order);
+      Fit = baseflow.fitab(eventq,eventdqdt,'mean','order',order);
       ab0 = Fit.ab;
       rsq0 = Fit.rsq;
-      [qfit0,dqfit0] = bfra.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
-      [Qtstr0,aQbstr0] = bfra.QtauString(ab0,'printvalues',true);
+      [qfit0,dqfit0] = baseflow.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
+      [Qtstr0,aQbstr0] = baseflow.QtauString(ab0,'printvalues',true);
    else
       ab0 = nan;
       rsq0 = nan;
@@ -263,7 +263,7 @@ function [T, Q, q, dqdt, r, alltags, eventtag, order] = parseinputs( ...
       T, Q, q, dqdt, r, alltags, eventtag, varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.checkevent';
+   parser.FunctionName = 'baseflow.checkevent';
    parser.addRequired('T', @(x) isnumeric(x) | isdatetime(x));
    parser.addRequired('Q', @isnumeric);
    parser.addRequired('q', @isnumeric);
@@ -315,5 +315,5 @@ end
 %     figure; plot(qfit,dqfit,'-o'); legend('fit function');
 %     figure; plot(q,-dqtst,'-o'); legend('fit test');
 
-%abl = bfra_quickfit(q,dqdt,'lin');
-%[q,dqdt] = bfra_Qlin(a,b,Q0,t)
+%abl = baseflow_quickfit(q,dqdt,'lin');
+%[q,dqdt] = baseflow_Qlin(a,b,Q0,t)

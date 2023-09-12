@@ -11,7 +11,7 @@ function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,show
    %     PhiFit =
    %     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) fits
    %     an ensemble of drainable porosity values using the event-scale
-   %     recession data in structs Results and Fits returned by bfra.fitevents.
+   %     recession data in structs Results and Fits returned by baseflow.fitevents.
    %     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute
    %     drainable porosity from early-time and late-time recession parameters
    %     and aquifer properties area A, depth D, and channel lenght L.
@@ -23,16 +23,16 @@ function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,show
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-   % phid = bfra.eventphi(Results,Fits,A,D,[],bhat);
-   % phi = bfra.fitphidist(phid,'mean','cdf');
+   % phid = baseflow.eventphi(Results,Fits,A,D,[],bhat);
+   % phi = baseflow.fitphidist(phid,'mean','cdf');
 
-   phidist(:,1) = bfra.eventphi( ...
+   phidist(:,1) = baseflow.eventphi( ...
       Results,Fits,A,D,L,1,'lateqtls',lateqtls,'earlyqtls',earlyqtls);
 
-   phidist(:,2) = bfra.eventphi( ...
+   phidist(:,2) = baseflow.eventphi( ...
       Results,Fits,A,D,L,1.5,'lateqtls',lateqtls,'earlyqtls',earlyqtls);
 
-   phidist(:,3) = bfra.eventphi( ...
+   phidist(:,3) = baseflow.eventphi( ...
       Results,Fits,A,D,L,bhat,'lateqtls',lateqtls,'earlyqtls',earlyqtls);
 
    phidist(phidist>1.0) = nan;
@@ -40,10 +40,10 @@ function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,show
    phicombo = vertcat(phidist(:,1),phidist(:,2));
 
    % plot the fits
-   [PD(1),h1] = bfra.fitphidist(phidist(:,1),'PD','cdf',showfit);
-   [PD(2),h2] = bfra.fitphidist(phidist(:,2),'PD','cdf',showfit);
-   [PD(3),h3] = bfra.fitphidist(phidist(:,3),'PD','cdf',showfit);
-   [PD(4),h4] = bfra.fitphidist(phicombo,'PD','cdf',showfit);
+   [PD(1),h1] = baseflow.fitphidist(phidist(:,1),'PD','cdf',showfit);
+   [PD(2),h2] = baseflow.fitphidist(phidist(:,2),'PD','cdf',showfit);
+   [PD(3),h3] = baseflow.fitphidist(phidist(:,3),'PD','cdf',showfit);
+   [PD(4),h4] = baseflow.fitphidist(phicombo,'PD','cdf',showfit);
 
    % put the mean and standard errors in an array
    mu = [h1.mu; h2.mu; h3.mu; h4.mu];
@@ -55,9 +55,9 @@ function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,show
    PhiFit.mu      = mu;
    PhiFit.pm      = pm;
 
-   % [F1,h1]  = bfra.fitphidist(phi1,'PD','cdf');
-   % [F2,h2]  = bfra.fitphidist(phi2,'PD','cdf');
-   % [F3,h3]  = bfra.fitphidist(phi3,'PD','cdf');
-   % [F4,h4]  = bfra.fitphidist(phi4,'PD','cdf');
-   % [F,h]    = bfra.fitphidist([phi1;phi2],'PD','cdf');
+   % [F1,h1]  = baseflow.fitphidist(phi1,'PD','cdf');
+   % [F2,h2]  = baseflow.fitphidist(phi2,'PD','cdf');
+   % [F3,h3]  = baseflow.fitphidist(phi3,'PD','cdf');
+   % [F4,h4]  = baseflow.fitphidist(phi4,'PD','cdf');
+   % [F,h]    = baseflow.fitphidist([phi1;phi2],'PD','cdf');
 end

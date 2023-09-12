@@ -3,20 +3,20 @@ function [Fit,h] = fitphidist(phi,varargin)
    %
    % Syntax
    %
-   %     FIT = bfra.FITPHIDIST(phi);
-   %     FIT = bfra.FITPHIDIST(___,plottype);
-   %     FIT = bfra.FITPHIDIST(___,outputtype);
+   %     FIT = baseflow.FITPHIDIST(phi);
+   %     FIT = baseflow.FITPHIDIST(___,plottype);
+   %     FIT = baseflow.FITPHIDIST(___,outputtype);
    %
    % Description
    %
-   %     Fit = bfra.fitphidist(phi) returns probability distribution object
+   %     Fit = baseflow.fitphidist(phi) returns probability distribution object
    %     'Fit' which is a Beta Distribution fit to the input data in phi
    %
-   %     Fit = bfra.fitphidist(phi,outputtype) returns a Beta Distribution fit
+   %     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution fit
    %     to the input data in phi. 'outputtype' is 'PD', 'mean', 'median', or
    %     'std', where default 'PD' is the Probability Distribution object.
    %
-   %     Fit = bfra.fitphidist(__,plottype) returns any of the prior options
+   %     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options
    %     plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default
    %     is 'none'.
    %
@@ -113,7 +113,7 @@ function h = cdfplotphi(phi,PD,showfit)
 
       xarrow = [PD.mean 1.3*PD.mean];
       yarrow = [PD.cdf(PD.mean) PD.cdf(PD.mean)];
-      bfra.deps.arrow([xarrow(1),yarrow(1)],[xarrow(2),yarrow(2)], ...
+      baseflow.deps.arrow([xarrow(1),yarrow(1)],[xarrow(2),yarrow(2)], ...
          'BaseAngle',90,'Length',8,'TipAngle',10)
       text(0.95*xarrow(1),yarrow(1),arrowtxt,'HorizontalAlignment','right')
 
@@ -172,7 +172,7 @@ function [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)
    validplottype = @(x) any(validatestring(x,{'cdf','pdf','probplot'}));
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.fitphidist';
+   parser.FunctionName = 'baseflow.fitphidist';
    parser.addRequired('phi', @isvector);
    parser.addOptional('outputtype', 'PD', validoutput);
    parser.addOptional('plottype', 'none', validplottype);

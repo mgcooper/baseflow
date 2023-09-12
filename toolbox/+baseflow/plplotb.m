@@ -64,16 +64,16 @@ function h = plplotb(x,xmin,alpha,varargin)
    h.fit = loglog(ax,xccfit,yccfit,'LineWidth',3);
 
    % compute b for the legend
-   b = bfra.conversions(alpha,'alpha','b');
+   b = baseflow.conversions(alpha,'alpha','b');
 
    % build a legend, labels, etc.
    l1 = ['$' varsym '$ (data)'];
    if ~isnan(alphaci)
-      bL = bfra.conversions(alphaci(1),'alpha','b');
-      bH = bfra.conversions(alphaci(2),'alpha','b');
+      bL = baseflow.conversions(alphaci(1),'alpha','b');
+      bH = baseflow.conversions(alphaci(2),'alpha','b');
       l2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)',b,bL,bH);
    else
-      l2 = sprintf('MLE fit ($b=%.2f$)',bfra.conversions(alpha,'alpha','b'));
+      l2 = sprintf('MLE fit ($b=%.2f$)',baseflow.conversions(alpha,'alpha','b'));
       bL = nan;
       bH = nan;
    end
@@ -141,7 +141,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
    end
 
    % draw the arrow
-   bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
+   baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
       'BaseAngle',90,'Length',8,'TipAngle',10)
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
@@ -169,7 +169,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
    end
 
-   bfra.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
+   baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
       'BaseAngle',90,'Length',8,'TipAngle',10)
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
@@ -180,7 +180,7 @@ function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] = ..
       parseinputs(x, xmin, alpha, varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.plplotb';
+   parser.FunctionName = 'baseflow.plplotb';
    parser.CaseSensitive = false;
    parser.KeepUnmatched = true;
 

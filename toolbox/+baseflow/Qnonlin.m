@@ -65,16 +65,16 @@ function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
    end
    
    % get formatted strings for the legend
-   Qtstr = bfra.getstring('Q(t)', 'interpreter', interpreter);
+   Qtstr = baseflow.getstring('Q(t)', 'interpreter', interpreter);
    % showAB = false;
-   % Qtstr = bfra.QtString([a,b],Q0,showAB);
-   % tcstr = bfra.tcString(a,b,Q0,showAB);
+   % Qtstr = baseflow.QtString([a,b],Q0,showAB);
+   % tcstr = baseflow.tcString(a,b,Q0,showAB);
 
    % If Q(t) is an ensemble, this only plots the first one.
    if plotFig
 
       % get the characterisitc timescale
-      tc = bfra.characteristicTime(a(1), b(1), Q0(1));
+      tc = baseflow.characteristicTime(a(1), b(1), Q0(1));
 
       % make a figure
       subplot(2, 1, 1);

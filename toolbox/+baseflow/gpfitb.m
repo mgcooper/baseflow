@@ -42,9 +42,9 @@ function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
    kL = k_ci(1,1);
    kH = k_ci(2,1);
 
-   bL = bfra.conversions(kL,'k','b');
-   bM = bfra.conversions(kM,'k','b');
-   bH = bfra.conversions(kH,'k','b');
+   bL = baseflow.conversions(kL,'k','b');
+   bM = baseflow.conversions(kM,'k','b');
+   bH = baseflow.conversions(kH,'k','b');
 
    alphaM = 1+1/kM;
    alphaL = 1+1/kH;
@@ -60,8 +60,8 @@ function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
       freps = bootstrp(1000,@gpfit,x); % fit
       kreps = freps(:,1); % exponent
       sreps = freps(:,2); % tau0
-      breps = bfra.conversions(kreps,'k','b');
-      areps = bfra.conversions(kreps,'k','alpha');
+      breps = baseflow.conversions(kreps,'k','b');
+      areps = baseflow.conversions(kreps,'k','alpha');
 
       % As a rough check on the sampling distribution of the parameter
       % estimators, we can look at histograms of the bootstrap replicates.
@@ -192,7 +192,7 @@ function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
       % x = X(X>0);
       % [x,~] = prepCurveData(x,x);
       % figure;
-      % bfra.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
+      % baseflow.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);
    end
 end
 
@@ -205,7 +205,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',xmin,xminc);
 
-   bfra.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
+   baseflow.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
       'BaseAngle',90,'Length',8,'TipAngle',10)
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 
@@ -222,7 +222,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 
-   bfra.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
+   baseflow.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
       'BaseAngle',90,'Length',8,'TipAngle',10)
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 end
@@ -231,7 +231,7 @@ end
 function [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)
    
    parser = inputParser;
-   parser.FunctionName = 'bfra.gpfitb';
+   parser.FunctionName = 'baseflow.gpfitb';
    parser.addRequired('x', @isnumeric);
    parser.addParameter('xmin', 0, @isnumeric);
    parser.addParameter('varsym', '\tau', @ischar);

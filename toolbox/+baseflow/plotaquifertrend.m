@@ -54,13 +54,13 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
    % f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    ax = gca;
 
-   p1 = bfra.trendplot(t,Dc,'units','cm a$^{-1}$','leg',ctxt,'use',ax, ...
+   p1 = baseflow.trendplot(t,Dc,'units','cm a$^{-1}$','leg',ctxt,'use',ax, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDc,'reference',Dc, ...
       'method',method);
-   p2 = bfra.trendplot(t,Db,'units','cm a$^{-1}$','leg',btxt,'use',ax, ...
+   p2 = baseflow.trendplot(t,Db,'units','cm a$^{-1}$','leg',btxt,'use',ax, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDb,'reference',Db, ...
       'method',method);
-   p3 = bfra.trendplot(t,Dg,'units','cm a$^{-1}$','leg',gtxt,'use',ax, ...
+   p3 = baseflow.trendplot(t,Dg,'units','cm a$^{-1}$','leg',gtxt,'use',ax, ...
       'errorbounds',true,'errorbars',true,'method',method);
 
    set(ax,'XLim',[2001 2021],'YLim',[-80 80],'XTick',2002:3:2020);
@@ -101,9 +101,9 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
    uistack(p3.trend,'top')
 
    h.figure = f;
-   h.bfra.trendplot1 = p1;
-   h.bfra.trendplot2 = p2;
-   h.bfra.trendplot2 = p3;
+   h.baseflow.trendplot1 = p1;
+   h.baseflow.trendplot2 = p2;
+   h.baseflow.trendplot2 = p3;
 
 end
 
@@ -121,7 +121,7 @@ function h = plotflowperiod(t, Db, sigDb, method)
    % f = figure('Position',[156    45   856   580]);
    %f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    f = figure('Position', [0 0 700 400]);
-   p = bfra.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
+   p = baseflow.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDb,'method',method);
 
    % set transparency of the bars
@@ -144,7 +144,7 @@ function h = plotflowperiod(t, Db, sigDb, method)
    p.trend.LineWidth = 2;
 
    h.figure = f;
-   h.bfra.trendplot = p;
+   h.baseflow.trendplot = p;
 
    % xlims = xlim; ylims = ylim; box off; grid on;
    % plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);
@@ -171,9 +171,9 @@ function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
    % f = figure('Position',[156    45   856   580]);
    %f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    f = figure('Position', [0 0 700 400]);
-   p1 = bfra.trendplot(t,Dc,'units','cm/yr','leg',ctxt,'use',gca, ...
+   p1 = baseflow.trendplot(t,Dc,'units','cm/yr','leg',ctxt,'use',gca, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDc,'method',method);
-   p2 = bfra.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
+   p2 = baseflow.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
       'errorbounds',true,'errorbars',true,'yerr',sigDb,'method',method);
 
    % set transparency of the bars
@@ -210,8 +210,8 @@ function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
    set(gca,'XLim',[1990 2020],'XTick',1990:5:2020);
 
    h.figure = f;
-   h.bfra.trendplot1 = p1;
-   h.bfra.trendplot2 = p2;
+   h.baseflow.trendplot1 = p1;
+   h.baseflow.trendplot2 = p2;
 
    % xlims = xlim; ylims = ylim; box off; grid on;
    % plot([xlims(2) xlims(2)],[ylims(1) ylims(2)],'k','LineWidth',1);

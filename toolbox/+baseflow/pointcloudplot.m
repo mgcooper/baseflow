@@ -76,8 +76,8 @@ function out = pointcloudplot(q,dqdt,varargin)
 
       h = zeros(numel(reflines),1);
    else
-      xlabel(bfra.getstring('Q','units',true),'FontSize', 14, 'Interpreter', 'latex');
-      ylabel(bfra.getstring('dQdt','units',true),'FontSize',14, 'Interpreter', 'latex');
+      xlabel(baseflow.getstring('Q','units',true),'FontSize', 14, 'Interpreter', 'latex');
+      ylabel(baseflow.getstring('dQdt','units',true),'FontSize',14, 'Interpreter', 'latex');
 
       h = gobjects(numel(reflines),1);
    end
@@ -90,7 +90,7 @@ function out = pointcloudplot(q,dqdt,varargin)
       
       switch reflines{n}
          case 'early'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+            [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','earlytime',        ...
                               'refslope',3,                 ...
@@ -100,7 +100,7 @@ function out = pointcloudplot(q,dqdt,varargin)
             set(h(n),'LineWidth',1);
             
          case 'late'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+            [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','latetime',         ...
                               'refslope',blate,             ...
@@ -110,7 +110,7 @@ function out = pointcloudplot(q,dqdt,varargin)
             set(h(n),'LineWidth',1);
             
          case 'upperenvelope'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+            [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','upperenvelope',    ...
                               'labels',reflabels            ...
@@ -119,7 +119,7 @@ function out = pointcloudplot(q,dqdt,varargin)
             yupplim = ab(n,1)*max(xlims)^ab(n,2);
             
          case 'lowerenvelope'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+            [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','lowerenvelope',    ...
                               'labels',reflabels            ...
@@ -127,7 +127,7 @@ function out = pointcloudplot(q,dqdt,varargin)
             ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
             
          case 'bestfit'
-            [h(n),ab(n,:)] = bfra.plotrefline(              ...
+            [h(n),ab(n,:)] = baseflow.plotrefline(              ...
                               q,-dqdt,                      ...
                               'refline','bestfit',          ...
                               'labels',false                ...
@@ -135,7 +135,7 @@ function out = pointcloudplot(q,dqdt,varargin)
             set(h(n),'LineWidth',2);
             
          case 'userfit'
-            [h(n),ab(n,:)] =  bfra.plotrefline(             ...
+            [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','userfit',          ...
                               'userab',userab,              ...
@@ -169,12 +169,12 @@ function out = pointcloudplot(q,dqdt,varargin)
          %
          %          ibest = strcmp(reflines,'bestfit');
          %          iuser = strcmp(reflines,'userfit');
-         %          tbest = [bfra.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
-         %          tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
+         %          tbest = [baseflow.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
+         %          tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
          %
          %          % if user text provided, swap it out
          %          if ~isempty(usertext)
-         %             tuser = [bfra.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
+         %             tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
          %          end
          %          ltext = {tbest; tuser};
          % ------------------------------------
@@ -182,7 +182,7 @@ function out = pointcloudplot(q,dqdt,varargin)
          % only put bestfit in the legend
          keep = strcmp(reflines,'bestfit');
          hleg = h(keep);
-         ltxt = bfra.aQbString(ab(keep,:),'printvalues',true);
+         ltxt = baseflow.aQbString(ab(keep,:),'printvalues',true);
          ltxt = [ltxt ' (' upper(usertext) ' fit)'];
          %ltxt = [ltxt ' (nonlinear least-squares)'];
 
@@ -192,7 +192,7 @@ function out = pointcloudplot(q,dqdt,varargin)
          % use whichever one was requested
          keep = ismember(reflines,fitcheck);
          hleg = h(keep);
-         ltxt = bfra.aQbString(ab(keep,:),'printvalues',true);
+         ltxt = baseflow.aQbString(ab(keep,:),'printvalues',true);
 
          if ~isempty(usertext)
             ltxt = [ltxt ' (' upper(usertext) ' fit)'];
@@ -284,7 +284,7 @@ function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
    parser.addParameter('usertext', '', @ischar);
    parser.addParameter('rain', nan, @isnumeric);
    parser.addParameter('ax', emptyaxes(), @isaxis);
-   parser.FunctionName = 'bfra.pointcloudplot';
+   parser.FunctionName = 'baseflow.pointcloudplot';
    
    parser.parse(q, dqdt, varargin{:});
 

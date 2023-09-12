@@ -58,7 +58,7 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
       q, dqdt, method, mfilename, varargin{:});
 
    % PREP FITS
-   [x, y, logx, logy, weights, ok] = bfra.prepfits( ...
+   [x, y, logx, logy, weights, ok] = baseflow.prepfits( ...
       q, dqdt, 'weights', weights, 'mask', mask);
 
    % FAST EXIT
@@ -100,7 +100,7 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    end
 
    if plotfit == true
-      Fit.h = bfra.pointcloudplot(q,dqdt,'reflines',{'userfit'}, ...
+      Fit.h = baseflow.pointcloudplot(q,dqdt,'reflines',{'userfit'}, ...
          'userab',ab,'mask',mask,'usertext',method);
    end
 
@@ -354,7 +354,7 @@ function [Fit,ok] = evalFit(ab,x,y,ci,ok)
    Fit.bL = ci(2,1);
    Fit.bH = ci(2,2);
 
-   Fit.rsq = bfra.deps.rsquare(y,ab(1).*x.^ab(2));
+   Fit.rsq = baseflow.deps.rsquare(y,ab(1).*x.^ab(2));
    Fit.pvalue = nan;
    Fit.N = numel(y);
    Fit.x = x;
@@ -392,7 +392,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    %ab = nlinfit(q,dqdt,fnc,ab0,opts,'Weights',weights);
 
    % initialize r2
-   rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+   rsq0 = baseflow.deps.rsquare(y,ab0(1).*x.^ab0(2));
    rsq = rsq0;
 
    % 'nlinfit' function options
@@ -427,7 +427,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    ab1ok = true;
    try
       [ab1,R1,~,C1] = nlinfit(x,y,fnc,ab0,opts1); % R=resids,C=error variance
-      rsq1 = bfra.deps.rsquare(y,ab1(1).*x.^ab1(2));
+      rsq1 = baseflow.deps.rsquare(y,ab1(1).*x.^ab1(2));
 
    catch ME
 
@@ -454,7 +454,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
       try
          f3 = fit(x,y,ftype,opts3);
          ab3 = coeffvalues(f3);
-         rsq3 = bfra.deps.rsquare(y,ab3(1).*x.^ab3(2));
+         rsq3 = baseflow.deps.rsquare(y,ab3(1).*x.^ab3(2));
 
       catch ME
 
@@ -485,7 +485,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
       ab2ok = true;
       try
          [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-         rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+         rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 
       catch ME
 
@@ -508,7 +508,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
          ab4ok = true;
          try
             f4 = fit(x,y,ftype,opts4); ab4 = coeffvalues(f4);
-            rsq4 = bfra.deps.rsquare(y,ab4(1).*x.^ab4(2));
+            rsq4 = baseflow.deps.rsquare(y,ab4(1).*x.^ab4(2));
 
          catch ME
             if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
@@ -582,7 +582,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    ab0 = [exp(ab0(1)), ab0(2)];
 
    % initialize r2
-   rsq0 = bfra.deps.rsquare(y,ab0(1).*x.^ab0(2));
+   rsq0 = baseflow.deps.rsquare(y,ab0(1).*x.^ab0(2));
    rsq = rsq0;
 
    % 'nlinfit' function options
@@ -601,7 +601,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    ab2ok = true;
    try
       [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-      rsq2 = bfra.deps.rsquare(y,ab2(1).*x.^ab2(2));
+      rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 
    catch ME
 
@@ -716,7 +716,7 @@ function [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = ...
       mask = true(size(q));
    end
 
-   % NOTE: fitopts is not implemented, but see bfra.Fit, where it could be used
+   % NOTE: fitopts is not implemented, but see baseflow.Fit, where it could be used
    % to simplify calling this function from wrapper functions. Using the
    % unmatched method, it can be used to pass in arbitrary fitopts accepted
    % by any function but requires that the user know what to pass in.

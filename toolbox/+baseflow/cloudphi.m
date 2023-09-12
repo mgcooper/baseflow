@@ -52,7 +52,7 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
       theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, ...
       A, D, L, method, varargin{:});
 
-   % the easiest way to get a1/a2 is pointcloudintercept. bfra.fitab could also
+   % the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could also
    % be used but this function is intended to fit phi once b is known (or
    % prescribed)
 
@@ -63,27 +63,27 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 
    if isnan(userab)
       b2 = blate;
-      a1 = bfra.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
-      a2 = bfra.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
+      a1 = baseflow.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
+      a2 = baseflow.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
    else
 
    end
 
    switch b2
       case 1
-         phi = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+         phi = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
             'soln2','BS03','dispfit',dispfit);
       case 3/2
-         phi = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+         phi = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
             'soln2','BS04','dispfit',dispfit);
       otherwise
-         phi = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
+         phi = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
             'soln2','RS05','dispfit',dispfit);
    end
    a = a2;
 
    % make a dummy handle for the legend and print the value of phi
-   bfra.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
+   baseflow.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
       {'early','userfit'},'userab',[a2 blate],'reflabels',true);
    hdum = plot(0,0,'Color','none','HandleVisibility','off');
 
@@ -103,7 +103,7 @@ function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ..
 
    parser = inputParser;
    parser.StructExpand = false;
-   parser.FunctionName = 'bfra.cloudphi';
+   parser.FunctionName = 'baseflow.cloudphi';
 
    addRequired(parser, 'q', @isnumeric);
    addRequired(parser, 'dqdt', @isnumeric);
@@ -141,25 +141,25 @@ end
 % if isflat
 %    switch blate
 %       case 1
-%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
 %             'soln2','BS03','dispfit',dispfit);
 %       case 3/2
-%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
+%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...
 %             'soln2','BS04','dispfit',dispfit);
 %       otherwise
-%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
+%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...
 %             'soln2','RS05','dispfit',dispfit);
 %    end
 % else
 %    switch blate
 %       case 1
-%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...
+%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...
 %             'soln2','BR94','dispfit',dispfit,'theta',theta);
 %       case 3/2
-%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...
+%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...
 %             'soln2','RS06','dispfit',dispfit,'theta',theta);
 %       otherwise
-%          phi = bfra_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...
+%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...
 %             'soln2','RS06','dispfit',dispfit,'theta',theta);
 %    end
 % end

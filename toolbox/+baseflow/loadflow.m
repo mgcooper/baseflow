@@ -177,7 +177,7 @@ function [basinname, t1, t2, units, gapfill, addvar] = parseinputs( ...
       basinname, varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.loadflow';
+   parser.FunctionName = 'baseflow.loadflow';
    parser.PartialMatching = true;
 
    parser.addRequired('basinname', @ischar);

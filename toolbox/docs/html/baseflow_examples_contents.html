@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Baseflow Recession Analysis Toolbox Examples</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-09-06"><meta name="DC.source" content="bfra_examples_contents.m"><style type="text/css">
+      --><title>Baseflow Recession Analysis Toolbox Examples</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-09-12"><meta name="DC.source" content="baseflow_examples_contents.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,26 +67,26 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Baseflow Recession Analysis Toolbox Examples</h1><p>These examples provide an introduction to the toolbox. The purpose of these examples is to demonstrate a typical use-case for the main functions in the bfra toolbox. To explore the toolbox functions in more detail, see the <a href="m2html/function_index.html">Function Index</a>.</p><div><ul><li><a href="bfra_demo_1.html"><b>Estimate recession constants: Point cloud</b></a> shows how to detect recession events from a timeseries of observed streamflow discharge and estimate recession constants using the point cloud method.</li><li><a href="bfra_demo_2.html"><b>Estimate recession constants: Pareto distribution</b></a> shows how to detect recession events from a timeseries of observed streamflow discharge and estimate recession constants using a hybrid point-cloud and Pareto distribution fitting method.</li><li><a href="bfra_demo_3.html"><b>Aquifer property estimation: Introduction</b></a> shows how to estimate aquifer properties from curve fits to baseflow recession events.</li><li><a href="bfra_demo_kuparuk.html"><b>Estimate saturated aquifer thickness trends using baseflow recession analysis</b></a> shows how to detect recession events from a timeseries of observed streamflow discharge and estimate recession constants using a hybrid point-cloud and Pareto distribution fitting method, and then estimate trends in the saturated aquifer thickness using a linearized solution to the nonlinear storage-discharge equation.</li></ul></div><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+  </style></head><body><div class="content"><h1>Baseflow Recession Analysis Toolbox Examples</h1><p>These examples provide an introduction to the toolbox. The purpose of these examples is to demonstrate a typical use-case for the main functions in the baseflow toolbox. To explore the toolbox functions in more detail, see the <a href="m2html/function_index.html">Function Index</a>.</p><div><ul><li><a href="baseflow_demo_1.html"><b>Estimate recession constants: Point cloud</b></a> shows how to detect recession events from a timeseries of observed streamflow discharge and estimate recession constants using the point cloud method.</li><li><a href="baseflow_demo_2.html"><b>Estimate recession constants: Pareto distribution</b></a> shows how to detect recession events from a timeseries of observed streamflow discharge and estimate recession constants using a hybrid point-cloud and Pareto distribution fitting method.</li><li><a href="baseflow_demo_3.html"><b>Aquifer property estimation: Introduction</b></a> shows how to estimate aquifer properties from curve fits to baseflow recession events.</li><li><a href="baseflow_demo_kuparuk.html"><b>Estimate saturated aquifer thickness trends using baseflow recession analysis</b></a> shows how to detect recession events from a timeseries of observed streamflow discharge and estimate recession constants using a hybrid point-cloud and Pareto distribution fitting method, and then estimate trends in the saturated aquifer thickness using a linearized solution to the nonlinear storage-discharge equation.</li></ul></div><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% Baseflow Recession Analysis Toolbox Examples
 %  
 % These examples provide an introduction to the toolbox. The purpose of these
 % examples is to demonstrate a typical use-case for the main functions in the
-% bfra toolbox. To explore the toolbox functions in more detail, see the
+% baseflow toolbox. To explore the toolbox functions in more detail, see the
 % <m2html/function_index.html Function Index>.
 % 
-% * <bfra_demo_1.html *Estimate recession constants: Point cloud*> shows how
+% * <baseflow_demo_1.html *Estimate recession constants: Point cloud*> shows how
 % to detect recession events from a timeseries of observed streamflow discharge
 % and estimate recession constants using the point cloud method. 
-% * <bfra_demo_2.html *Estimate recession constants: Pareto distribution*>
+% * <baseflow_demo_2.html *Estimate recession constants: Pareto distribution*>
 % shows how to detect recession events from a timeseries of observed streamflow
 % discharge and estimate recession constants using a hybrid point-cloud and
 % Pareto distribution fitting method.
-% * <bfra_demo_3.html *Aquifer property estimation: Introduction*>
+% * <baseflow_demo_3.html *Aquifer property estimation: Introduction*>
 % shows how to estimate aquifer properties from curve fits to baseflow recession
 % events.
-% * <bfra_demo_kuparuk.html *Estimate saturated aquifer thickness trends using
+% * <baseflow_demo_kuparuk.html *Estimate saturated aquifer thickness trends using
 % baseflow recession analysis*> shows how to detect recession events from a
 % timeseries of observed streamflow discharge and estimate recession constants
 % using a hybrid point-cloud and Pareto distribution fitting method, and then

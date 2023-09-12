@@ -18,11 +18,11 @@ function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
    % Example
    %
    %     b = 1.5;
-   %     n = bfra.conversions(b,'b','n')
+   %     n = baseflow.conversions(b,'b','n')
    %        n = 0
    %
    %
-   % See also bfra.getstring
+   % See also baseflow.getstring
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
@@ -160,7 +160,7 @@ function [inputvalue, inputvarname, outputvarname, isflat] = parseinputs( ...
    validvarnames = {'b', 'alpha', 'beta', 'gamma', 'd', 'k', 'n', 'N', 'Nstar'};
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.conversions';
+   parser.FunctionName = 'baseflow.conversions';
 
    parser.addRequired('inputvalue', @isnumeric);
    parser.addRequired('inputvarname', @(x) ~isempty(validatestring(x, validvarnames)));

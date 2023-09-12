@@ -28,7 +28,7 @@ function [Dd,A,L,D] = loadprops(basinname, varargin)
    [basinname, version] = parseinputs(basinname, varargin{:});
 
    % load the metadata
-   Meta = bfra.loadmeta(basinname, version);
+   Meta = baseflow.loadmeta(basinname, version);
    A  = Meta.area_m2;
    Dd = 1000*Meta.Dd;
    D  = 0.5;
@@ -41,7 +41,7 @@ function [basinname, version] = parseinputs(basinname, varargin)
    validopts = @(x) any(validatestring(x, {'current', 'archive'}));
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.loadprops';
+   parser.FunctionName = 'baseflow.loadprops';
    parser.addRequired('basinname', @ischar);
    parser.addOptional('version', 'current', validopts);
    parser.parse(basinname, varargin{:});

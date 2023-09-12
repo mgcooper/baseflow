@@ -1,7 +1,7 @@
 function [Events, Info] = wrapevents(T,Q,R,varargin)
    %WRAPEVENTS Detect recession events on an annual calendar basis.
    %
-   % This function is a wrapper around bfra.getevents to detect recession events
+   % This function is a wrapper around baseflow.getevents to detect recession events
    % on an annual basis, passing one year of a multi-year timeseries of T, Q,
    % and R at a time to eventfinder, rather than passing the entire timeseries
    % to eventfinder. The main difference is that when one year of data is used
@@ -85,7 +85,7 @@ function [Events, Info] = wrapevents(T,Q,R,varargin)
       thisYearRain = Rmat(:,thisYear);
 
       % Detect events for this year
-      [thisYearEvents,thisYearInfo] = bfra.getevents( ...
+      [thisYearEvents,thisYearInfo] = baseflow.getevents( ...
          thisYearTime, thisYearFlow, thisYearRain, opts);
 
       % For each event, compute q, dqdt and fit a,b
@@ -114,7 +114,7 @@ function [Events, Info] = wrapevents(T,Q,R,varargin)
 
       % pause to look at the fits
       if opts.plotevents == true
-         hEvents = bfra.eventplotter(thisYearTime, thisYearFlow, ...
+         hEvents = baseflow.eventplotter(thisYearTime, thisYearFlow, ...
             thisYearRain, thisYearInfo, 'plotevents', true, ...
             'eventTags', 1);
          
@@ -172,7 +172,7 @@ end
 function [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)
 
    parser = inputParser;
-   parser.FunctionName = ['bfra.' mfilename];
+   parser.FunctionName = ['baseflow.' mfilename];
    parser.StructExpand = true;
 
    parser.addRequired('T', @(x) isnumeric(x) | isdatetime(x));

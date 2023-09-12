@@ -65,11 +65,11 @@ function result = runtests(varargin)
    % import matlab.unittest.plugins.CodeCoveragePlugin
    % import matlab.unittest.plugins.codecoverage.CoverageReport
    %
-   % suite = TestSuite.fromPackage("bfra.test");
+   % suite = TestSuite.fromPackage("baseflow.test");
    % runner = TestRunner.withNoPlugins;
-   % runner.addPlugin(CodeCoveragePlugin.forPackage("bfra.test", ...
-   %    'Producing',CoverageReport('+bfra/+test/bfraCoverageResults', ...
-   %    'MainFile','bfraCoverageTestResults.html')))
+   % runner.addPlugin(CodeCoveragePlugin.forPackage("baseflow.test", ...
+   %    'Producing',CoverageReport('+baseflow/+test/baseflowCoverageResults', ...
+   %    'MainFile','baseflowCoverageTestResults.html')))
    % runner.run(suite)
 
    % % to import from a class

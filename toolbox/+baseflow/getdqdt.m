@@ -3,15 +3,15 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
    %
    % Syntax
    %
-   %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod)
-   %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitwindow',fitwindow)
-   %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'fitmethod',fitmethod)
-   %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'pickmethod',pickmethod)
-   %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(_,'ax',axis_object)
+   %     [q,dqdt,dt,tq,rq] = baseflow.getdqdt(T,Q,R,derivmethod)
+   %     [q,dqdt,dt,tq,rq] = baseflow.getdqdt(_,'fitwindow',fitwindow)
+   %     [q,dqdt,dt,tq,rq] = baseflow.getdqdt(_,'fitmethod',fitmethod)
+   %     [q,dqdt,dt,tq,rq] = baseflow.getdqdt(_,'pickmethod',pickmethod)
+   %     [q,dqdt,dt,tq,rq] = baseflow.getdqdt(_,'ax',axis_object)
    %
    % Description
    %
-   %     [q,dqdt,dt,tq,rq] = bfra.getdqdt(T,Q,R,derivmethod) computes dQ/dt
+   %     [q,dqdt,dt,tq,rq] = baseflow.getdqdt(T,Q,R,derivmethod) computes dQ/dt
    %     using variable time stepping, exponential time stepping, or one of six
    %     standard numerical derivatives given in Thomas et al. 2015, Table 2.
    %     The method is passed in as the argument derivmethod with type char.
@@ -37,7 +37,7 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
    % Tip: this accepts pre-selected events, not raw timeseries. Use
-   % bfra.findevents to pick Events, then bfra.getdqdt to fit the events.
+   % baseflow.findevents to pick Events, then baseflow.getdqdt to fit the events.
    % This is a wrapper for multi-year, final analysis.
 
    % if called with no input, open this file
@@ -80,7 +80,7 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
       % into segments, for example early-time and late-time. It also returns Info
       % which is needed to parse sub-event picks.
 
-      [hFits,Picks] = bfra.plotdqdt(q,dqdt,'fitmethod',fitmethod,'pickmethod',...
+      [hFits,Picks] = baseflow.plotdqdt(q,dqdt,'fitmethod',fitmethod,'pickmethod',...
          pickmethod,'plotfits',plotfits,'eventID',eventID,'rain',rq);
 
       [q,dqdt,dt,tq,rq,Info] = packagefits(Picks,q,dqdt,dt,tq,R);

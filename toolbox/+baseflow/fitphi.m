@@ -108,7 +108,7 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
             % sloped, late-time b = 1-2 (heterogeneous soils)
             % note: if b = 3/2, n = 1, which means homogeneous soils
 
-            n = bfra.conversions(b2,'b','n','isflat',false);
+            n = baseflow.conversions(b2,'b','n','isflat',false);
 
             % a1 = 1.133/(k*phi*D^3*L^2*cos(theta))
             n1 = n+1;
@@ -159,9 +159,9 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 
             % flat, late-time b = 3/2-2  (heterogeneous soils)
 
-            n = bfra.conversions(b2,'b','n','isflat',true);
-            fR1 = bfra.specialfunctions('fR1',n);
-            fR2 = bfra.specialfunctions('fR2',n);
+            n = baseflow.conversions(b2,'b','n','isflat',true);
+            fR1 = baseflow.specialfunctions('fR1',n);
+            fR2 = baseflow.specialfunctions('fR2',n);
 
             n1 = n+1;
             n2 = n+2;
@@ -360,7 +360,7 @@ function [a1, a2, b2, A, D, L, theta, isflat, dispfit, soln1, soln2] = ...
 
    parser = inputParser;
    parser.StructExpand = false;
-   parser.FunctionName = 'bfra.fitphi';
+   parser.FunctionName = 'baseflow.fitphi';
 
    parser.addRequired('a1', @isnumeric);
    parser.addRequired('a2', @isnumeric);

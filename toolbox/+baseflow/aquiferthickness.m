@@ -44,7 +44,7 @@ function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
       isflat = varargin{1};
    end
 
-   N = bfra.conversions(b,'b','N','isflat',isflat);
+   N = baseflow.conversions(b,'b','N','isflat',isflat);
    D = tau./phi./(N+1).*Qb;
    S = D.*phi; % convert layer thickness to storage
 end

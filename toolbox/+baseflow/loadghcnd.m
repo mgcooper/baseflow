@@ -137,7 +137,7 @@ end
 function [basinname, t1, t2, units, gapfill] = parseinputs(basinname, varargin)
 
    p = inputParser;
-   p.FunctionName = 'bfra.loadghcnd';
+   p.FunctionName = 'baseflow.loadghcnd';
 
    p.addRequired('basinname', @ischar);
    p.addParameter('t1', NaT, @isdatelike);

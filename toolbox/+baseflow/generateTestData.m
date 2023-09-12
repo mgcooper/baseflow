@@ -7,11 +7,11 @@ function [t, q, dqdt] = generateTestData(a, b, q0, t)
    %
    % Description
    %
-   %     [t, q, dqdt] = bfra.generateTestData(a, b, Q0, t) generates timeseries
+   %     [t, q, dqdt] = baseflow.generateTestData(a, b, Q0, t) generates timeseries
    %     of discharge Q, first derivative of discharge dQdt, and time t for
    %     parameter values a, b, and initial discharge Q0.
    %
-   % See also: bfra.Qnonlin
+   % See also: baseflow.Qnonlin
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
@@ -46,11 +46,11 @@ function [t, q, dqdt] = generateTestData(a, b, q0, t)
          %q = (q(1:end)+q(2:end-1))./2;
          %dqdt = diff(q);
       otherwise
-         [q,dqdt,t] = bfra.Qnonlin(a,b,q0,t,false); % false = don't make fig
+         [q,dqdt,t] = baseflow.Qnonlin(a,b,q0,t,false); % false = don't make fig
    end
 end
 
-% % this was in bfra.test suite ParameterizedTestBfra. I am not certain why the
+% % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why the
 % data falls off, could be the noise I add, or could be the lack of a negative
 % sign on in genCurveData
 % for a linear model (exponential), Q = Q0*exp(-at), meaning
@@ -68,5 +68,5 @@ end
 % q = data.y;
 % dqdt = -data.x;
 % figure; loglog(-dqdt,q,'o')
-% [x,y,logx,logy] = bfra.prepfits(q,dqdt);
-% Fit = bfra.fitab(logx,logy,'nls');
+% [x,y,logx,logy] = baseflow.prepfits(q,dqdt);
+% Fit = baseflow.fitab(logx,logy,'nls');

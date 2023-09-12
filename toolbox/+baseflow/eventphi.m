@@ -18,7 +18,7 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    % Required inputs
    %
    %     Results  Table of a, b, tau, values for each event (output of fitevents)
-   %     Fits     Struct containing the fitted q/dqdt timeseries (output of bfra.dqdt)
+   %     Fits     Struct containing the fitted q/dqdt timeseries (output of baseflow.dqdt)
    %     A        Numeric scalar, basin area contributing to baseflow (L^2)
    %     D        Numeric scalar, saturated aquifer thickness (L)
    %     L        Numeric scalar, active stream length (L)
@@ -71,29 +71,29 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
       end
 
       % Put a line of slope 3 and 1/1.5/bhat through the point cloud
-      a1 = bfra.pointcloudintercept(thisq, thisdqdt, b1, 'envelope', ...
+      a1 = baseflow.pointcloudintercept(thisq, thisdqdt, b1, 'envelope', ...
          'refqtls', earlyqtls);
-      a2 = bfra.pointcloudintercept(thisq, thisdqdt, b2, 'envelope', ...
+      a2 = baseflow.pointcloudintercept(thisq, thisdqdt, b2, 'envelope', ...
          'refqtls', lateqtls);
 
       % Choose appropriate solutions
       if isempty(soln1) && isempty(soln2)
 
          if b2 == 1
-            phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true, ...
+            phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',true, ...
                'soln1','PK62','soln2','BS03');
          elseif b2 == 3/2
-            phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true, ...
+            phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',true, ...
                'soln1','PK62','soln2','BS04');
          elseif b2>1 && b2<2
-            phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true, ...
+            phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',true, ...
                'soln1','RS05','soln2','RS05');
          else
             % phi remains nan
          end
          % user-specified solutions
       else
-         phi(n) = bfra.fitphi(a1,a2,b2,A,D,L,'isflat',true,             ...
+         phi(n) = baseflow.fitphi(a1,a2,b2,A,D,L,'isflat',true,             ...
             'soln1',soln1,'soln2',soln2);
       end
       a(n) = a2;
@@ -106,7 +106,7 @@ function [Results, Fits, A, D, L, b2, earlyqtls, lateqtls, soln1, soln2] = ...
       parseinputs(Results, Fits, A, D, L, b2, varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.eventphi';
+   parser.FunctionName = 'baseflow.eventphi';
    parser.StructExpand = false;
    parser.addRequired('Results', @isstruct);
    parser.addRequired('Fits', @isstruct);

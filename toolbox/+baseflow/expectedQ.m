@@ -3,8 +3,8 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
    %
    % Syntax
    %
-   %  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau);
-   %  [Qexp,Q0] = bfra.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
+   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau);
+   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
    %              Qexp/Q0 relative to the input Q
    %
    % See also: aquifertrend, baseflowtrend
@@ -30,7 +30,7 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
 
    if ~isempty(qtls)
       u = 'm$^3$ d$^{-1}$';
-      fdc = bfra.fdcurve(flow(flow>0), 'refpoints', [Q0 Qexp], ...
+      fdc = baseflow.fdcurve(flow(flow>0), 'refpoints', [Q0 Qexp], ...
          'units', u, 'plotfit', plotfit);
       pQ0 = fdc.fref(1);
       pQexp = fdc.fref(2);
@@ -47,7 +47,7 @@ function [a, b, tau, q, dqdt, tau0, qtls, flow, mask, plotfit] = parseinputs( ..
    validopt = @(x) any(validatestring(x,{'qtls','plotfit'}));
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.expectedQ';
+   parser.FunctionName = 'baseflow.expectedQ';
    parser.addRequired('a', @isnumeric);
    parser.addRequired('b', @isnumeric);
    parser.addRequired('tau', @isnumeric);
@@ -123,7 +123,7 @@ end
 % % where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:
 % b1    = 3;
 % b2    = b;
-% a1    = bfra.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);
+% a1    = baseflow.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);
 % Q0    = (a1*tau0)^(1/(1-b1));
 % Qexp  = Q0*(2-b2)/(3-b2); % could it be: Q0*(b1-2)/(3-b2);
 %
@@ -134,8 +134,8 @@ end
 % % if we equate the early-time and late-time fits to get Q0
 % b1 = 3;
 % b2 = b;
-% a1 = bfra.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);
-% a2 = bfra.pointcloudintercept(q,dqdt,b2,'envelope','refqtls',[0.5 0.5],'mask',mask);
+% a1 = baseflow.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);
+% a2 = baseflow.pointcloudintercept(q,dqdt,b2,'envelope','refqtls',[0.5 0.5],'mask',mask);
 % Q0    = (a1/a2)^(1/(b2-b1));
 % Qexp  = Q0*(2-b2)/(3-b2);
 %

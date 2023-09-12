@@ -24,7 +24,7 @@ clc
 % Set the main options
 
 savedata    = false;
-sitename    = bfra.basinname('KUPARUK R NR DEADHORSE AK');
+sitename    = baseflow.basinname('KUPARUK R NR DEADHORSE AK');
 t1          = datetime(1990,1,1);   % start at 1990 for CALM
 t2          = datetime(2020,12,31);
 fitevents   = true; % if true, run fitevents, otherwise load saved Fits
@@ -49,9 +49,9 @@ load('data/annualdata.mat','Data');
 % Set the algorithm options. Here we use a combination of default options and 
 % site-specific options.
 
-opts.getevents = bfra.setopts('getevents', 'asannual', true);
-opts.fitevents = bfra.setopts('fitevents');
-opts.globalfit = bfra.setopts('globalfit', ...
+opts.getevents = baseflow.setopts('getevents', 'asannual', true);
+opts.fitevents = baseflow.setopts('fitevents');
+opts.globalfit = baseflow.setopts('globalfit', ...
    'drainagearea',A,'aquiferdepth',D, ...
    'streamlength',L,'drainagedensity',Dd, ...
    'bootfit',bootfit,'bootreps',nreps, 'plotfits',true);
@@ -59,13 +59,13 @@ opts.globalfit = bfra.setopts('globalfit', ...
 % Get all recession events and then fit them
 
 if fitevents == true
-   [Events, Info] = bfra.wrapevents(T,Q,R,opts.getevents); 
-   [Fits,K] = bfra.fitevents(Events,opts.fitevents);
-   
+   [Events, Info] = baseflow.wrapevents(T,Q,R,opts.getevents);
+   [Fits,K] = baseflow.fitevents(Events,opts.fitevents);
+
    if savedata == true
       save(fname,'Events','Fits','K','opts');
    end
-   
+
 else % load pre-saved data
    load(fname,'Events','Fits','K','opts');
 end
@@ -74,13 +74,13 @@ end
 % == true (very slow).
 
 if fitglobal == true
-   
-   GlobalFit = bfra.globalfit(K,Events,Fits,opts.globalfit);
-   
+
+   GlobalFit = baseflow.globalfit(K,Events,Fits,opts.globalfit);
+
    if savedata == true
       save(fname,'Events','Fits','K','GlobalFit','opts');
    end
-   
+
 else % load pre-saved data
    load(fname,'Events','Fits','K','GlobalFit','opts');
 end
@@ -94,17 +94,17 @@ pQexp    = GlobalFit.pQexp;
 %% 
 % Compute baseflow and aquifer thickness trends
 
-[Qb,~,Qa,~,hb] = bfra.baseflowtrend(T, Q, A, ...
+[Qb,~,Qa,~,hb] = baseflow.baseflowtrend(T, Q, A, ...
    'pctl', pQexp, 'showfig', false); % cm/d/y
 
-[Db,Sb] = bfra.aquiferthickness( ...
+[Db,Sb] = baseflow.aquiferthickness( ...
    bhat, tauexp, phihat, Qb, true); % cm/yr
 
 Qb = Qb.*365.25; % convert from cm/d/yr to cm/yr/yr
 %% 
 % Compute the combined uncertainty
 
-sig_dndt = bfra.dndtuncertainty( ...
+sig_dndt = baseflow.dndtuncertainty( ...
    T, Qb, K, Fits, GlobalFit, opts.globalfit, 0.05);
 %% 
 % Add the baseflow recession analysis timeseries to the annual Data table, 
@@ -121,12 +121,12 @@ DataG = DataC(find(year(DataC.Time)==2002):end,:);
 % Plot the alt trend
 
 if plotfigs == true
-   bfra.plotaquifertrend(Data.Time, Data.Db, Data.sigDb);
-   
-   bfra.plotaquifertrend(DataC.Time, DataC.Db, DataC.sigDb, ...
+   baseflow.plotaquifertrend(Data.Time, Data.Db, Data.sigDb);
+
+   baseflow.plotaquifertrend(DataC.Time, DataC.Db, DataC.sigDb, ...
       DataC.Dc, DataC.sigDc);
-   
-   bfra.plotaquifertrend(DataG.Time, DataG.Db, DataG.sigDb, ...
+
+   baseflow.plotaquifertrend(DataG.Time, DataG.Db, DataG.sigDb, ...
       DataG.Dc, DataG.sigDc);
 end
 %% 

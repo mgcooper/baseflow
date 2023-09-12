@@ -7,15 +7,15 @@ function [Basins,Meta,Poly] = loadbasins(basinname,varargin)
    %
    % Description
    %
-   %     Basins = bfra.loadbasins(basinname) returns struct Basins containing
+   %     Basins = baseflow.loadbasins(basinname) returns struct Basins containing
    %     the spatial basin boundary information.
    %
-   %     [Basins,Meta,Poly] = bfra.loadbasins(basinname) additionally returns
+   %     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally returns
    %     table Meta containing the basin metadata information and geoshape Poly
    %     containing a computational geometry object representation of the basin
    %     boundary.
    %
-   %     [Basins,Meta,Poly] = bfra.loadbasins(___,'projection',projtype)
+   %     [Basins,Meta,Poly] = baseflow.loadbasins(___,'projection',projtype)
    %     specifies whether to return the basin boundary in geographic or
    %     projected coordinates. Options are 'geo' and 'ease'. 'geo' is WGS 84.
    %     'ease' is NSIDC EASE North projection.
@@ -29,7 +29,7 @@ function [Basins,Meta,Poly] = loadbasins(basinname,varargin)
    if nargin == 0; open(mfilename('fullpath')); return; end
 
    % TODO: accept stationname. see loadcalm, it worked as soon as i added support
-   % for stationname to bfra.loadmeta meaning it relies entirely on the basinname
+   % for stationname to baseflow.loadmeta meaning it relies entirely on the basinname
    % returend by loadmeta, whereas this does not, because the Calm database has an
    % entry for the basins or the index in Meta, so maybe doing that with boundaries
    % would simplify thigns here.
@@ -101,7 +101,7 @@ function [basinname, version, projection] = parseinputs(basinname,varargin)
    validproj = @(x)any(validatestring(x,{'ease','geo'}));
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.loadbasins';
+   parser.FunctionName = 'baseflow.loadbasins';
    parser.addRequired('basinname', @(x)ischar(x)|iscell(x));
    parser.addOptional( 'version', 'current', validopts);
    parser.addParameter('projection', 'geo', validproj);

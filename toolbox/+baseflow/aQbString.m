@@ -20,11 +20,11 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    % % large number
    % a = 1250;
    % b = 2;
-   % bfra.aQbString([a, b], "printvalues",true)
+   % baseflow.aQbString([a, b], "printvalues",true)
    % 
    % Also return Q(t) with a value for Q0:
    % 
-   % [~, Qtstr] = bfra.aQbString([a, b], 1000, "printvalues",true)
+   % [~, Qtstr] = baseflow.aQbString([a, b], 1000, "printvalues",true)
    % 
    % % Compare with sprintf
    % aexp = floor(log10(a));
@@ -33,7 +33,7 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    %
    % % small number
    % a = 0.001250;
-   % bfra.aQbString([a, b], "printvalues",true)
+   % baseflow.aQbString([a, b], "printvalues",true)
    %
    % % Compare with sprintf
    % aexp = floor(log10(a));
@@ -44,7 +44,7 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    
-   % TODO: merge this with bfra.strings. See note below about $ after = sign.
+   % TODO: merge this with baseflow.strings. See note below about $ after = sign.
 
    % parse inputs
    [ab, Q0, printvalues] = parseinputs(varargin{:});
@@ -77,7 +77,7 @@ end
 %% INPUT PARSER
 function [ab, Q0, printvalues] = parseinputs(varargin)
    p = inputParser;
-   p.FunctionName = 'bfra.aQbString';
+   p.FunctionName = 'baseflow.aQbString';
    addOptional(p,'ab',[],@(x)isnumeric(x));
    addOptional(p,'Q0',[],@(x)isnumeric(x));
    addParameter(p,'printvalues',false,@(x)islogical(x));

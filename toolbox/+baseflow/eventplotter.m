@@ -153,11 +153,11 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
    else
       interpreter = 'latex';
    end
-   ylabel(h.ax(1), bfra.getstring('Q','units',true,'interpreter',interpreter), ...
+   ylabel(h.ax(1), baseflow.getstring('Q','units',true,'interpreter',interpreter), ...
       'Interpreter',interpreter,'FontSize',10);
-   ylabel(h.ax(2),bfra.getstring('dQdt','units',true,'interpreter',interpreter), ...
+   ylabel(h.ax(2),baseflow.getstring('dQdt','units',true,'interpreter',interpreter), ...
       'Interpreter',interpreter,'FontSize',10);
-   ylabel(h.ax(3),bfra.getstring('d2Qdt2','units',true,'interpreter',interpreter), ...
+   ylabel(h.ax(3),baseflow.getstring('d2Qdt2','units',true,'interpreter',interpreter), ...
       'Interpreter',interpreter,'FontSize',10);
 
    % add a line at zero
@@ -174,12 +174,12 @@ function [T, Q, R, N, Info, eventTags, reversesign, plotevents, dqdt, d2qdt] = .
       parseinputs(T, Q, R, Info, varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.eventplotter';
+   parser.FunctionName = 'baseflow.eventplotter';
 
    N = numel(Info.istart);
 
-   defaultdQdt = [0; diff(Q)]; % bfra.deps.derivative(Q);
-   defaultd2Qdt = [0; diff(defaultdQdt)]; % bfra.deps.derivative(defaultdQdt);
+   defaultdQdt = [0; diff(Q)]; % baseflow.deps.derivative(Q);
+   defaultd2Qdt = [0; diff(defaultdQdt)]; % baseflow.deps.derivative(defaultdQdt);
 
    parser.addRequired('T', @isdatelike);
    parser.addRequired('Q', @isnumeric);
@@ -221,14 +221,14 @@ end
 % %
 % % plot the 50th percentile as a reference line
 % % q50 = quantile(q,0.5);
-% % h1.refline = bfra.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line
+% % h1.refline = baseflow.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line
 %
 %
-% % plot the events identified by bfra.findevents, just to be sure
+% % plot the events identified by baseflow.findevents, just to be sure
 % %     for i = 1:length(T)
 % %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);
 % %     end
 % % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep','keep (check)');
 %
 % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep');
-% ylabel(bfra.getstring('Q','units',true));
+% ylabel(baseflow.getstring('Q','units',true));

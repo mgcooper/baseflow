@@ -10,10 +10,10 @@ end
 function test_rundemos(testCase)
 
    % Get the list of .m demo files in the demos/mfiles folder
-   demopath = bfra.privatefunction('demopath');
-   cd(demopath('mfiles'))
+   demopath = fullfile(baseflow.internal.demopath(), 'mfiles');
+   cd(demopath)
 
-   demoFiles = dir(fullfile(demopath('mfiles'), '*.m'));
+   demoFiles = dir('*.m');
    demoFiles = string(fullfile({demoFiles.folder}, {demoFiles.name}).');
 
    % Loop through each demo file and run it

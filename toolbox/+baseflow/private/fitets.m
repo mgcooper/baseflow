@@ -3,11 +3,11 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
    %
    %  Syntax
    %
-   %     ETS = bfra.fitets(T,Q,R,derivmethod)
-   %     ETS = bfra.fitets(_,'etsparam',fitwindow)
-   %     ETS = bfra.fitets(_,'fitab',fitmethod)
-   %     ETS = bfra.fitets(_,'plotfit',pickmethod)
-   %     ETS = bfra.fitets(_,'ax',axis_object)
+   %     ETS = baseflow.fitets(T,Q,R,derivmethod)
+   %     ETS = baseflow.fitets(_,'etsparam',fitwindow)
+   %     ETS = baseflow.fitets(_,'fitab',fitmethod)
+   %     ETS = baseflow.fitets(_,'plotfit',pickmethod)
+   %     ETS = baseflow.fitets(_,'ax',axis_object)
    %
    %  Required inputs
    %

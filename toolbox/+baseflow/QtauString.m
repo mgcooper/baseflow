@@ -35,7 +35,7 @@ end
 %% INPUT PARSER
 function [ab, tau0, printvalues] = parseinputs(mfilename, varargin)
    parser = inputParser;
-   parser.FunctionName = ['bfra.' mfilename];
+   parser.FunctionName = ['baseflow.' mfilename];
 
    parser.addOptional('ab', [], @isnumeric);
    parser.addOptional('tau0', [], @isnumeric);

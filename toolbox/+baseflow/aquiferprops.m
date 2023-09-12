@@ -41,7 +41,7 @@ function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
    % The optional D parameter becomes required if soln = "RS05", i.e., Rupp and
    % Selker, 2005. This is essentially undocumented as well. The core method
    % implemented by this function is soln = "BS04", that is, Boussinesq, 1904.
-   % See bfra.fitphi for detail on all available solutions.
+   % See baseflow.fitphi for detail on all available solutions.
    %
    % See also: fitphi, globalfit
    %
@@ -56,7 +56,7 @@ function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
    % the opposite. The notes below follow Troch's paper so a1/b1 == late time,
    % but the implementation uses early/late for clarity
    %
-   % bfra_fitphi assumes D is known and eliminates k to get phi by setting
+   % baseflow_fitphi assumes D is known and eliminates k to get phi by setting
    % early- and late-time equations equal. Q0 is not involved in that approach.
    %
    % It should be possible to modify this using the fitphi method by settting
@@ -148,17 +148,17 @@ function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
 
    % Step 7: compute the early- and late-time intercepts
    bearly = 3;
-   aearly = bfra.pointcloudintercept(q, dqdt, bearly, 'envelope', ...
+   aearly = baseflow.pointcloudintercept(q, dqdt, bearly, 'envelope', ...
       'refqtls', args.earlyqtls);
 
    % late-time intercept either Boussinesq 1904 or Rupp and Selker, 2005
    switch soln
       case 'BS04'
          blate = 3/2;
-         alate = bfra.pointcloudintercept(q, dqdt, blate, 'envelope', ...
+         alate = baseflow.pointcloudintercept(q, dqdt, blate, 'envelope', ...
             'refqtls', args.lateqtls, 'mask', args.mask);
       case 'RS05'
-         alate = bfra.pointcloudintercept(q, dqdt, blate, 'envelope', ...
+         alate = baseflow.pointcloudintercept(q, dqdt, blate, 'envelope', ...
             'refqtls', args.lateqtls, 'mask', args.mask);
    end
 
@@ -191,13 +191,13 @@ function Props = aquiferprops(q,dqdt,alate,blate,soln,phi,A,L,varargin)
          % --------------------------------
 
          % late time:
-         n     = bfra.conversions(blate,'b','n','isflat',true);
-         fR2   = bfra.specialfunctions('fR2',n);
+         n     = baseflow.conversions(blate,'b','n','isflat',true);
+         fR2   = baseflow.specialfunctions('fR2',n);
          clate = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
          k     = (alate*phi/clate)^(n+2);
 
          % early time:
-         % fR1      = bfra_specialfunctions('fR1',n);
+         % fR1      = baseflow_specialfunctions('fR1',n);
          % cearly   = fR1/(D^3*L^2);
          % k        = cearly/(aearly*phi);
 
@@ -238,7 +238,7 @@ function [q, dqdt, alate, blate, soln, phi, A, L, D, args] = parseinputs( ...
       q, dqdt, alate, blate, soln, phi, A, L, varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.aquiferprops';
+   parser.FunctionName = 'baseflow.aquiferprops';
 
    parser.addRequired('q', @isnumeric);
    parser.addRequired('dqdt', @isnumeric);

@@ -9,7 +9,7 @@ function varargout = Setup(varargin)
    %  getpref('baseflow').
    %
    %  msg = Setup('uninstall') removes all toolbox paths from the search path
-   %  and unsets bfra toolbox preferences. Does not delete the toolbox directory.
+   %  and unsets baseflow toolbox preferences. Does not delete the toolbox directory.
    %
    %  msg = Setup('dependencies') generates a list of function and toolbox
    %  dependencies and determines which ones are not on the current search path.
@@ -21,7 +21,7 @@ function varargout = Setup(varargin)
    %  msg = Setup('rmpath') removes all toolbox paths from the search path. Does
    %  not modify any pathdef.m files or userpath.
    %
-   % See also bfra.dependencies
+   % See also baseflow.dependencies
 
    % NOTE genpath ignores folders named private, folders that begin with the @
    % character (class folders), folders that begin with the + character (package
@@ -56,7 +56,7 @@ function varargout = Setup(varargin)
    % if 'install' is requested but the toolbox is installed, ask the user
    if strcmp(option,'install') && ispref('baseflow','installed')
       if getpref('baseflow','installed')
-         msg = '\n * bfra toolbox is installed, press ''y'' to re-install ';
+         msg = '\n * baseflow toolbox is installed, press ''y'' to re-install ';
          msg = [msg 'or any other key to abort *\n'];
          str = input(msg,'s');
          if ~strcmp(str,'y')
@@ -238,15 +238,15 @@ function msg = addtoolboxpaths(varargin)
    thispath = fileparts(mfilename('fullpath'));
    % add paths containing source code
    addpath(genpath(thispath),'-end');
-   % remove namespace +bfra and git directories from path
-   % rmpath(genpath(fullfile(thispath,'+bfra')));
+   % remove namespace +baseflow and git directories from path
+   % rmpath(genpath(fullfile(thispath,'+baseflow')));
    rmpath(genpath(fullfile(thispath,'.git')));
    setpref('baseflow','install_directory',thispath)
    setpref('baseflow','installed',true)
    msg.addpath = true;
 
    if inoctave
-      addpath(fullfile(thispath, '+bfra', 'private'));
+      addpath(fullfile(thispath, '+baseflow', 'private'));
    end
 end
 
@@ -270,7 +270,7 @@ function msg = inittoolboxprefs(varargin)
    if ispref('baseflow')
       rmpref('baseflow');
    end
-   addpref('baseflow', 'version', bfra.version)
+   addpref('baseflow', 'version', baseflow.version)
    % note: 'pathdef_filename' removed from prefs
    if inoctave == true
       prefs = {'installed','install_directory','octave_install', ...
@@ -343,9 +343,9 @@ function msg = checkdependencies(varargin)
    end
 
    % get all unique dependencies
-   funcname = fullfile(thispath,'docs','bfra_demo.m');
-   report = bfra.internal.dependencies(funcname,'check');
-   % report = bfra.dependencies('docs/bfra_demo.m','check');
+   funcname = fullfile(thispath,'docs','baseflow_demo.m');
+   report = baseflow.internal.dependencies(funcname,'check');
+   % report = baseflow.dependencies('docs/baseflow_demo.m','check');
    msg.function_dependencies = report.function_dependencies;
    msg.missing_dependencies = report.missing_dependencies;
    msg.product_dependencies = report.product_dependencies;

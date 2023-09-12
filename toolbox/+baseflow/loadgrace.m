@@ -3,7 +3,7 @@ function [Grace, Meta] = loadgrace(varargin)
    %
    % Grace data should be in cm/timestep
    %
-   % See also: bfra.loadghcnd, bfra.loadflow, bfra.loadcalm
+   % See also: baseflow.loadghcnd, baseflow.loadflow, baseflow.loadcalm
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -89,7 +89,7 @@ end
 function [basinname, t1, t2, regularize] = parseinputs(varargin)
 
    parser = inputParser;
-   parser.FunctionName = 'bfra.loadgrace';
+   parser.FunctionName = 'baseflow.loadgrace';
    parser.addOptional('basinname','all',@ischar);
    parser.addParameter('t1',NaT,@(x) isdatetime(x) | isnumeric(x));
    parser.addParameter('t2',NaT,@(x) isdatetime(x) | isnumeric(x));

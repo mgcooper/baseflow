@@ -110,12 +110,12 @@ c1 = c1/c1expr
 %% 
 % Find the pdf
 
-Qtc_pdf  = c1.*Q
+Qtc_pdf = c1.*Q
 % Derive the characteristic drainage timescale, $t_c$
 % Define the $t_c$ integrand, which is the scalar multiple of the pdf and the 
 % independent variable time
 
-dtc_dt   = Qtc_pdf.*t
+dtc_dt = Qtc_pdf.*t
 %% 
 % Integrate $\frac{dt_c}{dt}$ to find the mean lifetime aka the characteristic 
 % timescale $t_c$
@@ -128,7 +128,7 @@ tc = int(dtc_dt,t,tlowerIntegralLimit,tupperIntegralLimit)
 % 
 % $$t_c = \frac{\tau_0}{3-2b}$$
 % 
-% The quantity $\tau_0$ will be described in more detail in the tutorial bfra_dynamical_systems.mlx. 
+% The quantity $\tau_0$ will be described in more detail in the tutorial baseflow_dynamical_systems.mlx. 
 % Derive the expected value of discharge, $Q_c$
 % Set up the integrand to find the expected value of $Q(t)$ 
 
@@ -138,18 +138,12 @@ dQc_dt = Q(t).*Qtc_pdf
 
 Qc = int(dQc_dt,t,tlowerIntegralLimit,tupperIntegralLimit)
 %% Verification
-% Compare the results above with the symbolic function bfra.sym.expectedvalue
+% Compare the results above with the symbolic function baseflow.sym.expectedvalue
 %% 
 % Define the limits of integration and call the function
 
-[tc,Qc] = bfra.sym.expectedvalue(Q,t,tlowerIntegralLimit,tupperIntegralLimit)
+[tc,Qc] = baseflow.sym.expectedvalue(Q,t,tlowerIntegralLimit,tupperIntegralLimit)
 %% 
 % The expression for $t_c$ can be simplified using the same variable substitution 
 % described above. The expression for $Q_{c}$ can be simplified (and shown to 
 % equal the one given above) by noting that $2+(1/(b-1))-(b/(b-1))=1$.
-% 
-% 
-% 
-% 
-% 
-%

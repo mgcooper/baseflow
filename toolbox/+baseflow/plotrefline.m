@@ -31,7 +31,7 @@ function [href,ab] = plotrefline(x,y,varargin)
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-   % NOTE: y comes in as -dq/dt, send it to bfra.fitab as -y, and to refline as y
+   % NOTE: y comes in as -dq/dt, send it to baseflow.fitab as -y, and to refline as y
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -42,7 +42,7 @@ function [href,ab] = plotrefline(x,y,varargin)
 
    % need options for how/if to apply the mask - e.g., we might want to show the
    % 'bestfit' to all data, and use the mask for late-time fit. also keep in mind
-   % bfra.eventphi calls this. mask is default true in parsing.
+   % baseflow.eventphi calls this. mask is default true in parsing.
 
    % use this to find the equation of the line
    axb = @(a,x,b) a.*x.^b;
@@ -66,29 +66,29 @@ function [href,ab] = plotrefline(x,y,varargin)
          b = 0;                           % slope = 0 unless stage precision is known
          a = precision*3600*24/timestep;  % 1 m3/s converted to m3/timestep with timestep in days
       case 'linear'
-         F = bfra.fitab(x(mask), -y(mask), 'ols', 'order', 1);
+         F = baseflow.fitab(x(mask), -y(mask), 'ols', 'order', 1);
          a = F.ab(1);
          b = F.ab(2);
       case 'bestfit'
-         F = bfra.fitab(x(mask), -y(mask), 'nls');
+         F = baseflow.fitab(x(mask), -y(mask), 'nls');
          a = F.ab(1);
          b = F.ab(2);
       case 'userfit'
          a = userab(1);
          b = userab(2);
       case 'envelope'
-         F = bfra.fitab(x(mask), -y(mask), ...
+         F = baseflow.fitab(x(mask), -y(mask), ...
             'envelope', 'refqtls', refqtls, 'order', refslope);
          a = F.ab(1);
          b = F.ab(2);
       case 'earlytime'
          if refslope == 1; refslope = 3; end
-         F = bfra.fitab(x, -y, ...
+         F = baseflow.fitab(x, -y, ...
             'envelope', 'refqtls', [0.95 0.95], 'order', refslope);
          a = F.ab(1);
          b = F.ab(2);
       case 'latetime'
-         F = bfra.fitab(x(mask), -y(mask), ...
+         F = baseflow.fitab(x(mask), -y(mask), ...
             'envelope', 'refqtls', [0.5 0.5], 'order', refslope);
          a = F.ab(1);
          b = F.ab(2);
@@ -166,7 +166,7 @@ function addlabels(a,b,refline)
          end
 
          if ~isoctave
-            bfra.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
+            baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
                'BaseAngle',90,'Length',8,'TipAngle',10);
             text(1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
                'fontsize',13,'Interpreter','latex');
@@ -174,7 +174,7 @@ function addlabels(a,b,refline)
 
       case 'upperenvelope'
 
-         axpos = bfra.deps.plotboxpos(gca); % only works with correct axes position
+         axpos = baseflow.deps.plotboxpos(gca); % only works with correct axes position
          % xtxt = exp(mean(log(xlim)));
 
          xlims = log10(xlim);
@@ -183,7 +183,7 @@ function addlabels(a,b,refline)
          rtxt = 0.98;
 
          % some values of rtxt that work for different types of plots
-         % 5.1    bfra_checkevent2 figure (I used 5.22 in the final fig)
+         % 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)
          % 0.22   not sure (note said 0.22 works with tiledlayout)
          % 3.8    not sure (note said i think 3.8 works with subplot)
          % 0.86   the standard point cloud plot (standard figure size)
@@ -205,7 +205,7 @@ end
 function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
    parser = inputParser;
-   parser.FunctionName = 'bfra.plotrefline';
+   parser.FunctionName = 'baseflow.plotrefline';
 
    parser.addRequired('x', @isnumeric);
    parser.addRequired('y', @isnumeric);

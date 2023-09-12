@@ -55,7 +55,7 @@ function [t,q,r,Info] = findevents(T,Q,R,varargin)
       [t,q,r,Info] = setEventEmpty();
    else
       % call eventfinder either way, then update if pickfits == true
-      [t,q,r,Info] = bfra.eventfinder(T,Q,R, ...
+      [t,q,r,Info] = baseflow.eventfinder(T,Q,R, ...
          'nmin',        nmin,          ...
          'fmax',        fmax,          ...
          'rmax',        rmax,          ...
@@ -73,9 +73,9 @@ function [t,q,r,Info] = findevents(T,Q,R,varargin)
       % within an eventfinder event, but only Info.istart is used in the
       % main algorithm so it is sufficient at this point
       if pickevents == true
-         [t,q,r,Info] = bfra.eventpicker(T,Q,R,nmin,Info);
+         [t,q,r,Info] = baseflow.eventpicker(T,Q,R,nmin,Info);
       elseif plotevents == true
-         Info.hEvents = bfra.eventplotter(T,Q,R,Info,'plotevents',plotevents);
+         Info.hEvents = baseflow.eventplotter(T,Q,R,Info,'plotevents',plotevents);
       end
    end
 end
@@ -121,7 +121,7 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
       parser.addParameter('pickevents',  false, @(x) islogical(x) & isscalar(x)       );
       parser.addParameter('plotevents',  false, @(x) islogical(x) & isscalar(x)       );
    end
-   parser.FunctionName = ['bfra.' mfilename];
+   parser.FunctionName = ['baseflow.' mfilename];
    parser.parse(T, Q, R, varargin{:});
 
    qmin        = parser.Results.qmin;
