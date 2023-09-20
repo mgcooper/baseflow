@@ -1,4 +1,4 @@
-function [Events, Info] = wrapevents(T,Q,R,varargin)
+function [EventsData, Info] = wrapevents(T,Q,R,varargin)
    %WRAPEVENTS Detect recession events on an annual calendar basis.
    %
    % This function is a wrapper around baseflow.getevents to detect recession events
@@ -47,9 +47,9 @@ function [Events, Info] = wrapevents(T,Q,R,varargin)
    [T, Q, R, numyears] = prepinput(T, Q, R);
 
    % Save the input data
-   Events.inputTime = T;
-   Events.inputFlow = Q;
-   Events.inputRain = R;
+   EventsData.inputTime = T;
+   EventsData.inputFlow = Q;
+   EventsData.inputRain = R;
 
    % Compute the number of timesteps per year
    numsteps = size(Q,1)/numyears;
@@ -117,12 +117,12 @@ function [Events, Info] = wrapevents(T,Q,R,varargin)
          hEvents = baseflow.eventplotter(thisYearTime, thisYearFlow, ...
             thisYearRain, thisYearInfo, 'plotevents', true, ...
             'eventTags', 1);
-         
+
          set(hEvents.ax(1), 'YScale', 'log')
-         
+
          sprintf('all events fitted for %d',thisYear); pause; close all
       end
-      
+
       % Concatenate Info
       if thisYear == 1
          Info = thisYearInfo;
@@ -133,11 +133,11 @@ function [Events, Info] = wrapevents(T,Q,R,varargin)
    end
 
    [ndays,numyears] = size(Qsave);
-   Events.eventTime = reshape(tsave, ndays*numyears, 1);
-   Events.eventFlow = reshape(Qsave, ndays*numyears, 1);
-   Events.eventRain = reshape(Rsave, ndays*numyears, 1);
-   Events.eventTags = reshape(Etags, ndays*numyears, 1);
-   
+   EventsData.eventTime = reshape(tsave, ndays*numyears, 1);
+   EventsData.eventFlow = reshape(Qsave, ndays*numyears, 1);
+   EventsData.eventRain = reshape(Rsave, ndays*numyears, 1);
+   EventsData.eventTags = reshape(Etags, ndays*numyears, 1);
+
    debug = false;
    if debug == true
       figure; plot(T(1:720), Q(1:720), 'o'); hold on;
@@ -159,7 +159,25 @@ end
 function [T,Q,R,numyears] = prepinput(T,Q,R)
    % PREPINPUT remove leap inds and determine number of years.
 
-   leapidx = month(T)==2 & day(T)==29;
+   if isoctave()
+      try
+         pkg load financial
+      catch e
+         if strcmp(e.message, 'package financial is not installed')
+            disp(['Package financial is required but not installed. ' ...
+               'To install the package, run ’pkg install -forge financial’ ' ...
+               'from the Octave prompt.'])
+         end
+         rethrow(e)
+      end
+   end
+   monthnums = nan(size(T));
+   daynums = nan(size(T));
+   for n = 1:numel(T)
+      monthnums = month(T(n));
+      daynums = day(T(n));
+   end
+   leapidx = monthnums==2 & daynums==29;
    T(leapidx) = [];
    Q(leapidx) = [];
    R(leapidx) = [];

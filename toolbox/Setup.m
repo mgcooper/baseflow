@@ -245,8 +245,10 @@ function msg = addtoolboxpaths(varargin)
    setpref('baseflow','installed',true)
    msg.addpath = true;
 
+   % In Octave, this might be needed to make private folders inside packages accessible.
    if inoctave
       addpath(fullfile(thispath, '+baseflow', 'private'));
+      addpath(fullfile(thispath, '+baseflow', '+internal', 'private'));
    end
 end
 

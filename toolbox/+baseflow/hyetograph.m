@@ -101,19 +101,21 @@ function H = hyetograph(time, flow, prec, varargin)
    H(3) = h1;
    H(4) = h2;
    
-   % Set up listener to trigger setlogticks if YScale is set to 'log'
-   addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerLogScale(s, e, ax(1)));
+   if ~isoctave
+      % Set up listener to trigger setlogticks if YScale is set to 'log'
+      addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerLogScale(s, e, ax(1)));
+      
+      % Set up listener to trigger interpreter if labels are updated
+      addlistener(ax(1), 'YLabel', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));
    
-   % Set up listener to trigger interpreter if labels are updated
-   addlistener(ax(1), 'YLabel', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));
-
-   % Set up listener to trigger interpreter if labels are updated so the
-   % interpreter is set to 'tex' if isoctave() returns true, and 'latex'
-   % otherwise. 
-   % addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));
-   
-   % this is the example syntax from octave, not sure if its helpful
-   %addlistener(gcf, "position", {@my_listener, "my string"})
+      % Set up listener to trigger interpreter if labels are updated so the
+      % interpreter is set to 'tex' if isoctave() returns true, and 'latex'
+      % otherwise. 
+      % addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));
+      
+      % this is the example syntax from octave, not sure if its helpful
+      % addlistener(gcf, "position", {@my_listener, "my string"})
+   end
 end
 
 % Listener function to handle YScale change

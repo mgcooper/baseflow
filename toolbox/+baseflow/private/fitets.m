@@ -37,8 +37,17 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
    % is an estimate of dq/dt and the average q within the window and those
    % two values are used to compute -dq/dt = aQ^b.
 
-   persistent inoctave
-   if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
+   persistent inoctave opts
+   if isempty(inoctave)
+      inoctave = exist("OCTAVE_VERSION", "builtin") > 0;
+   end
+   if isempty(opts)
+      if inoctave
+         opts = optimset();
+         opts = optimset(opts, 'Display', 'Off');
+      else
+         opts = statset('Display','off');
+      end
    end
 
    % PARSE INPUTS
@@ -57,23 +66,18 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
    % Fit gamma (a in the linear model -dq/dt = aQ)
    b0 = [mean(ye) 0.2 0];
 
-   if inoctave
-      opts = optimset('Display','off');
-   else
-      opts = statset('Display','off');
-   end
-
    func = @(b,x)b(1)*exp(-b(2)*x)+b(3);
    try
       abc = nlinfit(xe,ye,func,b0,opts);
-   catch % ME
-      % rethrow(ME)
+   catch ME
       if ~inoctave
          try
             abc = tryexpfit(xe,ye);
          catch ME
             rethrow(ME)
          end
+      else
+         rethrow(ME)
       end
    end
 

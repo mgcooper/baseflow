@@ -24,7 +24,15 @@ function [fullpath_bk, filename_bk] = backupfile(filename, makecopy, makezip)
    if nargin < 3
       makezip = false;
    end
-   filename = convertStringsToChars(filename);
+   if isoctave
+      try
+         filename = char(filename);
+      catch ME
+         rethrow(ME)
+      end
+   else
+      filename = convertStringsToChars(filename);
+   end
    validateattributes(filename, {'char'}, {'row'}, mfilename, 'FILENAME', 1)
    validateattributes(makecopy, {'logical'}, {'scalar'}, mfilename, 'MAKECOPY', 2)
    validateattributes(makezip, {'logical'}, {'scalar'}, mfilename, 'MAKEZIP', 3)
@@ -80,22 +88,3 @@ function filename = rmtrailingsep(filename)
       filename(end) = [];
    end
 end
-
-% Unused material
-
-% % If the backup file exists, recursively append versions starting with _v2
-%    % until the version number does not exist.
-%    if isfile(filename_bk) || isfolder(filename_bk)
-%       n = 2;
-%       while isfile(filename_bk) || isfolder(filename_bk)
-%          filename_bk = [filename '_bk_' filedate '_v' num2str(n) fileext];
-%          n = n+1;
-%       end
-%    end
-
-% This would go after the n = n+1 end to copy the existing backup file to _v0.
-% To use this, add back % fullpath_bk = [filepath filename_bk];
-
-% This assumes _v0 does not exist, so I commented it out instead of
-% checking, just leave it if it exists and create new ones with _vX.
-% movefile(fullpath_bk, strrep(fullpath_bk, fileext, ['_v0' fileext]));
