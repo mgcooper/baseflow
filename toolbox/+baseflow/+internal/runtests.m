@@ -1,5 +1,5 @@
 function result = runtests(varargin)
-   %RUNTESTS Run all tests in the baseflow test suite.
+   %RUNTESTS Run all tests in the test suite.
    %
    %  result = runtests() Runs all tests.
    %  result = runtests('debug') Runs all tests in verbose / debug mode.
@@ -14,8 +14,7 @@ function result = runtests(varargin)
    import matlab.unittest.plugins.StopOnFailuresPlugin
    
    % Create a test suite from the tests/ folder
-   suite = TestSuite.fromFolder( ...
-      fullfile(fileparts(baseflow.internal.basepath()), 'tests'));
+   suite = TestSuite.fromFolder(fullfile(projectpath(), 'tests'));
 
    if nargin < 1
       % Run parameterized test suite

@@ -18,3 +18,4 @@ function q = setconstantnan(q,rmax)
       end
    end
 end
+

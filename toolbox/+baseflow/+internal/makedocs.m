@@ -12,6 +12,9 @@ function makedocs(varargin)
    %
    % See also: 
 
+   % Set the package name. TODO: should be automated.
+   pkgname = '+baseflow';
+   
    % Parse optional arguments
    validopts = {'docpages', 'demos', 'functions', 'docsearch'};
    narginchk(0, numel(validopts))
@@ -26,10 +29,10 @@ function makedocs(varargin)
       validopts)), validopts, 2);
 
    % Set paths to the toolbox folder, docs, demos, and html folders
-   demopath = fullfile(baseflow.internal.basepath(), 'demos');
-   docspath = fullfile(baseflow.internal.basepath(), 'docs');
-   htmlpath = fullfile(baseflow.internal.basepath(), 'docs', 'html');
-   indexpath = fullfile(fileparts(baseflow.internal.basepath()), 'docs');
+   demopath = fullfile(toolboxpath(), 'demos');
+   docspath = fullfile(toolboxpath(), 'docs');
+   htmlpath = fullfile(toolboxpath(), 'docs', 'html');
+   indexpath = fullfile(projectpath(), 'docs');
 
    % Nest m2html/ in html/ to distinguish it from stuff published using matlab
    m2htmlpath = fullfile(htmlpath, 'm2html');
@@ -61,7 +64,7 @@ function makedocs(varargin)
       end
 
       % To convert to m-files, use convertlivescripts
-      baseflow.internal.convertlivescripts();
+      convertlivescripts();
    end
 
    %% build a doc search database
@@ -100,16 +103,16 @@ function makedocs(varargin)
       end
 
       % run m2html from the project base directory (one dir above this one)
-      job = withcd(baseflow.internal.basepath()); %#ok<NASGU>
+      job = withcd(toolboxpath()); %#ok<NASGU>
 
       % note that m2html uses relative paths. generate a list of dirs to ignore.
-      alldirs = dir([baseflow.internal.basepath() filesep]);
+      alldirs = dir(pwd());
       alldirs = alldirs([alldirs.isdir]);
       alldirs(strncmp({alldirs.name}, '.', 1) & strlength({alldirs.name})<3) = [];
-      ignored = {alldirs(~ismember({alldirs.name},'+baseflow')).name};
+      ignored = {alldirs(~ismember({alldirs.name}, pkgname)).name};
 
       % folder containing code to generate documentation
-      mfilepath = fullfile('+baseflow');
+      mfilepath = fullfile(pkgname);
 
       if ~isfolder(m2htmlpath)
          mkdir(m2htmlpath)

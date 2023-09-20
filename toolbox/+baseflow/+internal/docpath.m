@@ -1,7 +1,7 @@
 function fullpath = docpath(docname, varargin)
    %DOCPATH Return path to toolbox doc file.
    
-   docspath = fullfile(baseflow.internal.basepath(), 'docs', 'html');
+   docspath = fullfile(toolboxpath(), 'docs', 'html');
    
    if isfile(fullfile(docspath, [docname '.html']))
       % help pages documentation

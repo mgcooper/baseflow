@@ -5,17 +5,17 @@
 % 
 % Notes for users:
 %% 
-% * Detecting recession events is reasonably fast but fitting events is slow
-% * Computing uncertainties is very slow (bootstrap fit)
+% * This demo is designed to replicate the experiment noted above, therefore 
+% it may use different notation, terminology, or other conventions than the current 
+% toolbox version.
+% * Detecting recession events is reasonably fast but fitting events is slow.
+% * Computing uncertainties is very slow because it uses a bootstrap fit.
 % * Therefore, an option is included to either run each step or load pre-computed 
-% data
+% data.
 % * In typical use, one might run this script once to generate the 'Events' 
-% data and save that
-% * Then experiment with the 'fitevents' function and save the 'Fits' data
-% * Then experiment with the 'globalfit' function and save the 'GlobalFit' data
-%% 
-% NOTE: this script assumes it is being run in the folder that contains the 
-% data/ folder 
+% data and save that.
+% * Then experiment with the 'fitevents' function and save the 'Fits' data.
+% * Then experiment with the 'globalfit' function and save the 'GlobalFit' data.
 
 clearvars
 close all
@@ -32,7 +32,11 @@ fitglobal   = true; % if true, run globalfit, otherwise load saved GlobalFit
 plotfigs    = true; % if true, globalfit will produce figures
 bootfit     = false; % if true, bootstrap uncertainties (very slow)
 nreps       = 1000; % number of bootstrap samples
-fname       = 'data/Events.mat'; % filename to save Events, Fits, and GlobalFit
+
+%% 
+% Set the filename to save the Events, Fits, and GlobalFit .mat files.
+
+fname = fullfile(baseflow.internal.basepath('data'), 'Events.mat');
 %% 
 % Set the basin geomorphological parameters
 
@@ -43,8 +47,7 @@ L  = A*Dd/1000;      % active stream length
 %% 
 % Load the streamflow data and the CALM-network active layer thickness data
 
-load('data/dailyflow.mat','T','Q','R');
-load('data/annualdata.mat','Data');
+[T, Q, R, Data] = baseflow.loadExampleData('kuparuk');
 %% 
 % Set the algorithm options. Here we use a combination of default options and 
 % site-specific options.
@@ -52,15 +55,15 @@ load('data/annualdata.mat','Data');
 opts.getevents = baseflow.setopts('getevents', 'asannual', true);
 opts.fitevents = baseflow.setopts('fitevents');
 opts.globalfit = baseflow.setopts('globalfit', ...
-   'drainagearea',A,'aquiferdepth',D, ...
-   'streamlength',L,'drainagedensity',Dd, ...
-   'bootfit',bootfit,'bootreps',nreps, 'plotfits',true);
+   'drainagearea', A, 'aquiferdepth', D, ...
+   'streamlength', L, 'drainagedensity', Dd, ...
+   'bootfit', bootfit, 'bootreps', nreps, 'plotfits', true);
 %% 
 % Get all recession events and then fit them
 
 if fitevents == true
-   [Events, Info] = baseflow.wrapevents(T,Q,R,opts.getevents);
-   [Fits,K] = baseflow.fitevents(Events,opts.fitevents);
+   [Events, Info] = baseflow.wrapevents(T, Q, R, opts.getevents);
+   [Fits, K] = baseflow.fitevents(Events, opts.fitevents);
 
    if savedata == true
       save(fname,'Events','Fits','K','opts');
@@ -75,29 +78,29 @@ end
 
 if fitglobal == true
 
-   GlobalFit = baseflow.globalfit(K,Events,Fits,opts.globalfit);
+   GlobalFit = baseflow.globalfit(K, Events, Fits, opts.globalfit);
 
    if savedata == true
-      save(fname,'Events','Fits','K','GlobalFit','opts');
+      save(fname, 'Events', 'Fits', 'K', 'GlobalFit', 'opts');
    end
 
 else % load pre-saved data
-   load(fname,'Events','Fits','K','GlobalFit','opts');
+   load(fname, 'Events', 'Fits', 'K', 'GlobalFit', 'opts');
 end
 %% 
 % Take out parameters and data needed for the next steps
 
-bhat     = GlobalFit.b;
-tauexp   = GlobalFit.tau;
-phihat   = GlobalFit.phi;
-pQexp    = GlobalFit.pQexp;
+bhat = GlobalFit.b;
+pQexp = GlobalFit.pQexp;
+tauexp = GlobalFit.tau;
+phihat = GlobalFit.phi;
 %% 
 % Compute baseflow and aquifer thickness trends
 
-[Qb,~,Qa,~,hb] = baseflow.baseflowtrend(T, Q, A, ...
+[Qb, ~, Qa, ~, hb] = baseflow.baseflowtrend(T, Q, A, ...
    'pctl', pQexp, 'showfig', false); % cm/d/y
 
-[Db,Sb] = baseflow.aquiferthickness( ...
+[Db, Sb] = baseflow.aquiferthickness( ...
    bhat, tauexp, phihat, Qb, true); % cm/yr
 
 Qb = Qb.*365.25; % convert from cm/d/yr to cm/yr/yr
@@ -109,14 +112,14 @@ sig_dndt = baseflow.dndtuncertainty( ...
 %% 
 % Add the baseflow recession analysis timeseries to the annual Data table, 
 
-Data = addvars(Data,Qb,Sb,Db);
+Data = addvars(Data, Qb, Sb, Db);
 Data.sigDb = Data.Db.*sig_dndt;
 %% 
 % Make separate tables for the Grace period and Calm period
 
 inanC = isnan(Data.Dc);%  | isnan(Data.Q);
-DataC = Data(~inanC,:);
-DataG = DataC(find(year(DataC.Time)==2002):end,:);
+DataC = Data(~inanC, :);
+DataG = DataC(find(year(DataC.Time) == 2002):end, :);
 %% 
 % Plot the alt trend
 

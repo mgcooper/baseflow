@@ -62,7 +62,7 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    %     plotevents  option to plot picked events
    %
    % Note: either the 'opts' struct can be provided with the
-   % 
+   %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
    % See also: fitevents, eventfinder, eventsplitter, eventpicker, eventplotter
@@ -158,7 +158,7 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
    if isempty(parser)
       parser = inputParser;
       parser.StructExpand = true;
-      parser.PartialMatching = false;
+      % parser.PartialMatching = false;
       parser.CaseSensitive = true;
 
       parser.addRequired('T', @isdatelike);

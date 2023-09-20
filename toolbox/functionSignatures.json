@@ -87,17 +87,6 @@
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "baseflow.completions":
-   {
-      "inputs": 
-      [
-         {"name":"funcname", "type":["choices=baseflow.completions('completions')"]}
-      ],
-      "outputs":
-      [
-         {"name":"proplist", "type":["cell"]}
-      ]
-   },
    "baseflow.conversions":
    {
       "inputs":
@@ -386,7 +375,7 @@
    {
       "inputs": 
       [
-         {"name":"funcname", "type":["choices=baseflow.completions('help')"]}
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('help')"]}
       ],
       "outputs":
       [
@@ -494,7 +483,7 @@
    {
       "inputs": 
       [
-         {"name":"funcname", "type":["choices=baseflow.completions('open')"]}
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('open')"]}
       ],
       "outputs":
       [
@@ -614,7 +603,7 @@
    {
       "inputs": 
       [
-         {"name":"funcname", "type":["choices=baseflow.completions('private')"]}
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('private')"]}
       ],
       "outputs":
       [
@@ -728,8 +717,47 @@
          }
       ]
    },
+   "baseflow.internal.completions":
+   {
+      "inputs": 
+      [
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('completions')"]}
+      ],
+      "outputs":
+      [
+         {"name":"proplist", "type":["cell"]}
+      ]
+   },
+   "baseflow.internal.makecontents":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'-backup', '-nobackup'}"]}
+      ]
+   },
+   "baseflow.internal.makedocs":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'docpages', 'demos', 'functions', 'docsearch'}"]}
+      ]
+   },
+   "baseflow.internal.runtests":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'debug'}"]}
+      ]
+   },
+   "baseflow.internal.version":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'verbose', 'silent'}"]}
+      ]
+   },
    "+baseflow/private/formatPlotMarkers":
-  {
+   {
    "inputs":
       [
       {"name":"fillspacing",  "kind":"namevalue", "type":["numeric","scalar","double"]},
@@ -738,7 +766,7 @@
       {"name":"suppliedaxes", "kind":"namevalue", "type":["matlab.graphics.axis.Axes"]},
       {"name":"suppliedline", "kind":"namevalue", "type":["matlab.graphics.chart.primitive.Line"]}
       ]
-  },
+   },
    "+baseflow/private/prepalttrend":
    {
       "inputs":

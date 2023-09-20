@@ -10,3 +10,4 @@ function [S, E, L] = nonnansegments(q, nmin)
    E = E(L >= nmin);
    L = L(L >= nmin);
 end
+

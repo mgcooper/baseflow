@@ -52,7 +52,7 @@ function setup(testCase)
 
 end
 
-function teardown(testCase)
+function teardown(testCase) %#ok<INUSD>
 
 end
 

@@ -16,7 +16,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
    %        expected way (e.g., the code gives the right error for a
    %        specific bad input)
    % 
-   % See also: 
+   % See also: test_internal
 
    properties (TestParameter)
       SetupOption = {'install','uninstall','dependencies','addpath','savepath','rmpath','delpath'};

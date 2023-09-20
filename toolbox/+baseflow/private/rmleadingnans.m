@@ -6,8 +6,9 @@ function [t,q,r,si] = rmleadingnans(t,q,r)
 
    tf = logical(cumprod(isnan(q(:))));   % consecutive leading nans true
    si = find(tf==false,1,'first');    % first non-nan indici
-   
+
    t(tf) = [];
    q(tf) = [];
    r(tf) = [];
 end
+

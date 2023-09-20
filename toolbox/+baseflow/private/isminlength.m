@@ -6,3 +6,4 @@ function [tf, istart, iend] = isminlength(tf, nmin)
    iend = find(diff([tf; false]) == -1);  % end index of useable events
    % NOTE runlength returns a value of 1 for consecutive nan's
 end
+

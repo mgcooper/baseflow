@@ -2,7 +2,7 @@
 
 A matlab toolbox for characterizing aquifer properties from streamflow measurements using baseflow recession analysis. Developed at the Pacific Northwest National Laboratory to study changes in soil water storage in Arctic and Subarctic watersheds. Supported by the Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project.  
 
-For a quick introduction, see [Getting Started](https://mgcooper.github.io/baseflow/).  
+For an overview, see [Getting Started](https://mgcooper.github.io/baseflow/).  
 
 [![status](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3/status.svg)](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3) [![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mgcooper/baseflow?include_prereleases) [![MATLAB](https://github.com/mgcooper/baseflow/actions/workflows/run-tests.yml/badge.svg?branch=dev)](https://github.com/mgcooper/baseflow/actions/workflows/run-tests.yml) [![GitHub license](https://img.shields.io/github/license/mgcooper/baseflow)](https://github.com/mgcooper/baseflow/blob/main/LICENSE)
 
@@ -25,24 +25,24 @@ Requires Statistics, Optimization, Struct, and Tablicious packages.
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc` for recommended startup options.
-- Unit tests are located in `tests/`. From the top-level folder, they can be run in a matlab session by typing `runtests('tests')` at the command window and pressing enter. For verbose output and/or to enter debug mode on errors, type `runtests('tests', 'debug', true)`. 
-- To use the toolbox in new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
+- Unit tests are in `tests/`. To run them from the top-level folder, type `runtests('tests')` at the command window and press enter. To debug errors, try `runtests('tests', 'debug', true)`.
+- In new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).  
 For Octave compatibility, see [Octave](#octave).  
 
 ## Get started
 
-Toolbox functions are located in the `+baseflow` namespace folder. To see a list of toolbox functions, type `help +baseflow` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help baseflow.function_name` at the command line then press enter.
+Toolbox functions are in the `+baseflow` namespace folder. To see a list of toolbox functions, type `help +baseflow` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help baseflow.function_name` at the command line then press enter.
 
-Toolbox documentation and examples are also available in the Matlab help browser. To get started, in your Matlab command window:
+Toolbox documentation and examples are available in the Matlab help browser. To get started, in your Matlab command window:
 
 - Type `baseflow.help()` to open the toolbox documentation in the help browser.
 - Type `baseflow.help('function_name')` to open documentation for a specific function.
 - Type `doc baseflow` or try `doc +baseflow` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch baseflow`.
 
-In addition to the toolbox documentation and examples provided in the Matlab help browser, there are several notebooks in `demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Several other notebooks in the `demos` folder demonstrate how to use the toolbox functions, each of which are also available as html files in the `docs` folder, and are viewable in the Matlab help browser. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
+Demo notebooks are in `demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Each demo is available as an html file in `toolbox/docs`, double click to view them in the Matlab help browser, or use `baseflow.help(<docname>)`. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
 
 ## Contribute
 
@@ -68,15 +68,15 @@ If you find this software useful, please consider citing the software release in
 
 ## Configuration
 
-Installing the `baseflow` toolbox is as simple as cloning this repo and adding it to the matlab search path. Users should manage the toolbox however they normally manage their search path, for example, using the `startup.m` file. However, the `+baseflow` namespace prefix means that package functions will not interfere with functions sharing the same name on the search path. This means it is ok to put this toolbox on your `userpath` if you want it available on startup.
+Installing `baseflow` is as simple as cloning this repo and adding it to the Matlab search path. Users should manage the toolbox however they normally manage their search path, for example using `startup.m`. However, functions in the `+baseflow` namespace will not interfere with functions sharing the same name on the search path, so feel free to put the toolbox on your `userpath` if you want it available on startup.
 
-For extended use of the toolbox, the convenience function `Setup.m` includes options to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
+For more control, use the convenience function `Setup.m` to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
 
 - Running `Setup('install')` does the following:
   - Toolbox paths are added to the search path (not persistent between sessions).
   - Default toolbox preferences are added to a new user preferences group `baseflow` (persistent between sessions).
   <!-- - Dependencies are checked using `baseflow.internal.dependencies` to determine if the required files are on the search path. -->
-- Note that `Setup` does not modify `userpath`, does not call `savepath`, and never modifies the root-level `pathdef.m` file. It only calls `addpath` and `rmpath` to put the toolbox on the user search path.
+- Note that `Setup` does not modify `userpath`, does not call `savepath`, and never modifies the root-level `pathdef.m` file. It only calls `addpath` and `rmpath` to add and remove the toolbox from the search path.
 - In subsequent sessions, toolbox paths can be managed like so:
   - `Setup('addpath')` or simply `Setup` with no arguments adds the toolbox to the search path for the current session.
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
