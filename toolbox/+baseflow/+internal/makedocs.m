@@ -12,8 +12,8 @@ function makedocs(varargin)
    %
    % See also: 
 
-   % Set the package name. TODO: should be automated.
-   pkgname = '+baseflow';
+   % Retrieve the package namespace folder
+   [~, pkgfolder] = mpackagename();
    
    % Parse optional arguments
    validopts = {'docpages', 'demos', 'functions', 'docsearch'};
@@ -109,10 +109,10 @@ function makedocs(varargin)
       alldirs = dir(pwd());
       alldirs = alldirs([alldirs.isdir]);
       alldirs(strncmp({alldirs.name}, '.', 1) & strlength({alldirs.name})<3) = [];
-      ignored = {alldirs(~ismember({alldirs.name}, pkgname)).name};
+      ignored = {alldirs(~ismember({alldirs.name}, pkgfolder)).name};
 
       % folder containing code to generate documentation
-      mfilepath = fullfile(pkgname);
+      mfilepath = fullfile(pkgfolder);
 
       if ~isfolder(m2htmlpath)
          mkdir(m2htmlpath)

@@ -1,15 +1,15 @@
 function proplist = completions(funcname)
    %COMPLETIONS Generate function auto-completions for string literals.
 
-   % For now, this has to be set, but it should be auto-generated.
-   pkgname = '+baseflow';
+   % Retrieve the package namespace folder
+   [~, pkgfolder] = mpackagename();
 
    switch lower(funcname)
 
       case 'completions'
 
          % To generate a completions list of all functions in +pkg folder:
-         % tmp = dir(fullfile(toolboxpath(), pkgname, '*.m'));
+         % tmp = dir(fullfile(toolboxpath(), pkgfolder, '*.m'));
          % proplist = strrep({tmp.name}, '.m', '');
 
          % To hard-code them using all members of the case set below:
@@ -17,11 +17,11 @@ function proplist = completions(funcname)
 
       case 'open'
          % restrict to +pkg files
-         tmp = dir(fullfile(toolboxpath(), pkgname, '*.m'));
+         tmp = dir(fullfile(toolboxpath(), pkgfolder, '*.m'));
          proplist = strrep({tmp.name}, '.m', '')';
 
       case 'private'
-         tmp = dir(fullfile(toolboxpath(), pkgname, 'private', '*.m'));
+         tmp = dir(fullfile(toolboxpath(), pkgfolder, 'private', '*.m'));
          proplist = strrep({tmp.name}, '.m', '')';
 
       case 'folders'
