@@ -1,4 +1,7 @@
-function tbpath = getinstallpath()
-   %GETINSTALLPATH Return toolbox installation path.
-   tbpath = getpref('baseflow','install_directory');
+function tbpath = installpath(tbxname)
+   %INSTALLPATH Return toolbox installation path.
+   if nargin < 1
+      tbxname = mpackagename();
+   end
+   tbpath = getpref(tbxname,'install_directory');
 end

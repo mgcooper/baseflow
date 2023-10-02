@@ -35,8 +35,8 @@ function proplist = completions(funcname)
          % Remove folders if any part of the path starts with a dot
          tmp = dir(fullfile(projectpath(), '**/*'));
          tmp = tmp([tmp.isdir]);
-         drop = contains({tmp.folder}, {'.git', 'resources'}) | ...
-            strncmp({tmp.name}, '.', 1);
+         drop = contains( ...
+            {tmp.folder}, {'.git', 'resources'}) | strncmp({tmp.name}, '.', 1);
          tmp(drop) = [];
          proplist = {tmp.name}';
 

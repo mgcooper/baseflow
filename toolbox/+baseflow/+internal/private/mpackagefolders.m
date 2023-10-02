@@ -13,7 +13,7 @@ function varargout = mpackagefolders(foldername, opts)
    %
    % Copyright (c) 2023, Matt Cooper, BSD 3-Clause License, github.com/mgcooper
    %
-   % See also: mfilename, mcallername, mfoldername, ismfile
+   % See also: mpackagename, mfilename, mcallername, mfoldername, ismfile
 
    arguments
       foldername (1,:) string = pwd()

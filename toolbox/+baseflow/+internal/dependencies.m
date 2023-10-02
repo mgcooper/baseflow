@@ -11,13 +11,12 @@ function report = dependencies(funcname,option)
    %
    % See also: Setup
 
-   % use this to generate a list of all functions in the package, then cycle over
-   % all of them and find the dependencies
-   % funcpath = fileparts(which('baseflow.fitab'));
+   % use this to generate a list of all functions in the package, then cycle
+   % over all of them and find the dependencies
+   % funcpath = fileparts(which('pkg.func'));
    % funclist = getlist(funcpath,'.m');
 
-   % if called with no input, open this file
-   if nargin == 0; open(mfilename('fullpath')); return; end
+   [pkgname, pkgfolder] = mpackagename();
 
    % valid options
    validopts = ["all","missing","installed","resolve","report","check"];
@@ -26,16 +25,13 @@ function report = dependencies(funcname,option)
    end
 
    % use this to test a particular function
-   % if nargin == 0
-   % funcname = 'baseflow_demo.mlx';
-   % funcname = 'baseflow_gettingStarted.m';
-   % funcname = 'baseflow.fitab';
-   % funcname = 'baseflow_kuparuk.m';
-   % end
+   if nargin == 0
+      funcname = '';
+   end
 
    % this loads the saved dependencies.mat file and checks against util/
    if opts.check == true
-      report = dependencycheck();
+      report = dependencycheck(pkgfolder);
       return;
    end
 
@@ -48,9 +44,9 @@ function report = dependencies(funcname,option)
       % return a table of all dependencies
       report = cell2table(funclist,'VariableNames',{'function_dependencies'});
    elseif opts.report == true
-      report = getdependencyreport(funclist,prodlist,funcname);
+      report = getdependencyreport(funclist,prodlist,funcname,pkgfolder);
    elseif opts.missing == true
-      report = getmissingdependencies(funclist,funcname);
+      report = getmissingdependencies(funclist,funcname,pkgname,pkgfolder);
    elseif opts.installed == true
       report = getinstalleddependencies(funclist);
    elseif opts.resolve == true
@@ -58,12 +54,12 @@ function report = dependencies(funcname,option)
    end
 end
 
-function report = getdependencyreport(funclist,prodlist,funcname)
+function report = getdependencyreport(funclist,prodlist,funcname,pkgfolder)
 
    % get a list of dependencies that are not toolbox functions, i.e. those that
    % need to be included in util/
    % report = funclist;
-   skip = {'+baseflow',funcname,'ExtractNameVal','Cupid'};
+   skip = {pkgfolder, funcname, 'ExtractNameVal', 'Cupid'};
    keep = true(numel(funclist),1);
    for n = 1:numel(funclist)
       keep(n) = ~ismember(funclist{n},skip);
@@ -73,8 +69,8 @@ function report = getdependencyreport(funclist,prodlist,funcname)
    % report = report(keep);
 end
 
-function report = dependencycheck
-   load(fullfile(getinstallpath(), '+baseflow', 'private', 'dependencies.mat'), 'report')
+function report = dependencycheck(pkgfolder)
+   load(fullfile(getinstallpath(), pkgfolder, 'private', 'dependencies.mat'), 'report')
    deps = report.function_dependencies;
    deps = deps(~isfile(fullfile(getinstallpath(), 'util', deps)));
    deps = deps(~isfolder(strrep(fullfile(getinstallpath(), 'util', deps),'.m','')));
@@ -86,15 +82,15 @@ function report = dependencycheck
    end
 end
 
-function report = getmissingdependencies(funclist,funcname)
+function report = getmissingdependencies(funclist,funcname,pkgname,pkgfolder)
 
-   % remove functions in the toolbox first, leave the ones in util/ so they can be
-   % compared here if needed for debugging.
+   % remove functions in the toolbox first, leave the ones in util/ so they can
+   % be compared here if needed for debugging.
    missing = funclist;
    % Also remove the 'cupid' toolbox and 'ExtractNameVal' functions that get
-   % picked up as dependent but are not. What remains after this is functions that
-   % are either in util/ or need to be moved there.
-   skip = {'+baseflow',funcname,'ExtractNameVal','Cupid'};
+   % picked up as dependent but are not. What remains after this is functions
+   % that are either in util/ or need to be moved there.
+   skip = {pkgfolder, funcname, 'ExtractNameVal', 'Cupid'};
    keep = true(numel(missing),1);
    for n = 1:numel(missing)
       keep(n) = ~ismember(missing{n},skip);
@@ -102,22 +98,22 @@ function report = getmissingdependencies(funclist,funcname)
    missing = missing(keep);
 
    % now remove ones that are in util.
-   skip = {'baseflow/util'};
+   skip = {fullfile(pkgname, 'util')};
    keep = true(numel(missing),1);
    for n = 1:numel(missing)
       keep(n) = ~ismember(missing{n},skip);
    end
    missing = missing(keep);
 
-   % % since I use addpath(...,'-end'), the dependency check finds functions in my
-   % main function folder not the ones in baseflow/util.
-   % % now check if funclist ismember paths to versions elsewhere that are in util .
-   % % what remains are missing.
+   % % since I use addpath(...,'-end'), the dependency check finds functions in
+   % the main function folder not the ones in pkgname/util.
+   % now check if funclist ismember paths to versions elsewhere that are in
+   % util. What remains are missing.
    keep = true(numel(missing),1);
    for n = 1:numel(missing)
       [~,funcname] = fileparts(missing{n});
       allfuncs = which(funcname,'-all');
-      if any(ismember(allfuncs,fullfile('baseflow','util',funcname)))
+      if any(ismember(allfuncs,fullfile(pkgname,'util',funcname)))
          keep(n) = false;
       end
    end
@@ -137,15 +133,16 @@ function report = resolvedependencies(funclist,funcname)
 
    % cycle through the dependent functions and copy them to util/
 
-   % NOTE: this is for private use, it won't work if you don't have the functions
-   % on your local computer. Please contact me at matt.cooper@pnnl.gov if you have
-   % any trouble running this toolbox or if any function dependencies are missing
-   % from the toolbox. Alternatively, look for the missing functions in
-   % https://github.com/mgcooper/matfunclib (I suggest the dev branch). Thank you.
+   % NOTE: this is for private use, it won't work if you don't have the
+   % functions on your local computer. Please contact me at matt.cooper@pnnl.gov
+   % if you have any trouble running this toolbox or if any function
+   % dependencies are missing from the toolbox. Alternatively, look for the
+   % missing functions in https://github.com/mgcooper/matfunclib (I suggest the
+   % dev branch). Thank you.
 
    % TODO: add method to clone from https://github.com/mgcooper/matfunclib
 
-   report = getmissingdependencies(funclist,funcname);
+   report = getmissingdependencies(funclist,funcname,pkgname,pkgfolder);
 
    if ischar(report.missing_dependencies) && ...
          strcmp(report.missing_dependencies,'all dependencies are installed')
@@ -162,30 +159,30 @@ function report = resolvedependencies(funclist,funcname)
    % behavior in the toolbox but the core functionality should
 
    %%
-   % if the commented loop in baseflow.dependencies.m is used, this is required
+   
+   % % if the commented loop in baseflow.dependencies.m is used, this is required
    % dependentFunctions = unique(vertcat(allDependencies.function_dependencies{:}));
 
    % % nearly certain it isn't necessary to cycle over all functions, I may have
-   % added this to figure out which functions were responsible for some functions
-   % that were returned as required but sholdn't be like the Cupid toolbox
-
+   % % added this to figure out which functions were responsible for some
+   % % functions that were returned as required but sholdn't be like the Cupid
+   % % toolbox
+   % 
    % Depends = cell(numel(funclist),3);
    % for n = 1:numel(funclist)
-   %
+   % 
    %    % this is needed if getlist is used
    %    % thisfunc = [funcpath filesep funclist(n).name];
-   %
+   % 
    %    thisfunc = funclist{n};
    %    [fl,pl] = matlab.codetools.requiredFilesAndProducts(thisfunc);
    %    fl = transpose(fl);
-   %
+   % 
    %    Depends{n,1} = thisfunc;
    %    Depends{n,2} = fl;
    %    Depends{n,3} = {pl(:).Name}';
-   %
    % end
-   %
+   % 
    % Depends = cell2table(Depends,'VariableNames',...
    %    {'function_name','function_dependencies','product_dependencies'});
-
 end
