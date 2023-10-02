@@ -4,7 +4,7 @@
 <head>
   <title>Description of open</title>
   <meta name="keywords" content="open">
-  <meta name="description" content="OPEN Open package namespace function file in the MATLAB Editor.">
+  <meta name="description" content="OPEN Open package namespace function file in the Editor.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,13 +21,13 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>OPEN Open package namespace function file in the MATLAB Editor.</strong></div>
+<div class="box"><strong>OPEN Open package namespace function file in the Editor.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="box"><strong>function open(varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">OPEN Open package namespace function file in the MATLAB Editor.</pre></div>
+<div class="fragment"><pre class="comment">OPEN Open package namespace function file in the Editor.</pre></div>
 
 
 <!-- crossreference -->
@@ -35,8 +35,7 @@
 
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
-
-<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+</ul>
 
 
 This function is called by:
@@ -82,8 +81,7 @@ This function is called by:
 <li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>	LOADPROPS Load basin properties from metadata table.</li>
 <li><a href="mapbasins.html" class="code" title="function h = mapbasins(Basins,varargin)">mapbasins</a>	MAPBASINS Map basin boundaries and color their faces by an attribute.</li>
 <li><a href="mapgages.html" class="code" title="function h = mapgages(lat,lon,varargin)">mapgages</a>	MAPGAGES map a set of gage locations and color their faces by an attribute</li>
-<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li>
-<li><a href="phifitensemble.html" class="code" title="function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)">phifitensemble</a>	PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</li>
+<li><a href="phifitensemble.html" class="code" title="function PhiFit = phifitensemble(Results, Fits, A, D, L, bhat, lateqtls,earlyqtls, showfit)">phifitensemble</a>	PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</li>
 <li><a href="plfitb.html" class="code" title="function varargout = plfitb(x,varargin)">plfitb</a>	PLFITB fit an unbounded Pareto Distribution to recession parameter tau</li>
 <li><a href="plotaquifertrend.html" class="code" title="function h = plotaquifertrend(t,Db,sigDb,varargin)">plotaquifertrend</a>	PLOTAQUIFERTREND Plot the saturated aquifer thickness trend.</li>
 <li><a href="plotdqdt.html" class="code" title="function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)">plotdqdt</a>	PLOTDQDT Plot the log-log q vs dq/dt point-cloud</li>
@@ -93,7 +91,7 @@ This function is called by:
 <li><a href="pointcloudplot.html" class="code" title="function out = pointcloudplot(q,dqdt,varargin)">pointcloudplot</a>	POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.</li>
 <li><a href="setopts.html" class="code" title="function opts = setopts(funcname,varargin)">setopts</a>	SETOPTS Set algorithm options for functions getevents, fitevents, globalfit.</li>
 <li><a href="specialfunctions.html" class="code" title="function varargout = specialfunctions(funcname,varargin)">specialfunctions</a>	SPECIALFUNCTIONS Special function ibarary required for recession analysis.</li>
-<li><a href="wrapevents.html" class="code" title="function [Events, Info] = wrapevents(T,Q,R,varargin)">wrapevents</a>	WRAPEVENTS Detect recession events on an annual calendar basis.</li></ul>
+<li><a href="wrapevents.html" class="code" title="function [EventsData, Info] = wrapevents(T,Q,R,varargin)">wrapevents</a>	WRAPEVENTS Detect recession events on an annual calendar basis.</li></ul>
 <!-- crossreference -->
 
 
@@ -103,16 +101,12 @@ This function is called by:
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function open(varargin)</a>
-0002    <span class="comment">%OPEN Open package namespace function file in the MATLAB Editor.</span>
+0002    <span class="comment">%OPEN Open package namespace function file in the Editor.</span>
 0003    narginchk(1,1)
 0004    funcname = validatestring(varargin{1}, baseflow.internal.completions(<span class="string">'open'</span>));
-0005    <a href="open.html" class="code" title="function open(varargin)">open</a>([<span class="string">'baseflow.'</span> funcname])
-0006    
-0007    <span class="comment">% note, this would also work to open help pages, if it is desirable to</span>
-0008    <span class="comment">% collapse the two functions into one. But see baseflow.completions for where I</span>
-0009    <span class="comment">% restrict the available options for this function to top-level +baseflow/</span>
-0010    <span class="comment">% function files</span>
-0011    <span class="comment">% baseflow.help(funcname)</span>
-0012 <span class="keyword">end</span></pre></div>
+0005 
+0006    edit(fullfile(baseflow.internal.buildpath(<span class="string">'+baseflow'</span>), funcname))
+0007 <span class="keyword">end</span>
+0008</pre></div>
 </body>
 </html>

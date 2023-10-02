@@ -90,7 +90,7 @@
      plotevents  option to plot picked events
 
  Note: either the 'opts' struct can be provided with the
- 
+
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
  See also: <a href="fitevents.html" class="code" title="function [Fits,Results] = fitevents(Events,varargin)">fitevents</a>, <a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>, eventsplitter, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>, <a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>
@@ -107,7 +107,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
 
 
 This function is called by:
@@ -285,51 +285,52 @@ This function is called by:
 0158    <span class="keyword">if</span> isempty(parser)
 0159       parser = inputParser;
 0160       parser.StructExpand = true;
-0161       parser.PartialMatching = false;
-0162       parser.CaseSensitive = true;
-0163 
-0164       parser.addRequired(<span class="string">'T'</span>, @isdatelike);
-0165       parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
-0166       parser.addRequired(<span class="string">'R'</span>, @isnumeric);
-0167 
-0168       parser.addParameter(<span class="string">'qmin'</span>, 1, @isnumericscalar);
-0169       parser.addParameter(<span class="string">'nmin'</span>, 4, @isnumericscalar);
-0170       parser.addParameter(<span class="string">'fmax'</span>, 2, @isnumericscalar);
-0171       parser.addParameter(<span class="string">'rmax'</span>, 2, @isnumericscalar);
-0172       parser.addParameter(<span class="string">'rmin'</span>, 0, @isnumericscalar);
-0173       parser.addParameter(<span class="string">'cmax'</span>, 2, @isnumericscalar);
-0174       parser.addParameter(<span class="string">'rmconvex'</span>, false, @islogicalscalar);
-0175       parser.addParameter(<span class="string">'rmnochange'</span>, false, @islogicalscalar);
-0176       parser.addParameter(<span class="string">'rmrain'</span>, false, @islogicalscalar);
-0177       parser.addParameter(<span class="string">'pickevents'</span>, false, @islogicalscalar);
-0178       parser.addParameter(<span class="string">'plotevents'</span>, false, @islogicalscalar);
-0179       parser.addParameter(<span class="string">'asannual'</span>, false, @islogicalscalar);
-0180    <span class="keyword">end</span>
-0181    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
-0182    parser.parse(T, Q, R, varargin{:});
-0183 
-0184    qmin = parser.Results.qmin;
-0185    nmin = parser.Results.nmin;
-0186    fmax = parser.Results.fmax;
-0187    rmax = parser.Results.rmax;
-0188    rmin = parser.Results.rmin;
-0189    cmax = parser.Results.cmax;
-0190    rmrain = parser.Results.rmrain;
-0191    rmconvex = parser.Results.rmconvex;
-0192    rmnochange = parser.Results.rmnochange;
-0193    pickevents = parser.Results.pickevents;
-0194    plotevents = parser.Results.plotevents;
-0195    asannual = parser.Results.asannual;
-0196 
-0197    <span class="comment">% Convert datetime to double if datetime was passed in</span>
-0198    T = todatenum(T);
-0199 
-0200    <span class="comment">% Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )</span>
-0201    validateattributes(T, {<span class="string">'double'</span>}, {<span class="string">'size'</span>, size(Q)}, mfilename, <span class="string">'T'</span>, 1)
-0202    validateattributes(nmin, {<span class="string">'double'</span>}, {<span class="string">'&gt;'</span>, 2}, mfilename, <span class="string">'nmin'</span>, 4)
-0203    <span class="keyword">if</span> isempty(R)
-0204       R = zeros(size(Q));
-0205    <span class="keyword">end</span>
-0206 <span class="keyword">end</span></pre></div>
+0161       parser.KeepUnmatched = true;
+0162       <span class="comment">% parser.PartialMatching = false;</span>
+0163       parser.CaseSensitive = true;
+0164 
+0165       parser.addRequired(<span class="string">'T'</span>, @isdatelike);
+0166       parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
+0167       parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0168 
+0169       parser.addParameter(<span class="string">'qmin'</span>, 1, @isnumericscalar);
+0170       parser.addParameter(<span class="string">'nmin'</span>, 4, @isnumericscalar);
+0171       parser.addParameter(<span class="string">'fmax'</span>, 2, @isnumericscalar);
+0172       parser.addParameter(<span class="string">'rmax'</span>, 2, @isnumericscalar);
+0173       parser.addParameter(<span class="string">'rmin'</span>, 0, @isnumericscalar);
+0174       parser.addParameter(<span class="string">'cmax'</span>, 2, @isnumericscalar);
+0175       parser.addParameter(<span class="string">'rmconvex'</span>, false, @islogicalscalar);
+0176       parser.addParameter(<span class="string">'rmnochange'</span>, false, @islogicalscalar);
+0177       parser.addParameter(<span class="string">'rmrain'</span>, false, @islogicalscalar);
+0178       parser.addParameter(<span class="string">'pickevents'</span>, false, @islogicalscalar);
+0179       parser.addParameter(<span class="string">'plotevents'</span>, false, @islogicalscalar);
+0180       parser.addParameter(<span class="string">'asannual'</span>, false, @islogicalscalar);
+0181    <span class="keyword">end</span>
+0182    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0183    parser.parse(T, Q, R, varargin{:});
+0184 
+0185    qmin = parser.Results.qmin;
+0186    nmin = parser.Results.nmin;
+0187    fmax = parser.Results.fmax;
+0188    rmax = parser.Results.rmax;
+0189    rmin = parser.Results.rmin;
+0190    cmax = parser.Results.cmax;
+0191    rmrain = parser.Results.rmrain;
+0192    rmconvex = parser.Results.rmconvex;
+0193    rmnochange = parser.Results.rmnochange;
+0194    pickevents = parser.Results.pickevents;
+0195    plotevents = parser.Results.plotevents;
+0196    asannual = parser.Results.asannual;
+0197 
+0198    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0199    T = todatenum(T);
+0200 
+0201    <span class="comment">% Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )</span>
+0202    validateattributes(T, {<span class="string">'double'</span>}, {<span class="string">'size'</span>, size(Q)}, mfilename, <span class="string">'T'</span>, 1)
+0203    validateattributes(nmin, {<span class="string">'double'</span>}, {<span class="string">'&gt;'</span>, 2}, mfilename, <span class="string">'nmin'</span>, 4)
+0204    <span class="keyword">if</span> isempty(R)
+0205       R = zeros(size(Q));
+0206    <span class="keyword">end</span>
+0207 <span class="keyword">end</span></pre></div>
 </body>
 </html>

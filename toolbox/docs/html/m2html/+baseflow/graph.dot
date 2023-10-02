@@ -49,7 +49,6 @@ digraph m2html {
   loadprops -> open;
   mapbasins -> open;
   mapgages -> open;
-  open -> open;
   phifitensemble -> open;
   plfitb -> open;
   plotaquifertrend -> open;

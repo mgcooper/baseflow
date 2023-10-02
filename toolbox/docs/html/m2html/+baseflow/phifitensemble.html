@@ -24,7 +24,7 @@
 <div class="box"><strong>PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) </strong></div>
+<div class="box"><strong>function PhiFit = phifitensemble(Results, Fits, A, D, L, bhat, lateqtls,earlyqtls, showfit) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.
@@ -55,7 +55,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
 
 
 This function is called by:
@@ -69,68 +69,69 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)</a>
-0002    <span class="comment">%PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</span>
-0003    <span class="comment">%</span>
-0004    <span class="comment">% Syntax</span>
-0005    <span class="comment">%</span>
-0006    <span class="comment">%     PhiFit =</span>
-0007    <span class="comment">%     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)</span>
-0008    <span class="comment">%</span>
-0009    <span class="comment">% Description</span>
-0010    <span class="comment">%</span>
-0011    <span class="comment">%     PhiFit =</span>
-0012    <span class="comment">%     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) fits</span>
-0013    <span class="comment">%     an ensemble of drainable porosity values using the event-scale</span>
-0014    <span class="comment">%     recession data in structs Results and Fits returned by baseflow.fitevents.</span>
-0015    <span class="comment">%     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute</span>
-0016    <span class="comment">%     drainable porosity from early-time and late-time recession parameters</span>
-0017    <span class="comment">%     and aquifer properties area A, depth D, and channel lenght L.</span>
-0018    <span class="comment">%</span>
-0019    <span class="comment">% See also: fitphi, eventphi</span>
-0020    <span class="comment">%</span>
-0021    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0022 
-0023    <span class="comment">% if called with no input, open this file</span>
-0024    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0025 
-0026    <span class="comment">% phid = baseflow.eventphi(Results,Fits,A,D,[],bhat);</span>
-0027    <span class="comment">% phi = baseflow.fitphidist(phid,'mean','cdf');</span>
-0028 
-0029    phidist(:,1) = baseflow.eventphi( <span class="keyword">...</span>
-0030       Results,Fits,A,D,L,1,<span class="string">'lateqtls'</span>,lateqtls,<span class="string">'earlyqtls'</span>,earlyqtls);
-0031 
-0032    phidist(:,2) = baseflow.eventphi( <span class="keyword">...</span>
-0033       Results,Fits,A,D,L,1.5,<span class="string">'lateqtls'</span>,lateqtls,<span class="string">'earlyqtls'</span>,earlyqtls);
-0034 
-0035    phidist(:,3) = baseflow.eventphi( <span class="keyword">...</span>
-0036       Results,Fits,A,D,L,bhat,<span class="string">'lateqtls'</span>,lateqtls,<span class="string">'earlyqtls'</span>,earlyqtls);
-0037 
-0038    phidist(phidist&gt;1.0) = nan;
-0039    phidist(phidist&lt;0.0) = nan;
-0040    phicombo = vertcat(phidist(:,1),phidist(:,2));
-0041 
-0042    <span class="comment">% plot the fits</span>
-0043    [PD(1),h1] = baseflow.fitphidist(phidist(:,1),<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
-0044    [PD(2),h2] = baseflow.fitphidist(phidist(:,2),<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
-0045    [PD(3),h3] = baseflow.fitphidist(phidist(:,3),<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
-0046    [PD(4),h4] = baseflow.fitphidist(phicombo,<span class="string">'PD'</span>,<span class="string">'cdf'</span>,showfit);
-0047 
-0048    <span class="comment">% put the mean and standard errors in an array</span>
-0049    mu = [h1.mu; h2.mu; h3.mu; h4.mu];
-0050    pm = [h1.pm; h2.pm; h3.pm; h4.pm];
-0051 
-0052    PhiFit.phidist = phidist;
-0053    PhiFit.phi12   = phicombo;
-0054    PhiFit.PD      = PD;
-0055    PhiFit.mu      = mu;
-0056    PhiFit.pm      = pm;
-0057 
-0058    <span class="comment">% [F1,h1]  = baseflow.fitphidist(phi1,'PD','cdf');</span>
-0059    <span class="comment">% [F2,h2]  = baseflow.fitphidist(phi2,'PD','cdf');</span>
-0060    <span class="comment">% [F3,h3]  = baseflow.fitphidist(phi3,'PD','cdf');</span>
-0061    <span class="comment">% [F4,h4]  = baseflow.fitphidist(phi4,'PD','cdf');</span>
-0062    <span class="comment">% [F,h]    = baseflow.fitphidist([phi1;phi2],'PD','cdf');</span>
-0063 <span class="keyword">end</span></pre></div>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function PhiFit = phifitensemble(Results, Fits, A, D, L, bhat, lateqtls, </a><span class="keyword">...</span>
+0002       earlyqtls, showfit)
+0003    <span class="comment">%PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.</span>
+0004    <span class="comment">%</span>
+0005    <span class="comment">% Syntax</span>
+0006    <span class="comment">%</span>
+0007    <span class="comment">%     PhiFit =</span>
+0008    <span class="comment">%     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">% Description</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">%     PhiFit =</span>
+0013    <span class="comment">%     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) fits</span>
+0014    <span class="comment">%     an ensemble of drainable porosity values using the event-scale</span>
+0015    <span class="comment">%     recession data in structs Results and Fits returned by baseflow.fitevents.</span>
+0016    <span class="comment">%     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute</span>
+0017    <span class="comment">%     drainable porosity from early-time and late-time recession parameters</span>
+0018    <span class="comment">%     and aquifer properties area A, depth D, and channel lenght L.</span>
+0019    <span class="comment">%</span>
+0020    <span class="comment">% See also: fitphi, eventphi</span>
+0021    <span class="comment">%</span>
+0022    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0023 
+0024    <span class="comment">% if called with no input, open this file</span>
+0025    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0026 
+0027    <span class="comment">% phid = baseflow.eventphi(Results,Fits,A,D,[],bhat);</span>
+0028    <span class="comment">% phi = baseflow.fitphidist(phid,'mean','cdf');</span>
+0029 
+0030    phidist(:, 1) = baseflow.eventphi(Results, Fits, A, D, L, 1, <span class="keyword">...</span>
+0031       <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
+0032 
+0033    phidist(:, 2) = baseflow.eventphi(Results, Fits, A, D, L, 1.5, <span class="keyword">...</span>
+0034       <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
+0035 
+0036    phidist(:, 3) = baseflow.eventphi(Results, Fits, A, D, L, bhat, <span class="keyword">...</span>
+0037       <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
+0038 
+0039    phidist(phidist &gt; 1.0) = nan;
+0040    phidist(phidist &lt; 0.0) = nan;
+0041    phicombo = vertcat(phidist(:, 1), phidist(:, 2));
+0042 
+0043    <span class="comment">% plot the fits</span>
+0044    [PD(1), h1] = baseflow.fitphidist(phidist(:, 1), <span class="string">'PD'</span>, <span class="string">'cdf'</span>, showfit);
+0045    [PD(2), h2] = baseflow.fitphidist(phidist(:, 2), <span class="string">'PD'</span>, <span class="string">'cdf'</span>, showfit);
+0046    [PD(3), h3] = baseflow.fitphidist(phidist(:, 3), <span class="string">'PD'</span>, <span class="string">'cdf'</span>, showfit);
+0047    [PD(4), h4] = baseflow.fitphidist(phicombo, <span class="string">'PD'</span>, <span class="string">'cdf'</span>, showfit);
+0048 
+0049    <span class="comment">% put the mean and standard errors in an array</span>
+0050    mu = [h1.mu; h2.mu; h3.mu; h4.mu];
+0051    pm = [h1.pm; h2.pm; h3.pm; h4.pm];
+0052 
+0053    PhiFit.phidist = phidist;
+0054    PhiFit.phi12   = phicombo;
+0055    PhiFit.PD      = PD;
+0056    PhiFit.mu      = mu;
+0057    PhiFit.pm      = pm;
+0058 
+0059    <span class="comment">% [F1,h1]  = baseflow.fitphidist(phi1,'PD','cdf');</span>
+0060    <span class="comment">% [F2,h2]  = baseflow.fitphidist(phi2,'PD','cdf');</span>
+0061    <span class="comment">% [F3,h3]  = baseflow.fitphidist(phi3,'PD','cdf');</span>
+0062    <span class="comment">% [F4,h4]  = baseflow.fitphidist(phi4,'PD','cdf');</span>
+0063    <span class="comment">% [F,h]    = baseflow.fitphidist([phi1;phi2],'PD','cdf');</span>
+0064 <span class="keyword">end</span></pre></div>
 </body>
 </html>

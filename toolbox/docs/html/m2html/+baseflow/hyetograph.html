@@ -52,7 +52,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
 
 
 This function is called by:
@@ -174,115 +174,117 @@ This function is called by:
 0101    H(3) = h1;
 0102    H(4) = h2;
 0103    
-0104    <span class="comment">% Set up listener to trigger setlogticks if YScale is set to 'log'</span>
-0105    addlistener(ax(1), <span class="string">'YScale'</span>, <span class="string">'PostSet'</span>, @(s, e) <a href="#_sub1" class="code" title="subfunction triggerLogScale(~, ~, ax)">triggerLogScale</a>(s, e, ax(1)));
-0106    
-0107    <span class="comment">% Set up listener to trigger interpreter if labels are updated</span>
-0108    addlistener(ax(1), <span class="string">'YLabel'</span>, <span class="string">'PostSet'</span>, @(s, e) <a href="#_sub2" class="code" title="subfunction triggerInterpreter(~, ~, ax)">triggerInterpreter</a>(s, e, ax(1)));
-0109 
-0110    <span class="comment">% Set up listener to trigger interpreter if labels are updated so the</span>
-0111    <span class="comment">% interpreter is set to 'tex' if isoctave() returns true, and 'latex'</span>
-0112    <span class="comment">% otherwise.</span>
-0113    <span class="comment">% addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));</span>
-0114    
-0115    <span class="comment">% this is the example syntax from octave, not sure if its helpful</span>
-0116    <span class="comment">%addlistener(gcf, &quot;position&quot;, {@my_listener, &quot;my string&quot;})</span>
-0117 <span class="keyword">end</span>
-0118 
-0119 <span class="comment">% Listener function to handle YScale change</span>
-0120 <a name="_sub1" href="#_subfunctions" class="code">function triggerLogScale(~, ~, ax)</a>
-0121   <span class="keyword">if</span> strcmp(get(ax, <span class="string">'YScale'</span>), <span class="string">'log'</span>)
-0122     setlogticks(ax, <span class="string">'axset'</span>, <span class="string">'y'</span>);
-0123   <span class="keyword">end</span>
-0124 <span class="keyword">end</span>
-0125 
-0126 <span class="comment">% Listener function to handle Interpreter change</span>
-0127 <a name="_sub2" href="#_subfunctions" class="code">function triggerInterpreter(~, ~, ax)</a>
-0128    labelHandle = get(ax, <span class="string">'YLabel'</span>);
-0129    interpreterSetting = get(labelHandle, <span class="string">'Interpreter'</span>);
-0130 
-0131    <span class="keyword">if</span> isoctave() &amp;&amp; strcmp(interpreterSetting, <span class="string">'latex'</span>)
-0132       set(labelHandle, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
-0133    <span class="keyword">end</span>
-0134 <span class="keyword">end</span>
-0135 
-0136 <span class="comment">%% Input Parser</span>
-0137 <a name="_sub3" href="#_subfunctions" class="code">function [time, flow, prec, t1, t2, units, fig] = parseinputs(funcname, </a><span class="keyword">...</span>
-0138       time, flow, prec, varargin)
-0139 
-0140    <span class="comment">% parse graphics handle if provided</span>
-0141    tf = cellfun(@(arg) isscalar(arg) &amp;&amp; ishandle(arg) &amp;&amp; <span class="keyword">...</span>
-0142       strcmp(<span class="string">'axes'</span>, get(arg,<span class="string">'type'</span>)), varargin);
-0143 
-0144    <span class="keyword">if</span> any(tf)
-0145       ax = varargin{tf};
-0146       fig = get(ax, <span class="string">'Parent'</span>);
-0147       varargin = varargin(~tf);
-0148    <span class="keyword">else</span>
-0149       fig = gcf;
-0150    <span class="keyword">end</span>
-0151    
-0152    set(fig, <span class="string">'Position'</span>, [0 0 700 400]);
-0153 
-0154    parser = inputParser;
-0155    parser.FunctionName = funcname;
-0156    parser.addRequired(<span class="string">'time'</span>, @isdatelike);
-0157    parser.addRequired(<span class="string">'flow'</span>, @isnumericvector);
-0158    parser.addRequired(<span class="string">'prec'</span>, @isnumericvector);
-0159    parser.addOptional(<span class="string">'t1'</span>, NaT, @isdatelike);
-0160    parser.addOptional(<span class="string">'t2'</span>, NaT, @isdatelike);
-0161    parser.addParameter(<span class="string">'units'</span>, {<span class="string">'mm'</span>,<span class="string">'cm d-1'</span>}, @ischarlike);
-0162 
-0163    parser.parse(time,flow,prec,varargin{:});
+0104    <span class="keyword">if</span> ~isoctave
+0105       <span class="comment">% Set up listener to trigger setlogticks if YScale is set to 'log'</span>
+0106       addlistener(ax(1), <span class="string">'YScale'</span>, <span class="string">'PostSet'</span>, @(s, e) <a href="#_sub1" class="code" title="subfunction triggerLogScale(~, ~, ax)">triggerLogScale</a>(s, e, ax(1)));
+0107       
+0108       <span class="comment">% Set up listener to trigger interpreter if labels are updated</span>
+0109       addlistener(ax(1), <span class="string">'YLabel'</span>, <span class="string">'PostSet'</span>, @(s, e) <a href="#_sub2" class="code" title="subfunction triggerInterpreter(~, ~, ax)">triggerInterpreter</a>(s, e, ax(1)));
+0110    
+0111       <span class="comment">% Set up listener to trigger interpreter if labels are updated so the</span>
+0112       <span class="comment">% interpreter is set to 'tex' if isoctave() returns true, and 'latex'</span>
+0113       <span class="comment">% otherwise.</span>
+0114       <span class="comment">% addlistener(ax(1), 'YScale', 'PostSet', @(s, e) triggerInterpreter(s, e, ax(1)));</span>
+0115       
+0116       <span class="comment">% this is the example syntax from octave, not sure if its helpful</span>
+0117       <span class="comment">% addlistener(gcf, &quot;position&quot;, {@my_listener, &quot;my string&quot;})</span>
+0118    <span class="keyword">end</span>
+0119 <span class="keyword">end</span>
+0120 
+0121 <span class="comment">% Listener function to handle YScale change</span>
+0122 <a name="_sub1" href="#_subfunctions" class="code">function triggerLogScale(~, ~, ax)</a>
+0123   <span class="keyword">if</span> strcmp(get(ax, <span class="string">'YScale'</span>), <span class="string">'log'</span>)
+0124     setlogticks(ax, <span class="string">'axset'</span>, <span class="string">'y'</span>);
+0125   <span class="keyword">end</span>
+0126 <span class="keyword">end</span>
+0127 
+0128 <span class="comment">% Listener function to handle Interpreter change</span>
+0129 <a name="_sub2" href="#_subfunctions" class="code">function triggerInterpreter(~, ~, ax)</a>
+0130    labelHandle = get(ax, <span class="string">'YLabel'</span>);
+0131    interpreterSetting = get(labelHandle, <span class="string">'Interpreter'</span>);
+0132 
+0133    <span class="keyword">if</span> isoctave() &amp;&amp; strcmp(interpreterSetting, <span class="string">'latex'</span>)
+0134       set(labelHandle, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0135    <span class="keyword">end</span>
+0136 <span class="keyword">end</span>
+0137 
+0138 <span class="comment">%% Input Parser</span>
+0139 <a name="_sub3" href="#_subfunctions" class="code">function [time, flow, prec, t1, t2, units, fig] = parseinputs(funcname, </a><span class="keyword">...</span>
+0140       time, flow, prec, varargin)
+0141 
+0142    <span class="comment">% parse graphics handle if provided</span>
+0143    tf = cellfun(@(arg) isscalar(arg) &amp;&amp; ishandle(arg) &amp;&amp; <span class="keyword">...</span>
+0144       strcmp(<span class="string">'axes'</span>, get(arg,<span class="string">'type'</span>)), varargin);
+0145 
+0146    <span class="keyword">if</span> any(tf)
+0147       ax = varargin{tf};
+0148       fig = get(ax, <span class="string">'Parent'</span>);
+0149       varargin = varargin(~tf);
+0150    <span class="keyword">else</span>
+0151       fig = gcf;
+0152    <span class="keyword">end</span>
+0153    
+0154    set(fig, <span class="string">'Position'</span>, [0 0 700 400]);
+0155 
+0156    parser = inputParser;
+0157    parser.FunctionName = funcname;
+0158    parser.addRequired(<span class="string">'time'</span>, @isdatelike);
+0159    parser.addRequired(<span class="string">'flow'</span>, @isnumericvector);
+0160    parser.addRequired(<span class="string">'prec'</span>, @isnumericvector);
+0161    parser.addOptional(<span class="string">'t1'</span>, NaT, @isdatelike);
+0162    parser.addOptional(<span class="string">'t2'</span>, NaT, @isdatelike);
+0163    parser.addParameter(<span class="string">'units'</span>, {<span class="string">'mm'</span>,<span class="string">'cm d-1'</span>}, @ischarlike);
 0164 
-0165    time = parser.Results.time;
-0166    flow = parser.Results.flow;
-0167    prec = parser.Results.prec;
-0168    t1 = parser.Results.t1;
-0169    t2 = parser.Results.t2;
-0170    units = parser.Results.units;
-0171    
-0172    time = todatenum(time);
-0173 <span class="keyword">end</span>
-0174 
-0175 <span class="comment">% =======================================</span>
-0176 <span class="comment">% Create plot</span>
-0177 <span class="comment">% yyaxis left;</span>
-0178 <span class="comment">% h1 = plot(time,flow,'-o','MarkerSize',4,'MarkerFaceColor',colors(1,:), ...</span>
-0179 <span class="comment">%    'MarkerEdgeColor','none','Tag','StreamflowPlot');</span>
-0180 <span class="comment">% ax = gca;</span>
-0181 <span class="comment">% set(ax,'Tag','HyetographAxis');</span>
-0182 <span class="comment">%</span>
-0183 <span class="comment">% % % With yyaxis, there is only one axis, so I don't track them separately</span>
-0184 <span class="comment">% % ax1 = gca;</span>
-0185 <span class="comment">% % ax1.Tag = 'StreamflowAxis';</span>
-0186 <span class="comment">%</span>
-0187 <span class="comment">% % Set the remaining axes properties</span>
-0188 <span class="comment">% set(ax,'XMinorGrid','on','YMinorGrid','on');</span>
-0189 <span class="comment">% grid(ax,'on');</span>
-0190 <span class="comment">%</span>
-0191 <span class="comment">% % hacky way to make space so the precip bars do not obscure the streamflow</span>
-0192 <span class="comment">% % ylim([ax.YLim(1),1.5*ax.YLim(2)]);</span>
-0193 <span class="comment">%</span>
-0194 <span class="comment">% % Create ylabel</span>
-0195 <span class="comment">% ylabel(['Streamflow (' units{1} ')'],'Color',colors(1,:),'Interpreter','tex');</span>
-0196 <span class="comment">%</span>
-0197 <span class="comment">% % Create second plot</span>
-0198 <span class="comment">% yyaxis right; % varargin{:} goes on bar if needed</span>
-0199 <span class="comment">% h2 = bar(time,prec,'FaceColor',colors(2,:),'EdgeColor','none',...</span>
-0200 <span class="comment">%    'Tag','PrecipitationPlot');</span>
-0201 <span class="comment">%</span>
-0202 <span class="comment">% % % With yyaxis, there is only one axis, so I don't track them separately</span>
-0203 <span class="comment">% % ax2 = gca;</span>
-0204 <span class="comment">% % ax2.Tag = 'PrecipitationAxis';</span>
-0205 <span class="comment">%</span>
-0206 <span class="comment">% % Create ylabel</span>
-0207 <span class="comment">% ylabel(['Precipitation (' units{2} ')'],'Color',colors(2,:),'Interpreter','tex');</span>
-0208 <span class="comment">% axis(ax,'ij');</span>
-0209 <span class="comment">%</span>
-0210 <span class="comment">% % return control to left axis</span>
-0211 <span class="comment">% yyaxis left</span>
-0212 <span class="comment">% =======================================</span>
-0213</pre></div>
+0165    parser.parse(time,flow,prec,varargin{:});
+0166 
+0167    time = parser.Results.time;
+0168    flow = parser.Results.flow;
+0169    prec = parser.Results.prec;
+0170    t1 = parser.Results.t1;
+0171    t2 = parser.Results.t2;
+0172    units = parser.Results.units;
+0173    
+0174    time = todatenum(time);
+0175 <span class="keyword">end</span>
+0176 
+0177 <span class="comment">% =======================================</span>
+0178 <span class="comment">% Create plot</span>
+0179 <span class="comment">% yyaxis left;</span>
+0180 <span class="comment">% h1 = plot(time,flow,'-o','MarkerSize',4,'MarkerFaceColor',colors(1,:), ...</span>
+0181 <span class="comment">%    'MarkerEdgeColor','none','Tag','StreamflowPlot');</span>
+0182 <span class="comment">% ax = gca;</span>
+0183 <span class="comment">% set(ax,'Tag','HyetographAxis');</span>
+0184 <span class="comment">%</span>
+0185 <span class="comment">% % % With yyaxis, there is only one axis, so I don't track them separately</span>
+0186 <span class="comment">% % ax1 = gca;</span>
+0187 <span class="comment">% % ax1.Tag = 'StreamflowAxis';</span>
+0188 <span class="comment">%</span>
+0189 <span class="comment">% % Set the remaining axes properties</span>
+0190 <span class="comment">% set(ax,'XMinorGrid','on','YMinorGrid','on');</span>
+0191 <span class="comment">% grid(ax,'on');</span>
+0192 <span class="comment">%</span>
+0193 <span class="comment">% % hacky way to make space so the precip bars do not obscure the streamflow</span>
+0194 <span class="comment">% % ylim([ax.YLim(1),1.5*ax.YLim(2)]);</span>
+0195 <span class="comment">%</span>
+0196 <span class="comment">% % Create ylabel</span>
+0197 <span class="comment">% ylabel(['Streamflow (' units{1} ')'],'Color',colors(1,:),'Interpreter','tex');</span>
+0198 <span class="comment">%</span>
+0199 <span class="comment">% % Create second plot</span>
+0200 <span class="comment">% yyaxis right; % varargin{:} goes on bar if needed</span>
+0201 <span class="comment">% h2 = bar(time,prec,'FaceColor',colors(2,:),'EdgeColor','none',...</span>
+0202 <span class="comment">%    'Tag','PrecipitationPlot');</span>
+0203 <span class="comment">%</span>
+0204 <span class="comment">% % % With yyaxis, there is only one axis, so I don't track them separately</span>
+0205 <span class="comment">% % ax2 = gca;</span>
+0206 <span class="comment">% % ax2.Tag = 'PrecipitationAxis';</span>
+0207 <span class="comment">%</span>
+0208 <span class="comment">% % Create ylabel</span>
+0209 <span class="comment">% ylabel(['Precipitation (' units{2} ')'],'Color',colors(2,:),'Interpreter','tex');</span>
+0210 <span class="comment">% axis(ax,'ij');</span>
+0211 <span class="comment">%</span>
+0212 <span class="comment">% % return control to left axis</span>
+0213 <span class="comment">% yyaxis left</span>
+0214 <span class="comment">% =======================================</span>
+0215</pre></div>
 </body>
 </html>

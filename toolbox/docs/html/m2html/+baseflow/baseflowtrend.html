@@ -69,7 +69,7 @@
 This function calls:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the MATLAB Editor.</li></ul>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
 
 
 This function is called by:
@@ -81,7 +81,7 @@ This function is called by:
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="#_sub1" class="code">function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)</a></li></ul>
+<li><a href="#_sub1" class="code">function [t, Q, A, method, prctle, showfig] = parseinputs(t, Q, A, varargin)</a></li></ul>
 
 
 
@@ -126,49 +126,50 @@ This function is called by:
 0038    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0039 
 0040    <span class="comment">% PARSE INPUTS</span>
-0041    [t, Q, A, method, pctl, showfig] = <a href="#_sub1" class="code" title="subfunction [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)">parseinputs</a>(t,Q,A,varargin{:});
+0041    [t, Q, A, method, pctl, showfig] = <a href="#_sub1" class="code" title="subfunction [t, Q, A, method, prctle, showfig] = parseinputs(t, Q, A, varargin)">parseinputs</a>(t, Q, A, varargin{:});
 0042 
 0043    <span class="comment">% MAIN FUNCTION</span>
-0044 
-0045    [Q,t] = padtimeseries(Q,t,datenum(year(t(1)),1,1), datenum(year(t(end)),12,31),1); <span class="comment">%#ok&lt;*DATNM&gt;</span>
-0046    [Q,t] = rmleapinds(Q,t);
-0047 
-0048    <span class="comment">% convert the flow from m3/d posted daily to cm/d posted annually</span>
-0049    <span class="keyword">if</span> ~isdatetime(t); t = datetime(t,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>); <span class="keyword">end</span>
-0050    t = transpose(year(mean(reshape(t,365,numel(t)/365))));
-0051    Qa = transpose(mean(reshape(Q,365,numel(Q)/365),<span class="string">'omitnan'</span>)).*(100/A);
-0052 
-0053    <span class="comment">% regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually</span>
-0054    ha = baseflow.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>, <span class="keyword">...</span>
-0055       <span class="string">'title'</span>,<span class="string">'mean flow'</span>,<span class="string">'leg'</span>,<span class="string">'mean flow regression'</span>,<span class="string">'showfig'</span>, <span class="keyword">...</span>
-0056       showfig,<span class="string">'method'</span>,method);
-0057    hb = baseflow.trendplot(t,Qa,<span class="string">'anom'</span>,false,<span class="string">'units'</span>,<span class="string">'cm/d/y'</span>,<span class="string">'quan'</span>, <span class="keyword">...</span>
-0058       pctl,<span class="string">'title'</span>,<span class="string">'baseflow'</span>,<span class="string">'leg'</span>,<span class="string">'baseflow regression'</span>,<span class="keyword">...</span>
-0059       <span class="string">'showfig'</span>,showfig,<span class="string">'alpha'</span>,0.05);
-0060    dQadt = ha.trend.YData(:);  <span class="comment">% mean flow trend</span>
-0061    dQbdt = hb.trend.YData(:);  <span class="comment">% baseflow trend</span>
-0062    Qb = Qa-(dQadt-dQbdt);      <span class="comment">% baseflow timeseries, cm/day</span>
-0063 <span class="keyword">end</span>
-0064 
-0065 <span class="comment">%% INPUT PARSER</span>
-0066 <a name="_sub1" href="#_subfunctions" class="code">function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)</a>
-0067 
-0068    parser = inputParser;
-0069    parser.FunctionName = <span class="string">'baseflow.baseflowtrend'</span>;
-0070    parser.addRequired(<span class="string">'t'</span>, @isdatelike);
-0071    parser.addRequired(<span class="string">'Q'</span>, @isnumericvector);
-0072    parser.addRequired(<span class="string">'A'</span>, @isnumericscalar);
-0073    parser.addParameter(<span class="string">'method'</span>, <span class="string">'ols'</span>, @ischarlike);
-0074    parser.addParameter(<span class="string">'pctl'</span>, 0.25, @isnumericscalar);
-0075    parser.addParameter(<span class="string">'showfig'</span>, false, @islogicalscalar);
-0076    parser.parse(t,Q,A,varargin{:});
-0077 
-0078    <span class="comment">% Convert datetime to double if datetime was passed in</span>
-0079    t = todatenum(t);
-0080 
-0081    method = parser.Results.method;
-0082    prctle = parser.Results.pctl;
-0083    showfig = parser.Results.showfig;
-0084 <span class="keyword">end</span></pre></div>
+0044    t1 = datenum(year(t(1)), 1, 1, 0, 0, 0);
+0045    t2 = datenum(year(t(end)), 12, 31, 0, 0, 0);
+0046    [Q, t] = padtimeseries(Q, t, t1, t2, 1); <span class="comment">%#ok&lt;*DATNM&gt;</span>
+0047    [Q, t] = rmleapinds(Q, t);
+0048 
+0049    <span class="comment">% convert the flow from m3/d posted daily to cm/d posted annually</span>
+0050    <span class="comment">%if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end</span>
+0051    t = transpose(year(mean(reshape(t, 365, numel(t) / 365))));
+0052    Qa = transpose(mean(reshape(Q, 365, numel(Q) / 365), <span class="string">'omitnan'</span>)) .* (100/A);
+0053 
+0054    <span class="comment">% regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually</span>
+0055    ha = baseflow.trendplot(t, Qa, <span class="string">'anomalies'</span>, false, <span class="string">'units'</span>, <span class="string">'cm/d/y'</span>, <span class="keyword">...</span>
+0056       <span class="string">'titletext'</span>, <span class="string">'mean flow'</span>, <span class="string">'legendtext'</span>, <span class="string">'mean flow regression'</span>, <span class="keyword">...</span>
+0057       <span class="string">'showfig'</span>, showfig, <span class="string">'method'</span>, method);
+0058    hb = baseflow.trendplot(t, Qa, <span class="string">'anomalies'</span>, false, <span class="string">'units'</span>, <span class="string">'cm/d/y'</span>, <span class="keyword">...</span>
+0059       <span class="string">'quantile'</span>, pctl, <span class="string">'titletext'</span>, <span class="string">'baseflow'</span>, <span class="string">'legendtext'</span>, <span class="keyword">...</span>
+0060       <span class="string">'baseflow regression'</span>, <span class="string">'showfig'</span>, showfig, <span class="string">'alpha'</span>, 0.05);
+0061    dQadt = reshape(get(ha.trend, <span class="string">'YData'</span>), [], 1); <span class="comment">% mean flow trend</span>
+0062    dQbdt = reshape(get(hb.trend, <span class="string">'YData'</span>), [], 1); <span class="comment">% baseflow trend</span>
+0063    Qb = Qa-(dQadt-dQbdt); <span class="comment">% baseflow timeseries, cm/day</span>
+0064 <span class="keyword">end</span>
+0065 
+0066 <span class="comment">%% INPUT PARSER</span>
+0067 <a name="_sub1" href="#_subfunctions" class="code">function [t, Q, A, method, prctle, showfig] = parseinputs(t, Q, A, varargin)</a>
+0068 
+0069    parser = inputParser;
+0070    parser.FunctionName = <span class="string">'baseflow.baseflowtrend'</span>;
+0071    parser.addRequired(<span class="string">'t'</span>, @isdatelike);
+0072    parser.addRequired(<span class="string">'Q'</span>, @isnumericvector);
+0073    parser.addRequired(<span class="string">'A'</span>, @isnumericscalar);
+0074    parser.addParameter(<span class="string">'method'</span>, <span class="string">'ols'</span>, @ischarlike);
+0075    parser.addParameter(<span class="string">'pctl'</span>, 0.25, @isnumericscalar);
+0076    parser.addParameter(<span class="string">'showfig'</span>, false, @islogicalscalar);
+0077    parser.parse(t,Q,A,varargin{:});
+0078 
+0079    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0080    t = todatenum(t);
+0081 
+0082    method = parser.Results.method;
+0083    prctle = parser.Results.pctl;
+0084    showfig = parser.Results.showfig;
+0085 <span class="keyword">end</span></pre></div>
 </body>
 </html>
