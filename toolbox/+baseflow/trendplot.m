@@ -1,7 +1,7 @@
-function h = trendplot(t,y,varargin)
+function h = trendplot(t, y, varargin)
    %TRENDPLOT Plot a timeseries and linear trendline fit.
    %
-   % h = trendplot(t,y) plots time T and data Y and fits a trendline
+   % h = trendplot(t, y) plots time T and data Y and fits a trendline
    %
    % Copyright Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
@@ -30,8 +30,7 @@ function h = trendplot(t,y,varargin)
    h = drawLegend(h, ab, err, makeleg, legidx, ...
       opts.precision, opts.legendtext, opts.units, opts.alpha);
 
-   %axis tight
-
+   % format the figure
    ylabel(opts.ylabeltext);
    xlabel(opts.xlabeltext);
    title(opts.titletext);
@@ -50,11 +49,11 @@ function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)
    % create a regular time in years, works for both months and years
    y0 = year(tt(1)); % the first year (double) works for datetime and datenum
    if isdatetime(tt)
-      t0 = datetime(y0,1,1); % start of the first year (datetime)
-      tt = years( tt-tt(1)) + ( y0 + years( tt(1) - t0 ) );
+      t0 = datetime(y0, 1, 1); % start of the first year (datetime)
+      tt = years( tt - tt(1)) + ( y0 + years( tt(1) - t0 ) );
    else
-      t0 = datenum([y0, 1, 1]); % start of the first year (datenum)
-      tt = (tt - t0) / datenum([0, 0, 365.25]) + y0; % conversion to decimal years
+      t0 = datenum([y0, 1, 1]); %#ok<*DATNM> % start of the first year (datenum)
+      tt = (tt - t0) / datenum([0, 0, 365.25]) + y0; % convert to decimal years
    end
 
    % see old method that checked for months at end
@@ -62,15 +61,15 @@ function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)
    % convert to anomalies if requested
    if anomalies == true
       if ~isnan(reference)
-         y = y-mean(reference,1,'omitnan');
+         y = y - mean(reference, 1, 'omitnan');
       else
-         y = y-mean(y,1,'omitnan');
+         y = y - mean(y, 1, 'omitnan');
       end
    end
 
    % if yerr is a scalar, make it a vector of size equal to y
    if isscalar(yerr)
-      yerr = yerr.*ones(size(y));
+      yerr = yerr .* ones(size(y));
    end
 end
 
@@ -78,11 +77,11 @@ end
 function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)
 
    inans = isnan(y);
-   ncols = size(y,2);
-   abfit = nan(ncols,2);
-   error = nan(ncols,1);
+   ncols = size(y, 2);
+   abfit = nan(ncols, 2);
+   error = nan(ncols, 1);
    confi = nan;
-   yconf = nan(size(y,1),2); % confidence bounds for trendline
+   yconf = nan(size(y, 1), 2); % confidence bounds for trendline
 
    % note, conf int's not symmetric for quantile regression, so I use the
    % mean of the lower and upper for now
@@ -98,50 +97,65 @@ function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)
 
                % only get conf levels if requested
                if isnan(alpha)
-                  abfit(n,:) = baseflow.deps.tsregr(t,y(:,n));
+                  abfit(n, :) = baseflow.deps.tsregr(t, y(:, n));
                else
-                  abfit(n,:) = baseflow.deps.tsregr(t,y(:,n));
-                  outab = baseflow.deps.ktaub([t,y(:,n)], alpha, false);
+                  abfit(n, :) = baseflow.deps.tsregr(t, y(:, n));
+                  outab = baseflow.deps.ktaub([t, y(:, n)], alpha, false);
                   confi = [outab.CIlower, outab.CIupper];
-                  error(n) = mean([abfit(n,2)-confi(1),confi(2)-abfit(n,2)]);
+                  error(n) = mean([abfit(n, 2)-confi(1), confi(2)-abfit(n, 2)]);
                end
 
                % not sure we want the setnan
-               yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
-               yfit = setnan(yfit,[],inans);
+               yfit = transpose(abfit(:, 1) + abfit(:, 2)*t');
+               yfit = setnan(yfit, [], inans);
 
             case 'ols'
 
                if isnan(alpha)
-                  abfit(n,:) = olsfit(t,y(:,n));
+                  abfit(n, :) = olsfit(t, y(:, n));
                else
 
-                  lmmdl = fitlm(t,y(:,n));
-                  coeff = lmmdl.Coefficients.Estimate;     % Coefficients
-                  confi = coefCI(lmmdl,alpha);             % coefficent CIs
+                  % Compute fitted line and CIs
+                  if isoctave
+                     [~, stats] = fitlm(t, y(:, n), "display", "off");
+                     % coeff = [lmmdl{2:3, 2}]; % this might work in matlab too
+                     coeff = stats.coeffs(:, 1);
+                     confi = stats.coeffs(:, 3:4);
+                     [yfit, yconf] = predictlm(stats, t);
+                  else
+                     mdl = fitlm(t, y(:,n));
+                     coeff = mdl.Coefficients.Estimate;
+                     confi = coefCI(mdl, alpha);
+                     [yfit, yconf] = predict(mdl, t, 'alpha', alpha);
+                  end
+
                   abfit(n,:) = coeff;
-                  error(n) = confi(2,2)-abfit(n,2);           % symmetric for ols
-                  [yfit,yconf] = predict(lmmdl,t,'alpha',alpha); % fitted line and CIs
+                  error(n) = confi(2, 2) - abfit(n, 2); % symmetric for ols
+
+                  % Plot the fit
+                  % figure;
+                  % plot(t, y(:, n), '-o'); hold on;
+                  % plot(t, yfit, '-');
+                  % plot(t, yconf, '--');
 
                   % [B,CI] = regress(y(:,n),[ones(size(t)) t],alpha);
                   % CB(:,1)= CI(1,1)+CI(2,1)*t;
                   % CB(:,2)= CI(1,2)+CI(2,2)*t;
                   % CB = anomaly(CB); % convert to anomalies?
-
                end
          end
       else
          % only get conf levels if requested
          if isnan(alpha)
-            abfit(n,:) = quantreg(t,y(:,n),qtl);
+            abfit(n, :) = quantreg(t, y(:, n), qtl);
          else
-            [abfit(n,:),S] = quantreg(t,y(:,n),qtl,1,1000,alpha);
+            [abfit(n, :), S] = quantreg(t, y(:, n), qtl, 1, 1000, alpha);
             confi = S.ci_boot';
-            error(n) = mean([abfit(n,2)-confi(2,1),confi(2,2)-abfit(n,2)]);
+            error(n) = mean([abfit(n, 2)-confi(2, 1), confi(2, 2)-abfit(n, 2)]);
          end
 
-         yfit = abfit(:,1) + abfit(:,2)*t'; yfit = yfit';
-         yfit = setnan(yfit,[],inans);
+         yfit = transpose(abfit(:, 1) + abfit(:, 2) * t');
+         yfit = setnan(yfit, [], inans);
       end
    end
 
@@ -174,9 +188,9 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
    % if an axis was provided, use it, otherwise make a new figure
    if not(isaxis(useax))
       if showfig == true
-         h.figure = figure('Position',figpos);
+         h.figure = figure('Position', figpos);
       else
-         h.figure = figure('Position',figpos,'Visible','off');
+         h.figure = figure('Position', figpos, 'Visible', 'off');
       end
       h.ax = gca;
    else
@@ -189,9 +203,9 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
    % to add the next trendplot trendline to the existing legend
    % legobj      = findobj(gcf,'Type','Legend');
 
-   figchi = get(gcf,'Children');
-   axobjs = findobj(gcf,'Type','Axes');
-   legobj = findobj(gcf,'Type','Legend');
+   figchi = get(gcf, 'Children');
+   axobjs = findobj(gcf, 'Type', 'Axes');
+   legobj = findobj(gcf, 'Type', 'Legend');
    numleg = numel(legobj); % 1 = one legend, 2 indicates a subplot
    numaxs = numel(axobjs);
 
@@ -205,16 +219,15 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
    numchild = numel(axchilds);
    % above here og don't mess
 
-   linesobjs = findobj(axchilds,'type','line');
-   patchobjs = findobj(axchilds,'type','patch');
-   errorobjs = findobj(axchilds,'type','errorbar');
+   linesobjs = findobj(axchilds, 'type', 'line');
+   patchobjs = findobj(axchilds, 'type', 'patch');
+   errorobjs = findobj(axchilds, 'type', 'errorbar');
 
    % if only the error bars have handle visibility on, this should work.
    % also this shows that i can figure out how many have handlevis on and
    % use that to determine thislineidx. note, thislineidx is used to set
    % the color order, so repeated calls to trendplot use the same color for
-   % the line/patch/errorbar, but it is also used to set the new legend
-   % text
+   % the line/patch/errorbar, but it is also used to set the new legend text
    numlines = numel(linesobjs);
    %thislineidx = numlines+1;
    numpatch = numel(patchobjs);
@@ -226,12 +239,13 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
    % be one line object (the trendline)
 
    % when i added errorbars, it worked to just do thislineidx = numlines+1,
-   % until i plotted wihtout errorbarrs, then it didn't work, so I added
-   % this:
+   % until i plotted wihtout errorbarrs, then it didn't work, so I added this:
    if numebars > 0 && numebars == numlines
       thislineidx = numlines+1;
-   elseif numebars == 0 && mod(numlines,2) == 0
+   elseif numebars == 0 && mod(numlines, 2) == 0
       thislineidx = numlines/2+1; % should alwasy be two lines per plot
+   else
+      thislineidx = numlines+1;
    end
 
    %    % this is the original
@@ -243,7 +257,7 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
    %       thislineidx = numlines+1;
    %    end
 
-   set(h.ax,'ColorOrderIndex',thislineidx);
+   set(h.ax, 'ColorOrderIndex', thislineidx);
 
    hold on;
 
@@ -264,30 +278,29 @@ function h = plotTrend(h,t,y,yfit,yerr,yci,errorbars,errorbounds,varargs)
    % plot errorbounds first
    if errorbounds == true
 
-      c = h.ax.ColorOrder(h.ax.ColorOrderIndex,:);
+      % c = h.ax.ColorOrder(h.ax.ColorOrderIndex, :);
+      c = get(h.ax, 'ColorOrder');
+      c = c(get(h.ax, 'ColorOrderIndex'), :);
 
-      Y = [yci(:,2)' fliplr(yci(:,1)')];
+      Y = [yci(:, 2)' fliplr(yci(:, 1)')];
       X = [t' fliplr(t')];
 
-      h.bounds = patch('XData',X,'YData',Y,'FaceColor',c,'FaceAlpha',0.15,...
-         'EdgeColor','none','Parent',h.ax,'HandleVisibility','off');
+      h.bounds = patch('XData', X, 'YData', Y, 'FaceColor', c, 'FaceAlpha', ...
+         0.15, 'EdgeColor', 'none', 'Parent', h.ax, 'HandleVisibility', 'off');
    end
 
    if errorbars == true
 
       % formatPlotMarkers handles edgecolor, facecolor, and marker size
-      h.plot = errorbar(h.ax,t,y,yerr, ...
-         'Marker','o', ...
-         'LineWidth', 1.5, ...
-         'LineStyle', '-', ...
-         'MarkerEdgeColor', [.5 .5 .5] );
+      h.plot = errorbar(h.ax, t, y, yerr,'-o');
+      set(h.plot, 'LineWidth', 1.5, 'MarkerEdgeColor', [.5 .5 .5] );
 
    else % trendlines
-      h.plot = plot(h.ax,t,y,'-o','LineWidth',2,varargs{:});
+      h.plot = plot(h.ax, t, y, '-o', 'LineWidth', 2, varargs{:});
    end
 
-   h.trend = plot(h.ax,t,yfit,'-','Color',h.plot.Color,  ...
-      'LineWidth',1,'HandleVisibility','off');
+   h.trend = plot(h.ax, t, yfit, '-', 'Color', get(h.plot, 'Color'), ...
+      'LineWidth', 1, 'HandleVisibility', 'off');
    formatPlotMarkers();
 end
 
@@ -366,7 +379,7 @@ function [t, y, opts, vargs] = parseinputs(t, y, mfilename, varargin)
 
    parser = inputParser;
    parser.FunctionName = mfilename;
-   parser.PartialMatching = true;
+   % parser.PartialMatching = true;
    parser.KeepUnmatched = true;
 
    dpos = [321 241 512 384]; % default figure size
@@ -394,5 +407,5 @@ function [t, y, opts, vargs] = parseinputs(t, y, mfilename, varargin)
    parser.parse(t, y, varargin{:});
    opts = parser.Results;
    vargs = namedargs2cell(parser.Unmatched);
-
 end
+

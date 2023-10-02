@@ -37,6 +37,11 @@ end
 %% plot grace period
 function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
 
+   if isoctave
+      h = [];
+      return
+   end
+
    if all(isempty(Dg))
       h = nan;
       return
@@ -54,21 +59,22 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
    % f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    ax = gca;
 
-   p1 = baseflow.trendplot(t,Dc,'units','cm a$^{-1}$','leg',ctxt,'use',ax, ...
-      'errorbounds',true,'errorbars',true,'yerr',sigDc,'reference',Dc, ...
-      'method',method);
-   p2 = baseflow.trendplot(t,Db,'units','cm a$^{-1}$','leg',btxt,'use',ax, ...
-      'errorbounds',true,'errorbars',true,'yerr',sigDb,'reference',Db, ...
-      'method',method);
-   p3 = baseflow.trendplot(t,Dg,'units','cm a$^{-1}$','leg',gtxt,'use',ax, ...
-      'errorbounds',true,'errorbars',true,'method',method);
+   p1 = baseflow.trendplot(t, Dc, 'units', 'cm a$^{-1}$', 'legendtext', ctxt, ...
+      'useax', ax, 'errorbounds', true, 'errorbars', true, 'yerr', sigDc, ...
+      'reference', Dc, 'method', method);
+   p2 = baseflow.trendplot(t, Db, 'units', 'cm a$^{-1}$', 'legendtext', btxt, ...
+      'useax', ax, 'errorbounds', true, 'errorbars', true, 'yerr', sigDb, ...
+      'reference', Db, 'method', method);
+   p3 = baseflow.trendplot(t, Dg, 'units', 'cm a$^{-1}$', 'legendtext', gtxt, ...
+      'useax', ax, 'errorbounds', true, 'errorbars', true, 'method', method);
 
-   set(ax,'XLim',[2001 2021],'YLim',[-80 80],'XTick',2002:3:2020);
+   set(ax, 'XLim', [2001 2021], 'YLim', [-80 80], 'XTick', 2002:3:2020);
 
-   p3.trend.Color = colors(5,:);
-   p3.bounds.FaceColor = colors(5,:);
-   p3.plot.MarkerFaceColor = colors(5,:);
-   p3.plot.Color = colors(5,:);
+   % TODO: Replace with set/get
+   p3.trend.Color = colors(5, :);
+   p3.bounds.FaceColor = colors(5, :);
+   p3.plot.MarkerFaceColor = colors(5, :);
+   p3.plot.Color = colors(5, :);
 
    p1.trend.LineWidth = 3;
    p2.trend.LineWidth = 3;
@@ -79,17 +85,17 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
    grid off
 
    lstr = p1.ax.Legend.String;
-   str6 = strrep(lstr{1},'CALM (measured) (','');
-   str6 = ['2002:2020 ' strrep(str6,')','')];
-   str7 = strrep(lstr{2},[btxt ' ('],'');
-   str7 = ['2002:2020 ' strrep(str7,')','')];
-   str8 = strrep(lstr{3},[sprintf(gtxt) ' ('],'');
-   str8 = ['2002:2020 ' strrep(str8,')','')];
+   str6 = strrep(lstr{1}, 'CALM (measured) (', '');
+   str6 = ['2002:2020 ' strrep(str6,')', '')];
+   str7 = strrep(lstr{2}, [btxt ' ('], '');
+   str7 = ['2002:2020 ' strrep(str7, ')', '')];
+   str8 = strrep(lstr{3}, [sprintf(gtxt) ' ('], '');
+   str8 = ['2002:2020 ' strrep(str8, ')', '')];
 
    lobj = [p1.plot p2.plot p3.plot p1.trend p2.trend p3.trend];
-   ltxt = {ctxt; btxt; strrep(gtxt,'\\','\'); str6; str7; str8};
-   legend(lobj,ltxt,'numcolumns',2,'Interpreter','latex','location', ...
-      'northwest','AutoUpdate','off');
+   ltxt = {ctxt; btxt; strrep(gtxt, '\\', '\'); str6; str7; str8};
+   legend(lobj, ltxt, 'numcolumns', 2, 'Interpreter', 'latex',' location', ...
+      'northwest', 'AutoUpdate', 'off');
 
    p1.bounds.FaceAlpha = 0.15;
    p2.bounds.FaceAlpha = 0.15;
@@ -121,27 +127,34 @@ function h = plotflowperiod(t, Db, sigDb, method)
    % f = figure('Position',[156    45   856   580]);
    %f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    f = figure('Position', [0 0 700 400]);
-   p = baseflow.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
-      'errorbounds',true,'errorbars',true,'yerr',sigDb,'method',method);
+   p = baseflow.trendplot(t, Db, 'units', 'cm/yr', 'legendtext', btxt, ...
+      'useax', gca, 'errorbounds', true, 'errorbars', true, 'yerr', sigDb, ...
+      'method', method);
 
    % set transparency of the bars
-   set([p.plot.Bar, p.plot.Line], 'ColorType', 'truecoloralpha', ...
-      'ColorData', [p.plot.Line.ColorData(1:3); 255*0.5])
+   if isoctave
 
-   lstr = p.ax.Legend.String;
-   str1 = strrep(lstr{1},[btxt ' ('],'');
-   str1 = strrep(str1,'cm/yr)','cm a$^{-1}$');
+      lobj = [p.plot p.trend];
+      legend(lobj, {'BFRA', 'trend'},'location','north','AutoUpdate','off');
+      ylabel('ALT anomaly (cm)','Interpreter','tex');
 
-   lobj = [p.plot p.trend];
-   ltxt = {btxt; str1};
-   legend(lobj,ltxt,'location','north','AutoUpdate','off');
+   else
 
-   % if I want to set the tick font to latext
-   % ax = gca;
-   % ax.TickLabelInterpreter
-   ylabel('$ALT$ anomaly (cm)','Interpreter','latex');
+      set([p.plot.Bar, p.plot.Line], 'ColorType', 'truecoloralpha', ...
+         'ColorData', [p.plot.Line.ColorData(1:3); 255*0.5])
 
-   p.trend.LineWidth = 2;
+      lstr = p.ax.Legend.String;
+      str1 = strrep(lstr{1},[btxt ' ('],'');
+      str1 = strrep(str1,'cm/yr)','cm a$^{-1}$');
+
+      lobj = [p.plot p.trend];
+      ltxt = {btxt; str1};
+      legend(lobj,ltxt,'location','north','AutoUpdate','off');
+
+      ylabel('$ALT$ anomaly (cm)','Interpreter','latex');
+   end
+
+   set(p.trend, 'LineWidth', 2);
 
    h.figure = f;
    h.baseflow.trendplot = p;
@@ -171,43 +184,49 @@ function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
    % f = figure('Position',[156    45   856   580]);
    %f = figure('Units','centimeters','Position',[5 5 23 19*3/4]);
    f = figure('Position', [0 0 700 400]);
-   p1 = baseflow.trendplot(t,Dc,'units','cm/yr','leg',ctxt,'use',gca, ...
-      'errorbounds',true,'errorbars',true,'yerr',sigDc,'method',method);
-   p2 = baseflow.trendplot(t,Db,'units','cm/yr','leg',btxt,'use',gca, ...
-      'errorbounds',true,'errorbars',true,'yerr',sigDb,'method',method);
+   p1 = baseflow.trendplot(t, Dc, 'units', 'cm/yr', 'legendtext', ctxt, ...
+      'useax', gca, 'errorbounds', true, 'errorbars', true, 'yerr', sigDc, ...
+      'method', method);
+   p2 = baseflow.trendplot(t, Db, 'units', 'cm/yr', 'legendtext', btxt, ...
+      'useax', gca, 'errorbounds', true, 'errorbars', true, 'yerr', sigDb, ...
+      'method', method);
 
    % set transparency of the bars
-   set([p1.plot.Bar, p1.plot.Line], 'ColorType', 'truecoloralpha', ...
-      'ColorData', [p1.plot.Line.ColorData(1:3); 255*0.5])
-   set([p2.plot.Bar, p2.plot.Line], 'ColorType', 'truecoloralpha', ...
-      'ColorData', [p2.plot.Line.ColorData(1:3); 255*0.5])
+   if isoctave
+      lobj = [p1.plot p2.plot];
+      legend(lobj,{'BFRA', 'CALM'},'location','north','AutoUpdate','off');
+      ylabel('ALT anomaly (cm)','Interpreter','tex');
 
-   % % set transparance of marker faces
-   % set(p1.plot.MarkerHandle, 'FaceColorType', 'truecoloralpha', ...
-   %     'FaceColorData', [p1.plot.Line.ColorData(1:3); 255*0.75])
-   % set(p2.plot.MarkerHandle, 'FaceColorType', 'truecoloralpha', ...
-   %     'FaceColorData', [p2.plot.Line.ColorData(1:3); 255*0.75])
+   else
 
-   lstr = p1.ax.Legend.String;
-   str1 = strrep(lstr{1},'CALM (measured) (','');
-   str1 = strrep(str1,'cm/yr)','cm a$^{-1}$');
-   str2 = strrep(lstr{2},[btxt ' ('],'');
-   str2 = strrep(str2,'cm/yr)','cm a$^{-1}$');
+      set([p1.plot.Bar, p1.plot.Line], 'ColorType', 'truecoloralpha', ...
+         'ColorData', [p1.plot.Line.ColorData(1:3); 255*0.5])
+      set([p2.plot.Bar, p2.plot.Line], 'ColorType', 'truecoloralpha', ...
+         'ColorData', [p2.plot.Line.ColorData(1:3); 255*0.5])
 
-   lobj = [p1.plot p2.plot p1.trend p2.trend];
-   ltxt = {ctxt; btxt; str1; str2};
-   legend(lobj,ltxt,'location','north','AutoUpdate','off');
+      % % set transparance of marker faces
+      % set(p1.plot.MarkerHandle, 'FaceColorType', 'truecoloralpha', ...
+      %     'FaceColorData', [p1.plot.Line.ColorData(1:3); 255*0.75])
+      % set(p2.plot.MarkerHandle, 'FaceColorType', 'truecoloralpha', ...
+      %     'FaceColorData', [p2.plot.Line.ColorData(1:3); 255*0.75])
 
-   % if I want to set the tick font to latext
-   % ax = gca;
-   % ax.TickLabelInterpreter
-   ylabel('$ALT$ anomaly (cm)','Interpreter','latex');
+      lstr = get(get(p1.ax, 'Legend'), 'String');
+      str1 = strrep(lstr{1},'CALM (measured) (','');
+      str1 = strrep(str1,'cm/yr)','cm a$^{-1}$');
+      str2 = strrep(lstr{2},[btxt ' ('],'');
+      str2 = strrep(str2,'cm/yr)','cm a$^{-1}$');
+      lobj = [p1.plot p2.plot p1.trend p2.trend];
+      ltxt = {ctxt; btxt; str1; str2};
+      legend(lobj,ltxt,'location','north','AutoUpdate','off');
 
-   p1.trend.LineWidth = 2;
-   p2.trend.LineWidth = 2;
+      ylabel('$ALT$ anomaly (cm)','Interpreter','latex');
+   end
+
+   set(p1.trend, 'LineWidth', 2);
+   set(p2.trend, 'LineWidth', 2);
 
    axis tight
-   set(gca,'XLim',[1990 2020],'XTick',1990:5:2020);
+   set(gca, 'XLim', [1990 2020], 'XTick', 1990:5:2020);
 
    h.figure = f;
    h.baseflow.trendplot1 = p1;
@@ -233,10 +252,10 @@ function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);
 
    parser = inputParser;
    parser.FunctionName = mfilename;
-   parser.addOptional('Dc', nan(size(Db)), @(x)isnumeric(x));
-   parser.addOptional('sigDc', nan(size(Db)), @(x)isnumeric(x));
-   parser.addOptional('Dg', nan(size(Db)), @(x)isnumeric(x));
-   parser.addParameter('method', 'ols', @(x) ischar(x));
+   parser.addOptional('Dc', nan(size(Db)), @isnumeric);
+   parser.addOptional('sigDc', nan(size(Db)), @isnumeric);
+   parser.addOptional('Dg', nan(size(Db)), @isnumeric);
+   parser.addParameter('method', 'ols', @ischar);
    parser.parse(varargin{:});
 
    Dc = parser.Results.Dc;

@@ -38,32 +38,33 @@ function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
    if nargin == 0; open(mfilename('fullpath')); return; end
 
    % PARSE INPUTS
-   [t, Q, A, method, pctl, showfig] = parseinputs(t,Q,A,varargin{:});
+   [t, Q, A, method, pctl, showfig] = parseinputs(t, Q, A, varargin{:});
 
    % MAIN FUNCTION
-
-   [Q,t] = padtimeseries(Q,t,datenum(year(t(1)),1,1), datenum(year(t(end)),12,31),1); %#ok<*DATNM>
-   [Q,t] = rmleapinds(Q,t);
+   t1 = datenum(year(t(1)), 1, 1, 0, 0, 0);
+   t2 = datenum(year(t(end)), 12, 31, 0, 0, 0);
+   [Q, t] = padtimeseries(Q, t, t1, t2, 1); %#ok<*DATNM>
+   [Q, t] = rmleapinds(Q, t);
 
    % convert the flow from m3/d posted daily to cm/d posted annually
-   if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end
-   t = transpose(year(mean(reshape(t,365,numel(t)/365))));
-   Qa = transpose(mean(reshape(Q,365,numel(Q)/365),'omitnan')).*(100/A);
+   %if ~isdatetime(t); t = datetime(t,'ConvertFrom','datenum'); end
+   t = transpose(year(mean(reshape(t, 365, numel(t) / 365))));
+   Qa = transpose(mean(reshape(Q, 365, numel(Q) / 365), 'omitnan')) .* (100/A);
 
    % regress Q [cm/d/y] against t [y] to get the trend [cm/d] posted annually
-   ha = baseflow.trendplot(t,Qa,'anom',false,'units','cm/d/y', ...
-      'title','mean flow','leg','mean flow regression','showfig', ...
-      showfig,'method',method);
-   hb = baseflow.trendplot(t,Qa,'anom',false,'units','cm/d/y','quan', ...
-      pctl,'title','baseflow','leg','baseflow regression',...
-      'showfig',showfig,'alpha',0.05);
-   dQadt = ha.trend.YData(:);  % mean flow trend
-   dQbdt = hb.trend.YData(:);  % baseflow trend
-   Qb = Qa-(dQadt-dQbdt);      % baseflow timeseries, cm/day
+   ha = baseflow.trendplot(t, Qa, 'anomalies', false, 'units', 'cm/d/y', ...
+      'titletext', 'mean flow', 'legendtext', 'mean flow regression', ...
+      'showfig', showfig, 'method', method);
+   hb = baseflow.trendplot(t, Qa, 'anomalies', false, 'units', 'cm/d/y', ...
+      'quantile', pctl, 'titletext', 'baseflow', 'legendtext', ...
+      'baseflow regression', 'showfig', showfig, 'alpha', 0.05);
+   dQadt = reshape(get(ha.trend, 'YData'), [], 1); % mean flow trend
+   dQbdt = reshape(get(hb.trend, 'YData'), [], 1); % baseflow trend
+   Qb = Qa-(dQadt-dQbdt); % baseflow timeseries, cm/day
 end
 
 %% INPUT PARSER
-function [t, Q, A, method, prctle, showfig] = parseinputs(t,Q,A,varargin)
+function [t, Q, A, method, prctle, showfig] = parseinputs(t, Q, A, varargin)
 
    parser = inputParser;
    parser.FunctionName = 'baseflow.baseflowtrend';

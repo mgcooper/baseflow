@@ -19,9 +19,6 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-   % TODO: implement aggfunc option to compute an event-aggregate tau e.g. using
-   % the mean flow, median flow, max flow, or min flow
-
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
@@ -56,18 +53,12 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
       Qtags = Events.eventTags;
    end
 
-   L = nan(numfits,1);
-   q = nan(size(Q));
-   t = nan(size(Q));
-   s = nan(size(Q));
-   dq = nan(size(Q));
-   tau = nan(size(Q));
-   dqdt = nan(size(Q));
+   % Initialize values
+   L = nan(numfits, 1);
+   [q, t, s, dq, tau, dqdt] = deal(nan(size(Q)));
 
-   % Aggregated values
-   qagg = nan(numfits,1);
-   dqagg = nan(numfits,1);
-   tauagg = nan(numfits,1);
+   % Initialize aggregated values
+   [qagg, dqagg, tauagg] = deal(nan(numfits, 1));
 
    for m = 1:numfits
       tag = etags(m);
@@ -89,21 +80,21 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
       switch aggfunc
          case 'none'
          case 'min'
-            qagg(m) = min(q(iii),[],'omitnan');
-            dqagg(m) = min(dqdt(iii),[],'omitnan');
-            tauagg(m) = min(tau(ii),[],'omitnan');
+            qagg(m) = nanmin(q(iii));
+            dqagg(m) = nanmin(dqdt(iii));
+            tauagg(m) = nanmin(tau(ii));
          case 'max'
-            qagg(m) = max(q(iii),[],'omitnan');
-            dqagg(m) = max(dqdt(iii),[],'omitnan');
-            tauagg(m) = max(tau(ii),[],'omitnan');
+            qagg(m) = nanmax(q(iii));
+            dqagg(m) = nanmax(dqdt(iii));
+            tauagg(m) = nanmax(tau(ii));
          case 'median'
-            qagg(m) = median(q(iii),'omitnan');
-            dqagg(m) = median(dqdt(iii),'omitnan');
-            tauagg(m) = median(tau(ii),'omitnan');
+            qagg(m) = nanmedian(q(iii));
+            dqagg(m) = nanmedian(dqdt(iii));
+            tauagg(m) = nanmedian(tau(ii));
          case 'mean'
-            qagg(m) = mean(q(iii),'omitnan');
-            dqagg(m) = mean(dqdt(iii),'omitnan');
-            tauagg(m) = mean(tau(ii),'omitnan');
+            qagg(m) = nanmean(q(iii));
+            dqagg(m) = nanmean(dqdt(iii));
+            tauagg(m) = nanmean(tau(ii));
       end
    end
 

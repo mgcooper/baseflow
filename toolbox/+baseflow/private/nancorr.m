@@ -21,5 +21,11 @@ function [Rho,Pval] = nancorr( X,Y,varargin )
    X(naninds) = [];
    Y(naninds) = [];
 
-   [Rho,Pval] = corr(X,Y,varargin{:});
+   if isoctave
+      [Rho,Pval] = corrcoef(X,Y,varargin{:});
+      % Rho = corr(X,Y);
+      % Pval = nan;
+   else
+      [Rho,Pval] = corr(X,Y,varargin{:});
+   end
 end

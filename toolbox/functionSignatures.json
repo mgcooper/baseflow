@@ -253,7 +253,7 @@
       "inputs":
       [
          {"name":"phi",        "kind": "required",  "type": ["vector","double"]},
-         {"name":"outputtype", "kind": "ordered",   "type": ["char", "choices={'PD','mean','std','median'}"],"default":"'PD'","purpose":"Option"},
+         {"name":"outputtype", "kind": "ordered",   "type": ["char", "choices={'PD','mean','std'}"],"default":"'PD'","purpose":"Option"},
          {"name":"plottype",   "kind": "ordered",   "type": ["char", "choices={'pdf','cdf','probplot','none'}"],"default":"'none'","purpose":"Option"}
       ]
    },

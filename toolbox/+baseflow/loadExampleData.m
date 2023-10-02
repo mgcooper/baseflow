@@ -20,7 +20,15 @@ function varargout = loadExampleData(varargin)
    end
    
    if strcmp(option, 'kuparuk')
-      load(fullfile(datapath, 'annualdata.mat'),'Data');
+      if isoctave
+         load(fullfile(datapath, 'annualdata_octave.mat'),'Data');
+         try
+            Data = struct2table(Data);
+         catch
+         end
+      else
+         load(fullfile(datapath, 'annualdata.mat'),'Data');
+      end
    else
       Data = [];
    end

@@ -179,8 +179,8 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
             legend(Trends.Properties.VariableNames(1:end-1),'Location','best');
 
             % this was in the aggregateCalmData temporary function i deleted
-            baseflow.trendplot(Data.Time,Data.mu,'useax',gca, ...
-               'errorbars',true,'yerr',Data.sigma);
+            baseflow.trendplot(Data.Time, Data.mu, 'useax', gca, ...
+               'errorbars', true, 'yerr', Data.sigma);
          end
 
          % NOTE:

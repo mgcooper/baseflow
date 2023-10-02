@@ -1,4 +1,5 @@
-function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit)
+function PhiFit = phifitensemble(Results, Fits, A, D, L, bhat, lateqtls, ...
+      earlyqtls, showfit)
    %PHIFITENSEMBLE Fit phi estimate ensemble using all recession events in Fits.
    %
    % Syntax
@@ -26,24 +27,24 @@ function PhiFit = phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,show
    % phid = baseflow.eventphi(Results,Fits,A,D,[],bhat);
    % phi = baseflow.fitphidist(phid,'mean','cdf');
 
-   phidist(:,1) = baseflow.eventphi( ...
-      Results,Fits,A,D,L,1,'lateqtls',lateqtls,'earlyqtls',earlyqtls);
+   phidist(:, 1) = baseflow.eventphi(Results, Fits, A, D, L, 1, ...
+      'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
 
-   phidist(:,2) = baseflow.eventphi( ...
-      Results,Fits,A,D,L,1.5,'lateqtls',lateqtls,'earlyqtls',earlyqtls);
+   phidist(:, 2) = baseflow.eventphi(Results, Fits, A, D, L, 1.5, ...
+      'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
 
-   phidist(:,3) = baseflow.eventphi( ...
-      Results,Fits,A,D,L,bhat,'lateqtls',lateqtls,'earlyqtls',earlyqtls);
+   phidist(:, 3) = baseflow.eventphi(Results, Fits, A, D, L, bhat, ...
+      'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
 
-   phidist(phidist>1.0) = nan;
-   phidist(phidist<0.0) = nan;
-   phicombo = vertcat(phidist(:,1),phidist(:,2));
+   phidist(phidist > 1.0) = nan;
+   phidist(phidist < 0.0) = nan;
+   phicombo = vertcat(phidist(:, 1), phidist(:, 2));
 
    % plot the fits
-   [PD(1),h1] = baseflow.fitphidist(phidist(:,1),'PD','cdf',showfit);
-   [PD(2),h2] = baseflow.fitphidist(phidist(:,2),'PD','cdf',showfit);
-   [PD(3),h3] = baseflow.fitphidist(phidist(:,3),'PD','cdf',showfit);
-   [PD(4),h4] = baseflow.fitphidist(phicombo,'PD','cdf',showfit);
+   [PD(1), h1] = baseflow.fitphidist(phidist(:, 1), 'PD', 'cdf', showfit);
+   [PD(2), h2] = baseflow.fitphidist(phidist(:, 2), 'PD', 'cdf', showfit);
+   [PD(3), h3] = baseflow.fitphidist(phidist(:, 3), 'PD', 'cdf', showfit);
+   [PD(4), h4] = baseflow.fitphidist(phicombo, 'PD', 'cdf', showfit);
 
    % put the mean and standard errors in an array
    mu = [h1.mu; h2.mu; h3.mu; h4.mu];

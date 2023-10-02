@@ -4,20 +4,26 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    %
    % Syntax
    %
-   %     [sig_dndt, sig_lamda] = dndtuncertainty(T,Qb,Results,Fits,GlobalFit,opts)
+   %  [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,Results,Fits,GlobalFit,opts)
    %
    % Description
    %
-   %     [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,Results,Fits,GlobalFit,opts)
-   %     Computes the combined uncertainty (with correlation) for: dn/dt = 
-   %     lambda*dq/dt where dn/dt is the 'long term' (interannual) trend in
-   %     groundwater layer thickness (n), q is the 'long term' trend in
-   %     baseflow, and lambda = tau/phi*1/(N+1) is the linearized sensitivity
-   %     coefficient with reference drainage timescale tau [days], drainable
-   %     porosity [-], and exponent N [-], where N = 3-2b for all known
-   %     flat-aquifer and all known linearized sloped-aquifer solutions to the
-   %     one-dimensional groundwater flow equation for a Boussinesq aquifer, and
-   %     parameter b from -dQ/dt = aQb.
+   %  [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,Results,Fits,GlobalFit,opts)
+   %
+   %  Computes the combined uncertainty (with correlation) for:
+   %
+   %     dn/dt = lambda*dq/dt
+   %
+   %  where dn/dt is the 'long term' (interannual) trend in groundwater layer
+   %  thickness (n), q is the 'long term' trend in baseflow, and
+   %
+   %     lambda = tau/phi*1/(N+1)
+   %
+   %  is the linearized sensitivity coefficient with reference drainage
+   %  timescale tau [days], drainable porosity [-], and exponent N [-], where N
+   %  = 3-2b for all known flat-aquifer and all known linearized sloped-aquifer
+   %  solutions to the one-dimensional groundwater flow equation for a
+   %  Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
    %
    % See also: alttrend, aquiferthickness
    %
@@ -37,12 +43,13 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    end
 
    % Convert time in days to years
-   if ~isdatetime(T)
-      T = datetime(T, 'ConvertFrom', 'datenum'); 
+   if isdatetime(T)
+      T = todatenum(T);
    end
-   
-   [~, T] = padtimeseries(nan(size(T)), T, datenum(year(T(1)), 1, 1), ...
-      datenum(year(T(end)), 12, 31), 1); %#ok<*DATNM> 
+
+   t1 = datenum(year(T(1)), 1, 1);
+   t2 = datenum(year(T(end)), 12, 31);
+   [~, T] = padtimeseries(nan(size(T)), T, t1, t2, 1); %#ok<*DATNM>
    T = transpose(year(mean(reshape(T, 365, numel(T)/365))));
 
    if numel(T) ~= numel(Qb)
@@ -50,59 +57,69 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    end
 
    % Define the sensitivity coefficient and dn/dt trend functions
-   Flam = @(tau,phi,b) tau./(phi.*(4-2.*b));
+   Flam = @(tau, phi, b) tau./(phi.*(4-2.*b));
    Fdndt = @(tau,phi,b,dqdt) tau./(phi.*(4-2.*b)).*dqdt;
 
-   % Regress baseflow in units cm/day/year to get uncertainty on dq/dt using
-   % fitlm on the baseflow timeseries:
-   % Qb = GlobalFit.Qb./365.25;              % cm/yr -> cm/day
+   % Regress baseflow in units cm/day/year to get uncertainty on dq/dt
    Qb = Qb./365.25;                          % cm/yr -> cm/day
-   mdl = fitlm(T,Qb); % plot(mdl)
-   dbfdt = mdl.Coefficients.Estimate(2);     % cm/day/year
-   std_dbfdt = mdl.Coefficients.SE(2);       % standard error
-   CI_dbfdt = mdl.coefCI;                    % 95% CI's
-   CI_dbfdt = CI_dbfdt(2,:);
-   sig_dbfdt = CI_dbfdt(2)-dbfdt;            % they're symetric so just take one
 
-   % Parameters 
+   [~, mdl] = fitlm_octmat(T, Qb);
+      dbfdt = mdl.Coefficients.Estimate(2);  % cm/day/year
+   se_dbfdt = mdl.Coefficients.SE(2);        % standard error
+   CI_dbfdt = mdl.Coefficients.CI(2, :);     % 95% CI's
+   sig_dbfdt = CI_dbfdt(2) - dbfdt;          % they're symetric so just take one
+
+   % In octave, the full Jacobian/Covariance Matrix method is not supported, but
+   % the uncertainty is dominated by the linear regression, so return that.
+   if isoctave
+      sig_dndt = sig_dbfdt;
+      sig_lamda = nan;
+      return
+   end
+
+   % Parameters
    A = opts.drainagearea;     % basin area [m2]
    D = opts.aquiferdepth;     % reference active layer thickness [m]
    L = opts.streamlength;     % effective stream network length [m]
 
-   lateqtls = opts.lateqtls;
-   earlyqtls = opts.earlyqtls;
-   
+   % Fit drainable porosity
    bhat = GlobalFit.b;
    PhiFit = baseflow.phifitensemble(Results, Fits, A, D, L, bhat, ...
-      lateqtls, earlyqtls, false);
-   
+      opts.lateqtls, opts.earlyqtls, false);
+
    % The sample populations of tau, phi, and Nstar
    [~,~,~,~,G] = baseflow.eventtau(Results, Fits, Fits, ...
       'usefits', true, 'aggfunc', 'max');
-   
+
    b = [Results.b];
    tau = G.tau; % [K.tauH]';
    Np1 = 1./(4-2.*b);
-   phi1 = PhiFit.phidist(:,1);
-   phi2 = PhiFit.phidist(:,2);
-   phi = (phi1+phi2)./2;
+   phi1 = PhiFit.phidist(:, 1);
+   phi2 = PhiFit.phidist(:, 2);
+   phi = (phi1 + phi2) ./ 2;
 
    % correlation between b and phi, using the two phi dist's b = 1 and b = 3/2:
-   rho_phi12 = nancorr(phi1,phi2);
-   rho_phib1 = nancorr(Np1,phi1);
-   rho_phib2 = nancorr(Np1,phi2);
-   cov_phib1 = cov(Np1,phi1,'omitrows');
-   cov_phib2 = cov(Np1,phi2,'omitrows');
+   rho_phi12 = nancorr(phi1, phi2);
+   rho_phib1 = nancorr(Np1, phi1);
+   rho_phib2 = nancorr(Np1, phi2);
+
+   if isoctave
+      cov_phib1 = cov(Np1, phi1);
+      cov_phib2 = cov(Np1, phi2);
+   else
+      cov_phib1 = cov(Np1, phi1, 'omitrows');
+      cov_phib2 = cov(Np1, phi2, 'omitrows');
+   end
 
    % define the uncertainties (standard errors)
    % if we averaged phi1 and phi2, then the combined uncertainty would be:
    sig_phi1 = PhiFit.pm(1);
    sig_phi2 = PhiFit.pm(2);
    sig_phi = rho_phi12*sig_phi1*sig_phi2;
-   sig_phi = sqrt((0.5*sig_phi1)^2+(0.5*sig_phi2)^2+2*0.5*0.5*sig_phi);
-   sig_tau = mean([GlobalFit.tau_H-GlobalFit.tau,GlobalFit.tau-GlobalFit.tau_L]);
-   sig_b = mean([GlobalFit.b_H-GlobalFit.b,GlobalFit.b-GlobalFit.b_L]);
-   sig_Np1 = 2*sig_b;     % uncertainty on 1/(4-2*b) OR 1/(1-2*b) is 2*sig(b)
+   sig_phi = sqrt((0.5 * sig_phi1)^2 + (0.5 * sig_phi2)^2 + 2*0.5*0.5*sig_phi);
+   sig_tau = mean([GlobalFit.tau_H - GlobalFit.tau, GlobalFit.tau - GlobalFit.tau_L]);
+   sig_b = mean([GlobalFit.b_H - GlobalFit.b, GlobalFit.b - GlobalFit.b_L]);
+   sig_Np1 = 2*sig_b; % uncertainty on 1/(4-2*b) OR 1/(1-2*b) is 2*sig(b)
    % the 0.5 on sig_phi1/2 is from the averaging procedure which divides by 2
 
    if alpha == 0.32
@@ -116,11 +133,11 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    tauhat = GlobalFit.tau;                      % days
    phihat = PhiFit.mu(4);                       % -
    bhat = GlobalFit.b;                          % -
-   Nhat = 1/(4-2*bhat);                         % -
+   Nhat = 1 / (4 - 2*bhat);                     % -
 
    % Compute the sensitivity coefficient and dn/dt
-   lambda = Flam(tauhat,phihat,bhat);
-   dndt = Fdndt(tauhat,phihat,bhat,dbfdt);      % cm/yr
+   lambda = Flam(tauhat, phihat, bhat);
+   dndt = Fdndt(tauhat, phihat, bhat, dbfdt);   % cm/yr
 
    % Compute the jacobian
    dqdtv = dbfdt.*ones(size(tau));
@@ -128,16 +145,16 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
 
    % Construct the covariance matrix and compute the combined uncertainty
    u = [sig_tau, sig_phi, sig_Np1, sig_dbfdt];
-   V = corr([tau,phi,Np1,dqdtv]).*u.*u';
-   sig_dndt = sqrt(J*V*J');
-   % w/o correlated errors: sqrt(sum((J.*u).^2))
+   V = corr([tau, phi, Np1, dqdtv]) .* u .* u';
+   sig_dndt = sqrt(J * V * J');
+   % w/o correlated errors: sqrt(sum((J .* u).^2))
 
    % Compute the uncertainty on lambda (repeat above steps)
    J = [lambda./tauhat, -lambda./phihat, lambda./Nhat];
    u = [sig_tau, sig_phi, sig_Np1];
-   V = corr([tau,phi,Np1]).*u.*u';
-   sig_lamda = sqrt(J*V*J');
-   % w/o correlated errors: sqrt(sum((J.*u).^2))
+   V = corr([tau, phi, Np1]) .* u .* u';
+   sig_lamda = sqrt(J * V * J');
+   % w/o correlated errors: sqrt(sum((J .* u).^2))
 
    if testflag == true
       warning('method comparison not currently supported')

@@ -17,8 +17,8 @@ function [ DataOut ] = setnan(Data,varargin)
    % should all be numeric, this won't work as expected (e.g. when reading
    % in new data for the first time and setting a known value nan)
 
-   wastable = istable(Data);           % was a table
-   wastimetable = istimetable(Data);   % was a timetable
+   wastable = isa(Data, 'table');           % was a table
+   wastimetable = isa(Data, 'timetable');   % was a timetable
 
    % if only the Data was passed in, set all values nan
    if nargin == 1

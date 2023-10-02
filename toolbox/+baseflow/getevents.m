@@ -158,6 +158,7 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
    if isempty(parser)
       parser = inputParser;
       parser.StructExpand = true;
+      parser.KeepUnmatched = true;
       % parser.PartialMatching = false;
       parser.CaseSensitive = true;
 

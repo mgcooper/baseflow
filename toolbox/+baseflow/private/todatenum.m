@@ -8,6 +8,9 @@ function varargout = todatenum(varargin)
 end
 
 function T = tryconvert(T)
+   if isa(T, 'datenum')
+      return
+   end
    if isdatetime(T)
       if isoctave
          %warning('attempting conversion from datetime to datenum')

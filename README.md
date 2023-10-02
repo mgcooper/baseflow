@@ -18,15 +18,15 @@ Requires Statistics, Optimization, Struct, and Tablicious packages.
 
 ## Install
 
-- Clone this repo **or** use [`mpm`](http://mobeets.github.io/mpm/) in your Matlab terminal:
+- Clone this repo or use [`mpm`](http://mobeets.github.io/mpm/) in your Matlab terminal:
   - `mpm install baseflow`
 - cd into the `toolbox` directory.
 - Run `Setup.m`:
   - Type `msg = Setup('install')` at the command line then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc` for recommended startup options.
-- Unit tests are in `tests/`. To run them from the top-level folder, type `runtests('tests')` at the command window and press enter. To debug errors, try `runtests('tests', 'debug', true)`.
-- In new Matlab sessions, navigate to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
+- Unit tests are in `tests/`. To run them from the top-level folder, type `runtests('tests')` at the command window and press enter. To debug, try `runtests('tests', 'debug', true)`.
+- In new Matlab sessions, cd to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
 
 For more options, see [Configuration](#configuration).  
 For Octave compatibility, see [Octave](#octave).  
@@ -35,7 +35,7 @@ For Octave compatibility, see [Octave](#octave).
 
 Toolbox functions are in the `+baseflow` namespace folder. To see a list of toolbox functions, type `help +baseflow` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help baseflow.function_name` at the command line then press enter.
 
-Toolbox documentation and examples are available in the Matlab help browser. To get started, in your Matlab command window:
+Toolbox documentation is available in the Matlab help browser. To get started, in your Matlab command window:
 
 - Type `baseflow.help()` to open the toolbox documentation in the help browser.
 - Type `baseflow.help('function_name')` to open documentation for a specific function.

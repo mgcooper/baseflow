@@ -24,13 +24,13 @@ function [data_out,dates_out] = padtimeseries(data,dates,padstart,padend,dt)
 
    wasdatetime = isdatetime(dates);
    if wasdatetime == true
-      dates = datenum(dates); %#ok<*DATNM> 
+      dates = todatenum(dates); %#ok<*DATNM>
    end
 
    % convert padstart/padend to datenums
-   padstart = datenum(padstart);
-   padend   = datenum(padend);
-   dates    = datenum(dates);
+   padstart = todatenum(padstart);
+   padend   = todatenum(padend);
+   dates    = todatenum(dates);
 
    % get the missing dates
    missing_datesi = padstart:dt:dates(1)-dt;
@@ -45,6 +45,10 @@ function [data_out,dates_out] = padtimeseries(data,dates,padstart,padend,dt)
    dates_out = [missing_datesi';dates;missing_datesf'];
 
    if wasdatetime == true
-      dates_out = datetime(dates_out,'ConvertFrom','datenum');
+      try
+         dates_out = datetime(dates_out,'ConvertFrom','datenum');
+      catch e
+         % might fail in octave
+      end
    end
 end

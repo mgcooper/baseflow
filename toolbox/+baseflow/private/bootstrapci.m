@@ -23,6 +23,12 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
    % TODO
    % add a check if x has a column of ones and add one if not
 
+   % Just call isoctave. TODO: check if function overhead matters.
+   % persistent inoctave
+   % if isempty(inoctave)
+   %    inoctave = isoctave();
+   % end
+
    %if nargin<4, Fcost = @(r)sum(abs(r.*(tau-(r<0)))); end
    if nargin<6, alpha=0.05; end % confidence level
 
@@ -56,7 +62,11 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
 
    % bootstrapped confidence intervals on ab. the transpose makes x*ab work.
    Fci = {@(bootr)fminsearch(@(ab)Fcost(yhat+bootr-x*ab),ab0,opts)',resid};
-   abci = bootci(Nboot,Fci,'type','cper','alpha',alpha); % default alpha =0.05
+   if isoctave
+      abci = bootci(Nboot,Fci,'type','bca','alpha',alpha);
+   else
+      abci = bootci(Nboot,Fci,'type','cper','alpha',alpha);
+   end
 
    % compute the 95th pctl prediction intervals
    yyhat = zeros(size(x,1),Nboot);

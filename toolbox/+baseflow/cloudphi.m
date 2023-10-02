@@ -52,8 +52,8 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
       theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, ...
       A, D, L, method, varargin{:});
 
-   % the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could also
-   % be used but this function is intended to fit phi once b is known (or
+   % the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could
+   % also be used but this function is intended to fit phi once b is known (or
    % prescribed)
 
    % a1 = early-time a
@@ -88,7 +88,7 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    hdum = plot(0,0,'Color','none','HandleVisibility','off');
 
    if isoctave
-      txt = sprintf('phi = %.2f',phi);
+      txt = sprintf('\\phi = %.2f',phi);
       legend(hdum,txt,'Interpreter','tex','Location','northwest','box','off');
    else
       txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);

@@ -83,9 +83,9 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    % Description
    %
    %     Split recession events detected by eventfinder into individual segments
-   %     ready to fit with baseflow.fitab or baseflow.fitevents. For example, if an
-   %     event is interrupted by rainfall or if rainfall is detected from convex
-   %     dq/dt, the event can be split into separate segments thought to
+   %     ready to fit with baseflow.fitab or baseflow.fitevents. For example, if
+   %     an event is interrupted by rainfall or if rainfall is detected from
+   %     convex dq/dt, the event can be split into separate segments thought to
    %     represent uninterrupted baseflow. Follows recommendations in Dralle et
    %     al. 2017.
    %
