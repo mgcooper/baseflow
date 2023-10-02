@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of fitphidist</title>
+  <meta name="keywords" content="fitphidist">
+  <meta name="description" content="FITPHIDIST fit drainable porosity (phi) values with a Beta distribution">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; fitphidist.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>fitphidist
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>FITPHIDIST fit drainable porosity (phi) values with a Beta distribution</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Fit,h] = fitphidist(phi,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">FITPHIDIST fit drainable porosity (phi) values with a Beta distribution
+
+ Syntax
+
+     FIT = baseflow.FITPHIDIST(phi);
+     FIT = baseflow.FITPHIDIST(___,plottype);
+     FIT = baseflow.FITPHIDIST(___,outputtype);
+
+ Description
+
+     Fit = baseflow.fitphidist(phi) returns probability distribution object
+     'Fit' which is a Beta Distribution fit to the input data in phi
+
+     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution fit
+     to the input data in phi. 'outputtype' is 'PD', 'mean', or 'std', where
+     default 'PD' is the Probability Distribution object. 
+
+     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options
+     plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default
+     is 'none'.
+
+ See also: <a href="eventphi.html" class="code" title="function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)">eventphi</a>, <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, <a href="fitphidist.html" class="code" title="function [Fit,h] = fitphidist(phi,varargin)">fitphidist</a>
+
+ Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function h = cdfplotphi(phi, PD, showfit)</a></li>
+<li><a href="#_sub2" class="code">function h = probplotphi(phi,PD)</a></li>
+<li><a href="#_sub3" class="code">function [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Fit,h] = fitphidist(phi,varargin)</a>
+0002    <span class="comment">%FITPHIDIST fit drainable porosity (phi) values with a Beta distribution</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     FIT = baseflow.FITPHIDIST(phi);</span>
+0007    <span class="comment">%     FIT = baseflow.FITPHIDIST(___,plottype);</span>
+0008    <span class="comment">%     FIT = baseflow.FITPHIDIST(___,outputtype);</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">% Description</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">%     Fit = baseflow.fitphidist(phi) returns probability distribution object</span>
+0013    <span class="comment">%     'Fit' which is a Beta Distribution fit to the input data in phi</span>
+0014    <span class="comment">%</span>
+0015    <span class="comment">%     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution fit</span>
+0016    <span class="comment">%     to the input data in phi. 'outputtype' is 'PD', 'mean', or 'std', where</span>
+0017    <span class="comment">%     default 'PD' is the Probability Distribution object.</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">%     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options</span>
+0020    <span class="comment">%     plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default</span>
+0021    <span class="comment">%     is 'none'.</span>
+0022    <span class="comment">%</span>
+0023    <span class="comment">% See also: eventphi, fitphi, fitphidist</span>
+0024    <span class="comment">%</span>
+0025    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
+0026 
+0027    <span class="comment">% if called with no input, open this file</span>
+0028    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0029 
+0030    <span class="comment">% PARSE INPUTS</span>
+0031    [phi, outputtype, plottype, showfit] = <a href="#_sub3" class="code" title="subfunction [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)">parseinputs</a>(phi, varargin{:});
+0032 
+0033    <span class="comment">% Force all inputs to be column vectors</span>
+0034    phi = phi(:);
+0035 
+0036    <span class="comment">% Fit the beta distribution</span>
+0037    [PARAMHAT, PARAMCI] = betafit(phi);
+0038    [M, V] = betastat(PARAMHAT(1), PARAMHAT(2));
+0039    PD.paramEst = PARAMHAT;
+0040    PD.paramCI = PARAMCI;
+0041    PD.a = PARAMHAT(1);
+0042    PD.b = PARAMHAT(2);
+0043    PD.mean = M;
+0044    PD.std = sqrt(V);
+0045 
+0046    <span class="comment">% Create the figure</span>
+0047    <span class="keyword">switch</span> plottype
+0048       <span class="keyword">case</span> <span class="string">'cdf'</span>
+0049          h = <a href="#_sub1" class="code" title="subfunction h = cdfplotphi(phi, PD, showfit)">cdfplotphi</a>(phi, PD, showfit);
+0050       <span class="keyword">case</span> <span class="string">'probplot'</span>
+0051          h = <a href="#_sub2" class="code" title="subfunction h = probplotphi(phi,PD)">probplotphi</a>(phi, PD, showfit);
+0052       <span class="keyword">case</span> <span class="string">'pdf'</span>
+0053    <span class="keyword">end</span>
+0054 
+0055    <span class="comment">% package output</span>
+0056    <span class="keyword">switch</span> outputtype
+0057       <span class="keyword">case</span> <span class="string">'PD'</span>
+0058          <span class="comment">% send back the probability distribution</span>
+0059          Fit = PD;
+0060       <span class="keyword">case</span> <span class="string">'mean'</span>
+0061          <span class="comment">% send back the mean</span>
+0062          Fit = PD.mean;
+0063       <span class="keyword">case</span> <span class="string">'std'</span>
+0064          <span class="comment">% send back the mean</span>
+0065          Fit = PD.std;
+0066    <span class="keyword">end</span>
+0067 <span class="keyword">end</span>
+0068 
+0069 <a name="_sub1" href="#_subfunctions" class="code">function h = cdfplotphi(phi, PD, showfit)</a>
+0070 
+0071    <span class="comment">% Get the cdf</span>
+0072    [cdfY, cdfX] = ecdf(phi, <span class="string">'Function'</span>, <span class="string">'cdf'</span>);
+0073    
+0074    <span class="comment">% Create the figure</span>
+0075    h.figure = figure(<span class="string">'Visible'</span>, showfit);
+0076    h.data = plot(cdfX, cdfY, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, [0 0.447 0.741], <span class="keyword">...</span>
+0077       <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>, <span class="string">'Visible'</span>, showfit); hold on;
+0078 
+0079    <span class="comment">% Create grid where function will be computed</span>
+0080    XLims = get(gca, <span class="string">'XLim'</span>);
+0081    XLims = XLims + [-1 1] * 0.01 * diff(XLims);
+0082    XGrid = linspace(XLims(1), XLims(2), 100);
+0083 
+0084    <span class="comment">% plot the cdf</span>
+0085    phifit = betacdf(XGrid, PD.a, PD.b);
+0086    h.fit = plot(XGrid, phifit, <span class="string">'k'</span>);
+0087    set(gca, <span class="string">'XLim'</span>, [0 max(phi)])
+0088 
+0089    <span class="comment">% bootstrap standard error / CI's</span>
+0090    booterr = true;
+0091    N = 1000;
+0092    <span class="keyword">if</span> booterr == true
+0093       reps = bootstrp(N, @betafit, phi);
+0094       mureps = reps(:, 1) ./ (sum(reps, 2));
+0095       sigreps = sqrt(prod(reps, 2) ./ ((sum(reps, 2)+1) .* (sum(reps, 2)).^2));
+0096    <span class="keyword">end</span>
+0097 
+0098    <span class="comment">% this slightly overestimates the error, which is fine (conservative)</span>
+0099    mu = mean(mureps);
+0100    sg = mean(sigreps);
+0101    pm = std(mureps) * 1.96; <span class="comment">% or: mean(sigreps)/sqrt(N)*1.96</span>
+0102 
+0103    <span class="keyword">if</span> showfit == true &amp;&amp; ~isoctave
+0104       
+0105       <span class="comment">% compose legend text and arrow text</span>
+0106       ltxt = {<span class="string">'\phi'</span>, sprintf(<span class="string">'Beta (\\alpha=%.2f,\\beta=%.1f)'</span>, PD.a, PD.b)};
+0107       arrowtxt = sprintf(<span class="string">'\\langle\\phi\\rangle=%.3f\\pm%.3f'</span>, mu, round(pm, 3));
+0108 
+0109       <span class="comment">% add xlabel and legend</span>
+0110       xlabel(<span class="string">'x'</span>);
+0111       ylabel(<span class="string">'P(\phi \leq x)'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0112       
+0113       xarrow = [PD.mean 1.3*PD.mean];
+0114       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
+0115       baseflow.deps.arrow([xarrow(2), yarrow(2)],[xarrow(1), yarrow(1)], <span class="keyword">...</span>
+0116          <span class="string">'BaseAngle'</span>, 90, <span class="string">'Length'</span>, 8, <span class="string">'TipAngle'</span>, 10)
+0117       text(0.95*xarrow(2), yarrow(2), arrowtxt, <span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>)
+0118 
+0119       h.legend = legend(ltxt, <span class="string">'Location'</span>, <span class="string">'east'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0120       h.legend.Position(2) = 0.68*h.legend.Position(2);
+0121       h.legend.Position(1) = 0.85*h.legend.Position(1);
+0122    <span class="keyword">end</span>
+0123 
+0124    h.ax = gca;
+0125    h.mu = mu;
+0126    h.pm = pm;
+0127 <span class="keyword">end</span>
+0128 
+0129 <a name="_sub2" href="#_subfunctions" class="code">function h = probplotphi(phi,PD)</a>
+0130 
+0131    <span class="keyword">if</span> isoctave
+0132       error([mfilename <span class="string">': probplot not implemented in Octave. Use ''cdf''.'</span>])
+0133    <span class="keyword">end</span>
+0134 
+0135    <span class="comment">% Create the figure</span>
+0136    h.figure = figure;
+0137 
+0138    <span class="comment">% plot the data, suppressing the normal plot with 'noref'</span>
+0139    h.data = probplot(<span class="string">'normal'</span>, phi, [], [], <span class="string">'noref'</span>); hold on;
+0140 
+0141    <span class="comment">% add the fit</span>
+0142    h.fit = probplot(gca, PD);
+0143 
+0144    <span class="comment">% format the symbols</span>
+0145    c  = [0 0.447 0.741];
+0146    set(h.data, <span class="string">'MarkerFaceColor'</span>, c, <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerSize'</span>, 6, <span class="keyword">...</span>
+0147       <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>);
+0148    set(h.fit, <span class="string">'Color'</span>, <span class="string">'k'</span>, <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="string">'LineWidth'</span>, 2);
+0149 
+0150    ylabel(<span class="string">'P(\phi\leq x)'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0151    title(<span class="string">''</span>)
+0152    set(gca, <span class="string">'XLim'</span>, [0 0.2])
+0153    h.ax = gca;
+0154 <span class="keyword">end</span>
+0155 
+0156 <span class="comment">%% INPUT PARSER</span>
+0157 <a name="_sub3" href="#_subfunctions" class="code">function [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)</a>
+0158 
+0159    validoutput = @(x) any(validatestring(x, {<span class="string">'PD'</span>, <span class="string">'mean'</span>, <span class="string">'std'</span>}));
+0160    validplottype = @(x) any(validatestring(x, {<span class="string">'cdf'</span>, <span class="string">'pdf'</span>, <span class="string">'probplot'</span>}));
+0161 
+0162    parser = inputParser;
+0163    parser.FunctionName = <span class="string">'baseflow.fitphidist'</span>;
+0164    parser.addRequired(<span class="string">'phi'</span>, @isvector);
+0165    parser.addOptional(<span class="string">'outputtype'</span>, <span class="string">'PD'</span>, validoutput);
+0166    parser.addOptional(<span class="string">'plottype'</span>, <span class="string">'none'</span>, validplottype);
+0167    parser.addOptional(<span class="string">'showfit'</span>, true, @islogical);
+0168    parser.parse(phi, varargin{:});
+0169 
+0170    outputtype = parser.Results.outputtype;
+0171    plottype = parser.Results.plottype;
+0172    showfit = parser.Results.showfit;
+0173 <span class="keyword">end</span></pre></div>
+</body>
+</html>

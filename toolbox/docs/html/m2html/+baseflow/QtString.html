@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of QtString</title>
+  <meta name="keywords" content="QtString">
+  <meta name="description" content="QTSTRING Return latex-formatted string for Q(t) function.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; QtString.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>QtString
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>QTSTRING Return latex-formatted string for Q(t) function.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Qtstr,aQbstr] = QtString(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">QTSTRING Return latex-formatted string for Q(t) function.
+
+
+ See also: <a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>, <a href="QtauString.html" class="code" title="function [Qtaustr,aQbstr] = QtauString(varargin)">QtauString</a>, <a href="aQbString.html" class="code" title="function [aQbstr,Qtstr] = aQbString(varargin)">aQbString</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [ab, Q0, printvalues] = parseinputs(mfilename, varargin)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Qtstr,aQbstr] = QtString(varargin)</a>
+0002    <span class="comment">%QTSTRING Return latex-formatted string for Q(t) function.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">%</span>
+0005    <span class="comment">% See also: Qnonlin, QtauString, aQbString</span>
+0006    <span class="comment">%</span>
+0007    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0008 
+0009    <span class="comment">% if called with no input, open this file</span>
+0010    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0011 
+0012    <span class="comment">% PARSE INPUTS</span>
+0013    [ab, Q0, printvalues] = <a href="#_sub1" class="code" title="subfunction [ab, Q0, printvalues] = parseinputs(mfilename, varargin)">parseinputs</a>(mfilename, varargin{:});
+0014 
+0015    <span class="comment">% this formats Q0 as an integer (.f)</span>
+0016    <span class="keyword">if</span> printvalues == true
+0017 
+0018       <span class="comment">% build the aQb string</span>
+0019       aexp    = floor(log10(ab(1)));
+0020       abase   = ab(1)*10^abs(aexp);
+0021       aQbstr  = sprintf(<span class="string">'-d$Q$/d$t = %.fe^{%.f}Q^{%.2f}$'</span>,abase,aexp,ab(2));
+0022 
+0023       <span class="comment">% build the Q(t) string</span>
+0024       <span class="keyword">if</span> isempty(Q0)
+0025          Qtstr = sprintf(<span class="string">'$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)} (b=%.2f)$'</span>,ab(2));
+0026       <span class="keyword">else</span>
+0027          Qtstr = sprintf(<span class="string">'$Q(t) = [%d^{-(b-1)}+at(b-1)]^{-1/(b-1)} (b=%.2f)$'</span>,Q0,ab(2));
+0028       <span class="keyword">end</span>
+0029 
+0030    <span class="keyword">else</span>
+0031       <span class="comment">% this is same as baseflow.getstring</span>
+0032       aQbstr = baseflow.getstring(<span class="string">'aQb'</span>);
+0033       Qtstr = baseflow.getstring(<span class="string">'Q(t)'</span>);
+0034    <span class="keyword">end</span>
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">%% INPUT PARSER</span>
+0038 <a name="_sub1" href="#_subfunctions" class="code">function [ab, Q0, printvalues] = parseinputs(mfilename, varargin)</a>
+0039 
+0040    parser = inputParser;
+0041    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0042    parser.addOptional(<span class="string">'ab'</span>, [], @isnumeric);
+0043    parser.addOptional(<span class="string">'Q0'</span>, [], @isnumeric);
+0044    parser.addParameter(<span class="string">'printvalues'</span>, false, @islogical);
+0045    parser.parse(varargin{:});
+0046 
+0047    ab = parser.Results.ab;
+0048    Q0 = parser.Results.Q0;
+0049    printvalues = parser.Results.printvalues;
+0050 <span class="keyword">end</span></pre></div>
+</body>
+</html>

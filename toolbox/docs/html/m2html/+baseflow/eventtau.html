@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of eventtau</title>
+  <meta name="keywords" content="eventtau">
+  <meta name="description" content="EVENTTAU Compute drainage timescale tau from event-scale parameters a and b.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; eventtau.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>eventtau
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>EVENTTAU Compute drainage timescale tau from event-scale parameters a and b.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">EVENTTAU Compute drainage timescale tau from event-scale parameters a and b.
+
+ Syntax
+
+     [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits)
+
+ Description
+
+     tau = baseflow.eventtau(Results, Events, Fits) computes drainage timescale
+     tau from event-scale parameters a,b, and flow Q using the structures K,
+     Events, and Fits produced with baseflow.getevents and baseflow.fitevents
+
+     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values
+     to event-scale values using an aggregation function. Options are 'min',
+     'max', 'mean', 'median'.
+
+ See also: <a href="eventphi.html" class="code" title="function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)">eventphi</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [Results, Events, Fits, usefits, aggfunc] = parseinputs(</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)</a>
+0002    <span class="comment">%EVENTTAU Compute drainage timescale tau from event-scale parameters a and b.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Description</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     tau = baseflow.eventtau(Results, Events, Fits) computes drainage timescale</span>
+0011    <span class="comment">%     tau from event-scale parameters a,b, and flow Q using the structures K,</span>
+0012    <span class="comment">%     Events, and Fits produced with baseflow.getevents and baseflow.fitevents</span>
+0013    <span class="comment">%</span>
+0014    <span class="comment">%     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values</span>
+0015    <span class="comment">%     to event-scale values using an aggregation function. Options are 'min',</span>
+0016    <span class="comment">%     'max', 'mean', 'median'.</span>
+0017    <span class="comment">%</span>
+0018    <span class="comment">% See also: eventphi</span>
+0019    <span class="comment">%</span>
+0020    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0021 
+0022    <span class="comment">% if called with no input, open this file</span>
+0023    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0024 
+0025    <span class="comment">% PARSE INPUTS</span>
+0026    [Results, Events, Fits, usefits, aggfunc] = <a href="#_sub1" class="code" title="subfunction [Results, Events, Fits, usefits, aggfunc] = parseinputs( ">parseinputs</a>( <span class="keyword">...</span>
+0027       Results, Events, Fits, varargin{:});
+0028 
+0029    <span class="comment">% MAIN FUNCTION</span>
+0030    Sfnc = baseflow.getfunction(<span class="string">'SofabQ'</span>);
+0031    dqfnc = @(a,dqdt) -dqdt./a; <span class="comment">% must have derived this at some point</span>
+0032    taufnc = baseflow.getfunction(<span class="string">'tauofabQ'</span>);
+0033 
+0034    <span class="keyword">if</span> isscalar(Results)
+0035       etags = Results.eventTag;
+0036       a = Results.a;
+0037       b = Results.b;
+0038    <span class="keyword">else</span>
+0039       etags = [Results.eventTag];
+0040       a = [Results.a];
+0041       b = [Results.b];
+0042    <span class="keyword">end</span>
+0043 
+0044    numfits = numel(a); <span class="comment">% use Results b/c some 'Events' don't get fit</span>
+0045 
+0046    <span class="keyword">if</span> usefits == true
+0047       Q = Fits.q;
+0048       dQdt = Fits.dqdt;
+0049       Qtags = Fits.eventTags;
+0050    <span class="keyword">else</span>
+0051       Q = Events.eventFlow;
+0052       dQdt = Fits.dqdt;
+0053       Qtags = Events.eventTags;
+0054    <span class="keyword">end</span>
+0055 
+0056    <span class="comment">% Initialize values</span>
+0057    L = nan(numfits, 1);
+0058    [q, t, s, dq, tau, dqdt] = deal(nan(size(Q)));
+0059 
+0060    <span class="comment">% Initialize aggregated values</span>
+0061    [qagg, dqagg, tauagg] = deal(nan(numfits, 1));
+0062 
+0063    <span class="keyword">for</span> m = 1:numfits
+0064       tag = etags(m);
+0065       i = etags == tag; <span class="comment">% should just be m</span>
+0066       ii = Qtags == tag; <span class="comment">% Fits.eventTags == m;</span>
+0067       tau(ii) = taufnc(a(i),b(i),Q(ii));
+0068 
+0069       <span class="comment">% return fit q/dqdt for point cloud plot but use event q for tau</span>
+0070       iii = Fits.eventTags == tag;
+0071       q(iii) = Fits.q(iii);
+0072       dqdt(iii) = Fits.dqdt(iii);
+0073 
+0074       t(ii) = 1:numel(Q(ii)); <span class="comment">% should just be 1:sum(ii)</span>
+0075       s(ii) = abs(tau(ii)./(2-b(i)).*Q(ii));
+0076       dq(ii) = dqfnc(a(i),dQdt(ii));
+0077       L(m) = sum(ii); <span class="comment">% L is the length of each event</span>
+0078 
+0079       <span class="comment">% aggfunc</span>
+0080       <span class="keyword">switch</span> aggfunc
+0081          <span class="keyword">case</span> <span class="string">'none'</span>
+0082          <span class="keyword">case</span> <span class="string">'min'</span>
+0083             qagg(m) = nanmin(q(iii));
+0084             dqagg(m) = nanmin(dqdt(iii));
+0085             tauagg(m) = nanmin(tau(ii));
+0086          <span class="keyword">case</span> <span class="string">'max'</span>
+0087             qagg(m) = nanmax(q(iii));
+0088             dqagg(m) = nanmax(dqdt(iii));
+0089             tauagg(m) = nanmax(tau(ii));
+0090          <span class="keyword">case</span> <span class="string">'median'</span>
+0091             qagg(m) = nanmedian(q(iii));
+0092             dqagg(m) = nanmedian(dqdt(iii));
+0093             tauagg(m) = nanmedian(tau(ii));
+0094          <span class="keyword">case</span> <span class="string">'mean'</span>
+0095             qagg(m) = nanmean(q(iii));
+0096             dqagg(m) = nanmean(dqdt(iii));
+0097             tauagg(m) = nanmean(tau(ii));
+0098       <span class="keyword">end</span>
+0099    <span class="keyword">end</span>
+0100 
+0101    inan = isnan(tau);
+0102 
+0103    q = q(~inan);
+0104    s = s(~inan);
+0105    t = t(~inan);
+0106    dq = dq(~inan);
+0107    tau = tau(~inan);
+0108    dqdt = dqdt(~inan);
+0109    tags = Qtags(~inan);
+0110 
+0111    aggvals.q = qagg;
+0112    aggvals.dqdt = dqagg;
+0113    aggvals.tau = tauagg;
+0114 <span class="keyword">end</span>
+0115 
+0116 <span class="comment">%% INPUT PARSER</span>
+0117 <a name="_sub1" href="#_subfunctions" class="code">function [Results, Events, Fits, usefits, aggfunc] = parseinputs( </a><span class="keyword">...</span>
+0118       Results, Events, Fits, varargin)
+0119 
+0120    parser = inputParser;
+0121    parser.StructExpand = false;
+0122    parser.FunctionName = <span class="string">'baseflow.eventtau'</span>;
+0123 
+0124    parser.addRequired(<span class="string">'Results'</span>, @isstruct);
+0125    parser.addRequired(<span class="string">'Events'</span>, @isstruct);
+0126    parser.addRequired(<span class="string">'Fits'</span>, @isstruct);
+0127    parser.addParameter(<span class="string">'usefits'</span>, false, @islogical);
+0128    parser.addParameter(<span class="string">'aggfunc'</span>, <span class="string">'none'</span>, @ischar);
+0129 
+0130    parser.parse(Results, Events, Fits, varargin{:});
+0131 
+0132    Results = parser.Results.Results;
+0133    Fits = parser.Results.Fits;
+0134    Events = parser.Results.Events;
+0135    usefits = parser.Results.usefits;
+0136    aggfunc = parser.Results.aggfunc;
+0137 <span class="keyword">end</span></pre></div>
+</body>
+</html>

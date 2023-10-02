@@ -10,7 +10,7 @@
           "default":"'install'","purpose":"Option"}
       ]
    },
-   "bfra.aQbString":
+   "baseflow.aQbString":
    {
       "inputs":
       [
@@ -19,7 +19,7 @@
          {"name":"printvalues",  "kind":"namevalue", "type":["logical", "scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.aquiferprops":
+   "baseflow.aquiferprops":
    {
       "inputs":
       [
@@ -39,7 +39,7 @@
          {"name":"Dd",        "kind": "namevalue", "type": ["scalar","double"]}
       ]
    },
-   "bfra.baseflowtrend":
+   "baseflow.baseflowtrend":
    {
       "inputs":
       [
@@ -51,21 +51,21 @@
 
       ]
    },
-   "bfra.basinname":
+   "baseflow.basinname":
    {
       "inputs":
       [
-         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.basinlist"]}
+         {"name":"typenamehere","kind": "required",   "type": ["char","choices=baseflow.basinlist"]}
       ]
    },
-   "bfra.stationname":
+   "baseflow.stationname":
    {
       "inputs":
       [
-         {"name":"typenamehere","kind": "required",   "type": ["char","choices=bfra.stationlist"]}
+         {"name":"typenamehere","kind": "required",   "type": ["char","choices=baseflow.stationlist"]}
       ]
    },
-   "bfra.cloudphi":
+   "baseflow.cloudphi":
    {
       "inputs":
       [
@@ -87,18 +87,7 @@
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.completions":
-   {
-      "inputs": 
-      [
-         {"name":"funcname", "type":["choices=bfra.completions('completions')"]}
-      ],
-      "outputs":
-      [
-         {"name":"proplist", "type":["cell"]}
-      ]
-   },
-   "bfra.conversions":
+   "baseflow.conversions":
    {
       "inputs":
       [
@@ -108,7 +97,7 @@
          {"name":"isflat",        "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.eventfinder":
+   "baseflow.eventfinder":
    {
       "inputs":
       [
@@ -124,7 +113,7 @@
          {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.eventpicker":
+   "baseflow.eventpicker":
    {
       "inputs":
       [
@@ -135,7 +124,7 @@
          {"name":"Info",         "kind":"required",  "type":["struct"]}
       ]
    },
-   "bfra.eventplotter":
+   "baseflow.eventplotter":
    {
       "inputs":
       [
@@ -150,7 +139,7 @@
          {"name":"d2qdt",        "kind":"namevalue",  "type":["double","vector"]}
       ]
    },
-   "bfra.eventphi":
+   "baseflow.eventphi":
    {
       "inputs":
       [
@@ -169,7 +158,7 @@
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.eventtau":
+   "baseflow.eventtau":
    {
       "inputs":
       [
@@ -180,7 +169,7 @@
          {"name":"aggfunc",   "kind": "namevalue", "type": ["char", "choices={'mean','median'}"],"default":"'median'","purpose":"Option"}
       ]
    },
-   "bfra.expectedQ":
+   "baseflow.expectedQ":
    {
       "inputs":
       [
@@ -192,7 +181,7 @@
          {"name":"plotfit","kind": "ordered",   "type": ["char","choices={'plotfit'}"],"purpose":"Option"}
       ]
    },
-   "bfra.fdcurve":
+   "baseflow.fdcurve":
    {
       "inputs":
       [
@@ -203,7 +192,7 @@
          {"name":"plotfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.fitab":
+   "baseflow.fitab":
    {
       "inputs":
       [
@@ -220,7 +209,7 @@
          {"name":"fitopts",   "kind": "namevalue", "type": "struct"}
       ]
    },
-   "bfra.fitevents":
+   "baseflow.fitevents":
    {
       "inputs":
       [
@@ -242,7 +231,7 @@
          {"name":"Fits",      "type": ["struct"] }
       ]
    },
-   "bfra.fitphi":
+   "baseflow.fitphi":
    {
       "inputs":
       [
@@ -259,16 +248,16 @@
          {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','Brutsaert, 1994','Rupp and Selker, 2006 b=1','Rupp and Selker, 2006 b=f(n)','BS04','BS03','BR94','RS06b1','RS06','RS05'}"],"default":"'RS05bn'","purpose":"Option"}
       ]
    },
-   "bfra.fitphidist":
+   "baseflow.fitphidist":
    {
       "inputs":
       [
          {"name":"phi",        "kind": "required",  "type": ["vector","double"]},
-         {"name":"outputtype", "kind": "ordered",   "type": ["char", "choices={'PD','mean','std','median'}"],"default":"'PD'","purpose":"Option"},
+         {"name":"outputtype", "kind": "ordered",   "type": ["char", "choices={'PD','mean','std'}"],"default":"'PD'","purpose":"Option"},
          {"name":"plottype",   "kind": "ordered",   "type": ["char", "choices={'pdf','cdf','probplot','none'}"],"default":"'none'","purpose":"Option"}
       ]
    },
-   "bfra.generateTestData":
+   "baseflow.generateTestData":
    {
       "inputs":
       [
@@ -278,7 +267,7 @@
          {"name":"t",         "kind": "required",  "type": ["vector","double"]}
       ]
    },
-   "bfra.getdqdt":
+   "baseflow.getdqdt":
    {
       "inputs":
       [
@@ -303,7 +292,7 @@
          {"name":"rq",        "type": ["double"] }
       ]
    },
-   "bfra.getevents":
+   "baseflow.getevents":
    {
       "inputs":
       [
@@ -330,14 +319,14 @@
          {"name":"Info",         "type": ["struct"] }
       ]
    },
-   "bfra.getfunction":
+   "baseflow.getfunction":
    {
       "inputs":
       [
       {"name":"requestedfnc",    "kind":"required",   "type":[["scalar"],["char","choices={'SofabQ','tauofabQ','tauofabQ0','Qofabtau','aofa0','boftautau0','expectedQ','expectedTau','expectedTime'}"]]}
       ]
    },
-   "bfra.getstring":
+   "baseflow.getstring":
    {
       "inputs":
       [
@@ -346,7 +335,7 @@
          {"name":"interpreter",  "kind":"namevalue",  "type":["char","choices={'latex','tex'}"]}
       ]
    },
-   "bfra.globalfit":
+   "baseflow.globalfit":
    {
       "inputs":
       [
@@ -370,7 +359,7 @@
          {"name":"lateqtls",        "kind": "namevalue", "type": ["vector","double"]}
       ]
    },
-   "bfra.gpfitb":
+   "baseflow.gpfitb":
    {
       "inputs":
       [
@@ -382,18 +371,18 @@
          {"name":"labelplot", "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.help":
+   "baseflow.help":
    {
       "inputs": 
       [
-         {"name":"funcname", "type":["choices=bfra.completions('help')"]}
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('help')"]}
       ],
       "outputs":
       [
          {"name":"proplist", "type":["cell"]}
       ]
    },
-   "bfra.hyetograph":
+   "baseflow.hyetograph":
    {
       "inputs":
       [
@@ -404,62 +393,62 @@
          {"name":"t2",     "kind":"ordered",    "type":[["numeric","scalar"],["datetime","scalar"]],"purpose":"Input Value"}
       ]
    },
-   "bfra.loadbasins":
+   "baseflow.loadbasins":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "ordered","type": ["char","choices=bfra.basinlist"]},
+         {"name":"basinname", "kind": "ordered","type": ["char","choices=baseflow.basinlist"]},
          {"name":"projection","kind": "namevalue","type": ["char","choices={'geo','ease'}"]}
       ]
    },
-   "bfra.loadcalm":
+   "baseflow.loadcalm":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"basinname", "kind": "required", "type": ["char","choices=baseflow.stationlist"]},
          {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
 
       ]
    },
-   "bfra.loadflow":
+   "baseflow.loadflow":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra.stationlist"]},
+         {"name":"basinname", "kind": "required",  "type": ["char","choices=baseflow.stationlist"]},
          {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
          {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["numeric","scalar"]]},
          {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
          {"name":"gapfill",   "kind": "namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.loadghcnd":
+   "baseflow.loadghcnd":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required",  "type": ["char","choices=bfra.stationlist"]},
+         {"name":"basinname", "kind": "required",  "type": ["char","choices=baseflow.stationlist"]},
          {"name":"t1",        "kind": "namevalue", "type": [["datetime","scalar"],["double","scalar"]]},
          {"name":"t2",        "kind": "namevalue", "type": [["datetime","scalar"],["double","scalar"]]},
          {"name":"units",     "kind": "namevalue", "type": ["char","choices={'mm/d','cm/d','m/d','mm/y','cm/y','m/y','m3/d','m3/y','km3/y'}"]},
          {"name":"gapfill",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.loadmeta":
+   "baseflow.loadmeta":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"basinname", "kind": "required", "type": ["char","choices=baseflow.stationlist"]},
          {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
       ]
    },
-   "bfra.loadprops":
+   "baseflow.loadprops":
    {
       "inputs":
       [
-         {"name":"basinname", "kind": "required", "type": ["char","choices=bfra.stationlist"]},
+         {"name":"basinname", "kind": "required", "type": ["char","choices=baseflow.stationlist"]},
          {"name":"version",   "kind": "required", "type": ["char","choices={'current','archive'}"]}
       ]
    },
-   "bfra.mapbasins":
+   "baseflow.mapbasins":
    {
       "inputs":
       [
@@ -476,7 +465,7 @@
          {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
       ]
    },
-   "bfra.mapgages":
+   "baseflow.mapgages":
    {
       "inputs":
       [
@@ -490,18 +479,18 @@
          {"name":"ax",        "kind": "namevalue", "type": ["matlab.graphics.axis.Axes"]}
       ]
    },
-   "bfra.open":
+   "baseflow.open":
    {
       "inputs": 
       [
-         {"name":"funcname", "type":["choices=bfra.completions('open')"]}
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('open')"]}
       ],
       "outputs":
       [
          {"name":"proplist", "type":["cell"]}
       ]
    },
-   "bfra.plfitb":
+   "baseflow.plfitb":
    {
       "inputs":
       [
@@ -515,7 +504,7 @@
          {"name":"plotfit",   "kind":"namevalue",  "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.plotdqdt":
+   "baseflow.plotdqdt":
    {
       "inputs":
       [
@@ -535,7 +524,7 @@
          {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.plotrefline":
+   "baseflow.plotrefline":
    {
       "inputs":
       [
@@ -554,7 +543,7 @@
          {"name":"ax",        "kind":"namevalue",  "type":["matlab.graphics.axis.Axes"]}
       ]
    },
-   "bfra.plplotb":
+   "baseflow.plplotb":
    {
       "inputs":
       [
@@ -568,7 +557,7 @@
          {"name":"labelplot",  "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.pointcloudplot":
+   "baseflow.pointcloudplot":
    {
       "inputs":
       [
@@ -587,7 +576,7 @@
          {"name":"ax",        "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]}
       ]
    },
-   "bfra.pointcloudintercept":
+   "baseflow.pointcloudintercept":
    {
       "inputs":
       [
@@ -600,7 +589,7 @@
          {"name":"bci",       "kind": "namevalue", "type": ["vector","double"]}
       ]
    },
-   "bfra.prepfits":
+   "baseflow.prepfits":
    {
       "inputs":
       [
@@ -610,18 +599,18 @@
          {"name":"mask",      "kind": "namevalue", "type": ["vector","logical"]}
       ]
    },
-   "bfra.privatefunction":
+   "baseflow.privatefunction":
    {
       "inputs": 
       [
-         {"name":"funcname", "type":["choices=bfra.completions('private')"]}
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('private')"]}
       ],
       "outputs":
       [
          {"name":"funchandle", "type":["function_handle"]}
       ]
    },
-   "bfra.Qnonlin":
+   "baseflow.Qnonlin":
    {
       "inputs":
       [
@@ -632,7 +621,7 @@
          {"name":"plotfig",   "kind": "positional", "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.QtauString":
+   "baseflow.QtauString":
    {
       "inputs":
       [
@@ -641,7 +630,7 @@
          {"name":"printvalues",  "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.QtString":
+   "baseflow.QtString":
    {
       "inputs":
       [
@@ -650,7 +639,7 @@
          {"name":"printvalues",  "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
-   "bfra.trendplot":
+   "baseflow.trendplot":
    {
       "inputs":
       [
@@ -675,7 +664,7 @@
       ]
    },
    "_comment": "event opts",
-   "bfra.setopts":
+   "baseflow.setopts":
    {
       "inputs":
       [
@@ -728,8 +717,47 @@
          }
       ]
    },
-   "+bfra/private/formatPlotMarkers":
-  {
+   "baseflow.internal.completions":
+   {
+      "inputs": 
+      [
+         {"name":"funcname", "type":["choices=baseflow.internal.completions('completions')"]}
+      ],
+      "outputs":
+      [
+         {"name":"proplist", "type":["cell"]}
+      ]
+   },
+   "baseflow.internal.makecontents":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'-backup', '-nobackup'}"]}
+      ]
+   },
+   "baseflow.internal.makedocs":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'docpages', 'demos', 'functions', 'docsearch'}"]}
+      ]
+   },
+   "baseflow.internal.runtests":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'debug'}"]}
+      ]
+   },
+   "baseflow.internal.version":
+   {
+      "inputs": 
+      [
+         {"name":"option", "type":["choices={'verbose', 'silent'}"]}
+      ]
+   },
+   "+baseflow/private/formatPlotMarkers":
+   {
    "inputs":
       [
       {"name":"fillspacing",  "kind":"namevalue", "type":["numeric","scalar","double"]},
@@ -738,8 +766,8 @@
       {"name":"suppliedaxes", "kind":"namevalue", "type":["matlab.graphics.axis.Axes"]},
       {"name":"suppliedline", "kind":"namevalue", "type":["matlab.graphics.chart.primitive.Line"]}
       ]
-  },
-   "+bfra/private/prepalttrend":
+   },
+   "+baseflow/private/prepalttrend":
    {
       "inputs":
       [
@@ -749,7 +777,7 @@
          {"name":"mask",      "kind": "namevalue", "type": ["vector","logical"]}
       ]
    },
-   "+bfra/private/subtight":
+   "+baseflow/private/subtight":
    {
       "inputs":
       [
@@ -762,7 +790,7 @@
          {"name":"style",  "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"}
       ]
    },
-   "+bfra/private/subtight":
+   "+baseflow/private/subtight":
    {
       "inputs":
       [

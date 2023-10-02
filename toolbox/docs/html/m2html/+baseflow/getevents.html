@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of getevents</title>
+  <meta name="keywords" content="getevents">
+  <meta name="description" content="GETEVENTS Get recession events from daily hydrograph timeseries T, Q, and R.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; getevents.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>getevents
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>GETEVENTS Get recession events from daily hydrograph timeseries T, Q, and R.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Events,Info] = getevents(T,Q,R,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">GETEVENTS Get recession events from daily hydrograph timeseries T, Q, and R.
+
+% Syntax
+
+     Events = getevents(T,Q,R)
+     [Events, Info] = getevents(T,Q,R,opts)
+     [Events, Info] = getevents(_, 'qmin', qmin)
+     [Events, Info] = getevents(_, 'nmin', nmin)
+     [Events, Info] = getevents(_, 'fmax', fmax)
+     [Events, Info] = getevents(_, 'rmax', rmax)
+     [Events, Info] = getevents(_, 'rmin', rmin)
+     [Events, Info] = getevents(_, 'cmax', cmax)
+     [Events, Info] = getevents(_, 'rmrain', true)
+     [Events, Info] = getevents(_, 'rmconvex', true)
+     [Events, Info] = getevents(_, 'rmnochange', false)
+     [Events, Info] = getevents(_, 'pickevents', true)
+     [Events, Info] = getevents(_, 'plotevents', true)
+     [Events, Info] = getevents(_, 'asannual', true)
+
+% Description
+
+     EVENTS = GETEVENTS(T, Q, R) Detects, processes, and organizes
+     individual recession events from daily hydrograph timeseries T, Q, and
+     rainfall R using default algorithm options. Event discharge,
+     timestamps, and diagnostic info about the events are returned in output
+     structure Events. Note: this function is a wrapper around eventfinder
+     to perform pre- and post-processing and organize all recession events
+     into the Events structure.
+
+     EVENTS = GETEVENTS(_, OPTS) Uses user-defined options in struct OPTS.
+     Use baseflow.setopts to set default OPTS struct and custom optional values.
+
+     [EVENTS, INFO] = GETEVENTS(_) Also returns struct INFO which contains
+     the indices of the identified local maxima, minima, convex points,
+     candidate recession values, kept recession values, and the start and
+     stop index of each kept event. Use this information with EVENTPLOTTER.
+
+     Tip: events are identified by their indices on the t,q,r arrays, so if
+     any filtering is applied prior to passing in the arrays, the data needs
+     to be used in subsequent functions or the indices won't be correct
+
+% Required inputs
+
+     T     time, nx1 vector of datetimes or datenums
+     Q     flow, nx1 vector of discharge (length/time) (assumed m3/day/day)
+     R     rain, nx1 vector of rainfall (length/time) (assumed mm/day)
+
+% Optional name-value inputs
+
+     opts        (optional) structure containing the following fields:
+     qmin        minimum flow value, below which values are set nan
+     nmin        minimum event length
+     fmax        maximum # of missing values gap-filled
+     rmax        maximum run of sequential constant values
+     rmin        minimum rainfall required to censor flow (mm/day?)
+     cmax        maximum run of sequential convex dQ/dt values
+     rmconvex    remove convex derivatives
+     rmnochange  remove consecutive constant derivates
+     rmrain      remove rainfall
+     pickevents  option to manually pick events
+     plotevents  option to plot picked events
+
+ Note: either the 'opts' struct can be provided with the
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
+
+ See also: <a href="fitevents.html" class="code" title="function [Fits,Results] = fitevents(Events,varargin)">fitevents</a>, <a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>, eventsplitter, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>, <a href="eventplotter.html" class="code" title="function [h,f] = eventplotter(T,Q,R,Info,varargin)">eventplotter</a>
+
+ Note: For data-heavy workflows, replace the Events output struct with the
+ eventTags list. The Events struct includes the input data and the event
+ data for convenience, but the event data can be easily extracted from the
+ input data using the eventTags.</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function Info = updateinfo(Info,ifirst,numdata)</a></li>
+<li><a href="#_sub2" class="code">function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain,</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Events,Info] = getevents(T,Q,R,varargin)</a>
+0002    <span class="comment">%GETEVENTS Get recession events from daily hydrograph timeseries T, Q, and R.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">%% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     Events = getevents(T,Q,R)</span>
+0007    <span class="comment">%     [Events, Info] = getevents(T,Q,R,opts)</span>
+0008    <span class="comment">%     [Events, Info] = getevents(_, 'qmin', qmin)</span>
+0009    <span class="comment">%     [Events, Info] = getevents(_, 'nmin', nmin)</span>
+0010    <span class="comment">%     [Events, Info] = getevents(_, 'fmax', fmax)</span>
+0011    <span class="comment">%     [Events, Info] = getevents(_, 'rmax', rmax)</span>
+0012    <span class="comment">%     [Events, Info] = getevents(_, 'rmin', rmin)</span>
+0013    <span class="comment">%     [Events, Info] = getevents(_, 'cmax', cmax)</span>
+0014    <span class="comment">%     [Events, Info] = getevents(_, 'rmrain', true)</span>
+0015    <span class="comment">%     [Events, Info] = getevents(_, 'rmconvex', true)</span>
+0016    <span class="comment">%     [Events, Info] = getevents(_, 'rmnochange', false)</span>
+0017    <span class="comment">%     [Events, Info] = getevents(_, 'pickevents', true)</span>
+0018    <span class="comment">%     [Events, Info] = getevents(_, 'plotevents', true)</span>
+0019    <span class="comment">%     [Events, Info] = getevents(_, 'asannual', true)</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">%% Description</span>
+0022    <span class="comment">%</span>
+0023    <span class="comment">%     EVENTS = GETEVENTS(T, Q, R) Detects, processes, and organizes</span>
+0024    <span class="comment">%     individual recession events from daily hydrograph timeseries T, Q, and</span>
+0025    <span class="comment">%     rainfall R using default algorithm options. Event discharge,</span>
+0026    <span class="comment">%     timestamps, and diagnostic info about the events are returned in output</span>
+0027    <span class="comment">%     structure Events. Note: this function is a wrapper around eventfinder</span>
+0028    <span class="comment">%     to perform pre- and post-processing and organize all recession events</span>
+0029    <span class="comment">%     into the Events structure.</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">%     EVENTS = GETEVENTS(_, OPTS) Uses user-defined options in struct OPTS.</span>
+0032    <span class="comment">%     Use baseflow.setopts to set default OPTS struct and custom optional values.</span>
+0033    <span class="comment">%</span>
+0034    <span class="comment">%     [EVENTS, INFO] = GETEVENTS(_) Also returns struct INFO which contains</span>
+0035    <span class="comment">%     the indices of the identified local maxima, minima, convex points,</span>
+0036    <span class="comment">%     candidate recession values, kept recession values, and the start and</span>
+0037    <span class="comment">%     stop index of each kept event. Use this information with EVENTPLOTTER.</span>
+0038    <span class="comment">%</span>
+0039    <span class="comment">%     Tip: events are identified by their indices on the t,q,r arrays, so if</span>
+0040    <span class="comment">%     any filtering is applied prior to passing in the arrays, the data needs</span>
+0041    <span class="comment">%     to be used in subsequent functions or the indices won't be correct</span>
+0042    <span class="comment">%</span>
+0043    <span class="comment">%% Required inputs</span>
+0044    <span class="comment">%</span>
+0045    <span class="comment">%     T     time, nx1 vector of datetimes or datenums</span>
+0046    <span class="comment">%     Q     flow, nx1 vector of discharge (length/time) (assumed m3/day/day)</span>
+0047    <span class="comment">%     R     rain, nx1 vector of rainfall (length/time) (assumed mm/day)</span>
+0048    <span class="comment">%</span>
+0049    <span class="comment">%% Optional name-value inputs</span>
+0050    <span class="comment">%</span>
+0051    <span class="comment">%     opts        (optional) structure containing the following fields:</span>
+0052    <span class="comment">%     qmin        minimum flow value, below which values are set nan</span>
+0053    <span class="comment">%     nmin        minimum event length</span>
+0054    <span class="comment">%     fmax        maximum # of missing values gap-filled</span>
+0055    <span class="comment">%     rmax        maximum run of sequential constant values</span>
+0056    <span class="comment">%     rmin        minimum rainfall required to censor flow (mm/day?)</span>
+0057    <span class="comment">%     cmax        maximum run of sequential convex dQ/dt values</span>
+0058    <span class="comment">%     rmconvex    remove convex derivatives</span>
+0059    <span class="comment">%     rmnochange  remove consecutive constant derivates</span>
+0060    <span class="comment">%     rmrain      remove rainfall</span>
+0061    <span class="comment">%     pickevents  option to manually pick events</span>
+0062    <span class="comment">%     plotevents  option to plot picked events</span>
+0063    <span class="comment">%</span>
+0064    <span class="comment">% Note: either the 'opts' struct can be provided with the</span>
+0065    <span class="comment">%</span>
+0066    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0067    <span class="comment">%</span>
+0068    <span class="comment">% See also: fitevents, eventfinder, eventsplitter, eventpicker, eventplotter</span>
+0069    <span class="comment">%</span>
+0070    <span class="comment">% Note: For data-heavy workflows, replace the Events output struct with the</span>
+0071    <span class="comment">% eventTags list. The Events struct includes the input data and the event</span>
+0072    <span class="comment">% data for convenience, but the event data can be easily extracted from the</span>
+0073    <span class="comment">% input data using the eventTags.</span>
+0074 
+0075    <span class="comment">%% Main function</span>
+0076 
+0077    <span class="comment">% if called with no input, open this file</span>
+0078    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0079 
+0080    <span class="comment">% PARSE INPUTS</span>
+0081    [qmin, nmin, fmax, rmax, rmin, ~, rmconvex, rmnochange, rmrain, <span class="keyword">...</span>
+0082       pickevents, plotevents, asannual, T, Q, R] = parseinputs(mfilename, <span class="keyword">...</span>
+0083       T, Q, R, varargin{:});
+0084 
+0085    <span class="comment">% save the input data</span>
+0086    Events.inputTime = T;
+0087    Events.inputFlow = Q;
+0088    Events.inputRain = R;
+0089 
+0090    <span class="comment">% iF is the first non-nan index, to recover indices after removing nans</span>
+0091    numdata     = numel(T);
+0092    Q(Q&lt;qmin)   = nan;                     <span class="comment">% set values &lt; qmin nan</span>
+0093    Q           = setconstantnan(Q,rmax);  <span class="comment">% set constant non-nan values nan</span>
+0094    [T,Q,R,iF]  = rmleadingnans(T,Q,R);    <span class="comment">% remove leading nans</span>
+0095    [T,Q,R]     = rmtrailingnans(T,Q,R);   <span class="comment">% remove trailing nans</span>
+0096    Q           = fillnans(Q,fmax);        <span class="comment">% gap fill missing values</span>
+0097 
+0098    <span class="comment">% If events are detected on an annual basis, option to smooth measurement</span>
+0099    <span class="comment">% noise. If multi-year timeseries are used, smoothing is not effective, there</span>
+0100    <span class="comment">% is too much variability to select consistent smoothing parameters.</span>
+0101    <span class="keyword">if</span> asannual
+0102       Q = smoothflow(Q);
+0103    <span class="keyword">end</span>
+0104 
+0105    <span class="keyword">if</span> isempty(Q) || ( sum(~isnan(Q)) &lt; nmin ) <span class="comment">% fast exit</span>
+0106       [t,q,r,Info] = setEventEmpty();
+0107    <span class="keyword">else</span>
+0108       <span class="comment">% call eventfinder either way, then update if pickfits == true</span>
+0109       [t,q,r,Info] = baseflow.eventfinder(T,Q,R, <span class="keyword">...</span>
+0110          <span class="string">'nmin'</span>,        nmin,          <span class="keyword">...</span>
+0111          <span class="string">'fmax'</span>,        fmax,          <span class="keyword">...</span>
+0112          <span class="string">'rmax'</span>,        rmax,          <span class="keyword">...</span>
+0113          <span class="string">'rmin'</span>,        rmin,          <span class="keyword">...</span>
+0114          <span class="string">'rmconvex'</span>,    rmconvex,      <span class="keyword">...</span>
+0115          <span class="string">'rmnochange'</span>,  rmnochange,    <span class="keyword">...</span>
+0116          <span class="string">'rmrain'</span>,      rmrain         );
+0117 
+0118       Info = <a href="#_sub1" class="code" title="subfunction Info = updateinfo(Info,ifirst,numdata)">updateinfo</a>(Info,iF,numdata);
+0119 
+0120       <span class="comment">% NOTE: eventpicker doesn't update Info for events that are picked</span>
+0121       <span class="comment">% within an eventfinder event, but only Info.istart is used in the</span>
+0122       <span class="comment">% main algorithm so it is sufficient at this point</span>
+0123       <span class="keyword">if</span> pickevents == true
+0124          [t,q,r,Info] = baseflow.eventpicker(T,Q,R,nmin,Info);
+0125       <span class="keyword">elseif</span> plotevents == true
+0126          <span class="comment">% Info.hEvents = baseflow.eventplotter(T,Q,R,Info,'plotevents',plotevents);</span>
+0127       <span class="keyword">end</span>
+0128    <span class="keyword">end</span>
+0129 
+0130    <span class="comment">% if asannual == false</span>
+0131    [ <span class="keyword">...</span>
+0132       Events.eventTime, <span class="keyword">...</span>
+0133       Events.eventFlow, <span class="keyword">...</span>
+0134       Events.eventRain, <span class="keyword">...</span>
+0135       Events.eventTags] = flattenevents(t,q,r,Info);
+0136    <span class="comment">% end</span>
+0137 <span class="keyword">end</span>
+0138 
+0139 <a name="_sub1" href="#_subfunctions" class="code">function Info = updateinfo(Info,ifirst,numdata)</a>
+0140 
+0141    fields = fieldnames(Info);
+0142 
+0143    <span class="keyword">for</span> m = 1:numel(fields)
+0144       Info.(fields{m}) = Info.(fields{m}) + ifirst - 1;
+0145    <span class="keyword">end</span>
+0146 
+0147    Info.runlengths   = Info.istop - Info.istart + 1;
+0148    Info.ifirst       = ifirst;
+0149    Info.datalength   = numdata;
+0150 <span class="keyword">end</span>
+0151 
+0152 <span class="comment">%% INPUT PARSER</span>
+0153 <a name="_sub2" href="#_subfunctions" class="code">function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, </a><span class="keyword">...</span>
+0154       pickevents, plotevents, asannual, T, Q, R] = parseinputs(mfilename, <span class="keyword">...</span>
+0155       T, Q, R, varargin)
+0156 
+0157    <span class="keyword">persistent</span> parser
+0158    <span class="keyword">if</span> isempty(parser)
+0159       parser = inputParser;
+0160       parser.StructExpand = true;
+0161       parser.KeepUnmatched = true;
+0162       <span class="comment">% parser.PartialMatching = false;</span>
+0163       parser.CaseSensitive = true;
+0164 
+0165       parser.addRequired(<span class="string">'T'</span>, @isdatelike);
+0166       parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
+0167       parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0168 
+0169       parser.addParameter(<span class="string">'qmin'</span>, 1, @isnumericscalar);
+0170       parser.addParameter(<span class="string">'nmin'</span>, 4, @isnumericscalar);
+0171       parser.addParameter(<span class="string">'fmax'</span>, 2, @isnumericscalar);
+0172       parser.addParameter(<span class="string">'rmax'</span>, 2, @isnumericscalar);
+0173       parser.addParameter(<span class="string">'rmin'</span>, 0, @isnumericscalar);
+0174       parser.addParameter(<span class="string">'cmax'</span>, 2, @isnumericscalar);
+0175       parser.addParameter(<span class="string">'rmconvex'</span>, false, @islogicalscalar);
+0176       parser.addParameter(<span class="string">'rmnochange'</span>, false, @islogicalscalar);
+0177       parser.addParameter(<span class="string">'rmrain'</span>, false, @islogicalscalar);
+0178       parser.addParameter(<span class="string">'pickevents'</span>, false, @islogicalscalar);
+0179       parser.addParameter(<span class="string">'plotevents'</span>, false, @islogicalscalar);
+0180       parser.addParameter(<span class="string">'asannual'</span>, false, @islogicalscalar);
+0181    <span class="keyword">end</span>
+0182    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0183    parser.parse(T, Q, R, varargin{:});
+0184 
+0185    qmin = parser.Results.qmin;
+0186    nmin = parser.Results.nmin;
+0187    fmax = parser.Results.fmax;
+0188    rmax = parser.Results.rmax;
+0189    rmin = parser.Results.rmin;
+0190    cmax = parser.Results.cmax;
+0191    rmrain = parser.Results.rmrain;
+0192    rmconvex = parser.Results.rmconvex;
+0193    rmnochange = parser.Results.rmnochange;
+0194    pickevents = parser.Results.pickevents;
+0195    plotevents = parser.Results.plotevents;
+0196    asannual = parser.Results.asannual;
+0197 
+0198    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0199    T = todatenum(T);
+0200 
+0201    <span class="comment">% Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )</span>
+0202    validateattributes(T, {<span class="string">'double'</span>}, {<span class="string">'size'</span>, size(Q)}, mfilename, <span class="string">'T'</span>, 1)
+0203    validateattributes(nmin, {<span class="string">'double'</span>}, {<span class="string">'&gt;'</span>, 2}, mfilename, <span class="string">'nmin'</span>, 4)
+0204    <span class="keyword">if</span> isempty(R)
+0205       R = zeros(size(Q));
+0206    <span class="keyword">end</span>
+0207 <span class="keyword">end</span></pre></div>
+</body>
+</html>

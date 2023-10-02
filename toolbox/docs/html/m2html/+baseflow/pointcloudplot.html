@@ -1,0 +1,390 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of pointcloudplot</title>
+  <meta name="keywords" content="pointcloudplot">
+  <meta name="description" content="POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; pointcloudplot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>pointcloudplot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function out = pointcloudplot(q,dqdt,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.
+
+ Syntax
+
+     out = pointcloudplot(q,dqdt,varargin)
+
+ Required inputs
+
+     q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)
+     dqdt        =  discharge rate of change (L T^-2)
+
+ Optional name-value inputs
+
+     mask        =  vector logical mask to exclude values from fitting
+     reflines    =  cell array of chars indicating what type of reflines to plot
+     reflabels   =  logical indicating whether to add labels
+     blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
+     userab      =  2x1 double indicating a user-defined intercept,slope pair
+     precision   =  scalar double indicating the precision in the x data, used to
+                    compute the 'lower envelope'
+     timestep    =  scalar double indicating the timestep of the x data, used to
+                    compute the 'lower envelope'
+     addlegend   =  logical indicating whether to add a legend or not
+     usertext    =  char that gets added to the legend if refline 'userfit' (to
+                    indicate what is being plotted, maybe a custom user model)
+     rain        =  vector double of rainfall (mm/time)
+     ax          =  graphic axis to plot into
+
+ See also: <a href="fitab.html" class="code" title="function [Fit,ok] = fitab(q,dqdt,method,varargin)">fitab</a>, <a href="plotdqdt.html" class="code" title="function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)">plotdqdt</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function hrain = plotrain(ax,h,rain,x,y)</a></li>
+<li><a href="#_sub2" class="code">function [q, dqdt, mask, reflines, reflabels, blate, userab, precision,</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function out = pointcloudplot(q,dqdt,varargin)</a>
+0002    <span class="comment">%POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     out = pointcloudplot(q,dqdt,varargin)</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% Required inputs</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">%     q           =  discharge (L T^-1, e.g. m d-1 or m^3 d-1)</span>
+0011    <span class="comment">%     dqdt        =  discharge rate of change (L T^-2)</span>
+0012    <span class="comment">%</span>
+0013    <span class="comment">% Optional name-value inputs</span>
+0014    <span class="comment">%</span>
+0015    <span class="comment">%     mask        =  vector logical mask to exclude values from fitting</span>
+0016    <span class="comment">%     reflines    =  cell array of chars indicating what type of reflines to plot</span>
+0017    <span class="comment">%     reflabels   =  logical indicating whether to add labels</span>
+0018    <span class="comment">%     blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)</span>
+0019    <span class="comment">%     userab      =  2x1 double indicating a user-defined intercept,slope pair</span>
+0020    <span class="comment">%     precision   =  scalar double indicating the precision in the x data, used to</span>
+0021    <span class="comment">%                    compute the 'lower envelope'</span>
+0022    <span class="comment">%     timestep    =  scalar double indicating the timestep of the x data, used to</span>
+0023    <span class="comment">%                    compute the 'lower envelope'</span>
+0024    <span class="comment">%     addlegend   =  logical indicating whether to add a legend or not</span>
+0025    <span class="comment">%     usertext    =  char that gets added to the legend if refline 'userfit' (to</span>
+0026    <span class="comment">%                    indicate what is being plotted, maybe a custom user model)</span>
+0027    <span class="comment">%     rain        =  vector double of rainfall (mm/time)</span>
+0028    <span class="comment">%     ax          =  graphic axis to plot into</span>
+0029    <span class="comment">%</span>
+0030    <span class="comment">% See also: fitab, plotdqdt</span>
+0031    <span class="comment">%</span>
+0032    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0033 
+0034    <span class="comment">% Note: ab is for 'reflines','userfit' so a pre-computed ab can be plotted</span>
+0035 
+0036    <span class="comment">% if called with no input, open this file</span>
+0037    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0038 
+0039    <span class="comment">% PARSE INPUTS</span>
+0040    [q, dqdt, mask, reflines, reflabels, blate, userab, precision, timestep, <span class="keyword">...</span>
+0041       addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin{:});
+0042 
+0043    <span class="comment">% create the figure / axes</span>
+0044    <span class="keyword">if</span> not(isaxis(ax)) || isempty(ax)
+0045       figure;
+0046       ax = gca;
+0047    <span class="keyword">end</span>
+0048    fig = get(ax,<span class="string">'Parent'</span>);
+0049    set(fig, <span class="string">'Position'</span>,[0 0 550 510]);
+0050 
+0051    <span class="comment">% plot the data</span>
+0052    h0 = loglog(ax,q,-dqdt,<span class="string">'o'</span>);
+0053    formatPlotMarkers(<span class="string">'markersize'</span>,6);
+0054    hold on; grid off;
+0055 
+0056    <span class="comment">% add circles around the t&gt;tau0 values if requested</span>
+0057    <span class="keyword">if</span> sum(mask) &lt; numel(q)
+0058       h1 = scatter(q(mask),-dqdt(mask),<span class="string">'r'</span>);
+0059    <span class="keyword">else</span>
+0060       h1 = [];
+0061    <span class="keyword">end</span>
+0062 
+0063    <span class="comment">% add some space around the data</span>
+0064    xlims = xlim;
+0065    ylims = ylim;
+0066    ylowlim = min(ylims);
+0067    yupplim = max(ylims);
+0068 
+0069    xlim([xlims(1)*.9 xlims(2)*1.1]);
+0070    <span class="comment">% xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);</span>
+0071 
+0072    <span class="comment">% set xylabels and init containers for reflines</span>
+0073    <span class="keyword">if</span> isoctave
+0074       xlabel(<span class="string">'Q (m^3 d^{-1})'</span>,<span class="string">'FontSize'</span>,14, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0075       ylabel(<span class="string">'-dQ/dt (m^3 d^{-2})'</span>,<span class="string">'FontSize'</span>,14, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0076 
+0077       h = zeros(numel(reflines),1);
+0078    <span class="keyword">else</span>
+0079       xlabel(baseflow.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>, 14, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>);
+0080       ylabel(baseflow.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true),<span class="string">'FontSize'</span>,14, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>);
+0081 
+0082       h = gobjects(numel(reflines),1);
+0083    <span class="keyword">end</span>
+0084 
+0085    <span class="comment">% initialize array to hold parameters a and b</span>
+0086    ab = nan(numel(reflines),2);
+0087 
+0088    <span class="comment">% add reference lines</span>
+0089    <span class="keyword">for</span> n = 1:numel(reflines)
+0090       
+0091       <span class="keyword">switch</span> reflines{n}
+0092          <span class="keyword">case</span> <span class="string">'early'</span>
+0093             [h(n),ab(n,:)] =  baseflow.plotrefline(             <span class="keyword">...</span>
+0094                               q,-dqdt,                      <span class="keyword">...</span>
+0095                               <span class="string">'refline'</span>,<span class="string">'earlytime'</span>,        <span class="keyword">...</span>
+0096                               <span class="string">'refslope'</span>,3,                 <span class="keyword">...</span>
+0097                               <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
+0098                               <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
+0099                               );
+0100             set(h(n),<span class="string">'LineWidth'</span>,1);
+0101             
+0102          <span class="keyword">case</span> <span class="string">'late'</span>
+0103             [h(n),ab(n,:)] =  baseflow.plotrefline(             <span class="keyword">...</span>
+0104                               q,-dqdt,                      <span class="keyword">...</span>
+0105                               <span class="string">'refline'</span>,<span class="string">'latetime'</span>,         <span class="keyword">...</span>
+0106                               <span class="string">'refslope'</span>,blate,             <span class="keyword">...</span>
+0107                               <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
+0108                               <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
+0109                               );
+0110             set(h(n),<span class="string">'LineWidth'</span>,1);
+0111             
+0112          <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
+0113             [h(n),ab(n,:)] =  baseflow.plotrefline(             <span class="keyword">...</span>
+0114                               q,-dqdt,                      <span class="keyword">...</span>
+0115                               <span class="string">'refline'</span>,<span class="string">'upperenvelope'</span>,    <span class="keyword">...</span>
+0116                               <span class="string">'labels'</span>,reflabels            <span class="keyword">...</span>
+0117                               );
+0118             <span class="comment">% make ylimits span the min dq/dt to the upper envelope at max Q</span>
+0119             yupplim = ab(n,1)*max(xlims)^ab(n,2);
+0120             
+0121          <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
+0122             [h(n),ab(n,:)] =  baseflow.plotrefline(             <span class="keyword">...</span>
+0123                               q,-dqdt,                      <span class="keyword">...</span>
+0124                               <span class="string">'refline'</span>,<span class="string">'lowerenvelope'</span>,    <span class="keyword">...</span>
+0125                               <span class="string">'labels'</span>,reflabels            <span class="keyword">...</span>
+0126                               );
+0127             ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
+0128             
+0129          <span class="keyword">case</span> <span class="string">'bestfit'</span>
+0130             [h(n),ab(n,:)] = baseflow.plotrefline(              <span class="keyword">...</span>
+0131                               q,-dqdt,                      <span class="keyword">...</span>
+0132                               <span class="string">'refline'</span>,<span class="string">'bestfit'</span>,          <span class="keyword">...</span>
+0133                               <span class="string">'labels'</span>,false                <span class="keyword">...</span>
+0134                               );
+0135             set(h(n),<span class="string">'LineWidth'</span>,2);
+0136             
+0137          <span class="keyword">case</span> <span class="string">'userfit'</span>
+0138             [h(n),ab(n,:)] =  baseflow.plotrefline(             <span class="keyword">...</span>
+0139                               q,-dqdt,                      <span class="keyword">...</span>
+0140                               <span class="string">'refline'</span>,<span class="string">'userfit'</span>,          <span class="keyword">...</span>
+0141                               <span class="string">'userab'</span>,userab,              <span class="keyword">...</span>
+0142                               <span class="string">'labels'</span>,reflabels,           <span class="keyword">...</span>
+0143                               <span class="string">'mask'</span>,mask                   <span class="keyword">...</span>
+0144                               );
+0145       <span class="keyword">end</span>
+0146       out.ab.(reflines{n}) = ab(n,:);
+0147    <span class="keyword">end</span>
+0148    set(gca,<span class="string">'YLim'</span>,[ylowlim yupplim]);
+0149 
+0150    <span class="comment">% plot rain if provided</span>
+0151    <span class="keyword">if</span> all(~isnan(rain))
+0152       hrain = <a href="#_sub1" class="code" title="subfunction hrain = plotrain(ax,h,rain,x,y)">plotrain</a>(ax,h0,rain,q,-dqdt);
+0153    <span class="keyword">else</span>
+0154       hrain = nan;
+0155    <span class="keyword">end</span>
+0156 
+0157    <span class="comment">% leaving this out for now</span>
+0158    <span class="keyword">if</span> addlegend == true
+0159 
+0160       <span class="comment">% check if both userfit and bestfit are requested</span>
+0161       fitcheck = {<span class="string">'bestfit'</span>,<span class="string">'userfit'</span>};
+0162 
+0163       <span class="keyword">if</span> all(ismember(fitcheck,reflines))
+0164 
+0165          <span class="comment">% ------------------------------------</span>
+0166          <span class="comment">%          % put them both in the legend</span>
+0167          <span class="comment">%          ibf   = ismember(reflines,fitcheck);</span>
+0168          <span class="comment">%          hleg  = h(ibf);</span>
+0169          <span class="comment">%</span>
+0170          <span class="comment">%          ibest = strcmp(reflines,'bestfit');</span>
+0171          <span class="comment">%          iuser = strcmp(reflines,'userfit');</span>
+0172          <span class="comment">%          tbest = [baseflow.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];</span>
+0173          <span class="comment">%          tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];</span>
+0174          <span class="comment">%</span>
+0175          <span class="comment">%          % if user text provided, swap it out</span>
+0176          <span class="comment">%          if ~isempty(usertext)</span>
+0177          <span class="comment">%             tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];</span>
+0178          <span class="comment">%          end</span>
+0179          <span class="comment">%          ltext = {tbest; tuser};</span>
+0180          <span class="comment">% ------------------------------------</span>
+0181 
+0182          <span class="comment">% only put bestfit in the legend</span>
+0183          keep = strcmp(reflines,<span class="string">'bestfit'</span>);
+0184          hleg = h(keep);
+0185          ltxt = baseflow.aQbString(ab(keep,:),<span class="string">'printvalues'</span>,true);
+0186          ltxt = [ltxt <span class="string">' ('</span> upper(usertext) <span class="string">' fit)'</span>];
+0187          <span class="comment">%ltxt = [ltxt ' (nonlinear least-squares)'];</span>
+0188 
+0189          <span class="comment">% check if either userfit or bestfit are requested</span>
+0190       <span class="keyword">elseif</span> any(ismember(fitcheck,reflines))
+0191 
+0192          <span class="comment">% use whichever one was requested</span>
+0193          keep = ismember(reflines,fitcheck);
+0194          hleg = h(keep);
+0195          ltxt = baseflow.aQbString(ab(keep,:),<span class="string">'printvalues'</span>,true);
+0196 
+0197          <span class="keyword">if</span> ~isempty(usertext)
+0198             ltxt = [ltxt <span class="string">' ('</span> upper(usertext) <span class="string">' fit)'</span>];
+0199          <span class="keyword">elseif</span> ~any(ismember(reflines,<span class="string">'userfit'</span>))
+0200             ltxt = [ltxt <span class="string">' (NLS fit)'</span>];
+0201          <span class="keyword">elseif</span> ~any(ismember(reflines,<span class="string">'bestfit'</span>))
+0202             ltxt = [ltxt <span class="string">' (MLE fit)'</span>];
+0203          <span class="keyword">end</span>
+0204 
+0205       <span class="keyword">end</span>
+0206 
+0207       <span class="keyword">if</span> isobject(hrain)
+0208          hleg = [hleg hrain];
+0209          ltxt = {ltxt,<span class="string">'rain'</span>};
+0210       <span class="keyword">end</span>
+0211 
+0212       ltxt = strrep(ltxt,<span class="string">'$'</span>,<span class="string">''</span>);
+0213       l = legend(hleg,ltxt,<span class="string">'location'</span>,<span class="string">'northwest'</span>,<span class="string">'interpreter'</span>,<span class="string">'tex'</span>, <span class="keyword">...</span>
+0214          <span class="string">'AutoUpdate'</span>,<span class="string">'off'</span>);
+0215 
+0216       <span class="comment">%    if isoctave</span>
+0217       <span class="comment">%       ltxt = strrep(ltxt,'$','');</span>
+0218       <span class="comment">%       l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...</span>
+0219       <span class="comment">%          'AutoUpdate','off');</span>
+0220       <span class="comment">%    else</span>
+0221       <span class="comment">%       l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...</span>
+0222       <span class="comment">%          'AutoUpdate','off');</span>
+0223       <span class="comment">%    end</span>
+0224 
+0225    <span class="keyword">else</span>
+0226       l = nan;
+0227    <span class="keyword">end</span>
+0228    <span class="comment">% package the output</span>
+0229    out.fig        = fig;
+0230    out.scatter    = h0;
+0231    out.mask       = h1;
+0232    out.reflines   = h;
+0233    out.ax         = gca;
+0234    out.hrain      = hrain;
+0235    out.legend     = l;
+0236 <span class="keyword">end</span>
+0237 
+0238 <span class="comment">%% LOCAL FUNCTIONS</span>
+0239 <a name="_sub1" href="#_subfunctions" class="code">function hrain = plotrain(ax,h,rain,x,y)</a>
+0240 
+0241    <span class="comment">% ax is the axis to plot into</span>
+0242    <span class="comment">% h is the handle of the plotted q/dqdt to get the marker size to scale</span>
+0243    <span class="comment">% the rain circles</span>
+0244    <span class="comment">% x and y are q -dqdt</span>
+0245 
+0246    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
+0247    <span class="comment">% the plotted circles</span>
+0248    <span class="keyword">if</span> sum(rain)==0
+0249       hrain = nan;
+0250    <span class="keyword">else</span>
+0251 
+0252       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
+0253       <span class="comment">% sz = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
+0254       <span class="comment">% scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
+0255 
+0256       <span class="comment">% this mimics the way scatter scales the circles</span>
+0257       sz = get(h,<span class="string">'MarkerSize'</span>) + sqrt(pi.*(rain(rain&gt;0)).^2);
+0258       x = x(rain&gt;0);
+0259       y = y(rain&gt;0);
+0260 
+0261       hold on;
+0262       <span class="keyword">for</span> n = 1:numel(sz)
+0263          hrain(n) = plot(ax,x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,sz(n), <span class="keyword">...</span>
+0264             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
+0265       <span class="keyword">end</span>
+0266    <span class="keyword">end</span>
+0267 <span class="keyword">end</span>
+0268 
+0269 <span class="comment">%% INPUT PARSER</span>
+0270 <a name="_sub2" href="#_subfunctions" class="code">function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, </a><span class="keyword">...</span>
+0271       timestep, addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin)
+0272    
+0273    parser = inputParser;
+0274    parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0275    parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
+0276    parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
+0277    parser.addParameter(<span class="string">'reflines'</span>, {<span class="string">'bestfit'</span>}, @iscell);
+0278    parser.addParameter(<span class="string">'reflabels'</span>, false, @islogical);
+0279    parser.addParameter(<span class="string">'blate'</span>, 1, @isnumeric);
+0280    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
+0281    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric);
+0282    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric);
+0283    parser.addParameter(<span class="string">'addlegend'</span>, true, @islogical);
+0284    parser.addParameter(<span class="string">'usertext'</span>, <span class="string">''</span>, @ischar);
+0285    parser.addParameter(<span class="string">'rain'</span>, nan, @isnumeric);
+0286    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
+0287    parser.FunctionName = <span class="string">'baseflow.pointcloudplot'</span>;
+0288    
+0289    parser.parse(q, dqdt, varargin{:});
+0290 
+0291    mask = parser.Results.mask;
+0292    reflines = parser.Results.reflines;
+0293    reflabels = parser.Results.reflabels;
+0294    blate = parser.Results.blate;
+0295    userab = parser.Results.userab;
+0296    precision = parser.Results.precision;
+0297    timestep = parser.Results.timestep;
+0298    addlegend = parser.Results.addlegend;
+0299    usertext = parser.Results.usertext;
+0300    rain = parser.Results.rain;
+0301    ax = parser.Results.ax;
+0302 <span class="keyword">end</span></pre></div>
+</body>
+</html>

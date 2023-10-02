@@ -1,49 +1,48 @@
 source('Setup.m')
 
-# To install the required packages, use the following:
-# pkg install -forge struct
-# pkg install -forge statistics
-# pkg install -verbose -forge tablicious
-# pkg install -forge optim
-
-# To see which packages are installed:
-# pkg list
-
 pkg load struct
 pkg load statistics
 pkg load tablicious
 pkg load optim
+pkg load statistics-bootstrap
+# pkg load nan # may be needed or useful
 
-# may need pkg load nan
+# # If for some reason Setup.m is not sourced or is not working, this roughly replicates it:
+# addpath(genpath(pwd()));
+# rmpath([pwd() filesep ".git"]);
+# rmpath([pwd() filesep "toolbox/+baseflow"]);
 
-# Could add this to readme:
-% On Linux use your package manager to install Octave packages:
-% `apt-get install octave-statistics`
+# # Adding these back might be necessary on octave due to a bug in package namespace private folders
+# addpath(pwd() filesep "toolbox/+baseflow/private"]);
+# addpath(pwd() filesep "toolbox/+baseflow/+internal/private"]);
 
-% Or download, compile and install packages in Octave:
-% `pkg install -forge statistics`
+# To install octave:
+# MacOS: brew install octave
+# Windows: choco install octave or download
+# Linux: Flatpak
 
-% Resolve errors due to required packages that are not installed e.g. io:
+# To install the required packages, use the following on MacOS:
+# pkg install -forge struct
+# pkg install -forge statistics
+# pkg install -verbose -forge tablicious
+# pkg install -forge optim
+# pkg install "https://github.com/gnu-octave/statistics-bootstrap/archive/refs/heads/master.zip"
 
-% `pkg install -forge io`
+# To see which packages are installed:
+# pkg list
 
-% – On Windows all packages are usually installed with Octave. Consult the Octave documentation for more information.
+# On Linux use your package manager to install Octave packages:
+# apt-get install octave-statistics
 
-% For help with windows installation see [octave beginner's guide](http://calliope.dem.uniud.it/CLASS/ING-AMB/2018/GNU-Octave-for-beginners.pdf).
+# Or download, compile and install packages in Octave:
+# pkg install -forge statistics
+# pkg install -forge io
 
-% Install octave:
-% MacOS: brew install octave
-% Windows: choco install octave or download
-% Linux: Flatpak
+# On Windows all packages are normally installed with Octave. Consult the Octave documentation for more information.
 
+# For help with windows installation see [octave beginner's guide](http://calliope.dem.uniud.it/CLASS/ING-AMB/2018/GNU-Octave-for-beginners.pdf).
 
 # Enable the Octave:language-extension warning if you want to be told about writing code that works in Octave but not MATLAB: 
 # warning("on", "Octave:language-extension")
-
-# if for some reason Setup.m is not working, try something like this:
-# addpath(pwd());
-# rmpath([pwd() filesep "+bfra"]);
-# rmpath([pwd() filesep "demos"]);
-# rmpath([pwd() filesep ".git"]);
 
 # check this for building docs: https://github.com/gnu-octave/pkg-octave-doc

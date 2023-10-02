@@ -9,7 +9,7 @@ function varargout = Setup(varargin)
    %  getpref('baseflow').
    %
    %  msg = Setup('uninstall') removes all toolbox paths from the search path
-   %  and unsets bfra toolbox preferences. Does not delete the toolbox directory.
+   %  and unsets baseflow toolbox preferences. Does not delete the toolbox directory.
    %
    %  msg = Setup('dependencies') generates a list of function and toolbox
    %  dependencies and determines which ones are not on the current search path.
@@ -21,7 +21,7 @@ function varargout = Setup(varargin)
    %  msg = Setup('rmpath') removes all toolbox paths from the search path. Does
    %  not modify any pathdef.m files or userpath.
    %
-   % See also bfra.dependencies
+   % See also baseflow.internal.dependencies
 
    % NOTE genpath ignores folders named private, folders that begin with the @
    % character (class folders), folders that begin with the + character (package
@@ -54,12 +54,12 @@ function varargout = Setup(varargin)
    end
 
    % if 'install' is requested but the toolbox is installed, ask the user
-   if strcmp(option,'install') && ispref('baseflow','installed')
-      if getpref('baseflow','installed')
-         msg = '\n * bfra toolbox is installed, press ''y'' to re-install ';
+   if strcmp(option, 'install') && ispref('baseflow', 'installed')
+      if getpref('baseflow', 'installed')
+         msg = '\n * baseflow toolbox is installed, press ''y'' to re-install ';
          msg = [msg 'or any other key to abort *\n'];
-         str = input(msg,'s');
-         if ~strcmp(str,'y')
+         str = input(msg, 's');
+         if ~strcmp(str, 'y')
             return
          end
       end
@@ -95,6 +95,8 @@ function varargout = Setup(varargin)
       pkg load statistics
       pkg load tablicious
       pkg load optim
+      pkg load statistics-bootstrap
+      pkg load financial
       % setenv ("OCTAVE_LATEX_DEBUG_FLAG", "1")
       % setenv ("OCTAVE_LATEX_BINARY", )
       % setenv ("OCTAVE_DVIPNG_BINARY", )
@@ -232,31 +234,31 @@ end
 % -----------------
 
 function msg = addtoolboxpaths(varargin)
-   %ADDTOOLBOXPATHS
+   %ADDTOOLBOXPATHS Add toolbox paths containing source code to the path
    narginchk(0,1); if nargin==1; msg = varargin{1}; end
-   % get the path to the toolbox
+   % get the path to the toolbox and add paths containing code
    thispath = fileparts(mfilename('fullpath'));
-   % add paths containing source code
    addpath(genpath(thispath),'-end');
-   % remove namespace +bfra and git directories from path
-   % rmpath(genpath(fullfile(thispath,'+bfra')));
+   % remove namespace +baseflow and git directories from path
+   % rmpath(genpath(fullfile(thispath,'+baseflow')));
    rmpath(genpath(fullfile(thispath,'.git')));
    setpref('baseflow','install_directory',thispath)
    setpref('baseflow','installed',true)
    msg.addpath = true;
 
+   % In Octave, make private folders inside packages accessible.
    if inoctave
-      addpath(fullfile(thispath, '+bfra', 'private'));
+      addpath(fullfile(thispath, '+baseflow', 'private'));
+      addpath(fullfile(thispath, '+baseflow', '+internal', 'private'));
    end
 end
 
 function msg = rmtoolboxpaths(varargin)
-   %RMTOOLBOXPATHS
+   %RMTOOLBOXPATHS Remove toolbox paths and update preference group.
    narginchk(0,1); if nargin==1, msg = varargin{1}; end
    rmpath(genpath(fileparts(mfilename('fullpath'))));
-   % update the prefs
-   setpref('baseflow','install_directory',false)
-   setpref('baseflow','installed',false)
+   setpref('baseflow', 'install_directory', false)
+   setpref('baseflow', 'installed', false)
    % setpref('baseflow','dependencies_checked',false) - keep this on rmpath,
    % it indicates whether the dependencies were satisfied on install or the
    % last check.
@@ -270,7 +272,7 @@ function msg = inittoolboxprefs(varargin)
    if ispref('baseflow')
       rmpref('baseflow');
    end
-   addpref('baseflow', 'version', bfra.version)
+   addpref('baseflow', 'version', baseflow.internal.version())
    % note: 'pathdef_filename' removed from prefs
    if inoctave == true
       prefs = {'installed','install_directory','octave_install', ...
@@ -343,9 +345,9 @@ function msg = checkdependencies(varargin)
    end
 
    % get all unique dependencies
-   funcname = fullfile(thispath,'docs','bfra_demo.m');
-   report = bfra.dependencies(funcname,'check');
-   % report = bfra.dependencies('docs/bfra_demo.m','check');
+   funcname = fullfile(thispath,'docs','baseflow_demo.m');
+   report = baseflow.internal.dependencies(funcname,'check');
+   % report = baseflow.dependencies('docs/baseflow_demo.m','check');
    msg.function_dependencies = report.function_dependencies;
    msg.missing_dependencies = report.missing_dependencies;
    msg.product_dependencies = report.product_dependencies;

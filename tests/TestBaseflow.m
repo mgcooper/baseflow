@@ -16,7 +16,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
    %        expected way (e.g., the code gives the right error for a
    %        specific bad input)
    % 
-   % See also: 
+   % See also: test_internal
 
    properties (TestParameter)
       SetupOption = {'install','uninstall','dependencies','addpath','savepath','rmpath','delpath'};
@@ -49,7 +49,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          end
 
          % Get actual result
-         strActual = bfra.getstring(VarStr);
+         strActual = baseflow.getstring(VarStr);
 
          % Verify that the actual result matches the expected result
          testCase.verifyEqual(strActual,expectedStr)
@@ -61,7 +61,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
       function test_basinname(testCase,BasinName)
 
          % get the basin name from the database
-         ActualName = bfra.basinname(BasinName);
+         ActualName = baseflow.basinname(BasinName);
 
          % Verify that the actual result matches the expected result
          testCase.verifyEqual(BasinName,ActualName);
@@ -75,7 +75,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          a = 1e-2;
          b = 1.5;
          q0 = 1;
-         [t, q] = bfra.generateTestData(a,b,q0);
+         [t, q] = baseflow.generateTestData(a,b,q0);
 
          % Calculate expected result for CTS method
          dq = q-[nan; q(1:end-1)];
@@ -83,14 +83,14 @@ classdef TestBaseflow < matlab.unittest.TestCase
          dqdtExpected = dq./dt;
 
          % Get the actual result
-         [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
+         [~,dqdtActual] = baseflow.getdqdt(t,q,[],DerivMethod);
 
          % Verify that the actual result matches the expected result
          testCase.verifyEqual(dqdtActual,dqdtExpected)
 
          % for testing:
          % DerivMethod = 'CTS';
-         % [~,dqdtActual] = bfra.getdqdt(t,q,[],DerivMethod);
+         % [~,dqdtActual] = baseflow.getdqdt(t,q,[],DerivMethod);
          % isequal(dqdtActual,dqdtExpected)
          % scatterfit(dqdtActual,dqdtExpected)
 
@@ -109,25 +109,25 @@ classdef TestBaseflow < matlab.unittest.TestCase
          % for testing
          % FitMethod = 'ols';
          % b = 1.5;
-         % [~,q,dqdt] = bfra.generateTestData(a,b,q0,t);
+         % [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
          % figure; loglog(q,-dqdt,'o')
          % also useful to see this:
-         % bfra.Qnonlin(a,b,q0,t,true)
+         % baseflow.Qnonlin(a,b,q0,t,true)
 
-         % f = bfra.fitab(q,dqdt,'mean'); ab = f.ab
-         % f = bfra.fitab(q,dqdt,'ols'); ab = f.ab
-         % f = bfra.fitab(q,dqdt,'nls'); ab = f.ab
-         % f = bfra.fitab(q,dqdt,'median'); ab = f.ab
+         % f = baseflow.fitab(q,dqdt,'mean'); ab = f.ab
+         % f = baseflow.fitab(q,dqdt,'ols'); ab = f.ab
+         % f = baseflow.fitab(q,dqdt,'nls'); ab = f.ab
+         % f = baseflow.fitab(q,dqdt,'median'); ab = f.ab
 
          % generate the test data
-         [~,q,dqdt] = bfra.generateTestData(a,b,q0,t);
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
 
          % fit the data
          switch FitMethod
             case {'mean','median'}
-               Fit = bfra.fitab(q,dqdt,FitMethod,'order',b);
+               Fit = baseflow.fitab(q,dqdt,FitMethod,'order',b);
             otherwise
-               Fit = bfra.fitab(q,dqdt,FitMethod);
+               Fit = baseflow.fitab(q,dqdt,FitMethod);
          end
 
          % Get the expected result
@@ -137,7 +137,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          abActual = Fit.ab;
 
          % for testing:
-         % f = bfra.fitab(q,dqdt,FitMethod); abActual = f.ab
+         % f = baseflow.fitab(q,dqdt,FitMethod); abActual = f.ab
          % isequal(abActual,abExpected)
 
          % Verify that the actual result matches the expected result
@@ -153,7 +153,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
             case 'b'
                b = 1.5;
                nExpected = 0;
-               nActual = bfra.conversions(b,'b','n','isflat',true);
+               nActual = baseflow.conversions(b,'b','n','isflat',true);
 
                % Verify that the actual result matches the expected result
                testCase.verifyEqual(nActual,nExpected);
@@ -161,7 +161,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
             case 'n'
                n = -1;
                bExpected = 1;
-               bActual = bfra.conversions(n,'n','b','isflat',true);
+               bActual = baseflow.conversions(n,'n','b','isflat',true);
 
                % Verify that the actual result matches the expected result
                testCase.verifyEqual(bActual,bExpected);
@@ -169,7 +169,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
             case 'alpha'
                alpha = 4.0;
                bExpected = 1.25;
-               bActual = bfra.conversions(alpha,'alpha','b','isflat',true);
+               bActual = baseflow.conversions(alpha,'alpha','b','isflat',true);
 
                % Verify that the actual result matches the expected result
                testCase.verifyEqual(bActual,bExpected);
@@ -185,7 +185,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
 
          % compute the fit
-         [bActual,alphaActual] = bfra.plfitb(x);
+         [bActual,alphaActual] = baseflow.plfitb(x);
 
          % Verify that the actual result matches the expected result
          testCase.verifyEqual(PowerLawExponent,alphaActual,'AbsTol',0.1);
@@ -214,7 +214,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          end
 
          % get the actual result
-         [SminActual,SmaxActual] = bfra.aquiferstorage(a,b,qmin,qmax);
+         [SminActual,SmaxActual] = baseflow.aquiferstorage(a,b,qmin,qmax);
 
          % Verify that the actual result matches the expected result
          testCase.verifyEqual([SminExpected,SmaxExpected],[SminActual,SmaxActual]);
@@ -225,7 +225,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
       %-------------------------------------------
       function test_aquiferthickness(testCase,RecessionExponent,TauValue,PhiValue)
 
-         % note: this implicitly tests bfra.conversions
+         % note: this implicitly tests baseflow.conversions
 
          % make test data
          Qb = 2;
@@ -238,7 +238,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          SExpected = DExpected*phi;
 
          % get the actual result
-         [DActual,SActual] = bfra.aquiferthickness(b,tau,phi,Qb);
+         [DActual,SActual] = baseflow.aquiferthickness(b,tau,phi,Qb);
 
          % Verify that the actual result matches the expected result
          testCase.verifyEqual([DExpected,SExpected],[DActual,SActual]);
@@ -266,7 +266,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          end
 
          % get the actual result
-         [tActual,qActual] = bfra.eventfinder(t,q,[],'nmin',MinEventDuration, ...
+         [tActual,qActual] = baseflow.eventfinder(t,q,[],'nmin',MinEventDuration, ...
             'fmax',0,'rmax',0,'rmin',0,'rmconvex',RmConvex,'rmnochange',false, ...
             'rmrain',false);
 
@@ -347,7 +347,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          qExpected = [];
 
          % figure; plot(tExpected, qExpected, '-o')
-         [tActual,qActual] = bfra.eventfinder(t, q, [], 'nmin', ...
+         [tActual,qActual] = baseflow.eventfinder(t, q, [], 'nmin', ...
             MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
             RmConvex, 'rmnochange', false, 'rmrain', false);
 
@@ -355,7 +355,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          testCase.verifyEqual(qExpected, qActual);
 
          % This does not error, it returns empty, so use the above test
-         % testCase.verifyError(@() bfra.eventfinder(t, q, [], 'nmin', ...
+         % testCase.verifyError(@() baseflow.eventfinder(t, q, [], 'nmin', ...
          %  MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
          %  RmConvex, 'rmnochange', false, 'rmrain', false));
       end

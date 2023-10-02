@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of loadgrace</title>
+  <meta name="keywords" content="loadgrace">
+  <meta name="description" content="LOADGRACE Load grace data for basin in baseflow basin database.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; loadgrace.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>loadgrace
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>LOADGRACE Load grace data for basin in baseflow basin database.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function [Grace, Meta] = loadgrace(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">LOADGRACE Load grace data for basin in baseflow basin database.
+
+ Grace data should be in cm/timestep
+
+ See also: baseflow.<a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>, baseflow.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, baseflow.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a></pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>	BASINNAME Return string 'basin' from the baseflow basin database.</li>
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function [basinname, t1, t2, regularize] = parseinputs(varargin)</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Grace, Meta] = loadgrace(varargin)</a>
+0002    <span class="comment">%LOADGRACE Load grace data for basin in baseflow basin database.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Grace data should be in cm/timestep</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">% See also: baseflow.loadghcnd, baseflow.loadflow, baseflow.loadcalm</span>
+0007 
+0008    <span class="comment">% if called with no input, open this file</span>
+0009    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0010 
+0011    <span class="comment">% fast exit if toolbox not configured for data functions</span>
+0012    <span class="keyword">if</span> ~isenv(<span class="string">'BASEFLOW_DATA_PATH'</span>)
+0013       error(<span class="string">'BASEFLOW_DATA_PATH environment variable not set'</span>)
+0014    <span class="keyword">end</span>
+0015 
+0016    <span class="comment">% parse inputs</span>
+0017    [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, t1, t2, regularize] = <a href="#_sub1" class="code" title="subfunction [basinname, t1, t2, regularize] = parseinputs(varargin)">parseinputs</a>(varargin{:});
+0018 
+0019    <span class="comment">% load the old data note: an earlier version used the grace_minmax.mat file</span>
+0020    load(fullfile(getenv(<span class="string">'BASEFLOW_DATA_PATH'</span>), <span class="string">'grace'</span>, <span class="string">'grace_basins_v0.mat'</span>), <span class="string">'Grace'</span>)
+0021 
+0022    <span class="comment">% the new data</span>
+0023    <span class="comment">% load(filedata,'Grace');</span>
+0024 
+0025    Meta = Grace.meta;
+0026 
+0027    <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'all'</span>)    <span class="comment">% return all the basins</span>
+0028       <span class="comment">% need to add options to regularize (interp to a regular monthly cal)</span>
+0029       <span class="comment">% or trim to t1:t2</span>
+0030       <span class="keyword">return</span>
+0031    <span class="keyword">else</span>
+0032 
+0033       <span class="comment">% use ismember for exact match not contains</span>
+0034       allnames = lower(Meta.name);
+0035       idx = ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>));
+0036 
+0037       <span class="keyword">if</span> sum(idx) == 0
+0038          error(<span class="string">'basin not found, may not have Grace for this basin, otherwise check name'</span>);
+0039       <span class="keyword">else</span>
+0040 
+0041          <span class="comment">%       % temporary hack to get the 2022 data</span>
+0042          <span class="comment">%       if strcmp(basinname,'KUPARUK R NR DEADHORSE AK')</span>
+0043          <span class="comment">%          load([pathdata 'grace_kuparuk'],'Grace');</span>
+0044          <span class="comment">%          Grace = renamevars(Grace,'Scsr','S');</span>
+0045          <span class="comment">%          Grace = removevars(Grace,'Sjpl');</span>
+0046          <span class="comment">%</span>
+0047          <span class="comment">%          % the other data is normalized to 2002-2020, but this data is</span>
+0048          <span class="comment">%          % not, so do that here</span>
+0049          <span class="comment">%          Grace.S = Grace.S-nanmean(Grace.S);</span>
+0050          <span class="comment">%</span>
+0051          <span class="comment">%       else</span>
+0052          <span class="comment">%          Time = tocolumn(Grace.time);</span>
+0053          <span class="comment">%          S = tocolumn(Grace.Sa_avg(idx,:));</span>
+0054          <span class="comment">%          Grace = timetable(S,'RowTimes',Time);</span>
+0055          <span class="comment">%       end</span>
+0056 
+0057          <span class="comment">% % delete this and replace w/above if using 2022 data</span>
+0058          Time = tocolumn(Grace.time);
+0059          S = tocolumn(Grace.Sa_avg(idx,:));
+0060          Grace = timetable(S,<span class="string">'RowTimes'</span>,Time);
+0061          <span class="comment">% %</span>
+0062 
+0063          Meta = Meta(idx,:);
+0064 
+0065          <span class="comment">% if t1/t2 requested, retime to a regular monthly calendar</span>
+0066          <span class="keyword">if</span> ~isnat(t1)
+0067             Time = t1:calmonths(1):t2;
+0068             Grace = retime(Grace,<span class="string">'monthly'</span>,<span class="string">'linear'</span>);
+0069             Grace = retime(Grace,Time,<span class="string">'fillwithmissing'</span>);
+0070          <span class="keyword">end</span>
+0071 
+0072          Grace.Properties.VariableUnits = {<span class="string">'cm'</span>};
+0073 
+0074          <span class="comment">% % for now I return monthly S, but this is what is returned in BFRA_drive</span>
+0075          <span class="comment">%          % Pull out the data</span>
+0076          <span class="comment">%          G.T = Grace.time;</span>
+0077          <span class="comment">%          G.S = Grace.Sa_avg(idx,:);</span>
+0078          <span class="comment">%          G.SL = Grace.Smin(idx,:);</span>
+0079          <span class="comment">%          G.SH = Grace.Smax(idx,:);</span>
+0080          <span class="comment">%          G.TL = Grace.tmin(idx,:);</span>
+0081          <span class="comment">%          G.TH = Grace.tmax(idx,:);</span>
+0082          <span class="comment">%          G.Tref = Grace.time_ref;</span>
+0083          <span class="comment">%          Grace = G;</span>
+0084       <span class="keyword">end</span>
+0085    <span class="keyword">end</span>
+0086 <span class="keyword">end</span>
+0087 
+0088 <span class="comment">%% INPUT PARSER</span>
+0089 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, t1, t2, regularize] = parseinputs(varargin)</a>
+0090 
+0091    parser = inputParser;
+0092    parser.FunctionName = <span class="string">'baseflow.loadgrace'</span>;
+0093    parser.addOptional(<span class="string">'basinname'</span>,<span class="string">'all'</span>,@ischar);
+0094    parser.addParameter(<span class="string">'t1'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
+0095    parser.addParameter(<span class="string">'t2'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
+0096    parser.addParameter(<span class="string">'regularize'</span>, true, @ischar);
+0097    parser.parse(varargin{:});
+0098 
+0099    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = parser.Results.basinname;
+0100    t1 = parser.Results.t1;
+0101    t2 = parser.Results.t2;
+0102    regularize = parser.Results.regularize;
+0103 
+0104    <span class="keyword">if</span> ~isdatetime(t1) <span class="comment">%#ok&lt;*NODEF&gt;</span>
+0105       t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0106       t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0107    <span class="keyword">end</span>
+0108 <span class="keyword">end</span></pre></div>
+</body>
+</html>

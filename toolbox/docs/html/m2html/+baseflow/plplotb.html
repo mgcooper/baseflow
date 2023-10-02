@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plplotb</title>
+  <meta name="keywords" content="plplotb">
+  <meta name="description" content="PLPLOTB Plot the power law fit to the P(tau) pareto distribution.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../function_index.html">Home</a> &gt;  <a href="function_index.html">+baseflow</a> &gt; plplotb.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../function_index.html"><img alt="<" border="0" src="../html_img/left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="function_index.html">Index for +baseflow&nbsp;<img alt=">" border="0" src="../html_img/right.png"></a></td></tr></table>-->
+
+<h1>plplotb
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>PLPLOTB Plot the power law fit to the P(tau) pareto distribution.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="box"><strong>function h = plplotb(x,xmin,alpha,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PLPLOTB Plot the power law fit to the P(tau) pareto distribution.
+
+ Required inputs
+
+     x     = vector double of data believed to follow a Pareto distribution
+     xmin  = scalar double indicating the lower bound of the distribution
+     alpha = scalar double indicating the exponent of the distribution
+
+ Optional inputs
+
+     alphaci  = 2x1 double of lower and upper confidence intervals for alpha
+     xminci   = 2x1 double of lower and upper confidence intervals for xmin
+     varsym   = char in latex format representing the data symbol, used for plot
+     trimline = logical scalar indicating whether to 'trim' the fitted line
+                 similar to 'axis tight' option (b/c power law data is often
+                 covering many orders of magnitude)
+     labelplot = logical scalar indicating whether to add a label showing the
+                 value of xmin and the expected value of x
+     ax       =  graphic axis to plot into
+
+ See also: plfit, <a href="plfitb.html" class="code" title="function varargout = plfitb(x,varargin)">plfitb</a>, <a href="gpfitb.html" class="code" title="function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)">gpfitb</a>, <a href="eventtau.html" class="code" title="function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)">eventtau</a>
+
+ Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
+
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+
+This function calls:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="open.html" class="code" title="function open(varargin)">open</a>	OPEN Open package namespace function file in the Editor.</li></ul>
+
+
+This function is called by:
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<ul style="list-style-image:url(../html_img/matlabicon.gif)">
+
+<li><a href="#_sub1" class="code">function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)</a></li>
+<li><a href="#_sub2" class="code">function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] =</a></li></ul>
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function h = plplotb(x,xmin,alpha,varargin)</a>
+0002    <span class="comment">%PLPLOTB Plot the power law fit to the P(tau) pareto distribution.</span>
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Required inputs</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     x     = vector double of data believed to follow a Pareto distribution</span>
+0007    <span class="comment">%     xmin  = scalar double indicating the lower bound of the distribution</span>
+0008    <span class="comment">%     alpha = scalar double indicating the exponent of the distribution</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">% Optional inputs</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">%     alphaci  = 2x1 double of lower and upper confidence intervals for alpha</span>
+0013    <span class="comment">%     xminci   = 2x1 double of lower and upper confidence intervals for xmin</span>
+0014    <span class="comment">%     varsym   = char in latex format representing the data symbol, used for plot</span>
+0015    <span class="comment">%     trimline = logical scalar indicating whether to 'trim' the fitted line</span>
+0016    <span class="comment">%                 similar to 'axis tight' option (b/c power law data is often</span>
+0017    <span class="comment">%                 covering many orders of magnitude)</span>
+0018    <span class="comment">%     labelplot = logical scalar indicating whether to add a label showing the</span>
+0019    <span class="comment">%                 value of xmin and the expected value of x</span>
+0020    <span class="comment">%     ax       =  graphic axis to plot into</span>
+0021    <span class="comment">%</span>
+0022    <span class="comment">% See also: plfit, plfitb, gpfitb, eventtau</span>
+0023    <span class="comment">%</span>
+0024    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0025 
+0026    <span class="comment">% if called with no input, open this file</span>
+0027    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0028 
+0029    <span class="comment">% PARSE INPUTS</span>
+0030    [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot] = <span class="keyword">...</span>
+0031       parseinputs(x, xmin, alpha, varargin{:});
+0032 
+0033    <span class="comment">% Compute the complementary cumulative distribution function</span>
+0034    N = numel(x);
+0035    xccp = sort(x);
+0036    yccp = (N:-1:1)'./N;
+0037    refy = yccp(find(xccp&gt;=xmin,1,<span class="string">'first'</span>));
+0038 
+0039    <span class="comment">% Option to extend the line forward a bit (purely aesthetic)</span>
+0040    <span class="keyword">if</span> trimline == true
+0041       xccfit = sort(x(x&gt;=xmin));
+0042       xccfit = [xccfit; xccfit(end)*1.2];
+0043    <span class="keyword">else</span>
+0044       xccfit = sort(x); <span class="comment">% this extends the line back toward the origin</span>
+0045       xccfit = [xccfit; xccfit(end)*1.2]; <span class="comment">% this extends the line forward a bit</span>
+0046    <span class="keyword">end</span>
+0047 
+0048    <span class="comment">% Compute the theoretical ccdf</span>
+0049    yccfit = (xccfit./xmin).^(1-alpha);
+0050 
+0051    <span class="comment">% scale the fitted x&gt;xmin ccdf to pass through the refPoint</span>
+0052    yccfit = yccfit.*refy;
+0053    xccfit = xccfit(yccfit&lt;=1);
+0054    yccfit = yccfit(yccfit&lt;=1);
+0055 
+0056    <span class="comment">% Create the figure</span>
+0057    <span class="comment">% figure('Position',[0 0 300 200]); ax = gca; % for publishing:</span>
+0058    figure(<span class="string">'Position'</span>,[0 0 500 400]);
+0059    ax = gca;
+0060 
+0061    <span class="comment">% plot it</span>
+0062    h.data = loglog(ax,xccp,yccp,<span class="string">'o'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'MarkerSize'</span>,10, <span class="keyword">...</span>
+0063       <span class="string">'MarkerFaceColor'</span>,<span class="string">'w'</span>); hold on;
+0064    h.fit = loglog(ax,xccfit,yccfit,<span class="string">'LineWidth'</span>,3);
+0065 
+0066    <span class="comment">% compute b for the legend</span>
+0067    b = baseflow.conversions(alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0068 
+0069    <span class="comment">% build a legend, labels, etc.</span>
+0070    l1 = [<span class="string">'$'</span> varsym <span class="string">'$ (data)'</span>];
+0071    <span class="keyword">if</span> ~isnan(alphaci)
+0072       bL = baseflow.conversions(alphaci(1),<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0073       bH = baseflow.conversions(alphaci(2),<span class="string">'alpha'</span>,<span class="string">'b'</span>);
+0074       l2 = sprintf(<span class="string">'MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)'</span>,b,bL,bH);
+0075    <span class="keyword">else</span>
+0076       l2 = sprintf(<span class="string">'MLE fit ($b=%.2f$)'</span>,baseflow.conversions(alpha,<span class="string">'alpha'</span>,<span class="string">'b'</span>));
+0077       bL = nan;
+0078       bH = nan;
+0079    <span class="keyword">end</span>
+0080 
+0081    xtext = <span class="string">'$x$'</span>;
+0082    ytext = [<span class="string">'$p('</span> varsym <span class="string">'\ge x)$'</span>];
+0083 
+0084    <span class="keyword">if</span> isoctave
+0085       l1 = latex2tex(l1);
+0086       l2 = sprintf(<span class="string">'MLE fit (b=%.2f [%.2f,%.2f] 95%% CI)'</span>,b,bL,bH);
+0087       xlabel(latex2tex(xtext),<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>);
+0088       ylabel(latex2tex(ytext),<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>);
+0089       h.legend = legend({l1,l2},<span class="string">'interpreter'</span>,<span class="string">'tex'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+0090    <span class="keyword">else</span>
+0091       xlabel(xtext,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0092       ylabel(ytext,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0093       h.legend = legend({l1,l2},<span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+0094    <span class="keyword">end</span>
+0095 
+0096    <span class="comment">% h.legend.Position = [0.27 0.40 0.30 0.10];</span>
+0097 
+0098    <span class="keyword">if</span> ~isnan(xminci)
+0099       xminL = xminci(1);
+0100       xminH = xminci(2);
+0101    <span class="keyword">else</span>
+0102       xminL = xmin;
+0103       xminH = xmin;
+0104    <span class="keyword">end</span>
+0105 
+0106    <span class="keyword">if</span> labelplot == true
+0107       <span class="comment">%addlabels(xccfit,ccfit,xmin,xminL,xminH,b,bL,bH,refy);</span>
+0108       <a href="#_sub1" class="code" title="subfunction addlabels(xfit,yfit,tau0,tau0L,tau0H,b)">addlabels</a>(xccfit,yccfit,xmin,xminL,xminH,b);
+0109    <span class="keyword">end</span>
+0110 
+0111    <span class="comment">% add a little white space above P=1</span>
+0112    h.ax = gca;
+0113    ylimits = get(ax, <span class="string">'YLim'</span>);
+0114    ylimits(2) = 1.5;
+0115    set(h.ax, <span class="string">'YLim'</span>, ylimits);
+0116    hold off
+0117 <span class="keyword">end</span>
+0118 
+0119 <span class="comment">%% LOCAL FUNCTIONS</span>
+0120 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)</a>
+0121    <span class="comment">%ADDLABELS add an arrow pointing to tau0 and tau_exp</span>
+0122 
+0123    <span class="comment">% 'arrow' is not octave compatible afaik</span>
+0124    <span class="keyword">if</span> isoctave
+0125       <span class="keyword">return</span>
+0126    <span class="keyword">end</span>
+0127 
+0128    <span class="comment">% tau0</span>
+0129    xminc = (tau0H-tau0+tau0-tau0L)/2;
+0130    xlims = xlim;
+0131    ndecx = log10(xlims(2))-log10(xlims(1));
+0132    xarrw = [10^(log10(tau0)-ndecx/10) tau0];
+0133    yarrw = yfit(find(xfit&gt;=xarrw(1),1,<span class="string">'first'</span>));
+0134    yarrw = [yarrw yarrw];
+0135 
+0136    <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
+0137    <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
+0138       ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f$ days'</span>,tau0);
+0139    <span class="keyword">else</span>
+0140       ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,tau0,xminc);
+0141    <span class="keyword">end</span>
+0142 
+0143    <span class="comment">% draw the arrow</span>
+0144    baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], <span class="keyword">...</span>
+0145       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0146    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
+0147       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+0148 
+0149    <span class="comment">% % tauExp</span>
+0150    <span class="comment">%----------------------------------------------------------------------------</span>
+0151    <span class="comment">% test using the new xminL/H</span>
+0152    <span class="comment">% deactivate this and reactive the two lines below to go back</span>
+0153    xexp = tau0*(2-b)/(3-2*b);
+0154    tauL = tau0L*(2-b)/(3-2*b);
+0155    tauH = tau0H*(2-b)/(3-2*b);
+0156    xexpc = (tauH-tauL)/2;
+0157    <span class="comment">% xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);</span>
+0158    <span class="comment">% xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));</span>
+0159    <span class="comment">%----------------------------------------------------------------------------</span>
+0160 
+0161    xarrw = [10^(log10(xexp)-ndecx/10) xexp];
+0162    yarrw = yfit(find(xfit&gt;=xarrw(2),1,<span class="string">'first'</span>));
+0163    yarrw = [yarrw yarrw];
+0164 
+0165    <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
+0166    <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
+0167       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f$ days'</span>,xexp);
+0168    <span class="keyword">else</span>
+0169       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
+0170    <span class="keyword">end</span>
+0171 
+0172    baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], <span class="keyword">...</span>
+0173       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0174    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
+0175       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+0176 <span class="keyword">end</span>
+0177 
+0178 <span class="comment">%% INPUT PARSER</span>
+0179 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] = </a><span class="keyword">...</span>
+0180       parseinputs(x, xmin, alpha, varargin)
+0181 
+0182    parser = inputParser;
+0183    parser.FunctionName = <span class="string">'baseflow.plplotb'</span>;
+0184    parser.CaseSensitive = false;
+0185    parser.KeepUnmatched = true;
+0186 
+0187    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
+0188    parser.addRequired(<span class="string">'xmin'</span>, @isnumeric);
+0189    parser.addRequired(<span class="string">'alpha'</span>, @isnumeric);
+0190    parser.addParameter(<span class="string">'alphaci'</span>, nan, @isnumeric);
+0191    parser.addParameter(<span class="string">'xminci'</span>, nan, @isnumeric);
+0192    parser.addParameter(<span class="string">'varsym'</span>, <span class="string">'\tau'</span>, @ischar);
+0193    parser.addParameter(<span class="string">'trimline'</span>, false, @islogical);
+0194    parser.addParameter(<span class="string">'labelplot'</span>, true, @islogical);
+0195 
+0196    parser.parse(x, xmin, alpha, varargin{:});
+0197 
+0198    alphaci     = parser.Results.alphaci;
+0199    xminci      = parser.Results.xminci;
+0200    varsym      = parser.Results.varsym;
+0201    trimline    = parser.Results.trimline;
+0202    labelplot   = parser.Results.labelplot;
+0203 <span class="keyword">end</span></pre></div>
+</body>
+</html>
