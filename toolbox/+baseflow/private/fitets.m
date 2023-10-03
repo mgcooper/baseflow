@@ -46,7 +46,7 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
          opts = optimset();
          opts = optimset(opts, 'Display', 'Off');
       else
-         opts = statset('Display','off');
+         opts = statset('Display', 'off');
       end
    end
 

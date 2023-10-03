@@ -111,9 +111,18 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
       % plot all values
       allidx = struct2vec(Info, plotfields);
       allidx = min(allidx):1:max(allidx);
-
-      h1.alldata = scatter(h.ax(m), T(allidx), Q(allidx), 3*sz, ...
-         [0.5 0.5 0.5], 'filled');
+      
+      switch m
+         case 1 % Q
+            h1.alldata = scatter(h.ax(m), T(allidx), Q(allidx), 3*sz, ...
+               [0.5 0.5 0.5], 'filled');
+         case 2 % dQ/dt
+            h2.alldata = scatter(h.ax(m), T(allidx), dqdt(allidx), 3*sz, ...
+               [0.5 0.5 0.5], 'filled');
+         case 3 % d2Q/dt2
+            h3.alldata = scatter(h.ax(m), T(allidx), d2qdt(allidx), 3*sz, ...
+               [0.5 0.5 0.5], 'filled');
+      end
 
       for n = 1:numel(plotfields)
 
@@ -145,6 +154,8 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
       legend(['all data', plotfields], 'AutoUpdate', 'off', 'Orientation', ...
          'horizontal', 'Location', 'ne', 'FontSize', 10);
       set(gca,'FontSize',10)
+      
+      datetick;
    end
 
    % add labels

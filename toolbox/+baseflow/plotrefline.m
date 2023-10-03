@@ -1,4 +1,4 @@
-function [href,ab] = plotrefline(x,y,varargin)
+function varargout = plotrefline(x,y,varargin)
    %PLOTREFLINE Add a reference line to a point cloud plot.
    %
    % Syntax
@@ -129,6 +129,14 @@ function [href,ab] = plotrefline(x,y,varargin)
    % the precision of the measurements, here I assume that it is 1 m3/s, and
    % this lower envelope would appear as a horizontal line, also at
    % integer multiples of it.
+   
+   switch nargout
+      case 1
+         varargout{1} = href;
+      case 2
+         varargout{1} = href;
+         varargout{2} = ab;
+   end
 end
 
 %% LOCAL FUNCTIONS
@@ -233,5 +241,5 @@ function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
    linecolor   = parser.Results.linecolor;
    precision   = parser.Results.precision;
    timestep    = parser.Results.timestep;
-   ax          = parser.Results.ax;
+   ax          = parser.Results.ax;   
 end

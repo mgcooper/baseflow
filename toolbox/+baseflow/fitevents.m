@@ -75,13 +75,17 @@ function [Fits,Results] = fitevents(Events,varargin)
    % manage warnings
    if isoctave
       %warning('off','Octave:invalid-fun-call');
-      warning('off','Octave:nearly-singular-matrix');
+      withwarnoff({ ...
+         'Octave:nearly-singular-matrix'} ...
+         );
    else
-      warning('off','MATLAB:rankDeficientMatrix');
-      warning('off','stats:nlinfit:IterationLimitExceeded');
-      warning('off','stats:nlinfit:ModelConstantWRTParam');
-      warning('off','stats:nlinfit:IllConditionedJacobian');
-      warning('off','baseflow:deps:rsquare:NegativeRsquared');
+      withwarnoff({ ...
+         'MATLAB:rankDeficientMatrix', ...
+         'stats:nlinfit:IterationLimitExceeded', ...
+         'stats:nlinfit:ModelConstantWRTParam', ...
+         'stats:nlinfit:IllConditionedJacobian', ...
+         'baseflow:deps:rsquare:NegativeRsquared'} ...
+         );
    end
 
    debugflag = false;
@@ -141,18 +145,6 @@ function [Fits,Results] = fitevents(Events,varargin)
    vars = fieldnames(Results);
    for n = 1:numel(vars)
       Results.(vars{n}) = Results.(vars{n})(ikeep);
-   end
-
-
-   % TURN WARNINGS BACK ON
-   if isoctave
-      warning('on','Octave:nearly-singular-matrix');
-   else
-      warning('on','MATLAB:rankDeficientMatrix');
-      warning('on','stats:nlinfit:IterationLimitExceeded');
-      warning('on','stats:nlinfit:ModelConstantWRTParam');
-      warning('on','stats:nlinfit:IllConditionedJacobian');
-      warning('on','baseflow:deps:rsquare:NegativeRsquared');
    end
 end
 

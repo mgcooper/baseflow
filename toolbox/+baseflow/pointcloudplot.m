@@ -1,4 +1,4 @@
-function out = pointcloudplot(q,dqdt,varargin)
+function varargout = pointcloudplot(q,dqdt,varargin)
    %POINTCLOUDPLOT Plot a point-cloud diagram to estimate aquifer parameters.
    %
    % Syntax
@@ -45,17 +45,17 @@ function out = pointcloudplot(q,dqdt,varargin)
       figure;
       ax = gca;
    end
-   fig = get(ax,'Parent');
-   set(fig, 'Position',[0 0 550 510]);
+   fig = get(ax, 'Parent');
+   set(fig, 'Position', [0 0 550 510]);
 
    % plot the data
-   h0 = loglog(ax,q,-dqdt,'o');
-   formatPlotMarkers('markersize',6);
+   h0 = loglog(ax, q, -dqdt, 'o');
+   formatPlotMarkers('markersize', 6);
    hold on; grid off;
 
    % add circles around the t>tau0 values if requested
    if sum(mask) < numel(q)
-      h1 = scatter(q(mask),-dqdt(mask),'r');
+      h1 = scatter(q(mask), -dqdt(mask), 'r');
    else
       h1 = [];
    end
@@ -66,18 +66,20 @@ function out = pointcloudplot(q,dqdt,varargin)
    ylowlim = min(ylims);
    yupplim = max(ylims);
 
-   xlim([xlims(1)*.9 xlims(2)*1.1]);
+   xlim([xlims(1) * 0.9 xlims(2) * 1.1]);
    % xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
 
    % set xylabels and init containers for reflines
    if isoctave
       xlabel('Q (m^3 d^{-1})','FontSize',14, 'Interpreter', 'tex');
-      ylabel('-dQ/dt (m^3 d^{-2})','FontSize',14, 'Interpreter', 'tex');
+      ylabel('-dQ/dt (m^3 d^{-2})','FontSize', 14, 'Interpreter', 'tex');
 
       h = zeros(numel(reflines),1);
    else
-      xlabel(baseflow.getstring('Q','units',true),'FontSize', 14, 'Interpreter', 'latex');
-      ylabel(baseflow.getstring('dQdt','units',true),'FontSize',14, 'Interpreter', 'latex');
+      xlabel(baseflow.getstring('Q','units',true), ...
+         'FontSize', 14, 'Interpreter', 'latex');
+      ylabel(baseflow.getstring('dQdt','units',true), ...
+         'FontSize', 14, 'Interpreter', 'latex');
 
       h = gobjects(numel(reflines),1);
    end
@@ -145,11 +147,11 @@ function out = pointcloudplot(q,dqdt,varargin)
       end
       out.ab.(reflines{n}) = ab(n,:);
    end
-   set(gca,'YLim',[ylowlim yupplim]);
+   set(gca,'YLim', [ylowlim yupplim]);
 
    % plot rain if provided
    if all(~isnan(rain))
-      hrain = plotrain(ax,h0,rain,q,-dqdt);
+      hrain = plotrain(ax, h0, rain, q, -dqdt);
    else
       hrain = nan;
    end
@@ -158,7 +160,7 @@ function out = pointcloudplot(q,dqdt,varargin)
    if addlegend == true
 
       % check if both userfit and bestfit are requested
-      fitcheck = {'bestfit','userfit'};
+      fitcheck = {'bestfit', 'userfit'};
 
       if all(ismember(fitcheck,reflines))
 
@@ -180,19 +182,19 @@ function out = pointcloudplot(q,dqdt,varargin)
          % ------------------------------------
 
          % only put bestfit in the legend
-         keep = strcmp(reflines,'bestfit');
+         keep = strcmp(reflines, 'bestfit');
          hleg = h(keep);
-         ltxt = baseflow.aQbString(ab(keep,:),'printvalues',true);
+         ltxt = baseflow.aQbString(ab(keep, :), 'printvalues', true);
          ltxt = [ltxt ' (' upper(usertext) ' fit)'];
          %ltxt = [ltxt ' (nonlinear least-squares)'];
 
          % check if either userfit or bestfit are requested
-      elseif any(ismember(fitcheck,reflines))
+      elseif any(ismember(fitcheck, reflines))
 
          % use whichever one was requested
-         keep = ismember(reflines,fitcheck);
+         keep = ismember(reflines, fitcheck);
          hleg = h(keep);
-         ltxt = baseflow.aQbString(ab(keep,:),'printvalues',true);
+         ltxt = baseflow.aQbString(ab(keep, :), 'printvalues', true);
 
          if ~isempty(usertext)
             ltxt = [ltxt ' (' upper(usertext) ' fit)'];
@@ -202,16 +204,20 @@ function out = pointcloudplot(q,dqdt,varargin)
             ltxt = [ltxt ' (MLE fit)'];
          end
 
+      else
+         % this could mean only late-time or early-time or other requested
+         hleg = h;
+         ltxt = reflines;
       end
 
       if isobject(hrain)
          hleg = [hleg hrain];
-         ltxt = {ltxt,'rain'};
+         ltxt = {ltxt, 'rain'};
       end
 
-      ltxt = strrep(ltxt,'$','');
-      l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
-         'AutoUpdate','off');
+      ltxt = strrep(ltxt, '$', '');
+      L = legend(hleg,ltxt, 'location', 'northwest', 'interpreter', 'tex', ...
+         'AutoUpdate', 'off');
 
       %    if isoctave
       %       ltxt = strrep(ltxt,'$','');
@@ -223,16 +229,20 @@ function out = pointcloudplot(q,dqdt,varargin)
       %    end
 
    else
-      l = nan;
+      L = nan;
    end
    % package the output
-   out.fig        = fig;
-   out.scatter    = h0;
-   out.mask       = h1;
-   out.reflines   = h;
-   out.ax         = gca;
-   out.hrain      = hrain;
-   out.legend     = l;
+   if nargout == 1
+      out.fig        = fig;
+      out.scatter    = h0;
+      out.mask       = h1;
+      out.reflines   = h;
+      out.ax         = gca;
+      out.hrain      = hrain;
+      out.legend     = L;
+      
+      varargout{1} = out;
+   end
 end
 
 %% LOCAL FUNCTIONS

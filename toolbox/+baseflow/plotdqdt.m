@@ -19,14 +19,14 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    %
    % See also: getdqdt, fitdqdt
 
-   % NOTE: now that pickFitter calls baseflow.fitab, this function does everything
-   % that an official workflow would do, i think, and therefore should be
-   % renamed eventually (except it doesn't pick events)
+   % NOTE: now that pickFitter calls baseflow.fitab, this function does
+   % everything that an complete workflow would do, i think, and therefore
+   % should be renamed eventually (except it doesn't pick events)
 
    % NOTE: rain is optional b/c at this point, events are picked
 
-   % NOTE: this is only called from getdqdt, and only if 'pickmethod' is something
-   % other than 'none'.
+   % NOTE: this is only called from getdqdt, and only if 'pickmethod' is
+   % something other than 'none'.
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -40,7 +40,8 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    [hFits, Fits, Picks] = initOutput();
 
    % Prep fits
-   [~, ~, logx, logy, weights, ok] = baseflow.prepfits(q, dqdt, 'weights', weights);
+   [~, ~, logx, logy, weights, ok] = baseflow.prepfits(q, dqdt, ...
+      'weights', weights);
 
    if ok == false
       return;
@@ -57,23 +58,19 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
       showfig, blate, timestep, precision, labelplot);
 end
 
-%% LOCAL FUNCTIONS
-function [hFits, Fits, Picks] = initOutput()
-   % initialize output
-   Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
-   Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
-   Picks.nPicks = nan; hFits = nan;
-end
-
-% SELECT FITS
+%% SELECT FITS
 function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)
 
    switch pickmethod
       case 'none'  % do nothing (use the entire event)
          istart = [];
          istop = [];
-         
+
       case 'auto' % auto detect transition between early/late time
+
+         if isoctave
+            error('auto detection not enabled on Octave')
+         end
 
          % if called w/o output, it will generate a figure
          chgpts = findchangepts(dqdt, 'MaxNumChanges', 2, 'Statistic', ...
@@ -99,6 +96,11 @@ function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)
          endPts      = pickedPts(2:2:end);
 
          close(pickFig);
+         
+         if isodd(numel(pickedPts))
+            error('baseflow:plotdqdt:oddNumberPickedPoints', ...
+               'Each manually-selected recession segment must have one start and one end point.')
+         end
 
          % for manual, need to find the indices
          istart = nan(size(startPts));
@@ -141,7 +143,7 @@ function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)
    Picks.runlengths    = istop-istart+1;
 end
 
-% FIT PICKS
+%% FIT PICKS
 function Fits = pickFitter(Picks,fitmethod)
 
    for n = 1:Picks.nPicks
@@ -149,14 +151,14 @@ function Fits = pickFitter(Picks,fitmethod)
       logq = Picks.Q{n};
       logdqdt = Picks.dQdt{n};
       weights = Picks.Weights{n};
-      
+
       q = exp(logq);
       dqdt = -exp(logdqdt);
 
       switch fitmethod
 
          case {'ols','qtl','nls','mle'}
-            Fit = baseflow.fitab(q,dqdt,'nls');
+            Fit = baseflow.fitab(q, dqdt, fitmethod);
          case 'comp'
             FitO = baseflow.fitab(q,dqdt,'ols','weights',weights);
             FitQ = baseflow.fitab(q,dqdt,'qtl','weights',weights);
@@ -174,20 +176,16 @@ function Fits = pickFitter(Picks,fitmethod)
    Fits.nFits = Picks.nPicks;
 end
 
-% PLOT FITS
+%% PLOT FITS
 function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
       showfig,blate,timestep,precision,labelplot)
 
    if plotfits == true
       if showfig == true
-
-         if strcmp(ax,'none')
-            % changed this to make a figure instead
-            %ax = gca;
-            figure('Position',[1 1 658  576]);
+         if strcmp(ax, 'none')
+            figure('Position',[1 1 658 576]);
             ax = gca;
-         end % else, useax was passed in
-
+         end
       else
          figure('Position',[1 1 658  576],'visible','off');
          ax = gca;
@@ -216,7 +214,10 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
    rain = Picks.Rain{end};
    hold on;
 
-   % plot the entire event and get ax lims before setting log scale
+   % Plot the entire event and get ax lims before setting log scale. Note: in
+   % an earlier version this was moved after the 1:nPlot loop for the case
+   % where multiple events are plotted, the difference is how the lines plot on
+   % top of the scatter points.
    h.scatter = plot(h.ax, x, y, 'o', 'MarkerSize', 8, ...
       'MarkerFaceColor', c(1,:), 'MarkerEdgeColor', 'none');
 
@@ -246,35 +247,31 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
       end
    end
 
-   % remove empty legend text
+   % Remove empty legend text
    ltext = ltext(~ismember(ltext,''));
+   xtext = baseflow.getstring('Q','units',true);
+   ytext = baseflow.getstring('dQdt','units',true);
 
-   % % I moved this up so the lines plot on top, might have wanted it here for
-   % the case where we plot multiple events
-   %    % plot the entire event and get ax lims before setting log scale
-   %    h.scatter   = plot(h.ax,x,y,'o', 'MarkerSize',        8,             ...
-   %                                     'MarkerFaceColor',   c(1,:),        ...
-   %                                     'MarkerEdgeColor',   'none'         );
-
+   % Format the figure
    axis tight; axis square;
-   h.ax.XScale = 'log';
-   h.ax.YScale = 'log';
+   set(h.ax, 'XScale', 'log', 'YScale', 'log');
 
-   % set AutoUpdate,'off' if adding back the text along the line
-   %    h.leg       = legend([h.plots{:}],ltext,'Location','best',      ...
-   %                   'Interpreter','latex','AutoUpdate','off');
+   if isoctave
+      ltext = latex2tex(ltext);
+      xtext = latex2tex(xtext);
+      ytext = latex2tex(ytext);
+      interpreter = 'tex';
+   else
+      interpreter = 'latex';
+   end
 
-   xlabel(baseflow.strings('Q','units',true));
-   ylabel(baseflow.strings('dQdt','units',true));
+   xlabel(xtext, 'Interpreter', interpreter);
+   ylabel(ytext, 'Interpreter', interpreter);
 
-   xlimkeep = get(gca,'XLim');
-   ylimkeep = get(gca,'YLim');
+   xlimkeep = get(gca, 'XLim');
+   ylimkeep = get(gca, 'YLim');
 
-   % % no longer used, 'earlytime' and 'latetime' reflines instead
-   %    if isnan(refpoints)
-   %       refpoints   = quantile(y,refqtls);     % use the 5th/95th pctl
-   %    end
-
+   % Add reference lines
    [hUpper,abUpper] = baseflow.plotrefline(x,y, ...
       'refline',  'upperenvelope',  ...
       'timestep', timestep );
@@ -298,67 +295,116 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
 
    % make the ylimits span the minimum dq/dt to the upper envelope at max Q
    if timestep >= 1
-      ylowlim = min(0.8*abLower(1),min(ylimkeep));
-      yupplim = abUpper(1)*max(xlimkeep)^abUpper(2);
+      ylowlim = min(0.8 * abLower(1), min(ylimkeep));
+      yupplim = abUpper(1) * max(xlimkeep)^abUpper(2);
 
-      set(gca,'YLim',[ylowlim yupplim]);
+      set(gca, 'YLim', [ylowlim yupplim]);
    end
 
-   h = plotrain(h,rain,x,y);
+   h = plotrain(h, rain, x, y);
 
    % I added this so rain is in the legend
-   if isfield(h,'hrain') && isaxis(h.hrain)
-      ltext = [ltext 'rain'];
-      h.leg = legend( [h.plots{:} h.hrain(1)],ltext, ...
-         'Location','best','Interpreter','latex', ...
-         'FontSize',11,'AutoUpdate','off');
-   else
-      h.leg = legend( [h.plots{:} hUpper],ltext, ...
-         'Location','best','Interpreter','latex', ...
-         'FontSize',11,'AutoUpdate','off');
+   if ~isoctave
+      withwarnoff('MATLAB:legend:IgnoringExtraEntries');
    end
-
-   % ff = figformat('labelinterpreter','latex','linelinewidth',2,   ...
-   %    'suppliedline',h.plots{1},'legendlocation',     ...
-   %    'northwest');
-   % h.ff = ff;
-
-   grid off;
+   
+   if isfield(h, 'hrain') && isaxis(h.hrain)
+      ltext = [ltext 'rain'];
+      h.leg = legend( [h.plots{:} h.hrain(1)], ltext, ...
+         'Location', 'northwest', 'Interpreter', interpreter, ...
+         'FontSize', 13, 'AutoUpdate', 'off');
+   else
+      h.leg = legend( [h.plots{:} hUpper], ltext, ...
+         'Location', 'northwest', 'Interpreter', interpreter, ...
+         'FontSize', 13, 'AutoUpdate', 'off');
+   end
+   grid off
 
    % fprintf('%.f picks selected to plot\n',numel(ltext))
    if labelplot == true
-      addlabels(h)
+      labelReflines(h)
    end
 
-   % axpos = baseflow.deps.plotboxpos(gca); % only works with correct axes position
+   % axpos = baseflow.deps.plotboxpos(gca);
+   % only works with correct axes position
    % xtext = exp(mean(log(xlimkeep)));
    % addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);
    % addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);
    % addRotatedText(1*xtext,axb(aMax,1*xtext,bMax),'upper envelope',1.5,axpos);
 end
 
-function addlabels(h)
+%%
+function labelReflines(h)
 
-   ya = 50;
-   xa = (ya/h.aLate)^(1/h.bLate);
-   xa = [xa xa*3];
+   % Use the axis limits and the number of decades to place the labels
+   ylims = ylim;
+   xlims = xlim;
+
+   ndecsy = log10(ylims(2)) - log10(ylims(1));
+   ndecsx = log10(xlims(2)) - log10(xlims(1));
+
+   % Place the late-time arrow above the first decade
+   factor = 10;
+   ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
+   xa = (ya / h.aLate) ^ (1 / h.bLate);
+
+   % If xa is off the chart, adjust y and recompute
+   while xa < xlims(1)
+      factor = factor - 1;
+      ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
+      xa = (ya / h.aLate) ^ (1 / h.bLate);
+   end
+
+   % Make the arrow span 1/10th or so of the total number of decades
+   xa = [xa 10 ^ (log10(xa) + ndecsx/factor)];
    ya = [ya ya];
-   ta = sprintf('$b=%.2f$ ($\\hat{b}$)',h.bLate);
 
-   baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
-   text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
+   % Convert from data units to normalized figure units
+   [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
 
-   xa = (ya(1)/h.aEarly)^(1/h.bEarly);
-   xa = [xa xa*3];
-   ta = sprintf('$b=%.0f$',h.bEarly);
+   % Place the arrow. When headwidth is adjusted the arrow tip is slightly
+   % elongated, so adjust normX a tad bit
+   normX(2) = normX(2)*1.02;
+   annotation('arrow', normX, normY, 'HeadStyle', 'plain', 'HeadWidth', 4, ...
+      'HeadLength', 8, 'LineWidth', 1)
 
-   baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
-   text(1.05*xa(2),ya(2),ta,'HorizontalAlignment','left')
+
+   % Add the label
+   if isoctave
+      ta = sprintf('b=%.2f', h.bLate);
+      text(1.05 * xa(2), ya(2), ta, ...
+         'HorizontalAlignment', 'left', 'Interpreter', 'tex')
+   else
+      ta = sprintf('$b=%.2f$ ($\\hat{b}$)', h.bLate);
+      text(1.05 * xa(2), ya(2), ta, ...
+         'HorizontalAlignment', 'left', 'Interpreter', 'latex')
+   end
+
+   % Draw the early-time arrow
+   xa = (ya(1) / h.aEarly) ^ (1 / h.bEarly);
+   xa = [xa 10^(log10(xa) + ndecsx/factor)];
+
+   % Convert from data units to normalized figure units
+   [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
+   normX(2) = normX(2)*1.01;
+
+   % Place the arrow
+   annotation('arrow', normX, normY, 'HeadStyle', 'plain', 'HeadWidth', 4, ...
+      'HeadLength', 10, 'LineWidth', 1)
+
+   % Add the label
+   if isoctave
+      ta = sprintf('b=%.0f', h.bEarly);
+      text(1.05 * xa(2), ya(2), ta, ...
+         'HorizontalAlignment', 'left', 'Interpreter', 'tex')
+   else
+      ta = sprintf('$b=%.0f$', h.bEarly);
+      text(1.05 * xa(2), ya(2), ta, ...
+         'HorizontalAlignment', 'left', 'Interpreter', 'latex')
+   end
 end
 
-
+%%
 function h = plotrain(h,rain,x,y)
 
    % add rain. scale the circles such that 1 mm of rain equals the size of
@@ -384,6 +430,7 @@ function h = plotrain(h,rain,x,y)
    end
 end
 
+%%
 function addRotatedText(xtxt,ytxt,txt,slope,axpos)
 
    % https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib
@@ -402,13 +449,13 @@ function addRotatedText(xtxt,ytxt,txt,slope,axpos)
       'rotation',atext);
 end
 
-% PLOT EVENT
+%% PLOT EVENT
 function pickFig = eventPlotter(q,dqdt)
    pickFig = figure;
    scatter(q,dqdt,36,[0,0.447,0.741],'filled');
 end
 
-% DETECT TRANSITION
+%% DETECT TRANSITION
 function [istart, istop] = detectTransition(q,dqdt,istart,istop)
 
    nPicks   = numel(istart);
@@ -440,6 +487,13 @@ function [istart, istop] = detectTransition(q,dqdt,istart,istop)
    end
 end
 
+%% Initialize output
+function [hFits, Fits, Picks] = initOutput()
+   Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
+   Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
+   Picks.nPicks = nan; hFits = nan;
+end
+
 %% INPUT PARSER
 function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
       rain, ax, blate, precision, timestep, eventID, labelplot] = parseinputs(...
@@ -448,19 +502,6 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    parser = inputParser;
    parser.FunctionName = ['baseflow.' mfilename];
    parser.CaseSensitive = false;
-
-   validateattributes(q, {'numeric'},{'real','column'}, mfilename, 'q');
-   validateattributes(dqdt, {'numeric'},{'real','column'}, mfilename, 'dqdt');
-   validateattributes('fitmethod', {'char','string'},{'scalartext'}, mfilename);
-   validateattributes('pickmethod', {'char','string'},{'scalartext'}, mfilename);
-   validateattributes('plotfits', {'logical'},{'scalar'}, mfilename);
-   validateattributes('weights', {'numeric'},{'real','column'}, mfilename);
-   validateattributes('ax', {'matlab.graphics.axis.Axes','char'},{'scalar'}, mfilename);
-   validateattributes('timestep', {'numeric','duration'}, mfilename);
-   validateattributes('precision', {'numeric'}, mfilename);
-   validateattributes('blate', {'numeric'},{'real','scalar'}, mfilename);
-   validateattributes('rain', {'numeric'},{'real','column'}, mfilename);
-
    parser.addRequired('q');
    parser.addRequired('dqdt');
    parser.addParameter('fitmethod', 'nls');
@@ -492,4 +533,19 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    precision = parser.Results.precision;
    fitmethod = parser.Results.fitmethod;
    pickmethod = parser.Results.pickmethod;
+
+   if ~ischar(ax)
+      validateattributes(ax, {'matlab.graphics.axis.Axes'},{'scalar'}, mfilename);
+   end
+
+   validateattributes(q, {'numeric'}, {'real','column'}, mfilename, 'q');
+   validateattributes(dqdt, {'numeric'}, {'real','column'}, mfilename, 'dqdt');
+   validateattributes(rain, {'numeric'}, {'real','column'}, mfilename);
+   validateattributes(blate, {'numeric'}, {'real','scalar'}, mfilename);
+   validateattributes(weights, {'numeric'}, {'real','column'}, mfilename);
+   validateattributes(timestep, {'numeric', 'duration'}, {'nonempty'}, mfilename);
+   validateattributes(plotfits, {'logical'}, {'scalar'}, mfilename);
+   validateattributes(precision, {'numeric'}, {'nonempty'}, mfilename);
+   validateattributes(fitmethod, {'char', 'string'}, {'scalartext'}, mfilename);
+   validateattributes(pickmethod, {'char', 'string'}, {'scalartext'}, mfilename);
 end

@@ -19,7 +19,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    %  start with linear=rsq0, set rsq=rsq0
    %  try non-robust nlinfit=rsq2, if rsq2>rsq, set rsq=rsq2 and
    %  select nlinfit non-robust
-   %  else
+   %  else select linear
 
    % try non-robust nonlinear least squares fitting
    ab2ok = true;
@@ -40,7 +40,6 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    end
 
    if ab2ok && rsq2 > rsq && rsq2 > 0
-
       fselect = 'nlinfit';
       rsq = rsq2;
    else
@@ -66,9 +65,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
          ab = ab2;
 
       case 'linear'
-
          %[B, BINT, R, RINT, STATS] = regress (Y, X, [ALPHA])
-
          [ab,ci] = regress(logy,[ones(size(y)) logx]);
          ci(1,:) = exp(ci(1,:));
          ab = [exp(ab(1)); ab(2)];
