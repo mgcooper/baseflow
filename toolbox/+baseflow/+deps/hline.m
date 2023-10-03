@@ -1,52 +1,130 @@
 function hhh=hline(y,linetype,label)
-%HLINE Draw a horizontal line on the current axes at specified location.
-% 
-%  h = hline(y, linetype, label)
-% 
-% Draws a horizontal line on the current axes at the location specified by
-% 'y'.  Optional arguments are 'linetype' (default is 'r:') and 'label', 
-% which applies a text label to the graph near the line.  The
-% label appears in the same color as the line.
-%
-% The line is held on the current axes, and after plotting the line, the 
-% function returns the axes to its prior hold state.
-%
-% The HandleVisibility property of the line object is set to "off", so 
-% not only does it not appear on legends, but it is not findable by using 
-% findobj.  Specifying an output argument causes the function to
-% return a handle to the line, so it can be manipulated or deleted.  
-% Also, the HandleVisibility can be overridden by setting the root's 
-% ShowHiddenHandles property to on.
-%
-% h = hline(42,'g','The Answer')
-%
-% returns a handle to a green horizontal line on the current axes at y=42,
-% and creates a text object on the current axes, close to the line, which
-% reads "The Answer".
-%
-% hline also supports vector inputs to draw multiple lines at once.  For example,
-%
-% hline([4 8 12],{'g','r','b'},{'l1','lab2','LABELC'})
-%
-% draws three lines with the appropriate labels and colors.
-% 
-% By Brandon Kuczenski for Kensington Labs.
-% brandon_kuczenski@kensingtonlabs.com
-% 8 November 2001
-% 
-% See also: vline
+   %HLINE Draw a horizontal line on the current axes at specified location.
+   %
+   %  h = hline(y, linetype, label)
+   %
+   % Draws a horizontal line on the current axes at the location specified by
+   % 'y'.  Optional arguments are 'linetype' (default is 'r:') and 'label',
+   % which applies a text label to the graph near the line.  The
+   % label appears in the same color as the line.
+   %
+   % The line is held on the current axes, and after plotting the line, the
+   % function returns the axes to its prior hold state.
+   %
+   % The HandleVisibility property of the line object is set to "off", so
+   % not only does it not appear on legends, but it is not findable by using
+   % findobj.  Specifying an output argument causes the function to
+   % return a handle to the line, so it can be manipulated or deleted.
+   % Also, the HandleVisibility can be overridden by setting the root's
+   % ShowHiddenHandles property to on.
+   %
+   % h = hline(42,'g','The Answer')
+   %
+   % returns a handle to a green horizontal line on the current axes at y=42,
+   % and creates a text object on the current axes, close to the line, which
+   % reads "The Answer".
+   %
+   % hline also supports vector inputs to draw multiple lines at once.  For example,
+   %
+   % hline([4 8 12],{'g','r','b'},{'l1','lab2','LABELC'})
+   %
+   % draws three lines with the appropriate labels and colors.
+   %
+   % By Brandon Kuczenski for Kensington Labs.
+   % brandon_kuczenski@kensingtonlabs.com
+   % 8 November 2001
+   %
+   % See also: vline
 
+   if length(y)>1  % vector input
+      for I=1:length(y)
+         switch nargin
+            case 1
+               linetype='r:';
+               label='';
+            case 2
+               if ~iscell(linetype)
+                  linetype={linetype};
+               end
+               if I>length(linetype)
+                  linetype=linetype{end};
+               else
+                  linetype=linetype{I};
+               end
+               label='';
+            case 3
+               if ~iscell(linetype)
+                  linetype={linetype};
+               end
+               if ~iscell(label)
+                  label={label};
+               end
+               if I>length(linetype)
+                  linetype=linetype{end};
+               else
+                  linetype=linetype{I};
+               end
+               if I>length(label)
+                  label=label{end};
+               else
+                  label=label{I};
+               end
+         end
+         h(I)=hline(y(I),linetype,label);
+      end
+   else
+      switch nargin
+         case 1
+            linetype='r:';
+            label='';
+         case 2
+            linetype=linetype;
+            label='';
+         case 3
+            linetype=linetype;
+            label=label;
+      end
+
+
+
+
+      g=ishold(gca);
+      hold on
+
+      x=get(gca,'xlim');
+      h=plot(x,[y y],linetype);
+      if ~isempty(label)
+         yy=get(gca,'ylim');
+         yrange=yy(2)-yy(1);
+         yunit=(y-yy(1))/yrange;
+         if yunit<0.2
+            text(x(1)+0.02*(x(2)-x(1)),y+0.02*yrange,label,'color',get(h,'color'))
+         else
+            text(x(1)+0.02*(x(2)-x(1)),y-0.02*yrange,label,'color',get(h,'color'))
+         end
+      end
+
+      if g==0
+         hold off
+      end
+      set(h,'tag','hline','handlevisibility','off') % this last part is so that it doesn't show up on legends
+   end % else
+
+   if nargout
+      hhh=h;
+   end
+end
 % LICENSE
-% 
+%
 % Copyright (c) 2001, Brandon Kuczenski
 % All rights reserved.
-% 
+%
 % Redistribution and use in source and binary forms, with or without
 % modification, are permitted provided that the following conditions are met:
-% 
+%
 % * Redistributions of source code must retain the above copyright notice, this
 %   list of conditions and the following disclaimer.
-% 
+%
 % * Redistributions in binary form must reproduce the above copyright notice,
 %   this list of conditions and the following disclaimer in the documentation
 %   and/or other materials provided with the distribution
@@ -60,81 +138,3 @@ function hhh=hline(y,linetype,label)
 % CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 % OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 % OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-if length(y)>1  % vector input
-    for I=1:length(y)
-        switch nargin
-        case 1
-            linetype='r:';
-            label='';
-        case 2
-            if ~iscell(linetype)
-                linetype={linetype};
-            end
-            if I>length(linetype)
-                linetype=linetype{end};
-            else
-                linetype=linetype{I};
-            end
-            label='';
-        case 3
-            if ~iscell(linetype)
-                linetype={linetype};
-            end
-            if ~iscell(label)
-                label={label};
-            end
-            if I>length(linetype)
-                linetype=linetype{end};
-            else
-                linetype=linetype{I};
-            end
-            if I>length(label)
-                label=label{end};
-            else
-                label=label{I};
-            end
-        end
-        h(I)=hline(y(I),linetype,label);
-    end
-else
-    switch nargin
-    case 1
-        linetype='r:';
-        label='';
-    case 2
-        linetype=linetype;
-        label='';
-    case 3
-        linetype=linetype;
-        label=label;
-    end
-
-    
-    
-    
-    g=ishold(gca);
-    hold on
-
-    x=get(gca,'xlim');
-    h=plot(x,[y y],linetype);
-    if ~isempty(label)
-        yy=get(gca,'ylim');
-        yrange=yy(2)-yy(1);
-        yunit=(y-yy(1))/yrange;
-        if yunit<0.2
-            text(x(1)+0.02*(x(2)-x(1)),y+0.02*yrange,label,'color',get(h,'color'))
-        else
-            text(x(1)+0.02*(x(2)-x(1)),y-0.02*yrange,label,'color',get(h,'color'))
-        end
-    end
-
-    if g==0
-    hold off
-    end
-    set(h,'tag','hline','handlevisibility','off') % this last part is so that it doesn't show up on legends
-end % else
-
-if nargout
-    hhh=h;
-end

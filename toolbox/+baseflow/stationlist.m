@@ -1,10 +1,12 @@
-function stations = stationlist
-   %STATIONLIST Return list of stations from the baseflow basin database.
+function stations = stationlist()
+   %STATIONLIST Return list of stations from the baseflow gage database.
    %
+   % Syntax
    %
-   % See also: stationname
+   %     stations = stationlist()
+   %
+   % See also: stationname, basinlist
 
-   % load(fullfile(fileparts([mfilename '.m']),'stationlist.mat'),'stations');
-   load 'stationlist.mat' 'stations';
+   load stationlist.mat stations
    stations = ['ALL_BASINS'; stations];
 end
