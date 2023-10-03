@@ -15,7 +15,7 @@ authors:
 identifiers:
   - type: doi
     value: 10.5281/zenodo.8401281
-    description: The DOI for version 1.0.1 of the software
+    description: The DOI for version 1.0.0 of the software
 repository-code: 'https://github.com/mgcooper/baseflow'
 url: 'https://github.com/mgcooper/baseflow'
 keywords:
@@ -25,5 +25,5 @@ keywords:
   - storage
   - permafrost
 license: BSD-3-Clause
-version: 1.0.1
+version: 1.0.0
 date-released: '2023-10-02'
