@@ -14,7 +14,7 @@ authors:
     orcid: 'https://orcid.org/0000-0002-0165-209X'
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.8401281
+    value: 10.5281/zenodo.8401301
     description: The DOI for version 1.0.0 of the software
 repository-code: 'https://github.com/mgcooper/baseflow'
 url: 'https://github.com/mgcooper/baseflow'

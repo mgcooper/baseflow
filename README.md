@@ -14,7 +14,7 @@ Developed on MATLAB Version: 9.9.0 (R2020b).
 Mathworks Statistics and Machine Learning Toolbox&trade;.  
 Mathworks Curve Fitting Toolbox&trade;.  
 Compatible with Octave, tested on version 8.2.0.  
-Requires Statistics, Optimization, Struct, and Tablicious packages.  
+Requires Statistics, Optimization, Struct, Tablicious, and Statistics-bootstrap packages.  
 
 ## Install
 

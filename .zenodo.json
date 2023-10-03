@@ -1,6 +1,9 @@
 {
-    "license": "other-open",
+    "description": "Matlab/Octave toolbox for baseflow recession analysis",
+    "license": "BSD-3-Clause",
     "title": "baseflow",
+    "version": "v1.0.0",
+    "publication_date": "2023-10-03",
     "upload_type": "software",
     "creators": [
         {
@@ -14,5 +17,23 @@
             "name": "Tian Zhou"
         }
     ],
-    "access_right": "open"
+    "access_right": "open",
+    "keywords": [
+      "hydrology",
+      "baseflow",
+      "groundwater",
+      "permafrost"
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url", 
+            "identifier": "https://github.com/mgcooper/baseflow/tree/v1.0.0", 
+            "relation": "isSupplementTo"
+        }, 
+        {
+            "scheme": "doi", 
+            "identifier": "10.5281/zenodo.7373923", 
+            "relation": "isVersionOf"
+        }
+    ]
 }
