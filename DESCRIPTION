@@ -3,8 +3,8 @@ Version: 1.0.0
 Date: 2023-10-02
 Author: Matt Cooper <mguycooper@gmail.com>
 Maintainer: Matt Cooper <mguycooper@gmail.com>
-Title: Baseflow: a toolbox for baseflow recession analysis
-Description: Matlab-compatible Octave package for estimating aquifer and conceptual catchment-scale aquifer properties from streamflow data using one-dimensional lateral groundwater flow hydraulic theory.
+Title: baseflow: a MATLAB and GNU Octave package for baseflow recession analysis
+Description: Matlab/Octave toolbox for baseflow recession analysis.
 License: BSD-3-Clause
 Problems: Incomplete test coverage. Some Octave incompatibilities may exist.
 Url: https://github.com/mgcooper/baseflow
