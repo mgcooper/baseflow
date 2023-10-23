@@ -20,7 +20,7 @@ authors:
     orcid: 0000-0003-1582-4005
     affiliation: 1
 affiliations:
- - name: Atmospheric Science and Global Change, Pacific Northwest National Laboratory, Richland, WA, USA
+ - name: Atmospheric, Climate, and Earth Sciences, Pacific Northwest National Laboratory, Richland, WA, USA
    index: 1
 date: today
 bibliography: paper.bib
