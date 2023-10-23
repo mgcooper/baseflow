@@ -212,8 +212,8 @@ a Creative Commons Attribution 4.0 International License (CC BY
   change of streamflow to streamflow itself:</p>
   <p><named-content id="eqU003AaQb" content-type="equation"><disp-formula><alternatives>
   <tex-math><![CDATA[
-  -\dfrac{\mathrm{d}Q}{\mathrm{d}t}=aQ^b]]></tex-math>
-  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mo>−</mml:mo><mml:mfrac displaystyle="true"><mml:mrow><mml:mi mathvariant="normal">d</mml:mi><mml:mi>Q</mml:mi></mml:mrow><mml:mrow><mml:mi mathvariant="normal">d</mml:mi><mml:mi>t</mml:mi></mml:mrow></mml:mfrac><mml:mo>=</mml:mo><mml:mi>a</mml:mi><mml:msup><mml:mi>Q</mml:mi><mml:mi>b</mml:mi></mml:msup></mml:mrow></mml:math></alternatives></disp-formula></named-content></p>
+  -\frac{\mathrm{d}Q}{\mathrm{d}t}=aQ^b]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mo>−</mml:mo><mml:mfrac><mml:mrow><mml:mi mathvariant="normal">d</mml:mi><mml:mi>Q</mml:mi></mml:mrow><mml:mrow><mml:mi mathvariant="normal">d</mml:mi><mml:mi>t</mml:mi></mml:mrow></mml:mfrac><mml:mo>=</mml:mo><mml:mi>a</mml:mi><mml:msup><mml:mi>Q</mml:mi><mml:mi>b</mml:mi></mml:msup></mml:mrow></mml:math></alternatives></disp-formula></named-content></p>
   <p>where <inline-formula><alternatives>
   <tex-math><![CDATA[Q]]></tex-math>
   <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mi>Q</mml:mi></mml:math></alternatives></inline-formula>

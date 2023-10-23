@@ -52,7 +52,7 @@ Several publicly available software packages provide standardized methods for ba
 
 <!-- $$-\frac{dQ}{dt} = aQ^b$$ -->
 \begin{equation}\label{eq:aQb}
--\dfrac{\mathrm{d}Q}{\mathrm{d}t}=aQ^b
+-\frac{\mathrm{d}Q}{\mathrm{d}t}=aQ^b
 \end{equation}
 
 where $Q$ is streamflow, $t$ is time, and recession parameters $a$ and $b$ determine the shape of the recession curve (\autoref{fig:figure_1}). Several well-known solutions to the one-dimensional lateral groundwater flow equation for unconfined aquifers can be written in the same form as \autoref{eq:aQb}. Parameters $a$ and $b$ can be regarded as lumped coefficients from which various aquifer properties can be recovered [@brutsaert_1977_WRR; @troch_1993_WRR; @rupp_2006_WRR].
