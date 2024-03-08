@@ -406,6 +406,6 @@ function [t, y, opts, vargs] = parseinputs(t, y, mfilename, varargin)
 
    parser.parse(t, y, varargin{:});
    opts = parser.Results;
-   vargs = namedargs2cell(parser.Unmatched);
+   vargs = struct2varargin(parser.Unmatched);
 end
 
