@@ -18,6 +18,11 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
    %     vtsparam : scalar, double, parameter that controls window size
    %     plotfit  : logical, scalar, indicates whether to plot the fit
    %
+   % This code is based on the method described in:
+   % Rupp, D. E. and Selker, J. S.: Information, artifacts, and noise in dQ/dt −
+   % Q recession analysis, Advances in Water Resources, 29, 154–160,
+   % https://doi.org/10.1016/j.advwatres.2005.03.019, 2006.
+   %
    % See also fitdqdt, fitets
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
@@ -31,7 +36,10 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
    % need e and the stage-discharge relation.
 
    % prep the time vector
-   t = days(T-T(1)+(T(2)-T(1))); % keep og T
+   t = T - T(1) + (T(2)-T(1)); % keep og T
+
+   % For datetimes:
+   % t = days(T-T(1)+(T(2)-T(1))); % keep og T
 
    % initialize the approximations for dq/dt and Q (and dq and dt)
    [N,q,dqdt,dq,dt,tq,rq] = initfit(Q,'eventdqdt');
@@ -71,6 +79,9 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
    % dq    = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
    % dqdt  = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
 
+   % Patch: post the estimates on the original time vector. It is unclear
+   % what value should be used, but anything other than the original time
+   % complicates subsequent identification of events.
    tq = T;
 
    if plotfit == true

@@ -126,6 +126,10 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
    q = interp1(tq(~isnan(q)),q(~isnan(q)),T);
    dq = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
    dqdt = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+
+   % Patch: post the estimates on the original time vector. It is unclear
+   % what value should be used, but anything other than the original time
+   % complicates subsequent identification of events.
    tq = T;
 
    if plotfit == true
