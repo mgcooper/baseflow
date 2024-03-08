@@ -5,6 +5,7 @@ pkg load statistics
 pkg load tablicious
 pkg load optim
 pkg load statistics-bootstrap
+pkg load financial
 # pkg load nan # may be needed or useful
 
 # # If for some reason Setup.m is not sourced or is not working, this roughly replicates it:

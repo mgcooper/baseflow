@@ -6,6 +6,9 @@ For an overview, see [Getting Started](https://mgcooper.github.io/baseflow/).
 
 [![status](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3/status.svg)](https://joss.theoj.org/papers/d0adcf9e526c841f7265c30844c576a3) [![DOI](https://zenodo.org/badge/511647633.svg)](https://zenodo.org/badge/latestdoi/511647633) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/mgcooper/baseflow?include_prereleases) [![MATLAB](https://github.com/mgcooper/baseflow/actions/workflows/run-tests.yml/badge.svg?branch=dev)](https://github.com/mgcooper/baseflow/actions/workflows/run-tests.yml) [![GitHub license](https://img.shields.io/github/license/mgcooper/baseflow)](https://github.com/mgcooper/baseflow/blob/main/LICENSE)
 
+<!-- This is the joss badge but the status one above links to the same place -->
+<!-- [![DOI](https://joss.theoj.org/papers/10.21105/joss.05492/status.svg)](https://doi.org/10.21105/joss.05492) -->
+
 <!-- [![View baseflow on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/<insert final part of baseflow link here>) -->  
 
 ## Dependencies
@@ -68,7 +71,7 @@ If you find this software useful, please consider citing the software release in
 
 ## Configuration
 
-Installing `baseflow` is as simple as cloning this repo and adding it to the Matlab search path. Users should manage the toolbox however they normally manage their search path, for example using `startup.m`. However, functions in the `+baseflow` namespace will not interfere with functions sharing the same name on the search path, so feel free to put the toolbox on your `userpath` if you want it available on startup.
+Installing `baseflow` is as simple as cloning this repo and adding it to the Matlab search path. Users should manage the toolbox however they normally manage their search path, for example using `startup.m`. Note that functions in the `+baseflow` namespace will not interfere with functions sharing the same name on the search path, so feel free to put the toolbox on your `userpath` if you want it available on startup.
 
 For more control, use the convenience function `Setup.m` to manage the toolbox installation and paths. Starting from an initial install in your local repo directory:
 
@@ -82,7 +85,7 @@ For more control, use the convenience function `Setup.m` to manage the toolbox i
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
-Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party matlab/octave software). However, Octave users may find Setup particularly convenient because Setup will load the required packages. Although all dependencies are nominally included in this toolbox, if users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
+Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party Matlab/Octave software). However, Octave users may find `Setup` particularly convenient because it will load the required packages. Although all dependencies are nominally included in this toolbox, if users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
 
 <!-- Disabled this after moving all dependencies to package namespace folders and running built in matlab dependency report -->
  <!-- If for some reason a dependencies is found that is not on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using: -->
@@ -98,9 +101,9 @@ See `Setup.m` for additional configuration options -->
 
 ## Package namespace
 
-The `baseflow` toolbox uses the package namespace `+baseflow`. Package functions are accessed using dot notation: `baseflow.<function name>`. If dot notation is used, the package does not need to be imported. The package is imported implicitly by the `+` prefix on the directory name, as long as the **toolbox** (not package) directory is on the matlab search path (i.e., the parent folder containing the `+baseflow` package directory needs to be on the Matlab search path).
+The `baseflow` toolbox uses the package namespace `+baseflow`. Package functions are accessed using dot notation: `baseflow.<function name>`. The package does not need to be imported, but the parent folder containing the `+baseflow` package folder (i.e., the **toolbox** folder) needs to be on the Matlab search path.
 
-If desired, package functions can be imported into a workspace using `import baseflow.<function name>`. Subsequent calls to the imported function can then omit the package prefix. The entire package can be imported using `import baseflow.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
+If desired, package functions can be imported into a workspace using `import baseflow.<function name>`. Subsequent calls to the imported function can omit the package prefix. The entire package can be imported using `import baseflow.*`. However, imported functions are only available in the calling workspace. To use imported package functions in called functions or class definition files, import them again in those files or just use dot notation at all times, which is the convention used throughout the `baseflow` toolbox.
 
 <!-- If any other `+baseflow` packages exist on the search path, functions in all packages share the `+baseflow` namespace, similar to a [python namespace package](https://packaging.python.org/en/latest/guides/packaging-namespace-packages/) -->
 
@@ -112,6 +115,8 @@ Octave is supported but users may encounter errors. In particular, `baseflow` re
 `optim`  
 `statistics`  
 `tablicious`  
+`statistics-bootstrap`  
+`financial`  
 
 For some demos, the `Symbolic` package is needed.  
 
@@ -127,20 +132,14 @@ To install packages, use the pkg command in Octave:
 Install tablicious from the repository:  
 `pkg install https://github.com/apjanke/octave-tablicious/archive/refs/heads/master.zip`
 
-Each time you use the baseflow toolbox, these packages need to be loaded:  
-`pkg load struct`  
-`pkg load optim`  
-`pkg load statistics`  
-`pkg load tablicious`  
-
-To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name. Use the convenience function `Setup.m` to automatically import these packages.
+To load a package, use `pkg load <pkgname>`. To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name. Use the convenience function `Setup.m` to automatically import required packages.
 
 The `pkg load` commands listed above are included in the .octaverc file. Depending on your configuration, it may or may not be sourced at startup. Octave users are encouraged to run `Setup` when using the toolbox, it will load the required packages and manage warnings. See `Setup.m` for more information.
 
 Limitations when running in Octave:
 
 - The live scripts in the `demos/` folder will not work on Octave, use the `.m` files instead.
-- Functions relying on `datetime` objects will not work on Octave.
+- Functions relying on `datetime` objects may not work on Octave.
 - Graphics object functions do not work in Octave, including those that use `gobjects`.
 - Latex interpreter is not supported in Octave.
 
