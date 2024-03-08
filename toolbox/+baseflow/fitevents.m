@@ -152,7 +152,8 @@ end
 function [q, dqdt, dt, tq, ok] = preparefit(q, dqdt, dt, tq, thisfit)
 
    % if there are multiple fits for an event, qHat, dHat, etc. will be cell
-   % arrays. this pulls out the selected values to fit.
+   % arrays. this pulls out the selected values to fit. Otherwise, it simply
+   % returns the inputs as outputs.
 
    if iscell(q)
       q = q{thisfit};
@@ -195,7 +196,7 @@ function [Fits, K, fitcount] = saveFit(T, q, dqdt, dt, tq, derivmethod, ...
 
 
       % collect all data for the point-cloud
-      fitIdx = ismember(T,tq);
+      fitIdx = ismember(T, tq);
       %fitIdx = ismember(T,datenum(tq)); % TEST
       Fits.q(        fitIdx) = q;
       Fits.dqdt(     fitIdx) = dqdt;
