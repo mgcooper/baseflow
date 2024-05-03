@@ -11,13 +11,13 @@ For an overview, see [Getting Started](https://mgcooper.github.io/baseflow/).
 
 <!-- [![View baseflow on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/<insert final part of baseflow link here>) -->  
 
-## Dependencies
+## Requirements
 
-Developed on MATLAB Version: 9.9.0 (R2020b).  
-Mathworks Statistics and Machine Learning Toolbox&trade;.  
-Mathworks Curve Fitting Toolbox&trade;.  
-Compatible with Octave, tested on version 8.2.0.  
-Requires Statistics, Optimization, Struct, Tablicious, and Statistics-bootstrap packages.  
+- MATLAB&reg;, developed on version 9.9.0 (R2020b).
+  - Mathworks Statistics and Machine Learning Toolbox.  
+  - Mathworks Curve Fitting Toolbox.  
+- Octave, tested on version 8.2.0.  
+  - Statistics, Optimization, Struct, Tablicious, and Statistics-bootstrap packages.  
 
 ## Install
 
@@ -25,27 +25,29 @@ Requires Statistics, Optimization, Struct, Tablicious, and Statistics-bootstrap 
   - `mpm install baseflow`
 - cd into the `toolbox` directory.
 - Run `Setup.m`:
-  - Type `msg = Setup('install')` at the command line then press enter.
+  - Type `msg = Setup('install')` at the command window then press enter.
   - Check `msg` for information about the installation.
 - If running in Octave, see `.octaverc` for recommended startup options.
-- Unit tests are in `tests/`. To run them from the top-level folder, type `runtests('tests')` at the command window and press enter. To debug, try `runtests('tests', 'debug', true)`.
-- In new Matlab sessions, cd to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path, or manage the search path however you normally do.
+- Unit tests are in `tests/`. To run them from the top-level folder:
+  - Type `runtests('tests')` at the command window and press enter.
+  - To debug, try `runtests('tests', debug=true)`.
+- In new Matlab sessions, cd to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path (or manage the search path however you normally do).
 
 For more options, see [Configuration](#configuration).  
 For Octave compatibility, see [Octave](#octave).  
 
 ## Get started
 
-Toolbox functions are in the `+baseflow` namespace folder. To see a list of toolbox functions, type `help +baseflow` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help baseflow.function_name` at the command line then press enter.
+Toolbox functions are in the `+baseflow` namespace. To see a list of toolbox functions, type `help +baseflow` at the command line then press enter. To see the help for a specific function, click on any of the hyperlinks, or type `help baseflow.<function_name>` at the command line then press enter.
 
 Toolbox documentation is available in the Matlab help browser. To get started, in your Matlab command window:
 
 - Type `baseflow.help()` to open the toolbox documentation in the help browser.
-- Type `baseflow.help('function_name')` to open documentation for a specific function.
+- Type `baseflow.help('<function_name>')` to open documentation for a specific function.
 - Type `doc baseflow` or try `doc +baseflow` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch baseflow`.
 
-Demo notebooks are in `demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Each demo is available as an html file in `toolbox/docs`, double click to view them in the Matlab help browser, or use `baseflow.help(<docname>)`. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
+Notebooks are in `demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Each demo is available as an html file in `toolbox/docs`. Double click to view them in the Matlab help browser, or use `baseflow.help(<docname>)`. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
 
 ## Contribute
 
@@ -57,6 +59,7 @@ If you find a bug, have a question, or want to contribute, feel free to open an 
 
 If you find this software useful, please consider citing the software release in `Citation.cff` and/or the following paper for which the software was developed:
 
+```bib
     @ARTICLE{10.1029/2022WR033154,
     AUTHOR={Cooper, Matthew G, Zhou, Tian, Bennett, Katrina E, Bolton, W Robert, Coon, Ethan T, Fleming, Sean W, Rowland, Joel C, and Schwenk, Jon},
     TITLE={Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession},
@@ -68,6 +71,7 @@ If you find this software useful, please consider citing the software release in
     DOI={10.1029/2022WR033154},
     ISSN={1944-7973},
     }
+```
 
 ## Configuration
 
@@ -109,7 +113,7 @@ If desired, package functions can be imported into a workspace using `import bas
 
 ## Octave
 
-Octave is supported but users may encounter errors. In particular, `baseflow` relies on the `tablicious` package for `string` and `datetime` support, but `tablicious` does not fully support these objects. `baseflow` has been tested on macOS with Octave v8.1.0 and 8.2.0. Octave can be downloaded [here](https://octave.org/download.html). `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). If running in Octave, the following packages are required:
+Octave is supported but `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). In particular, `baseflow` uses the [`tablicious`](https://github.com/apjanke/octave-tablicious) package for `string` and `datetime` support, but `tablicious` does not fully support these objects. `baseflow` was tested on macOS with Octave v8.1.0 and 8.2.0. Octave can be downloaded [here](https://octave.org/download.html). If running in Octave, the following packages are required:
 
 `struct`  
 `optim`  
@@ -140,7 +144,7 @@ Limitations when running in Octave:
 
 - The live scripts in the `demos/` folder will not work on Octave, use the `.m` files instead.
 - Functions relying on `datetime` objects may not work on Octave.
-- Graphics object functions do not work in Octave, including those that use `gobjects`.
+- Graphics objects are not supported in Octave, including `gobjects` which may cause errors.
 - Latex interpreter is not supported in Octave.
 
 Work is ongoing to patch these incompatibilities. See `+baseflow/private/isoctave` to patch errors.
