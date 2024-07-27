@@ -112,8 +112,8 @@ function varargout = plfitb(x,varargin)
          varargout{1} = 1+1/alpha;
          varargout{2} = alpha;
       case 3
-         varargout{1} = b;
-         varargout{2} = 1+1/alpha;
+         varargout{1} = 1+1/alpha;
+         varargout{2} = alpha;
          varargout{3} = xmin;
    end
 

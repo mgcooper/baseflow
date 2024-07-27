@@ -274,13 +274,13 @@ function [alpha,xmin,n,bof]=plvar(x,varargin)
                      L(k) = -vec(k)*slogz - n*log(zvec(k) - sum(xminvec.^-vec(k)));
                   end
                end
-               [Y,I] = max(L);
+               [Y,I] = max(L); %#ok<ASGLU> 
                % compute KS statistic
                fit = cumsum((((xmin:ymax).^-vec(I)))./ (zvec(I) - sum((1:xmin-1).^-vec(I))));
-               cdi = cumsum(hist(z,xmin:ymax)./n);
+               cdi = cumsum(hist(z,xmin:ymax)./n); %#ok<*HIST> 
                dat(xm,:) = [max(abs( fit - cdi )) vec(I)];
             end
-            [D,I] = min(dat(:,1));
+            [D,I] = min(dat(:,1)); %#ok<ASGLU> 
             ymin  = ymins(I);
             n     = sum(y>=ymin);
             alpha = dat(I,2);

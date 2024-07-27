@@ -37,7 +37,7 @@ function [normX, normY] = normalizeDataCoordinates(ax, x, y)
    ax.Units = 'normalized';
 
    % Fetch position and limits
-   ax_pos = plotboxpos(ax);
+   ax_pos = baseflow.deps.plotboxpos(ax);
    x_lim = ax.XLim;
    y_lim = ax.YLim;
 

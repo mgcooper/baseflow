@@ -19,14 +19,11 @@ function h = mapgages(lat,lon,varargin)
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
-   % if called with no input, open this file
-   if nargin == 0; open(mfilename('fullpath')); return; end
-
    % not sure if this function is deprecated by mapbasins, but I added the
    % parsing from that function in case it's worth keeping this
 
    % parse inputs
-   [lat, lon, cvar, cbartitle, latlims, lonlims] = parseinputs( ...
+   [lat, lon, cvar, cbartitle, latlims, lonlims, proj] = parseinputs( ...
       lat, lon, varargin{:});
 
    % --------------- load world borders
@@ -64,7 +61,7 @@ function h = mapgages(lat,lon,varargin)
 end
 
 %% INPUT PARSER
-function [lat, lon, cvar, cbartitle, latlims, lonlims] = parseinputs( ...
+function [lat, lon, cvar, cbartitle, latlims, lonlims, proj] = parseinputs( ...
       lat, lon, varargin)
 
    p = inputParser;
@@ -75,12 +72,13 @@ function [lat, lon, cvar, cbartitle, latlims, lonlims] = parseinputs( ...
    p.addParameter('cbartitle', '', @ischar);
    p.addParameter('latlims', [50 75], @isnumeric);
    p.addParameter('lonlims', [-168 -60], @isnumeric);
-   p.addParameter('projstr', 'lambert', @ischar);
+   p.addParameter('proj', 'lambert', @ischar);
    p.addParameter('ax', gca, @isaxis);
    p.parse(lat, lon, varargin{:});
 
    lat = p.Results.lat;
    lon = p.Results.lon;
+   proj = p.Results.proj;
    cvar = p.Results.cvar;
    latlims = p.Results.latlims;
    lonlims = p.Results.lonlims;

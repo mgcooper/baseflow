@@ -32,11 +32,7 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-   % if called with no input, open this file
-   if nargin == 0; open(mfilename('fullpath')); return; end
-
    % input parsing
-   %-------------------------------------------------------------------------------
    p              = inputParser;
    p.FunctionName = 'fitdqdt';
 
@@ -57,6 +53,7 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
    fitab    = p.Results.fitab;
    plotfit  = p.Results.plotfit;
    flag     = p.Results.flag;
-   %-------------------------------------------------------------------------------
 
+   % Jul 2024 - set these to suppress codeissues
+   [q,dqdt,dt,tq,rq,r] = deal([], [], [], [], [], []);
 end

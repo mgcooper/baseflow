@@ -83,21 +83,23 @@ end
 
 %% input parser
 function [x, y, w, modeltype] = parseinputs(mfilename, varargin)
-   p = inputParser;
-   p.FunctionName = mfilename;
-   p.KeepUnmatched = true;
 
-   validstrings = {'default','linear','exponential','power','semilogx','semilogy'};
-   validoption = @(x)any(validatestring(x,validstrings));
+   parser = inputParser;
+   parser.FunctionName = mfilename;
+   parser.KeepUnmatched = true;
 
-   p.addOptional('x', [], @(x)isnumeric(x));
-   p.addOptional('y', [], @(x)isnumeric(x));
-   p.addOptional('w', [], @(x)isnumeric(x));
-   p.addOptional('modeltype','default', validoption);
+   validstrings = {
+      'default','linear','exponential','power','semilogx','semilogy'};
+   validoption = @(x) any(validatestring(x, validstrings));
 
-   p.parse(varargin{:});
-   x = p.Results.x;
-   y = p.Results.y;
-   w = p.Results.w;
-   modeltype = p.Results.modeltype;
+   parser.addOptional('x', [], @isnumeric);
+   parser.addOptional('y', [], @isnumeric);
+   parser.addOptional('w', [], @isnumeric);
+   parser.addOptional('modeltype','default', validoption);
+
+   parser.parse(varargin{:});
+   x = parser.Results.x;
+   y = parser.Results.y;
+   w = parser.Results.w;
+   modeltype = parser.Results.modeltype;
 end

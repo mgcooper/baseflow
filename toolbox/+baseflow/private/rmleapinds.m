@@ -1,4 +1,4 @@
-function [ data_out, dates_out ] = rmleapinds( data,dates,varargin)
+function [data_out, dates_out] = rmleapinds(data, dates, varargin)
    %RMLEAPINDS removes the feb 29 indices of data
    %
    %  [data_out, dates_out] = rmleapinds(data,dates) removes leap inds (feb 29)
@@ -16,10 +16,12 @@ function [ data_out, dates_out ] = rmleapinds( data,dates,varargin)
    %
    % See also: padtimeseries
 
-   if nargin>2
-      if strcmp(varargin{1},'legacy')
-         [ data_out,dates_out ] = rmleapinds_legacy( data_in,t ); return;
-      else; error('unknown input');
+   if nargin > 2
+      if strcmp(varargin{1}, 'legacy')
+         [data_out, dates_out] = rmleapinds_legacy(data, dates);
+         return
+      else
+         error('unknown input');
       end
    end
 
@@ -70,25 +72,28 @@ function [ data_out, dates_out ] = rmleapinds( data,dates,varargin)
    % dates_out(feb29,:,:) = [];
 end
 
-function [ data_out,dates_out ] = rmleapinds_legacy( data_in,t )
+function [data_out, dates_out] = rmleapinds_legacy(data_in, dates)
    %RMLEAPINDS removes the feb 29 indices of data
    %
    %   Inputs
-   %     data_in  : a column or row matrix of data
-   %     t        : time matrix same size as data
-
+   %     data        : a column or row matrix of data
+   %     dates       : time matrix same size as data
+   %
    %   Outputs
-   %     data_out : same as data_in but with feb 29 removed
+   %     data_out    : same as data_in but with feb 29 removed
+   %     dates_out   : same as dates_in but with feb 29 removed
+   %
+   % See also:
 
-   if isdatetime(t)
-      t = datenum(t);
+   if isdatetime(dates)
+      dates = datenum(dates);
    end
 
-   feb29 = find(t(:,2) == 2 & t(:,3) == 29);
+   feb29 = find(dates(:,2) == 2 & dates(:,3) == 29);
 
    data_out = data_in;
    data_out(feb29,:,:) = [];
 
-   t = datevec(t);
+   dates = datevec(dates);
    dates_out(feb29,:) = [];
 end

@@ -43,7 +43,7 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    %     "envelope"
    %
    %  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
-   % 
+   %
    % See also: prepfits, fitevents
 
    % if called with no input, open this file
@@ -108,16 +108,24 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    debug = false;
    if debug == true
       pos = get(0,'defaultfigureposition');
-      figure('Position',[pos(1) pos(2) 2*pos(3) pos(4)]);
-      subplot(1,2,1);
-      loglog(X,y,'-o'); hold on; plot(X,yfit,':');
-      xlabel('log Q'); ylabel('log -dQ/dt');
-      legend('data','fit');
-   
-      subplot(1,2,2);
-      plot(X,y,'-o'); hold on; plot(X,yfit,':');
-      xlabel('Q'); ylabel('-dQ/dt');
-      legend('data','fit');
+      figure('Position', [pos(1) pos(2) 2*pos(3) pos(4)])
+      subplot(1, 2, 1)
+      hold on
+      loglog(X, y, '-o');
+      % Jul 2024 - yfit undefined so commented it out
+      % plot(X, yfit, ':');
+      xlabel('log Q');
+      ylabel('log -dQ/dt');
+      legend('data', 'fit');
+
+      subplot(1, 2, 2)
+      hold on
+      plot(X, y, '-o');
+      % Jul 2024 - yfit undefined so commented it out
+      % plot(X, yfit, ':');
+      xlabel('Q');
+      ylabel('-dQ/dt');
+      legend('data', 'fit');
    end
 end
 
@@ -133,7 +141,7 @@ function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave)
    else
       ft = fittype('poly1');
       fopts = fitoptions( 'Method', 'LinearLeastSquares');
-      fopts = setfield(fopts,'Weights', weights);
+      fopts.Weights = weights;
       [f,~] = fit( logx, logy, ft, fopts );
       ab = fliplr(coeffvalues(f));
    end
@@ -299,7 +307,7 @@ function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)
    ok = all(isreal(ab));
 end
 
-function [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy)
+function [ab,ci,ok] = fitMLE(logx,logy,~,alpha,sigx,sigy,rxy) %#ok<DEFNU>
 
    % Set default values for maximum likelihood estimation
    if nargin == 2
@@ -380,7 +388,7 @@ function [Fit,ok] = evalFit(ab,x,y,ci,ok)
    %figure; loglog(x,y,'o'); hold on; loglog(x,ab(1).*x.^ab(2))
 end
 
-function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
+function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
 
    % initial estimates using log-log linear fit
    ok = true;
@@ -574,7 +582,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    end
 end
 
-function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
+function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,~)
 
    % initial estimates using log-log linear fit
    ok = true;
@@ -600,7 +608,7 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    % try non-robust nonlinear least squares fitting
    ab2ok = true;
    try
-      [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
+      [ab2,~,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
       rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 
    catch ME

@@ -20,7 +20,7 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    % See also: getdqdt, fitdqdt
 
    % NOTE: now that pickFitter calls baseflow.fitab, this function does
-   % everything that an complete workflow would do, i think, and therefore
+   % everything that a complete workflow would do, i think, and therefore
    % should be renamed eventually (except it doesn't pick events)
 
    % NOTE: rain is optional b/c at this point, events are picked
@@ -33,7 +33,7 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 
    % PARSE INPUTS
    [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, rain, ax, ...
-      blate, precision, timestep, eventID, labelplot] = parseinputs( ...
+      blate, precision, timestep, ~, labelplot] = parseinputs( ...
       q, dqdt, mfilename, varargin{:});
 
    % INIT OUTPUT
@@ -43,8 +43,8 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    [~, ~, logx, logy, weights, ok] = baseflow.prepfits(q, dqdt, ...
       'weights', weights);
 
-   if ok == false
-      return;
+   if not(ok)
+      return
    end
 
    % Pick fits
@@ -96,7 +96,7 @@ function Picks = fitSelector(q,dqdt,weights,pickmethod,rain)
          endPts      = pickedPts(2:2:end);
 
          close(pickFig);
-         
+
          if isodd(numel(pickedPts))
             error('baseflow:plotdqdt:oddNumberPickedPoints', ...
                'Each manually-selected recession segment must have one start and one end point.')
@@ -170,14 +170,14 @@ function Fits = pickFitter(Picks,fitmethod)
       end
 
       Fits.ab(n,:) = Fit.ab;
-      Fits.xplot(n,:) = linspace(0.75*min(q),max(q)*1.25,50);
-      Fits.yplot(n,:) = Fits.ab(n,1).*Fits.xplot(n,:).^Fits.ab(n,2);
+      Fits.xplot(n,:) = linspace(0.75*min(q), max(q)*1.25,50);
+      Fits.yplot(n,:) = Fits.ab(n,1)*Fits.xplot(n,:).^Fits.ab(n,2);
    end
    Fits.nFits = Picks.nPicks;
 end
 
 %% PLOT FITS
-function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
+function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
       showfig,blate,timestep,precision,labelplot)
 
    if plotfits == true
@@ -278,7 +278,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
 
    [hLower,abLower]  = baseflow.plotrefline(x,y, ...
       'refline',  'lowerenvelope',  ...
-      'precision',precision );
+      'precision',precision ); %#ok<*ASGLU> 
 
    [hLate,abLate] = baseflow.plotrefline(x,y, ...
       'refline', 'latetime', ...
@@ -307,7 +307,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,    ...
    if ~isoctave
       withwarnoff('MATLAB:legend:IgnoringExtraEntries');
    end
-   
+
    if isfield(h, 'hrain') && isaxis(h.hrain)
       ltext = [ltext 'rain'];
       h.leg = legend( [h.plots{:} h.hrain(1)], ltext, ...
@@ -431,7 +431,7 @@ function h = plotrain(h,rain,x,y)
 end
 
 %%
-function addRotatedText(xtxt,ytxt,txt,slope,axpos)
+function addRotatedText(xtxt,ytxt,txt,slope,axpos) %#ok<*DEFNU> 
 
    % https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib
 
@@ -470,19 +470,23 @@ function [istart, istop] = detectTransition(q,dqdt,istart,istop)
       dq1   = dqdt(istart(1):istop(1));
       dq2   = dqdt(istart(2):istop(2));
       dq3   = dqdt(istart(3):istop(3));
-      ab1   = baseflow.wols(log(q1),log(-dq1));
-      ab2   = baseflow.wols(log(q2),log(-dq2));
-      ab3   = baseflow.wols(log(q3),log(-dq3));
+
+      % Jul 2024 - commented out b/c "wols" is not a function in the toolbox.
+      % Not sure if this is supposed to be "ols" or a weighted version.
+      % ab1   = baseflow.wols(log(q1), log(-dq1));
+      % ab2   = baseflow.wols(log(q2), log(-dq2));
+      % ab3   = baseflow.wols(log(q3), log(-dq3));
 
       % three cases we want to :
       % 1: a flat period between two recessions
       % 2: a flat period followed by another one then a recession
       % 2: a recession followed by two flat periods
 
-      if ab1(2)>1 && ab2(2)<1 && ab3(2)>1
-         istart(2)   = [];
-         istop(2)    = [];
-      end
+      % Jul 2024 - commented out b/c "wols" is not a function in the toolbox.
+      % if ab1(2)>1 && ab2(2)<1 && ab3(2)>1
+      %    istart(2)   = [];
+      %    istop(2)    = [];
+      % end
       %end
    end
 end

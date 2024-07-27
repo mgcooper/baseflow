@@ -1,4 +1,9 @@
-function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
+function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
+   %fitNLS_matlab
+   %
+   %  [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
+   %
+   % See also:
 
    % initial estimates using log-log linear fit
    ok = true;

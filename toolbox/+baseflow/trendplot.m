@@ -183,7 +183,10 @@ function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)
 end
 
 % MAKE THE FIGURE
-function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
+function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,~)
+   %
+   % [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
+
 
    % if an axis was provided, use it, otherwise make a new figure
    if not(isaxis(useax))
@@ -201,7 +204,7 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
    % subplots, i can't just use findobj(gcf,'Type','Legend') to determine
    % if the current plot has a legend already, which i want because I want
    % to add the next trendplot trendline to the existing legend
-   % legobj      = findobj(gcf,'Type','Legend');
+   % legobj = findobj(gcf,'Type','Legend');
 
    figchi = get(gcf, 'Children');
    axobjs = findobj(gcf, 'Type', 'Axes');
@@ -248,14 +251,14 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,errorbounds)
       thislineidx = numlines+1;
    end
 
-   %    % this is the original
-   %    if errorbounds == true && mod(numchilds,2) == 1
-   %       numlines = (numchilds-1)/2;
-   %       thislineidx = numlines+1;
-   %    else
-   %       numlines = numel(axchildren)/2;
-   %       thislineidx = numlines+1;
-   %    end
+   % % this is the original
+   % if errorbounds && mod(numchilds,2) == 1
+   %    numlines = (numchilds-1)/2;
+   %    thislineidx = numlines+1;
+   % else
+   %    numlines = numel(axchildren)/2;
+   %    thislineidx = numlines+1;
+   % end
 
    set(h.ax, 'ColorOrderIndex', thislineidx);
 
@@ -351,7 +354,7 @@ function h = drawLegend(h,ab,err,makeleg,legidx,precision,legtext,units,alpha)
    else
       if isnan(alpha)
          trendtxt = sprintf( ...
-             [legtext ' (trend: %.' num2str(prec) 'f ' units ')'], ...
+            [legtext ' (trend: %.' num2str(prec) 'f ' units ')'], ...
             ab(2));
       else
          errstr = num2str(round(100*(1-alpha)));

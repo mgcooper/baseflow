@@ -37,7 +37,7 @@ function varargout = pointcloudplot(q,dqdt,varargin)
    if nargin == 0; open(mfilename('fullpath')); return; end
 
    % PARSE INPUTS
-   [q, dqdt, mask, reflines, reflabels, blate, userab, precision, timestep, ...
+   [q, dqdt, mask, reflines, reflabels, blate, userab, ~, ~, ...
       addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin{:});
 
    % create the figure / axes
@@ -165,20 +165,20 @@ function varargout = pointcloudplot(q,dqdt,varargin)
       if all(ismember(fitcheck,reflines))
 
          % ------------------------------------
-         %          % put them both in the legend
-         %          ibf   = ismember(reflines,fitcheck);
-         %          hleg  = h(ibf);
+         % % put them both in the legend
+         % ibf   = ismember(reflines,fitcheck);
+         % hleg  = h(ibf);
          %
-         %          ibest = strcmp(reflines,'bestfit');
-         %          iuser = strcmp(reflines,'userfit');
-         %          tbest = [baseflow.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
-         %          tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
+         % ibest = strcmp(reflines,'bestfit');
+         % iuser = strcmp(reflines,'userfit');
+         % tbest = [baseflow.aQbString(ab(ibest,:),'printvalues',true) ' (NLS fit)'];
+         % tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (user fit)'];
          %
-         %          % if user text provided, swap it out
-         %          if ~isempty(usertext)
-         %             tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
-         %          end
-         %          ltext = {tbest; tuser};
+         % % if user text provided, swap it out
+         % if ~isempty(usertext)
+         %    tuser = [baseflow.aQbString(ab(iuser,:),'printvalues',true) ' (' usertext ')'];
+         % end
+         % ltext = {tbest; tuser};
          % ------------------------------------
 
          % only put bestfit in the legend
@@ -219,14 +219,14 @@ function varargout = pointcloudplot(q,dqdt,varargin)
       L = legend(hleg,ltxt, 'location', 'northwest', 'interpreter', 'tex', ...
          'AutoUpdate', 'off');
 
-      %    if isoctave
-      %       ltxt = strrep(ltxt,'$','');
-      %       l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
-      %          'AutoUpdate','off');
-      %    else
-      %       l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...
-      %          'AutoUpdate','off');
-      %    end
+      % if isoctave
+      %    ltxt = strrep(ltxt,'$','');
+      %    l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
+      %       'AutoUpdate','off');
+      % else
+      %    l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...
+      %       'AutoUpdate','off');
+      % end
 
    else
       L = nan;
@@ -269,7 +269,7 @@ function hrain = plotrain(ax,h,rain,x,y)
       y = y(rain>0);
 
       hold on;
-      for n = 1:numel(sz)
+      for n = numel(sz):-1:1
          hrain(n) = plot(ax,x(n),y(n),'o','MarkerSize',sz(n), ...
             'MarkerFaceColor','none','Color','m','LineWidth',1);
       end

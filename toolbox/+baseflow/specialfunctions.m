@@ -1,4 +1,4 @@
-function varargout = specialfunctions(funcname,varargin)
+function varargout = specialfunctions(funcname, varargin)
    % SPECIALFUNCTIONS Special function ibarary required for recession analysis.
    %
    %  fnc = specialfunctions(fR1) returns the inverse incomplete beta function
@@ -7,13 +7,10 @@ function varargout = specialfunctions(funcname,varargin)
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-   % if called with no input, open this file
-   if nargin == 0; open(mfilename('fullpath')); return; end
-
-   %    L2      = L.*L;
-   %    phiA2   = phi.*A.^2;
-   %    phiL2   = phi.*L.^2;
-   %    kL2     = kD.*L.^2;
+   % L2      = L.*L;
+   % phiA2   = phi.*A.^2;
+   % phiL2   = phi.*L.^2;
+   % kL2     = kD.*L.^2;
 
    switch funcname
 
@@ -52,9 +49,17 @@ function varargout = specialfunctions(funcname,varargin)
          % c     = fR2./phi.*( (kD.*L.*L) ./ (2.^n.*(n+1).*A.^(n+3)));
 
       case 'fLo'
+         
+         assert(numel(varargin) >= 4)
+         kD = varargin{2};
+         L = varargin{3};
+         phi = varargin{4};
+         
+         phiL2 = phi.*L.^2;
 
-         h0overD = 0.0;                  % assume h0=0, fLo=1.1361
-         fLo = getfLo(h0overD,soln);
+         h0overD = 0.0; % assume h0=0, fLo=1.1361         
+         soln = 2; % jul 2024 - soln was unset, so I used Lockington.
+         fLo = getfLo(h0overD, soln);
 
          b = 3;
          N = -3;
@@ -64,15 +69,15 @@ end
 
 %% Local Functions
 function fR1 = getfR1(n)
-   BR1     = beta(n+2,2);
-   gamma   = 2.*(n+2).*BR1;
-   mu      = (4-3.*gamma-sqrt(gamma.^2-2.*gamma+4))./(4.*(1-2.*gamma));
-   fR1     = (1-mu).*(n+1).*(n+2)./(2.*(1-2.*mu));
+   BR1     = beta(n+2, 2);
+   gamma   = 2 * (n+2) .* BR1;
+   mu      = (4 - 3*gamma - sqrt(gamma.^2 - 2*gamma + 4)) ./ (4*(1 - 2*gamma));
+   fR1     = (1-mu) .* (n+1) .* (n+2) ./ (2 * (1 - 2*mu));
 end
 
 function fR2 = getfR2(n)
-   BR2 = beta((n+2)./(n+3),1/2);
-   fR2 = (n+2).*(BR2./(n+3)).^(1./(n+2));
+   BR2 = beta((n+2) ./ (n+3), 1/2);
+   fR2 = (n+2) .* (BR2 ./ (n+3)) .^ (1./(n+2));
 end
 
 function fLo = getfLo(h0overD,soln)

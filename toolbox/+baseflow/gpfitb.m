@@ -1,4 +1,4 @@
-function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
+function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
    %GPFITB Fit Generalized Pareto Distribution to recession parameter tau.
    %
    % Syntax
@@ -20,9 +20,6 @@ function [Fit,bM,alphaM,kM] = gpfitb(x,varargin)
    % See also: plfitb
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
-
-   % if called with no input, open this file
-   if nargin == 0; open(mfilename('fullpath')); return; end
 
    % PARSE INPUTS
    [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin{:});

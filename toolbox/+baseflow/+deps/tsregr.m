@@ -1,22 +1,32 @@
-function ab = tsregr(x,y)
+function ab = tsregr(x, y)
    %TSREGR Theil-Sen estimator.
    %
-   %    [B0, B1] = TSREGR(X,Y) calculates straight line coefficients
-   %       Y = B0 + B1*X
+   %    ab = tsregr(x, y)
+   %
+   %  Description
+   %
+   %    [AB] = TSREGR(X,Y) calculates straight line coefficients
+   %       Y = AB(1) + AB(2)*X
    %    for N data points {X,Y} using the Theil-Sen estimator.
    %
    % Joe Henning - Fall 2011
    %
-   % See also: ktaub
-
+   % Updates by mgcooper.
    % mgc changed output from [b0,b1] to ab
    % mgc added ,'omitnan' to all calls to median
    % mgc convert to column on input
+   %
+   % See also: ktaub
 
-   x = x(:); y = y(:);
-   if isdatetime(x); x = datenum(x); end
-   % note: would be better to convert to duration using years, months, etc.
+   % mgc: convert to columns
+   x = x(:);
+   y = y(:);
+
+   % mgc: would be better to convert to duration using years, months, etc.
    % functions, but for that, need to know desired timestep
+   if isdatetime(x)
+      x = datenum(x);
+   end
 
    if (length(x) ~= length(y))
       fprintf('   Error ==> length(x) must be equal to length(y)');
@@ -41,7 +51,7 @@ function ab = tsregr(x,y)
    ym = median(y,'omitnan');
 
    b1 = median(m,'omitnan');
-   %b0 = median(y,'omitnan') - b1*median(x,'omitnan');
+   % b0 = median(y,'omitnan') - b1*median(x,'omitnan');
    b0 = median(y - b1*x ,'omitnan');
 
    ab(1) = b0;

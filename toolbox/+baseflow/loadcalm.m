@@ -173,24 +173,28 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
          % for debugging:
          plottrends = false;
          if plottrends == true
-            figure; plot(Calm.Time,alldata,'-o'); hold on;
-            plot(Calm.Time,mean(alldata,2,'omitnan')); set(gca,'ColorOrderIndex',1)
-            plot(Calm.Time,tseries); formatPlotMarkers();
+            figure
+            hold on
+            plot(Calm.Time, alldata, '-o');
+            plot(Calm.Time, mean(alldata,2,'omitnan'));
+            set(gca, 'ColorOrderIndex', 1)
+            plot(Calm.Time,tseries);
+            formatPlotMarkers();
             legend(Trends.Properties.VariableNames(1:end-1),'Location','best');
 
             % this was in the aggregateCalmData temporary function i deleted
-            baseflow.trendplot(Data.Time, Data.mu, 'useax', gca, ...
-               'errorbars', true, 'yerr', Data.sigma);
+            % baseflow.trendplot(Data.Time, Data.mu, 'useax', gca, ...
+            %    'errorbars', true, 'yerr', Data.sigma);
          end
 
          % NOTE:
-         % say one site has values every other year, then the overlap is only 50%,
-         % but it may be good data. Return to that edge case if needed. For now,
-         % use total overlap. Besides, in that case, the data will be retained if
-         % the trends are not more than maxdiff apart.
+         % say one site has values every other year, then the overlap is only
+         % 50%, but it may be good data. Return to that edge case if needed. For
+         % now, use total overlap. Besides, in that case, the data will be
+         % retained if the trends are not more than maxdiff apart.
 
-         % Regarding maxdiff check: two checks are considered: 1) is the trend of
-         % any individual site more than x% different than the site with the
+         % Regarding maxdiff check: two checks are considered: 1) is the trend
+         % of any individual site more than x% different than the site with the
          % longest record? and 2) is the trend of the average of all sites more
          % than x% different than the site with the longest record? The second
          % method is implemented. The first method would require this:

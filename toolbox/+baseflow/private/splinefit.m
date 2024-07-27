@@ -96,7 +96,7 @@ function pp = splinefit(varargin)
    A = ppval(base,x);
 
    % Bin data
-   [~,ibin] = histc(x,[-inf,breaks(2:end-1),inf]);
+   [~,ibin] = histc(x,[-inf,breaks(2:end-1),inf]); %#ok<*HISTC> 
 
    % Sparse system matrix
    mx = numel(x);
