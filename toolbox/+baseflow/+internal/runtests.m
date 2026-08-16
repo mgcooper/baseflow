@@ -12,7 +12,7 @@ function result = runtests(varargin)
    import matlab.unittest.Verbosity
    import matlab.unittest.plugins.DiagnosticsValidationPlugin
    import matlab.unittest.plugins.StopOnFailuresPlugin
-   
+
    % Create a test suite from the tests/ folder
    suite = TestSuite.fromFolder(fullfile(projectpath(), 'tests'));
 
@@ -43,8 +43,9 @@ function result = runtests(varargin)
       % 'IncludingPassingDiagnostics' option means that the plugin checks
       % diagnostics for passing tests as well as failing ones.
       % 'ValidateUsingBaseWorkspace' means that the plugin validates that the
-      % diagnostic code can execute in the base workspace without errors. plugin
-      % = DiagnosticsValidationPlugin('IncludingPassingDiagnostics',true,...
+      % diagnostic code can execute in the base workspace without errors.
+      %
+      % plugin = DiagnosticsValidationPlugin('IncludingPassingDiagnostics',true,...
       %                                      'ValidateUsingBaseWorkspace',true);
       % runner.addPlugin(plugin)
 
