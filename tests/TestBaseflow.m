@@ -147,6 +147,104 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
       %-------------------------------------------
       %-------------------------------------------
+      function test_fitab_order1(testCase,FitMethod)
+
+         % generate nonlinear (b = 1.5) test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+
+         % fit with 'order' = 1: methods that estimate the slope redirect
+         % to 'mean'; 'mean' and 'median' force the slope directly
+         Fit = baseflow.fitab(q,dqdt,FitMethod,'order',1);
+
+         % Verify the fitted exponent is forced to 1 (linear reservoir)
+         returned = Fit.ab(2);
+         expected = 1;
+         testCase.verifyEqual(returned,expected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_fitab_order1_envelope(testCase)
+
+         % generate test data with deterministic scatter so the 0.95
+         % quantile envelope and the mean give different intercepts
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+         q = q .* (1 + 0.2*sin((1:numel(q))'));
+
+         % 'envelope' with 'order' = 1 must stay an envelope fit through
+         % 'refqtls'; it must not redirect to the 'mean' method
+         FitE = baseflow.fitab(q,dqdt,'envelope','refqtls',[0.95 0.95],'order',1);
+         FitM = baseflow.fitab(q,dqdt,'mean','order',1);
+
+         % Verify the slope is 1 and the intercept differs from the mean fit
+         returned = FitE.ab(2);
+         expected = 1;
+         testCase.verifyEqual(returned,expected);
+         returned = FitE.ab(1);
+         notExpected = FitM.ab(1);
+         testCase.verifyNotEqual(returned,notExpected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_fitab_order1_scope(testCase)
+
+         % generate nonlinear (b = 1.5) test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+
+         % 'qtl' passes 'order' to quantreg as the polynomial degree, so
+         % 'order' = 1 must run quantile regression, not the 'mean' method
+         Fit = baseflow.fitab(q,dqdt,'qtl','order',1);
+         returned = Fit.fselect;
+         expected = 'qtl';
+         testCase.verifyEqual(returned,expected);
+
+         % 'mle' is unsupported and must error with 'order' = 1 too
+         testCase.verifyError( ...
+            @() baseflow.fitab(q,dqdt,'mle','order',1), ?MException);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_fitevents_fitorder(testCase)
+
+         % build a one-event Events structure from nonlinear test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         % Note: generateTestData returns its own t, sized to match q
+         [t,q] = baseflow.generateTestData(a,b,q0,t);
+         Events.eventTime = t;
+         Events.eventFlow = q;
+         Events.eventRain = zeros(size(q));
+         Events.eventTags = ones(size(q));
+
+         % fitevents must pass 'fitorder' to fitab so the event is fit
+         % with a linear reservoir model
+         [~,Results] = baseflow.fitevents(Events,'fitorder',1);
+
+         % Verify a fit was returned and the exponent is forced to 1
+         testCase.verifyNotEmpty(Results.b);
+         returned = Results.b;
+         expected = ones(size(Results.b));
+         testCase.verifyEqual(returned,expected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
       function test_conversions(testCase,RecessionParameterNames)
 
          switch RecessionParameterNames

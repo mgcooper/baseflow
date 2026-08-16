@@ -13,6 +13,9 @@ function [Fits,Results] = fitevents(Events,varargin)
    %     [Fits,Results] = fitevents(Events,opts) uses user-supplied
    %     algorithm options in struct opts. See baseflow.setopts to set options.
    %
+   %     Note: this function fits all events individually. To fit all events
+   %     simultaneously (using the point cloud), use baseflow.fitab.
+   %
    % Required inputs
    %
    %     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted daily)
@@ -22,6 +25,22 @@ function [Fits,Results] = fitevents(Events,varargin)
    %     Fits: structure containing the fitted q/dqdt data
    %     Results: table of fitted values e.g., a, b, tau, for each event
    %
+   % Examples
+   %
+   %  Fit all events individually using a linear reservoir model:
+   %
+   %     opts = baseflow.setopts('fitevents', 'fitorder', 1);
+   %     [EventFits, FitsTable] = baseflow.fitevents(EventData, opts);
+   %
+   %  Note: to fit all events simultaneously, use baseflow.fitab on the
+   %  point cloud. To fit the point cloud with a linear reservoir model:
+   %
+   %     abFit = baseflow.fitab( ...
+   %        EventFits.q, ...
+   %        EventFits.dqdt, 'order', 1, ...
+   %        'plotfit', true);
+   %
+   %
    % See also getevents, getdqdt, fitdqdt
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
@@ -30,6 +49,13 @@ function [Fits,Results] = fitevents(Events,varargin)
    % special-case fitting routines including octave compatibility once, here.
    % This will be most problematic for fitab, because it is useful as a
    % standalone function for fitting a single event.
+   %
+   % Note: getdqdt and fitab share 'fitmethod' (nls, ols, mle, none, qtl).
+   % The fitab-only methods 'envelope', 'mean', and 'median' cannot be
+   % selected here. To fit events with a linear reservoir model, set
+   % 'fitorder' to 1. With fitmethod 'nls' or 'ols', fitab then forces a
+   % line of slope 1.
+
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -131,7 +157,9 @@ function [Fits,Results] = fitevents(Events,varargin)
          if ok == false
             continue
          else
-            [iFit, ok] = baseflow.fitab(q, dqdt, fitmethod, 'fitopts', fitopts);
+            % Note: fitopts is a placeholder. It is not implemented.
+            [iFit, ok] = baseflow.fitab(q, dqdt, fitmethod, ...
+               'order', fitorder, 'fitopts', fitopts);
          end
 
          [Fits, Results, nFits] = saveFit(eventTime, q, dqdt, dt, tq, ...
