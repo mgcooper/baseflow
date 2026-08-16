@@ -515,7 +515,7 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    parser.addParameter('precision', 1);
    parser.addParameter('timestep', 1);
    parser.addParameter('eventID', '', @ischar);
-   parser.addParameter('labelplot', true, @islogical);
+   parser.addParameter('labelplot', false, @islogical);
 
    parser.parse(q, dqdt, varargin{:});
 
