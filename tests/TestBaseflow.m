@@ -218,6 +218,25 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
       %-------------------------------------------
       %-------------------------------------------
+      function test_fitab_qtl_default_order(testCase)
+
+         % generate nonlinear (b = 1.5) test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+
+         % 'qtl' with no 'order' must apply the quantreg default of 1 and
+         % run quantile regression; the nan parser default crashed it
+         Fit = baseflow.fitab(q,dqdt,'qtl');
+         returned = Fit.fselect;
+         expected = 'qtl';
+         testCase.verifyEqual(returned,expected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
       function test_fitevents_fitorder(testCase)
 
          % build a one-event Events structure from nonlinear test data

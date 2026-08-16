@@ -294,6 +294,13 @@ function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)
       qtl = 0.05;
    end
 
+   % 'order' is the quantreg polynomial degree. The fitab parser default
+   % is nan, which crashes the quantreg indexing, so apply the quantreg
+   % default of 1 (a straight-line quantile fit).
+   if isnan(order)
+      order = 1;
+   end
+
    % apply the mask / weights
    logx = logx(weights>0);
    logy = logy(weights>0);
