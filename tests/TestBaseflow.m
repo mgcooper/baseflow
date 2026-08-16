@@ -237,6 +237,33 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
       %-------------------------------------------
       %-------------------------------------------
+      function test_plotdqdt_labelplot(testCase)
+
+         % close the figures this test creates
+         testCase.addTeardown(@() close('all','force'));
+
+         % generate nonlinear (b = 1.5) test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+
+         % 'labelplot' defaults to false: no refline arrow annotations
+         baseflow.plotdqdt(q,dqdt);
+         returned = numel(findall(gcf,'-isa','matlab.graphics.shape.Arrow'));
+         expected = 0;
+         testCase.verifyEqual(returned,expected);
+         close('all','force')
+
+         % 'labelplot' true draws the refline arrows (see labelReflines)
+         baseflow.plotdqdt(q,dqdt,'labelplot',true);
+         returned = numel(findall(gcf,'-isa','matlab.graphics.shape.Arrow'));
+         testCase.verifyGreaterThan(returned,0);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
       function test_fitevents_fitorder(testCase)
 
          % build a one-event Events structure from nonlinear test data

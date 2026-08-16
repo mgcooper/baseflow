@@ -519,6 +519,8 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    parser.addParameter('precision', 1);
    parser.addParameter('timestep', 1);
    parser.addParameter('eventID', '', @ischar);
+   % labelplot defaults to false: draw the b-value refline arrows and
+   % labels (see labelReflines) only when the caller requests them.
    parser.addParameter('labelplot', false, @islogical);
 
    parser.parse(q, dqdt, varargin{:});
