@@ -66,8 +66,13 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
       Fit = nan; return;
    end
 
-   % If method = 'ols' and 'order' = 1, use method 'mean' with a line of slope 1
-   if strcmp(method,'ols') && order == 1
+   % If 'order' = 1 and the method is 'ols' or 'nls', switch to 'mean'.
+   % The 'mean' method forces a line of slope 1. fitOLS and fitNLS ignore
+   % 'order'. Do not switch the other methods. The 'mean', 'median', and
+   % 'envelope' methods force a line of slope 'order'. plotrefline relies
+   % on 'envelope' with 'order' = 1. 'qtl' passes 'order' to quantreg as
+   % the polynomial degree. 'mle' errors as unsupported.
+   if order == 1 && any(strcmp(method, {'ols', 'nls'}))
       method = 'mean';
    end
 
