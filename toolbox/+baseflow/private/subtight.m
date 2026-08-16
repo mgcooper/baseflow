@@ -79,7 +79,7 @@ function h=subtight(m,n,p,varargin)
 end
 
 %% input parser
-function [m, n, p, gap, marw, marh] = parseinputs(m, n, p, funcname, varargin);
+function [m, n, p, gap, marw, marh] = parseinputs(m, n, p, funcname, varargin)
 
    classes = {'numeric','char','string'};
    atts = {'nonempty'};

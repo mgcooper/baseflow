@@ -176,7 +176,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
 end
 
 %% INPUT PARSER
-function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot, ax] = ...
+function [x, xmin, alpha, alphaci, xminci, varsym, trimline, labelplot] = ...
       parseinputs(x, xmin, alpha, varargin)
 
    parser = inputParser;

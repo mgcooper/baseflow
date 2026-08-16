@@ -278,11 +278,11 @@ function [alpha,xmin,L,D,n,dat]=plfit(x, varargin)
                   L(k) = -vec(k)*slogz-n*log(zvec(k)-sum(xminvec.^-vec(k)));
                end
             end
-            [Y,I] = max(L);
+            [~,I] = max(L);
             % compute KS statistic
             fit = cumsum((((xmin:xmax).^-vec(I)))./(zvec(I) -           ...
                sum((1:xmin-1).^-vec(I))));
-            cdi = cumsum(hist(z,xmin:xmax)./n);
+            cdi = cumsum(hist(z,xmin:xmax)./n); %#ok<HIST>
             dat(xm,:) = [max(abs( fit - cdi )) vec(I)];
          end
          % select the index for the minimum value of D

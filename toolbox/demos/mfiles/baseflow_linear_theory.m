@@ -126,7 +126,9 @@ Qc = int(dQc_dt,t,0,inf)
 
 tlowerIntegralLimit = 0;
 tupperIntegralLimit = Inf;
-[tc,Qexp] = baseflow.sym.expectedvalue(Q,t,tlowerIntegralLimit,tupperIntegralLimit)
+[tc,Qexp] = baseflow.sym.expectedvalue(Q,t,tlowerIntegralLimit,tupperIntegralLimit);
+disp(tc)
+disp(Qexp)
 %% 
 % See what happens when an upper limit is defined, equivalent to a lower limit 
 % on streamflow
