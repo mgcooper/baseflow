@@ -75,6 +75,9 @@ function b = convert2b(inputvalue,inputvarname,isflat)
          k = inputvalue;
          b = (2.*k+1)./(k+1);
          %b = (k+1)./(2.*k+1);
+      case 'a' % conversion between -dQ/dt = aQ^b and Q = cS^d
+         % a = inputvalue;
+         % This function converts b only; 'a' is not a valid inputvarname.
 
       case 'n'
          n =  inputvalue;
