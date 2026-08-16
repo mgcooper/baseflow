@@ -1,16 +1,16 @@
-function h = mapbasins(Basins,varargin)
+function h = mapbasins(Basins, varargin)
    %MAPBASINS Map basin boundaries and color their faces by an attribute.
    %
    % Syntax
    %
-   %     h = mapbasins(Basins,varargin)
+   %     h = mapbasins(Basins, varargin)
    %
    % Description
    %
    %     h = mapbasins(Basins) creates a map-axes figure showing the basin
    %     outlines for all basins in struct Basins.
    %
-   %     h = mapbasins(___,'varname',varname) colors the faces of the basins
+   %     h = mapbasins(___, 'varname', varname) colors the faces of the basins
    %     using the value of variable varname. Basins must contain the data such
    %     that cdata = Basins.(varname) returns the data.
    %
@@ -30,9 +30,6 @@ function h = mapbasins(Basins,varargin)
    % See also: mapgages, loadbounds
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
-
-   % if called with no input, open this file
-   if nargin == 0; open(mfilename('fullpath')); return; end
 
    % PARSE INPUTS
    [Basins, Meta, facemapping, cvarname, cbartxt, latlims, lonlims, proj, ...
@@ -126,7 +123,7 @@ function h = mapbasins(Basins,varargin)
          % this was the sort method before I added the flipud to simplify the
          % mapping from the Basins idx to the patchobjs idx.
          % we get the mapping from the cvar sort above to the Area sort next
-         %[~,idx]     = sort([Basins.Area],'ascend');
+         %[~,idx] = sort([Basins.Area],'ascend');
 
          % right now, Basins are sorted from low to high cvar, so the index is
          % 1:numel(cvar), and the patchobjs are numel(cvar):-1:1, which means we
@@ -190,20 +187,22 @@ function h = mapbasins(Basins,varargin)
       [latn,lonn] = polyjoin({Basins.Lat},{Basins.Lon});
       plotm(latn,lonn,'k','LineWidth',1);
 
-      %    for n = 1:numel(Basins)
-      %       latn = [Basins(n).Lat];
-      %       lonn = [Basins(n).Lon];
+      % for n = 1:numel(Basins)
+      %    latn = [Basins(n).Lat];
+      %    lonn = [Basins(n).Lon];
       %
-      %       % use patchm for consistency? or plotm for speed?
-      %       plotm(latn,lonn,'k');
-      %    end
-
+      %    % use patchm for consistency? or plotm for speed?
+      %    plotm(latn, lonn, 'k');
+      % end
+      %
       % % I used this to confirm that the sorting by area after
-      %    figure; plot([Basins(13).Lon],[Basins(13).Lat]); hold on;
-      %    for n = 1:numel(Basins)
-      %       plot([Basins(n).Lon],[Basins(n).Lat]);
-      %       pause;
-      %    end
+      % figure
+      % hold on
+      % plot([Basins(13).Lon],[Basins(13).Lat]);
+      % for n = 1:numel(Basins)
+      %    plot([Basins(n).Lon],[Basins(n).Lat]);
+      %    pause
+      % end
 
    end
 
@@ -239,10 +238,10 @@ function h = mapbasins(Basins,varargin)
             dists(m) = haversine([ypos(n),xpos(n)],[ypos(m),xpos(m)]);
          end
 
-         %       at this point I would need to jitter xpos(m),ypos(m) but i need to do it
-         %       systematically e.g. instead of using the quantiles above, need to use
-         %       opposite corners, but it will have to be iterative using while and
-         %       surely there's a better way but it's too coplicated for now
+         % at this point I would need to jitter xpos(m),ypos(m) but i need to do
+         % it systematically e.g. instead of using the quantiles above, need to
+         % use opposite corners, but it will have to be iterative using while
+         % and surely there's a better way but it's too coplicated for now
          reldists = dists./xspan;
          notok =  find(reldists < 0.025 & reldists > 0);
          if numel(notok) > 0
@@ -262,20 +261,20 @@ function h = mapbasins(Basins,varargin)
             textm(ypos(n),xpos(n),num2str(ltxt(n)),'FontSize',8, ...
                'Color',[0.8500 0.3250 0.0980]);
 
-            %       xpos = quantile([Basins(n).Lon],0.20);
-            %       ypos = quantile([Basins(n).Lat],0.70);
-            %       xpos = mean([Basins(n).Lon],'omitnan');
-            %       ypos = mean([Basins(n).Lat],'omitnan');
-            %       xpos = median([Basins(n).Lon],'omitnan');
-            %       ypos = median([Basins(n).Lat],'omitnan');
-            %       xpos = min([Basins(n).Lon]);
-            %       ypos = max([Basins(n).Lat]);
-
+            % xpos = quantile([Basins(n).Lon],0.20);
+            % ypos = quantile([Basins(n).Lat],0.70);
+            % xpos = mean([Basins(n).Lon],'omitnan');
+            % ypos = mean([Basins(n).Lat],'omitnan');
+            % xpos = median([Basins(n).Lon],'omitnan');
+            % ypos = median([Basins(n).Lat],'omitnan');
+            % xpos = min([Basins(n).Lon]);
+            % ypos = max([Basins(n).Lat]);
          end
       end
    end
 
-   % Make the colorbar transparent % https://stackoverflow.com/questions/37423603/setting-alpha-of-colorbar-in-matlab-r2015b
+   % Make the colorbar transparent
+   % https://stackoverflow.com/questions/37423603/setting-alpha-of-colorbar-in-matlab-r2015b
    if facemapping == true
       drawnow;
       if facealpha<0.5
@@ -311,7 +310,6 @@ function h = mapbasins(Basins,varargin)
    % h.cbar.Face.Texture.CData = cdata;
    % drawnow
 
-
    % this works well for N. Ameria
    %h.cbar.Position = [0.356 0.0588 0.387 0.0256];
 
@@ -319,9 +317,9 @@ function h = mapbasins(Basins,varargin)
    %h.cbar.Position = [0.33 0.11755 0.38737 0.025641];
 
    % % I used this to figure out the position above by guess and chekc
-   %     h.cbar.Position(3)=0.5*h.cbar.Position(3);
-   %     h.cbar.Position(1)=1.5*h.cbar.Position(1);
-   %     h.cbar.Position(2)=0.5*h.cbar.Position(2);
+   % h.cbar.Position(3)=0.5*h.cbar.Position(3);
+   % h.cbar.Position(1)=1.5*h.cbar.Position(1);
+   % h.cbar.Position(2)=0.5*h.cbar.Position(2);
 end
 
 %%

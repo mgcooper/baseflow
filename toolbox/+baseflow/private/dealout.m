@@ -49,18 +49,8 @@ function varargout = dealout(varargin)
       % Syntax is [out1, out2, ..., outN] = dealout(in1, in2, ..., inN]
       [varargout{1:nargout}] = deal(args{1:nargout});
 
-      % Note: this syntax is useful for forcing one output
-      % [varargout{1:max(1,nargout)}] = deal(varargin{1:nargout});
    catch
       % Syntax is [out1, out2, ..., outN] = dealout(CellArray)
       varargout = args{:};
    end
-
-   % TODO:
-   % Compare with this format:
-   % if ~iscell(x), x = num2cell(x); end
-   % varargout = cell(1,nargout);
-   % [varargout{:}] = deal(x{:});
-
-   % Compare with fex function deal2
 end

@@ -97,7 +97,7 @@ tlowerIntegralLimit = 0;
 tupperIntegralLimit = Inf;
 % Define the expression for streamflow as a function of time, $Q(t)$
 
-Q(t) = (Q0^(1-b)+a*(b-1).*t).^(1/(1-b))
+Q(t) = (Q0^(1-b)+a*(b-1).*t).^(1/(1-b)) %#ok<*NOPTS> 
 % Derive the theoretical probability distribution for the drainage timescale, $t_c$
 % Introduce a normalization constant $c_1$ that normalizes the integral over 
 % all possible states of the sytem

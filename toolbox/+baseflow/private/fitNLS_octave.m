@@ -1,4 +1,9 @@
-function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
+function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,~)
+   %fitNLS_octave
+   %
+   %  [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
+   %
+   % See also
 
    % initial estimates using log-log linear fit
    ok = true;
@@ -24,8 +29,8 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    % try non-robust nonlinear least squares fitting
    ab2ok = true;
    try
-      [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
-      rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
+      [ab2,~,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
+      rsq2 = baseflow.deps.rsquare(y, ab2(1) * x .^ ab2(2));
 
    catch ME
 

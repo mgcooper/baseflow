@@ -14,7 +14,7 @@ function [Grace, Meta] = loadgrace(varargin)
    end
 
    % parse inputs
-   [basinname, t1, t2, regularize] = parseinputs(varargin{:});
+   [basinname, t1, t2, ~] = parseinputs(varargin{:});
 
    % load the old data note: an earlier version used the grace_minmax.mat file
    load(fullfile(getenv('BASEFLOW_DATA_PATH'), 'grace', 'grace_basins_v0.mat'), 'Grace')

@@ -8,9 +8,8 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - given-names: Matthew
+  - given-names: Matthew G
     family-names: Cooper
-    name-particle: G.
     orcid: 'https://orcid.org/0000-0002-0165-209X'
 identifiers:
   - type: doi

@@ -248,7 +248,7 @@ function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)
 end
 
 %% parse inputs
-function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);
+function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin)
 
    parser = inputParser;
    parser.FunctionName = mfilename;

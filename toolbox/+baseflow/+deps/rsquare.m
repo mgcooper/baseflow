@@ -48,10 +48,14 @@ function [r2, rmse] = rsquare(obs,mod,varargin)
    % to improve this code. His code POLYFITN was consulted in the inclusion of
    % the C-option (REF. File ID: #34765).
 
-   if isempty(varargin); c = false; % mgc changed from true to false
-   elseif length(varargin)>1; error 'Too many input arguments';
-   elseif ~islogical(varargin{1}); error 'C must be logical (TRUE||FALSE)'
-   else c = varargin{1};
+   if isempty(varargin)
+      c = false; % mgc changed from true to false
+   elseif length(varargin)>1
+      error 'Too many input arguments';
+   elseif ~islogical(varargin{1})
+      error 'C must be logical (TRUE||FALSE)'
+   else
+      c = varargin{1};
    end
 
    % Compare inputs
