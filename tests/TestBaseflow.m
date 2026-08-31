@@ -33,6 +33,27 @@ classdef TestBaseflow < matlab.unittest.TestCase
       RmConvex = {false, true};
    end
 
+   properties (Access = private)
+      % Open-figure snapshot taken before each test. The method teardown
+      % closes only figures the test created, so a full suite run leaves
+      % zero open figures without touching pre-existing user figures.
+      figsbefore
+   end
+
+   methods (TestMethodSetup)
+      function snapshotfigures(testCase)
+         % Record the figures that exist before the test runs.
+         testCase.figsbefore = findall(0, 'Type', 'figure');
+      end
+   end
+
+   methods (TestMethodTeardown)
+      function closetestfigures(testCase)
+         % Close figures created during the test (see tests/closenewfigs.m).
+         closenewfigs(testCase.figsbefore)
+      end
+   end
+
    methods (Test)
 
       %-------------------------------------------
@@ -239,9 +260,6 @@ classdef TestBaseflow < matlab.unittest.TestCase
       %-------------------------------------------
       function test_plotdqdt_labelplot(testCase)
 
-         % close the figures this test creates
-         testCase.addTeardown(@() close('all','force'));
-
          % generate nonlinear (b = 1.5) test data
          a = 1e-2;
          b = 1.5;
@@ -254,7 +272,9 @@ classdef TestBaseflow < matlab.unittest.TestCase
          returned = numel(findall(gcf,'-isa','matlab.graphics.shape.Arrow'));
          expected = 0;
          testCase.verifyEqual(returned,expected);
-         close('all','force')
+         % Close only the figure this test created, so a pre-existing user
+         % figure survives; plotdqdt opens a fresh figure for the next call.
+         closenewfigs(testCase.figsbefore)
 
          % 'labelplot' true draws the refline arrows (see labelReflines)
          baseflow.plotdqdt(q,dqdt,'labelplot',true);

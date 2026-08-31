@@ -1,26 +1,68 @@
-function test_withcd
-   %TEST_WITHCD Test withcd.
+function tests = test_withcd
+   %TEST_WITHCD Test the withcd temporary-directory helper.
+   %
+   % withcd lives in toolbox/+baseflow/+internal/private/, so no test can
+   % reach it through the package path: MATLAB exposes a private function
+   % only to functions in its parent folder. Setup copies the source file
+   % onto a temporary folder placed on the path, and the tests run against
+   % that copy. The cd target is a second temporary folder so no test
+   % writes inside the repository.
    tests = functiontests(localfunctions);
 end
 
+function setupOnce(testCase)
+   % Copy withcd.m onto the path and create the resolved cd target.
+   import matlab.unittest.fixtures.TemporaryFolderFixture
+   import matlab.unittest.fixtures.PathFixture
 
-function testWithCd(testCase)
-
+   % Copy withcd.m from +internal/private onto a temporary path folder.
    thispath = fileparts(mfilename('fullpath'));
-   gotopath = fileparts(fileparts(thispath));
-   
-   obj = withcd(gotopath); %#ok<*NASGU> 
-   
-   hi = pwd(); 
-   
-   testCase.verifyEqual(hi, gotopath, 'withcd failed to reach top level project path')   
-   
-   % !touch test.txt
-   
-   %assert(isfile(fullfile(gotopath, 'test.txt')))
-%    verifyTrue(testCase, isfile(fullfile(gotopath, 'test.txt')))
-% 
-%    if isfile(fullfile(gotopath, 'test.txt'))
-%       delete(fullfile(gotopath, 'test.txt'))
-%    end
+   srcfile = fullfile(fileparts(thispath), 'toolbox', '+baseflow', ...
+      '+internal', 'private', 'withcd.m');
+   pathfolder = testCase.applyFixture(TemporaryFolderFixture);
+   copyfile(srcfile, pathfolder.Folder);
+   testCase.applyFixture(PathFixture(pathfolder.Folder));
+
+   % Create the cd target and resolve it the way pwd() reports it, so the
+   % comparisons survive the macOS /var -> /private/var symlink.
+   targetfixture = testCase.applyFixture(TemporaryFolderFixture);
+   startdir = pwd();
+   cd(targetfixture.Folder);
+   testCase.TestData.target = pwd();
+   cd(startdir);
+end
+
+function test_cdAndRestore(testCase)
+   % withcd changes to the target for the cleanup object's lifetime and
+   % restores the original directory when the object is destroyed.
+   originalDir = pwd();
+   obj = withcd(testCase.TestData.target);
+   testCase.verifyClass(obj, 'onCleanup')
+   returned = pwd();
+   expected = testCase.TestData.target;
+   testCase.verifyEqual(returned, expected, ...
+      'withcd failed to change to the target directory')
+   clear obj
+   returned = pwd();
+   expected = originalDir;
+   testCase.verifyEqual(returned, expected, ...
+      'withcd failed to restore the original directory')
+end
+
+function test_fileCreatedInTarget(testCase)
+   % Implements the parked assertion from the original test file: a file
+   % created inside the withcd context lands in the target directory. The
+   % parked version shelled out with '!touch test.txt' against the repo
+   % root; this version uses fopen, which works on every platform, and
+   % writes to the temporary target instead.
+   target = testCase.TestData.target;
+   obj = withcd(target);
+   testCase.verifyClass(obj, 'onCleanup')
+   fid = fopen('test.txt', 'w');
+   testCase.assertGreaterThan(fid, 0, 'failed to open test.txt for writing')
+   fclose(fid);
+   returned = isfile(fullfile(target, 'test.txt'));
+   testCase.verifyTrue(returned, ...
+      'file created under withcd did not land in the target directory')
+   clear obj
 end

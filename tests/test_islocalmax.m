@@ -5,6 +5,9 @@ end
 
 function setup(testCase)
 
+   % Snapshot open figures; teardown closes only figures created here.
+   testCase.TestData.figsbefore = findall(0, 'Type', 'figure');
+
    % generate test data
    [T,Q] = baseflow.loadExampleData();
 
@@ -52,8 +55,9 @@ function setup(testCase)
 
 end
 
-function teardown(testCase) %#ok<INUSD>
-
+function teardown(testCase)
+   % Close the figures the setup function created (see tests/closenewfigs.m).
+   closenewfigs(testCase.TestData.figsbefore)
 end
 
 function test_peakfinder(testCase)
