@@ -41,6 +41,21 @@ function test_rundemos(testCase)
    demodir = baseflow.internal.buildpath('demos', 'mfiles');
    demofiles = dir(fullfile(demodir, '*.m'));
    testCase.assertNotEmpty(demofiles, 'no demo scripts found')
+
+   % The theory demos call syms, so they need the Symbolic Math Toolbox.
+   % Skip any demo whose source uses syms when the license is absent (for
+   % example on CI runners), so the result reflects the demos the machine
+   % can run.
+   if ~license('test', 'Symbolic_Toolbox')
+      needsyms = arrayfun(@(d) contains( ...
+         fileread(fullfile(demodir, d.name)), 'syms'), demofiles);
+      for k = find(needsyms(:)')
+         fprintf('skipping %s: no Symbolic Math Toolbox license\n', ...
+            demofiles(k).name)
+      end
+      demofiles = demofiles(~needsyms);
+   end
+
    for k = 1:numel(demofiles)
       [returned, errmsg] = rundemo(fullfile(demodir, demofiles(k).name));
       expected = true;
