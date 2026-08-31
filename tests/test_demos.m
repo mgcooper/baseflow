@@ -43,10 +43,12 @@ function test_rundemos(testCase)
    testCase.assertNotEmpty(demofiles, 'no demo scripts found')
 
    % The theory demos call syms, so they need the Symbolic Math Toolbox.
-   % Skip any demo whose source uses syms when the license is absent (for
-   % example on CI runners), so the result reflects the demos the machine
-   % can run.
-   if ~license('test', 'Symbolic_Toolbox')
+   % Skip any demo whose source uses syms when syms does not resolve, so
+   % the result reflects the demos the machine can run. Note: probe with
+   % exist, not license('test','Symbolic_Toolbox') - CI batch licensing
+   % reports the license as available even when the product is not
+   % installed (run 33347197058).
+   if exist('syms', 'file') == 0
       needsyms = arrayfun(@(d) contains( ...
          fileread(fullfile(demodir, d.name)), 'syms'), demofiles);
       for k = find(needsyms(:)')
