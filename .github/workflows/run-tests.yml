@@ -5,10 +5,12 @@ name: Tests
 # Controls when the action will run. 
 on:
   # Triggers the workflow on push or pull requests for the specified branch
+  # Note: the branch list must be comma-separated. A space-separated list
+  # parses as one branch named "main dev" and the workflow never triggers.
   push:
-    branches: [ main dev ]
+    branches: [ main, dev ]
   pull_request:
-    branches: [ main dev ]
+    branches: [ main, dev ]
 
   # Allows you to run this workflow manually from the Actions tab (default branch only)
   workflow_dispatch:
@@ -23,17 +25,25 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
-      # Sets up MATLAB on the GitHub Actions runner
+      # Sets up MATLAB on the GitHub Actions runner. The release matches the
+      # version the suite is verified against locally. The products list
+      # covers the declared toolbox dependencies plus the Optimization and
+      # Mapping toolboxes the code also uses.
       - name: Setup MATLAB
-        uses: matlab-actions/setup-matlab@v1
-        # release: r2020b
-        # uses: matlab-actions/setup-matlab@v1.2.4
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: R2025b
+          products: >-
+            Statistics_and_Machine_Learning_Toolbox
+            Curve_Fitting_Toolbox
+            Optimization_Toolbox
+            Mapping_Toolbox
 
       # Runs a set of commands using the runners shell
       - name: Run tests and generate artifacts
-        uses: matlab-actions/run-tests@v1
+        uses: matlab-actions/run-tests@v2
         with:
           source-folder: toolbox
           # select-by-tag: Unit
@@ -44,6 +54,15 @@ jobs:
           # test-results-pdf: test-results/results.pdf # supported on macOS with R2020b and later
           # output-detail: concise # none, terse, concise, detailed, or verbose, default is detailed for fails and concise otherwise
           # logging-level: terse # same as above
+
+      # Publish the JUnit results and Cobertura coverage the previous step
+      # produced. if: always() keeps the evidence for failing runs too.
+      - name: Upload test results and coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results
 
       # As an alternative to run-tests, you can use run-command to execute a MATLAB script, function, or statement.
       #- name: Run all tests
