@@ -7,8 +7,6 @@ digraph m2html {
   aquiferthickness -> open;
   aquifertrend -> open;
   baseflowtrend -> open;
-  basinlist -> basinlist;
-  basinname -> open;
   characteristicTime -> open;
   checkevent -> open;
   checkevent -> prepfits;
@@ -31,7 +29,6 @@ digraph m2html {
   getfunction -> open;
   getstring -> open;
   globalfit -> open;
-  gpfitb -> open;
   hyetograph -> open;
   loadbasins -> basinname;
   loadbasins -> open;
@@ -47,8 +44,6 @@ digraph m2html {
   loadmeta -> open;
   loadprops -> basinname;
   loadprops -> open;
-  mapbasins -> open;
-  mapgages -> open;
   phifitensemble -> open;
   plfitb -> open;
   plotaquifertrend -> open;
@@ -58,7 +53,6 @@ digraph m2html {
   pointcloudintercept -> open;
   pointcloudplot -> open;
   setopts -> open;
-  specialfunctions -> open;
   wrapevents -> open;
 
   Contents [URL="Contents.html"];

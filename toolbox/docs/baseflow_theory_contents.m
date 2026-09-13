@@ -5,3 +5,4 @@
 % 
 % * <baseflow_linear_theory.html *Linear Reservoir Model*> shows how to derive some basic aspects of the theory for a linear reservoir model. 
 % * <baseflow_nonlinear_theory.html *Nonlinear Reservoir Model*> shows how to derive some basic aspects of the theory for a nonlinear reservoir model.
+% * <baseflow_powerlaw_notation.html *Power-law notation*> compares the power-law notation of plfit, r_plfit, the generalized Pareto distribution, and the toolbox b and tau conventions.

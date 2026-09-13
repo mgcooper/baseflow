@@ -51,6 +51,21 @@
      Results, Events, Fits are outputs of baseflow.getevents and baseflow.fitevents
      opts is a struct containing fields area, D0, and L (see below)
 
+ Example
+
+  Detect and fit events, then fit global parameters. The basin area,
+  aquifer depth, and stream length describe the Kuparuk River basin:
+
+     [T, Q, R] = baseflow.loadExampleData();
+     A = 8.6545e9; D = 0.5; L = A * 0.8 / 1000;
+     Events = baseflow.getevents(T, Q, R);
+     [Fits, Results] = baseflow.fitevents(Events);
+     opts = baseflow.setopts('globalfit', 'drainagearea', A, ...
+        'aquiferdepth', D, 'streamlength', L);
+     GlobalFit = baseflow.globalfit(Results, Events, Fits, opts);
+     fprintf('b = %.2f, tau = %.0f days, phi = %.3f\n', ...
+        GlobalFit.b, GlobalFit.tau, GlobalFit.phi)
+
  See also: <a href="setopts.html" class="code" title="function opts = setopts(funcname,varargin)">setopts</a>, <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, <a href="fitevents.html" class="code" title="function [Fits,Results] = fitevents(Events,varargin)">fitevents</a>, <a href="fitphi.html" class="code" title="function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)">fitphi</a>, <a href="eventphi.html" class="code" title="function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)">eventphi</a>, <a href="eventtau.html" class="code" title="function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)">eventtau</a>
 
  Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</pre></div>
@@ -104,164 +119,179 @@ This function is called by:
 0023    <span class="comment">%     Results, Events, Fits are outputs of baseflow.getevents and baseflow.fitevents</span>
 0024    <span class="comment">%     opts is a struct containing fields area, D0, and L (see below)</span>
 0025    <span class="comment">%</span>
-0026    <span class="comment">% See also: setopts, getevents, fitevents, fitphi, eventphi, eventtau</span>
+0026    <span class="comment">% Example</span>
 0027    <span class="comment">%</span>
-0028    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
-0029 
-0030    <span class="comment">% if called with no input, open this file</span>
-0031    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0032 
-0033    <span class="comment">% TODO make the inputs more general, rather than these hard-coded structures</span>
-0034    <span class="comment">% and tables</span>
-0035 
-0036    <span class="comment">% NOTE in the current setup, early/lateqtls are used for eventphi, refqtls for</span>
-0037    <span class="comment">% point cloud</span>
-0038 
-0039    <span class="comment">% PARSE INPUTS</span>
-0040    <span class="comment">%#ok&lt;*ASGLU&gt;</span>
-0041    [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, <span class="keyword">...</span>
-0042       refqtls, earlyqtls, lateqtls, isflat] = parseinputs( <span class="keyword">...</span>
-0043       Results, Events, Fits, mfilename, varargin{:});
+0028    <span class="comment">%  Detect and fit events, then fit global parameters. The basin area,</span>
+0029    <span class="comment">%  aquifer depth, and stream length describe the Kuparuk River basin:</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">%     [T, Q, R] = baseflow.loadExampleData();</span>
+0032    <span class="comment">%     A = 8.6545e9; D = 0.5; L = A * 0.8 / 1000;</span>
+0033    <span class="comment">%     Events = baseflow.getevents(T, Q, R);</span>
+0034    <span class="comment">%     [Fits, Results] = baseflow.fitevents(Events);</span>
+0035    <span class="comment">%     opts = baseflow.setopts('globalfit', 'drainagearea', A, ...</span>
+0036    <span class="comment">%        'aquiferdepth', D, 'streamlength', L);</span>
+0037    <span class="comment">%     GlobalFit = baseflow.globalfit(Results, Events, Fits, opts);</span>
+0038    <span class="comment">%     fprintf('b = %.2f, tau = %.0f days, phi = %.3f\n', ...</span>
+0039    <span class="comment">%        GlobalFit.b, GlobalFit.tau, GlobalFit.phi)</span>
+0040    <span class="comment">%</span>
+0041    <span class="comment">% See also: setopts, getevents, fitevents, fitphi, eventphi, eventtau</span>
+0042    <span class="comment">%</span>
+0043    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
 0044 
-0045    <span class="comment">% Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])</span>
-0046    [tau, q, dqdt, tags] = baseflow.eventtau(Results, Events, Fits, <span class="string">'usefits'</span>, false);
-0047    
-0048    TauFit = baseflow.plfitb(tau, <span class="string">'plotfit'</span>, plotfits, <span class="string">'bootfit'</span>, bootfit, <span class="keyword">...</span>
-0049       <span class="string">'bootreps'</span>, nreps, <span class="string">'limit'</span>, 20);
+0045    <span class="comment">% if called with no input, open this file</span>
+0046    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0047 
+0048    <span class="comment">% TODO make the inputs more general, rather than these hard-coded structures</span>
+0049    <span class="comment">% and tables</span>
 0050 
-0051    <span class="comment">% Parameters needed for next steps</span>
-0052    bhat     = TauFit.b;
-0053    bhatL    = TauFit.b_L;
-0054    bhatH    = TauFit.b_H;
-0055    tau0     = TauFit.tau0;
-0056    tauexp   = TauFit.tau;
-0057    itau     = TauFit.taumask;
-0058 
-0059    <span class="comment">% Fit a</span>
-0060    [ahat, ahatLH, xbar, ybar] = baseflow.pointcloudintercept(q, dqdt, bhat, <span class="keyword">...</span>
-0061       <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, refqtls, <span class="string">'mask'</span>, itau, <span class="string">'bci'</span>, [bhatL bhatH]);
-0062 
-0063    <span class="comment">% Fit Q0 and Qhat</span>
-0064    [Qexp, Q0, pQexp, pQ0] = baseflow.expectedQ(ahat, bhat, tauexp, q, dqdt, tau0, <span class="keyword">...</span>
-0065       <span class="string">'qtls'</span>, Q, <span class="string">'mask'</span>, itau);
-0066 
-0067    <span class="comment">% Fit phi</span>
-0068    <span class="keyword">switch</span> phimethod
-0069       <span class="keyword">case</span> <span class="string">'distfit'</span>
-0070          phid = baseflow.eventphi(Results, Fits, A, D, L, bhat, <span class="keyword">...</span>
-0071             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
-0072          phi = baseflow.fitphidist(phid, <span class="string">'mean'</span>, <span class="string">'cdf'</span>, plotfits);
+0051    <span class="comment">% NOTE in the current setup, early/lateqtls are used for eventphi, refqtls for</span>
+0052    <span class="comment">% point cloud</span>
+0053 
+0054    <span class="comment">% PARSE INPUTS</span>
+0055    <span class="comment">%#ok&lt;*ASGLU&gt;</span>
+0056    [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, nreps, phimethod, <span class="keyword">...</span>
+0057       refqtls, earlyqtls, lateqtls, isflat] = parseinputs( <span class="keyword">...</span>
+0058       Results, Events, Fits, mfilename, varargin{:});
+0059 
+0060    <span class="comment">% Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])</span>
+0061    [tau, q, dqdt, tags] = baseflow.eventtau(Results, Events, Fits, <span class="string">'usefits'</span>, false);
+0062    
+0063    TauFit = baseflow.plfitb(tau, <span class="string">'plotfit'</span>, plotfits, <span class="string">'bootfit'</span>, bootfit, <span class="keyword">...</span>
+0064       <span class="string">'bootreps'</span>, nreps, <span class="string">'limit'</span>, 20);
+0065 
+0066    <span class="comment">% Parameters needed for next steps</span>
+0067    bhat     = TauFit.b;
+0068    bhatL    = TauFit.b_L;
+0069    bhatH    = TauFit.b_H;
+0070    tau0     = TauFit.tau0;
+0071    tauexp   = TauFit.tau;
+0072    itau     = TauFit.taumask;
 0073 
-0074       <span class="keyword">case</span> <span class="string">'pointcloud'</span>
-0075          phi = baseflow.cloudphi(q, dqdt, bhat, A, D, L, <span class="string">'envelope'</span>, <span class="keyword">...</span>
-0076             <span class="string">'lateqtls'</span>, refqtls, <span class="string">'earlyqtls'</span>, earlyqtls, <span class="string">'mask'</span>, itau);
+0074    <span class="comment">% Fit a</span>
+0075    [ahat, ahatLH, xbar, ybar] = baseflow.pointcloudintercept(q, dqdt, bhat, <span class="keyword">...</span>
+0076       <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, refqtls, <span class="string">'mask'</span>, itau, <span class="string">'bci'</span>, [bhatL bhatH]);
 0077 
-0078       <span class="keyword">case</span> <span class="string">'phicombo'</span>
-0079          phi1 = baseflow.eventphi(Results, Fits, A, D, L, 1, <span class="keyword">...</span>
-0080             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
-0081          phi2 = baseflow.eventphi(Results, Fits, A, D, L, 3/2, <span class="keyword">...</span>
-0082             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
-0083          phid = vertcat(phi1, phi2); phid(phid&gt;1) = nan; phid(phid&lt;0) = nan;
-0084          phi = baseflow.fitphidist(phid, <span class="string">'mean'</span>, <span class="string">'cdf'</span>, plotfits);
-0085    <span class="keyword">end</span>
-0086 
-0087    <span class="comment">% % Fit k</span>
-0088    <span class="comment">% [k,Q0_2,D_2] = baseflow.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...</span>
-0089    <span class="comment">%    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);</span>
-0090    <span class="comment">% Q0    = Qexp*(3-b)/(2-b);</span>
-0091 
-0092    <span class="comment">% note on units: ahat is estimated from the point cloud. the dimensions of ahat</span>
-0093    <span class="comment">% are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units</span>
-0094    <span class="comment">% d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we get:</span>
-0095    <span class="comment">% (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1</span>
-0096 
-0097    <span class="comment">% % turned this off b/c phicloud makes one</span>
-0098    <span class="comment">% % plot the pointcloud if requested</span>
-0099    <span class="comment">% if plotfits == true</span>
-0100    <span class="comment">%</span>
-0101    <span class="comment">%    h = baseflow.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...</span>
-0102    <span class="comment">%    'reflines',{'early','late','userfit'},'reflabels',true, ...</span>
-0103    <span class="comment">%    'userab',[ahat bhat],'addlegend',true);</span>
-0104    <span class="comment">%    h.legend.AutoUpdate = 'off';</span>
-0105    <span class="comment">%    scatter(xbar,ybar,60,'k','filled','s');</span>
-0106    <span class="comment">% end</span>
-0107 
-0108    <span class="comment">% PARSE OUTPUTS</span>
-0109    GlobalFit      = TauFit;
-0110    GlobalFit.phi  = phi;
-0111    GlobalFit.q    = q;
-0112    GlobalFit.dqdt = dqdt;
-0113    GlobalFit.tags = tags;
-0114    GlobalFit.a    = ahat;
-0115    GlobalFit.a_L  = ahatLH(1);
-0116    GlobalFit.a_H  = ahatLH(2);
-0117    GlobalFit.xbar = xbar;
-0118    GlobalFit.ybar = ybar;
-0119    GlobalFit.Q0   = Q0;
-0120    GlobalFit.Qexp = Qexp;
-0121    GlobalFit.pQexp = pQexp;
-0122    GlobalFit.pQ0  = pQ0;
-0123 <span class="keyword">end</span>
-0124 
-0125 <span class="comment">%% INPUT PARSER</span>
-0126 <a name="_sub1" href="#_subfunctions" class="code">function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod, </a><span class="keyword">...</span>
-0127       refqtls, earlyqtls, lateqtls, isflat] = parseinputs(K, Events, Fits, <span class="keyword">...</span>
-0128       funcname, varargin)
-0129 
-0130    parser = inputParser;
-0131    parser.FunctionName = [<span class="string">'baseflow.'</span> funcname];
-0132    parser.StructExpand = true;
-0133    parser.PartialMatching = false;
-0134 
-0135    parser.addRequired(<span class="string">'Results'</span>, @isstruct);
-0136    parser.addRequired(<span class="string">'Events'</span>, @isstruct);
-0137    parser.addRequired(<span class="string">'Fits'</span>, @isstruct);
-0138    parser.addParameter(<span class="string">'drainagearea'</span>, nan, @isnumericscalar);
-0139    parser.addParameter(<span class="string">'drainagedensity'</span>, 0.8, @isnumericscalar);
-0140    parser.addParameter(<span class="string">'aquiferdepth'</span>, nan, @isnumericscalar);
-0141    parser.addParameter(<span class="string">'streamlength'</span>, nan, @isnumericscalar);
-0142    parser.addParameter(<span class="string">'aquiferslope'</span>, nan, @isnumericscalar);
-0143    parser.addParameter(<span class="string">'aquiferbreadth'</span>, nan, @isnumericscalar);
-0144    parser.addParameter(<span class="string">'drainableporosity'</span>, 0.1, @isnumericscalar);
-0145    parser.addParameter(<span class="string">'isflat'</span>, true, @islogicalscalar);
-0146    parser.addParameter(<span class="string">'plotfits'</span>, false, @islogicalscalar);
-0147    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogicalscalar);
-0148    parser.addParameter(<span class="string">'bootreps'</span>, 1000, @isdoublescalar);
-0149    parser.addParameter(<span class="string">'phimethod'</span>, <span class="string">'pointcloud'</span>, @ischarlike);
-0150    parser.addParameter(<span class="string">'refqtls'</span>, [0.50 0.50],  @isnumericvector);
-0151    parser.addParameter(<span class="string">'earlyqtls'</span>, [0.95 0.95],  @isnumericvector);
-0152    parser.addParameter(<span class="string">'lateqtls'</span>, [0.50 0.50],  @isnumericvector);
-0153 
-0154    parser.parse(K, Events, Fits, varargin{:});
-0155 
-0156    A           = parser.Results.drainagearea;      <span class="comment">% basin area [m2]</span>
-0157    Dd          = parser.Results.drainagedensity;   <span class="comment">% drainage density [km-1]</span>
-0158    D           = parser.Results.aquiferdepth;      <span class="comment">% reference active layer thickness [m]</span>
-0159    L           = parser.Results.streamlength;      <span class="comment">% effective stream network length [m]</span>
-0160    theta       = parser.Results.aquiferslope;      <span class="comment">% aquifer slope [1]</span>
-0161    B           = parser.Results.aquiferbreadth;    <span class="comment">% aquifer breadth [m]</span>
-0162    phi         = parser.Results.drainableporosity; <span class="comment">% drainable porosity [1]</span>
-0163    plotfits    = parser.Results.plotfits;
-0164    bootfit     = parser.Results.bootfit;
-0165    bootreps    = parser.Results.bootreps;
-0166    phimethod   = parser.Results.phimethod;
-0167    refqtls     = parser.Results.refqtls;
-0168    earlyqtls   = parser.Results.earlyqtls;
-0169    lateqtls    = parser.Results.lateqtls;
-0170    isflat      = parser.Results.isflat;
-0171 
-0172    <span class="comment">% if stream length and drainage density are both provided, check that they are</span>
-0173    <span class="comment">% consistent with the provided area. note: Dd comes in as 1/km b/c that's how it</span>
-0174    <span class="comment">% is almost always reported (km/km2). divide by 1000 to get 1/m.</span>
-0175    <span class="keyword">if</span> ~isnan(Dd) &amp;&amp; ~isnan(L)
-0176       <span class="keyword">if</span> Dd/1000*A ~= L        <span class="comment">% 1/m * m^2 = m</span>
-0177          warning(<span class="string">'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd'</span>);
-0178          L = Dd/1000*A;
-0179       <span class="keyword">end</span>
-0180    <span class="keyword">end</span>
-0181 
-0182    <span class="comment">% take values out of the data structures that are needed</span>
-0183    Q = Events.inputFlow;       <span class="comment">% daily streamflow [m3 d-1]</span>
-0184 <span class="keyword">end</span></pre></div>
+0078    <span class="comment">% Fit Q0 and Qhat</span>
+0079    [Qexp, Q0, pQexp, pQ0] = baseflow.expectedQ(ahat, bhat, tauexp, q, dqdt, tau0, <span class="keyword">...</span>
+0080       <span class="string">'qtls'</span>, Q, <span class="string">'mask'</span>, itau);
+0081 
+0082    <span class="comment">% Fit phi</span>
+0083    <span class="keyword">switch</span> phimethod
+0084       <span class="keyword">case</span> <span class="string">'distfit'</span>
+0085          phid = baseflow.eventphi(Results, Fits, A, D, L, bhat, <span class="keyword">...</span>
+0086             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
+0087          phi = baseflow.fitphidist(phid, <span class="string">'mean'</span>, <span class="string">'cdf'</span>, plotfits);
+0088 
+0089       <span class="keyword">case</span> <span class="string">'pointcloud'</span>
+0090          phi = baseflow.cloudphi(q, dqdt, bhat, A, D, L, <span class="string">'envelope'</span>, <span class="keyword">...</span>
+0091             <span class="string">'lateqtls'</span>, refqtls, <span class="string">'earlyqtls'</span>, earlyqtls, <span class="string">'mask'</span>, itau);
+0092 
+0093       <span class="keyword">case</span> <span class="string">'phicombo'</span>
+0094          phi1 = baseflow.eventphi(Results, Fits, A, D, L, 1, <span class="keyword">...</span>
+0095             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
+0096          phi2 = baseflow.eventphi(Results, Fits, A, D, L, 3/2, <span class="keyword">...</span>
+0097             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
+0098          phid = vertcat(phi1, phi2); phid(phid&gt;1) = nan; phid(phid&lt;0) = nan;
+0099          phi = baseflow.fitphidist(phid, <span class="string">'mean'</span>, <span class="string">'cdf'</span>, plotfits);
+0100    <span class="keyword">end</span>
+0101 
+0102    <span class="comment">% % Fit k</span>
+0103    <span class="comment">% [k,Q0_2,D_2] = baseflow.aquiferprops(q,dqdt,ahat,bhat,'RS05',phi,A,D,L, ...</span>
+0104    <span class="comment">%    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);</span>
+0105    <span class="comment">% Q0    = Qexp*(3-b)/(2-b);</span>
+0106 
+0107    <span class="comment">% note on units: ahat is estimated from the point cloud. the dimensions of ahat</span>
+0108    <span class="comment">% are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units</span>
+0109    <span class="comment">% d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we get:</span>
+0110    <span class="comment">% (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1</span>
+0111 
+0112    <span class="comment">% % turned this off b/c phicloud makes one</span>
+0113    <span class="comment">% % plot the pointcloud if requested</span>
+0114    <span class="comment">% if plotfits == true</span>
+0115    <span class="comment">%</span>
+0116    <span class="comment">%    h = baseflow.pointcloudplot(q,dqdt,'blate',1,'mask',itau,    ...</span>
+0117    <span class="comment">%    'reflines',{'early','late','userfit'},'reflabels',true, ...</span>
+0118    <span class="comment">%    'userab',[ahat bhat],'addlegend',true);</span>
+0119    <span class="comment">%    h.legend.AutoUpdate = 'off';</span>
+0120    <span class="comment">%    scatter(xbar,ybar,60,'k','filled','s');</span>
+0121    <span class="comment">% end</span>
+0122 
+0123    <span class="comment">% PARSE OUTPUTS</span>
+0124    GlobalFit      = TauFit;
+0125    GlobalFit.phi  = phi;
+0126    GlobalFit.q    = q;
+0127    GlobalFit.dqdt = dqdt;
+0128    GlobalFit.tags = tags;
+0129    GlobalFit.a    = ahat;
+0130    GlobalFit.a_L  = ahatLH(1);
+0131    GlobalFit.a_H  = ahatLH(2);
+0132    GlobalFit.xbar = xbar;
+0133    GlobalFit.ybar = ybar;
+0134    GlobalFit.Q0   = Q0;
+0135    GlobalFit.Qexp = Qexp;
+0136    GlobalFit.pQexp = pQexp;
+0137    GlobalFit.pQ0  = pQ0;
+0138 <span class="keyword">end</span>
+0139 
+0140 <span class="comment">%% INPUT PARSER</span>
+0141 <a name="_sub1" href="#_subfunctions" class="code">function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod, </a><span class="keyword">...</span>
+0142       refqtls, earlyqtls, lateqtls, isflat] = parseinputs(K, Events, Fits, <span class="keyword">...</span>
+0143       funcname, varargin)
+0144 
+0145    parser = inputParser;
+0146    parser.FunctionName = [<span class="string">'baseflow.'</span> funcname];
+0147    parser.StructExpand = true;
+0148    parser.PartialMatching = false;
+0149 
+0150    parser.addRequired(<span class="string">'Results'</span>, @isstruct);
+0151    parser.addRequired(<span class="string">'Events'</span>, @isstruct);
+0152    parser.addRequired(<span class="string">'Fits'</span>, @isstruct);
+0153    parser.addParameter(<span class="string">'drainagearea'</span>, nan, @isnumericscalar);
+0154    parser.addParameter(<span class="string">'drainagedensity'</span>, 0.8, @isnumericscalar);
+0155    parser.addParameter(<span class="string">'aquiferdepth'</span>, nan, @isnumericscalar);
+0156    parser.addParameter(<span class="string">'streamlength'</span>, nan, @isnumericscalar);
+0157    parser.addParameter(<span class="string">'aquiferslope'</span>, nan, @isnumericscalar);
+0158    parser.addParameter(<span class="string">'aquiferbreadth'</span>, nan, @isnumericscalar);
+0159    parser.addParameter(<span class="string">'drainableporosity'</span>, 0.1, @isnumericscalar);
+0160    parser.addParameter(<span class="string">'isflat'</span>, true, @islogicalscalar);
+0161    parser.addParameter(<span class="string">'plotfits'</span>, false, @islogicalscalar);
+0162    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogicalscalar);
+0163    parser.addParameter(<span class="string">'bootreps'</span>, 1000, @isdoublescalar);
+0164    parser.addParameter(<span class="string">'phimethod'</span>, <span class="string">'pointcloud'</span>, @ischarlike);
+0165    parser.addParameter(<span class="string">'refqtls'</span>, [0.50 0.50],  @isnumericvector);
+0166    parser.addParameter(<span class="string">'earlyqtls'</span>, [0.95 0.95],  @isnumericvector);
+0167    parser.addParameter(<span class="string">'lateqtls'</span>, [0.50 0.50],  @isnumericvector);
+0168 
+0169    parser.parse(K, Events, Fits, varargin{:});
+0170 
+0171    A           = parser.Results.drainagearea;      <span class="comment">% basin area [m2]</span>
+0172    Dd          = parser.Results.drainagedensity;   <span class="comment">% drainage density [km-1]</span>
+0173    D           = parser.Results.aquiferdepth;      <span class="comment">% reference active layer thickness [m]</span>
+0174    L           = parser.Results.streamlength;      <span class="comment">% effective stream network length [m]</span>
+0175    theta       = parser.Results.aquiferslope;      <span class="comment">% aquifer slope [1]</span>
+0176    B           = parser.Results.aquiferbreadth;    <span class="comment">% aquifer breadth [m]</span>
+0177    phi         = parser.Results.drainableporosity; <span class="comment">% drainable porosity [1]</span>
+0178    plotfits    = parser.Results.plotfits;
+0179    bootfit     = parser.Results.bootfit;
+0180    bootreps    = parser.Results.bootreps;
+0181    phimethod   = parser.Results.phimethod;
+0182    refqtls     = parser.Results.refqtls;
+0183    earlyqtls   = parser.Results.earlyqtls;
+0184    lateqtls    = parser.Results.lateqtls;
+0185    isflat      = parser.Results.isflat;
+0186 
+0187    <span class="comment">% if stream length and drainage density are both provided, check that they are</span>
+0188    <span class="comment">% consistent with the provided area. note: Dd comes in as 1/km b/c that's how it</span>
+0189    <span class="comment">% is almost always reported (km/km2). divide by 1000 to get 1/m.</span>
+0190    <span class="keyword">if</span> ~isnan(Dd) &amp;&amp; ~isnan(L)
+0191       <span class="keyword">if</span> Dd/1000*A ~= L        <span class="comment">% 1/m * m^2 = m</span>
+0192          warning(<span class="string">'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd'</span>);
+0193          L = Dd/1000*A;
+0194       <span class="keyword">end</span>
+0195    <span class="keyword">end</span>
+0196 
+0197    <span class="comment">% take values out of the data structures that are needed</span>
+0198    Q = Events.inputFlow;       <span class="comment">% daily streamflow [m3 d-1]</span>
+0199 <span class="keyword">end</span></pre></div>
 </body>
 </html>

@@ -27,7 +27,32 @@
 <div class="box"><strong>function varargout = loadExampleData(varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">LOADEXAMPLEDATA Load toolbox example data.</pre></div>
+<div class="fragment"><pre class="comment">LOADEXAMPLEDATA Load toolbox example data.
+
+ Syntax
+
+     [T, Q, R] = baseflow.loadExampleData()
+     [T, Q, R, Data] = baseflow.loadExampleData('kuparuk')
+
+ Description
+
+     [T, Q, R] = baseflow.loadExampleData() loads the daily streamflow
+     example data from the toolbox data/ folder. It returns the time
+     vector T (datenum), the daily flow Q, and the daily rain R.
+
+     [T, Q, R, Data] = baseflow.loadExampleData('kuparuk') also loads
+     the annual Kuparuk basin data and returns it in Data. The function
+     returns outputs in order, one per requested output.
+
+ Example
+
+  Load the daily streamflow data and plot the hydrograph:
+
+     [T, Q, R] = baseflow.loadExampleData();
+     plot(datetime(T, 'ConvertFrom', 'datenum'), Q)
+     ylabel('Q (m^3 d^{-1})')
+
+ See also: baseflow.<a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a></pre></div>
 
 
 <!-- crossreference -->
@@ -51,49 +76,74 @@ This function is called by:
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function varargout = loadExampleData(varargin)</a>
 0002    <span class="comment">%LOADEXAMPLEDATA Load toolbox example data.</span>
-0003 
-0004    narginchk(0, 1);
-0005    
-0006    <span class="keyword">if</span> nargin == 1
-0007       option = validatestring(varargin{1}, {<span class="string">'kuparuk'</span>}, mfilename, <span class="string">'OPTION'</span>, 1);
-0008    <span class="keyword">else</span>
-0009       option = <span class="string">'default'</span>;
-0010    <span class="keyword">end</span>
-0011    
-0012    datapath = fullfile(baseflow.internal.basepath(), <span class="string">'data'</span>);
-0013 
-0014    <span class="keyword">if</span> isoctave
-0015       load(fullfile(datapath, <span class="string">'dailyflow_octave.mat'</span>), <span class="string">'T'</span>, <span class="string">'Q'</span>, <span class="string">'R'</span>);
-0016       T = datenum(T); <span class="comment">%#ok&lt;*DATNM&gt;</span>
-0017    <span class="keyword">else</span>
-0018       load(fullfile(datapath, <span class="string">'dailyflow.mat'</span>), <span class="string">'T'</span>, <span class="string">'Q'</span>, <span class="string">'R'</span>);
-0019       T = datenum(T); <span class="comment">%#ok&lt;*DATNM&gt;</span>
-0020    <span class="keyword">end</span>
-0021    
-0022    <span class="keyword">if</span> strcmp(option, <span class="string">'kuparuk'</span>)
-0023       <span class="keyword">if</span> isoctave
-0024          load(fullfile(datapath, <span class="string">'annualdata_octave.mat'</span>),<span class="string">'Data'</span>);
-0025          <span class="keyword">try</span>
-0026             Data = struct2table(Data);
-0027          <span class="keyword">catch</span>
-0028          <span class="keyword">end</span>
-0029       <span class="keyword">else</span>
-0030          load(fullfile(datapath, <span class="string">'annualdata.mat'</span>),<span class="string">'Data'</span>);
-0031       <span class="keyword">end</span>
-0032    <span class="keyword">else</span>
-0033       Data = [];
-0034    <span class="keyword">end</span>
-0035    
-0036    <span class="keyword">switch</span> nargout
-0037       <span class="keyword">case</span> 1
-0038          varargout{1} = T;
-0039       <span class="keyword">case</span> 2
-0040          [varargout{1:nargout}] = deal(T, Q);
-0041       <span class="keyword">case</span> 3
-0042          [varargout{1:nargout}] = deal(T, Q, R);
-0043       <span class="keyword">case</span> 4
-0044          [varargout{1:nargout}] = deal(T, Q, R, Data);
+0003    <span class="comment">%</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     [T, Q, R] = baseflow.loadExampleData()</span>
+0007    <span class="comment">%     [T, Q, R, Data] = baseflow.loadExampleData('kuparuk')</span>
+0008    <span class="comment">%</span>
+0009    <span class="comment">% Description</span>
+0010    <span class="comment">%</span>
+0011    <span class="comment">%     [T, Q, R] = baseflow.loadExampleData() loads the daily streamflow</span>
+0012    <span class="comment">%     example data from the toolbox data/ folder. It returns the time</span>
+0013    <span class="comment">%     vector T (datenum), the daily flow Q, and the daily rain R.</span>
+0014    <span class="comment">%</span>
+0015    <span class="comment">%     [T, Q, R, Data] = baseflow.loadExampleData('kuparuk') also loads</span>
+0016    <span class="comment">%     the annual Kuparuk basin data and returns it in Data. The function</span>
+0017    <span class="comment">%     returns outputs in order, one per requested output.</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">% Example</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">%  Load the daily streamflow data and plot the hydrograph:</span>
+0022    <span class="comment">%</span>
+0023    <span class="comment">%     [T, Q, R] = baseflow.loadExampleData();</span>
+0024    <span class="comment">%     plot(datetime(T, 'ConvertFrom', 'datenum'), Q)</span>
+0025    <span class="comment">%     ylabel('Q (m^3 d^{-1})')</span>
+0026    <span class="comment">%</span>
+0027    <span class="comment">% See also: baseflow.getevents</span>
+0028 
+0029    narginchk(0, 1);
+0030    
+0031    <span class="keyword">if</span> nargin == 1
+0032       option = validatestring(varargin{1}, {<span class="string">'kuparuk'</span>}, mfilename, <span class="string">'OPTION'</span>, 1);
+0033    <span class="keyword">else</span>
+0034       option = <span class="string">'default'</span>;
+0035    <span class="keyword">end</span>
+0036    
+0037    datapath = fullfile(baseflow.internal.basepath(), <span class="string">'data'</span>);
+0038 
+0039    <span class="keyword">if</span> isoctave
+0040       load(fullfile(datapath, <span class="string">'dailyflow_octave.mat'</span>), <span class="string">'T'</span>, <span class="string">'Q'</span>, <span class="string">'R'</span>);
+0041       T = datenum(T); <span class="comment">%#ok&lt;*DATNM&gt;</span>
+0042    <span class="keyword">else</span>
+0043       load(fullfile(datapath, <span class="string">'dailyflow.mat'</span>), <span class="string">'T'</span>, <span class="string">'Q'</span>, <span class="string">'R'</span>);
+0044       T = datenum(T); <span class="comment">%#ok&lt;*DATNM&gt;</span>
 0045    <span class="keyword">end</span>
-0046 <span class="keyword">end</span></pre></div>
+0046    
+0047    <span class="keyword">if</span> strcmp(option, <span class="string">'kuparuk'</span>)
+0048       <span class="keyword">if</span> isoctave
+0049          load(fullfile(datapath, <span class="string">'annualdata_octave.mat'</span>),<span class="string">'Data'</span>);
+0050          <span class="keyword">try</span>
+0051             Data = struct2table(Data);
+0052          <span class="keyword">catch</span>
+0053          <span class="keyword">end</span>
+0054       <span class="keyword">else</span>
+0055          load(fullfile(datapath, <span class="string">'annualdata.mat'</span>),<span class="string">'Data'</span>);
+0056       <span class="keyword">end</span>
+0057    <span class="keyword">else</span>
+0058       Data = [];
+0059    <span class="keyword">end</span>
+0060    
+0061    <span class="keyword">switch</span> nargout
+0062       <span class="keyword">case</span> 1
+0063          varargout{1} = T;
+0064       <span class="keyword">case</span> 2
+0065          [varargout{1:nargout}] = deal(T, Q);
+0066       <span class="keyword">case</span> 3
+0067          [varargout{1:nargout}] = deal(T, Q, R);
+0068       <span class="keyword">case</span> 4
+0069          [varargout{1:nargout}] = deal(T, Q, R, Data);
+0070    <span class="keyword">end</span>
+0071 <span class="keyword">end</span></pre></div>
 </body>
 </html>

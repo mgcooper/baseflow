@@ -39,6 +39,15 @@
      of discharge Q, first derivative of discharge dQdt, and time t for
      parameter values a, b, and initial discharge Q0.
 
+ Example
+
+  Generate a nonlinear (b = 1.5) recession curve and plot it in
+  point-cloud form:
+
+     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);
+     loglog(q, -dqdt, 'o')
+     xlabel('Q'), ylabel('-dQ/dt')
+
  See also: baseflow.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
@@ -76,64 +85,73 @@ This function is called by:
 0011    <span class="comment">%     of discharge Q, first derivative of discharge dQdt, and time t for</span>
 0012    <span class="comment">%     parameter values a, b, and initial discharge Q0.</span>
 0013    <span class="comment">%</span>
-0014    <span class="comment">% See also: baseflow.Qnonlin</span>
+0014    <span class="comment">% Example</span>
 0015    <span class="comment">%</span>
-0016    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0017 
-0018    <span class="comment">% if called with no input, open this file</span>
-0019    <span class="comment">% if nargin == 0; open(mfilename('fullpath')); return; end</span>
-0020 
-0021    <span class="comment">% default Q0 and time</span>
-0022    <span class="keyword">switch</span> nargin
-0023       <span class="keyword">case</span> 0
-0024          a = 1e-2;
-0025          b = 1.5;
-0026          q0 = 100;
-0027          t = 1:100;
-0028       <span class="keyword">case</span> 1 <span class="comment">% assume b is provided, and swap a for b</span>
-0029          b = a;
-0030          a = 1e-2;
-0031          q0 = 100;
-0032          t = 1:100;
-0033       <span class="keyword">case</span> 2
-0034          q0 = 100;
-0035          t = 1:100;
-0036       <span class="keyword">case</span> 3
-0037          t = 1:100;
-0038    <span class="keyword">end</span>
-0039 
-0040    t = t(:);
-0041 
-0042    <span class="keyword">switch</span> b
-0043       <span class="keyword">case</span> 1
-0044          q = q0.*exp(-a.*t);
-0045          dqdt = -a.*q;
-0046          <span class="comment">%q = (q(1:end)+q(2:end-1))./2;</span>
-0047          <span class="comment">%dqdt = diff(q);</span>
-0048       <span class="keyword">otherwise</span>
-0049          [q,dqdt,t] = baseflow.Qnonlin(a,b,q0,t,false); <span class="comment">% false = don't make fig</span>
-0050    <span class="keyword">end</span>
-0051 <span class="keyword">end</span>
-0052 
-0053 <span class="comment">% % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why the</span>
-0054 <span class="comment">% data falls off, could be the noise I add, or could be the lack of a negative</span>
-0055 <span class="comment">% sign on in genCurveData</span>
-0056 <span class="comment">% for a linear model (exponential), Q = Q0*exp(-at), meaning</span>
-0057 <span class="comment">%</span>
-0058 <span class="comment">% for the linear case:</span>
-0059 <span class="comment">% data = genCurveData('exponential');</span>
-0060 <span class="comment">% a = 1e-2;</span>
-0061 <span class="comment">% q = data.y;</span>
-0062 <span class="comment">% dqdt = -a.*q;</span>
-0063 <span class="comment">% figure; semilogy(-dqdt,q,'o')</span>
-0064 <span class="comment">%</span>
-0065 <span class="comment">%</span>
-0066 <span class="comment">% for the nonlinear case:</span>
-0067 <span class="comment">% data = genCurveData('power');</span>
-0068 <span class="comment">% q = data.y;</span>
-0069 <span class="comment">% dqdt = -data.x;</span>
-0070 <span class="comment">% figure; loglog(-dqdt,q,'o')</span>
-0071 <span class="comment">% [x,y,logx,logy] = baseflow.prepfits(q,dqdt);</span>
-0072 <span class="comment">% Fit = baseflow.fitab(logx,logy,'nls');</span></pre></div>
+0016    <span class="comment">%  Generate a nonlinear (b = 1.5) recession curve and plot it in</span>
+0017    <span class="comment">%  point-cloud form:</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">%     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);</span>
+0020    <span class="comment">%     loglog(q, -dqdt, 'o')</span>
+0021    <span class="comment">%     xlabel('Q'), ylabel('-dQ/dt')</span>
+0022    <span class="comment">%</span>
+0023    <span class="comment">% See also: baseflow.Qnonlin</span>
+0024    <span class="comment">%</span>
+0025    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0026 
+0027    <span class="comment">% if called with no input, open this file</span>
+0028    <span class="comment">% if nargin == 0; open(mfilename('fullpath')); return; end</span>
+0029 
+0030    <span class="comment">% default Q0 and time</span>
+0031    <span class="keyword">switch</span> nargin
+0032       <span class="keyword">case</span> 0
+0033          a = 1e-2;
+0034          b = 1.5;
+0035          q0 = 100;
+0036          t = 1:100;
+0037       <span class="keyword">case</span> 1 <span class="comment">% assume b is provided, and swap a for b</span>
+0038          b = a;
+0039          a = 1e-2;
+0040          q0 = 100;
+0041          t = 1:100;
+0042       <span class="keyword">case</span> 2
+0043          q0 = 100;
+0044          t = 1:100;
+0045       <span class="keyword">case</span> 3
+0046          t = 1:100;
+0047    <span class="keyword">end</span>
+0048 
+0049    t = t(:);
+0050 
+0051    <span class="keyword">switch</span> b
+0052       <span class="keyword">case</span> 1
+0053          q = q0.*exp(-a.*t);
+0054          dqdt = -a.*q;
+0055          <span class="comment">%q = (q(1:end)+q(2:end-1))./2;</span>
+0056          <span class="comment">%dqdt = diff(q);</span>
+0057       <span class="keyword">otherwise</span>
+0058          [q,dqdt,t] = baseflow.Qnonlin(a,b,q0,t,false); <span class="comment">% false = don't make fig</span>
+0059    <span class="keyword">end</span>
+0060 <span class="keyword">end</span>
+0061 
+0062 <span class="comment">% % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why the</span>
+0063 <span class="comment">% data falls off, could be the noise I add, or could be the lack of a negative</span>
+0064 <span class="comment">% sign on in genCurveData</span>
+0065 <span class="comment">% for a linear model (exponential), Q = Q0*exp(-at), meaning</span>
+0066 <span class="comment">%</span>
+0067 <span class="comment">% for the linear case:</span>
+0068 <span class="comment">% data = genCurveData('exponential');</span>
+0069 <span class="comment">% a = 1e-2;</span>
+0070 <span class="comment">% q = data.y;</span>
+0071 <span class="comment">% dqdt = -a.*q;</span>
+0072 <span class="comment">% figure; semilogy(-dqdt,q,'o')</span>
+0073 <span class="comment">%</span>
+0074 <span class="comment">%</span>
+0075 <span class="comment">% for the nonlinear case:</span>
+0076 <span class="comment">% data = genCurveData('power');</span>
+0077 <span class="comment">% q = data.y;</span>
+0078 <span class="comment">% dqdt = -data.x;</span>
+0079 <span class="comment">% figure; loglog(-dqdt,q,'o')</span>
+0080 <span class="comment">% [x,y,logx,logy] = baseflow.prepfits(q,dqdt);</span>
+0081 <span class="comment">% Fit = baseflow.fitab(logx,logy,'nls');</span></pre></div>
 </body>
 </html>

@@ -29,6 +29,11 @@
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">HELP Open toolbox html help document in the MATLAB Help browser.
 
+ Syntax
+
+     baseflow.help()
+     baseflow.help(docname)
+
  baseflow.help() opens the baseflow toolbox help pages in the MATLAB help
  browser.
 
@@ -66,32 +71,37 @@ This function is called by:
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function help(docname)</a>
 0002    <span class="comment">%HELP Open toolbox html help document in the MATLAB Help browser.</span>
 0003    <span class="comment">%</span>
-0004    <span class="comment">% baseflow.help() opens the baseflow toolbox help pages in the MATLAB help</span>
-0005    <span class="comment">% browser.</span>
-0006    <span class="comment">%</span>
-0007    <span class="comment">% baseflow.help(DOCNAME) opens the documentation file DOCNAME.HTML in the matlab</span>
-0008    <span class="comment">% help browser. DOCNAME can be the name of a function, an example/demo, or</span>
-0009    <span class="comment">% any other file with an .html extension in the docs/ folder or any subfolder</span>
-0010    <span class="comment">% of docs/.</span>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     baseflow.help()</span>
+0007    <span class="comment">%     baseflow.help(docname)</span>
+0008    <span class="comment">%</span>
+0009    <span class="comment">% baseflow.help() opens the baseflow toolbox help pages in the MATLAB help</span>
+0010    <span class="comment">% browser.</span>
 0011    <span class="comment">%</span>
-0012    <span class="comment">% % Example: Open the function documentation for baseflow.getevents.</span>
-0013    <span class="comment">%</span>
-0014    <span class="comment">% baseflow.help('getevents')</span>
-0015    <span class="comment">%</span>
-0016    <span class="comment">% See also: privatefunction, completions, showdemo</span>
-0017 
-0018    <span class="keyword">if</span> usejava(<span class="string">'desktop'</span>)
-0019       <span class="comment">% might need this, if web does not do the appropriate error checking.</span>
-0020       <span class="comment">% also see 'demo', 'showdemo', and 'open'</span>
-0021    <span class="keyword">end</span>
+0012    <span class="comment">% baseflow.help(DOCNAME) opens the documentation file DOCNAME.HTML in the matlab</span>
+0013    <span class="comment">% help browser. DOCNAME can be the name of a function, an example/demo, or</span>
+0014    <span class="comment">% any other file with an .html extension in the docs/ folder or any subfolder</span>
+0015    <span class="comment">% of docs/.</span>
+0016    <span class="comment">%</span>
+0017    <span class="comment">% % Example: Open the function documentation for baseflow.getevents.</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">% baseflow.help('getevents')</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">% See also: privatefunction, completions, showdemo</span>
 0022 
-0023    <span class="comment">% docname should point to an html help file</span>
-0024    <span class="keyword">if</span> nargin &lt; 1
-0025       docname = <span class="string">'baseflow_welcome'</span>;
+0023    <span class="keyword">if</span> usejava(<span class="string">'desktop'</span>)
+0024       <span class="comment">% might need this, if web does not do the appropriate error checking.</span>
+0025       <span class="comment">% also see 'demo', 'showdemo', and 'open'</span>
 0026    <span class="keyword">end</span>
-0027    
-0028    <span class="comment">% Not sure if there is any benefit to 'web' vs 'showdemo' vs 'demo'</span>
-0029    web(baseflow.internal.docpath(docname)) 
-0030 <span class="keyword">end</span></pre></div>
+0027 
+0028    <span class="comment">% docname should point to an html help file</span>
+0029    <span class="keyword">if</span> nargin &lt; 1
+0030       docname = <span class="string">'baseflow_welcome'</span>;
+0031    <span class="keyword">end</span>
+0032    
+0033    <span class="comment">% Not sure if there is any benefit to 'web' vs 'showdemo' vs 'demo'</span>
+0034    web(baseflow.internal.docpath(docname)) 
+0035 <span class="keyword">end</span></pre></div>
 </body>
 </html>

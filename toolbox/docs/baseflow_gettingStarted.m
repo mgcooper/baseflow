@@ -30,6 +30,8 @@
 % * <https://www.mathworks.com/products/statistics.html Statistics and Machine 
 % Learning Toolbox>™. 
 % * <https://www.mathworks.com/products/curvefitting.html Curve Fitting Toolbox>™.
+% * <https://www.mathworks.com/products/mapping.html Mapping Toolbox>™, only
+% for the |mapbasins| and |mapgages| functions.
 %% Accessing Help
 % Need help? To see a list of toolbox functions, at the command window type: 
 %%
@@ -111,8 +113,10 @@
 %     savefitplots   : (logical scalar) Flag indicating whether to save plots of fits. Default = false.
 %     etsparam       : (numeric scalar) Min flow length parameter for ETS algorithm [-]. Default = 0.2.
 %     vtsparam       : (numeric scalar) Min flow length parameter for VTS algorithm [-]. Default = 1.0.
+%     ctsmethod      : (char) Finite-difference stencil for the CTS method: 'B1', 'B2', 'F1', 'F2', 'C2', or 'C4'. Default = 'B1'.
 %     drainagearea   : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
 %     gageID         : (char) Station name or ID. Default = none.
+%     fitopts        : (struct) baseflow.fitab options for every event fit: weights, order, quantile, refqtls, Nboot, alpha (numeric); mask, plotfit (logical). Fields override the same-named fitab options; weights and mask must be scalars. Default = struct().
 %
 %% 
 % API specification for |*globalfit*|:
@@ -200,11 +204,17 @@
 % * |plplotb| Plot the power law fit to the P(tau) Pareto distribution
 % * |checkevent| Plot detected recession event and fitted values
 %% 
+% Functions used for mapping (these require the Mapping Toolbox, plus
+% functions and data files that the toolbox does not ship):
+%% 
+% * |mapbasins| Map basin boundaries and color their faces by an attribute.
+% * |mapgages| Map a set of gage locations and color their faces by an attribute.
+%% 
 % Functions that simplify routine tasks:
 %% 
-% * |aQbstring| Return a formatted string for equation aQ^b .
+% * |aQbString| Return a formatted string for equation aQ^b .
 % * |basinlist| Generate a list of basins in the |baseflow| database.
-% * |basinname| Generate a list of basins in the |baseflow| database.
+% * |basinname| Return a basin name string from the |baseflow| basin database.
 % * |characteristicTime| Compute the characteristic e-folding time for aquifer 
 % discharge
 % * |conversions| Convert common variables to their equivalent value in terms 
@@ -213,15 +223,14 @@
 % * |getfunction| Get an anonymous function from the toolbox function library
 % * |getstring| Get a latex-formatted string for common variables used for plot 
 % labels
-% * |privatefunction| Get an anonymous function for a private toolbox function
 % * |setopts| Set algorithm options for functions getevents, fitevents, and 
 % globalfit
-% * |specialfunctions| Libarary of special functions required for recession 
+% * |specialfunctions| Library of special functions required for recession 
 % analysis
 %% 
 % Functions that support toolbox management:
 %% 
-% * |completions| Generate function auto-completions for string literals.
+% * |baseflow.internal.completions| Generate function auto-completions for string literals.
 % * |help| Open toolbox html help document in the MATLAB Help browser.
 % * |open| Open package namespace function file in the MATLAB Editor.
 % * |privatefunction| Return handle to function in private/ folder.
@@ -240,6 +249,7 @@
 %     +deps/ - Third-party functions called by package functions.
 %     +internal/ - Internal toolbox functions.
 %     +sym/ - Symbolic functions accessible to users.
+%     +util/ - Utility functions that count events, fits, and tau values (numevents, numfits, numtau).
 %     private/ - Undocumented private methods not accessible to users.
 %  data/ - Example datasets.
 %  demos/ - Example live scripts.

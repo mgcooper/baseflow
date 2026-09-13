@@ -66,7 +66,7 @@ This function is called by:
 <li><a href="#_sub1" class="code">function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)</a></li>
 <li><a href="#_sub2" class="code">function h = plotflowperiod(t, Db, sigDb, method)</a></li>
 <li><a href="#_sub3" class="code">function h = plotcalmperiod(t, Db, sigDb, Dc, sigDc, method)</a></li>
-<li><a href="#_sub4" class="code">function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);</a></li></ul>
+<li><a href="#_sub4" class="code">function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin)</a></li></ul>
 
 
 
@@ -93,7 +93,7 @@ This function is called by:
 0020    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0021 
 0022    <span class="comment">% parse inputs</span>
-0023    [Dc, Dg, sigDc, method] = <a href="#_sub4" class="code" title="subfunction [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);">parseinputs</a>(Db, mfilename, varargin{:});
+0023    [Dc, Dg, sigDc, method] = <a href="#_sub4" class="code" title="subfunction [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin)">parseinputs</a>(Db, mfilename, varargin{:});
 0024 
 0025    <span class="comment">% call the subfunction</span>
 0026    <span class="keyword">if</span> all(isnan(Dc)) &amp;&amp; all(isnan(Dg))
@@ -321,7 +321,7 @@ This function is called by:
 0248 <span class="keyword">end</span>
 0249 
 0250 <span class="comment">%% parse inputs</span>
-0251 <a name="_sub4" href="#_subfunctions" class="code">function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin);</a>
+0251 <a name="_sub4" href="#_subfunctions" class="code">function [Dc, Dg, sigDc, method] = parseinputs(Db, mfilename, varargin)</a>
 0252 
 0253    parser = inputParser;
 0254    parser.FunctionName = mfilename;
