@@ -83,6 +83,7 @@ function makedocs(varargin)
       publish(fullfile(docspath, 'baseflow_contents.m'), mpubopts);
       publish(fullfile(docspath, 'baseflow_theory_contents.m'), mpubopts);
       publish(fullfile(docspath, 'baseflow_examples_contents.m'), mpubopts);
+      publish(fullfile(docspath, 'baseflow_powerlaw_notation.m'), mpubopts);
 
       % for github actions the landing page must be saved as docs/index.html
       % where docs/ is at the top-level.
@@ -128,7 +129,7 @@ function makedocs(varargin)
          'globalHypertextLinks', 'off', ...   % hyperlinks among other matlab folders
          'graph', 'on', ...                   % graphviz dependency graph
          'indexFile', 'function_index', ...   % basename of the HTML index file
-         'template', 'blue2_baseflow', ...        % other template
+         'template', 'blue2_baseflow', ...    % other template
          'ignored', ignored, ...              % dirs to ignore
          'verbose', 'on' ...
          );

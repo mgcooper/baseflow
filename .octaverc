@@ -1,10 +1,16 @@
-source('Setup.m')
+source('toolbox/Setup.m')
 
 pkg load struct
 pkg load statistics
 pkg load tablicious
 pkg load optim
+# statistics-bootstrap renamed upstream to statistics-resampling; load
+# whichever name is installed (older installations have the old name)
+if isempty(pkg('list','statistics-resampling'))
 pkg load statistics-bootstrap
+else
+pkg load statistics-resampling
+end
 pkg load financial
 # pkg load nan # may be needed or useful
 
@@ -27,7 +33,7 @@ pkg load financial
 # pkg install -forge statistics
 # pkg install -verbose -forge tablicious
 # pkg install -forge optim
-# pkg install "https://github.com/gnu-octave/statistics-bootstrap/archive/refs/heads/master.zip"
+# pkg install "https://github.com/gnu-octave/statistics-resampling/archive/refs/heads/master.zip"
 
 # To see which packages are installed:
 # pkg list

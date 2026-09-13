@@ -1,168 +1,219 @@
-function report = dependencies(funcname,option)
-   % DEPENDENCIES Generate function and product dependencies for function.
+function report = dependencies(funcname, option)
+   % DEPENDENCIES Report and check function and product dependencies.
    %
    %  Input
-   %     funcname = char of any function name
+   %     funcname = char of any function name, or a cell array of function
+   %     names to analyze together. Empty ('') or omitted analyzes every
+   %     public function in the +baseflow package.
+   %     option = char of one analysis option, listed below.
    %
    %  Output
-   %     funclist = table with column of all functions that input funcname
-   %     depends on, the functions that each of those depends on, and the
-   %     products that each of those depends on.
+   %     report = struct or table of dependency results; the fields depend
+   %     on the option.
+   %
+   %  Options
+   %     'all'       table of every required file
+   %     'report'    struct with function and product dependencies
+   %     'missing'   required files that resolve outside this toolbox and
+   %                 have no same-named file inside it
+   %     'check'     'missing' plus a product comparison against the
+   %                 DESCRIPTION MatlabProducts line
+   %     'installed' product dependencies and whether each is installed
+   %     'resolve'   copy missing .m files into toolbox/+baseflow/private/
+   %                 and missing data files into toolbox/data/
+   %
+   %  Every option analyzes the current code with
+   %  matlab.codetools.requiredFilesAndProducts. No option needs a saved
+   %  dependencies.mat file.
    %
    %  Example
    %
-   %    % Generate a dependency report.
-   %    funcname = 'my_pkg_demo.m';
-   %    report = tbx.internal.dependencies(funcname, 'report');
+   %    % Check that the toolbox is self-contained.
+   %    report = baseflow.internal.dependencies('', 'check');
    %
-   %    % Note: if returned as table:
-   %    deps = report.function_dependencies
-   %
-   %    % Sort the list:
-   %    deps = cellfun(@(x)strrep(x,[fileparts(x) filesep],''),deps,'uni',0);
-   %    deps = sort(string(deps));
-   %    report.function_dependencies = deps;
-   %
-   %    % Save the list:
-   %    fsave = fullfile(pwd, 'dependencies.mat');
-   %    save(fsave, 'report');
-   %
-   %    % Save as a textfile in the top-level:
-   %    fsave = strrep(fsave, 'mat', 'txt');
-   %    fid = fopen(fsave,'w');
-   %    n = 0;
-   %    while n<numel(deps)
-   %       n = n+1;
-   %       fprintf(fid,'%s\n',deps{n});
-   %    end
-   %    fclose(fid);
+   %    % Report the dependencies of one function.
+   %    report = baseflow.internal.dependencies('baseflow.fitab', 'report');
    %
    % See also: Setup
 
-   % Use this to generate a list of all functions in the package, then cycle
-   % over all of them and find the dependencies:
-   %
-   % funcpath = fileparts(which('pkg.func'));
-   % funclist = getlist(funcpath,'.m');
-   
-
-   [pkgname, pkgfolder] = mpackagename();
-
    % valid options
-   validopts = ["all","missing","installed","resolve","report","check"];
-   for n = 1:numel(validopts)
-      opts.(validopts(n)) = option == validopts(n);
+   validopts = {'all', 'missing', 'installed', 'resolve', 'report', 'check'};
+   if nargin < 2 || isempty(option)
+      option = 'report';
    end
-
-   % use this to test a particular function
-   if nargin == 0
+   if nargin < 1
       funcname = '';
    end
+   option = validatestring(option, validopts, mfilename, 'option', 2);
 
-   % this loads the saved dependencies.mat file and checks against util/
-   if opts.check == true
-      report = dependencycheck(pkgfolder);
-      return
-   end
+   % Resolve the target files: named functions, or the whole public API.
+   % The public API is +baseflow plus its public +util subpackage;
+   % +internal, +deps, and private/ are implementation and vendored code.
+   if isempty(funcname)
 
-   funcpath = fileparts(which(funcname));
-   [funclist,prodlist] = matlab.codetools.requiredFilesAndProducts(funcname);
-   funclist = transpose(funclist);
-   prodlist = transpose(prodlist);
+      pkgfolder = fullfile(toolboxpath(), '+baseflow');
+      utilfolder = fullfile(pkgfolder, '+util');
+      files = [ ...
+         listfiles(pkgfolder, 'aslist', true, 'fullpath', true, 'mfiles', true); ...
+         listfiles(utilfolder, 'aslist', true, 'fullpath', true, 'mfiles', true)];
 
-   if opts.all == true
-      % return a table of all dependencies
-      report = cell2table(funclist,'VariableNames',{'function_dependencies'});
-   elseif opts.report == true
-      report = getdependencyreport(funclist,prodlist,funcname,pkgfolder);
-   elseif opts.missing == true
-      report = getmissingdependencies(funclist,funcname,pkgname,pkgfolder);
-   elseif opts.installed == true
-      % subfunction getinstalleddependencies is missing, check baseflow tbx.
-      % report = getinstalleddependencies(funclist);
-   elseif opts.resolve == true
-      report = resolvedependencies(funclist,funcname,pkgfolder,pkgname);
-   end
-end
-
-function report = getdependencyreport(funclist,prodlist,funcname,pkgfolder)
-
-   % get a list of dependencies that are not toolbox functions, i.e. those that
-   % need to be included in util/
-   % report = funclist;
-   skip = {pkgfolder, funcname, 'ExtractNameVal', 'Cupid'};
-   keep = true(numel(funclist),1);
-   for n = 1:numel(funclist)
-      keep(n) = ~ismember(funclist{n},skip);
-   end
-   report.function_dependencies = funclist(keep);
-   report.product_dependencies = prodlist;
-   % report = report(keep);
-end
-
-function report = dependencycheck(pkgfolder)
-   load(fullfile(installpath(), pkgfolder, 'private', 'dependencies.mat'), 'report')
-   deps = report.function_dependencies;
-   deps = deps(~isfile(fullfile(installpath(), 'util', deps)));
-   deps = deps(~isfolder(strrep(fullfile(installpath(), 'util', deps),'.m','')));
-   % convert to table and return
-   if isempty(deps)
-      report.missing_dependencies = 'all dependencies are installed';
    else
-      report.missing_dependencies = deps;
-   end
-end
-
-function report = getmissingdependencies(funclist,funcname,pkgname,pkgfolder)
-
-   % remove functions in the toolbox first, leave the ones in util/ so they can
-   % be compared here if needed for debugging.
-   missing = funclist;
-   % Also remove the 'cupid' toolbox and 'ExtractNameVal' functions that get
-   % picked up as dependent but are not. What remains after this is functions
-   % that are either in util/ or need to be moved there.
-   skip = {pkgfolder, funcname, 'ExtractNameVal', 'Cupid'};
-   keep = true(numel(missing),1);
-   for n = 1:numel(missing)
-      keep(n) = ~ismember(missing{n},skip);
-   end
-   missing = missing(keep);
-
-   % now remove ones that are in util.
-   skip = {fullfile(pkgname, 'util')};
-   keep = true(numel(missing),1);
-   for n = 1:numel(missing)
-      keep(n) = ~ismember(missing{n},skip);
-   end
-   missing = missing(keep);
-
-   % % since I use addpath(...,'-end'), the dependency check finds functions in
-   % the main function folder not the ones in pkgname/util.
-   % now check if funclist ismember paths to versions elsewhere that are in
-   % util. What remains are missing.
-   keep = true(numel(missing),1);
-   for n = 1:numel(missing)
-      [~,funcname] = fileparts(missing{n});
-      allfuncs = which(funcname,'-all');
-      if any(ismember(allfuncs,fullfile(pkgname,'util',funcname)))
-         keep(n) = false;
+      if ischar(funcname) || isstring(funcname)
+         funcname = cellstr(funcname);
+      end
+      files = cellfun(@which, funcname, 'UniformOutput', false);
+      unresolved = cellfun(@isempty, files);
+      if any(unresolved)
+         error('baseflow:dependencies:unknownFunction', ...
+            'function %s was not found on the path', ...
+            strjoin(funcname(unresolved), ', '))
       end
    end
-   missing = missing(keep);
 
-   % convert to table and return
-   report.function_dependencies = funclist;
-   if isempty(missing)
-      report.missing_dependencies = 'all dependencies are installed';
+   % Resolve names to the vendored copies during the analysis. Put the
+   % toolbox paths at the front of the path, and restore the original path
+   % afterward. addtoolboxpaths appends with '-end'. On the author's
+   % machine, names otherwise resolve to the original un-vendored sources
+   % (matfunclib), which add their own dependencies to the closure as
+   % false missing files.
+   origpath = path();
+   restorepath = onCleanup(@() path(origpath));
+   addpath(genpath(toolboxpath()));
+
+   % MATLAB does not allow private folders on the path. A call from a folder
+   % that cannot see a vendored private copy can still resolve to the
+   % original source (for example, a withwarnoff call in an +internal
+   % function). The same-name check below marks such a file as satisfied
+   % by its vendored copy.
+
+   % Live analysis. requiredFilesAndProducts excludes MathWorks-shipped
+   % files, so every returned file is either toolbox code or an external
+   % dependency.
+   [funclist, prodlist] = matlab.codetools.requiredFilesAndProducts(files);
+   funclist = transpose(funclist);
+   prodnames = transpose({prodlist.Name});
+
+   % Classify the required files. A file outside the toolbox counts as
+   % missing only when no file with the same name ships inside the toolbox,
+   % because addtoolboxpaths appends with '-end'. On a machine with the
+   % original un-vendored sources on the path (the author's machine, with
+   % matfunclib), a dependency resolves to the outside copy. The vendored
+   % copy in private/ still satisfies it.
+   % The trailing separator keeps a sibling folder such as toolbox-old
+   % from matching the toolbox root prefix.
+   tbroot = toolboxpath();
+   outside = funclist(~startsWith(funclist, [tbroot, filesep]));
+   missing = outside(~cellfun(@(f) insidetoolbox(f, tbroot), outside));
+
+   % Deliberately un-vendored references stay out of the missing list.
+   % plfitb's 'hanel' method calls r_plfit, which stays external by
+   % decision (no license grant; README documents the requirement).
+   % requiredFilesAndProducts omits r_plfit where it is not on the path,
+   % so list it whenever the analysis includes plfitb.
+   knownexternal = {'r_plfit.m'};
+   known = cellfun(@(f) ismember(basename(f), knownexternal), missing);
+   knownfiles = missing(known);
+   missing = missing(~known);
+   analyzed = cellfun(@basename, funclist, 'UniformOutput', false);
+   if isempty(knownfiles) && ismember('plfitb.m', analyzed)
+      knownfiles = knownexternal;
+   end
+
+   % Entry points whose external references await the bfra-3kh.25
+   % vendor/gate/de-advertise decision (TODO.md, dependency section).
+   % requiredFilesAndProducts omits calls it cannot resolve. On a machine
+   % without the original sources, those references never appear in the
+   % analysis, so this list still reports these entry points on that machine.
+   pendingentries = {'loadcalm.m', 'loadghcnd.m', 'loadgrace.m', ...
+      'mapbasins.m', 'mapgages.m'};
+   pending = pendingentries(ismember(pendingentries, analyzed));
+
+   switch option
+
+      case 'all'
+         % return a table of all required files
+         report = cell2table( ...
+            funclist, 'VariableNames', {'function_dependencies'});
+
+      case 'report'
+         report.function_dependencies = funclist;
+         report.product_dependencies = prodnames;
+
+      case {'missing', 'check'}
+         report.function_dependencies = funclist;
+         report.product_dependencies = prodnames;
+         report.known_external = knownfiles;
+         report.pending_decision = pending;
+         if isempty(missing)
+            report.missing_dependencies = 'all dependencies are installed';
+         else
+            report.missing_dependencies = missing;
+         end
+         if strcmp(option, 'check')
+            report = comparedeclaredproducts(report, prodnames);
+         end
+
+      case 'installed'
+         % report each required product and whether ver() finds it
+         v = ver;
+         report.product_dependencies = prodnames;
+         report.installed = ismember(prodnames, {v.Name});
+
+      case 'resolve'
+         report = resolvedependencies(missing, funclist, prodnames, tbroot);
+   end
+end
+
+function tf = insidetoolbox(f, tbroot)
+   % INSIDETOOLBOX True when a file with this name ships in the toolbox.
+   tf = ~isempty(dir(fullfile(tbroot, '**', basename(f))));
+end
+
+function name = basename(f)
+   % BASENAME Return the file name with its extension.
+   [~, base, ext] = fileparts(f);
+   name = [base, ext];
+end
+
+function report = comparedeclaredproducts(report, prodnames)
+   % COMPAREDECLAREDPRODUCTS Compare detected products with DESCRIPTION.
+   %
+   % The DESCRIPTION file at the repo root is the official dependency list.
+   % Its MatlabProducts line declares the required MATLAB toolboxes, and its
+   % Depends line declares the Octave packages. An installed copy without
+   % the repo root has no DESCRIPTION, so this function skips the
+   % comparison there.
+   descfile = fullfile(projectpath(), 'DESCRIPTION');
+   if ~isfile(descfile)
+      report.undeclared_products = 'DESCRIPTION not found; not compared';
+      return
+   end
+   txt = fileread(descfile);
+   tok = regexp(txt, 'MatlabProducts:\s*([^\n]*)', 'tokens', 'once');
+   if isempty(tok)
+      report.undeclared_products = 'no MatlabProducts line in DESCRIPTION';
+      return
+   end
+   declared = strtrim(strsplit(tok{1}, ','));
+
+   % Known requiredFilesAndProducts false positives: the analysis reports
+   % the Signal Processing and Symbolic Math toolboxes for code that never
+   % calls them. No identifier in the flagged files resolves to either
+   % product, and CI passes without them installed.
+   falsepos = {'Signal Processing Toolbox', 'Symbolic Math Toolbox', 'MATLAB'};
+   detected = setdiff(prodnames, falsepos);
+   undeclared = setdiff(detected, declared);
+   if isempty(undeclared)
+      report.undeclared_products = 'all products are declared';
    else
-      report.missing_dependencies = missing;
+      report.undeclared_products = undeclared;
    end
 end
 
 %% internal use
-function report = resolvedependencies(funclist,funcname,pkgfolder,pkgname)
+function report = resolvedependencies(missing, funclist, prodnames, tbroot)
 
-   % cycle through the dependent functions and copy them to util/
+   % copy the missing dependent functions into the vendored private folder
 
    % NOTE: this is for private use, it won't work if you don't have the
    % functions on your local computer. Please contact me at matt.cooper@pnnl.gov
@@ -173,19 +224,26 @@ function report = resolvedependencies(funclist,funcname,pkgfolder,pkgname)
 
    % TODO: add method to clone from https://github.com/mgcooper/matfunclib
 
-   report = getmissingdependencies(funclist,funcname,pkgname,pkgfolder);
-
-   if ischar(report.missing_dependencies) && ...
-         strcmp(report.missing_dependencies,'all dependencies are installed')
+   report.function_dependencies = funclist;
+   report.product_dependencies = prodnames;
+   if isempty(missing)
+      report.missing_dependencies = 'all dependencies are installed';
       return
-   else
-      for n = 1:numel(report.missing_dependencies)
-         [~,fname,ext] = fileparts(report.missing_dependencies{n});
-         destpath = fullfile(installpath(),'util',[fname,ext]);
-         copyfile(report.missing_dependencies{n},destpath);
-      end
+   end
+   report.missing_dependencies = missing;
+
+   % .m files go to the vendored private folder. Data files go to
+   % toolbox/data: MATLAB does not search private folders for a bare
+   % load('file.mat'), so a data file in private/ stays unreachable.
+   mfiles = endsWith(missing, '.m');
+   for n = find(mfiles(:)')
+      copyfile(missing{n}, fullfile(tbroot, '+baseflow', 'private'));
+   end
+   for n = find(~mfiles(:)')
+      copyfile(missing{n}, fullfile(tbroot, 'data'));
    end
 
+   % Parked WIP: per-function dependency attribution.
    % any functions listed in dependentFunctions may be required for some fringe
    % behavior in the toolbox but the core functionality should
 

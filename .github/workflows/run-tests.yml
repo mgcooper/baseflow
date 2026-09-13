@@ -29,8 +29,8 @@ jobs:
       
       # Sets up MATLAB on the GitHub Actions runner. The release matches the
       # version the suite is verified against locally. The products list
-      # covers the declared toolbox dependencies plus the Optimization and
-      # Mapping toolboxes the code also uses.
+      # covers the toolboxes in the DESCRIPTION MatlabProducts line plus
+      # the Optimization Toolbox.
       - name: Setup MATLAB
         uses: matlab-actions/setup-matlab@v2
         with:

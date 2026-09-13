@@ -2,8 +2,8 @@
     "description": "Matlab/Octave toolbox for baseflow recession analysis",
     "license": "BSD-3-Clause",
     "title": "baseflow: a MATLAB and GNU Octave package for baseflow recession analysis",
-    "version": "v1.0.0",
-    "publication_date": "2023-10-03",
+    "version": "v1.1.0",
+    "publication_date": "2026-08-30",
     "upload_type": "software",
     "creators": [
         {
@@ -27,7 +27,7 @@
     "related_identifiers": [
         {
             "scheme": "url", 
-            "identifier": "https://github.com/mgcooper/baseflow/tree/v1.0.0", 
+            "identifier": "https://github.com/mgcooper/baseflow/tree/v1.1.0",
             "relation": "isSupplementTo"
         }, 
         {

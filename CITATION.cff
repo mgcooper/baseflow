@@ -11,10 +11,13 @@ authors:
   - given-names: Matthew G
     family-names: Cooper
     orcid: 'https://orcid.org/0000-0002-0165-209X'
+  - given-names: Tian
+    family-names: Zhou
+    orcid: 'https://orcid.org/0000-0003-1582-4005'
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.8401301
-    description: The DOI for version 1.0.0 of the software
+    value: 10.5281/zenodo.7373923
+    description: The concept DOI for all versions of the software
 repository-code: 'https://github.com/mgcooper/baseflow'
 url: 'https://github.com/mgcooper/baseflow'
 keywords:
@@ -24,5 +27,5 @@ keywords:
   - storage
   - permafrost
 license: BSD-3-Clause
-version: 1.0.0
-date-released: '2023-10-02'
+version: 1.1.0
+date-released: '2026-08-30'

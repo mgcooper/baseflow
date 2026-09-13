@@ -36,17 +36,24 @@ function test_cdAndRestore(testCase)
    % withcd changes to the target for the cleanup object's lifetime and
    % restores the original directory when the object is destroyed.
    originalDir = pwd();
-   obj = withcd(testCase.TestData.target);
-   testCase.verifyClass(obj, 'onCleanup')
+   cleanup_returned = withcd(testCase.TestData.target);
+   testCase.verifyClass(cleanup_returned, 'onCleanup')
    returned = pwd();
    expected = testCase.TestData.target;
    testCase.verifyEqual(returned, expected, ...
       'withcd failed to change to the target directory')
-   clear obj
+   clear cleanup_returned
    returned = pwd();
    expected = originalDir;
    testCase.verifyEqual(returned, expected, ...
       'withcd failed to restore the original directory')
+end
+
+function test_notAFolderErrors(testCase)
+   % A path that is not an existing folder raises the mustBeFolder
+   % validator error from the arguments block.
+   testCase.verifyError(@() withcd(fullfile(testCase.TestData.target, ...
+      'no-such-subfolder')), 'MATLAB:validators:mustBeFolder')
 end
 
 function test_fileCreatedInTarget(testCase)
@@ -56,13 +63,14 @@ function test_fileCreatedInTarget(testCase)
    % root; this version uses fopen, which works on every platform, and
    % writes to the temporary target instead.
    target = testCase.TestData.target;
-   obj = withcd(target);
-   testCase.verifyClass(obj, 'onCleanup')
+   cleanup_returned = withcd(target);
+   testCase.verifyClass(cleanup_returned, 'onCleanup')
+   % fopen returns -1 when it cannot open the file.
    fid = fopen('test.txt', 'w');
    testCase.assertGreaterThan(fid, 0, 'failed to open test.txt for writing')
    fclose(fid);
    returned = isfile(fullfile(target, 'test.txt'));
    testCase.verifyTrue(returned, ...
       'file created under withcd did not land in the target directory')
-   clear obj
+   clear cleanup_returned
 end
