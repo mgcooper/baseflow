@@ -1,6 +1,18 @@
 function [Qtstr,aQbstr] = QtString(varargin)
    %QTSTRING Return latex-formatted string for Q(t) function.
    %
+   % Syntax
+   %
+   %     [Qtstr, aQbstr] = baseflow.QtString(ab, Q0)
+   %     [Qtstr, aQbstr] = baseflow.QtString(_, 'printvalues', true)
+   %
+   % Description
+   %
+   %     [Qtstr, aQbstr] = baseflow.QtString(ab, Q0) returns latex strings
+   %     for the Q(t) solution and the recession equation -dQ/dt = aQ^b.
+   %     When 'printvalues' is true, the strings include the values of the
+   %     optional inputs ab = [a b] and the initial flow Q0. Otherwise the
+   %     strings contain symbols only.
    %
    % See also: Qnonlin, QtauString, aQbString
    %

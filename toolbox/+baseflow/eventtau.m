@@ -15,6 +15,16 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
    %     to event-scale values using an aggregation function. Options are 'min',
    %     'max', 'mean', 'median'.
    %
+   % Example
+   %
+   %  Detect and fit events, then compute the drainage timescale tau:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     Events = baseflow.getevents(T, Q, R);
+   %     [Fits, Results] = baseflow.fitevents(Events);
+   %     tau = baseflow.eventtau(Results, Events, Fits, 'usefits', false);
+   %     histogram(tau(~isnan(tau)))
+   %
    % See also: eventphi
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper

@@ -1,5 +1,11 @@
 function [ anoms,norms,pctdif,pctanom ] = anomaly( data, norms )
    %ANOMALY Compute climatological anomalies and normals of column-wise data.
+   %
+   %  [anoms, norms, pctdif, pctanom] = anomaly(data, norms) subtracts the
+   %  column normals norms from data to compute the anomalies anoms.
+   %  Without norms, anomaly uses the nan-omitted mean of each column.
+   %  pctdif is the anomaly as a percent of the normal, and pctanom is
+   %  100 + pctdif.
 
    % also see climatology.m and season.m in CDT
 

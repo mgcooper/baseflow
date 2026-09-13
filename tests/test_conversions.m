@@ -1,32 +1,52 @@
-function tests = test_conversions
+classdef test_conversions < matlab.unittest.TestCase
    %TEST_CONVERSIONS Test baseflow.conversions.
-   tests = functiontests(localfunctions);
-end
 
-function test_convert2b(testCase)
-   % Test the conversions from one parameter to another for the 'isflat' condition
-   tolerance = 0.001;
-   testCase.verifyEqual(baseflow.conversions(1.5, 'b', 'n', 'isflat', true), (3-2.*1.5)./(1.5-2), 'AbsTol',0.001,'Failed to convert b to n correctly');
-   testCase.verifyEqual(baseflow.conversions(1.5, 'n', 'b', 'isflat', true), (2.*1.5+3)./(1.5+2), 'AbsTol', tolerance,'Failed to convert n to b correctly');
-   testCase.verifyEqual(baseflow.conversions(2.0, 'b', 'd', 'isflat', true), 1./(2-2), 'AbsTol', tolerance,'Failed to convert b to d correctly');
-   testCase.verifyEqual(baseflow.conversions(1.5, 'b', 'k', 'isflat', true), (1.5-2)./(1-1.5), 'AbsTol', tolerance,'Failed to convert b to k correctly');
-   testCase.verifyEqual(baseflow.conversions(1.5, 'b', 'N', 'isflat', true), 3-2.*1.5, 'AbsTol', tolerance,'Failed to convert b to N correctly');
-   testCase.verifyEqual(baseflow.conversions(1.0, 'b', 'alpha', 'isflat', true), 1./(1-1), 'AbsTol', tolerance,'Failed to convert b to alpha correctly');
-   testCase.verifyEqual(baseflow.conversions(2.0, 'b', 'beta', 'isflat', true), 1./(2-2), 'AbsTol', tolerance,'Failed to convert b to beta correctly');
-   testCase.verifyEqual(baseflow.conversions(1.5, 'b', 'gamma', 'isflat', true), 1./(2.*1.5-3), 'AbsTol', tolerance,'Failed to convert b to gamma correctly');
-end
+   properties (TestParameter)
+      % Flat-aquifer conversions. Each case holds the input value, the input
+      % and output parameter names, and the formula for the expected output
+      % value. The b = 1 and b = 2 cases give infinite alpha, beta, and d.
+      flatcase = struct( ...
+         'b_to_n', {{1.5, 'b', 'n', @(b) (3-2.*b)./(b-2)}}, ...
+         'n_to_b', {{1.5, 'n', 'b', @(n) (2.*n+3)./(n+2)}}, ...
+         'b_to_d', {{2.0, 'b', 'd', @(b) 1./(2-b)}}, ...
+         'b_to_k', {{1.5, 'b', 'k', @(b) (b-2)./(1-b)}}, ...
+         'b_to_N', {{1.5, 'b', 'N', @(b) 3-2.*b}}, ...
+         'b_to_alpha', {{1.0, 'b', 'alpha', @(b) 1./(b-1)}}, ...
+         'b_to_beta', {{2.0, 'b', 'beta', @(b) 1./(b-2)}}, ...
+         'b_to_gamma', {{1.5, 'b', 'gamma', @(b) 1./(2.*b-3)}})
 
-function test_errorThrownForNonNumericInput(testCase)
-   % Testing the function throws an error for non-numeric inputvalue
-   testCase.verifyError(@()baseflow.conversions('string', 'b', 'n'), 'MATLAB:InputParser:ArgumentFailedValidation');
-end
+      % Bad inputs. Each case holds the input value, the input parameter
+      % name, and the expected error identifier: a non-numeric inputvalue,
+      % a non-char inputvarname, and an unsupported inputvarname.
+      badinput = struct( ...
+         'nonnumeric_value', {{'string', 'b', ...
+         'MATLAB:InputParser:ArgumentFailedValidation'}}, ...
+         'nonchar_varname', {{1.5, 123, ...
+         'MATLAB:unrecognizedStringChoice'}}, ...
+         'unsupported_varname', {{1.5, 'unsupported', ...
+         'MATLAB:unrecognizedStringChoice'}})
+   end
 
-function test_errorThrownForNonCharVarname(testCase)
-   % Testing the function throws an error for non-char inputvarname
-   testCase.verifyError(@()baseflow.conversions(1.5, 123, 'n'), 'MATLAB:unrecognizedStringChoice');
-end
+   methods (Test)
+      function test_convert2b(testCase, flatcase)
+         % Test the conversions from one parameter to another for the
+         % 'isflat' condition
+         tolerance = 0.001;
+         [inputvalue, inputname, outputname, formula] = flatcase{:};
 
-function test_errorThrownForUnsupportedVarname(testCase)
-   % Testing the function throws an error for unsupported inputvarname
-   testCase.verifyError(@()baseflow.conversions(1.5, 'unsupported', 'n'), 'MATLAB:unrecognizedStringChoice');
+         returned = baseflow.conversions(inputvalue, inputname, ...
+            outputname, 'isflat', true);
+         expected = formula(inputvalue);
+         testCase.verifyEqual(returned, expected, 'AbsTol', tolerance, ...
+            sprintf('Failed to convert %s to %s correctly', ...
+            inputname, outputname));
+      end
+
+      function test_errorThrownForBadInput(testCase, badinput)
+         % Verify that the function throws an error for each bad input
+         [inputvalue, inputname, expected] = badinput{:};
+         testCase.verifyError( ...
+            @() baseflow.conversions(inputvalue, inputname, 'n'), expected);
+      end
+   end
 end

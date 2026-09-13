@@ -19,7 +19,7 @@ function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)
    %     r        rain (mm/time)
    %     nmin     minimum event length
    %
-   % See also: getevents, findevents, eventfinder, eventsplitter, eventplotter
+   % See also: getevents, findevents, eventfinder, eventplotter
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 

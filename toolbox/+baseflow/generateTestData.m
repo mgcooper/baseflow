@@ -11,6 +11,15 @@ function [t, q, dqdt] = generateTestData(a, b, q0, t)
    %     of discharge Q, first derivative of discharge dQdt, and time t for
    %     parameter values a, b, and initial discharge Q0.
    %
+   % Example
+   %
+   %  Generate a nonlinear (b = 1.5) recession curve and plot it in
+   %  point-cloud form:
+   %
+   %     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);
+   %     loglog(q, -dqdt, 'o')
+   %     xlabel('Q'), ylabel('-dQ/dt')
+   %
    % See also: baseflow.Qnonlin
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper

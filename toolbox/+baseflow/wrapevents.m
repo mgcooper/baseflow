@@ -1,6 +1,11 @@
 function [EventsData, Info] = wrapevents(T,Q,R,varargin)
    %WRAPEVENTS Detect recession events on an annual calendar basis.
    %
+   % Syntax
+   %
+   %     [EventsData, Info] = baseflow.wrapevents(T, Q, R)
+   %     [EventsData, Info] = baseflow.wrapevents(T, Q, R, Name, Value)
+   %
    % This function is a wrapper around baseflow.getevents to detect recession events
    % on an annual basis, passing one year of a multi-year timeseries of T, Q,
    % and R at a time to eventfinder, rather than passing the entire timeseries
@@ -31,6 +36,15 @@ function [EventsData, Info] = wrapevents(T,Q,R,varargin)
    %                 entering them individually
    %
    % Note: flow comes in as m3/day/day
+   %
+   % Example
+   %
+   %  Detect recession events one calendar year at a time:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     opts = baseflow.setopts('getevents', 'asannual', true);
+   %     [Events, Info] = baseflow.wrapevents(T, Q, R, opts);
+   %     fprintf('Detected %d events\n', max(Events.eventTags))
    %
    % See also: getevents
    %

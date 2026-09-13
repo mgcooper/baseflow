@@ -1,5 +1,5 @@
 function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,~)
-   %fitNLS_octave
+   %FITNLS_OCTAVE Fit -dQ/dt = aQ^b by nonlinear least squares in Octave.
    %
    %  [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    %

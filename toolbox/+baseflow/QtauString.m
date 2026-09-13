@@ -1,6 +1,19 @@
 function [Qtaustr,aQbstr] = QtauString(varargin)
    %QTAUSTRING Return latex-formatted string for Q(tau) function.
    %
+   % Syntax
+   %
+   %     [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0)
+   %     [Qtaustr, aQbstr] = baseflow.QtauString(_, 'printvalues', true)
+   %
+   % Description
+   %
+   %     [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0) returns latex
+   %     strings for the dimensionless Q* = (tau/tau0)^-alpha function and
+   %     the recession equation -dQ/dt = aQ^b. When 'printvalues' is true,
+   %     the strings include the values of the optional inputs ab = [a b]
+   %     and the reference time tau0. Otherwise the strings contain symbols
+   %     only.
    %
    % See also: Qnonlin, QtString
    %

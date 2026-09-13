@@ -97,7 +97,11 @@ function [peakInds,peakMags] = peakfinder(x0, sel, thresh, extrema, includeEndpo
    if len0 ~= s(1) && len0 ~= s(2)
       error('PEAKFINDER:Input','The input data must be a vector')
    elseif isempty(x0)
-      varargout = {[],[]};
+      % The signature declares named outputs, not varargout, so assign both
+      % outputs here. A varargout assignment leaves both named outputs
+      % undefined when x0 is empty.
+      peakInds = [];
+      peakMags = [];
       return;
    end
    if ~isreal(x0)

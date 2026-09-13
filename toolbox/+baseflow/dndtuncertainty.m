@@ -25,7 +25,7 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    %  solutions to the one-dimensional groundwater flow equation for a
    %  Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
    %
-   % See also: alttrend, aquiferthickness
+   % See also: aquifertrend, aquiferthickness
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 

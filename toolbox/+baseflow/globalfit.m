@@ -23,6 +23,21 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    %     Results, Events, Fits are outputs of baseflow.getevents and baseflow.fitevents
    %     opts is a struct containing fields area, D0, and L (see below)
    %
+   % Example
+   %
+   %  Detect and fit events, then fit global parameters. The basin area,
+   %  aquifer depth, and stream length describe the Kuparuk River basin:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     A = 8.6545e9; D = 0.5; L = A * 0.8 / 1000;
+   %     Events = baseflow.getevents(T, Q, R);
+   %     [Fits, Results] = baseflow.fitevents(Events);
+   %     opts = baseflow.setopts('globalfit', 'drainagearea', A, ...
+   %        'aquiferdepth', D, 'streamlength', L);
+   %     GlobalFit = baseflow.globalfit(Results, Events, Fits, opts);
+   %     fprintf('b = %.2f, tau = %.0f days, phi = %.3f\n', ...
+   %        GlobalFit.b, GlobalFit.tau, GlobalFit.phi)
+   %
    % See also: setopts, getevents, fitevents, fitphi, eventphi, eventtau
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper

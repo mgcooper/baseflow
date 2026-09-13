@@ -10,6 +10,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
    %     6) an equality test for power law distribution fitting
    %     7) an equality test for aquifer storage estimation
    %     8) an equality test for aquifer thickness estimation
+   %     9) an equality test for the fitevents 'ctsmethod' option
    %
    % Notes:
    %     A) A negative test verifies that the code errors/fails in an
@@ -22,8 +23,10 @@ classdef TestBaseflow < matlab.unittest.TestCase
       SetupOption = {'install','uninstall','dependencies','addpath','savepath','rmpath','delpath'};
       VarStr = {'Q','dQdt','aQb'};
       DerivMethod = {'CTS'}; % {'ETS','VTS','CTS'}
+      CtsMethod = {'B1','B2','F1','F2','C2','C4'};
       FitMethod = {'ols','nls','mean','median'};
       RecessionExponent = {1.0,1.5}; % linear and non-linear
+      OrderOption = struct('default', {{}}, 'order1', {{'order', 1}});
       RecessionParameterNames = {'b','n','alpha'};
       PowerLawExponent = {1.5, 2.0, 2.5, 3.0, 3.5};
       TauValue = {10, 100, 1000};
@@ -38,6 +41,25 @@ classdef TestBaseflow < matlab.unittest.TestCase
       % closes only figures the test created, so a full suite run leaves
       % zero open figures without touching pre-existing user figures.
       figsbefore
+
+      % The first recession event in the example data. The class setup
+      % builds it once so the fitevents tests do not repeat getevents.
+      firstevent
+   end
+
+   methods (TestClassSetup)
+      function loadfirstevent(testCase)
+         % Detect events in the example data. Keep only the first event so
+         % each fitevents call fits one event and the tests stay fast.
+         [T, Q, R] = baseflow.loadExampleData();
+         Events = baseflow.getevents(T, Q, R);
+         ievent = Events.eventTags == 1;
+         testCase.firstevent = struct( ...
+            'eventTime', Events.eventTime(ievent), ...
+            'eventFlow', Events.eventFlow(ievent), ...
+            'eventRain', Events.eventRain(ievent), ...
+            'eventTags', Events.eventTags(ievent));
+      end
    end
 
    methods (TestMethodSetup)
@@ -62,30 +84,33 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
          switch VarStr
             case 'Q'
-               expectedStr = '$Q$';
+               expected = '$Q$';
             case 'dQdt'
-               expectedStr = '$-\mathrm{d}Q/\mathrm{d}t$';
+               expected = '$-\mathrm{d}Q/\mathrm{d}t$';
             case 'aQb'
-               expectedStr = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
+               expected = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
          end
 
          % Get actual result
-         strActual = baseflow.getstring(VarStr);
+         returned = baseflow.getstring(VarStr);
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual(strActual,expectedStr)
+         testCase.verifyEqual(returned,expected)
       end
 
-      
+
       %-------------------------------------------
       %-------------------------------------------
       function test_basinname(testCase,BasinName)
 
          % get the basin name from the database
-         ActualName = baseflow.basinname(BasinName);
+         returned = baseflow.basinname(BasinName);
+
+         % A valid basin name maps to itself
+         expected = BasinName;
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual(BasinName,ActualName);
+         testCase.verifyEqual(returned,expected);
       end
       
       %-------------------------------------------
@@ -101,19 +126,19 @@ classdef TestBaseflow < matlab.unittest.TestCase
          % Calculate expected result for CTS method
          dq = q-[nan; q(1:end-1)];
          dt = (t(2)-t(1));
-         dqdtExpected = dq./dt;
+         expected = dq./dt;
 
-         % Get the actual result
-         [~,dqdtActual] = baseflow.getdqdt(t,q,[],DerivMethod);
+         % Get the actual result. The test data has no rainfall record.
+         [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual(dqdtActual,dqdtExpected)
+         testCase.verifyEqual(returned,expected)
 
          % for testing:
          % DerivMethod = 'CTS';
-         % [~,dqdtActual] = baseflow.getdqdt(t,q,[],DerivMethod);
-         % isequal(dqdtActual,dqdtExpected)
-         % scatterfit(dqdtActual,dqdtExpected)
+         % [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
+         % isequal(returned,expected)
+         % scatterfit(returned,expected)
 
       end
 
@@ -152,17 +177,20 @@ classdef TestBaseflow < matlab.unittest.TestCase
          end
 
          % Get the expected result
-         abExpected = [a;b];
+         expected = [a;b];
 
          % Get the actual result
-         abActual = Fit.ab;
+         returned = Fit.ab;
 
          % for testing:
-         % f = baseflow.fitab(q,dqdt,FitMethod); abActual = f.ab
-         % isequal(abActual,abExpected)
+         % f = baseflow.fitab(q,dqdt,FitMethod); returned = f.ab
+         % isequal(returned,expected)
+
+         % Allow a 1 percent relative error in each of a and b
+         tol = [0.01; 0.01];
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual(abActual,abExpected,'RelTol',[0.01; 0.01])
+         testCase.verifyEqual(returned,expected,'RelTol',tol)
 
       end
 
@@ -182,7 +210,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
          Fit = baseflow.fitab(q,dqdt,FitMethod,'order',1);
 
          % Verify the fitted exponent is forced to 1 (linear reservoir)
-         returned = Fit.ab(2);
+         returned = Fit.ab(2); % Fit.ab stores [a; b]
          expected = 1;
          testCase.verifyEqual(returned,expected);
       end
@@ -202,21 +230,23 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
          % 'envelope' with 'order' = 1 must stay an envelope fit through
          % 'refqtls'; it must not redirect to the 'mean' method
-         FitE = baseflow.fitab(q,dqdt,'envelope','refqtls',[0.95 0.95],'order',1);
+         FitE = baseflow.fitab(q,dqdt,'envelope', ...
+            'refqtls',[0.95 0.95],'order',1);
          FitM = baseflow.fitab(q,dqdt,'mean','order',1);
 
-         % Verify the slope is 1 and the intercept differs from the mean fit
-         returned = FitE.ab(2);
-         expected = 1;
-         testCase.verifyEqual(returned,expected);
-         returned = FitE.ab(1);
-         notExpected = FitM.ab(1);
-         testCase.verifyNotEqual(returned,notExpected);
+         % Verify the slope is 1 and the intercept differs from the mean
+         % fit. Fit.ab stores [a; b].
+         b_returned = FitE.ab(2);
+         b_expected = 1;
+         testCase.verifyEqual(b_returned,b_expected);
+         a_returned = FitE.ab(1);
+         a_notexpected = FitM.ab(1);
+         testCase.verifyNotEqual(a_returned,a_notexpected);
       end
 
       %-------------------------------------------
       %-------------------------------------------
-      function test_fitab_order1_scope(testCase)
+      function test_fitab_order_scope(testCase,OrderOption)
 
          % generate nonlinear (b = 1.5) test data
          a = 1e-2;
@@ -226,34 +256,17 @@ classdef TestBaseflow < matlab.unittest.TestCase
          [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
 
          % 'qtl' passes 'order' to quantreg as the polynomial degree, so
-         % 'order' = 1 must run quantile regression, not the 'mean' method
-         Fit = baseflow.fitab(q,dqdt,'qtl','order',1);
-         returned = Fit.fselect;
-         expected = 'qtl';
-         testCase.verifyEqual(returned,expected);
-
-         % 'mle' is unsupported and must error with 'order' = 1 too
-         testCase.verifyError( ...
-            @() baseflow.fitab(q,dqdt,'mle','order',1), ?MException);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitab_qtl_default_order(testCase)
-
-         % generate nonlinear (b = 1.5) test data
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-
+         % 'order' = 1 must run quantile regression, not the 'mean' method.
          % 'qtl' with no 'order' must apply the quantreg default of 1 and
-         % run quantile regression; the nan parser default crashed it
-         Fit = baseflow.fitab(q,dqdt,'qtl');
+         % run quantile regression. A nan parser default for 'order' crashes it.
+         Fit = baseflow.fitab(q,dqdt,'qtl',OrderOption{:});
          returned = Fit.fselect;
          expected = 'qtl';
          testCase.verifyEqual(returned,expected);
+
+         % 'mle' is unsupported and must error with or without 'order' = 1
+         testCase.verifyError( ...
+            @() baseflow.fitab(q,dqdt,'mle',OrderOption{:}), ?MException);
       end
 
       %-------------------------------------------
@@ -267,19 +280,23 @@ classdef TestBaseflow < matlab.unittest.TestCase
          t = 1:100;
          [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
 
+         % Count refline arrows by their annotation class
+         arrowclass = 'matlab.graphics.shape.Arrow';
+
          % 'labelplot' defaults to false: no refline arrow annotations
          baseflow.plotdqdt(q,dqdt);
-         returned = numel(findall(gcf,'-isa','matlab.graphics.shape.Arrow'));
-         expected = 0;
-         testCase.verifyEqual(returned,expected);
+         narrows_returned = numel(findall(gcf,'-isa',arrowclass));
+         narrows_expected = 0;
+         testCase.verifyEqual(narrows_returned,narrows_expected);
          % Close only the figure this test created, so a pre-existing user
          % figure survives; plotdqdt opens a fresh figure for the next call.
          closenewfigs(testCase.figsbefore)
 
-         % 'labelplot' true draws the refline arrows (see labelReflines)
+         % 'labelplot' true draws at least one refline arrow (see
+         % labelReflines)
          baseflow.plotdqdt(q,dqdt,'labelplot',true);
-         returned = numel(findall(gcf,'-isa','matlab.graphics.shape.Arrow'));
-         testCase.verifyGreaterThan(returned,0);
+         nlabeled_returned = numel(findall(gcf,'-isa',arrowclass));
+         testCase.verifyGreaterThan(nlabeled_returned,0);
       end
 
       %-------------------------------------------
@@ -303,10 +320,35 @@ classdef TestBaseflow < matlab.unittest.TestCase
          [~,Results] = baseflow.fitevents(Events,'fitorder',1);
 
          % Verify a fit was returned and the exponent is forced to 1
-         testCase.verifyNotEmpty(Results.b);
          returned = Results.b;
-         expected = ones(size(Results.b));
+         testCase.verifyNotEmpty(returned);
+         expected = ones(size(returned));
          testCase.verifyEqual(returned,expected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_fitevents_ctsmethod(testCase,CtsMethod)
+
+         % fitevents must pass 'ctsmethod' to getdqdt, so the dq/dt it
+         % stores for the event equals a direct getdqdt call
+         Event = testCase.firstevent;
+         [~,expected] = baseflow.getdqdt(Event.eventTime, ...
+            Event.eventFlow,Event.eventRain,'CTS','ctsmethod',CtsMethod);
+         returned = baseflow.fitevents(Event,'derivmethod','CTS', ...
+            'ctsmethod',CtsMethod,'plotfits',false);
+         testCase.verifyEqual(returned.dqdt,expected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_setopts_ctsmethod(testCase)
+
+         % The fitevents options default to the traditional backward
+         % first-order stencil
+         returned = baseflow.setopts('fitevents');
+         expected = 'B1';
+         testCase.verifyEqual(returned.ctsmethod,expected);
       end
 
       %-------------------------------------------
@@ -315,28 +357,32 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
          switch RecessionParameterNames
             case 'b'
+               % convert the recession exponent b to n for a flat aquifer
                b = 1.5;
-               nExpected = 0;
-               nActual = baseflow.conversions(b,'b','n','isflat',true);
+               expected = 0; % n = (3 - 2b)/(b - 2)
+               returned = baseflow.conversions(b,'b','n','isflat',true);
 
                % Verify that the actual result matches the expected result
-               testCase.verifyEqual(nActual,nExpected);
+               testCase.verifyEqual(returned,expected);
 
             case 'n'
+               % convert the conductivity exponent n to b for a flat aquifer
                n = -1;
-               bExpected = 1;
-               bActual = baseflow.conversions(n,'n','b','isflat',true);
+               expected = 1; % b = (2n + 3)/(n + 2)
+               returned = baseflow.conversions(n,'n','b','isflat',true);
 
                % Verify that the actual result matches the expected result
-               testCase.verifyEqual(bActual,bExpected);
+               testCase.verifyEqual(returned,expected);
 
             case 'alpha'
+               % convert the power law exponent alpha to b
                alpha = 4.0;
-               bExpected = 1.25;
-               bActual = baseflow.conversions(alpha,'alpha','b','isflat',true);
+               expected = 1.25; % b = 1 + 1/alpha
+               returned = baseflow.conversions(alpha,'alpha','b', ...
+                  'isflat',true);
 
                % Verify that the actual result matches the expected result
-               testCase.verifyEqual(bActual,bExpected);
+               testCase.verifyEqual(returned,expected);
          end
 
       end
@@ -349,10 +395,14 @@ classdef TestBaseflow < matlab.unittest.TestCase
          x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
 
          % compute the fit
-         [bActual,alphaActual] = baseflow.plfitb(x);
+         [~,returned] = baseflow.plfitb(x); % the second output is alpha
+         expected = PowerLawExponent;
+
+         % The estimate from random samples varies. Allow 0.1 absolute error.
+         tol = 0.1;
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual(PowerLawExponent,alphaActual,'AbsTol',0.1);
+         testCase.verifyEqual(returned,expected,'AbsTol',tol);
 
       end
 
@@ -369,19 +419,21 @@ classdef TestBaseflow < matlab.unittest.TestCase
          % compute the expected result
          switch RecessionExponent
             case 1.0
-               SminExpected = 1/a*qmin;
-               SmaxExpected = 1/a*qmax;
+               Smin_expected = 1/a*qmin;
+               Smax_expected = 1/a*qmax;
 
             case 1.5
-               SminExpected = 1/a/(2-b).*(qmin.^(2-b));
-               SmaxExpected = 1/a/(2-b).*(qmax.^(2-b));
+               Smin_expected = 1/a/(2-b).*(qmin.^(2-b));
+               Smax_expected = 1/a/(2-b).*(qmax.^(2-b));
          end
 
          % get the actual result
-         [SminActual,SmaxActual] = baseflow.aquiferstorage(a,b,qmin,qmax);
+         [Smin_returned,Smax_returned] = baseflow.aquiferstorage( ...
+            a,b,qmin,qmax);
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual([SminExpected,SmaxExpected],[SminActual,SmaxActual]);
+         testCase.verifyEqual([Smin_returned,Smax_returned], ...
+            [Smin_expected,Smax_expected]);
 
       end
 
@@ -398,14 +450,14 @@ classdef TestBaseflow < matlab.unittest.TestCase
          phi = PhiValue;
 
          % compute the expected result
-         DExpected = tau/phi/(4-2*b)*Qb;
-         SExpected = DExpected*phi;
+         D_expected = tau/phi/(4-2*b)*Qb;
+         S_expected = D_expected*phi;
 
          % get the actual result
-         [DActual,SActual] = baseflow.aquiferthickness(b,tau,phi,Qb);
+         [D_returned,S_returned] = baseflow.aquiferthickness(b,tau,phi,Qb);
 
          % Verify that the actual result matches the expected result
-         testCase.verifyEqual([DExpected,SExpected],[DActual,SActual]);
+         testCase.verifyEqual([D_returned,S_returned],[D_expected,S_expected]);
 
       end
 
@@ -422,50 +474,37 @@ classdef TestBaseflow < matlab.unittest.TestCase
          [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex);
 
          % Define expected t and q
-         tExpected = cell(numel(starts), 1);
-         qExpected = cell(numel(starts), 1);
+         t_expected = cell(numel(starts), 1);
+         q_expected = cell(numel(starts), 1);
          for n = 1:numel(starts)
-            tExpected{n, 1} = transpose(t(starts(n):ends(n)));
-            qExpected{n, 1} = transpose(q(starts(n):ends(n)));
+            t_expected{n, 1} = transpose(t(starts(n):ends(n)));
+            q_expected{n, 1} = transpose(q(starts(n):ends(n)));
          end
 
-         % get the actual result
-         [tActual,qActual] = baseflow.eventfinder(t,q,[],'nmin',MinEventDuration, ...
-            'fmax',0,'rmax',0,'rmin',0,'rmconvex',RmConvex,'rmnochange',false, ...
-            'rmrain',false);
+         % get the actual result. The synthetic signal has no rainfall record.
+         [t_returned,q_returned] = baseflow.eventfinder(t,q,[], ...
+            'nmin',MinEventDuration,'fmax',0,'rmax',0,'rmin',0, ...
+            'rmconvex',RmConvex,'rmnochange',false,'rmrain',false);
+
+         % Largest allowed count of event times that are in only one of the
+         % expected and returned series (see numdiff below)
+         maxdiff = 4;
 
          % % Verify that the actual result matches the expected result to within a
          % difference of up to two elements to account for the +/- 1 day criteria applied
          % in the eventfinder filters.
-         for n = 1:numel(tActual)
-            [commonT, ia, ib] = intersect(tExpected{n}, tActual{n});
-            numdiff = length(tExpected{n}) + length(tActual{n}) - 2*length(commonT);
+         for n = 1:numel(t_returned)
+            [commonT, ia, ib] = intersect(t_expected{n}, t_returned{n});
+            numdiff = length(t_expected{n}) + length(t_returned{n}) ...
+               - 2*length(commonT);
 
-            if numdiff <= 4
-               testCase.verifyEqual(tExpected{n}(ia), tActual{n}(ib));
-               testCase.verifyEqual(qExpected{n}(ia), qActual{n}(ib));
-
-               % texp = tExpected{n}(ia);
-               % qexp = qExpected{n}(ia);
-               % tact = tActual{n}(ib);
-               % qact = qActual{n}(ib);
-               % assertequal(tExpected{n}(ia), tActual{n}(ib));
-               % assertequal(qExpected{n}(ia), qActual{n}(ib));
-
-               % figure;
-               % plot(texp, qexp); hold on;
-               % plot(tact, qact, ':');
-
+            if numdiff <= maxdiff
+               testCase.verifyEqual(t_returned{n}(ib), t_expected{n}(ia));
+               testCase.verifyEqual(q_returned{n}(ib), q_expected{n}(ia));
             else
                error('Difference greater than 2 elements detected.');
             end
          end
-
-         % for scripting:
-         % assertequal([tActual,qActual], [tExpected,qExpected])
-
-         % For a 1:1 comparison:
-         % testCase.verifyEqual([tExpected,qExpected],[tActual,qActual]);
 
          % Plot the result
          if MinEventDuration == 3
@@ -475,9 +514,9 @@ classdef TestBaseflow < matlab.unittest.TestCase
             figure; plot(t,q); hold on;
             plot(t(inflect), q(inflect), 'x', 'MarkerSize', 20, 'Color', 'r');
 
-            for n = 1:numel(tActual)
-               plot(tExpected{n}, qExpected{n}, 'LineWidth', 2, 'Color', 'k');
-               plot(tActual{n},qActual{n},':','Color', 'g');
+            for n = 1:numel(t_returned)
+               plot(t_expected{n}, q_expected{n}, 'LineWidth', 2, 'Color', 'k');
+               plot(t_returned{n},q_returned{n},':','Color', 'g');
             end
 
             % Adjust legend and title based on rmconvex
@@ -507,21 +546,20 @@ classdef TestBaseflow < matlab.unittest.TestCase
          t = t(starts(1)+idx);
          q = q(starts(1)+idx);
 
-         tExpected = [];
-         qExpected = [];
+         t_expected = [];
+         q_expected = [];
 
-         % figure; plot(tExpected, qExpected, '-o')
-         [tActual,qActual] = baseflow.eventfinder(t, q, [], 'nmin', ...
+         % figure; plot(t_expected, q_expected, '-o')
+         % The synthetic signal has no rainfall record.
+         [t_returned,q_returned] = baseflow.eventfinder(t, q, [], 'nmin', ...
             MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
             RmConvex, 'rmnochange', false, 'rmrain', false);
 
-         testCase.verifyEqual(tExpected, tActual);
-         testCase.verifyEqual(qExpected, qActual);
+         testCase.verifyEqual(t_returned, t_expected);
+         testCase.verifyEqual(q_returned, q_expected);
 
-         % This does not error, it returns empty, so use the above test
-         % testCase.verifyError(@() baseflow.eventfinder(t, q, [], 'nmin', ...
-         %  MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
-         %  RmConvex, 'rmnochange', false, 'rmrain', false));
+         % eventfinder returns empty, not an error, for an event shorter than
+         % nmin; the equality checks above cover that case.
       end
 
    end
@@ -569,8 +607,9 @@ end
 %       % for debugging test_eventfinder
 %       % --------------
 %
-%       % if tExpected, tActual sizes don't match, try adjusting whether the point
-%       % prior to the min is removed. For example, if the test uses this syntax:
+%       % if t_expected, t_returned sizes don't match, try adjusting whether the
+%       % point prior to the min is removed. For example, if the test uses this
+%       % syntax:
 %       %
 %       % ievent = idx(n,1)+2 : idx(n,2);
 %       %
@@ -590,34 +629,34 @@ end
 %       % ievent1 = idx(1,1)+2 : idx(1,2);
 %       % ievent2 = idx(2,1)+2 : idx(2,2);
 %
-%       tExpected{1} = transpose(t(ievent1));
-%       qExpected{1} = transpose(q(ievent1));
-%       tExpected{2} = transpose(t(ievent2));
-%       qExpected{2} = transpose(q(ievent2));
+%       t_expected{1} = transpose(t(ievent1));
+%       q_expected{1} = transpose(q(ievent1));
+%       t_expected{2} = transpose(t(ievent2));
+%       q_expected{2} = transpose(q(ievent2));
 %
-%       isequal(tExpected{1},tActual{1})
-%       isequal(tExpected{2},tActual{2})
+%       isequal(t_expected{1},t_returned{1})
+%       isequal(t_expected{2},t_returned{2})
 %
 %       % If that says they are equal, then the issue is with removing the min.
 %
 %       % Below here is ohter stuff I used for debugging.
-%       [size(tExpected{1}); size(tActual{1})]
-%       [size(tExpected{2}); size(tActual{2})]
+%       [size(t_expected{1}); size(t_returned{1})]
+%       [size(t_expected{2}); size(t_returned{2})]
 %
 %       % depending on which one is missing, reverse the setdiff
-%       [val1, i1] = setdiff(tExpected{1}, tActual{1});
-%       [val1, i1] = setdiff(tActual{1}, tExpected{1});
+%       [val1, i1] = setdiff(t_expected{1}, t_returned{1});
+%       [val1, i1] = setdiff(t_returned{1}, t_expected{1});
 %
-%       [val2, i2] = setdiff(tExpected{2}, tActual{2})
-%       [val2, i2] = setdiff(tActual{2}, tExpected{2})
+%       [val2, i2] = setdiff(t_expected{2}, t_returned{2})
+%       [val2, i2] = setdiff(t_returned{2}, t_expected{2})
 %
-%       loc = ~ismember(tExpected{1}, tActual{1})
+%       loc = ~ismember(t_expected{1}, t_returned{1})
 %
 %       figure; plot(t,q); hold on;
-%       plot(tExpected{1},qExpected{1});
-%       plot(tExpected{2},qExpected{2});
-%       plot(tActual{1},qActual{1},'o','MarkerSize',6);
-%       plot(tActual{2},qActual{2},'o');
+%       plot(t_expected{1},q_expected{1});
+%       plot(t_expected{2},q_expected{2});
+%       plot(t_returned{1},q_returned{1},'o','MarkerSize',6);
+%       plot(t_returned{2},q_returned{2},'o');
 %
 %       % minima should be at -pi/2, 3*pi/2
 %       % maxima should be at pi/2, -3*pi/2

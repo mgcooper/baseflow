@@ -1,6 +1,11 @@
 function help(docname)
    %HELP Open toolbox html help document in the MATLAB Help browser.
    %
+   % Syntax
+   %
+   %     baseflow.help()
+   %     baseflow.help(docname)
+   %
    % baseflow.help() opens the baseflow toolbox help pages in the MATLAB help
    % browser.
    %

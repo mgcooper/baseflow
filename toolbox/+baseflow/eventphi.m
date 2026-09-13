@@ -36,7 +36,7 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    %     soln1       String indicating early-time theoretical solution.
    %     soln2       String indicating late-time theoretical solution.
    %
-   % See also: cloudphi, fitphi, fitdistphi
+   % See also: cloudphi, fitphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 

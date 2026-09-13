@@ -20,7 +20,7 @@ function GHCN = loadghcnd(basinname,varargin)
    %     GHCN = loadghcnd(___,'gapfill',true) gap-fills missing data using an
    %     auto-regressive fit to annual data values.
    %
-   % See also: loadflow, loadcalm, loadbounds
+   % See also: loadflow, loadcalm, loadbasins
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 

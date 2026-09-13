@@ -214,7 +214,7 @@
       "inputs":
       [
          {"name":"Events",       "kind": "required",  "type": ["struct"]},
-         {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
+         {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','CTS'}"],"purpose":"Option" },
          {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
          {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
          {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
@@ -222,7 +222,9 @@
          {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"saveplots",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
-         {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"}
+         {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
+         {"name":"ctsmethod",    "kind": "namevalue", "type": ["char", "choices={'B1','B2','F1','F2','C2','C4'}"],"default":"'B1'","purpose":"Option"},
+         {"name":"fitopts",      "kind": "namevalue", "type": "struct"}
       ],
 
       "outputs":
@@ -274,7 +276,7 @@
          {"name":"T",            "kind": "required",  "type": [["vector","double"],["vector","datetime"]]},
          {"name":"Q",            "kind": "required",  "type": ["vector","double"] },
          {"name":"R",            "kind": "required",  "type": ["vector","double"] },
-         {"name":"derivmethod",  "kind": "required",  "type": ["char", "choices={'VTS','ETS','CTS','SGO','SPN','SLM'}"],"purpose":"Option" },
+         {"name":"derivmethod",  "kind": "required",  "type": ["char", "choices={'VTS','ETS','CTS'}"],"purpose":"Option" },
          {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
          {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
          {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
@@ -343,7 +345,7 @@
          {"name":"Events",          "kind": "required",  "type": ["struct"]},
          {"name":"Fits",            "kind": "required",  "type": ["struct"]},
          {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"drainagedens",    "kind": "namevalue", "type": ["scalar","double"]},
+         {"name":"drainagedensity", "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},
@@ -686,7 +688,7 @@
                   {"name":"asannual",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
                ],
                [
-                  {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'}"],"purpose":"Option" },
+                  {"name":"derivmethod",  "kind": "namevalue", "type": ["char", "choices={'VTS','ETS','CTS'}"],"purpose":"Option" },
                   {"name":"fitmethod",    "kind": "namevalue", "type": ["char", "choices={'nls','ols','mle','qtl','none'}"], "default":"'nls'", "purpose":"Option" },
                   {"name":"fitorder",     "kind": "namevalue", "type": [["char", "choices={'none'}"],["scalar"]] },
                   {"name":"pickfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
@@ -694,11 +696,13 @@
                   {"name":"plotfits",     "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
                   {"name":"saveplots",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
                   {"name":"etsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"0.2"},
-                  {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"}
+                  {"name":"vtsparam",     "kind": "namevalue", "type": ["scalar","double"],"default":"1.0"},
+                  {"name":"ctsmethod",    "kind": "namevalue", "type": ["char", "choices={'B1','B2','F1','F2','C2','C4'}"],"default":"'B1'","purpose":"Option"},
+                  {"name":"fitopts",      "kind": "namevalue", "type": "struct"}
                ],
                [
                   {"name":"drainagearea",    "kind": "namevalue", "type": ["scalar","double"]},
-                  {"name":"drainagedens",    "kind": "namevalue", "type": ["scalar","double"]},
+                  {"name":"drainagedensity", "kind": "namevalue", "type": ["scalar","double"]},
                   {"name":"aquiferdepth",    "kind": "namevalue", "type": ["scalar","double"]},
                   {"name":"streamlength",    "kind": "namevalue", "type": ["scalar","double"]},
                   {"name":"aquiferslope",    "kind": "namevalue", "type": ["scalar","double"]},

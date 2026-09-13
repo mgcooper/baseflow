@@ -1,6 +1,17 @@
 function opts = setopts(funcname,varargin)
    %SETOPTS Set algorithm options for functions getevents, fitevents, globalfit.
    %
+   % Syntax
+   %
+   %     opts = baseflow.setopts(funcname)
+   %     opts = baseflow.setopts(funcname, Name, Value)
+   %
+   % Description
+   %
+   %     opts = baseflow.setopts(funcname) returns the default options
+   %     structure opts for function 'getevents', 'fitevents', or
+   %     'globalfit'. Name-value pairs override the same-named defaults.
+   %
    %  Required inputs
    %
    %     funcname    : 'getevents', 'fitevents', or 'globalfit'
@@ -28,7 +39,7 @@ function opts = setopts(funcname,varargin)
    %
    %  Optional name-value inputs for type 'fitevents'
    %
-   %     derivmethod    : derivative (dQ/dt) method
+   %     derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'
    %     fitmethod      : -dQ/dt = aQb fitting method
    %     fitorder       : fitting order (value of exponent b)
    %     fitnmin        : minimum number of values required to fit -dQ/dt = aQb
@@ -38,8 +49,21 @@ function opts = setopts(funcname,varargin)
    %     savefitplots   : save plots of fits?
    %     etsparam       : min flow length parameter for ETS algorithm
    %     vtsparam       : min flow length parameter for VTS algorithm
+   %     ctsmethod      : finite-difference stencil for the CTS method:
+   %                      'B1', 'B2', 'F1', 'F2', 'C2', or 'C4' (default 'B1')
    %     drainagearea   : drainage area in m2
    %     gageID         : station name or ID
+   %     fitopts        : struct of baseflow.fitab options that fitevents
+   %                      passes to every event fit (default: struct()).
+   %                      Allowed fields: weights, order, quantile,
+   %                      refqtls, Nboot, alpha (numeric); mask, plotfit
+   %                      (logical). A fitopts field overrides the
+   %                      same-named fitab option, so fitopts.order
+   %                      overrides fitorder. weights and mask must be
+   %                      scalars (baseflow:fitevents:nonscalarFitopt).
+   %                      An unknown field raises
+   %                      baseflow:fitab:unknownFitopt. A field of the
+   %                      wrong type raises baseflow:fitab:invalidFitopt.
    %
    %  Optional name-value inputs for type 'globalfit'
    %
@@ -59,7 +83,14 @@ function opts = setopts(funcname,varargin)
    %     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines
    %     lateqtls       : quantiles of Q and -dQ/dt for late reference lines
    %
-   % See also: getfits, fitdqdt
+   % Example
+   %
+   %  Set default event detection options, then override one default:
+   %
+   %     opts = baseflow.setopts('getevents', 'rmconvex', true);
+   %     disp(opts)
+   %
+   % See also: fitevents, getdqdt, fitdqdt
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
 
@@ -104,6 +135,8 @@ function opts = setopts(funcname,varargin)
          addParameter(p,   'saveplots',   false,      @islogicalscalar  );
          addParameter(p,   'etsparam',    0.2,        @isnumericscalar  );
          addParameter(p,   'vtsparam',    1.0,        @isnumericscalar  );
+         addParameter(p,   'ctsmethod',   'B1',       @ischar           );
+         addParameter(p,   'fitopts',     struct(),   @isstruct         );
 
          % global fit - input to baseflow.globalfit
       case 'globalfit'

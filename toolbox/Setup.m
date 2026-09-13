@@ -53,9 +53,10 @@ function varargout = Setup(varargin)
       option = validatestring(varargin{:},validopts,mfilename,'option',1);
    end
 
-   % if 'install' is requested but the toolbox is installed, ask the user
+   % if 'install' is requested but the toolbox is installed, ask the user.
+   % In a -batch run, input() cannot prompt, so proceed with the re-install.
    if strcmp(option, 'install') && ispref('baseflow', 'installed')
-      if getpref('baseflow', 'installed')
+      if getpref('baseflow', 'installed') && ~inbatchmode()
          msg = '\n * baseflow toolbox is installed, press ''y'' to re-install ';
          msg = [msg 'or any other key to abort *\n'];
          str = input(msg, 's');
@@ -95,7 +96,13 @@ function varargout = Setup(varargin)
       pkg load statistics
       pkg load tablicious
       pkg load optim
-      pkg load statistics-bootstrap
+      % Upstream renamed the bootstrap package statistics-bootstrap to
+      % statistics-resampling. Load whichever name is installed.
+      try
+         pkg load statistics-resampling
+      catch
+         pkg load statistics-bootstrap
+      end
       pkg load financial
       % setenv ("OCTAVE_LATEX_DEBUG_FLAG", "1")
       % setenv ("OCTAVE_LATEX_BINARY", )
@@ -112,6 +119,11 @@ end
 % Helper
 function tf = inoctave()
    tf = (exist ("OCTAVE_VERSION", "builtin") > 0);
+end
+
+function tf = inbatchmode()
+   %INBATCHMODE True in a MATLAB -batch run, where input() cannot prompt.
+   tf = ~inoctave() && batchStartupOptionUsed;
 end
 
 %% implement the Setup option
@@ -280,7 +292,8 @@ function msg = inittoolboxprefs(varargin)
          'Statistics_Package'};
    else
       prefs = {'installed','install_directory','octave_install', ...
-         'dependencies_checked','Curve_Fitting_Toolbox','Statistics_Toolbox'};
+         'dependencies_checked','Curve_Fitting_Toolbox', ...
+         'Statistics_Toolbox','MAP_Toolbox'};
    end
 
    for n = 1:numel(prefs)
@@ -304,25 +317,19 @@ function msg = rmtoolboxprefs(varargin)
 end
 
 function msg = checkdependencies(varargin)
-   %CHECKDEPENDENCIES
+   %CHECKDEPENDENCIES Run the live dependency check and record the result.
 
    narginchk(0,1); if nargin==1; msg = varargin{1}; end
 
-   % 26 Apr 2023 - removed dependency check after moving all dependencies to
-   % sub-package namespace folders and running matlab built in dependency report
-   % and resolving all dependencies.
-   fprintf(' * all dependencies are included in package namespace folders *\n');
-   fprintf([' * if users encounter missing dependencies, please open a ' ...
-      'ticket at https://github.com/mgcooper/baseflow/issues * \n']);
-
-   return
-
-   % this step should resolve any errors due to missing function
-   % dependencies. all required functions should be included in the toolbox,
-   % but this can be used to check in case any errors come up. It also
-   % returns a list of the required products. The list will include the
-   % symbolic math toolbox and signal processing toolbox, but they are not
-   % actually required, its a bug in the built-in function.
+   % The live analysis uses matlab.codetools, which Octave does not
+   % provide, and the toolbox-license block below uses Java. Skip both on
+   % Octave. The vendored private/ folders contain every function dependency.
+   if inoctave()
+      fprintf(' * dependency analysis requires MATLAB; skipped on Octave *\n');
+      msg.missing_dependencies = 'not checked on Octave';
+      msg.dependencies = true;
+      return
+   end
 
    % display message
    if isfield(msg,'install') && msg.install == true
@@ -331,10 +338,7 @@ function msg = checkdependencies(varargin)
       fprintf('\n * checking dependencies ... this can be slow *\n'); % entry point
    end
 
-   % get the path to the toolbox
-   thispath = fileparts(mfilename('fullpath'));
-
-   % add toolbox prefs
+   % add toolbox paths (also sets the install_directory preference)
    addtoolboxpaths();
 
    % default to not satisfied
@@ -344,13 +348,18 @@ function msg = checkdependencies(varargin)
       setpref('baseflow','dependencies_checked',false)
    end
 
-   % get all unique dependencies
-   funcname = fullfile(thispath,'docs','baseflow_demo.m');
-   report = baseflow.internal.dependencies(funcname,'check');
-   % report = baseflow.dependencies('docs/baseflow_demo.m','check');
+   % Analyze the whole public API live, without a saved dependencies.mat
+   % file. The report also compares the detected products against the
+   % DESCRIPTION MatlabProducts line. A bug in the built-in function can add
+   % the symbolic math toolbox and signal processing toolbox to the raw
+   % product list. The toolbox does not require them, and the comparison
+   % already discounts them.
+   report = baseflow.internal.dependencies('', 'check');
    msg.function_dependencies = report.function_dependencies;
    msg.missing_dependencies = report.missing_dependencies;
    msg.product_dependencies = report.product_dependencies;
+   msg.undeclared_products = report.undeclared_products;
+   msg.pending_decision = report.pending_decision;
 
    if ischar(msg.missing_dependencies) && ...
          strcmp(msg.missing_dependencies,'all dependencies are installed')
@@ -370,10 +379,19 @@ function msg = checkdependencies(varargin)
       setpref('baseflow','dependencies_checked',false)
    end
 
+   % Either result can include periphery references that await the user
+   % decision recorded in TODO.md.
+   if ~isempty(msg.pending_decision)
+      fprintf([' * note: %d functions keep external references ' ...
+         'pending a decision; see TODO.md *\n'], ...
+         numel(msg.pending_decision));
+   end
+
    msg.dependencies = true;
 
    % add installed toolboxes to prefs
-   required_toolboxes = {'Curve_Fitting_Toolbox','Statistics_Toolbox'};
+   required_toolboxes = {'Curve_Fitting_Toolbox','Statistics_Toolbox', ...
+      'MAP_Toolbox'};
    for n = 1:numel(required_toolboxes)
       check = getFeatureName(required_toolboxes{n});
       if ispref('baseflow',required_toolboxes{n})

@@ -1,5 +1,9 @@
 function varargout = getplotdata(varargin)
    %GETPLOTDATA Get data in current plot.
+   %
+   %  [xdata, ydata, zdata] = getplotdata(ax) returns the XData, YData, and
+   %  ZData of the children of axes ax. It returns one of these, in order,
+   %  for each requested output. With no input, ax is the current axes (gca).
 
    if nargin == 0
       ax = gca;

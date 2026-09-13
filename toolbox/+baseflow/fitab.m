@@ -28,7 +28,9 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    %     quantile scalar double, quantile used if 'method' == 'qtl' (quantile regression)
    %     Nboot    scalar double, bootstrap sample size for quantile regression
    %     plotfit  logical scalar indicating whether to make a plot or not
-   %     fitopts  struct containing fitting options (not currently implemented)
+   %     fitopts  struct whose fields override the same-named options above
+   %              (weights, order, mask, quantile, refqtls, Nboot, alpha,
+   %              plotfit); an unknown field is an error
    %
    % Notes
    %     weights are set zero anywhere mask is false
@@ -41,6 +43,14 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    %     default (recommended) behavior is to keep the x-quantile = 0.5 and vary
    %     the y-quantile to move the line up and down as desired to define an
    %     "envelope"
+   %
+   % Example
+   %
+   %  Generate test data with known parameters a and b, then fit them:
+   %
+   %     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);
+   %     Fit = baseflow.fitab(q, dqdt, 'nls');
+   %     fprintf('a = %.4f, b = %.2f\n', Fit.a, Fit.b)
    %
    %  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
@@ -726,22 +736,66 @@ function [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = ...
    Nboot    = parser.Results.Nboot;
    alpha    = parser.Results.alpha;
    plotfit  = parser.Results.plotfit;
-   fitopts  = parser.Unmatched;
+   fitopts  = parser.Results.fitopts;
 
-   if isscalar(weights) && weights == 1
-      weights = ones(size(q));
+   % Override each same-named parameter with its fitopts field after a type
+   % check. fitevents passes this struct to fitab, so a caller can set the
+   % per-fit options once. fitab errors on an unknown field or a wrong type,
+   % so it never ignores a fitopts field.
+   for f = transpose(fieldnames(fitopts))
+      value = fitopts.(f{1});
+      switch f{1}
+         case 'weights'
+            assert(isnumeric(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.weights must be numeric');
+            weights = value;
+         case 'order'
+            assert(isnumeric(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.order must be numeric');
+            order = value;
+         case 'mask'
+            assert(islogical(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.mask must be logical');
+            mask = value;
+         case 'quantile'
+            assert(isnumeric(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.quantile must be numeric');
+            qtl = value;
+         case 'refqtls'
+            assert(isnumeric(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.refqtls must be numeric');
+            refqtls = value;
+         case 'Nboot'
+            assert(isnumeric(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.Nboot must be numeric');
+            Nboot = value;
+         case 'alpha'
+            assert(isnumeric(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.alpha must be numeric');
+            alpha = value;
+         case 'plotfit'
+            assert(islogical(value), 'baseflow:fitab:invalidFitopt', ...
+               'fitopts.plotfit must be logical');
+            plotfit = value;
+         otherwise
+            error('baseflow:fitab:unknownFitopt', ...
+               ['unknown fitopts field %s; allowed: weights, order, ' ...
+               'mask, quantile, refqtls, Nboot, alpha, plotfit'], f{1});
+      end
    end
 
-   if isscalar(mask) && mask == 1
-      mask = true(size(q));
+   % Expand a scalar weight or mask to every point, because prepfits
+   % indexes both point by point. The parser default for mask is the
+   % numeric 1, so convert it to logical for prepfits.
+   if isscalar(weights)
+      weights = weights*ones(size(q));
    end
 
-   % NOTE: fitopts is not implemented, but see baseflow.Fit, where it could be used
-   % to simplify calling this function from wrapper functions. Using the
-   % unmatched method, it can be used to pass in arbitrary fitopts accepted
-   % by any function but requires that the user know what to pass in.
+   if isscalar(mask)
+      mask = repmat(logical(mask), size(q));
+   end
 
-   % could require:
+   % Fields that fitopts could hold later, by method (parked design notes):
    % if method = 'qtl', fitopts.quantile, fitopts.Nboot
    % if method = 'mle', fitopts.sigx, fitopts.sigy, fitopts.rxy
    % for all methods, fitopts.order, fitopts.alpha, fitopts.

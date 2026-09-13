@@ -1,5 +1,9 @@
 function rl = runlength(tf)
    %RUNLENGTH get run lengths of consecutive equal values along columns of data
+   %
+   %  rl = runlength(tf) returns an array rl the size of tf. Each element
+   %  of rl holds the length of the run of consecutive equal values that
+   %  contains it, computed down each column of tf.
    
    diffs = diff(tf) ~= 0;  % find where values change
    ncols = size(diffs, 2); % pad jumps at start and end

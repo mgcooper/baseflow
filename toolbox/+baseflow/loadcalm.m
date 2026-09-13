@@ -14,7 +14,15 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
    %     [Calm,Meta] = loadcalm(__,'t1',t1,'t2',t2) returns table Calm for the
    %     time period bounded by datetimes t1 and t2.
    %
-   % See also: baseflow.loadbounds, baseflow.loadflow
+   %     For the Kuparuk basin ('KUPARUK R NR DEADHORSE AK') with the default
+   %     'current' version, loadcalm pins the output to the nine sites in the
+   %     published bfra results (U11A, U11B, U11C, U12A, U12B, U13, U14,
+   %     U32A, U32B). The CALM source data changed after publication. The
+   %     pin keeps the output reproducible against the published results
+   %     (Cooper et al. 2023, WRR, doi:10.1029/2022WR033154). The 'archive'
+   %     version selects sites from the basin metadata instead.
+   %
+   % See also: baseflow.loadbasins, baseflow.loadflow
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 
@@ -138,26 +146,27 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
          % this handles the case with more than one "reference site"
          refslope = mean(slopes(iref));
 
-         % if the trend of the average is less than X% different than the trend of
-         % the longest record, then don't worry about overlap, use the average
-         % timeseries
+         % if the trend of the average is less than X% different than the trend
+         % of the longest record, then don't worry about overlap, use the
+         % average timeseries
          if abs(1-slopes(end)/refslope) < maxdiff
             Calm = aggregateCalm(Calm, Meta, 'avg', minlength, ...
                mincoverage, minoverlap, maxdiff);
             return
          end
-         % if here, all sites have minlength, mincoverage, but when averaged, their
-         % trend is more than maxdiff percent different from the trend of the
-         % reference site. If this is due to spatial variability, that's ok, but if
-         % it's due to temporal mismatch, like one site has 12 years of data from
-         % 1990-2002 and the other sites have 20 years from 2000-2020, then we
-         % exclude the one from 1990-2002 based on the minoverlap parameter, i.e.
-         % we remove sites that do not overlap with all other sites by minoverlap
-         % in percent terms relative to the total number of years.
+         % if here, all sites have minlength, mincoverage, but when averaged,
+         % their trend is more than maxdiff percent different from the trend of
+         % the reference site. If this is due to spatial variability, that's ok,
+         % but if it's due to temporal mismatch, like one site has 12 years of
+         % data from 1990-2002 and the other sites have 20 years from 2000-2020,
+         % then we exclude the one from 1990-2002 based on the minoverlap
+         % parameter, i.e. we remove sites that do not overlap with all other
+         % sites by minoverlap in percent terms relative to the total number of
+         % years.
 
          % determine overlap. simplest method: ok = nyears./nmax > minoverlap;
-         % better method: get actual overlap of each site relative to the ref site.
-         % this works if iref has more than one site.
+         % better method: get actual overlap of each site relative to the ref
+         % site. this works if iref has more than one site.
          overlap = nan(nsites,1);
          for n = 1:nsites
             overlap(n) = sum(all(~isnan([alldata(:,iref),alldata(:,n)]),2))/nmax;
@@ -187,11 +196,10 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
             %    'errorbars', true, 'yerr', Data.sigma);
          end
 
-         % NOTE:
-         % say one site has values every other year, then the overlap is only
-         % 50%, but it may be good data. Return to that edge case if needed. For
-         % now, use total overlap. Besides, in that case, the data will be
-         % retained if the trends are not more than maxdiff apart.
+         % NOTE: say one site has values every other year, then the overlap is
+         % only 50%, but it may be good data. Return to that edge case if
+         % needed. For now, use total overlap. Besides, in that case, the data
+         % will be retained if the trends are not more than maxdiff apart.
 
          % Regarding maxdiff check: two checks are considered: 1) is the trend
          % of any individual site more than x% different than the site with the
@@ -201,11 +209,12 @@ function [Calm, Meta] = aggregateCalm(Calm, Meta, aggfunc, minlength, ...
 
          % ok = abs(slopes(1:end-1)-slopes(iref))./slopes(iref) < maxdiff;
    end
-   % there was a note about using this to make a function baseflow.writeshapefile but
-   % it could also be used to find calm sites within a given boundary on the fly,
-   % e.g. if I want to expand my search programatically using this function, I
-   % could pass in the basin shapefile and a buffer tolerance and find all sites
-   % within that buffer, whcih would also be useful for finding rain stations
+   % there was a note about using this to make a function
+   % baseflow.writeshapefile but it could also be used to find calm sites within
+   % a given boundary on the fly, e.g. if I want to expand my search
+   % programatically using this function, I could pass in the basin shapefile
+   % and a buffer tolerance and find all sites within that buffer, whcih would
+   % also be useful for finding rain stations
 
    % % make a shapefile
    % [SE,CI,PM,mu,sigma] = stderror(transpose(table2array(Data)));
@@ -251,7 +260,10 @@ function [Calm,Meta] = loadcalmcurrent(MetaBasin)
          ["NumYears","YearStart","YearEnd","Coverage"]);
    end
 
-   % temp hack to check against the og list
+   % Pin the Kuparuk basin to the nine sites in the published bfra results
+   % (the original list). The CALM source data changed after publication,
+   % so this pin keeps the output reproducible against the paper. TODO.md
+   % records a deferred optional input to select sites.
    if strcmp(MetaBasin.name,'KUPARUK R NR DEADHORSE AK')
       sites = {'U11A','U11B','U11C','U12A','U12B','U13','U14','U32A','U32B'};
       keep = ismember(Calm.Properties.VariableNames,sites);

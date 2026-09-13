@@ -21,7 +21,7 @@ function [Flow,Meta] = loadflow(basinname,varargin)
    %     [Flow,Meta] = loadflow(___,'gapfill',true) gap-fills missing data using
    %     an auto-regressive fit to annual data values.
    %
-   % See also: loadcalm, loadbounds
+   % See also: loadcalm, loadbasins
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 

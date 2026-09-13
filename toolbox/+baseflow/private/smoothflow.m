@@ -1,5 +1,11 @@
 function [y,win] = smoothflow(x)
    %SMOOTHFLOW Smooth measurement noise.
+   %
+   %  [y, win] = smoothflow(x) smooths x with a Savitzky-Golay filter
+   %  (smoothdata 'sgolay') and returns the smoothed data y and the window
+   %  size win. Nan elements of x stay nan in y, and the function sets
+   %  negative smoothed values to zero. In Octave, a moving mean with an odd
+   %  window no larger than 7 replaces the Savitzky-Golay filter.
    
    % This is only needed when testing smooth in matlab
    % warnstate = warning;

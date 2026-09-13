@@ -30,6 +30,15 @@ function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
    %     the baseflow trendplot figure ha: figure handle for the annual flow
    %     trendplot figure
    %
+   % Example
+   %
+   %  Compute annual baseflow and its trend from the example daily
+   %  streamflow record. The basin area converts flow to cm/d:
+   %
+   %     [T, Q] = baseflow.loadExampleData();
+   %     [Qb, dQbdt] = baseflow.baseflowtrend(T, Q, 8.6545e9);
+   %     fprintf('Mean annual baseflow = %.3f cm/d\n', mean(Qb))
+   %
    % See also: aquiferthickness
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper

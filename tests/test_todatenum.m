@@ -1,26 +1,53 @@
-%TEST_TODATENUM Test baseflow/private/todatenum.
+classdef test_todatenum < matlab.unittest.TestCase
+   %TEST_TODATENUM Test baseflow/private/todatenum.
 
-% Define test data
-T = datetime(1,1,1);
+   properties (TestParameter)
+      % Edge cases (Inf, NaN, very large/small numbers). Each is a numeric
+      % input that is not a datetime.
+      numericinput = struct('nan', NaN, 'inf', Inf, 'large', 1e200, ...
+         'small', 1e-200)
+   end
 
-todatenum = baseflow.privatefunction('todatenum');
+   properties
+      % Test data: one datetime and the private todatenum function.
+      T
+      todatenum
+   end
 
-%% Test function accuracy with one input
+   methods (TestClassSetup)
+      function setupdata(testCase)
+         % Define test data
+         testCase.T = datetime(1,1,1);
+         testCase.todatenum = baseflow.privatefunction('todatenum');
+      end
+   end
 
-% Test function accuracy using assert
-expected = datenum(T); %#ok<*DATNM>
-returned = todatenum(T);
-assert(isequal(returned, expected));
+   methods (Test)
+      function test_oneInput(testCase)
+         % Test function accuracy with one input
+         expected = datenum(testCase.T); %#ok<*DATNM>
+         returned = testCase.todatenum(testCase.T);
+         testCase.verifyEqual(returned, expected)
+      end
 
-%% Test with edge cases (Inf, NaN, very large/small numbers)
-assert(isnan(todatenum(NaN)));
-assert(isinf(todatenum(Inf)));
-assert(abs(todatenum(1e200) - 1e200) < 1e-10); % replace with theoretical result
+      function test_edgeCases(testCase, numericinput)
+         % Test with edge cases (Inf, NaN, very large/small numbers).
+         % todatenum returns an input that is not a datetime unchanged, so
+         % the input is the theoretical result. verifyEqual treats NaN as
+         % equal to NaN.
+         expected = numericinput;
+         returned = testCase.todatenum(numericinput);
+         testCase.verifyEqual(returned, expected)
+      end
 
-%% Test function accuracy with multiple inputs
-
-expected = datenum(T);
-returned = cell(1, 3);
-[returned{1}, returned{2}, returned{3}] = todatenum(T, T, T);
-
-cellfun(@(ret, exp) assert(isequal(ret, expected)), returned);
+      function test_multipleInputs(testCase)
+         % Test function accuracy with multiple inputs: each datetime input
+         % returns its datenum in the same output position.
+         expected = repmat({datenum(testCase.T)}, 1, 3);
+         returned = cell(1, 3);
+         [returned{1}, returned{2}, returned{3}] = ...
+            testCase.todatenum(testCase.T, testCase.T, testCase.T);
+         testCase.verifyEqual(returned, expected)
+      end
+   end
+end

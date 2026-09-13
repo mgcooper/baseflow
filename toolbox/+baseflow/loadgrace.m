@@ -1,6 +1,22 @@
 function [Grace, Meta] = loadgrace(varargin)
    %LOADGRACE Load grace data for basin in baseflow basin database.
    %
+   % Syntax
+   %
+   %     [Grace, Meta] = baseflow.loadgrace(basinname)
+   %     [Grace, Meta] = baseflow.loadgrace(basinname, 't1', t1, 't2', t2)
+   %
+   % Description
+   %
+   %     [Grace, Meta] = baseflow.loadgrace(basinname) loads the grace
+   %     storage anomaly timetable Grace and the basin metadata Meta for
+   %     the named basin. With basinname 'all', Grace is the source struct
+   %     for every basin, and loadgrace ignores t1 and t2. loadgrace reads the
+   %     data file from the folder set by the BASEFLOW_DATA_PATH environment
+   %     variable. basinname is required. With no input, loadgrace opens this
+   %     file. For one named basin with t1 and t2, loadgrace retimes the data
+   %     to a regular monthly calendar from t1 to t2.
+   %
    % Grace data should be in cm/timestep
    %
    % See also: baseflow.loadghcnd, baseflow.loadflow, baseflow.loadcalm

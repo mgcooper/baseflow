@@ -27,7 +27,7 @@ function h = mapbasins(Basins, varargin)
    %     h  = baseflow.mapbasins(basins,'varname','perm_mean','cbartitle',    ...
    %         'permafrost extent (%)','latlims',[65 80],'lonlims',[-168 -60]);
    %
-   % See also: mapgages, loadbounds
+   % See also: mapgages, loadbasins
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 

@@ -1,6 +1,30 @@
 function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
    %POINTCLOUDINTERCEPT Estimate parameter 'a' from the point cloud intercept.
    %
+   % Syntax
+   %
+   %     ahat = baseflow.pointcloudintercept(q, dqdt, bhat, method)
+   %     ahat = baseflow.pointcloudintercept(_, 'mask', mask)
+   %     ahat = baseflow.pointcloudintercept(_, 'refqtls', refqtls)
+   %     ahat = baseflow.pointcloudintercept(_, 'bci', bci)
+   %
+   % Description
+   %
+   %     ahat = baseflow.pointcloudintercept(q, dqdt, bhat, method)
+   %     estimates the intercept ahat of a line with slope bhat fit to the
+   %     point cloud of log(-dqdt) versus log(q) using the given method.
+   %     The number of requested outputs selects the output list:
+   %
+   %     [ahat, ahatLH] = ...              ahatLH = [ahatL ahatH] bounds
+   %     [ahat, xbar, ybar] = ...          reference point
+   %     [ahat, ahatLH, xbar, ybar] = ...  bounds and reference point
+   %
+   %     ahatLH is [NaN NaN] unless bci is given. xbar and ybar are the
+   %     reference point that the line passes through. For 'envelope', they
+   %     are the refqtls quantiles of q and -dqdt. For 'median' and
+   %     'brutsaert', they are the medians of q and -dqdt. For 'mean', they
+   %     are the means of log(q) and log(-dqdt).
+   %
    % Required inputs
    %
    %  q        =  vector double of discharge data (L T^-1)
@@ -13,6 +37,8 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
    %  mask     =  logical mask to exclude data
    %  refqtls  =  reference quantiles that together define a pivot point through
    %              which the straight line must pass. use with method 'envelope'.
+   %  bci      =  [bL bH] confidence interval of bhat, used to compute the
+   %              bounds ahatLH (default nan, which returns NaN bounds)
    %
    %
    % See also: fitab

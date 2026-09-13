@@ -29,7 +29,17 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
    %     soln2    optional late-time theoretical solution
    %     dispfit  logical flag indicating whether to plot the result
    %
-   % See also: eventphi, cloudphi, fitdistphi
+   % Example
+   %
+   %  Estimate drainable porosity from typical early-time (a1) and late-time
+   %  (a2, b2) parameters. The A, D, L values describe the Kuparuk basin:
+   %
+   %     A = 8.6545e9; D = 0.5; L = A * 0.8 / 1000;
+   %     phi = baseflow.fitphi(1e-6, 1e-9, 1.5, A, D, L, ...
+   %        'soln1', 'PK62', 'soln2', 'BS04');
+   %     fprintf('phi = %.3f\n', phi)
+   %
+   % See also: eventphi, cloudphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
@@ -291,7 +301,7 @@ function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)
    else
       if strcmp(soln1,'RS05') && (b2 < 3/2 || b2>=2)
          warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
-         soln2 = 'B03';
+         soln2 = 'BS03';
 
       elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
          warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
@@ -306,6 +316,20 @@ function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)
 
    % concatenate the early-time and late-time solution
    soln = strcat(soln1,['_' soln2]);
+
+   % The remapping branches above can produce a pair with no derived phi
+   % formula, for example RS05 early with the BS03 late fallback when
+   % b2 <= 1. The switches below then return unassigned outputs, so raise
+   % an error first. knowncombos holds the six pairs that the solver switch
+   % implements (the '*' entries in the header notes). allcombos() also
+   % lists four pairs with no formula, so it is not the allowlist.
+   knowncombos = {'PK62_BS04', 'PK62_BS03', 'RS05_RS05', ...
+      'BR94_BR94', 'BR94_RS06', 'BR94_RS06b1'};
+   if ~ismember(soln, knowncombos)
+      error('baseflow:fitphi:unsupportedSolution', ...
+         'no derived solution for the pair %s; supported pairs: %s', ...
+         soln, strjoin(knowncombos, ', '));
+   end
 
    switch soln
       case 'PK62_BS04'

@@ -9,7 +9,9 @@ function NewData = timetablereduce(Data,varargin)
    % parse inputs
    [Data, dim, alpha, keeptime] = parseinputs(Data, mfilename, varargin{:});
 
-   Data.Properties.DimensionNames{1} = 'Time';
+   % the code below reads the row times as Data.Time, but the input time
+   % dimension can have any name (for example 'Date'), so rename it first
+   Data = renametimetabletimevar(Data);
    Time = Data.Time;
 
    % if the table has one column this returns the same data but renames the column
@@ -73,19 +75,4 @@ function [Data, dim, alpha, keeptime] = parseinputs(Data, funcname, varargin)
    dim = p.Results.dim;
    alpha = p.Results.alpha;
    keeptime = p.Results.keeptime;
-end
-
-%% 
-function T = renametimetabletimevar(T)
-   %RENAMETIMETABLETIMEVAR rename the time variable in table T to 'Time'
-   %
-   %  T = renametimetabletimevar(T)
-   %
-   % See also:
-
-   dims = T.Properties.DimensionNames;
-
-   if string(dims{1}) ~= "Time"
-      T.Properties.DimensionNames{1} = 'Time';
-   end
 end

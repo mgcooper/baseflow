@@ -63,9 +63,18 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    %
    % Note: either the 'opts' struct can be provided with the
    %
+   % Example
+   %
+   %  Detect recession events in the example daily streamflow data:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     opts = baseflow.setopts('getevents', 'rmconvex', true);
+   %     [Events, Info] = baseflow.getevents(T, Q, R, opts);
+   %     fprintf('Detected %d events\n', max(Events.eventTags))
+   %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
-   % See also: fitevents, eventfinder, eventsplitter, eventpicker, eventplotter
+   % See also: fitevents, eventfinder, eventpicker, eventplotter
    %
    % Note: For data-heavy workflows, replace the Events output struct with the
    % eventTags list. The Events struct includes the input data and the event

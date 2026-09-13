@@ -27,6 +27,15 @@ function varargout = pointcloudplot(q,dqdt,varargin)
    %     rain        =  vector double of rainfall (mm/time)
    %     ax          =  graphic axis to plot into
    %
+   % Example
+   %
+   %  Generate test data. Plot the point cloud with early- and late-time
+   %  reference lines:
+   %
+   %     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);
+   %     h = baseflow.pointcloudplot(q, dqdt, ...
+   %        'reflines', {'early', 'late'}, 'reflabels', true);
+   %
    % See also: fitab, plotdqdt
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper

@@ -40,7 +40,15 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %     rmnochange  remove consecutive constant derivates
    %     rmrain      remove rainfall
    %
-   % See also getevents, eventsplitter, eventpicker, eventplotter
+   % Example
+   %
+   %  Find recession events in one year of daily streamflow data:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     [t, q, r, Info] = baseflow.eventfinder(T(1:365), Q(1:365), R(1:365));
+   %     fprintf('Found %d events\n', numel(Info.istart))
+   %
+   % See also getevents, eventpicker, eventplotter
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
