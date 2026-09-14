@@ -5,9 +5,13 @@ end
 
 function setup(testCase)
 
+   % Snapshot open figures; teardown closes only figures created here.
+   testCase.TestData.figsbefore = findall(0, 'Type', 'figure');
+
    % generate test data
    [T,Q] = baseflow.loadExampleData();
 
+   % Select a fixed window of the example record as the test signal.
    t = T(100:200);
    A = Q(100:200);
    s = sign(diff(A));
@@ -52,16 +56,20 @@ function setup(testCase)
 
 end
 
-function teardown(testCase) %#ok<INUSD>
-
+function teardown(testCase)
+   % Close the figures the setup function created (see tests/closenewfigs.m).
+   closenewfigs(testCase.TestData.figsbefore)
 end
 
-function test_peakfinder(testCase)
+function test_peakLocations(testCase)
+   % Compare peak locations from the custom islocalmax, peakfinder, and the
+   % builtin islocalmax. Note: a local test named test_peakfinder resolves
+   % to the tests/test_peakfinder.m class and breaks suite creation.
 
    customislocalmax = baseflow.privatefunction('islocalmax');
 
    A = testCase.TestData.A;
-   expectedPeakIndex = testCase.TestData.expectedPeakIndex;
+   peak_expected = testCase.TestData.expectedPeakIndex;
 
    [tf_islocalmax,p_islocalmax] = islocalmax(A); %#ok<*ASGLU>
    try
@@ -73,16 +81,21 @@ function test_peakfinder(testCase)
    % get the index of the peak
    i_peakfinder = baseflow.deps.peakfinder(A); %#ok<*NASGU>
    i_islocalmax = find(tf_islocalmax);
-   i_baseflowcustom = find(tf_custom);
+   peak_returned = find(tf_custom);
 
    % compare peak locations
    msg = 'baseflow/private/islocalmax failed to identify the peak correctly';
-   testCase.verifyEqual(expectedPeakIndex, i_baseflowcustom, msg);
+   testCase.verifyEqual(peak_returned, peak_expected, msg);
 
-   %    assert(isequal(i_peakfinder, i_islocalmax, i_baseflowcustom))
-   %
-   %    % compare peak prominence
-   %    assert(isequal(p_islocalmax(p_islocalmax>0), p_findpeaks(p_findpeaks>0)))
+   % All three implementations agree on the fixture data. This check runs
+   % the index comparison from the commented script block below. The
+   % prominence comparison against findpeaks does not run: findpeaks
+   % needs the undeclared Signal Processing Toolbox, and the index
+   % comparison already checks that the implementations agree.
+   agreement_returned = {i_peakfinder(:), i_islocalmax(:)};
+   agreement_expected = {peak_returned(:), peak_returned(:)};
+   testCase.verifyEqual(agreement_returned, agreement_expected, ...
+      'peakfinder, islocalmax, and the custom islocalmax disagree')
 end
 
 % Below here is script-based test

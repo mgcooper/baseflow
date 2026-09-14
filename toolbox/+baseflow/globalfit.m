@@ -3,25 +3,40 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    %
    % Syntax
    %
-   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits);
-   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,opts);
-   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,Meta,'plotfits',plotfits);
-   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit);
-   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits,Meta,'bootfit',bootfit,'bootreps',nreps);
-   %     FIT = baseflow.GLOBALFIT(___,)
+   %     FIT = baseflow.GLOBALFIT(Results, Events, Fits);
+   %     FIT = baseflow.GLOBALFIT(_, opts);
+   %     FIT = baseflow.GLOBALFIT(_, Meta, 'plotfits', plotfits);
+   %     FIT = baseflow.GLOBALFIT(_, Meta, 'bootfit', bootfit);
+   %     FIT = baseflow.GLOBALFIT(_, 'bootfit', bootfit, 'bootreps', nreps);
    %
    % Description
    %
-   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits) uses the event-scale recession
-   %     analysis parameters saved in results table Results and fitted data saved
-   %     in Fits (both outputs of baseflow.fitevents) and the event-scale data saved in
-   %     Events (output of baseflow.getevents) and computes 'global' parameters tau,
-   %     tau0, phi, bhat, ahat, Qexp, and Q0.
+   %     FIT = baseflow.GLOBALFIT(Results,Events,Fits) uses the event-scale
+   %     recession analysis parameters saved in results table Results and fitted
+   %     data saved in Fits (both outputs of baseflow.fitevents) and the
+   %     event-scale data saved in Events (output of baseflow.getevents) and
+   %     computes 'global' parameters tau, tau0, phi, bhat, ahat, Qexp, and Q0.
    %
    % Required inputs
    %
-   %     Results, Events, Fits are outputs of baseflow.getevents and baseflow.fitevents
-   %     opts is a struct containing fields area, D0, and L (see below)
+   %     Results, Events, Fits are outputs of baseflow.getevents and
+   %     baseflow.fitevents opts is a struct containing fields area, D0, and L
+   %     (see below)
+   %
+   % Example
+   %
+   %  Detect and fit events, then fit global parameters. The basin area,
+   %  aquifer depth, and stream length describe the Kuparuk River basin:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     A = 8.6545e9; D = 0.5; L = A * 0.8 / 1000;
+   %     Events = baseflow.getevents(T, Q, R);
+   %     [Fits, Results] = baseflow.fitevents(Events);
+   %     opts = baseflow.setopts('globalfit', 'drainagearea', A, ...
+   %        'aquiferdepth', D, 'streamlength', L);
+   %     GlobalFit = baseflow.globalfit(Results, Events, Fits, opts);
+   %     fprintf('b = %.2f, tau = %.0f days, phi = %.3f\n', ...
+   %        GlobalFit.b, GlobalFit.tau, GlobalFit.phi)
    %
    % See also: setopts, getevents, fitevents, fitphi, eventphi, eventtau
    %
@@ -33,8 +48,8 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    % TODO make the inputs more general, rather than these hard-coded structures
    % and tables
 
-   % NOTE in the current setup, early/lateqtls are used for eventphi, refqtls for
-   % point cloud
+   % NOTE in the current setup, early/lateqtls are used for eventphi, refqtls
+   % for point cloud
 
    % PARSE INPUTS
    %#ok<*ASGLU>
@@ -43,8 +58,9 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
       Results, Events, Fits, mfilename, varargin{:});
 
    % Fit tau, a, b (tau [days], q [m3 d-1], dqdt [m3 d-2])
-   [tau, q, dqdt, tags] = baseflow.eventtau(Results, Events, Fits, 'usefits', false);
-   
+   [tau, q, dqdt, tags] = baseflow.eventtau(Results, Events, Fits, ...
+      'usefits', false);
+
    TauFit = baseflow.plfitb(tau, 'plotfit', plotfits, 'bootfit', bootfit, ...
       'bootreps', nreps, 'limit', 20);
 
@@ -61,8 +77,8 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
       'envelope', 'refqtls', refqtls, 'mask', itau, 'bci', [bhatL bhatH]);
 
    % Fit Q0 and Qhat
-   [Qexp, Q0, pQexp, pQ0] = baseflow.expectedQ(ahat, bhat, tauexp, q, dqdt, tau0, ...
-      'qtls', Q, 'mask', itau);
+   [Qexp, Q0, pQexp, pQ0] = baseflow.expectedQ(ahat, bhat, tauexp, q, dqdt, ...
+      tau0, 'qtls', Q, 'mask', itau);
 
    % Fit phi
    switch phimethod
@@ -89,10 +105,10 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    %    'mask',itau,'lateqtls',refqtls,'earlyqtls',earlyqtls,'Q0',Q0,'Dd',Dd);
    % Q0    = Qexp*(3-b)/(2-b);
 
-   % note on units: ahat is estimated from the point cloud. the dimensions of ahat
-   % are T^b-2 L^1-b. The time is in days and length is m3, so ahat has units
-   % d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we get:
-   % (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1
+   % note on units: ahat is estimated from the point cloud. the dimensions of
+   % ahat are T^b-2 L^1-b. The time is in days and length is m3, so ahat has
+   % units d^b-2 m^3(1-b) (it's easier if you pretend flow is m d-1). For Q0, we
+   % get: (d^b-2 m^3(1-b) * d)^(1/1-b) = d^(b-1)/(1-b) m^3(1-b)/(1-b) = m^3 d-1
 
    % % turned this off b/c phicloud makes one
    % % plot the pointcloud if requested
@@ -123,9 +139,9 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
 end
 
 %% INPUT PARSER
-function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod, ...
-      refqtls, earlyqtls, lateqtls, isflat] = parseinputs(K, Events, Fits, ...
-      funcname, varargin)
+function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, ...
+      phimethod, refqtls, earlyqtls, lateqtls, isflat] = parseinputs( ...
+      K, Events, Fits, funcname, varargin)
 
    parser = inputParser;
    parser.FunctionName = ['baseflow.' funcname];
@@ -139,7 +155,7 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod,
    parser.addParameter('drainagedensity', 0.8, @isnumericscalar);
    parser.addParameter('aquiferdepth', nan, @isnumericscalar);
    parser.addParameter('streamlength', nan, @isnumericscalar);
-   parser.addParameter('aquiferslope', nan, @isnumericscalar);
+   parser.addParameter('aquiferslope', 0, @isnumericscalar);
    parser.addParameter('aquiferbreadth', nan, @isnumericscalar);
    parser.addParameter('drainableporosity', 0.1, @isnumericscalar);
    parser.addParameter('isflat', true, @islogicalscalar);
@@ -169,12 +185,13 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, phimethod,
    lateqtls    = parser.Results.lateqtls;
    isflat      = parser.Results.isflat;
 
-   % if stream length and drainage density are both provided, check that they are
-   % consistent with the provided area. note: Dd comes in as 1/km b/c that's how it
-   % is almost always reported (km/km2). divide by 1000 to get 1/m.
+   % if stream length and drainage density are both provided, check that they
+   % are consistent with the provided area. note: Dd comes in as 1/km b/c that's
+   % how it is almost always reported (km/km2). divide by 1000 to get 1/m.
    if ~isnan(Dd) && ~isnan(L)
       if Dd/1000*A ~= L        % 1/m * m^2 = m
-         warning('provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd');
+         warning( ...
+            'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd');
          L = Dd/1000*A;
       end
    end

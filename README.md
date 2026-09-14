@@ -16,8 +16,43 @@ For an overview, see [Getting Started](https://mgcooper.github.io/baseflow/).
 - MATLAB&reg;, developed on version 9.9.0 (R2020b).
   - Mathworks Statistics and Machine Learning Toolbox.  
   - Mathworks Curve Fitting Toolbox.  
-- Octave, tested on version 8.2.0.  
-  - Statistics, Optimization, Struct, Tablicious, and Statistics-bootstrap packages.  
+- Octave: `tests/octave_smoke.m` verifies the core workflow (load example
+  data, `getevents`, `fitevents`, `fitab` with `nls`) on version 11.3.0.
+  The toolbox ran on version 8.2.0 in 2023.  
+  - Struct, Optimization, Statistics, Tablicious, Statistics-resampling
+    (formerly Statistics-bootstrap), and Financial packages.  
+
+The `DESCRIPTION` file lists the required dependencies. The theory demos
+(`baseflow_linear_theory` and `baseflow_nonlinear_theory`) also need the
+Symbolic Math Toolbox on MATLAB or the `symbolic` package on Octave.
+`DESCRIPTION` does not list these optional demo dependencies.
+
+The core analysis chain (`getevents`, `fitevents`, `fitab`,
+`eventfinder`, `eventtau`, `globalfit`, `fitphi`) needs no functions or
+data files outside the toolbox.
+
+Four public functions do not run with the toolbox files alone. The core
+analysis chain does not call them. The toolbox does not currently
+support these functions for public use.
+
+- `loadbasins`, `loadflow`, `loadmeta`, and `loadprops` load `.mat` files
+  from the folder that the `BASEFLOW_DATA_PATH` environment variable
+  names. The toolbox does not ship these files.
+- `loadflow` also references other functions that the toolbox does not
+  ship.
+
+One optional feature also has an external requirement: the
+`plfitb` method `'hanel'` calls `r_plfit`, the Hanel et al. (2017, PLOS
+ONE 12:e0170920) supplementary code. That code carries no license grant,
+so the toolbox does not vendor it. Get the code from the paper's
+supplement and put it on the MATLAB path. `baseflow.internal.dependencies`
+lists `r_plfit` in `known_external` and does not count it as missing.
+Note: the Hanel supplement code returns one `out` struct, while `plfitb`
+calls a copy edited to return `[alpha, xmin, L, D, out]`. Edit the
+function signature of your copy to return these five outputs.
+`toolbox/docs/baseflow_powerlaw_notation.m` maps the notation between
+`plfit`, `r_plfit`, the MATLAB generalized Pareto, and the toolbox's `b`
+and `tau` conventions.
 
 ## Install
 
@@ -30,7 +65,7 @@ For an overview, see [Getting Started](https://mgcooper.github.io/baseflow/).
 - If running in Octave, see `.octaverc` for recommended startup options.
 - Unit tests are in `tests/`. To run them from the top-level folder:
   - Type `runtests('tests')` at the command window and press enter.
-  - To debug, try `runtests('tests', debug=true)`.
+  - To debug, try `runtests('tests', 'Debug', true)`.
 - In new Matlab sessions, cd to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path (or manage the search path however you normally do).
 
 For more options, see [Configuration](#configuration).  
@@ -47,7 +82,7 @@ Toolbox documentation is available in the Matlab help browser. To get started, i
 - Type `doc baseflow` or try `doc +baseflow` to see the package contents in the help browser.
 - If the documentation does not open in the help browser, try `doc` without any arguments, then scroll down to "Supplemental Software" and click on "Baseflow Recession Analysis Toolbox". You can also try `docsearch baseflow`.
 
-Notebooks are in `demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Each demo is available as an html file in `toolbox/docs`. Double click to view them in the Matlab help browser, or use `baseflow.help(<docname>)`. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files compatible with both Matlab and Octave in the `demos/mfiles` folder.
+Notebooks are in `toolbox/demos/`. The notebook `baseflow_demo_kuparuk.mlx` replicates the analysis in the paper [Detecting Permafrost Active Layer Thickness Change From Nonlinear Baseflow Recession](https://doi.org/10.1029/2022WR033154). Each demo is available as an html file in `toolbox/docs/html`. Double click to view them in the Matlab help browser, or use `baseflow.help(<docname>)`. All demos are available as live `.mlx` files compatible with Matlab, and as `.m` files in the `toolbox/demos/mfiles` folder. See [Octave](#octave) for the demos that run on Octave.
 
 ## Contribute
 
@@ -57,7 +92,7 @@ If you find a bug, have a question, or want to contribute, feel free to open an 
 
 ## How do I cite this?
 
-If you find this software useful, please consider citing the software release in `Citation.cff` and/or the following paper for which the software was developed:
+If you find this software useful, please consider citing the software release in `CITATION.cff` and/or the following paper for which the software was developed:
 
 ```bib
     @ARTICLE{10.1029/2022WR033154,
@@ -83,13 +118,21 @@ For more control, use the convenience function `Setup.m` to manage the toolbox i
   - Toolbox paths are added to the search path (not persistent between sessions).
   - Default toolbox preferences are added to a new user preferences group `baseflow` (persistent between sessions).
   <!-- - Dependencies are checked using `baseflow.internal.dependencies` to determine if the required files are on the search path. -->
+  - The dependency check (`baseflow.internal.dependencies('', 'check')`) runs on MATLAB and stores its results in `msg`. On Octave, `Setup` skips the check.
 - Note that `Setup` does not modify `userpath`, does not call `savepath`, and never modifies the root-level `pathdef.m` file. It only calls `addpath` and `rmpath` to add and remove the toolbox from the search path.
 - In subsequent sessions, toolbox paths can be managed like so:
   - `Setup('addpath')` or simply `Setup` with no arguments adds the toolbox to the search path for the current session.
   - `Setup('rmpath')` removes the toolbox from the search path for the current session.
 - To display the current toolbox preferences try `getpref('baseflow')`.
 
-Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party Matlab/Octave software). However, Octave users may find `Setup` particularly convenient because it will load the required packages. Although all dependencies are nominally included in this toolbox, if users encounter any missing dependencies, please open an [issue](https://github.com/mgcooper/baseflow/issues).
+Running `Setup('install')` should only be necessary once (or not at all, if you choose to manage your search path however you normally manage third-party Matlab/Octave software). However, Octave users may find `Setup` particularly convenient because it will load the required packages. The core analysis chain needs no files outside the toolbox. [Requirements](#requirements) lists the functions that need external functions or data. If you find another missing dependency, please open an [issue](https://github.com/mgcooper/baseflow/issues).
+
+To run the dependency check at any time on MATLAB, use `msg = Setup('dependencies')`. The check stores these results in `msg`:
+
+- `missing_dependencies`: the required files that resolve outside the toolbox, or `'all dependencies are installed'`.
+- `undeclared_products`: the detected MATLAB products that the `DESCRIPTION` `MatlabProducts` line does not list, or `'all products are declared'`.
+
+The analysis cannot see a call that does not resolve on the search path. On a machine without the external files, `missing_dependencies` can report `'all dependencies are installed'` while a function still calls a file that the toolbox does not ship. The `dependencies_checked` preference is true only when `missing_dependencies` reports `'all dependencies are installed'`.
 
 <!-- Disabled this after moving all dependencies to package namespace folders and running built in matlab dependency report -->
  <!-- If for some reason a dependencies is found that is not on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using: -->
@@ -113,13 +156,13 @@ If desired, package functions can be imported into a workspace using `import bas
 
 ## Octave
 
-Octave is supported but `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). In particular, `baseflow` uses the [`tablicious`](https://github.com/apjanke/octave-tablicious) package for `string` and `datetime` support, but `tablicious` does not fully support these objects. `baseflow` was tested on macOS with Octave v8.1.0 and 8.2.0. Octave can be downloaded [here](https://octave.org/download.html). If running in Octave, the following packages are required:
+Octave support covers the core analysis functions and the demos. `baseflow` was developed on Matlab, and users may encounter unexpected behavior on Octave (please open an [issue](https://github.com/mgcooper/baseflow/issues)). In particular, `baseflow` uses the [`tablicious`](https://github.com/apjanke/octave-tablicious) package for `string` and `datetime` support, but `tablicious` does not fully support these objects. `tests/octave_smoke.m` verifies the core workflow on GNU Octave 11.3.0. The toolbox ran on Octave 8.2.0 in 2023. See the limitations below. Octave can be downloaded [here](https://octave.org/download.html). If running in Octave, the following packages are required:
 
 `struct`  
 `optim`  
 `statistics`  
 `tablicious`  
-`statistics-bootstrap`  
+`statistics-resampling` (the former `statistics-bootstrap`; either name works)  
 `financial`  
 
 For some demos, the `Symbolic` package is needed.  
@@ -127,25 +170,34 @@ For some demos, the `Symbolic` package is needed.
 To see which packages are installed:
 `pkg list`
 
-To install packages, use the pkg command in Octave:
+To install packages, use the pkg command in Octave. `pkg install` checks package dependencies but does not install them, so install the packages in this order. `financial` depends on `io`, and `statistics` 1.9.1 depends on `datatypes`. `statistics` 1.9.1 and `datatypes` 1.3.4 need Octave 11.1 or later.
 
 `pkg install -forge struct`  
-`pkg install -forge optim`  
+`pkg install -forge io`  
+`pkg install -forge datatypes`  
 `pkg install -forge statistics`  
+`pkg install -forge optim`  
+`pkg install -forge financial`  
+
+Install statistics-resampling from the repository:  
+`pkg install "https://github.com/gnu-octave/statistics-resampling/archive/refs/heads/master.zip"`
 
 Install tablicious from the repository:  
 `pkg install https://github.com/apjanke/octave-tablicious/archive/refs/heads/master.zip`
 
 To load a package, use `pkg load <pkgname>`. To see which packages are loaded, use `pkg list`, loaded packages will have an asterisk next to their name. Use the convenience function `Setup.m` to automatically import required packages.
 
-The `pkg load` commands listed above are included in the .octaverc file. Depending on your configuration, it may or may not be sourced at startup. Octave users are encouraged to run `Setup` when using the toolbox, it will load the required packages and manage warnings. See `Setup.m` for more information.
+The `.octaverc` file loads the required packages with `pkg load`. Depending on your configuration, it may or may not be sourced at startup. Octave users are encouraged to run `Setup` when using the toolbox, it will load the required packages and manage warnings. See `Setup.m` for more information.
 
 Limitations when running in Octave:
 
-- The live scripts in the `demos/` folder will not work on Octave, use the `.m` files instead.
+- The live scripts in the `toolbox/demos/` folder will not work on Octave. Use the `.m` files in `toolbox/demos/mfiles` instead.
+- On Octave 11.3.0, `baseflow_demo_1`, `baseflow_demo_2`, and `baseflow_demo_3` run. `baseflow_demo_kuparuk` errors in `trendplot` at its `fitlm` call. The theory demos need the `symbolic` package.
 - Functions relying on `datetime` objects may not work on Octave.
 - Graphics objects are not supported in Octave, including `gobjects` which may cause errors.
+- The vendored `+deps/arrow` function errors on Octave because it reads the MATLAB-only `WarpToFill` axes property. The arrow annotations in `gpfitb`, `plplotb`, `plotrefline`, and `fitphidist` call it.
 - Latex interpreter is not supported in Octave.
+- The `+internal` maintenance tooling and its private helpers are MATLAB-only. `Setup('dependencies')` skips the analysis on Octave.
 
 Work is ongoing to patch these incompatibilities. See `+baseflow/private/isoctave` to patch errors.
 

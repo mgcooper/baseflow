@@ -40,7 +40,7 @@ function [h,f] = eventplotter(T,Q,R,Info,varargin)
    %     -dQ/dt on the y-axis.
    %     
    %
-   % See also getevents, eventfinder, eventpicker, eventsplitter
+   % See also getevents, eventfinder, eventpicker
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 

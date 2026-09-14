@@ -21,7 +21,7 @@ function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
    % Required inputs
    %
    %     b (dimensionless) = baseflow recession parameter b in -dQ/dt = aQ^b
-   %     tau (Time) = aquifer drainage timescale, dQ/dS, where S = aquifer storage
+   %     tau (Time) = aquifer drainage timescale, dQ/dS; S = aquifer storage
    %     phi (Length/Length) = drainable porosity
    %     Qb (Length/Time) = baseflow
    %
@@ -37,14 +37,13 @@ function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-
-   if nargin == 4
-      isflat = true;
-   else
+   % default to flat aquifer
+   isflat = true;
+   if nargin == 5
       isflat = varargin{1};
    end
 
-   N = baseflow.conversions(b,'b','N','isflat',isflat);
-   D = tau./phi./(N+1).*Qb;
-   S = D.*phi; % convert layer thickness to storage
+   N = baseflow.conversions(b, 'b', 'N', 'isflat', isflat);
+   D = tau ./ phi ./ (N+1) .* Qb;
+   S = D .* phi; % convert layer thickness to storage
 end

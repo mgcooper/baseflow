@@ -5,12 +5,11 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %
    %     [T,Q,R,Info] = eventfinder(t,q,r)
    %     [T,Q,R,Info] = eventfinder(t,q,r,opts)
-   %     [T,Q,R,Info] = eventfinder(_, 'qmin', qmin)
    %     [T,Q,R,Info] = eventfinder(_, 'nmin', nmin)
    %     [T,Q,R,Info] = eventfinder(_, 'fmax', fmax)
    %     [T,Q,R,Info] = eventfinder(_, 'rmax', rmax)
    %     [T,Q,R,Info] = eventfinder(_, 'rmin', rmin)
-   %     [T,Q,R,Info] = eventfinder(_, 'rmrain', true)
+   %     [T,Q,R,Info] = eventfinder(_, 'rmrain', false)
    %     [T,Q,R,Info] = eventfinder(_, 'rmconvex', true)
    %     [T,Q,R,Info] = eventfinder(_, 'rmnochange', false)
    %
@@ -29,18 +28,32 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %
    % Optional name-value inputs
    %
-   %     opts        (optional) structure containing the following fields:
-   %     qmin        minimum flow magnitude
+   %     opts        (optional) structure with any of the fields below. It
+   %                 must not contain other fields, so a
+   %                 baseflow.setopts('getevents') struct is rejected.
    %     nmin        minimum event length
    %     fmax        maximum # of missing values gap-filled
    %     rmax        maximum run of sequential constant values
    %     rmin        minimum rainfall required to censor flow (mm/day?)
-   %     cmax        maximum run of sequential constant values
    %     rmconvex    remove convex derivatives
    %     rmnochange  remove consecutive constant derivates
    %     rmrain      remove rainfall
    %
-   % See also getevents, eventsplitter, eventpicker, eventplotter
+   %     Each option default is the baseflow.setopts('getevents') value.
+   %     nmin must be greater than 2. rmax must be greater than 1: the
+   %     rmnochange filter marks nonzero d2q/dt2 values nan. Each nan
+   %     counts as a run of length 1, so an rmax of 1 or less rejects
+   %     every day.
+   %
+   % Example
+   %
+   %  Find recession events in one year of daily streamflow data:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     [t, q, r, Info] = baseflow.eventfinder(T(1:365), Q(1:365), R(1:365));
+   %     fprintf('Found %d events\n', numel(Info.istart))
+   %
+   % See also getevents, eventpicker, eventplotter
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
@@ -109,8 +122,8 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    if isempty(inoctave); inoctave = exist("OCTAVE_VERSION", "builtin")>0;
    end
 
-   % if nmin is set to 0 (and maybe if it is set to 1) this method will fail
-   % because runlength returns 1 for consecutive nan values, see isminlength.
+   % This method fails when nmin is 0 or 1, because runlength counts each
+   % nan as a run of length 1. See isminlength.
 
    % Get a 3-day smoothed timeseries to control false positive convexity
    if inoctave
@@ -128,6 +141,8 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    % Part 1: find data to be excluded (run the filters)
 
    % filters: positive dq/dt, peaks +1 day, convex +1 day, and minima -1 day
+   % islocalmax and islocalmin are the private peakfinder wrappers, because
+   % Octave has no islocalmax or islocalmin.
    ipos = find(dqdt > 0); % increasing flow (positive dq/dt)
    imax = find(islocalmax(q)); % local maxima
    imin = find(islocalmin(q)); % local minima
@@ -244,32 +259,25 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
 
 end
 
-function tf = islocalmax(X)
-   tf = false(size(X));
-   tf(baseflow.deps.peakfinder(X,0,0,1,false)) = true;
-end
-
-function tf = islocalmin(X)
-   tf = false(size(X));
-   tf(baseflow.deps.peakfinder(X,0,0,-1,false)) = true;
-end
-
 %% INPUT PARSER
 function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)
 
+   % Take the option defaults from setopts so that getevents, wrapevents,
+   % and eventfinder use the same values.
    persistent parser
    if isempty(parser)
+      defaults = baseflow.setopts('getevents');
       parser = inputParser;
       addRequired(parser, 't',                  @isdatelike);
       addRequired(parser, 'q',                  @isdoublevector);
       addRequired(parser, 'r',                  @isnumeric);
-      addParameter(parser,'nmin',        4,     @isnumericscalar);
-      addParameter(parser,'fmax',        2,     @isnumericscalar);
-      addParameter(parser,'rmax',        2,     @isnumericscalar);
-      addParameter(parser,'rmin',        0,     @isnumericscalar);
-      addParameter(parser,'rmconvex',    false, @islogicalscalar);
-      addParameter(parser,'rmnochange',  false, @islogicalscalar);
-      addParameter(parser,'rmrain',      false, @islogicalscalar);
+      addParameter(parser,'nmin',       defaults.nmin,       @isnumericscalar);
+      addParameter(parser,'fmax',       defaults.fmax,       @isnumericscalar);
+      addParameter(parser,'rmax',       defaults.rmax,       @isnumericscalar);
+      addParameter(parser,'rmin',       defaults.rmin,       @isnumericscalar);
+      addParameter(parser,'rmconvex',   defaults.rmconvex,   @islogicalscalar);
+      addParameter(parser,'rmnochange', defaults.rmnochange, @islogicalscalar);
+      addParameter(parser,'rmrain',     defaults.rmrain,     @islogicalscalar);
    end
    parser.FunctionName = funcname;
    parse(parser,t,q,r,varargin{:});
@@ -281,6 +289,7 @@ function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)
    t = todatenum(t);
    validateattributes(t, {'double'}, {'size', size(q)}, funcname, 't', 1)
    validateattributes(opts.nmin, {'double'}, {'>', 2}, funcname, 'nmin')
+   validateattributes(opts.rmax, {'double'}, {'>', 1}, funcname, 'rmax')
 
    % Allow empty r i.e. input syntax eventfinder(t,q,[],...)
    if isempty(r)

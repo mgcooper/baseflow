@@ -12,9 +12,9 @@ function [Fit,h] = fitphidist(phi,varargin)
    %     Fit = baseflow.fitphidist(phi) returns probability distribution object
    %     'Fit' which is a Beta Distribution fit to the input data in phi
    %
-   %     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution fit
-   %     to the input data in phi. 'outputtype' is 'PD', 'mean', or 'std', where
-   %     default 'PD' is the Probability Distribution object. 
+   %     Fit = baseflow.fitphidist(phi,outputtype) returns a Beta Distribution
+   %     fit to the input data in phi. 'outputtype' is 'PD', 'mean', or 'std',
+   %     where default 'PD' is the Probability Distribution object.
    %
    %     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options
    %     plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default

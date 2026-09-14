@@ -6,7 +6,8 @@ function [ data_out,idx ] = rmnan(data_in,dim )
    %
    % See also setnan, setval
 
-   % this needs to be merged with setnan functionality to pass in logical indices
+   % this needs to be merged with setnan functionality to pass in logical
+   % indices
 
    if iscell(data_in)
       if nargin == 1 || (nargin == 2 && dim == 1)

@@ -1,3 +1,8 @@
+%FITSTS Fit recession events using splines. Not implemented.
+%
+%   The commented-out code below is parked work in progress. See the
+%   fitsts entry in TODO.md.
+
 % function [q,dqdt,dt,tq,rq,dq] = fitsts(T,Q,R,varargin)
 %    %FITSTS fit recession events using splines. not implemented.
 %    %

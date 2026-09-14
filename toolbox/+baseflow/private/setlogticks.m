@@ -49,8 +49,8 @@ function setlogticks(ax,varargin)
    end
 
    % if the axes span <1 order of magnitude and there are already ticks, don't
-   % replace them with the decades. If the axes are not numeric (e.g., if they are
-   % categorical), don't adjust them.
+   % replace them with the decades. If the axes are not numeric (e.g., if they
+   % are categorical), don't adjust them.
    if isnumeric(xlims) && numdecx < 1; numticks = numel(get(ax,'XTick'));
       if numticks > 2; skipx = true; else, sub10x = true; end
    end

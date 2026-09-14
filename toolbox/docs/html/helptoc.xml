@@ -49,6 +49,7 @@
                   Theoretical Basis
          <tocitem target="baseflow_linear_theory.html">Linear Reservoir Model</tocitem>
          <tocitem target="baseflow_nonlinear_theory.html">Nonlinear Reservoir Model</tocitem>
+         <tocitem target="baseflow_powerlaw_notation.html">Power-law notation across plfit, r_plfit, gpd, and baseflow</tocitem>
       </tocitem>
 
       <!-- Optional List of Examples, with hyperlinks to examples in other files -->

@@ -1,5 +1,9 @@
 function varargout = todatenum(varargin)
    %TODATENUM Convert input to datenum.
+   %
+   %  varargout = todatenum(varargin) converts each datetime input to a
+   %  datenum array and returns the inputs in the same order. Inputs that
+   %  are not datetime pass through unchanged.
 
    varargout = cell(1, numel(varargin));
    for n = 1:numel(varargin)

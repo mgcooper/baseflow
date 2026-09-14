@@ -22,17 +22,17 @@
 %# @deftypefnx {Function File} {@var{yy} =} smooth (@var{y}, @var{span}, 'sgolay', @var{degree})
 %# @deftypefnx {Function File} {@var{yy} =} smooth (@var{x}, @var{y}, ...)
 %#
-%# This is an implementation of the functionality of the @code{smooth} function in
-%# Matlab's Curve Fitting Toolbox.
+%# This is an implementation of the functionality of the @code{smooth} function
+%# in Matlab's Curve Fitting Toolbox.
 %#
-%# Smooths the @var{y} data with the chosen method, see the table below for available
-%# methods.
+%# Smooths the @var{y} data with the chosen method, see the table below for
+%# available methods.
 %#
 %# The @var{x} data does not need to have uniform spacing.
 %#
-%# For the methods 'moving' and 'sgolay' the @var{span} parameter defines how many data
-%# points to use for the smoothing of each data point. Default is 5, i.e. the
-%# center point and two neighbours on each side.
+%# For the methods 'moving' and 'sgolay' the @var{span} parameter defines how
+%# many data points to use for the smoothing of each data point. Default is 5,
+%# i.e. the center point and two neighbours on each side.
 %#
 %# Smoothing methods specified by @var{method}:
 %#
@@ -42,10 +42,11 @@
 %# is used. Corresponds to lowpass filtering.
 %#
 %# @item 'sgolay'
-%# Savitzky-Golay filter. For each data point a polynomial of degree @var{degree}
-%# is fitted (using a least-square regression) to the span and evaluated for the
-%# current @var{x} value. Also known as digital smoothing polynomial filter or
-%# least-squares smoothing filter. Default value of @var{degree} is 2.
+%# Savitzky-Golay filter. For each data point a polynomial of degree
+%# @var{degree} is fitted (using a least-square regression) to the span and
+%# evaluated for the current @var{x} value. Also known as digital smoothing
+%# polynomial filter or least-squares smoothing filter. Default value of
+%# @var{degree} is 2.
 %#
 %# @item 'lowess'
 %#
@@ -215,7 +216,8 @@ function yy = smooth (varargin)
 
     %# --- Savitzky-Golay filtering
     case 'sgolay'
-      %# FIXME: Check how Matlab takes care of the beginning and the end. Reduce polynomial degree?
+      %# FIXME: Check how Matlab takes care of the beginning and the end. Reduce
+      %# polynomial degree?
       for i=1:length (y)
         if (mod (span,2) == 0)
           error ('smooth: span must be odd.')

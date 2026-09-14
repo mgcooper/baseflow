@@ -18,7 +18,21 @@ function [Fits,Results] = fitevents(Events,varargin)
    %
    % Required inputs
    %
-   %     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted daily)
+   %     Events: output of baseflow.getevents (flow in m3 d-1 posted daily)
+   %
+   % Optional inputs
+   %
+   %     See baseflow.setopts for the name-value options and their defaults.
+   %
+   %     fitopts: struct of baseflow.fitab options passed to every event fit
+   %     (default: struct()). Allowed fields are weights, order, quantile,
+   %     refqtls, Nboot, and alpha (numeric), and mask and plotfit
+   %     (logical). A fitopts field overrides the same-named fitab option,
+   %     so fitopts.order overrides fitorder. weights and mask must be
+   %     scalars, because each event fit has its own points; any other size
+   %     raises baseflow:fitevents:nonscalarFitopt. An unknown field raises
+   %     baseflow:fitab:unknownFitopt. A field of the wrong type raises
+   %     baseflow:fitab:invalidFitopt.
    %
    % Outputs
    %
@@ -63,7 +77,7 @@ function [Fits,Results] = fitevents(Events,varargin)
    % PARSE INPUTS
    %#ok<*ASGLU>
    [derivmethod, fitmethod, fitorder, pickfits, pickmethod, plotfits, ...
-      saveplots, etsparam, vtsparam, fitopts] = parseinputs( ...
+      saveplots, etsparam, vtsparam, ctsmethod, fitopts] = parseinputs( ...
       Events, mfilename, varargin{:});
 
    % MAIN FUNCTION
@@ -114,8 +128,6 @@ function [Fits,Results] = fitevents(Events,varargin)
          );
    end
 
-   debugflag = false;
-
    % compute the recession constants
    for thisEvent = 1:numEvents
 
@@ -134,7 +146,7 @@ function [Fits,Results] = fitevents(Events,varargin)
 
       [qH,dH,dtH,tH] = baseflow.getdqdt(eventT, eventQ, eventR, derivmethod,   ...
          'pickmethod', pickmethod, 'fitmethod', fitmethod, 'etsparam', ...
-         etsparam, 'vtsparam', vtsparam);
+         etsparam, 'vtsparam', vtsparam, 'ctsmethod', ctsmethod);
 
       % undocumented feature
       if saveplots == true
@@ -157,7 +169,8 @@ function [Fits,Results] = fitevents(Events,varargin)
          if ok == false
             continue
          else
-            % Note: fitopts is a placeholder. It is not implemented.
+            % fitopts fields override fitab's same-named options; fitab
+            % validates them and errors on an unknown field.
             [iFit, ok] = baseflow.fitab(q, dqdt, fitmethod, ...
                'order', fitorder, 'fitopts', fitopts);
          end
@@ -202,7 +215,7 @@ end
 % GET FITS
 function [Fits, K, fitcount] = saveFit(T, q, dqdt, dt, tq, derivmethod, ...
       fitmethod, fitorder, eventdate, eventtag, fittag, fitcount, K, ...
-      Fits, iFit, savevars, ok) %#ok<INUSD> 
+      Fits, iFit, savevars, ok) %#ok<INUSD>
 
    % if fitting failed, set this event nan, otherwise save the fit
    if ok == true
@@ -286,7 +299,8 @@ end
 
 %% INPUT PARSER
 function [derivmethod, fitmethod, fitorder, pickfits, pickmethod, ...
-      plotfits, saveplots, etsparam, vtsparam, fitopts] = parseinputs( ...
+      plotfits, saveplots, etsparam, vtsparam, ctsmethod, fitopts] = ...
+      parseinputs( ...
       Events, funcname, varargin)
 
    persistent parser
@@ -303,16 +317,30 @@ function [derivmethod, fitmethod, fitorder, pickfits, pickmethod, ...
       parser.addParameter('saveplots',   false,   @islogicalscalar  );
       parser.addParameter('etsparam',    0.2,     @isnumericscalar  );
       parser.addParameter('vtsparam',    1.0,     @isnumericscalar  );
+      parser.addParameter('ctsmethod',   'B1',    @ischar           );
+      parser.addParameter('fitopts',     struct(), @isstruct        );
    end
    parser.FunctionName = funcname;
    parser.parse(Events,varargin{:});
 
-   fitopts = struct();
+   % fitab validates the fitopts fields and errors on an unknown one.
+   fitopts = parser.Results.fitopts;
+
+   % fitab applies weights and mask point by point. Each event has its own
+   % q and dqdt, so one vector cannot match the points of every event fit.
+   % Only a scalar weights or mask value applies to all of the fits.
+   if any(cellfun(@(f) isfield(fitopts, f) && ~isscalar(fitopts.(f)), ...
+         {'weights', 'mask'}))
+      error('baseflow:fitevents:nonscalarFitopt', ...
+         ['fitopts.weights and fitopts.mask must be scalars in fitevents. ' ...
+         'Use baseflow.fitab to weight or mask the points of one fit.'])
+   end
    fitorder = parser.Results.fitorder;
    pickfits = parser.Results.pickfits;
    plotfits = parser.Results.plotfits;
    etsparam = parser.Results.etsparam;
    vtsparam = parser.Results.vtsparam;
+   ctsmethod = parser.Results.ctsmethod;
    saveplots = parser.Results.saveplots;
    fitmethod = parser.Results.fitmethod;
    pickmethod = parser.Results.pickmethod;

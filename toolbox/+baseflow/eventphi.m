@@ -17,12 +17,15 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    %
    % Required inputs
    %
-   %     Results  Table of a, b, tau, values for each event (output of fitevents)
-   %     Fits     Struct containing the fitted q/dqdt timeseries (output of baseflow.dqdt)
+   %     Results  Table of a, b, tau, values for each event (output of
+   %              fitevents)
+   %     Fits     Struct containing the fitted q/dqdt timeseries (output of
+   %              baseflow.dqdt)
    %     A        Numeric scalar, basin area contributing to baseflow (L^2)
    %     D        Numeric scalar, saturated aquifer thickness (L)
    %     L        Numeric scalar, active stream length (L)
-   %     blate    Numeric scalar, late-time b parameter in -dqdt = aq^b (dimensionless)
+   %     blate    Numeric scalar, late-time b parameter in -dqdt = aq^b
+   %              (dimensionless)
    %
    % Optional name-value inputs
    %
@@ -36,7 +39,7 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    %     soln1       String indicating early-time theoretical solution.
    %     soln2       String indicating late-time theoretical solution.
    %
-   % See also: cloudphi, fitphi, fitdistphi
+   % See also: cloudphi, fitphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 

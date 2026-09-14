@@ -9,7 +9,7 @@ function Meta = loadmeta(basinname,varargin)
    %
    %     Meta = loadmeta(basinname) loads metadata table for basinname.
    %
-   % See also: loadflow, loadcalm, loadbounds
+   % See also: loadflow, loadbasins, loadprops
    %
    % Matt Cooper, 20-Feb-2022, https://github.com/mgcooper
 

@@ -70,7 +70,7 @@ function hhh=hline(y,linetype,label)
                   label=label{I};
                end
          end
-         h(I)=hline(y(I),linetype,label);
+         h(I)=baseflow.deps.hline(y(I),linetype,label);
       end
    else
       switch nargin

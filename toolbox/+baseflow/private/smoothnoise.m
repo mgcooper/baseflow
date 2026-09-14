@@ -1,5 +1,14 @@
 function [y, win] = smoothnoise(x, varargin)
    %SMOOTHNOISE smooth measurement noise
+   %
+   %  y = smoothnoise(x, method) smooths x with a Savitzky-Golay filter
+   %  (smoothdata 'sgolay') and returns the smoothed data y.
+   %
+   %  [y, win] = smoothnoise(x, 'annual') reshapes the data so each row
+   %  holds one 365-day year and smooths each year separately. It also
+   %  returns the window size win, one value per year. Only the 'annual'
+   %  method assigns win. Nan elements of x stay nan in y, and the function
+   %  sets negative values of y to zero when x is non-negative.
 
    % check if negative values exist
    noneg = false;
@@ -29,7 +38,8 @@ function [y, win] = smoothnoise(x, varargin)
          % reshape the input lists to matrices
          x = reshape(x, numyears, []);
          sz = size(x);
-         dim = find(sz == 365); % dim = 2; should be 2 but for 3+ dimensions not sure
+         % dim = 2; should be 2 but for 3+ dimensions not sure
+         dim = find(sz == 365);
       end
       y = nan(size(x));
       win = nan(numyears, 1);

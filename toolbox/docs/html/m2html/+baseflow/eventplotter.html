@@ -68,7 +68,7 @@
      -dQ/dt on the y-axis.
      
 
- See also <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, <a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>, eventsplitter
+ See also <a href="getevents.html" class="code" title="function [Events,Info] = getevents(T,Q,R,varargin)">getevents</a>, <a href="eventfinder.html" class="code" title="function [T, Q, R, Info] = eventfinder(t, q, r, varargin)">eventfinder</a>, <a href="eventpicker.html" class="code" title="function [T,Q,R,Info] = eventpicker(t,q,r,nmin,Info)">eventpicker</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -138,7 +138,7 @@ This function is called by:
 0040    <span class="comment">%     -dQ/dt on the y-axis.</span>
 0041    <span class="comment">%</span>
 0042    <span class="comment">%</span>
-0043    <span class="comment">% See also getevents, eventfinder, eventpicker, eventsplitter</span>
+0043    <span class="comment">% See also getevents, eventfinder, eventpicker</span>
 0044    <span class="comment">%</span>
 0045    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
 0046 
@@ -209,126 +209,137 @@ This function is called by:
 0111       <span class="comment">% plot all values</span>
 0112       allidx = struct2vec(Info, plotfields);
 0113       allidx = min(allidx):1:max(allidx);
-0114 
-0115       h1.alldata = scatter(h.ax(m), T(allidx), Q(allidx), 3*sz, <span class="keyword">...</span>
-0116          [0.5 0.5 0.5], <span class="string">'filled'</span>);
-0117 
-0118       <span class="keyword">for</span> n = 1:numel(plotfields)
-0119 
-0120          thisfield = plotfields{n};
-0121          ifield = Info.(thisfield);
-0122 
-0123          <span class="comment">% increase the plot symbol size depending on the field</span>
-0124          <span class="keyword">switch</span> thisfield
-0125             <span class="keyword">case</span> {<span class="string">'imaxima'</span>,<span class="string">'iminima'</span>}
-0126                ssize = 2*sz;
-0127             <span class="keyword">case</span> <span class="string">'ikeep'</span>
-0128                ssize = 2.5*sz;
-0129             <span class="keyword">otherwise</span>
-0130                ssize = sz;
-0131          <span class="keyword">end</span>
-0132 
-0133          <span class="keyword">switch</span> m
-0134             <span class="keyword">case</span> 1 <span class="comment">% Q</span>
-0135                h1.(thisfield) = scatter(h.ax(m),T(ifield),Q(ifield),ssize,<span class="string">'filled'</span>);
-0136             <span class="keyword">case</span> 2 <span class="comment">% dQ/dt</span>
-0137                h2.(thisfield) = scatter(h.ax(m),T(ifield),dqdt(ifield),ssize,<span class="string">'filled'</span>);
-0138             <span class="keyword">case</span> 3 <span class="comment">% d2Q/dt2</span>
-0139                h3.(thisfield) = scatter(h.ax(m),T(ifield),d2qdt(ifield),ssize,<span class="string">'filled'</span>);
+0114       
+0115       <span class="keyword">switch</span> m
+0116          <span class="keyword">case</span> 1 <span class="comment">% Q</span>
+0117             h1.alldata = scatter(h.ax(m), T(allidx), Q(allidx), 3*sz, <span class="keyword">...</span>
+0118                [0.5 0.5 0.5], <span class="string">'filled'</span>);
+0119          <span class="keyword">case</span> 2 <span class="comment">% dQ/dt</span>
+0120             h2.alldata = scatter(h.ax(m), T(allidx), dqdt(allidx), 3*sz, <span class="keyword">...</span>
+0121                [0.5 0.5 0.5], <span class="string">'filled'</span>);
+0122          <span class="keyword">case</span> 3 <span class="comment">% d2Q/dt2</span>
+0123             h3.alldata = scatter(h.ax(m), T(allidx), d2qdt(allidx), 3*sz, <span class="keyword">...</span>
+0124                [0.5 0.5 0.5], <span class="string">'filled'</span>);
+0125       <span class="keyword">end</span>
+0126 
+0127       <span class="keyword">for</span> n = 1:numel(plotfields)
+0128 
+0129          thisfield = plotfields{n};
+0130          ifield = Info.(thisfield);
+0131 
+0132          <span class="comment">% increase the plot symbol size depending on the field</span>
+0133          <span class="keyword">switch</span> thisfield
+0134             <span class="keyword">case</span> {<span class="string">'imaxima'</span>,<span class="string">'iminima'</span>}
+0135                ssize = 2*sz;
+0136             <span class="keyword">case</span> <span class="string">'ikeep'</span>
+0137                ssize = 2.5*sz;
+0138             <span class="keyword">otherwise</span>
+0139                ssize = sz;
 0140          <span class="keyword">end</span>
 0141 
-0142       <span class="keyword">end</span>
-0143 
-0144       <span class="comment">% ltext = ['all data', strrepn(plotfields, 'i', '')];</span>
-0145       legend([<span class="string">'all data'</span>, plotfields], <span class="string">'AutoUpdate'</span>, <span class="string">'off'</span>, <span class="string">'Orientation'</span>, <span class="keyword">...</span>
-0146          <span class="string">'horizontal'</span>, <span class="string">'Location'</span>, <span class="string">'ne'</span>, <span class="string">'FontSize'</span>, 10);
-0147       set(gca,<span class="string">'FontSize'</span>,10)
-0148    <span class="keyword">end</span>
-0149 
-0150    <span class="comment">% add labels</span>
-0151    <span class="keyword">if</span> isoctave
-0152       interpreter = <span class="string">'tex'</span>;
-0153    <span class="keyword">else</span>
-0154       interpreter = <span class="string">'latex'</span>;
-0155    <span class="keyword">end</span>
-0156    ylabel(h.ax(1), baseflow.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true,<span class="string">'interpreter'</span>,interpreter), <span class="keyword">...</span>
-0157       <span class="string">'Interpreter'</span>,interpreter,<span class="string">'FontSize'</span>,10);
-0158    ylabel(h.ax(2),baseflow.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true,<span class="string">'interpreter'</span>,interpreter), <span class="keyword">...</span>
-0159       <span class="string">'Interpreter'</span>,interpreter,<span class="string">'FontSize'</span>,10);
-0160    ylabel(h.ax(3),baseflow.getstring(<span class="string">'d2Qdt2'</span>,<span class="string">'units'</span>,true,<span class="string">'interpreter'</span>,interpreter), <span class="keyword">...</span>
-0161       <span class="string">'Interpreter'</span>,interpreter,<span class="string">'FontSize'</span>,10);
-0162 
-0163    <span class="comment">% add a line at zero</span>
-0164    h2.zeroline = plot(h.ax(2),xlim(h.ax(2)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
-0165    h3.zeroline = plot(h.ax(3),xlim(h.ax(3)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
-0166 
-0167    h.h1 = h1;
-0168    h.h2 = h2;
-0169    h.h3 = h3;
-0170 <span class="keyword">end</span>
-0171 
-0172 <span class="comment">%% INPUT PARSER</span>
-0173 <a name="_sub1" href="#_subfunctions" class="code">function [T, Q, R, N, Info, eventTags, reversesign, plotevents, dqdt, d2qdt] = </a><span class="keyword">...</span>
-0174       parseinputs(T, Q, R, Info, varargin)
-0175 
-0176    parser = inputParser;
-0177    parser.FunctionName = <span class="string">'baseflow.eventplotter'</span>;
-0178 
-0179    N = numel(Info.istart);
-0180 
-0181    defaultdQdt = [0; diff(Q)]; <span class="comment">% baseflow.deps.derivative(Q);</span>
-0182    defaultd2Qdt = [0; diff(defaultdQdt)]; <span class="comment">% baseflow.deps.derivative(defaultdQdt);</span>
-0183 
-0184    parser.addRequired(<span class="string">'T'</span>, @isdatelike);
-0185    parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
-0186    parser.addRequired(<span class="string">'R'</span>, @isnumeric);
-0187    parser.addRequired(<span class="string">'Info'</span>, @isstruct);
-0188    parser.addOptional(<span class="string">'eventTags'</span>, 1:N, @isnumericvector);
-0189    parser.addParameter(<span class="string">'reversesign'</span>, false, @islogicalscalar);
-0190    parser.addParameter(<span class="string">'plotevents'</span>, false, @islogicalscalar);
-0191    parser.addParameter(<span class="string">'dqdt'</span>, defaultdQdt, @isnumeric);
-0192    parser.addParameter(<span class="string">'d2qdt'</span>, defaultd2Qdt, @isnumeric);
-0193 
-0194    parser.parse(T, Q, R, Info, varargin{:});
-0195 
-0196    T = parser.Results.T;
-0197    Q = parser.Results.Q;
-0198    R = parser.Results.R;
-0199    Info = parser.Results.Info;
-0200    dqdt = parser.Results.dqdt;
-0201    d2qdt = parser.Results.d2qdt;
-0202    eventTags = parser.Results.eventTags;
-0203    plotevents = parser.Results.plotevents;
-0204    reversesign = parser.Results.reversesign;
-0205 
-0206    assert(numel(Q) == numel(T))
-0207    assert(numel(dqdt) == numel(T))
-0208 
-0209    <span class="comment">% Convert datetime to double if datetime was passed in</span>
-0210    T = todatenum(T);
-0211 
-0212 <span class="keyword">end</span>
-0213 
-0214 <span class="comment">% if ispublishing</span>
-0215 <span class="comment">%    exportgraphics(gcf,'html/event_example.png','Resolution',400);</span>
-0216 <span class="comment">% end</span>
-0217 
-0218 <span class="comment">% snapnow</span>
+0142          <span class="keyword">switch</span> m
+0143             <span class="keyword">case</span> 1 <span class="comment">% Q</span>
+0144                h1.(thisfield) = scatter(h.ax(m),T(ifield),Q(ifield),ssize,<span class="string">'filled'</span>);
+0145             <span class="keyword">case</span> 2 <span class="comment">% dQ/dt</span>
+0146                h2.(thisfield) = scatter(h.ax(m),T(ifield),dqdt(ifield),ssize,<span class="string">'filled'</span>);
+0147             <span class="keyword">case</span> 3 <span class="comment">% d2Q/dt2</span>
+0148                h3.(thisfield) = scatter(h.ax(m),T(ifield),d2qdt(ifield),ssize,<span class="string">'filled'</span>);
+0149          <span class="keyword">end</span>
+0150 
+0151       <span class="keyword">end</span>
+0152 
+0153       <span class="comment">% ltext = ['all data', strrepn(plotfields, 'i', '')];</span>
+0154       legend([<span class="string">'all data'</span>, plotfields], <span class="string">'AutoUpdate'</span>, <span class="string">'off'</span>, <span class="string">'Orientation'</span>, <span class="keyword">...</span>
+0155          <span class="string">'horizontal'</span>, <span class="string">'Location'</span>, <span class="string">'ne'</span>, <span class="string">'FontSize'</span>, 10);
+0156       set(gca,<span class="string">'FontSize'</span>,10)
+0157       
+0158       datetick;
+0159    <span class="keyword">end</span>
+0160 
+0161    <span class="comment">% add labels</span>
+0162    <span class="keyword">if</span> isoctave
+0163       interpreter = <span class="string">'tex'</span>;
+0164    <span class="keyword">else</span>
+0165       interpreter = <span class="string">'latex'</span>;
+0166    <span class="keyword">end</span>
+0167    ylabel(h.ax(1), baseflow.getstring(<span class="string">'Q'</span>,<span class="string">'units'</span>,true,<span class="string">'interpreter'</span>,interpreter), <span class="keyword">...</span>
+0168       <span class="string">'Interpreter'</span>,interpreter,<span class="string">'FontSize'</span>,10);
+0169    ylabel(h.ax(2),baseflow.getstring(<span class="string">'dQdt'</span>,<span class="string">'units'</span>,true,<span class="string">'interpreter'</span>,interpreter), <span class="keyword">...</span>
+0170       <span class="string">'Interpreter'</span>,interpreter,<span class="string">'FontSize'</span>,10);
+0171    ylabel(h.ax(3),baseflow.getstring(<span class="string">'d2Qdt2'</span>,<span class="string">'units'</span>,true,<span class="string">'interpreter'</span>,interpreter), <span class="keyword">...</span>
+0172       <span class="string">'Interpreter'</span>,interpreter,<span class="string">'FontSize'</span>,10);
+0173 
+0174    <span class="comment">% add a line at zero</span>
+0175    h2.zeroline = plot(h.ax(2),xlim(h.ax(2)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
+0176    h3.zeroline = plot(h.ax(3),xlim(h.ax(3)),[0 0],<span class="string">'k-'</span>,<span class="string">'LineWidth'</span>,1);
+0177 
+0178    h.h1 = h1;
+0179    h.h2 = h2;
+0180    h.h3 = h3;
+0181 <span class="keyword">end</span>
+0182 
+0183 <span class="comment">%% INPUT PARSER</span>
+0184 <a name="_sub1" href="#_subfunctions" class="code">function [T, Q, R, N, Info, eventTags, reversesign, plotevents, dqdt, d2qdt] = </a><span class="keyword">...</span>
+0185       parseinputs(T, Q, R, Info, varargin)
+0186 
+0187    parser = inputParser;
+0188    parser.FunctionName = <span class="string">'baseflow.eventplotter'</span>;
+0189 
+0190    N = numel(Info.istart);
+0191 
+0192    defaultdQdt = [0; diff(Q)]; <span class="comment">% baseflow.deps.derivative(Q);</span>
+0193    defaultd2Qdt = [0; diff(defaultdQdt)]; <span class="comment">% baseflow.deps.derivative(defaultdQdt);</span>
+0194 
+0195    parser.addRequired(<span class="string">'T'</span>, @isdatelike);
+0196    parser.addRequired(<span class="string">'Q'</span>, @isnumeric);
+0197    parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0198    parser.addRequired(<span class="string">'Info'</span>, @isstruct);
+0199    parser.addOptional(<span class="string">'eventTags'</span>, 1:N, @isnumericvector);
+0200    parser.addParameter(<span class="string">'reversesign'</span>, false, @islogicalscalar);
+0201    parser.addParameter(<span class="string">'plotevents'</span>, false, @islogicalscalar);
+0202    parser.addParameter(<span class="string">'dqdt'</span>, defaultdQdt, @isnumeric);
+0203    parser.addParameter(<span class="string">'d2qdt'</span>, defaultd2Qdt, @isnumeric);
+0204 
+0205    parser.parse(T, Q, R, Info, varargin{:});
+0206 
+0207    T = parser.Results.T;
+0208    Q = parser.Results.Q;
+0209    R = parser.Results.R;
+0210    Info = parser.Results.Info;
+0211    dqdt = parser.Results.dqdt;
+0212    d2qdt = parser.Results.d2qdt;
+0213    eventTags = parser.Results.eventTags;
+0214    plotevents = parser.Results.plotevents;
+0215    reversesign = parser.Results.reversesign;
+0216 
+0217    assert(numel(Q) == numel(T))
+0218    assert(numel(dqdt) == numel(T))
 0219 
-0220 <span class="comment">% % other options not in use</span>
-0221 <span class="comment">% %</span>
-0222 <span class="comment">% % plot the 50th percentile as a reference line</span>
-0223 <span class="comment">% % q50 = quantile(q,0.5);</span>
-0224 <span class="comment">% % h1.refline = baseflow.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line</span>
-0225 <span class="comment">%</span>
-0226 <span class="comment">%</span>
-0227 <span class="comment">% % plot the events identified by baseflow.findevents, just to be sure</span>
-0228 <span class="comment">% %     for i = 1:length(T)</span>
-0229 <span class="comment">% %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);</span>
-0230 <span class="comment">% %     end</span>
-0231 <span class="comment">% % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep','keep (check)');</span>
-0232 <span class="comment">%</span>
-0233 <span class="comment">% h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep');</span>
-0234 <span class="comment">% ylabel(baseflow.getstring('Q','units',true));</span></pre></div>
+0220    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0221    T = todatenum(T);
+0222 
+0223 <span class="keyword">end</span>
+0224 
+0225 <span class="comment">% if ispublishing</span>
+0226 <span class="comment">%    exportgraphics(gcf,'html/event_example.png','Resolution',400);</span>
+0227 <span class="comment">% end</span>
+0228 
+0229 <span class="comment">% snapnow</span>
+0230 
+0231 <span class="comment">% % other options not in use</span>
+0232 <span class="comment">% %</span>
+0233 <span class="comment">% % plot the 50th percentile as a reference line</span>
+0234 <span class="comment">% % q50 = quantile(q,0.5);</span>
+0235 <span class="comment">% % h1.refline = baseflow.deps.hline(h.ax(1),q50,':'); % add the 50th quantile line</span>
+0236 <span class="comment">%</span>
+0237 <span class="comment">%</span>
+0238 <span class="comment">% % plot the events identified by baseflow.findevents, just to be sure</span>
+0239 <span class="comment">% %     for i = 1:length(T)</span>
+0240 <span class="comment">% %         h.s1g = scatter(T{i},Q{i},200,'r','LineWidth',2);</span>
+0241 <span class="comment">% %     end</span>
+0242 <span class="comment">% % h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep','keep (check)');</span>
+0243 <span class="comment">%</span>
+0244 <span class="comment">% h.l1 = legend('increasing','decreasing','maxima','minima','convex','keep');</span>
+0245 <span class="comment">% ylabel(baseflow.getstring('Q','units',true));</span></pre></div>
 </body>
 </html>

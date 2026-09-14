@@ -1003,7 +1003,10 @@ if (nargout<=1)
 %	% create or modify the patches
 	newpatch = trueornan(ispatch) & (isempty(oldh)|~strcmp(get(oldh,'Type'),'patch'));
 	newline = ~trueornan(ispatch) & (isempty(oldh)|~strcmp(get(oldh,'Type'),'line'));
-	if isempty(oldh), H=gobjects(narrows,1); else, H=oldh; end
+%	% Octave has no gobjects, so preallocate H with numeric handles there.
+	if isempty(oldh)
+		if exist('OCTAVE_VERSION','builtin'), H=zeros(narrows,1); else, H=gobjects(narrows,1); end
+	else, H=oldh; end
 %	% make or modify the arrows
 	for k=1:narrows
 		if all(isnan(ud(k,[3 6])))&arrow_is2DXY(ax(k)), zz=[]; else, zz=z(:,k); end

@@ -17,6 +17,16 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
    %     [Fit,b,alpha,k] = gpfitb(x,'xmin',xmin) subtracts user-provided xmin
    %     from data in x. xmin is the threshold parameter.
    %
+   % Example
+   %
+   %  Sample a Pareto distribution with tau0 = 20 days and b = 1.4, then
+   %  fit the exceedances above the threshold xmin = 20:
+   %
+   %     rng('default')
+   %     x = 20 * rand(5000, 1) .^ (-2/3);
+   %     Fit = baseflow.gpfitb(x, 'xmin', 20, 'plotfit', false);
+   %     fprintf('tau0 = %.1f days, b = %.2f\n', Fit.tau0, Fit.b)
+   %
    % See also: plfitb
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper

@@ -1,12 +1,17 @@
-
-<!DOCTYPE html
-  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-   <!--
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>Baseflow Toolbox Contents</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-10-02"><meta name="DC.source" content="baseflow_contents.m"><style type="text/css">
+      -->
+<title>Baseflow Toolbox Contents</title>
+<meta name="generator" content="MATLAB 25.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2026-09-14">
+<meta name="DC.source" content="baseflow_contents.m">
+<style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -67,36 +72,258 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>Baseflow Toolbox Contents</h1><!--introduction--><p>This page lists the contents of the Baseflow Recession Analysis Toolbox.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1"><b>Getting Started</b></a></li><li><a href="#2"><b>User Guide</b></a></li><li><a href="#3"><b>Tutorials</b></a></li><li><a href="#4"><b>Functions</b></a></li></ul></div><h2 id="1"><b>Getting Started</b></h2><p>See <a href="baseflow_gettingStarted.html">Getting Started</a> for help setting up the toolbox.</p><h2 id="2"><b>User Guide</b></h2><p>See the <a href="baseflow_demo.html">Examples</a> for an introduction to using the toolbox.</p><h2 id="3"><b>Tutorials</b></h2><p>See the <a href="baseflow_theory_contents.html">Tutorials</a> for an introduction to the underlying theoretical basis of the baseflow toolbox.</p><h2 id="4"><b>Functions</b></h2><p>A list of toolbox functions is included below. For extended documentation, see the <a href="m2html/function_index.html">Function Index</a>.</p><div><ul><li><tt>aquifertrend</tt>       - compute the linear trend in saturated aquifer thickness</li><li><tt>aQbString</tt>          - return a formatted string for equation aQ^b</li><li><tt>aquiferprops</tt>       - estimate aquifer properties</li><li><tt>aquiferstorage</tt>     - estimate aquifer storage</li><li><tt>aquiferthickness</tt>   - estimate aquifer thickness</li><li><tt>baseflowtrend</tt>      - compute baseflow expected value and rate of change</li><li><tt>basinlist</tt>          - load the list of basins in the baseflow database</li><li><tt>basinname</tt>          - return string 'basin' from the baseflow basin database</li><li><tt>characteristicTime</tt> - compute the characteristic e-folding time for baseflow</li><li><tt>checkevent</tt>         - plot detected recession event and fitted values</li><li><tt>cloudphi</tt>           - estimate drainable porosity phi from the point cloud</li><li><tt>conversions</tt>        - convert inputvalue of inputvarname to the value of outputvarname</li><li><tt>dndtuncertainty</tt>    - compute combined uncertainty of the dn/dt trend estimate</li><li><tt>eventfinder</tt>        - find recession events on hydrograph timeseries t,q and rainfall r</li><li><tt>eventphi</tt>           - estimate drainable porosity phi from individual recession events</li><li><tt>eventpicker</tt>        - automated or user-guided recession event selection</li><li><tt>eventplotter</tt>       - plot recession events detected by eventfinder</li><li><tt>eventsplitter</tt>      - eventsplitter split detected recession events into useable segments for fitting</li><li><tt>eventtau</tt>           - compute drainage timescale tau from event-scale parameters a and b</li><li><tt>expectedQ</tt>          - compute the expected value of baseflow</li><li><tt>fitab</tt>              - fit event-scale recession equation -dq/dt = aQ^b</li><li><tt>fitcts</tt>             - fit q/dqdt using constant time step. not implemented.</li><li><tt>fitsts</tt>             - fit recession events using splines. not implemented.</li><li><tt>fitvts</tt>             - fit recession event using the variable timestep method</li><li><tt>flattenevents</tt>      - flatten the cell arrays returned by findevents</li><li><tt>fitdqdt</tt>            - estimate event-scale recession q and first-derivative dqdt</li><li><tt>fitevents</tt>          - wrapper around getdqdt and fitdqdt functions to fit all events</li><li><tt>fitets</tt>             - fit recession event using the exponential timestep method</li><li><tt>fitphi</tt>             - estimates drainable porosity phi using an early- and late-time solution</li><li><tt>fitphidist</tt>         - fit drainable porosity (phi) values with a Beta distribution</li><li><tt>getdqdt</tt>            - Numerical estimation of the time derivative of discharge dQ/dt</li><li><tt>getevents</tt>          - get individual recession events from daily timeseries T, Q, and R.</li><li><tt>getEventsData</tt>      - get data from Events for event number eventTag</li><li><tt>getFitsData</tt>        - get data from Fits for event number eventTag</li><li><tt>getstring</tt>          - get latex-formatted string for equations in the baseflow library</li><li><tt>getfunction</tt>        - get function handle from the baseflow function library</li><li><tt>globalfit</tt>          - fit global parameters using all individual event-scale recession data</li><li><tt>gpfitb</tt>             - fit Generalized Pareto Distribution to recession parameter tau</li><li><tt>initfit</tt>            - initialize arrays for common fitting routines in the baseflow toolbox</li><li><tt>loadbasins</tt>         - loadbasins load boundary object for basin specified by basinname</li><li><tt>loadcalm</tt>           - loads calm ALT data for a basin in the Bounds struct</li><li><tt>loadflow</tt>           - load timeseries of streamflow and metadata for basin</li><li><tt>loadghcnd</tt>          - reads in a global hydroclimatology network database file</li><li><tt>loadmeta</tt>           - load metadata for basin indicated by basinname</li><li><tt>loadprops</tt>          - load basin properties from metadata table</li><li><tt>mapbasins</tt>          - map a set of basin boundaries and color their faces by an attribute</li><li><tt>mapgages</tt>           - map a set of gage locations and color their faces by an attribute</li><li><tt>phifitensemble</tt>     - fit ensemble of phi estimates to all recession events in Fits</li><li><tt>prepalttrend</tt>       - prep data for fitting linear trend to active layer thickness data</li><li><tt>printtrend</tt>         - print trends computed from columns in table Data to the screen</li><li><tt>plfitb</tt>             - fit an unbounded Pareto Distribution to recession parameter tau</li><li><tt>plotdqdt</tt>           - Plots the log-log q vs dq/dt with options to select the</li><li><tt>plotrefline</tt>        - adds a reference line to a point cloud plot</li><li><tt>plplotb</tt>            - plots the power law fit to the P(tau) pareto distribution</li><li><tt>pointcloudintercept</tt>- estimate parameter 'a' from the point cloud intercept</li><li><tt>pointcloudplot</tt>     - plot a 'point cloud' diagram to estimate aquifer parameters</li><li><tt>prepfits</tt>           - preps q and -dq/dt for event-scale fitting</li><li><tt>Qnonlin</tt>            - plots the theoretical discharge predicted by a/b values</li><li><tt>QtauString</tt>         - returns latex-formatted string for Q(tau) function</li><li><tt>QtString</tt>           - returns latex-formatted string for Q(t) function</li><li><tt>setopts</tt>            - set algorithm options for functions getevents, fitevents, and globalfit</li><li><tt>stationlist</tt>        - return list of stations from the baseflow basin database</li><li><tt>stationname</tt>        - return string 'station' from the baseflow basin database</li><li><tt>specialfunctions</tt>   - libarary of special functions required for recession analysis</li><li><tt>taufunc</tt>            - returns inline function for tau or the value of tau</li><li><tt>wrapevents</tt>         - wrapper around baseflow.getevents to get recession all recession events</li><li><tt>wrapfits</tt>           - estimate recession coefficients (wrapper around baseflow.fitab)</li></ul></div><p>Utility functions (not documented)</p><div><ul><li><tt>generateTestData</tt>   - generate test data for baseflow recession analysis</li><li><tt>plotalttrend</tt>       - plot the saturated aquifer thickness trend</li><li><tt>setEventEmpty</tt>      - set recessoin event empty in Events structure</li><li><tt>version</tt>            - return the version number for the baseflow toolbox</li></ul></div><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>Baseflow Toolbox Contents</h1>
+<!--introduction-->
+<p>This page lists the contents of the Baseflow Recession Analysis Toolbox.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1"><b>Getting Started</b></a>
+</li>
+<li>
+<a href="#2"><b>User Guide</b></a>
+</li>
+<li>
+<a href="#3"><b>Tutorials</b></a>
+</li>
+<li>
+<a href="#4"><b>Functions</b></a>
+</li>
+</ul>
+</div>
+<h2 id="1">
+<b>Getting Started</b>
+</h2>
+<p>See <a href="baseflow_gettingStarted.html">Getting Started</a> for help setting up the toolbox.</p>
+<h2 id="2">
+<b>User Guide</b>
+</h2>
+<p>See the <a href="baseflow_examples_contents.html">Examples</a> for an introduction to using the toolbox.</p>
+<h2 id="3">
+<b>Tutorials</b>
+</h2>
+<p>See the <a href="baseflow_theory_contents.html">Tutorials</a> for an introduction to the underlying theoretical basis of the baseflow toolbox.</p>
+<h2 id="4">
+<b>Functions</b>
+</h2>
+<p>A list of toolbox functions is included below. For extended documentation, see the <a href="m2html/function_index.html">Function Index</a>. Call each function with the <tt>baseflow.</tt> prefix, for example <tt>baseflow.getevents</tt>.</p>
+<div>
+<ul>
+<li>
+<tt>aquifertrend</tt> - compute the linear trend in saturated aquifer thickness</li>
+<li>
+<tt>aQbString</tt> - return a formatted string for equation aQ^b</li>
+<li>
+<tt>aquiferprops</tt> - estimate aquifer properties</li>
+<li>
+<tt>aquiferstorage</tt> - estimate aquifer storage</li>
+<li>
+<tt>aquiferthickness</tt> - estimate aquifer thickness</li>
+<li>
+<tt>baseflowtrend</tt> - compute baseflow expected value and rate of change</li>
+<li>
+<tt>basinlist</tt> - load the list of basins in the baseflow database</li>
+<li>
+<tt>basinname</tt> - return a basin name string from the baseflow basin database</li>
+<li>
+<tt>characteristicTime</tt> - compute the characteristic e-folding time for baseflow</li>
+<li>
+<tt>checkevent</tt> - plot detected recession event and fitted values</li>
+<li>
+<tt>cloudphi</tt> - estimate drainable porosity phi from the point cloud</li>
+<li>
+<tt>conversions</tt> - convert inputvalue of inputvarname to the value of outputvarname</li>
+<li>
+<tt>dndtuncertainty</tt> - compute combined uncertainty of the dn/dt trend estimate</li>
+<li>
+<tt>eventfinder</tt> - find recession events on hydrograph timeseries t,q and rainfall r</li>
+<li>
+<tt>eventphi</tt> - estimate drainable porosity phi from individual recession events</li>
+<li>
+<tt>eventpicker</tt> - automated or user-guided recession event selection</li>
+<li>
+<tt>eventplotter</tt> - plot recession events detected by eventfinder</li>
+<li>
+<tt>eventtau</tt> - compute drainage timescale tau from event-scale parameters a and b</li>
+<li>
+<tt>expectedQ</tt> - compute the expected value of baseflow</li>
+<li>
+<tt>fdcurve</tt> - compute a flow duration curve from streamflow timeseries</li>
+<li>
+<tt>fitab</tt> - fit event-scale recession equation -dq/dt = aQ^b</li>
+<li>
+<tt>fitevents</tt> - fit all recession events with getdqdt and fitab</li>
+<li>
+<tt>fitphi</tt> - estimates drainable porosity phi using an early- and late-time solution</li>
+<li>
+<tt>fitphidist</tt> - fit drainable porosity (phi) values with a Beta distribution</li>
+<li>
+<tt>getdqdt</tt> - Numerical estimation of the time derivative of discharge dQ/dt</li>
+<li>
+<tt>getevents</tt> - get individual recession events from daily timeseries T, Q, and R.</li>
+<li>
+<tt>getEventsData</tt> - get data from Events for event number eventTag</li>
+<li>
+<tt>getFitsData</tt> - get data from Fits for event number eventTag</li>
+<li>
+<tt>getstring</tt> - get latex-formatted string for equations in the baseflow library</li>
+<li>
+<tt>getfunction</tt> - get function handle from the baseflow function library</li>
+<li>
+<tt>globalfit</tt> - fit global parameters using all individual event-scale recession data</li>
+<li>
+<tt>gpfitb</tt> - fit Generalized Pareto Distribution to recession parameter tau</li>
+<li>
+<tt>help</tt> - open toolbox html help document in the MATLAB Help browser</li>
+<li>
+<tt>hyetograph</tt> - plot a discharge rainfall hyetograph</li>
+<li>
+<tt>loadbasins</tt> - load boundary object for basin specified by basinname</li>
+<li>
+<tt>loadExampleData</tt> - load toolbox example data</li>
+<li>
+<tt>loadflow</tt> - load timeseries of streamflow and metadata for basin</li>
+<li>
+<tt>loadmeta</tt> - load metadata for basin indicated by basinname</li>
+<li>
+<tt>loadprops</tt> - load basin properties from metadata table</li>
+<li>
+<tt>open</tt> - open package namespace function file in the Editor</li>
+<li>
+<tt>phifitensemble</tt> - fit ensemble of phi estimates to all recession events in Fits</li>
+<li>
+<tt>printtrend</tt> - print trends computed from columns in table Data to the screen</li>
+<li>
+<tt>plfitb</tt> - fit an unbounded Pareto Distribution to recession parameter tau</li>
+<li>
+<tt>plotaquifertrend</tt> - plot the saturated aquifer thickness trend</li>
+<li>
+<tt>plotdqdt</tt> - plot the log-log q vs dq/dt point cloud</li>
+<li>
+<tt>plotrefline</tt> - adds a reference line to a point cloud plot</li>
+<li>
+<tt>plplotb</tt> - plots the power law fit to the P(tau) pareto distribution</li>
+<li>
+<tt>pointcloudintercept</tt>- estimate parameter 'a' from the point cloud intercept</li>
+<li>
+<tt>pointcloudplot</tt> - plot a 'point cloud' diagram to estimate aquifer parameters</li>
+<li>
+<tt>prepfits</tt> - preps q and -dq/dt for event-scale fitting</li>
+<li>
+<tt>privatefunction</tt> - return handle to function in private/ folder</li>
+<li>
+<tt>Qnonlin</tt> - plots the theoretical discharge predicted by a/b values</li>
+<li>
+<tt>QtauString</tt> - returns latex-formatted string for Q(tau) function</li>
+<li>
+<tt>QtString</tt> - returns latex-formatted string for Q(t) function</li>
+<li>
+<tt>setopts</tt> - set algorithm options for functions getevents, fitevents, and globalfit</li>
+<li>
+<tt>stationlist</tt> - return list of stations from the baseflow basin database</li>
+<li>
+<tt>stationname</tt> - return a station name string from the baseflow basin database</li>
+<li>
+<tt>specialfunctions</tt> - library of special functions required for recession analysis</li>
+<li>
+<tt>trendplot</tt> - plot a timeseries and linear trendline fit</li>
+<li>
+<tt>wrapevents</tt> - detect recession events on an annual calendar basis with baseflow.getevents</li>
+</ul>
+</div>
+<p>Utility functions (not documented)</p>
+<div>
+<ul>
+<li>
+<tt>generateTestData</tt> - generate test data for baseflow recession analysis</li>
+</ul>
+</div>
+<p>Functions in the <tt>+util</tt> package. Call each one as <tt>baseflow.util.&lt;name&gt;</tt>.</p>
+<div>
+<ul>
+<li>
+<tt>numevents</tt> - count the number of events in EventData returned by baseflow.getevents</li>
+<li>
+<tt>numfits</tt> - count the number of fits in EventFits returned by baseflow.fitevents</li>
+<li>
+<tt>numtau</tt> - count the number of tau values in the struct returned by baseflow.fitevents</li>
+</ul>
+</div>
+<p>Functions in the <tt>+internal</tt> package. Call each one as <tt>baseflow.internal.&lt;name&gt;</tt>.</p>
+<div>
+<ul>
+<li>
+<tt>version</tt> - return the version number for the baseflow toolbox</li>
+</ul>
+</div>
+<p>Private functions in <tt>+baseflow/private</tt>. Toolbox functions call them. They are not meant to be called by users.</p>
+<div>
+<ul>
+<li>
+<tt>fitcts</tt> - fit q/dqdt using a constant-time-step finite difference (use getdqdt method 'CTS')</li>
+<li>
+<tt>fitdqdt</tt> - estimate event-scale recession q and first-derivative dqdt</li>
+<li>
+<tt>fitets</tt> - fit recession event using the exponential timestep method (use getdqdt method 'ETS')</li>
+<li>
+<tt>fitsts</tt> - fit recession events using splines. Not implemented.</li>
+<li>
+<tt>fitvts</tt> - fit recession event using the variable timestep method (use getdqdt method 'VTS')</li>
+<li>
+<tt>flattenevents</tt> - flatten the cell arrays returned by findevents</li>
+<li>
+<tt>initfit</tt> - initialize arrays for common fitting routines in the baseflow toolbox</li>
+<li>
+<tt>prepalttrend</tt> - prep data for fitting linear trend to active layer thickness data</li>
+<li>
+<tt>setEventEmpty</tt> - set recession event to empty array in Events structure</li>
+<li>
+<tt>taufunc</tt> - returns inline function for tau or the value of tau</li>
+</ul>
+</div>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2025b</a>
+<br>
+</p>
+</div>
+<!--
 ##### SOURCE BEGIN #####
 %% Baseflow Toolbox Contents
-%  
-% This page lists the contents of the Baseflow Recession Analysis Toolbox. 
-% 
+%
+% This page lists the contents of the Baseflow Recession Analysis Toolbox.
+%
 %% *Getting Started*
-% 
+%
 % See <baseflow_gettingStarted.html Getting Started> for help setting up the toolbox.
-% 
+%
 %% *User Guide*
-% 
-% See the <baseflow_demo.html Examples> for an introduction to using the toolbox.
-% 
+%
+% See the <baseflow_examples_contents.html Examples> for an introduction to using the toolbox.
+%
 %% *Tutorials*
-% 
+%
 % See the <baseflow_theory_contents.html Tutorials> for an introduction to the underlying theoretical basis of the baseflow toolbox.
-% 
+%
 %% *Functions*
-% 
+%
 % A list of toolbox functions is included below. For extended documentation, see the <m2html/function_index.html Function Index>.
-% 
+% Call each function with the |baseflow.| prefix, for example |baseflow.getevents|.
+%
 % * |aquifertrend|       - compute the linear trend in saturated aquifer thickness
 % * |aQbString|          - return a formatted string for equation aQ^b
 % * |aquiferprops|       - estimate aquifer properties
-% * |aquiferstorage|     - estimate aquifer storage 
+% * |aquiferstorage|     - estimate aquifer storage
 % * |aquiferthickness|   - estimate aquifer thickness
 % * |baseflowtrend|      - compute baseflow expected value and rate of change
 % * |basinlist|          - load the list of basins in the baseflow database
-% * |basinname|          - return string 'basin' from the baseflow basin database
+% * |basinname|          - return a basin name string from the baseflow basin database
 % * |characteristicTime| - compute the characteristic e-folding time for baseflow
 % * |checkevent|         - plot detected recession event and fitted values
 % * |cloudphi|           - estimate drainable porosity phi from the point cloud
@@ -104,19 +331,13 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * |dndtuncertainty|    - compute combined uncertainty of the dn/dt trend estimate
 % * |eventfinder|        - find recession events on hydrograph timeseries t,q and rainfall r
 % * |eventphi|           - estimate drainable porosity phi from individual recession events
-% * |eventpicker|        - automated or user-guided recession event selection 
+% * |eventpicker|        - automated or user-guided recession event selection
 % * |eventplotter|       - plot recession events detected by eventfinder
-% * |eventsplitter|      - eventsplitter split detected recession events into useable segments for fitting
-% * |eventtau|           - compute drainage timescale tau from event-scale parameters a and b 
+% * |eventtau|           - compute drainage timescale tau from event-scale parameters a and b
 % * |expectedQ|          - compute the expected value of baseflow
+% * |fdcurve|            - compute a flow duration curve from streamflow timeseries
 % * |fitab|              - fit event-scale recession equation -dq/dt = aQ^b
-% * |fitcts|             - fit q/dqdt using constant time step. not implemented.
-% * |fitsts|             - fit recession events using splines. not implemented.
-% * |fitvts|             - fit recession event using the variable timestep method
-% * |flattenevents|      - flatten the cell arrays returned by findevents
-% * |fitdqdt|            - estimate event-scale recession q and first-derivative dqdt
-% * |fitevents|          - wrapper around getdqdt and fitdqdt functions to fit all events
-% * |fitets|             - fit recession event using the exponential timestep method
+% * |fitevents|          - fit all recession events with getdqdt and fitab
 % * |fitphi|             - estimates drainable porosity phi using an early- and late-time solution
 % * |fitphidist|         - fit drainable porosity (phi) values with a Beta distribution
 % * |getdqdt|            - Numerical estimation of the time derivative of discharge dQ/dt
@@ -127,41 +348,63 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 % * |getfunction|        - get function handle from the baseflow function library
 % * |globalfit|          - fit global parameters using all individual event-scale recession data
 % * |gpfitb|             - fit Generalized Pareto Distribution to recession parameter tau
-% * |initfit|            - initialize arrays for common fitting routines in the baseflow toolbox
-% * |loadbasins|         - loadbasins load boundary object for basin specified by basinname
-% * |loadcalm|           - loads calm ALT data for a basin in the Bounds struct
+% * |help|               - open toolbox html help document in the MATLAB Help browser
+% * |hyetograph|         - plot a discharge rainfall hyetograph
+% * |loadbasins|         - load boundary object for basin specified by basinname
+% * |loadExampleData|    - load toolbox example data
 % * |loadflow|           - load timeseries of streamflow and metadata for basin
-% * |loadghcnd|          - reads in a global hydroclimatology network database file 
 % * |loadmeta|           - load metadata for basin indicated by basinname
 % * |loadprops|          - load basin properties from metadata table
-% * |mapbasins|          - map a set of basin boundaries and color their faces by an attribute
-% * |mapgages|           - map a set of gage locations and color their faces by an attribute
+% * |open|               - open package namespace function file in the Editor
 % * |phifitensemble|     - fit ensemble of phi estimates to all recession events in Fits
-% * |prepalttrend|       - prep data for fitting linear trend to active layer thickness data
 % * |printtrend|         - print trends computed from columns in table Data to the screen
 % * |plfitb|             - fit an unbounded Pareto Distribution to recession parameter tau
-% * |plotdqdt|           - Plots the log-log q vs dq/dt with options to select the
+% * |plotaquifertrend|   - plot the saturated aquifer thickness trend
+% * |plotdqdt|           - plot the log-log q vs dq/dt point cloud
 % * |plotrefline|        - adds a reference line to a point cloud plot
 % * |plplotb|            - plots the power law fit to the P(tau) pareto distribution
 % * |pointcloudintercept|- estimate parameter 'a' from the point cloud intercept
 % * |pointcloudplot|     - plot a 'point cloud' diagram to estimate aquifer parameters
 % * |prepfits|           - preps q and -dq/dt for event-scale fitting
+% * |privatefunction|    - return handle to function in private/ folder
 % * |Qnonlin|            - plots the theoretical discharge predicted by a/b values
 % * |QtauString|         - returns latex-formatted string for Q(tau) function
 % * |QtString|           - returns latex-formatted string for Q(t) function
 % * |setopts|            - set algorithm options for functions getevents, fitevents, and globalfit
 % * |stationlist|        - return list of stations from the baseflow basin database
-% * |stationname|        - return string 'station' from the baseflow basin database
-% * |specialfunctions|   - libarary of special functions required for recession analysis
-% * |taufunc|            - returns inline function for tau or the value of tau
-% * |wrapevents|         - wrapper around baseflow.getevents to get recession all recession events
-% * |wrapfits|           - estimate recession coefficients (wrapper around baseflow.fitab)
-% 
+% * |stationname|        - return a station name string from the baseflow basin database
+% * |specialfunctions|   - library of special functions required for recession analysis
+% * |trendplot|          - plot a timeseries and linear trendline fit
+% * |wrapevents|         - detect recession events on an annual calendar basis with baseflow.getevents
+%
 % Utility functions (not documented)
-% 
+%
 % * |generateTestData|   - generate test data for baseflow recession analysis
-% * |plotalttrend|       - plot the saturated aquifer thickness trend
-% * |setEventEmpty|      - set recessoin event empty in Events structure
+%
+% Functions in the |+util| package. Call each one as |baseflow.util.<name>|.
+%
+% * |numevents|          - count the number of events in EventData returned by baseflow.getevents
+% * |numfits|            - count the number of fits in EventFits returned by baseflow.fitevents
+% * |numtau|             - count the number of tau values in the struct returned by baseflow.fitevents
+%
+% Functions in the |+internal| package. Call each one as |baseflow.internal.<name>|.
+%
 % * |version|            - return the version number for the baseflow toolbox
+%
+% Private functions in |+baseflow/private|. Toolbox functions call them. They are not meant to be called by users.
+%
+% * |fitcts|             - fit q/dqdt using a constant-time-step finite difference (use getdqdt method 'CTS')
+% * |fitdqdt|            - estimate event-scale recession q and first-derivative dqdt
+% * |fitets|             - fit recession event using the exponential timestep method (use getdqdt method 'ETS')
+% * |fitsts|             - fit recession events using splines. Not implemented.
+% * |fitvts|             - fit recession event using the variable timestep method (use getdqdt method 'VTS')
+% * |flattenevents|      - flatten the cell arrays returned by findevents
+% * |initfit|            - initialize arrays for common fitting routines in the baseflow toolbox
+% * |prepalttrend|       - prep data for fitting linear trend to active layer thickness data
+% * |setEventEmpty|      - set recession event to empty array in Events structure
+% * |taufunc|            - returns inline function for tau or the value of tau
+
 ##### SOURCE END #####
---></body></html>
+-->
+</body>
+</html>

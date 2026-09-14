@@ -11,7 +11,7 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    %     [Events, Info] = getevents(_, 'rmax', rmax)
    %     [Events, Info] = getevents(_, 'rmin', rmin)
    %     [Events, Info] = getevents(_, 'cmax', cmax)
-   %     [Events, Info] = getevents(_, 'rmrain', true)
+   %     [Events, Info] = getevents(_, 'rmrain', false)
    %     [Events, Info] = getevents(_, 'rmconvex', true)
    %     [Events, Info] = getevents(_, 'rmnochange', false)
    %     [Events, Info] = getevents(_, 'pickevents', true)
@@ -29,7 +29,8 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    %     into the Events structure.
    %
    %     EVENTS = GETEVENTS(_, OPTS) Uses user-defined options in struct OPTS.
-   %     Use baseflow.setopts to set default OPTS struct and custom optional values.
+   %     Use baseflow.setopts to set default OPTS struct and custom optional
+   %     values.
    %
    %     [EVENTS, INFO] = GETEVENTS(_) Also returns struct INFO which contains
    %     the indices of the identified local maxima, minima, convex points,
@@ -61,11 +62,24 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    %     pickevents  option to manually pick events
    %     plotevents  option to plot picked events
    %
+   %     Each option default is the baseflow.setopts('getevents') value.
+   %     nmin must be greater than 2 and rmax must be greater than 1 (see
+   %     eventfinder).
+   %
    % Note: either the 'opts' struct can be provided with the
+   %
+   % Example
+   %
+   %  Detect recession events in the example daily streamflow data:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     opts = baseflow.setopts('getevents', 'rmconvex', true);
+   %     [Events, Info] = baseflow.getevents(T, Q, R, opts);
+   %     fprintf('Detected %d events\n', max(Events.eventTags))
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
-   % See also: fitevents, eventfinder, eventsplitter, eventpicker, eventplotter
+   % See also: fitevents, eventfinder, eventpicker, eventplotter
    %
    % Note: For data-heavy workflows, replace the Events output struct with the
    % eventTags list. The Events struct includes the input data and the event
@@ -154,8 +168,11 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
       pickevents, plotevents, asannual, T, Q, R] = parseinputs(mfilename, ...
       T, Q, R, varargin)
 
+   % Take the option defaults from setopts so that getevents, wrapevents,
+   % and eventfinder use the same values.
    persistent parser
    if isempty(parser)
+      defaults = baseflow.setopts('getevents');
       parser = inputParser;
       parser.StructExpand = true;
       parser.KeepUnmatched = true;
@@ -166,18 +183,18 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
       parser.addRequired('Q', @isnumeric);
       parser.addRequired('R', @isnumeric);
 
-      parser.addParameter('qmin', 1, @isnumericscalar);
-      parser.addParameter('nmin', 4, @isnumericscalar);
-      parser.addParameter('fmax', 2, @isnumericscalar);
-      parser.addParameter('rmax', 2, @isnumericscalar);
-      parser.addParameter('rmin', 0, @isnumericscalar);
-      parser.addParameter('cmax', 2, @isnumericscalar);
-      parser.addParameter('rmconvex', false, @islogicalscalar);
-      parser.addParameter('rmnochange', false, @islogicalscalar);
-      parser.addParameter('rmrain', false, @islogicalscalar);
-      parser.addParameter('pickevents', false, @islogicalscalar);
-      parser.addParameter('plotevents', false, @islogicalscalar);
-      parser.addParameter('asannual', false, @islogicalscalar);
+      parser.addParameter('qmin', defaults.qmin, @isnumericscalar);
+      parser.addParameter('nmin', defaults.nmin, @isnumericscalar);
+      parser.addParameter('fmax', defaults.fmax, @isnumericscalar);
+      parser.addParameter('rmax', defaults.rmax, @isnumericscalar);
+      parser.addParameter('rmin', defaults.rmin, @isnumericscalar);
+      parser.addParameter('cmax', defaults.cmax, @isnumericscalar);
+      parser.addParameter('rmconvex', defaults.rmconvex, @islogicalscalar);
+      parser.addParameter('rmnochange', defaults.rmnochange, @islogicalscalar);
+      parser.addParameter('rmrain', defaults.rmrain, @islogicalscalar);
+      parser.addParameter('pickevents', defaults.pickevents, @islogicalscalar);
+      parser.addParameter('plotevents', defaults.plotevents, @islogicalscalar);
+      parser.addParameter('asannual', defaults.asannual, @islogicalscalar);
    end
    parser.FunctionName = ['baseflow.' mfilename];
    parser.parse(T, Q, R, varargin{:});
@@ -198,9 +215,11 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
    % Convert datetime to double if datetime was passed in
    T = todatenum(T);
 
-   % Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )
+   % Require T and Q same size but allow empty R
+   % (syntax: getevents(T,Q,[],...) )
    validateattributes(T, {'double'}, {'size', size(Q)}, mfilename, 'T', 1)
    validateattributes(nmin, {'double'}, {'>', 2}, mfilename, 'nmin', 4)
+   validateattributes(rmax, {'double'}, {'>', 1}, mfilename, 'rmax')
    if isempty(R)
       R = zeros(size(Q));
    end

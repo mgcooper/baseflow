@@ -7,9 +7,18 @@ function [t, q, dqdt] = generateTestData(a, b, q0, t)
    %
    % Description
    %
-   %     [t, q, dqdt] = baseflow.generateTestData(a, b, Q0, t) generates timeseries
-   %     of discharge Q, first derivative of discharge dQdt, and time t for
-   %     parameter values a, b, and initial discharge Q0.
+   %     [t, q, dqdt] = baseflow.generateTestData(a, b, Q0, t) generates
+   %     timeseries of discharge Q, first derivative of discharge dQdt, and time
+   %     t for parameter values a, b, and initial discharge Q0.
+   %
+   % Example
+   %
+   %  Generate a nonlinear (b = 1.5) recession curve and plot it in
+   %  point-cloud form:
+   %
+   %     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);
+   %     loglog(q, -dqdt, 'o')
+   %     xlabel('Q'), ylabel('-dQ/dt')
    %
    % See also: baseflow.Qnonlin
    %
@@ -50,9 +59,9 @@ function [t, q, dqdt] = generateTestData(a, b, q0, t)
    end
 end
 
-% % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why the
-% data falls off, could be the noise I add, or could be the lack of a negative
-% sign on in genCurveData
+% % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why
+% the data falls off, could be the noise I add, or could be the lack of a
+% negative sign on in genCurveData
 % for a linear model (exponential), Q = Q0*exp(-at), meaning
 %
 % for the linear case:

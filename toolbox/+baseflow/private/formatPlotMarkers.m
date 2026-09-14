@@ -1,6 +1,7 @@
 function h = formatPlotMarkers(varargin)
    %FORMATPLOTMARKERS apply custom formatting to plot markers. provides a cleaner
-   %method to set aesthetically pleasing plot formatting without cluttering code.
+   %method to set aesthetically pleasing plot formatting without cluttering
+   %code.
    %
    %  h = formatPlotMarkers() applies default formatting
    %
@@ -87,7 +88,8 @@ function h = formatPlotMarkers(varargin)
          child = Children(mm);
 
          %if child.Type == "bar" % add more types: || child.Type == ""
-         if strcmp(get(child,'Type'),"bar") % add more types: || child.Type == ""
+         % add more types: || child.Type == ""
+         if strcmp(get(child,'Type'),"bar")
             % continue, leave linesWithMarkers(mm) = false;
             continue
          end

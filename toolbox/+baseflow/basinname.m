@@ -19,7 +19,7 @@ function basin = basinname(typenamehere)
    %     basinname string as input to load data for that basin.
    %
    %
-   % See also: baseflow.loadcalm baseflow.loadflow baseflow.loadgrace
+   % See also: baseflow.loadbasins baseflow.loadflow baseflow.loadmeta
    % baseflow.stationlist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper

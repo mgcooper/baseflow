@@ -1,5 +1,9 @@
 function q = fillnans(q,fmax)
    %FILLNANS fill sequences of nan values of length > fmax
+   %
+   %  q = fillnans(q, fmax) fills nan runs in vector q with spline
+   %  interpolation (fillmissing). It fills a nan run when its length is
+   %  fmax or less and leaves longer runs unchanged.
 
    % this is hard to follow but it works. it finds the nan segments <= fmax in
    % length and then fills them. the part that's hard to follow is that it

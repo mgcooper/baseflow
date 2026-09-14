@@ -29,7 +29,17 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
    %     soln2    optional late-time theoretical solution
    %     dispfit  logical flag indicating whether to plot the result
    %
-   % See also: eventphi, cloudphi, fitdistphi
+   % Example
+   %
+   %  Estimate drainable porosity from typical early-time (a1) and late-time
+   %  (a2, b2) parameters. The A, D, L values describe the Kuparuk basin:
+   %
+   %     A = 8.6545e9; D = 0.5; L = A * 0.8 / 1000;
+   %     phi = baseflow.fitphi(1e-6, 1e-9, 1.5, A, D, L, ...
+   %        'soln1', 'PK62', 'soln2', 'BS04');
+   %     fprintf('phi = %.3f\n', phi)
+   %
+   % See also: eventphi, cloudphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
@@ -75,8 +85,8 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
    % the two soln options dictate the early-time expression for 'a'. the
    % late-time value is dictated by 'blate', but warn the user in case
    %
-   % NOTE: I don't think L is involved in any of the standard solutions. it appears
-   % in PK62-BS04 but I think it cancels.
+   % NOTE: I don't think L is involved in any of the standard solutions. it
+   % appears in PK62-BS04 but I think it cancels.
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -100,13 +110,14 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 
       switch soln
 
-         % NOTE: this is probably not a valid choice, because B94 is for
-         % homogeneous soils whereas RS06 is heterogeneous.
-         
-         case 'BR94_RS06'        % Brutsaert 1994, early-time, b = 3
+         case 'BR94_RS06'
+            % Brutsaert 1994, early-time, b = 3
+            % Rupp and Selker 2006 (late-time, sloped, b = f(n) = 1-2,
+            % heterogeneous soils)
+            % NOTE: if b = 3/2, n = 1, which means homogeneous soils
 
-            % sloped, late-time b = 1-2 (heterogeneous soils)
-            % note: if b = 3/2, n = 1, which means homogeneous soils
+            % NOTE: this is probably not a valid choice, because B94 is for
+            % homogeneous soils whereas RS06 is heterogeneous.
 
             n = baseflow.conversions(b2,'b','n','isflat',false);
 
@@ -120,15 +131,16 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
             a1a2 = (a1^n4*a2)^n3;
 
          case 'BR94_RS06b1'
-
-            % sloped, late-time b = 1 (heterogeneous soils)
+            % Brutsaert 1994, early-time, b = 3
+            % Rupp and Selker 2006 (late-time, sloped, heterogeneous soils,
+            % b = 1)
 
             c1c2 = sqrt(200*tand(theta)*1.133/(L*A*D^3));
             a1a2 = sqrt(a1*a2);
 
          case 'BR94_BR94'
-
-            % sloped, late-time b = 1 (homogeneous soils)
+            % Brutsaert 1994, early-time, b = 3
+            % Brutsaert 1994, sloped, late-time b = 1 (homogeneous soils)
 
             eta = A*tand(theta)/(2*L*D);
             p = 1/3;
@@ -154,7 +166,8 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
             % a2 = c1*c2/(phi^2*a1)*(1+c3)
             % phi = sqrt(c1*c2*(1+c3)/(a1*a2))
 
-         case 'RS05_RS05'       % Rupp and Selker, 2005 (early-time, b = 3)
+         case 'RS05_RS05'
+            % Rupp and Selker, 2005 (early-time, b = 3)
             % Rupp and Selker, 2005 (late-time, b = f(n))
 
             % flat, late-time b = 3/2-2  (heterogeneous soils)
@@ -173,22 +186,24 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 
             % phi = c1c2/a1a2;
 
-            % % this is in aquiferprops. probably better to use that, but should combine.
-            % trouble is that it all deepends what is known a priori (phi, D, or K)
+            % % this is in aquiferprops. probably better to use that, but should
+            % % combine.
+            % % trouble is it depends on what is known a priori (phi, D, or K)
             % % once phi is known, this can be used to compute kD in units m/d
             % % (should be around 100 m/d at most):
             % k1 = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time
             % k2 = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time
             %
-            % % this method is based on the same method used to estimate phi, by
-            % % equating early- and late-time and isolating k, but assumes D is known
+            % % this is based on the method used to estimate phi, it equates
+            % % early- and late-time and isolates k, but assumes D is known
             %
             % % this c1/c2 are as defined in my derivation in overleaf.
             % c1 = fR1/(D^3*L^2);
             % c2 = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));
             % k = ((c1/c2)*(a2/a1))^((n+2)/(n+3));
 
-         case 'PK62_BS04'        % Polubarinova-Kochina, 1962 (early-time, b = 3)
+         case 'PK62_BS04'
+            % Polubarinova-Kochina, 1962 (early-time, b = 3)
             % Boussinesq, 1904 (late-time, b = 1.5)
             % see Troch et al. 1993
 
@@ -208,7 +223,8 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 
             % conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2
 
-         case 'PK62_BS03'        % Polubarinova-Kochina, 1962 (early-time)
+         case 'PK62_BS03'
+            % Polubarinova-Kochina, 1962 (early-time)
             % Boussinesq, 1903 (late-time)
             p = 1/3;
             c1c2 = sqrt(1.133*p)*pi/(D*A);
@@ -275,30 +291,42 @@ function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)
       % water table
       % if strcmp(soln2,'RS05') && (b2 < 3/2 || b2>=2)
       if strcmp(soln2,'RS05') && (b2 <= 1 || b2>=2)
-         warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
+         warning( ...
+            ['Requested late-time solution (Rupp and Selker, 2005) ' ...
+            'is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1'])
          soln2 = 'BS03';
 
          % late-time B04 has b = 3/2
       elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
-         warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
+         warning( ...
+            ['Requested late-time solution (Boussinesq, 1904) ' ...
+            'implies b=3/2, using b=3/2'])
          b2 = 3/2;
 
          % late-time B03 has b = 1
       elseif strcmp(soln2,'BS03') && (b2 ~= 1)
-         warning('Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1')
+         warning( ...
+            ['Requested late-time solution (Boussinesq, 1903) ' ...
+            'implies b=1, using b=1'])
          b2 = 1;
       end
    else
       if strcmp(soln1,'RS05') && (b2 < 3/2 || b2>=2)
-         warning('Requested late-time solution (Rupp and Selker, 2005) is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1')
-         soln2 = 'B03';
+         warning( ...
+            ['Requested late-time solution (Rupp and Selker, 2005) ' ...
+            'is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1'])
+         soln2 = 'BS03';
 
       elseif strcmp(soln2,'BS04') && (b2 ~= 3/2)
-         warning('Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2')
+         warning( ...
+            ['Requested late-time solution (Boussinesq, 1904) ' ...
+            'implies b=3/2, using b=3/2'])
          b2 = 3/2;
 
       elseif strcmp(soln2,'BS03') && (b2 ~= 1)
-         warning('Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1')
+         warning( ...
+            ['Requested late-time solution (Boussinesq, 1903) ' ...
+            'implies b=1, using b=1'])
          b2 = 1;
       end
 
@@ -307,48 +335,80 @@ function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)
    % concatenate the early-time and late-time solution
    soln = strcat(soln1,['_' soln2]);
 
+   % The remapping branches above can produce a pair with no derived phi
+   % formula, for example RS05 early with the BS03 late fallback when
+   % b2 <= 1. The switches below then return unassigned outputs, so raise
+   % an error first. knowncombos holds the six pairs that the solver switch
+   % implements (the '*' entries in the header notes). allcombos() also
+   % lists four pairs with no formula, so it is not the allowlist.
+   knowncombos = {'PK62_BS04', 'PK62_BS03', 'RS05_RS05', ...
+      'BR94_BR94', 'BR94_RS06', 'BR94_RS06b1'};
+   if ~ismember(soln, knowncombos)
+      error('baseflow:fitphi:unsupportedSolution', ...
+         'no derived solution for the pair %s; supported pairs: %s', ...
+         soln, strjoin(knowncombos, ', '));
+   end
+
    switch soln
       case 'PK62_BS04'
-         desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: BS04, flat + constant k(z) + nonlinear'};
+         desc = {'early: PK62, flat + constant k(z) + nonlinear';
+            'late: BS04, flat + constant k(z) + nonlinear'};
       case 'PK62_BS03'
-         desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: BS03, flat + constant k(z) + linearized'};
+         desc = {'early: PK62, flat + constant k(z) + nonlinear';
+            'late: BS03, flat + constant k(z) + linearized'};
       case 'PK62_RS05'
-         desc = {'early: PK62, flat + constant k(z) + nonlinear';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
+         desc = {'early: PK62, flat + constant k(z) + nonlinear';
+            'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
       case 'RS05_RS05'
-         desc = {'early: RS05, flat + k(z)=(Z/D)^n + nonlinear';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
+         desc = {'early: RS05, flat + k(z)=(Z/D)^n + nonlinear';
+            'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
       case 'BR94_BR94'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BR94, sloped + constant k(z) + linearized'};
+         desc = {'early: BR94, sloped + constant k(z) + linearized';
+            'late: BR94, sloped + constant k(z) + linearized'};
       case 'BR94_RS06'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'};
+         desc = {'early: BR94, sloped + constant k(z) + linearized';
+            'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'};
       case 'BR94_RS06b1'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS06b1, sloped + constant k(z) + nonlinear'};
+         desc = {'early: BR94, sloped + constant k(z) + linearized';
+            'late: RS06b1, sloped + constant k(z) + nonlinear'};
       case 'BR94_BS04'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BS04, flat + constant k(z) + nonlinear'};
+         desc = {'early: BR94, sloped + constant k(z) + linearized';
+            'late: BS04, flat + constant k(z) + nonlinear'};
       case 'BR94_BS03'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: BS03, flat + constant k(z) + linearized'};
+         desc = {'early: BR94, sloped + constant k(z) + linearized';
+            'late: BS03, flat + constant k(z) + linearized'};
       case 'BR94_RS05'
-         desc = {'early: BR94, sloped + constant k(z) + linearized';'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
+         desc = {'early: BR94, sloped + constant k(z) + linearized';
+            'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'};
    end
 
    soln = cellstr(soln);
 end
 
 function [combos,descriptions] = allcombos()
+
    % in summary, all possible combos:
-   earlysolns  = {'PK62','PK62','PK62','RS05','BR94','BR94','BR94','BR94','BR94','BR94'};
-   latesolns   = {'BS04','BS03','RS05','RS05','BR94','RS06','RS06b1','BS04','BS03','RS05'};
-   descriptions= {'flat + constant k(z) + nonlinear early, flat + constant k(z) + nonlinear late', ...
-                  'flat + constant k(z) + nonlinear early, flat + constant k(z) + linearized late', ...
-                  'flat + constant k(z) + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late',...
-                  'flat + k(z)=(Z/D)^n + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late', ...
-                  'sloped + constant k(z) + linearized early, sloped + constant k(z) + linearized late', ...
-                  'sloped + constant k(z) + linearized early, sloped + k(z)=(Z/D)^n + nonlinear late', ...
-                  'sloped + constant k(z) + linearized early, sloped + constant k(z) + nonlinear late', ...
-                  'sloped + constant k(z) + linearized early, flat + constant k(z) + nonlinear late', ...
-                  'sloped + constant k(z) + linearized early, flat + constant k(z) + linearized late', ...
-                  'sloped + constant k(z) + linearized early, flat + k(z)=(Z/D)^n + nonlinear late'};
-               
-   combos = cell(10,1); 
+   earlysolns  = ...
+      {'PK62','PK62','PK62','RS05','BR94','BR94','BR94','BR94','BR94','BR94'};
+
+   latesolns = ...
+      {'BS04','BS03','RS05','RS05','BR94','RS06','RS06b1','BS04','BS03','RS05'};
+
+   descriptions = ...
+      {
+      'flat + constant k(z) + nonlinear early, flat + constant k(z) + nonlinear late', ...
+      'flat + constant k(z) + nonlinear early, flat + constant k(z) + linearized late', ...
+      'flat + constant k(z) + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late',...
+      'flat + k(z)=(Z/D)^n + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late', ...
+      'sloped + constant k(z) + linearized early, sloped + constant k(z) + linearized late', ...
+      'sloped + constant k(z) + linearized early, sloped + k(z)=(Z/D)^n + nonlinear late', ...
+      'sloped + constant k(z) + linearized early, sloped + constant k(z) + nonlinear late', ...
+      'sloped + constant k(z) + linearized early, flat + constant k(z) + nonlinear late', ...
+      'sloped + constant k(z) + linearized early, flat + constant k(z) + linearized late', ...
+      'sloped + constant k(z) + linearized early, flat + k(z)=(Z/D)^n + nonlinear late'
+      };
+
+   combos = cell(10,1);
    for n = 1:numel(earlysolns)
       combos{n} = [earlysolns{n} '_' latesolns{n}];
    end
@@ -408,7 +468,7 @@ end
 %                   1,0,1,0,0,1;
 %                   1,0,1,0,0,0;
 %                   1,0,1,0,1,1    ];
-% % could use this to build the 'descriptions'                
+% % could use this to build the 'descriptions'
 % modopts     = {'flat','sloped';'k(z)=c','k(z)=(Z/D)^n';'linearized','nonlinear'};
 
 % can't use this becaue we don't want all combos
@@ -417,7 +477,7 @@ end
 % solutiontype   = {'linearized','nonlinear'};
 % ensemble       = ensembleList(slope,conductivity,solutiontype);
 
-% % started to build this 
+% % started to build this
 % for n = 1:size(modopts,1)*2
 %    for m = 1:size(modelopts,2)
 %       switch m
@@ -427,4 +487,4 @@ end
 %       end
 %    end
 % end
-   
+

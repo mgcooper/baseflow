@@ -59,7 +59,8 @@ function [cont,dirflag] = getcontents(directory,varargin)
    % parse input arguments and arrange call(s) to 'main', which does the actual
    % searching of directories
 
-   assert(ischar(directory), 'iosr:getContents:invalidDir', 'directory must be a character array')
+   assert(ischar(directory), 'iosr:getContents:invalidDir', ...
+      'directory must be a character array')
 
    % Switch trap parses the varargin inputs default values
    recflag = false;
@@ -78,18 +79,23 @@ function [cont,dirflag] = getcontents(directory,varargin)
          case 'filter'
             str=varargin{i+1};
          otherwise
-            error('iosr:getContents:unknownOption','Unknown option: %s\n',varargin{i});
+            error('iosr:getContents:unknownOption', ...
+               'Unknown option: %s\n',varargin{i});
       end
    end
 
    % check input options
-   assert(ischar(pathflag), 'iosr:getContents:invalidPath', '''path'' option must be a string')
+   assert(ischar(pathflag), ...
+      'iosr:getContents:invalidPath', '''path'' option must be a string')
    assert(strcmp(pathflag,'relative') | strcmp(pathflag,'full'),...
       'iosr:getContents:invalidPath', ...
       '''path'' option must ''relative'' or ''full''')
-   assert(islogical(recflag) & numel(recflag)==1, 'iosr:getContents:invalidRec', '''rec'' option must be logical')
-   assert(islogical(sortflag) & numel(sortflag)==1, 'iosr:getContents:invalidSoftFlag', '''sort'' option must be a logical')
-   assert(ischar(str), 'iosr:getContents:invalidStr', 'str must be a character array')
+   assert(islogical(recflag) & isscalar(recflag), ...
+      'iosr:getContents:invalidRec', '''rec'' option must be logical')
+   assert(islogical(sortflag) & isscalar(sortflag), ...
+      'iosr:getContents:invalidSoftFlag', '''sort'' option must be a logical')
+   assert(ischar(str), ...
+      'iosr:getContents:invalidStr', 'str must be a character array')
 
    % first pass: contents of top-level folder
    [cont,dirflag] = main(directory,str);
@@ -133,7 +139,8 @@ function [cont,dirflag] = main(directory,str)
    %MAIN get the contents
 
    list = struct2cell(dir(directory));
-   dirbool = cell2mat(list(cellfun(@islogical,list(:,1)),:)); % return directory flags
+   % return directory flags
+   dirbool = cell2mat(list(cellfun(@islogical,list(:,1)),:));
    list = list(1,:); % keep only file names
    X = ~strncmp(list, '.', 1); % remove hidden files (those starting '.')
    list = list(X);

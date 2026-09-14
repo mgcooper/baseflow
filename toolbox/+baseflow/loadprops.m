@@ -11,7 +11,7 @@ function [Dd,A,L,D] = loadprops(basinname, varargin)
    %     basinname, Dd is drainage density in 1/km, A is area in m2, L is stream
    %     length in m, and D is aquifer thickness in meters
    %
-   % See also: loadmeta, loadbounds
+   % See also: loadmeta, loadbasins
    %
    % Matt Cooper, 03-Dec-2022, https://github.com/mgcooper
 

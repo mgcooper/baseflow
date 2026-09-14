@@ -7,13 +7,24 @@ function [tau,q,dqdt,tags,aggvals] = eventtau(Results,Events,Fits,varargin)
    %
    % Description
    %
-   %     tau = baseflow.eventtau(Results, Events, Fits) computes drainage timescale
-   %     tau from event-scale parameters a,b, and flow Q using the structures K,
-   %     Events, and Fits produced with baseflow.getevents and baseflow.fitevents
+   %     tau = baseflow.eventtau(Results, Events, Fits) computes drainage
+   %     timescale tau from event-scale parameters a,b, and flow Q using the
+   %     structures K, Events, and Fits produced with baseflow.getevents and
+   %     baseflow.fitevents
    %
-   %     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily values
-   %     to event-scale values using an aggregation function. Options are 'min',
-   %     'max', 'mean', 'median'.
+   %     tau = baseflow.eventtau(_, 'aggfunc', aggfunc) aggregates the daily
+   %     values to event-scale values using an aggregation function. Options are
+   %     'min', 'max', 'mean', 'median'.
+   %
+   % Example
+   %
+   %  Detect and fit events, then compute the drainage timescale tau:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     Events = baseflow.getevents(T, Q, R);
+   %     [Fits, Results] = baseflow.fitevents(Events);
+   %     tau = baseflow.eventtau(Results, Events, Fits, 'usefits', false);
+   %     histogram(tau(~isnan(tau)))
    %
    % See also: eventphi
    %

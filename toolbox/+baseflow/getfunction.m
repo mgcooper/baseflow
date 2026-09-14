@@ -7,11 +7,11 @@ function Fnc = getfunction(funcname)
    %
    % Description
    %
-   %     Fnc = baseflow.getfunction('SofabQ') returns anonymous function handle for
-   %     storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)
+   %     Fnc = baseflow.getfunction('SofabQ') returns anonymous function handle
+   %     for storage function S(a,b,Q) = (1/(a*(2-b)))*Q^(2-b)
    %
-   %     Fnc = baseflow.getfunction('expectedQ') returns anonymous function handle
-   %     for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)
+   %     Fnc = baseflow.getfunction('expectedQ') returns anonymous function
+   %     handle for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)
    %
    %     Use tab-completion to see full list of options
    %

@@ -4,7 +4,7 @@
 <head>
   <title>Description of stationlist</title>
   <meta name="keywords" content="stationlist">
-  <meta name="description" content="STATIONLIST Return list of stations from the baseflow basin database.">
+  <meta name="description" content="STATIONLIST Return list of stations from the baseflow gage database.">
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
   <meta name="robots" content="index, follow">
@@ -21,16 +21,19 @@
 </h1>
 
 <h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>STATIONLIST Return list of stations from the baseflow basin database.</strong></div>
+<div class="box"><strong>STATIONLIST Return list of stations from the baseflow gage database.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function stations = stationlist </strong></div>
+<div class="box"><strong>function stations = stationlist() </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre class="comment">STATIONLIST Return list of stations from the baseflow basin database.
+<div class="fragment"><pre class="comment">STATIONLIST Return list of stations from the baseflow gage database.
 
+ Syntax
 
- See also: <a href="stationname.html" class="code" title="function station = stationname(typenamehere)">stationname</a></pre></div>
+     stations = stationlist()
+
+ See also: <a href="stationname.html" class="code" title="function station = stationname(typenamehere)">stationname</a>, <a href="basinlist.html" class="code" title="function basins = basinlist()">basinlist</a></pre></div>
 
 
 <!-- crossreference -->
@@ -52,15 +55,17 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function stations = stationlist</a>
-0002    <span class="comment">%STATIONLIST Return list of stations from the baseflow basin database.</span>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function stations = stationlist()</a>
+0002    <span class="comment">%STATIONLIST Return list of stations from the baseflow gage database.</span>
 0003    <span class="comment">%</span>
-0004    <span class="comment">%</span>
-0005    <span class="comment">% See also: stationname</span>
-0006 
-0007    <span class="comment">% load(fullfile(fileparts([mfilename '.m']),'stationlist.mat'),'stations');</span>
-0008    load <span class="string">'stationlist.mat'</span> <span class="string">'stations'</span>;
-0009    stations = [<span class="string">'ALL_BASINS'</span>; stations];
-0010 <span class="keyword">end</span></pre></div>
+0004    <span class="comment">% Syntax</span>
+0005    <span class="comment">%</span>
+0006    <span class="comment">%     stations = stationlist()</span>
+0007    <span class="comment">%</span>
+0008    <span class="comment">% See also: stationname, basinlist</span>
+0009 
+0010    load stationlist.mat stations
+0011    stations = [<span class="string">'ALL_BASINS'</span>; stations];
+0012 <span class="keyword">end</span></pre></div>
 </body>
 </html>

@@ -2,13 +2,12 @@
 digraph m2html {
   QtString -> open;
   QtauString -> open;
+  aQbString -> open;
   aquiferprops -> open;
   aquiferstorage -> open;
   aquiferthickness -> open;
   aquifertrend -> open;
   baseflowtrend -> open;
-  basinlist -> basinlist;
-  basinname -> open;
   characteristicTime -> open;
   checkevent -> open;
   checkevent -> prepfits;
@@ -31,24 +30,15 @@ digraph m2html {
   getfunction -> open;
   getstring -> open;
   globalfit -> open;
-  gpfitb -> open;
   hyetograph -> open;
   loadbasins -> basinname;
   loadbasins -> open;
-  loadcalm -> basinname;
-  loadcalm -> open;
   loadflow -> basinname;
   loadflow -> open;
-  loadghcnd -> basinname;
-  loadghcnd -> open;
-  loadgrace -> basinname;
-  loadgrace -> open;
   loadmeta -> basinname;
   loadmeta -> open;
   loadprops -> basinname;
   loadprops -> open;
-  mapbasins -> open;
-  mapgages -> open;
   phifitensemble -> open;
   plfitb -> open;
   plotaquifertrend -> open;
@@ -58,7 +48,6 @@ digraph m2html {
   pointcloudintercept -> open;
   pointcloudplot -> open;
   setopts -> open;
-  specialfunctions -> open;
   wrapevents -> open;
 
   Contents [URL="Contents.html"];
@@ -102,14 +91,9 @@ digraph m2html {
   hyetograph [URL="hyetograph.html"];
   loadExampleData [URL="loadExampleData.html"];
   loadbasins [URL="loadbasins.html"];
-  loadcalm [URL="loadcalm.html"];
   loadflow [URL="loadflow.html"];
-  loadghcnd [URL="loadghcnd.html"];
-  loadgrace [URL="loadgrace.html"];
   loadmeta [URL="loadmeta.html"];
   loadprops [URL="loadprops.html"];
-  mapbasins [URL="mapbasins.html"];
-  mapgages [URL="mapgages.html"];
   open [URL="open.html"];
   phifitensemble [URL="phifitensemble.html"];
   plfitb [URL="plfitb.html"];

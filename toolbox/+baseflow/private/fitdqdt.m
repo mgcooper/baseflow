@@ -19,12 +19,15 @@ function [q,dqdt,dt,tq,rq,r] = fitdqdt(T,Q,R,method,varargin)
    %     Q     =  discharge (L T^-1, assumed to be m d-1 or m^3 d-1)
    %     R     =  rainfall (L T^-1, assumed to be mm d-1)
    %     derivmethod = method to compute numerical derivative dQ/dt. Options are
-   %     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'. default: ETS
+   %     'VTS','ETS','B1','B2','F1','F2','C2','C4','SGO','SPN','SLM'.
+   %     default: ETS
    %
    %  Optional name-value inputs
    %
-   %     etsparam =  scalar double, parameter that controls window size in ETS method
-   %     vtsparam =  scalar double, parameter that controls window size in VTS method
+   %     etsparam =  scalar double, parameter that controls window size in ETS
+   %                 method
+   %     vtsparam =  scalar double, parameter that controls window size in VTS
+   %                 method
    %     fitab    =  logical, scalar, indicates whether to fit a/b in -dQ/dt=aQb
    %     plotfit  =  logical, scalar, indicates whether to plot the fit
    %

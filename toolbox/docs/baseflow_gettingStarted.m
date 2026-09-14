@@ -82,6 +82,9 @@
 % The API specification for the toolbox is defined below and is also defined 
 % in the |setopts| function documentation.
 % 
+% Each table lists the |baseflow.setopts| defaults. A direct name-value call
+% without an options struct from |baseflow.setopts| uses the same defaults.
+% 
 % API specification for |*getevents*|:
 %%
 % 
@@ -99,6 +102,8 @@
 %     asannual    :  (logical scalar) Flag indicating whether to detect events on an annual basis. Set true if pickevents true. Default = false.
 %
 %% 
+% |nmin| must be greater than 2 and |rmax| must be greater than 1.
+% 
 % API specification for |*fitevents*|:
 %%
 % 
@@ -108,13 +113,13 @@
 %     pickfits       : (logical scalar) Flag indicating whether to pick fits manually. Default = false.
 %     pickmethod     : (char) Method to fit picks manually. Default = 'none'.
 %     plotfits       : (logical scalar) Flag indicating whether to plot the fits. Default = false.
-%     savefitplots   : (logical scalar) Flag indicating whether to save plots of fits. Default = false.
+%     saveplots      : (logical scalar) Flag to save plots of fits. fitevents parses this flag, but the flag has no effect. Default = false.
 %     etsparam       : (numeric scalar) Min flow length parameter for ETS algorithm [-]. Default = 0.2.
 %     vtsparam       : (numeric scalar) Min flow length parameter for VTS algorithm [-]. Default = 1.0.
-%     drainagearea   : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
-%     gageID         : (char) Station name or ID. Default = none.
+%     ctsmethod      : (char) Finite-difference stencil for the CTS method: 'B1', 'B2', 'F1', 'F2', 'C2', or 'C4'. Default = 'B1'.
+%     fitopts        : (struct) baseflow.fitab options for every event fit: weights, order, quantile, refqtls, Nboot, alpha (numeric); mask, plotfit (logical). Fields override the same-named fitab options; weights and mask must be scalars. Default = struct().
 %
-%% 
+% 
 % API specification for |*globalfit*|:
 %%
 % 
@@ -194,7 +199,7 @@
 %% 
 % * |hyetograph| Plot a discharge rainfall hyetograph.
 % * |pointcloudplot| Plot a point-cloud diagram to estimate aquifer parameters
-% * |plotdqdt| (deprecated) Plot the log-log q vs -dq/dt point-cloud with options 
+% * |plotdqdt| Plot the log-log q vs -dq/dt point-cloud with options 
 % to select recession segments for fitting
 % * |plotrefline| Add a reference line to a point cloud plot
 % * |plplotb| Plot the power law fit to the P(tau) Pareto distribution
@@ -202,9 +207,9 @@
 %% 
 % Functions that simplify routine tasks:
 %% 
-% * |aQbstring| Return a formatted string for equation aQ^b .
+% * |aQbString| Return a formatted string for equation aQ^b .
 % * |basinlist| Generate a list of basins in the |baseflow| database.
-% * |basinname| Generate a list of basins in the |baseflow| database.
+% * |basinname| Return a basin name string from the |baseflow| basin database.
 % * |characteristicTime| Compute the characteristic e-folding time for aquifer 
 % discharge
 % * |conversions| Convert common variables to their equivalent value in terms 
@@ -213,15 +218,14 @@
 % * |getfunction| Get an anonymous function from the toolbox function library
 % * |getstring| Get a latex-formatted string for common variables used for plot 
 % labels
-% * |privatefunction| Get an anonymous function for a private toolbox function
 % * |setopts| Set algorithm options for functions getevents, fitevents, and 
 % globalfit
-% * |specialfunctions| Libarary of special functions required for recession 
+% * |specialfunctions| Library of special functions required for recession 
 % analysis
 %% 
 % Functions that support toolbox management:
 %% 
-% * |completions| Generate function auto-completions for string literals.
+% * |baseflow.internal.completions| Generate function auto-completions for string literals.
 % * |help| Open toolbox html help document in the MATLAB Help browser.
 % * |open| Open package namespace function file in the MATLAB Editor.
 % * |privatefunction| Return handle to function in private/ folder.
@@ -240,6 +244,7 @@
 %     +deps/ - Third-party functions called by package functions.
 %     +internal/ - Internal toolbox functions.
 %     +sym/ - Symbolic functions accessible to users.
+%     +util/ - Utility functions that count events, fits, and tau values (numevents, numfits, numtau).
 %     private/ - Undocumented private methods not accessible to users.
 %  data/ - Example datasets.
 %  demos/ - Example live scripts.

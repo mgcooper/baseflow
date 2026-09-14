@@ -1,8 +1,8 @@
 function cms = cmd2cms(cmd)
-   %CMD2CMS convert cubic meters / second to cubic meters / day
+   %CMD2CMS Convert cubic meters / day to cubic meters / second
    %
    % inputs:
-   %   cfs = array of flow values in cubic meters/second
+   %   cmd = array of flow values in cubic meters/day
    %
    % outputs:
    %   cms = array of flow values in cubic meters/second

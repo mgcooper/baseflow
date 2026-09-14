@@ -1,5 +1,5 @@
 function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
-   %fitNLS_matlab
+   %FITNLS_MATLAB Fit -dQ/dt = aQ^b by nonlinear least squares in MATLAB.
    %
    %  [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    %

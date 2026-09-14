@@ -1,5 +1,5 @@
 function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,~)
-   %fitNLS_octave
+   %FITNLS_OCTAVE Fit -dQ/dt = aQ^b by nonlinear least squares in Octave.
    %
    %  [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
    %
@@ -90,7 +90,8 @@ function ci = nlparci_octave(beta, CovB, alpha)
 
    n = length(beta); % Number of coefficients
    dof = n - 1; % Degrees of freedom
-   t_score = tinv(1 - (1 - alpha) / 2, dof); % t-score for desired confidence level
+   % t-score for desired confidence level
+   t_score = tinv(1 - (1 - alpha) / 2, dof);
    se = sqrt(diag(CovB)); % Standard errors of the coefficients
    ci_lower = beta' - t_score * se; % Lower bounds of the confidence intervals
    ci_upper = beta' + t_score * se; % Upper bounds of the confidence intervals

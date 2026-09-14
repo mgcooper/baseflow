@@ -1,4 +1,30 @@
 function [ypred, yconf] = predictlm(stats, x, alpha, type, option)
+   %PREDICTLM Predict linear model response with confidence bounds.
+   %
+   % Syntax
+   %
+   %     [ypred, yconf] = predictlm(stats, x)
+   %     [ypred, yconf] = predictlm(stats, x, alpha)
+   %     [ypred, yconf] = predictlm(stats, x, alpha, type)
+   %     [ypred, yconf] = predictlm(stats, x, alpha, type, option)
+   %
+   % Description
+   %
+   %     [ypred, yconf] = predictlm(stats, x) evaluates the linear model in
+   %     stats at the values x and returns the predicted response ypred and
+   %     the confidence bounds yconf = [lower upper]. stats is a
+   %     single-predictor linear model with an intercept: a fitlm model
+   %     object, or an Octave regression struct with fields coeffs, vcov,
+   %     and mse. x holds the predictor values used to fit the model,
+   %     because the bounds use numel(x)-2 residual degrees of freedom.
+   %
+   %     [ypred, yconf] = predictlm(stats, x, alpha, type, option) uses
+   %     significance level alpha (default 0.05). type is 'confidence'
+   %     (default) for bounds on the fitted curve, or 'prediction' for
+   %     bounds on new observations. Set option true for simultaneous
+   %     bounds.
+   %
+   % See also: fitlm
 
    if nargin < 3 || isempty(alpha); alpha = 0.05; end
    if nargin < 4 || isempty(type); type = 'confidence'; end

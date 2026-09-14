@@ -59,7 +59,8 @@ function tex_labels = siUnitsToTex(units)
    % end
    % units = cellfun(@texlabel,units,'UniformOutput',false);
 
-   % This doesn't work b/c texlabel doesn't add the {} around the entire exponent
+   % This doesn't work b/c texlabel doesn't add the {} around the entire
+   % exponent
    % units = cellfun(@(x) strrep(x,'-','^-'),units,'UniformOutput',false);
 
 end

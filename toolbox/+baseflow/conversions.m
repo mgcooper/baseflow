@@ -12,7 +12,7 @@ function varargout = conversions(inputvalue,inputvarname,outputvarname,varargin)
    %     equivalent value in terms of outputvarname (use tab completion to get a
    %     list of supported input and output varnames)
    %
-   %     outputvalue = conversions(inputvalue,inputvarname,outputvarname,'isflat',false)
+   %     outputvalue = conversions(_,'isflat',false)
    %     uses the sloped-aquifer solution. Default behavior is true.
    %
    % Example
@@ -74,7 +74,6 @@ function b = convert2b(inputvalue,inputvarname,isflat)
       case 'k'
          k = inputvalue;
          b = (2.*k+1)./(k+1);
-         %b = (k+1)./(2.*k+1);
       case 'a' % conversion between -dQ/dt = aQ^b and Q = cS^d
          % a = inputvalue;
          % This function converts b only; 'a' is not a valid inputvarname.
@@ -114,13 +113,15 @@ function varargout = convertb(b,outputvarname,isflat)
    %                 d,    from Q = cS^d, where d = 1/(2-b)
    %                 n,    from k(z) = kD(z/D)^n,
    %                 k,    from P(Q) ~ Q^-(1+1/k)
+   %
+   % k is the gpfit shape parameter: the gpd tail pdf ~ x^-(1+1/k) equals the
+   % timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).
 
    alpha = 1./(b-1);       % power law exponent alpha
    beta  = 1./(b-2);
    gamma = 1./(2.*b-3);
    d     = 1./(2-b);
-   k     = (1-b)./(b-2);   % gpd shape parameter power law exponent k
-   % k     = (b-2)./(1-b);   % gpd shape parameter power law exponent k
+   k     = (1-b)./(b-2);
 
    switch isflat
       case true
@@ -166,8 +167,10 @@ function [inputvalue, inputvarname, outputvarname, isflat] = parseinputs( ...
    parser.FunctionName = 'baseflow.conversions';
 
    parser.addRequired('inputvalue', @isnumeric);
-   parser.addRequired('inputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
-   parser.addRequired('outputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
+   parser.addRequired('inputvarname', ...
+      @(x) ~isempty(validatestring(x, validvarnames)));
+   parser.addRequired('outputvarname', ...
+      @(x) ~isempty(validatestring(x, validvarnames)));
    parser.addParameter('isflat', true, @islogical);
 
    parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});

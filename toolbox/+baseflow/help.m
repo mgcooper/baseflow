@@ -1,13 +1,18 @@
 function help(docname)
    %HELP Open toolbox html help document in the MATLAB Help browser.
    %
+   % Syntax
+   %
+   %     baseflow.help()
+   %     baseflow.help(docname)
+   %
    % baseflow.help() opens the baseflow toolbox help pages in the MATLAB help
    % browser.
    %
-   % baseflow.help(DOCNAME) opens the documentation file DOCNAME.HTML in the matlab
-   % help browser. DOCNAME can be the name of a function, an example/demo, or
-   % any other file with an .html extension in the docs/ folder or any subfolder
-   % of docs/.
+   % baseflow.help(DOCNAME) opens the documentation file DOCNAME.HTML in the
+   % matlab help browser. DOCNAME can be the name of a function, an
+   % example/demo, or any other file with an .html extension in the docs/ folder
+   % or any subfolder of docs/.
    %
    % % Example: Open the function documentation for baseflow.getevents.
    %

@@ -4,8 +4,8 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
    % Syntax
    %
    %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau);
-   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
-   %              Qexp/Q0 relative to the input Q
+   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles
+   %              of Qexp/Q0 relative to the input Q
    %
    % See also: aquifertrend, baseflowtrend
    %
@@ -119,8 +119,8 @@ end
 % % Q0^(1-b2)/a1
 % % Q0 = a2*tau0)
 %
-% % if we believe that tau0 is the onset of recession at which time a=a1 and b=b1
-% % where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:
+% % if we believe that tau0 is the onset of recession at which time a=a1 and
+% % b=b1 where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:
 % b1    = 3;
 % b2    = b;
 % a1    = baseflow.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);
@@ -143,10 +143,10 @@ end
 % plot([Q0 Q0],ylim,'Color','g')
 % plot([Qexp Qexp],ylim,'Color','g')
 %
-% % NOTE: this is the way I did it originally but this is the case where it can be
-% % shown to only be true for b=3 therefore the version above is correct.
-% % if we believe that tau0 is the onset of recession at which time a=a2 and b=b2
-% % where a2 and b2 are the late-time fits, then tau0 = Q0^(1-b2)/a2:
+% % NOTE: this is the way I did it originally but this is the case where it can
+% % be shown to only be true for b=3 therefore the version above is correct.
+% % if we believe that tau0 is the onset of recession at which time a=a2 and
+% % b=b2 where a2 and b2 are the late-time fits, then tau0 = Q0^(1-b2)/a2:
 % Q0    = (a2*tau0)^(1/(1-b2));
 % Qexp  = Q0*(2-b2)/(3-b2);
 %
@@ -166,8 +166,8 @@ end
 % % (7) tau0 = tau*(3-bhat)/(2-bhat)^(1-bhat)
 %
 % % (6) implies that tau0/tau should equal ((3-b)/(2-b))^(1-b) = 0.748 ... very
-% % close to the ratio I found examining the troch solutions whcih i interpret as
-% % a discontinuity at b-3. It also implies we can get tau0 this way:
+% % close to the ratio I found examining the troch solutions whcih i interpret
+% % as a discontinuity at b-3. It also implies we can get tau0 this way:
 % % tau0 = tau*((3-b)/(2-b))^(1-b)
 % % but that doesn't match tau0 from the pareto fit, so
 %

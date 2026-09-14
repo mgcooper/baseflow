@@ -26,9 +26,15 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    %
    % Optional name-value inputs
    %
-   %     refqtls     reference quantiles that together define a pivot point
-   %                 through which the straight line must pass. use with method
-   %                 'envelope'.
+   %     earlyqtls   reference quantiles of q and dqdt that together define a
+   %                 pivot point through which the early-time line must pass.
+   %                 The early-time line uses method 'envelope'. Default is
+   %                 [0.95 0.95].
+   %     lateqtls    reference quantiles of q and dqdt that together define a
+   %                 pivot point through which the late-time line must pass.
+   %                 The late-time line uses the input method, and only
+   %                 method 'envelope' reads lateqtls. Default is
+   %                 [0.5 0.5].
    %     mask        logical mask to exclude data
    %     theta       effective slope of basin contributing area
    %     isflat      logical flag indicating if horizontal or sloped aquifer
@@ -37,7 +43,7 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    %     soln2       optional late-time theoretical solution
    %     dispfit     logical flag indicating whether to plot the result
    %
-   % See also: eventphi, fitphi, fitdistphi
+   % See also: eventphi, fitphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %

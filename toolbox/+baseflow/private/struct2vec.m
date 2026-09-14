@@ -44,8 +44,8 @@ function vec = struct2vec(S, fields, shape)
    %
    %    % Example with shape='row':
    %    vec = struct2vec(S, {'a', 'c', 'b'}, 'row')
-   %    % vec will be [1 2 3 6 8 7 9 4 5]. Note the order of S.c here is the same
-   %    % as the example above - the output is a row but the elements are
+   %    % vec will be [1 2 3 6 8 7 9 4 5]. Note the order of S.c here is the
+   %    % same as the example above - the output is a row but the elements are
    %    % concatenated in column-major. Preserving rows in the input is not
    %    % currently supported.
    %
@@ -92,10 +92,10 @@ end
 %    % Use cellfun to ensure the vector is comprised of each field in order.
 %    cellvec = cellfun(@(f) S.(f)(:), fields, 'UniformOutput', false);
 %
-%    % cellvec is a 1xN cell array, with N = numel(fields). If all fields of S are
-%    % row vectors, then each element of cellvec is a row vector, and horzcat
-%    % works. If all fields of S are column vectors, then each element of cellvec
-%    % is a column vector, and vertcat works.
+%    % cellvec is a 1xN cell array, with N = numel(fields). If all fields of S
+%    % are row vectors, then each element of cellvec is a row vector, and
+%    % horzcat works. If all fields of S are column vectors, then each element
+%    % of cellvec is a column vector, and vertcat works.
 %    cellvec = cellflatten(cellfun(@(c) c(:), cellvec, 'un', 0));
 %    vec = [cellvec{:}];
 %

@@ -23,9 +23,20 @@ function varargout = plfitb(x,varargin)
    %     range    the range of scaling parameters considered (see plfit.m)
    %     limit    scalar double that sets the upper bound of fitted exponent
    %     method   char indicating one of two algorithms (Clauset's or Hanel's)
-   %     bootfit  logical indicating whether to bootstrap the uncertainties (slow)
-   %     nreps    scalar double indicating how many replicates in the boot fit
+   %     bootfit  logical indicating whether to bootstrap the uncertainties
+   %              (slow)
+   %     bootreps scalar double indicating how many replicates in the boot fit
    %     plotfit  logical indicating whether to call plplot
+   %
+   % Example
+   %
+   %  Sample a Pareto distribution with tau0 = 20 days and b = 1.4. Fit
+   %  the sample to recover the parameters:
+   %
+   %     rng('default')
+   %     x = 20 * rand(5000, 1) .^ (-2/3);
+   %     Fit = baseflow.plfitb(x);
+   %     fprintf('tau0 = %.1f days, b = %.2f\n', Fit.tau0, Fit.b)
    %
    % See also: plfit, plplotb, gpfitb
    %
@@ -50,10 +61,22 @@ function varargout = plfitb(x,varargin)
                BootFit = plbootfit(x,range,limit,nreps);
             end
             % Undocumented feature, requires r_plfit function, not in toolbox.
+            % Hanel et al. (2017, PLOS ONE 12:e0170920) published r_plfit as
+            % supplementary code with no license grant, so it stays external.
+            % See the README r_plfit note and docs/baseflow_powerlaw_notation.m
+            % for the notation map.
          case 'hanel'
             [~,xmin] = baseflow.deps.plfit(x,'range',range,'limit',limit);
-            [alpha,xmin,L,D] = r_plfit(x,'rangemin',xmin,'alpha_min',  ...
-               range(1),'alpha_max',range(end));
+            % 'cdat' declares continuous data: without it r_plfit bins
+            % real-valued tau on the integer grid min(x):max(x) and fits
+            % the discrete model. Hanel's sample-mode exponent is the pdf
+            % exponent, directly comparable to Clauset's alpha.
+            % Note: r_plfit's help names the search bounds 'alpha_min'
+            % and 'alpha_max'. Its parser accepts only 'exp_min' and
+            % 'exp_max' and skips unknown options without an error. With
+            % the 'alpha_*' names, r_plfit keeps its default 0-5 search range.
+            [alpha,xmin,L,D] = r_plfit(x,'rangemin',xmin,'exp_min',  ...
+               range(1),'exp_max',range(end),'cdat');
             % if I had some max value to consider, I could pass 'rangemax'
       end
    else

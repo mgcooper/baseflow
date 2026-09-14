@@ -1,6 +1,20 @@
 function rl = runlength(tf)
    %RUNLENGTH get run lengths of consecutive equal values along columns of data
-   
+   %
+   %  rl = runlength(tf) returns an array rl the size of tf. Each element
+   %  of rl holds the length of the run of consecutive equal values that
+   %  contains it, computed down each column of tf. tf must be a column
+   %  vector or a matrix of column series. Pass a row vector as tf(:).
+   %
+   %  NaN never equals NaN, so each NaN is a run of length 1. For example,
+   %  runlength([1;1;NaN;NaN;NaN;2;2]) returns [2;2;1;1;1;2;2]. Callers use
+   %  NaN to break runs: isminlength calls runlength, and eventfinder and
+   %  setconstantnan call isminlength with NaN at the values they exclude.
+   %  Do not merge consecutive NaNs into one run. A long NaN gap would then
+   %  pass a minimum length test and join the runs on each side.
+   %
+   %  See also: isminlength
+
    diffs = diff(tf) ~= 0;  % find where values change
    ncols = size(diffs, 2); % pad jumps at start and end
    

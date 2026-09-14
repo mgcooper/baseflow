@@ -7,7 +7,7 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'fitmethod',fitmethod)
    %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'pickmethod',pickmethod)
    %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'weights',weights)
-   %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'useax',axis_object)
+   %     [hFits,Picks,Fits] = baseflow.plotdqdt(_,'ax',axis_object)
    %
    % Required inputs
    %
@@ -16,6 +16,20 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    %
    % Optional name-value inputs
    %
+   %     labelplot = logical, default false. When true, draw the b-value
+   %                 refline arrows and labels (see labelReflines).
+   %
+   % Example
+   %
+   %  Plot the point cloud for the longest detected recession event. Fit
+   %  -dQ/dt = aQ^b with ordinary least squares:
+   %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     Events = baseflow.getevents(T, Q, R);
+   %     i = Events.eventTags == mode(Events.eventTags);
+   %     [q, dqdt] = baseflow.getdqdt(Events.eventTime(i), ...
+   %        Events.eventFlow(i), Events.eventRain(i), 'ETS');
+   %     hFits = baseflow.plotdqdt(q, dqdt, 'fitmethod', 'ols');
    %
    % See also: getdqdt, fitdqdt
 

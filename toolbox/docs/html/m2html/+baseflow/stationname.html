@@ -31,8 +31,8 @@
 
   Syntax
 
-  station = baseflow.stationname(&lt;tab complete basin name&gt;), returns the station
-  name string as it exists in the baseflow basin database
+  station = baseflow.stationname(&lt;tab complete basin name&gt;), returns the
+  station name string as it exists in the baseflow basin database
 
   stationname = baseflow.stationname('ALL_STATIONS'), returns string all
   'ALL_STATIONS' which can be passed into other functions that require the
@@ -45,7 +45,8 @@
   stationname string as input to load data for that station.
 
 
-  See also: baseflow.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> baseflow.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> baseflow.<a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a> baseflow.<a href="stationlist.html" class="code" title="function stations = stationlist">stationlist</a></pre></div>
+  See also: baseflow.<a href="loadbasins.html" class="code" title="function [Basins,Meta,Poly] = loadbasins(basinname,varargin)">loadbasins</a> baseflow.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> baseflow.<a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>
+  baseflow.<a href="stationlist.html" class="code" title="function stations = stationlist()">stationlist</a></pre></div>
 
 
 <!-- crossreference -->
@@ -72,8 +73,8 @@ This function is called by:
 0003    <span class="comment">%</span>
 0004    <span class="comment">%  Syntax</span>
 0005    <span class="comment">%</span>
-0006    <span class="comment">%  station = baseflow.stationname(&lt;tab complete basin name&gt;), returns the station</span>
-0007    <span class="comment">%  name string as it exists in the baseflow basin database</span>
+0006    <span class="comment">%  station = baseflow.stationname(&lt;tab complete basin name&gt;), returns the</span>
+0007    <span class="comment">%  station name string as it exists in the baseflow basin database</span>
 0008    <span class="comment">%</span>
 0009    <span class="comment">%  stationname = baseflow.stationname('ALL_STATIONS'), returns string all</span>
 0010    <span class="comment">%  'ALL_STATIONS' which can be passed into other functions that require the</span>
@@ -86,13 +87,14 @@ This function is called by:
 0017    <span class="comment">%  stationname string as input to load data for that station.</span>
 0018    <span class="comment">%</span>
 0019    <span class="comment">%</span>
-0020    <span class="comment">%  See also: baseflow.loadcalm baseflow.loadflow baseflow.loadgrace baseflow.stationlist</span>
-0021 
-0022    p = inputParser;
-0023    p.FunctionName = <span class="string">'baseflow.stationname'</span>;
-0024    addRequired( p,<span class="string">'typenamehere'</span>);
-0025    parse(p,typenamehere);
-0026    station = p.Results.typenamehere;
-0027 <span class="keyword">end</span></pre></div>
+0020    <span class="comment">%  See also: baseflow.loadbasins baseflow.loadflow baseflow.loadmeta</span>
+0021    <span class="comment">%  baseflow.stationlist</span>
+0022 
+0023    p = inputParser;
+0024    p.FunctionName = <span class="string">'baseflow.stationname'</span>;
+0025    addRequired( p,<span class="string">'typenamehere'</span>);
+0026    parse(p,typenamehere);
+0027    station = p.Results.typenamehere;
+0028 <span class="keyword">end</span></pre></div>
 </body>
 </html>

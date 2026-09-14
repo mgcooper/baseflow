@@ -1,6 +1,21 @@
 function h = plplotb(x,xmin,alpha,varargin)
    %PLPLOTB Plot the power law fit to the P(tau) pareto distribution.
    %
+   % Syntax
+   %
+   %     h = baseflow.plplotb(x, xmin, alpha)
+   %     h = baseflow.plplotb(_, 'alphaci', alphaci)
+   %     h = baseflow.plplotb(_, 'xminci', xminci)
+   %     h = baseflow.plplotb(_, 'labelplot', labelplot)
+   %
+   % Description
+   %
+   %     h = baseflow.plplotb(x, xmin, alpha) plots the complementary
+   %     cumulative distribution of the data x on log-log axes. It also
+   %     plots the fitted Pareto distribution with lower bound xmin and
+   %     exponent alpha. h is a structure of graphics handles with fields
+   %     data, fit, legend, and ax.
+   %
    % Required inputs
    %
    %     x     = vector double of data believed to follow a Pareto distribution
@@ -11,12 +26,13 @@ function h = plplotb(x,xmin,alpha,varargin)
    %
    %     alphaci  = 2x1 double of lower and upper confidence intervals for alpha
    %     xminci   = 2x1 double of lower and upper confidence intervals for xmin
-   %     varsym   = char in latex format representing the data symbol, used for plot
+   %     varsym   = char in latex format representing the data symbol, used for
+   %                 plot
    %     trimline = logical scalar indicating whether to 'trim' the fitted line
    %                 similar to 'axis tight' option (b/c power law data is often
    %                 covering many orders of magnitude)
-   %     labelplot = logical scalar indicating whether to add a label showing the
-   %                 value of xmin and the expected value of x
+   %     labelplot = logical scalar indicating whether to add a label showing
+   %                 the value of xmin and the expected value of x
    %     ax       =  graphic axis to plot into
    %
    % See also: plfit, plfitb, gpfitb, eventtau

@@ -1,0 +1,317 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>Power-law notation across plfit, r_plfit, gpd, and baseflow</title>
+<meta name="generator" content="MATLAB 25.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2026-09-14">
+<meta name="DC.source" content="baseflow_powerlaw_notation.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>Power-law notation across plfit, r_plfit, gpd, and baseflow</h1>
+<!--introduction-->
+<p>This page maps the exponent conventions of the four power-law estimators that the toolbox works with. It states how each estimator imposes lower and upper cutoffs, and it runs a worked comparison on one synthetic dataset. It resolves a long-standing notation confusion. The mappings were checked against the r_plfit code, the Hanel appendices, and a transcription of the Kondlo thesis.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Reference convention: the pdf exponent A</a>
+</li>
+<li>
+<a href="#2">Cutoffs by method</a>
+</li>
+<li>
+<a href="#3">Worked comparison on one synthetic sample</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Reference convention: the pdf exponent A</h2>
+<p>Let A denote the exponent of the probability density,</p>
+<p>
+<img src="baseflow_powerlaw_notation_eq03625179267117583429.png" alt="$$p(x) \propto x^{-A}, \quad x \ge x_{min}.$$"></p>
+<p>Every quantity below is a function of A:</p>
+<div>
+<ul>
+<li>Clauset's <tt>alpha</tt> (deps/plfit.m) <b>is</b> A. The MLE is <tt>alpha = 1 + n/sum(log(x/xmin))</tt>.</li>
+<li>Hanel's sample-mode <tt>lambda</tt> (r_plfit) <b>is</b> A. It needs no transformation. Hanel claims that the method "works for all exponents", including lambda &lt;= 1. The claim holds because a finite upper cutoff x_max normalizes p(x) when the infinite-support integral diverges. This explanation resolves the notation confusion. The sign convention matches Clauset.</li>
+<li>The ccdf (survival) exponent is A-1: <tt>ccdf = (xmin/x)^(A-1)</tt>. This identity and the generalized Pareto mapping below hold for the unbounded Pareto tail with A &gt; 1. A &lt;= 1 requires a finite upper cutoff x_max. With x_max, the survival function uses the truncated normalization instead, with a logarithmic form at A = 1. Kondlo's <tt>a</tt> is the ccdf exponent, so <tt>alpha = a+1</tt>.</li>
+<li>The MATLAB generalized Pareto shape is <tt>k = 1/(A-1)</tt>, with threshold <tt>theta = xmin</tt> and scale <tt>sigma = xmin/(A-1) = k*xmin</tt> for an exact unbounded Pareto tail (A &gt; 1). <tt>sigma/k = xmin</tt> is the population identity. gpfitb's <tt>tau0 = sigma/k</tt> is therefore a consistent estimate of xmin from the independently fitted sigma and k. It does not recover xmin exactly in a finite sample. Confidence-interval propagation for tau0 is still a to-do in gpfitb.m.</li>
+<li>baseflow's recession exponent is <tt>b = 1 + 1/A</tt>, so <tt>A = 1/(b-1)</tt>, <tt>k = (1-b)/(b-2)</tt>, and <tt>b = (2k+1)/(k+1)</tt> (conversions.m, plfitb.m).</li>
+<li>Hanel's histogram-as-data mode 3 fits the <b>frequency distribution</b> of a sample whose pdf exponent is lambda. That frequency exponent is <tt>1 + 1/lambda</tt>. It is a different exponent, not a different convention for the same exponent.</li>
+</ul>
+</div>
+<p>Earlier scratch code contains three lambda-alpha relations. Each one is correct in its own context. The three relations apply to three different exponents that the scratch code wrote with one symbol:</p>
+<div>
+<ul>
+<li>
+<tt>alpha = lambda + 1</tt> (demo_rplfit candidate): correct when lambda names the <b>ccdf</b> exponent (Kondlo's a).</li>
+<li>
+<tt>alpha = 1 + 1/lambda</tt> (pllambda2alpha): correct for Hanel's <b>mode-3 frequency</b> exponent and for the rank-size (Zipf) duality.</li>
+<li>
+<tt>lambda = 1/(alpha - 1)</tt> (plalpha2lambda): the inverse of the previous relation; this lambda equals the gpd shape k.</li>
+</ul>
+</div>
+<p>Hanel's sample-mode lambda needs none of these relations because it is A itself. An edited r_plfit copy that sets <tt>out.b = 1 + 1/Aml</tt> is therefore correct (see the README r_plfit note).</p>
+<h2 id="2">Cutoffs by method</h2>
+<div>
+<ul>
+<li>
+<b>Clauset plfit</b>: estimates the lower cutoff xmin by scanning unique values for the minimum KS distance. It has no upper cutoff.</li>
+<li>
+<b>MATLAB gpd</b> (gpfitb): the user supplies the threshold (xmin), and the fit subtracts it. It has no upper cutoff.</li>
+<li>
+<b>Hanel r_plfit</b>: <tt>rangemin</tt> is an input that the code echoes back and never estimates (plfitb's 'hanel' method passes in Clauset's xmin). An explicit <tt>rangemax</tt> pre-truncates the support. In the default discrete mode, an automatic low-frequency cutoff re-solves the MLE iteratively on a trimmed support. The result is a doubly-truncated power-law MLE. Continuous data need the <tt>'cdat'</tt> flag. Without it, the code bins real values on the integer grid min(x):max(x). <tt>'cdat'</tt> also disables the automatic cutoff, so only <tt>rangemin</tt>, <tt>rangemax</tt>, or the sample extremes truncate a continuous fit. The search bounds are <tt>'exp_min'</tt> and <tt>'exp_max'</tt>. The help text names them <tt>'alpha_min'</tt>/|'alpha_max'|, but the parser accepts only the <tt>exp_*</tt> names and skips unknown options without an error.</li>
+<li>
+<b>Kondlo MLE</b> (Kondlo, 2010; not part of the toolbox): the full doubly-truncated estimator. It jointly estimates the exponent, both cutoffs L and U, and a Gaussian measurement-error sigma. It maximizes the likelihood of the truncated Pareto convolved with N(0, sigma^2). It accepts continuous data only, assumes homoskedastic Gaussian error, and requires a &gt; 0 (so A &gt; 1). It fits the whole sample rather than the tail only. U is weakly identified when the sample misses the upper tail.</li>
+</ul>
+</div>
+<h2 id="3">Worked comparison on one synthetic sample</h2>
+<p>Draw a Pareto sample with a known pdf exponent. Then fit it four ways.</p>
+<pre class="codeinput">
+<span class="comment">% known truth: pdf exponent A = 2.5, so b = 1.4, k = 2/3, ccdf a = 1.5</span>
+A = 2.5;
+xmin = 1;
+N = 5000;
+rng(42, <span class="string">'twister'</span>);
+u = rand(N, 1);
+x = xmin*(1 - u).^(-1/(A - 1));
+
+<span class="comment">% Clauset plfit: alpha estimates A directly</span>
+[alphaClauset, xminClauset] = baseflow.deps.plfit(x);
+fprintf(<span class="string">'Clauset  alpha = %.3f (xmin = %.3f)\n'</span>, alphaClauset, xminClauset)
+
+<span class="comment">% MATLAB gpd on the exceedances over the known threshold: A = 1 + 1/k</span>
+parmhat = gpfit(x(x &gt; xmin) - xmin);
+fprintf(<span class="string">'gpd      alpha = %.3f (k = %.3f)\n'</span>, 1 + 1/parmhat(1), parmhat(1))
+
+<span class="comment">% baseflow plfitb: b converts back to A = 1/(b-1)</span>
+Fit = baseflow.plfitb(x);
+fprintf(<span class="string">'plfitb   alpha = %.3f (b = %.3f, tau0 = %.3f)\n'</span>, <span class="keyword">...</span>
+   1/(Fit.b - 1), Fit.b, Fit.tau0)
+
+<span class="comment">% Hanel r_plfit (external; see the README r_plfit note): sample-mode</span>
+<span class="comment">% lambda estimates A directly. 'cdat' declares continuous data.</span>
+<span class="keyword">if</span> exist(<span class="string">'r_plfit'</span>, <span class="string">'file'</span>) == 2
+   alphaHanel = r_plfit(x, <span class="string">'rangemin'</span>, xminClauset, <span class="keyword">...</span>
+      <span class="string">'exp_min'</span>, 1.5, <span class="string">'exp_max'</span>, 3.5, <span class="string">'cdat'</span>);
+   fprintf(<span class="string">'r_plfit  alpha = %.3f\n'</span>, alphaHanel)
+<span class="keyword">else</span>
+   fprintf(<span class="string">'r_plfit  not on the path; see the README r_plfit note\n'</span>)
+<span class="keyword">end</span>
+
+<span class="comment">% the estimates agree with the truth within sampling error</span>
+assert(abs(alphaClauset - A) &lt; 0.15)
+assert(abs(1 + 1/parmhat(1) - A) &lt; 0.15)
+assert(abs(1/(Fit.b - 1) - A) &lt; 0.15)
+</pre>
+<pre class="codeoutput">Clauset  alpha = 2.516 (xmin = 1.000)
+gpd      alpha = 2.506 (k = 0.664)
+plfitb   alpha = 2.516 (b = 1.398, tau0 = 1.000)
+r_plfit  alpha = 2.512
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2025b</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% Power-law notation across plfit, r_plfit, gpd, and baseflow
+% This page maps the exponent conventions of the four power-law estimators
+% that the toolbox works with. It states how each estimator imposes lower
+% and upper cutoffs, and it runs a worked comparison on one synthetic
+% dataset. It resolves a long-standing notation confusion. The mappings
+% were checked against the r_plfit code, the Hanel appendices, and a
+% transcription of the Kondlo thesis.
+%
+%% Reference convention: the pdf exponent A
+% Let A denote the exponent of the probability density,
+%
+% $$p(x) \propto x^{-A}, \quad x \ge x_{min}.$$
+%
+% Every quantity below is a function of A:
+%
+% * Clauset's |alpha| (deps/plfit.m) *is* A. The MLE is
+%   |alpha = 1 + n/sum(log(x/xmin))|.
+% * Hanel's sample-mode |lambda| (r_plfit) *is* A. It needs no
+%   transformation. Hanel claims that the method "works for all
+%   exponents", including lambda <= 1. The claim holds because a finite
+%   upper cutoff x_max normalizes p(x) when the infinite-support integral
+%   diverges. This explanation resolves the notation confusion. The sign
+%   convention matches Clauset.
+% * The ccdf (survival) exponent is A-1: |ccdf = (xmin/x)^(A-1)|. This
+%   identity and the generalized Pareto mapping below hold for the
+%   unbounded Pareto tail with A > 1. A <= 1 requires a finite upper
+%   cutoff x_max. With x_max, the survival function uses the truncated
+%   normalization instead, with a logarithmic form at A = 1.
+%   Kondlo's |a| is the ccdf exponent, so |alpha = a+1|.
+% * The MATLAB generalized Pareto shape is |k = 1/(A-1)|, with
+%   threshold |theta = xmin| and scale |sigma = xmin/(A-1) = k*xmin| for
+%   an exact unbounded Pareto tail (A > 1). |sigma/k = xmin| is the
+%   population identity. gpfitb's |tau0 = sigma/k| is therefore a
+%   consistent estimate of xmin from the independently fitted sigma and
+%   k. It does not recover xmin exactly in a finite sample.
+%   Confidence-interval propagation for tau0 is still a to-do in gpfitb.m.
+% * baseflow's recession exponent is |b = 1 + 1/A|, so
+%   |A = 1/(b-1)|, |k = (1-b)/(b-2)|, and |b = (2k+1)/(k+1)|
+%   (conversions.m, plfitb.m).
+% * Hanel's histogram-as-data mode 3 fits the *frequency distribution*
+%   of a sample whose pdf exponent is lambda. That frequency exponent is
+%   |1 + 1/lambda|. It is a different exponent, not a different
+%   convention for the same exponent.
+%
+% Earlier scratch code contains three lambda-alpha relations. Each one is
+% correct in its own context. The three relations apply to three different
+% exponents that the scratch code wrote with one symbol:
+%
+% * |alpha = lambda + 1| (demo_rplfit candidate): correct when lambda
+%   names the *ccdf* exponent (Kondlo's a).
+% * |alpha = 1 + 1/lambda| (pllambda2alpha): correct for Hanel's
+%   *mode-3 frequency* exponent and for the rank-size (Zipf) duality.
+% * |lambda = 1/(alpha - 1)| (plalpha2lambda): the inverse of the
+%   previous relation; this lambda equals the gpd shape k.
+%
+% Hanel's sample-mode lambda needs none of these relations because it is A
+% itself. An edited r_plfit copy that sets |out.b = 1 + 1/Aml| is therefore
+% correct (see the README r_plfit note).
+%
+%% Cutoffs by method
+% * *Clauset plfit*: estimates the lower cutoff xmin by scanning unique
+%   values for the minimum KS distance. It has no upper cutoff.
+% * *MATLAB gpd* (gpfitb): the user supplies the threshold (xmin), and
+%   the fit subtracts it. It has no upper cutoff.
+% * *Hanel r_plfit*: |rangemin| is an input that the code echoes back
+%   and never estimates (plfitb's 'hanel' method passes in Clauset's
+%   xmin). An explicit |rangemax| pre-truncates the support. In the
+%   default discrete mode, an automatic low-frequency cutoff re-solves
+%   the MLE iteratively on a trimmed support. The result is a
+%   doubly-truncated power-law MLE. Continuous data need the |'cdat'|
+%   flag. Without it, the code bins real values on the integer grid
+%   min(x):max(x). |'cdat'| also disables the automatic cutoff, so only
+%   |rangemin|, |rangemax|, or the sample extremes truncate a continuous
+%   fit. The search bounds are |'exp_min'| and |'exp_max'|. The help
+%   text names them |'alpha_min'|/|'alpha_max'|, but the parser accepts
+%   only the |exp_*| names and skips unknown options without an
+%   error.
+% * *Kondlo MLE* (Kondlo, 2010; not part of the toolbox): the full
+%   doubly-truncated estimator. It jointly estimates the exponent, both
+%   cutoffs L and U, and a Gaussian measurement-error sigma. It
+%   maximizes the likelihood of the truncated Pareto convolved with
+%   N(0, sigma^2). It accepts continuous data only, assumes homoskedastic
+%   Gaussian error, and requires a > 0 (so A > 1). It fits the whole
+%   sample rather than the tail only. U is weakly identified when the
+%   sample misses the upper tail.
+%
+%% Worked comparison on one synthetic sample
+% Draw a Pareto sample with a known pdf exponent. Then fit it four ways.
+
+% known truth: pdf exponent A = 2.5, so b = 1.4, k = 2/3, ccdf a = 1.5
+A = 2.5;
+xmin = 1;
+N = 5000;
+rng(42, 'twister');
+u = rand(N, 1);
+x = xmin*(1 - u).^(-1/(A - 1));
+
+% Clauset plfit: alpha estimates A directly
+[alphaClauset, xminClauset] = baseflow.deps.plfit(x);
+fprintf('Clauset  alpha = %.3f (xmin = %.3f)\n', alphaClauset, xminClauset)
+
+% MATLAB gpd on the exceedances over the known threshold: A = 1 + 1/k
+parmhat = gpfit(x(x > xmin) - xmin);
+fprintf('gpd      alpha = %.3f (k = %.3f)\n', 1 + 1/parmhat(1), parmhat(1))
+
+% baseflow plfitb: b converts back to A = 1/(b-1)
+Fit = baseflow.plfitb(x);
+fprintf('plfitb   alpha = %.3f (b = %.3f, tau0 = %.3f)\n', ...
+   1/(Fit.b - 1), Fit.b, Fit.tau0)
+
+% Hanel r_plfit (external; see the README r_plfit note): sample-mode
+% lambda estimates A directly. 'cdat' declares continuous data.
+if exist('r_plfit', 'file') == 2
+   alphaHanel = r_plfit(x, 'rangemin', xminClauset, ...
+      'exp_min', 1.5, 'exp_max', 3.5, 'cdat');
+   fprintf('r_plfit  alpha = %.3f\n', alphaHanel)
+else
+   fprintf('r_plfit  not on the path; see the README r_plfit note\n')
+end
+
+% the estimates agree with the truth within sampling error
+assert(abs(alphaClauset - A) < 0.15)
+assert(abs(1 + 1/parmhat(1) - A) < 0.15)
+assert(abs(1/(Fit.b - 1) - A) < 0.15)
+
+##### SOURCE END #####
+-->
+</body>
+</html>

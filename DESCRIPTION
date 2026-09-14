@@ -1,6 +1,6 @@
 Name: baseflow
-Version: 1.0.0
-Date: 2023-10-02
+Version: 1.1.0
+Date: 2026-09-14
 Author: Matt Cooper <mguycooper@gmail.com>
 Maintainer: Matt Cooper <mguycooper@gmail.com>
 Title: baseflow: a MATLAB and GNU Octave package for baseflow recession analysis
@@ -9,4 +9,5 @@ License: BSD-3-Clause
 Problems: Incomplete test coverage. Some Octave incompatibilities may exist.
 Url: https://github.com/mgcooper/baseflow
 Categories: hydrology
-Depends: octave (>= 4.0.0), struct, io, optim, statistics, tablicious, statistics-bootstrap
+Depends: octave (>= 4.0.0), struct, optim, statistics, tablicious, statistics-resampling, financial
+MatlabProducts: Statistics and Machine Learning Toolbox, Curve Fitting Toolbox
