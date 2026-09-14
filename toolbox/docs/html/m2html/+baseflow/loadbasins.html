@@ -49,7 +49,7 @@
      'ease' is NSIDC EASE North projection.
 
 
- See also: <a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a>, <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, <a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>
+ See also: <a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>, <a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>, <a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>
 
  Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</pre></div>
 
@@ -101,95 +101,96 @@ This function is called by:
 0021    <span class="comment">%     'ease' is NSIDC EASE North projection.</span>
 0022    <span class="comment">%</span>
 0023    <span class="comment">%</span>
-0024    <span class="comment">% See also: loadgrace, loadflow, loadcalm</span>
+0024    <span class="comment">% See also: loadflow, loadmeta, loadprops</span>
 0025    <span class="comment">%</span>
 0026    <span class="comment">% Matt Cooper, 20-Feb-2022, https://github.com/mgcooper</span>
 0027 
 0028    <span class="comment">% if called with no input, open this file</span>
 0029    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0030 
-0031    <span class="comment">% TODO: accept stationname. see loadcalm, it worked as soon as i added</span>
-0032    <span class="comment">% support for stationname to baseflow.loadmeta meaning it relies entirely on</span>
-0033    <span class="comment">% the basinname returend by loadmeta, whereas this does not, because the Calm</span>
-0034    <span class="comment">% database has an entry for the basins or the index in Meta, so maybe doing</span>
-0035    <span class="comment">% that with boundaries would simplify thigns here.</span>
-0036 
-0037    <span class="comment">% parse inputs</span>
-0038    [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, version, projection] = <a href="#_sub1" class="code" title="subfunction [basinname, version, projection] = parseinputs(basinname,varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
-0039 
-0040    <span class="comment">% load the basin metadata</span>
-0041 
-0042    <span class="comment">% Nov 2022, checked this out from dev-bk, and copied below from current</span>
-0043    <span class="comment">% version of loadmeta</span>
-0044    <span class="keyword">switch</span> version
-0045       <span class="keyword">case</span> <span class="string">'current'</span>
-0046          filename = <span class="string">'basin_boundaries.mat'</span>;
-0047       <span class="keyword">case</span> <span class="string">'archive'</span>
-0048          filename = <span class="string">'basin_boundaries_tmp.mat'</span>;
-0049    <span class="keyword">end</span>
-0050    filename = fullfile(getenv(<span class="string">'BASEFLOW_DATA_PATH'</span>),<span class="string">'basins'</span>, filename);
-0051    load(filename, <span class="string">'Bounds'</span>, <span class="string">'Meta'</span>);
-0052 
-0053    <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'ALL_BASINS'</span>)    <span class="comment">% return all the basins</span>
-0054 
-0055       <span class="comment">% Meta = Bounds.meta; % commented out nov 2022, instead load Meta</span>
-0056       Basins = Bounds.(projection);
-0057       Poly = [Bounds.poly.(projection)];
-0058 
-0059       <span class="comment">% Sep 2, 2022, this was below this if/else/end, but seems like it</span>
-0060       <span class="comment">% should only be applicable to this case, unless I pass in a list of</span>
-0061       <span class="comment">% stations. if i get errors loading all the stations might need to</span>
-0062       <span class="comment">% comment this out and test uncommenting the block below</span>
-0063 
-0064       <span class="comment">% sort the Basins, Meta, and Poly by station</span>
-0065       Meta = sortrows(Meta,<span class="string">'station'</span>);
-0066       [~,ii] = sort({Basins.Station});
-0067       Basins = Basins(ii(:));
-0068       Poly = Poly(ii(:));
-0069 
-0070    <span class="keyword">else</span>
-0071 
-0072       <span class="comment">% use ismember for exact match not contains</span>
-0073       allnames = lower({Bounds.(projection).Name});
-0074       ii = find(ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>)));
-0075 
-0076       <span class="keyword">if</span> isempty(ii)
-0077          error(<span class="string">'basin not found, check name'</span>);
-0078       <span class="keyword">else</span>
-0079          Basins = Bounds.(projection)(ii,:);
-0080          Poly = Bounds.poly.(projection)(ii);
-0081          Meta = Meta(ii,:);
-0082       <span class="keyword">end</span>
-0083    <span class="keyword">end</span>
-0084 
-0085    <span class="comment">% % sort the Bounds, Meta, and Poly by station</span>
-0086    <span class="comment">% Meta     = sortrows(Meta,'station');</span>
-0087    <span class="comment">% [~,idx]  = sort({Bounds.Station});</span>
-0088    <span class="comment">% Basins   = Bounds(idx(:));</span>
-0089    <span class="comment">% Poly     = Poly(idx(:));</span>
-0090    <span class="comment">%</span>
-0091    <span class="comment">% %  not sure what this was from</span>
-0092    <span class="comment">% [~,idx] = sort({shp1.Station}); idx = idx';</span>
-0093    <span class="comment">% shp1    = shp1(idx);</span>
-0094    <span class="comment">% Basins   = sort</span>
-0095 <span class="keyword">end</span>
-0096 
-0097 <span class="comment">%% input parser</span>
-0098 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, version, projection] = parseinputs(basinname,varargin)</a>
-0099 
-0100    validopts = @(x)any(validatestring(x,{<span class="string">'current'</span>,<span class="string">'archive'</span>}));
-0101    validproj = @(x)any(validatestring(x,{<span class="string">'ease'</span>,<span class="string">'geo'</span>}));
-0102 
-0103    parser = inputParser;
-0104    parser.FunctionName = <span class="string">'baseflow.loadbasins'</span>;
-0105    parser.addRequired(<span class="string">'basinname'</span>, @(x)ischar(x)|iscell(x));
-0106    parser.addOptional( <span class="string">'version'</span>, <span class="string">'current'</span>, validopts);
-0107    parser.addParameter(<span class="string">'projection'</span>, <span class="string">'geo'</span>, validproj);
-0108    parser.parse(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
-0109 
-0110    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>   = parser.Results.basinname;
-0111    version     = parser.Results.version;
-0112    projection  = parser.Results.projection;
-0113 <span class="keyword">end</span></pre></div>
+0031    <span class="comment">% TODO: accept stationname. see loadcalm (now in the analysis project</span>
+0032    <span class="comment">% mgcooper/arctic_baseflow), it worked as soon as i added</span>
+0033    <span class="comment">% support for stationname to baseflow.loadmeta meaning it relies entirely on</span>
+0034    <span class="comment">% the basinname returend by loadmeta, whereas this does not, because the Calm</span>
+0035    <span class="comment">% database has an entry for the basins or the index in Meta, so maybe doing</span>
+0036    <span class="comment">% that with boundaries would simplify thigns here.</span>
+0037 
+0038    <span class="comment">% parse inputs</span>
+0039    [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, version, projection] = <a href="#_sub1" class="code" title="subfunction [basinname, version, projection] = parseinputs(basinname,varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
+0040 
+0041    <span class="comment">% load the basin metadata</span>
+0042 
+0043    <span class="comment">% Nov 2022, checked this out from dev-bk, and copied below from current</span>
+0044    <span class="comment">% version of loadmeta</span>
+0045    <span class="keyword">switch</span> version
+0046       <span class="keyword">case</span> <span class="string">'current'</span>
+0047          filename = <span class="string">'basin_boundaries.mat'</span>;
+0048       <span class="keyword">case</span> <span class="string">'archive'</span>
+0049          filename = <span class="string">'basin_boundaries_tmp.mat'</span>;
+0050    <span class="keyword">end</span>
+0051    filename = fullfile(getenv(<span class="string">'BASEFLOW_DATA_PATH'</span>),<span class="string">'basins'</span>, filename);
+0052    load(filename, <span class="string">'Bounds'</span>, <span class="string">'Meta'</span>);
+0053 
+0054    <span class="keyword">if</span> strcmp(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,<span class="string">'ALL_BASINS'</span>)    <span class="comment">% return all the basins</span>
+0055 
+0056       <span class="comment">% Meta = Bounds.meta; % commented out nov 2022, instead load Meta</span>
+0057       Basins = Bounds.(projection);
+0058       Poly = [Bounds.poly.(projection)];
+0059 
+0060       <span class="comment">% Sep 2, 2022, this was below this if/else/end, but seems like it</span>
+0061       <span class="comment">% should only be applicable to this case, unless I pass in a list of</span>
+0062       <span class="comment">% stations. if i get errors loading all the stations might need to</span>
+0063       <span class="comment">% comment this out and test uncommenting the block below</span>
+0064 
+0065       <span class="comment">% sort the Basins, Meta, and Poly by station</span>
+0066       Meta = sortrows(Meta,<span class="string">'station'</span>);
+0067       [~,ii] = sort({Basins.Station});
+0068       Basins = Basins(ii(:));
+0069       Poly = Poly(ii(:));
+0070 
+0071    <span class="keyword">else</span>
+0072 
+0073       <span class="comment">% use ismember for exact match not contains</span>
+0074       allnames = lower({Bounds.(projection).Name});
+0075       ii = find(ismember(allnames,lower(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>)));
+0076 
+0077       <span class="keyword">if</span> isempty(ii)
+0078          error(<span class="string">'basin not found, check name'</span>);
+0079       <span class="keyword">else</span>
+0080          Basins = Bounds.(projection)(ii,:);
+0081          Poly = Bounds.poly.(projection)(ii);
+0082          Meta = Meta(ii,:);
+0083       <span class="keyword">end</span>
+0084    <span class="keyword">end</span>
+0085 
+0086    <span class="comment">% % sort the Bounds, Meta, and Poly by station</span>
+0087    <span class="comment">% Meta     = sortrows(Meta,'station');</span>
+0088    <span class="comment">% [~,idx]  = sort({Bounds.Station});</span>
+0089    <span class="comment">% Basins   = Bounds(idx(:));</span>
+0090    <span class="comment">% Poly     = Poly(idx(:));</span>
+0091    <span class="comment">%</span>
+0092    <span class="comment">% %  not sure what this was from</span>
+0093    <span class="comment">% [~,idx] = sort({shp1.Station}); idx = idx';</span>
+0094    <span class="comment">% shp1    = shp1(idx);</span>
+0095    <span class="comment">% Basins   = sort</span>
+0096 <span class="keyword">end</span>
+0097 
+0098 <span class="comment">%% input parser</span>
+0099 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, version, projection] = parseinputs(basinname,varargin)</a>
+0100 
+0101    validopts = @(x)any(validatestring(x,{<span class="string">'current'</span>,<span class="string">'archive'</span>}));
+0102    validproj = @(x)any(validatestring(x,{<span class="string">'ease'</span>,<span class="string">'geo'</span>}));
+0103 
+0104    parser = inputParser;
+0105    parser.FunctionName = <span class="string">'baseflow.loadbasins'</span>;
+0106    parser.addRequired(<span class="string">'basinname'</span>, @(x)ischar(x)|iscell(x));
+0107    parser.addOptional( <span class="string">'version'</span>, <span class="string">'current'</span>, validopts);
+0108    parser.addParameter(<span class="string">'projection'</span>, <span class="string">'geo'</span>, validproj);
+0109    parser.parse(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});
+0110 
+0111    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>   = parser.Results.basinname;
+0112    version     = parser.Results.version;
+0113    projection  = parser.Results.projection;
+0114 <span class="keyword">end</span></pre></div>
 </body>
 </html>

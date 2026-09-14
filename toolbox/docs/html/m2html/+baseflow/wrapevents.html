@@ -63,6 +63,8 @@
   opts        =  structure containing the fields listed above, in lieu of
                  entering them individually
 
+ Each option default is the baseflow.setopts('getevents') value.
+
  Note: flow comes in as m3/day/day
 
  Example
@@ -142,204 +144,209 @@ This function is called by:
 0035    <span class="comment">%  opts        =  structure containing the fields listed above, in lieu of</span>
 0036    <span class="comment">%                 entering them individually</span>
 0037    <span class="comment">%</span>
-0038    <span class="comment">% Note: flow comes in as m3/day/day</span>
+0038    <span class="comment">% Each option default is the baseflow.setopts('getevents') value.</span>
 0039    <span class="comment">%</span>
-0040    <span class="comment">% Example</span>
+0040    <span class="comment">% Note: flow comes in as m3/day/day</span>
 0041    <span class="comment">%</span>
-0042    <span class="comment">%  Detect recession events one calendar year at a time:</span>
+0042    <span class="comment">% Example</span>
 0043    <span class="comment">%</span>
-0044    <span class="comment">%     [T, Q, R] = baseflow.loadExampleData();</span>
-0045    <span class="comment">%     opts = baseflow.setopts('getevents', 'asannual', true);</span>
-0046    <span class="comment">%     [Events, Info] = baseflow.wrapevents(T, Q, R, opts);</span>
-0047    <span class="comment">%     fprintf('Detected %d events\n', max(Events.eventTags))</span>
-0048    <span class="comment">%</span>
-0049    <span class="comment">% See also: getevents</span>
+0044    <span class="comment">%  Detect recession events one calendar year at a time:</span>
+0045    <span class="comment">%</span>
+0046    <span class="comment">%     [T, Q, R] = baseflow.loadExampleData();</span>
+0047    <span class="comment">%     opts = baseflow.setopts('getevents', 'asannual', true);</span>
+0048    <span class="comment">%     [Events, Info] = baseflow.wrapevents(T, Q, R, opts);</span>
+0049    <span class="comment">%     fprintf('Detected %d events\n', max(Events.eventTags))</span>
 0050    <span class="comment">%</span>
-0051    <span class="comment">%</span>
-0052    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0053 
-0054    <span class="comment">% if called with no input, open this file</span>
-0055    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0056 
-0057    <span class="comment">% PARSE INPUTS</span>
-0058    [T, Q, R, opts] = <a href="#_sub3" class="code" title="subfunction [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)">parseinputs</a>(T, Q, R, mfilename, varargin{:});
-0059 
-0060    <span class="comment">% Do some input checks to confirm the data is compatible with annual option</span>
-0061    [T, Q, R, numyears] = <a href="#_sub2" class="code" title="subfunction [T,Q,R,numyears] = prepinput(T,Q,R)">prepinput</a>(T, Q, R);
-0062 
-0063    <span class="comment">% Save the input data</span>
-0064    EventsData.inputTime = T;
-0065    EventsData.inputFlow = Q;
-0066    EventsData.inputRain = R;
-0067 
-0068    <span class="comment">% Compute the number of timesteps per year</span>
-0069    numsteps = size(Q,1)/numyears;
-0070 
-0071    <span class="comment">% Reshape the input lists to matrices</span>
-0072    <span class="keyword">if</span> mod(numyears,1) == 0
-0073       Qmat = reshape(Q,numsteps,numyears);    <span class="comment">% flow, one column each year</span>
-0074       Rmat = reshape(R,numsteps,numyears);    <span class="comment">% rain, one column each year</span>
-0075       Tmat = reshape(T,numsteps,numyears);    <span class="comment">% calendar, one column each year</span>
-0076    <span class="keyword">else</span>
-0077       <span class="comment">% Assume data is already in matrix form</span>
-0078       Qmat = Q;
-0079       Rmat = R;
-0080       Tmat = T;
-0081    <span class="keyword">end</span>
-0082 
-0083    <span class="comment">% Initialize output structure and output arrays</span>
-0084    Qsave = nan(size(Qmat));
-0085    Rsave = nan(size(Qmat));
-0086    tsave = nan(size(Qmat));
-0087    Etags = nan(size(Qmat));
-0088    Count = 0; <span class="comment">% initialize event counter</span>
-0089 
-0090    <span class="comment">% Compute the recession constants</span>
-0091    <span class="keyword">for</span> thisYear = 1:numyears
-0092 
-0093       <span class="keyword">if</span> all(isnan(Qmat(:,thisYear)))
-0094          <span class="keyword">continue</span>;
-0095       <span class="keyword">end</span>
-0096 
-0097       thisYearTime = Tmat(:,thisYear);
-0098       thisYearFlow = Qmat(:,thisYear);
-0099       thisYearRain = Rmat(:,thisYear);
-0100 
-0101       <span class="comment">% Detect events for this year</span>
-0102       [thisYearEvents,thisYearInfo] = baseflow.getevents( <span class="keyword">...</span>
-0103          thisYearTime, thisYearFlow, thisYearRain, opts);
-0104 
-0105       <span class="comment">% For each event, compute q, dqdt and fit a,b</span>
-0106       numEvents = numel(thisYearInfo.istart);
-0107       <span class="keyword">for</span> thisEvent = 1:numEvents
-0108 
-0109          <span class="comment">% Get the start/end index on the annual calendar</span>
-0110          si = thisYearInfo.istart(thisEvent);
-0111          ei = thisYearInfo.istop(thisEvent);
-0112 
-0113          eventQ = thisYearEvents.eventFlow(si:ei);
-0114          eventT = thisYearEvents.eventTime(si:ei);
-0115          eventR = thisYearEvents.eventRain(si:ei);
-0116 
-0117          <span class="comment">% If no flow was returned, continue</span>
-0118          <span class="keyword">if</span> all(isnan(eventQ)); <span class="keyword">continue</span>; <span class="keyword">else</span>
-0119             Count = Count+1;
-0120          <span class="keyword">end</span>
-0121 
-0122          <span class="comment">% Collect all data for the point-cloud</span>
-0123          Qsave( si:ei,thisYear ) = eventQ;
-0124          Rsave( si:ei,thisYear ) = eventR;
-0125          tsave( si:ei,thisYear ) = eventT;
-0126          Etags( si:ei,thisYear ) = Count;
-0127       <span class="keyword">end</span>
-0128 
-0129       <span class="comment">% pause to look at the fits</span>
-0130       <span class="keyword">if</span> opts.plotevents == true
-0131          hEvents = baseflow.eventplotter(thisYearTime, thisYearFlow, <span class="keyword">...</span>
-0132             thisYearRain, thisYearInfo, <span class="string">'plotevents'</span>, true, <span class="keyword">...</span>
-0133             <span class="string">'eventTags'</span>, 1);
-0134 
-0135          set(hEvents.ax(1), <span class="string">'YScale'</span>, <span class="string">'log'</span>)
+0051    <span class="comment">% See also: getevents</span>
+0052    <span class="comment">%</span>
+0053    <span class="comment">%</span>
+0054    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0055 
+0056    <span class="comment">% if called with no input, open this file</span>
+0057    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0058 
+0059    <span class="comment">% PARSE INPUTS</span>
+0060    [T, Q, R, opts] = <a href="#_sub3" class="code" title="subfunction [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)">parseinputs</a>(T, Q, R, mfilename, varargin{:});
+0061 
+0062    <span class="comment">% Do some input checks to confirm the data is compatible with annual option</span>
+0063    [T, Q, R, numyears] = <a href="#_sub2" class="code" title="subfunction [T,Q,R,numyears] = prepinput(T,Q,R)">prepinput</a>(T, Q, R);
+0064 
+0065    <span class="comment">% Save the input data</span>
+0066    EventsData.inputTime = T;
+0067    EventsData.inputFlow = Q;
+0068    EventsData.inputRain = R;
+0069 
+0070    <span class="comment">% Compute the number of timesteps per year</span>
+0071    numsteps = size(Q,1)/numyears;
+0072 
+0073    <span class="comment">% Reshape the input lists to matrices</span>
+0074    <span class="keyword">if</span> mod(numyears,1) == 0
+0075       Qmat = reshape(Q,numsteps,numyears);    <span class="comment">% flow, one column each year</span>
+0076       Rmat = reshape(R,numsteps,numyears);    <span class="comment">% rain, one column each year</span>
+0077       Tmat = reshape(T,numsteps,numyears);    <span class="comment">% calendar, one column each year</span>
+0078    <span class="keyword">else</span>
+0079       <span class="comment">% Assume data is already in matrix form</span>
+0080       Qmat = Q;
+0081       Rmat = R;
+0082       Tmat = T;
+0083    <span class="keyword">end</span>
+0084 
+0085    <span class="comment">% Initialize output structure and output arrays</span>
+0086    Qsave = nan(size(Qmat));
+0087    Rsave = nan(size(Qmat));
+0088    tsave = nan(size(Qmat));
+0089    Etags = nan(size(Qmat));
+0090    Count = 0; <span class="comment">% initialize event counter</span>
+0091 
+0092    <span class="comment">% Compute the recession constants</span>
+0093    <span class="keyword">for</span> thisYear = 1:numyears
+0094 
+0095       <span class="keyword">if</span> all(isnan(Qmat(:,thisYear)))
+0096          <span class="keyword">continue</span>;
+0097       <span class="keyword">end</span>
+0098 
+0099       thisYearTime = Tmat(:,thisYear);
+0100       thisYearFlow = Qmat(:,thisYear);
+0101       thisYearRain = Rmat(:,thisYear);
+0102 
+0103       <span class="comment">% Detect events for this year</span>
+0104       [thisYearEvents,thisYearInfo] = baseflow.getevents( <span class="keyword">...</span>
+0105          thisYearTime, thisYearFlow, thisYearRain, opts);
+0106 
+0107       <span class="comment">% For each event, compute q, dqdt and fit a,b</span>
+0108       numEvents = numel(thisYearInfo.istart);
+0109       <span class="keyword">for</span> thisEvent = 1:numEvents
+0110 
+0111          <span class="comment">% Get the start/end index on the annual calendar</span>
+0112          si = thisYearInfo.istart(thisEvent);
+0113          ei = thisYearInfo.istop(thisEvent);
+0114 
+0115          eventQ = thisYearEvents.eventFlow(si:ei);
+0116          eventT = thisYearEvents.eventTime(si:ei);
+0117          eventR = thisYearEvents.eventRain(si:ei);
+0118 
+0119          <span class="comment">% If no flow was returned, continue</span>
+0120          <span class="keyword">if</span> all(isnan(eventQ)); <span class="keyword">continue</span>; <span class="keyword">else</span>
+0121             Count = Count+1;
+0122          <span class="keyword">end</span>
+0123 
+0124          <span class="comment">% Collect all data for the point-cloud</span>
+0125          Qsave( si:ei,thisYear ) = eventQ;
+0126          Rsave( si:ei,thisYear ) = eventR;
+0127          tsave( si:ei,thisYear ) = eventT;
+0128          Etags( si:ei,thisYear ) = Count;
+0129       <span class="keyword">end</span>
+0130 
+0131       <span class="comment">% pause to look at the fits</span>
+0132       <span class="keyword">if</span> opts.plotevents == true
+0133          hEvents = baseflow.eventplotter(thisYearTime, thisYearFlow, <span class="keyword">...</span>
+0134             thisYearRain, thisYearInfo, <span class="string">'plotevents'</span>, true, <span class="keyword">...</span>
+0135             <span class="string">'eventTags'</span>, 1);
 0136 
-0137          sprintf(<span class="string">'all events fitted for %d'</span>,thisYear); pause; close all
-0138       <span class="keyword">end</span>
-0139 
-0140       <span class="comment">% Concatenate Info</span>
-0141       <span class="keyword">if</span> thisYear == 1
-0142          Info = thisYearInfo;
-0143       <span class="keyword">else</span>
-0144          thisYearInfo = <a href="#_sub1" class="code" title="subfunction thisYearInfo = updateinfo(thisYearInfo, thisYear)">updateinfo</a>(thisYearInfo, thisYear);
-0145          Info = catstructfields(1, Info, thisYearInfo);
-0146       <span class="keyword">end</span>
-0147    <span class="keyword">end</span>
-0148 
-0149    [ndays,numyears] = size(Qsave);
-0150    EventsData.eventTime = reshape(tsave, ndays*numyears, 1);
-0151    EventsData.eventFlow = reshape(Qsave, ndays*numyears, 1);
-0152    EventsData.eventRain = reshape(Rsave, ndays*numyears, 1);
-0153    EventsData.eventTags = reshape(Etags, ndays*numyears, 1);
-0154 
-0155    debug = false;
-0156    <span class="keyword">if</span> debug == true
-0157       figure; plot(T(1:720), Q(1:720), <span class="string">'o'</span>); hold on;
-0158       plot(T(thisYearInfo.imaxima), Q(thisYearInfo.imaxima), <span class="string">'o'</span>)
-0159    <span class="keyword">end</span>
-0160 <span class="keyword">end</span>
-0161 
-0162 <a name="_sub1" href="#_subfunctions" class="code">function thisYearInfo = updateinfo(thisYearInfo, thisYear)</a>
-0163    <span class="comment">% Adjust the indices in Info to be relative to the multi-year timeseries</span>
-0164    fields = fieldnames(thisYearInfo);
-0165    <span class="keyword">for</span> f = fields(:).'
-0166       <span class="keyword">if</span> strncmp(f, <span class="string">'i'</span>, 1)
-0167          thisYearInfo.(f{:}) = thisYearInfo.(f{:}) + <span class="keyword">...</span>
-0168             thisYearInfo.datalength * (thisYear-1) - 1;
-0169       <span class="keyword">end</span>
-0170    <span class="keyword">end</span>
-0171 <span class="keyword">end</span>
-0172 
-0173 <a name="_sub2" href="#_subfunctions" class="code">function [T,Q,R,numyears] = prepinput(T,Q,R)</a>
-0174    <span class="comment">% PREPINPUT remove leap inds and determine number of years.</span>
-0175 
-0176    <span class="keyword">if</span> isoctave()
-0177       <span class="keyword">try</span>
-0178          pkg load financial
-0179       <span class="keyword">catch</span> e
-0180          <span class="keyword">if</span> strcmp(e.message, <span class="string">'package financial is not installed'</span>)
-0181             disp([<span class="string">'Package financial is required but not installed. '</span> <span class="keyword">...</span>
-0182                <span class="string">'To install the package, run ’pkg install -forge financial’ '</span> <span class="keyword">...</span>
-0183                <span class="string">'from the Octave prompt.'</span>])
-0184          <span class="keyword">end</span>
-0185          rethrow(e)
-0186       <span class="keyword">end</span>
-0187    <span class="keyword">end</span>
-0188    monthnums = nan(size(T));
-0189    daynums = nan(size(T));
-0190    <span class="keyword">for</span> n = 1:numel(T)
-0191       monthnums = month(T(n));
-0192       daynums = day(T(n));
-0193    <span class="keyword">end</span>
-0194    leapidx = monthnums==2 &amp; daynums==29;
-0195    T(leapidx) = [];
-0196    Q(leapidx) = [];
-0197    R(leapidx) = [];
-0198    numyears = numel(T)/365;
-0199 
-0200    assert(numyears == round(numyears), <span class="string">'complete annual timeseries required'</span>);
-0201 <span class="keyword">end</span>
-0202 
-0203 <span class="comment">%% INPUT PARSER</span>
-0204 <a name="_sub3" href="#_subfunctions" class="code">function [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)</a>
-0205 
-0206    parser = inputParser;
-0207    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
-0208    parser.StructExpand = true;
-0209 
-0210    parser.addRequired(<span class="string">'T'</span>, @(x) isnumeric(x) | isdatetime(x));
-0211    parser.addRequired(<span class="string">'Q'</span>, @(x) isnumeric(x) &amp; numel(x)==numel(T));
-0212    parser.addRequired(<span class="string">'R'</span>, @isnumeric);
-0213 
-0214    parser.addParameter(<span class="string">'qmin'</span>, 1, @isnumericscalar);
-0215    parser.addParameter(<span class="string">'nmin'</span>, 4, @isnumericscalar);
-0216    parser.addParameter(<span class="string">'fmax'</span>, 2, @isnumericscalar);
-0217    parser.addParameter(<span class="string">'rmax'</span>, 2, @isnumericscalar);
-0218    parser.addParameter(<span class="string">'rmin'</span>, 0, @isnumericscalar);
-0219    parser.addParameter(<span class="string">'cmax'</span>, 2, @isnumericscalar);
-0220    parser.addParameter(<span class="string">'rmconvex'</span>, false, @islogical);
-0221    parser.addParameter(<span class="string">'rmnochange'</span>, true, @islogical);
-0222    parser.addParameter(<span class="string">'rmrain'</span>, false, @islogical);
-0223    parser.addParameter(<span class="string">'pickevents'</span>, false, @islogical);
-0224    parser.addParameter(<span class="string">'plotevents'</span>, false, @islogical);
-0225    parser.addParameter(<span class="string">'asannual'</span>, false, @islogical);
-0226 
-0227    parser.parse(T, Q, R, varargin{:});
-0228    opts = parser.Results;
-0229 
-0230    <span class="keyword">if</span> isempty(R)
-0231       R = zeros(size(Q));
-0232    <span class="keyword">end</span>
-0233 
-0234    <span class="comment">% Convert datetime to double if datetime was passed in</span>
-0235    T = todatenum(T);
-0236 <span class="keyword">end</span></pre></div>
+0137          set(hEvents.ax(1), <span class="string">'YScale'</span>, <span class="string">'log'</span>)
+0138 
+0139          sprintf(<span class="string">'all events fitted for %d'</span>,thisYear); pause; close all
+0140       <span class="keyword">end</span>
+0141 
+0142       <span class="comment">% Concatenate Info</span>
+0143       <span class="keyword">if</span> thisYear == 1
+0144          Info = thisYearInfo;
+0145       <span class="keyword">else</span>
+0146          thisYearInfo = <a href="#_sub1" class="code" title="subfunction thisYearInfo = updateinfo(thisYearInfo, thisYear)">updateinfo</a>(thisYearInfo, thisYear);
+0147          Info = catstructfields(1, Info, thisYearInfo);
+0148       <span class="keyword">end</span>
+0149    <span class="keyword">end</span>
+0150 
+0151    [ndays,numyears] = size(Qsave);
+0152    EventsData.eventTime = reshape(tsave, ndays*numyears, 1);
+0153    EventsData.eventFlow = reshape(Qsave, ndays*numyears, 1);
+0154    EventsData.eventRain = reshape(Rsave, ndays*numyears, 1);
+0155    EventsData.eventTags = reshape(Etags, ndays*numyears, 1);
+0156 
+0157    debug = false;
+0158    <span class="keyword">if</span> debug == true
+0159       figure; plot(T(1:720), Q(1:720), <span class="string">'o'</span>); hold on;
+0160       plot(T(thisYearInfo.imaxima), Q(thisYearInfo.imaxima), <span class="string">'o'</span>)
+0161    <span class="keyword">end</span>
+0162 <span class="keyword">end</span>
+0163 
+0164 <a name="_sub1" href="#_subfunctions" class="code">function thisYearInfo = updateinfo(thisYearInfo, thisYear)</a>
+0165    <span class="comment">% Adjust the indices in Info to be relative to the multi-year timeseries</span>
+0166    fields = fieldnames(thisYearInfo);
+0167    <span class="keyword">for</span> f = fields(:).'
+0168       <span class="keyword">if</span> strncmp(f, <span class="string">'i'</span>, 1)
+0169          thisYearInfo.(f{:}) = thisYearInfo.(f{:}) + <span class="keyword">...</span>
+0170             thisYearInfo.datalength * (thisYear-1) - 1;
+0171       <span class="keyword">end</span>
+0172    <span class="keyword">end</span>
+0173 <span class="keyword">end</span>
+0174 
+0175 <a name="_sub2" href="#_subfunctions" class="code">function [T,Q,R,numyears] = prepinput(T,Q,R)</a>
+0176    <span class="comment">% PREPINPUT remove leap inds and determine number of years.</span>
+0177 
+0178    <span class="keyword">if</span> isoctave()
+0179       <span class="keyword">try</span>
+0180          pkg load financial
+0181       <span class="keyword">catch</span> e
+0182          <span class="keyword">if</span> strcmp(e.message, <span class="string">'package financial is not installed'</span>)
+0183             disp([<span class="string">'Package financial is required but not installed. '</span> <span class="keyword">...</span>
+0184                <span class="string">'To install the package, run ’pkg install -forge financial’ '</span> <span class="keyword">...</span>
+0185                <span class="string">'from the Octave prompt.'</span>])
+0186          <span class="keyword">end</span>
+0187          rethrow(e)
+0188       <span class="keyword">end</span>
+0189    <span class="keyword">end</span>
+0190    monthnums = nan(size(T));
+0191    daynums = nan(size(T));
+0192    <span class="keyword">for</span> n = 1:numel(T)
+0193       monthnums = month(T(n));
+0194       daynums = day(T(n));
+0195    <span class="keyword">end</span>
+0196    leapidx = monthnums==2 &amp; daynums==29;
+0197    T(leapidx) = [];
+0198    Q(leapidx) = [];
+0199    R(leapidx) = [];
+0200    numyears = numel(T)/365;
+0201 
+0202    assert(numyears == round(numyears), <span class="string">'complete annual timeseries required'</span>);
+0203 <span class="keyword">end</span>
+0204 
+0205 <span class="comment">%% INPUT PARSER</span>
+0206 <a name="_sub3" href="#_subfunctions" class="code">function [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)</a>
+0207 
+0208    <span class="comment">% Take the option defaults from setopts so that getevents, wrapevents,</span>
+0209    <span class="comment">% and eventfinder use the same values.</span>
+0210    defaults = baseflow.setopts(<span class="string">'getevents'</span>);
+0211    parser = inputParser;
+0212    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0213    parser.StructExpand = true;
+0214 
+0215    parser.addRequired(<span class="string">'T'</span>, @(x) isnumeric(x) | isdatetime(x));
+0216    parser.addRequired(<span class="string">'Q'</span>, @(x) isnumeric(x) &amp; numel(x)==numel(T));
+0217    parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0218 
+0219    parser.addParameter(<span class="string">'qmin'</span>, defaults.qmin, @isnumericscalar);
+0220    parser.addParameter(<span class="string">'nmin'</span>, defaults.nmin, @isnumericscalar);
+0221    parser.addParameter(<span class="string">'fmax'</span>, defaults.fmax, @isnumericscalar);
+0222    parser.addParameter(<span class="string">'rmax'</span>, defaults.rmax, @isnumericscalar);
+0223    parser.addParameter(<span class="string">'rmin'</span>, defaults.rmin, @isnumericscalar);
+0224    parser.addParameter(<span class="string">'cmax'</span>, defaults.cmax, @isnumericscalar);
+0225    parser.addParameter(<span class="string">'rmconvex'</span>, defaults.rmconvex, @islogical);
+0226    parser.addParameter(<span class="string">'rmnochange'</span>, defaults.rmnochange, @islogical);
+0227    parser.addParameter(<span class="string">'rmrain'</span>, defaults.rmrain, @islogical);
+0228    parser.addParameter(<span class="string">'pickevents'</span>, defaults.pickevents, @islogical);
+0229    parser.addParameter(<span class="string">'plotevents'</span>, defaults.plotevents, @islogical);
+0230    parser.addParameter(<span class="string">'asannual'</span>, defaults.asannual, @islogical);
+0231 
+0232    parser.parse(T, Q, R, varargin{:});
+0233    opts = parser.Results;
+0234 
+0235    <span class="keyword">if</span> isempty(R)
+0236       R = zeros(size(Q));
+0237    <span class="keyword">end</span>
+0238 
+0239    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0240    T = todatenum(T);
+0241 <span class="keyword">end</span></pre></div>
 </body>
 </html>

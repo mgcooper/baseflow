@@ -155,54 +155,54 @@ This function is called by:
 0073          b = 2-1./d;
 0074       <span class="keyword">case</span> <span class="string">'k'</span>
 0075          k = inputvalue;
-0076          <span class="comment">% Invert k = (1-b)/(b-2) to get b (see convertb)</span>
-0077          b = (2.*k+1)./(k+1);
-0078       <span class="keyword">case</span> <span class="string">'a'</span> <span class="comment">% conversion between -dQ/dt = aQ^b and Q = cS^d</span>
-0079          <span class="comment">% a = inputvalue;</span>
-0080          <span class="comment">% This function converts b only; 'a' is not a valid inputvarname.</span>
-0081 
-0082       <span class="keyword">case</span> <span class="string">'n'</span>
-0083          n =  inputvalue;
-0084          <span class="keyword">switch</span> isflat
-0085             <span class="keyword">case</span> true
-0086                b = (2.*n+3)./(n+2);
-0087             <span class="keyword">case</span> false
-0088                b = (2.*n+1)./(n+1);
-0089          <span class="keyword">end</span>
-0090 
-0091       <span class="keyword">case</span> <span class="string">'N'</span>
-0092          N = inputvalue;
-0093          <span class="keyword">switch</span> isflat
-0094             <span class="keyword">case</span> true
-0095                b = (3-N)./2;
-0096             <span class="keyword">case</span> false
-0097                b = 1-N;
-0098          <span class="keyword">end</span>
-0099    <span class="keyword">end</span>
-0100 <span class="keyword">end</span>
-0101 
-0102 <a name="_sub2" href="#_subfunctions" class="code">function varargout = convertb(b,outputvarname,isflat)</a>
-0103    <span class="comment">%BCONVERSIONS Convert the recession flow power law exponent b to any of</span>
-0104    <span class="comment">%several other recession flow parameters.</span>
-0105    <span class="comment">%</span>
-0106    <span class="comment">%  Inputs:        b,    from dQ(t)=a*Q^b</span>
-0107    <span class="comment">%            isflat,    true if flat aquifer</span>
-0108    <span class="comment">%</span>
-0109    <span class="comment">%  Outputs:   alpha,    from P(Q) ~ t*^-alpha</span>
-0110    <span class="comment">%              beta,    from Q ~ S^-beta (beta = -d)</span>
-0111    <span class="comment">%             gamma,    from 1/gamma = 1/alpha + 1/beta</span>
-0112    <span class="comment">%                 N,    from a = c1*D^N, where c1 is a coefficient</span>
-0113    <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
-0114    <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
-0115    <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
-0116    <span class="comment">%                 k,    from P(Q) ~ Q^-(1+1/k)</span>
-0117 
-0118    alpha = 1./(b-1);       <span class="comment">% power law exponent alpha</span>
-0119    beta  = 1./(b-2);
-0120    gamma = 1./(2.*b-3);
-0121    d     = 1./(2-b);
-0122    <span class="comment">% gpfit shape parameter k: the gpd tail pdf ~ x^-(1+1/k) equals the</span>
-0123    <span class="comment">% timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).</span>
+0076          b = (2.*k+1)./(k+1);
+0077       <span class="keyword">case</span> <span class="string">'a'</span> <span class="comment">% conversion between -dQ/dt = aQ^b and Q = cS^d</span>
+0078          <span class="comment">% a = inputvalue;</span>
+0079          <span class="comment">% This function converts b only; 'a' is not a valid inputvarname.</span>
+0080 
+0081       <span class="keyword">case</span> <span class="string">'n'</span>
+0082          n =  inputvalue;
+0083          <span class="keyword">switch</span> isflat
+0084             <span class="keyword">case</span> true
+0085                b = (2.*n+3)./(n+2);
+0086             <span class="keyword">case</span> false
+0087                b = (2.*n+1)./(n+1);
+0088          <span class="keyword">end</span>
+0089 
+0090       <span class="keyword">case</span> <span class="string">'N'</span>
+0091          N = inputvalue;
+0092          <span class="keyword">switch</span> isflat
+0093             <span class="keyword">case</span> true
+0094                b = (3-N)./2;
+0095             <span class="keyword">case</span> false
+0096                b = 1-N;
+0097          <span class="keyword">end</span>
+0098    <span class="keyword">end</span>
+0099 <span class="keyword">end</span>
+0100 
+0101 <a name="_sub2" href="#_subfunctions" class="code">function varargout = convertb(b,outputvarname,isflat)</a>
+0102    <span class="comment">%BCONVERSIONS Convert the recession flow power law exponent b to any of</span>
+0103    <span class="comment">%several other recession flow parameters.</span>
+0104    <span class="comment">%</span>
+0105    <span class="comment">%  Inputs:        b,    from dQ(t)=a*Q^b</span>
+0106    <span class="comment">%            isflat,    true if flat aquifer</span>
+0107    <span class="comment">%</span>
+0108    <span class="comment">%  Outputs:   alpha,    from P(Q) ~ t*^-alpha</span>
+0109    <span class="comment">%              beta,    from Q ~ S^-beta (beta = -d)</span>
+0110    <span class="comment">%             gamma,    from 1/gamma = 1/alpha + 1/beta</span>
+0111    <span class="comment">%                 N,    from a = c1*D^N, where c1 is a coefficient</span>
+0112    <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
+0113    <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
+0114    <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
+0115    <span class="comment">%                 k,    from P(Q) ~ Q^-(1+1/k)</span>
+0116    <span class="comment">%</span>
+0117    <span class="comment">% k is the gpfit shape parameter: the gpd tail pdf ~ x^-(1+1/k) equals the</span>
+0118    <span class="comment">% timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).</span>
+0119 
+0120    alpha = 1./(b-1);       <span class="comment">% power law exponent alpha</span>
+0121    beta  = 1./(b-2);
+0122    gamma = 1./(2.*b-3);
+0123    d     = 1./(2-b);
 0124    k     = (1-b)./(b-2);
 0125 
 0126    <span class="keyword">switch</span> isflat
@@ -249,16 +249,18 @@ This function is called by:
 0167    parser.FunctionName = <span class="string">'baseflow.conversions'</span>;
 0168 
 0169    parser.addRequired(<span class="string">'inputvalue'</span>, @isnumeric);
-0170    parser.addRequired(<span class="string">'inputvarname'</span>, @(x) ~isempty(validatestring(x, validvarnames)));
-0171    parser.addRequired(<span class="string">'outputvarname'</span>, @(x) ~isempty(validatestring(x, validvarnames)));
-0172    parser.addParameter(<span class="string">'isflat'</span>, true, @islogical);
-0173 
-0174    parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});
+0170    parser.addRequired(<span class="string">'inputvarname'</span>, <span class="keyword">...</span>
+0171       @(x) ~isempty(validatestring(x, validvarnames)));
+0172    parser.addRequired(<span class="string">'outputvarname'</span>, <span class="keyword">...</span>
+0173       @(x) ~isempty(validatestring(x, validvarnames)));
+0174    parser.addParameter(<span class="string">'isflat'</span>, true, @islogical);
 0175 
-0176    inputvalue = parser.Results.inputvalue;
-0177    inputvarname = parser.Results.inputvarname;
-0178    outputvarname = parser.Results.outputvarname;
-0179    isflat = parser.Results.isflat;
-0180 <span class="keyword">end</span></pre></div>
+0176    parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});
+0177 
+0178    inputvalue = parser.Results.inputvalue;
+0179    inputvarname = parser.Results.inputvarname;
+0180    outputvarname = parser.Results.outputvarname;
+0181    isflat = parser.Results.isflat;
+0182 <span class="keyword">end</span></pre></div>
 </body>
 </html>

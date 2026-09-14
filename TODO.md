@@ -77,6 +77,14 @@ every item.
 
 ## Dependency tooling and self-containment (bfra-3kh.6 stub)
 
+Resolved 2026-09-14 (bead bfra-3kh.25, user decision): `loadcalm`,
+`loadghcnd`, `loadgrace`, `mapbasins`, and `mapgages` left the toolbox;
+the analysis project (mgcooper/arctic_baseflow) keeps synced copies
+(commit ae8edec there). The `pendingentries` list and the
+`pending_decision` report field are gone. The dependency check lists
+the matfunclib `getlist` chain that only `loadflow`'s parked `readflow`
+reaches as known external. The rows below record the earlier state.
+
 ### Done
 
 - [x] dependency tooling repaired. `baseflow.internal.dependencies`
@@ -492,42 +500,42 @@ user decision before any change. Findings with evidence:
 
 ### Todo
 
-- [ ] (user decision, item 1) `private/nonnansegments.m` option input.
+- [x] (user decision, item 1, done 2026-09-14: `option` implemented for matrix and cell elements) `private/nonnansegments.m` option input.
   Provenance: finding helpers#11. The function accepts a third input
   `option` and ignores it (parked matfunclib WIP). Options: drop the
   input, or raise an error when a caller passes it.
-- [ ] (user decision, item 2) `+deps/peakfinder.m` single interior
+- [x] (user decision, item 2, done 2026-09-14: monotone-branch patch plus no threshold in the trough and peak wrappers; Kuparuk b matches the published value) `+deps/peakfinder.m` single interior
   maximum. Provenance: finding helpers#14. When `includeEndpoints` is
   false, the monotone branch never reports a single interior maximum.
   `private/islocalmax.m` inherits the result. A fix changes vendored
   third-party code.
-- [ ] (user decision, item 3) Getting Started defaults. Provenance:
+- [x] (user decision, item 3, done 2026-09-14: the event parsers take their defaults from `setopts`) Getting Started defaults. Provenance:
   finding docs#5. The Getting Started API defaults come from `setopts`,
   but the function parsers use other defaults for direct name-value
   calls. Decision: choose the set of defaults that governs.
-- [ ] (user decision, item 4) plotdqdt deprecated label. Provenance:
+- [x] (user decision, item 4, done 2026-09-13) plotdqdt deprecated label. Provenance:
   findings docs#7 and userdocs#24. Getting Started labels `plotdqdt`
   deprecated; the code does not.
-- [ ] (user decision, item 5) getdqdt help methods. Provenance: finding
+- [x] (user decision, item 5, done 2026-09-13) getdqdt help methods. Provenance: finding
   userdocs#3. The help lists `derivmethod` values and options that the
   parser lacks (B1..C4, SGO/SPN/SLM, fitwindow, ax, fitab, plotfit). It
   omits CTS and `ctsmethod`. Options: remove them, mark them not
   implemented, or implement them.
-- [ ] (user decision, item 6) 1.1.0 release date. Provenance: finding
+- [x] (user decision, item 6, done: release date 2026-09-14) 1.1.0 release date. Provenance: finding
   userdocs#14. The date 2026-08-30 in CHANGELOG, DESCRIPTION,
   CITATION.cff, and .zenodo.json predates the content. Rec: set the
   real release date at J2.
-- [ ] (user decision, item 7) CITATION.cff authors. Provenance: finding
+- [x] (user decision, item 7, done 2026-09-13) CITATION.cff authors. Provenance: finding
   userdocs#16. CITATION.cff lists one author. .zenodo.json, Zenodo,
   JOSS, and README list Cooper and Tian Zhou.
-- [ ] (user decision, item 8) eventfinder `qmin` and `cmax`.
+- [x] (user decision, item 8, done 2026-09-13) eventfinder `qmin` and `cmax`.
   Provenance: finding userdocs#26. The eventfinder help documents
   `qmin`, `cmax`, and an opts struct that the parser rejects.
-- [ ] (user decision, item 9) `toolbox/functionSignatures.json`.
+- [x] (user decision, item 9, done 2026-09-13) `toolbox/functionSignatures.json`.
   Provenance: finding userdocs#28. Its `derivmethod` choices, the
   missing `fitopts`, the `drainagedens` name, and the eventphi options
   disagree with the parsers.
-- [ ] (user decision, item 10) `toolbox/docs/citing_baseflow.m` license
+- [x] (user decision, item 10, done 2026-09-13) `toolbox/docs/citing_baseflow.m` license
   wording. Provenance: finding records#17. The page attaches a citation
   condition to the BSD 3-Clause license.
 

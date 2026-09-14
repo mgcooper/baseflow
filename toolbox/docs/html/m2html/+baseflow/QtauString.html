@@ -31,6 +31,7 @@
 
  Syntax
 
+     [Qtaustr, aQbstr] = baseflow.QtauString(ab)
      [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0)
      [Qtaustr, aQbstr] = baseflow.QtauString(_, 'printvalues', true)
 
@@ -43,7 +44,30 @@
      and the reference time tau0. Otherwise the strings contain symbols
      only.
 
- See also: <a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>, <a href="QtString.html" class="code" title="function [Qtstr,aQbstr] = QtString(varargin)">QtString</a>
+ Optional inputs
+
+     one input: array [a,b]
+     two input: array [a,b], scalar tau0
+     'printvalues': logical, true includes the values of ab and tau0 in
+     the strings. The default is false.
+
+ Output
+
+     Qtaustr: formatted latex string for equation Q* = f(tau,tau0,alpha)
+     aQbstr: formatted latex string for equation dQdt = aQb
+
+ Example
+
+ a = 1250;
+ b = 2;
+ baseflow.QtauString([a, b], &quot;printvalues&quot;,true)
+
+ Also return Q* with a value for tau0:
+
+ Qtaustr = baseflow.QtauString([a, b], 5, &quot;printvalues&quot;,true)
+
+ See also: baseflow.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>, baseflow.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>, baseflow.<a href="QtString.html" class="code" title="function [Qtstr,aQbstr] = QtString(varargin)">QtString</a>,
+ baseflow.<a href="aQbString.html" class="code" title="function [aQbstr,Qtstr] = aQbString(varargin)">aQbString</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -76,77 +100,115 @@ This function is called by:
 0003    <span class="comment">%</span>
 0004    <span class="comment">% Syntax</span>
 0005    <span class="comment">%</span>
-0006    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0)</span>
-0007    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(_, 'printvalues', true)</span>
-0008    <span class="comment">%</span>
-0009    <span class="comment">% Description</span>
-0010    <span class="comment">%</span>
-0011    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0) returns latex</span>
-0012    <span class="comment">%     strings for the dimensionless Q* = (tau/tau0)^-alpha function and</span>
-0013    <span class="comment">%     the recession equation -dQ/dt = aQ^b. When 'printvalues' is true,</span>
-0014    <span class="comment">%     the strings include the values of the optional inputs ab = [a b]</span>
-0015    <span class="comment">%     and the reference time tau0. Otherwise the strings contain symbols</span>
-0016    <span class="comment">%     only.</span>
-0017    <span class="comment">%</span>
-0018    <span class="comment">% See also: Qnonlin, QtString</span>
-0019    <span class="comment">%</span>
-0020    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0021 
-0022    <span class="comment">% if called with no input, open this file</span>
-0023    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0024 
-0025    <span class="comment">% PARSE INPUTS</span>
-0026    [ab, tau0, printvalues] = <a href="#_sub1" class="code" title="subfunction [ab, tau0, printvalues] = parseinputs(mfilename, varargin)">parseinputs</a>(mfilename, varargin{:});
-0027 
-0028    <span class="keyword">if</span> printvalues == true
-0029       <span class="comment">% build the aQb string</span>
-0030       aexp    = floor(log10(ab(1)));
-0031       abase   = ab(1)*10^abs(aexp);
-0032       aQbstr  = sprintf(<span class="string">'-d$Q$/d$t = %.fe^{%.f}Q^{%.2f}$'</span>,abase,aexp,ab(2));
-0033 
-0034       <span class="comment">% build the Q(tau) string</span>
-0035       <span class="keyword">if</span> isempty(tau0)
-0036          Qtaustr = <span class="keyword">...</span>
-0037             sprintf(<span class="string">'$Q^* = [\\tau$/$\\tau_0$]$^{-\\alpha}$ $(b=%.2f)$'</span>,ab(2));
-0038       <span class="keyword">else</span>
-0039          Qtaustr = <span class="keyword">...</span>
-0040             sprintf(<span class="string">'$Q^* = [\\tau$/%d]$^{-\\alpha}$ $(b=%.2f)$'</span>,tau0,ab(2));
-0041       <span class="keyword">end</span>
-0042    <span class="keyword">else</span>
-0043       aQbstr  = <span class="string">'-d$Q$/d$t = aQ^b$'</span>;
-0044       Qtaustr = <span class="string">'$Q^* = [\tau$/$\tau_0$]$^{-\alpha}$'</span>;
-0045    <span class="keyword">end</span>
-0046 <span class="keyword">end</span>
-0047 
-0048 <span class="comment">%% INPUT PARSER</span>
-0049 <a name="_sub1" href="#_subfunctions" class="code">function [ab, tau0, printvalues] = parseinputs(mfilename, varargin)</a>
-0050    parser = inputParser;
-0051    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
-0052 
-0053    parser.addOptional(<span class="string">'ab'</span>, [], @isnumeric);
-0054    parser.addOptional(<span class="string">'tau0'</span>, [], @isnumeric);
-0055    parser.addParameter(<span class="string">'printvalues'</span>, false, @islogical);
-0056 
-0057    parser.parse(varargin{:});
-0058 
-0059    ab = parser.Results.ab;
-0060    tau0 = parser.Results.tau0;
-0061    printvalues = parser.Results.printvalues;
-0062 
-0063    <span class="comment">%    printvalues  = false;</span>
-0064    <span class="comment">%    Q0 = nan;</span>
-0065    <span class="comment">%    if nargin == 1</span>
-0066    <span class="comment">%       ab  = varargin{1};</span>
-0067    <span class="comment">%    elseif nargin == 2</span>
-0068    <span class="comment">%       ab  = [varargin{1};varargin{2}];</span>
-0069    <span class="comment">%    elseif nargin == 3</span>
-0070    <span class="comment">%       ab  = [varargin{1};varargin{2}];</span>
-0071    <span class="comment">%       Q0  = varargin{3};</span>
-0072    <span class="comment">%    elseif nargin == 4</span>
-0073    <span class="comment">%       ab  = [varargin{1};varargin{2}];</span>
-0074    <span class="comment">%       Q0  = varargin{3};</span>
-0075    <span class="comment">%       printvalues = varargin{4};</span>
-0076    <span class="comment">%    end</span>
-0077 <span class="keyword">end</span></pre></div>
+0006    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(ab)</span>
+0007    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0)</span>
+0008    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(_, 'printvalues', true)</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">% Description</span>
+0011    <span class="comment">%</span>
+0012    <span class="comment">%     [Qtaustr, aQbstr] = baseflow.QtauString(ab, tau0) returns latex</span>
+0013    <span class="comment">%     strings for the dimensionless Q* = (tau/tau0)^-alpha function and</span>
+0014    <span class="comment">%     the recession equation -dQ/dt = aQ^b. When 'printvalues' is true,</span>
+0015    <span class="comment">%     the strings include the values of the optional inputs ab = [a b]</span>
+0016    <span class="comment">%     and the reference time tau0. Otherwise the strings contain symbols</span>
+0017    <span class="comment">%     only.</span>
+0018    <span class="comment">%</span>
+0019    <span class="comment">% Optional inputs</span>
+0020    <span class="comment">%</span>
+0021    <span class="comment">%     one input: array [a,b]</span>
+0022    <span class="comment">%     two input: array [a,b], scalar tau0</span>
+0023    <span class="comment">%     'printvalues': logical, true includes the values of ab and tau0 in</span>
+0024    <span class="comment">%     the strings. The default is false.</span>
+0025    <span class="comment">%</span>
+0026    <span class="comment">% Output</span>
+0027    <span class="comment">%</span>
+0028    <span class="comment">%     Qtaustr: formatted latex string for equation Q* = f(tau,tau0,alpha)</span>
+0029    <span class="comment">%     aQbstr: formatted latex string for equation dQdt = aQb</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">% Example</span>
+0032    <span class="comment">%</span>
+0033    <span class="comment">% a = 1250;</span>
+0034    <span class="comment">% b = 2;</span>
+0035    <span class="comment">% baseflow.QtauString([a, b], &quot;printvalues&quot;,true)</span>
+0036    <span class="comment">%</span>
+0037    <span class="comment">% Also return Q* with a value for tau0:</span>
+0038    <span class="comment">%</span>
+0039    <span class="comment">% Qtaustr = baseflow.QtauString([a, b], 5, &quot;printvalues&quot;,true)</span>
+0040    <span class="comment">%</span>
+0041    <span class="comment">% See also: baseflow.getstring, baseflow.Qnonlin, baseflow.QtString,</span>
+0042    <span class="comment">% baseflow.aQbString</span>
+0043    <span class="comment">%</span>
+0044    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0045 
+0046    <span class="comment">% if called with no input, open this file</span>
+0047    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0048 
+0049    <span class="comment">% parse inputs</span>
+0050    [ab, tau0, printvalues] = <a href="#_sub1" class="code" title="subfunction [ab, tau0, printvalues] = parseinputs(mfilename, varargin)">parseinputs</a>(mfilename, varargin{:});
+0051 
+0052    <span class="comment">% main function. Each helper builds its own labels with values by design.</span>
+0053    <span class="comment">% baseflow.getstring holds the symbolic labels.</span>
+0054    <span class="keyword">if</span> printvalues == true
+0055 
+0056       <span class="comment">% build the aQb string</span>
+0057       aexp = floor(log10(ab(1)));
+0058       abase = ab(1) * 10 ^ -aexp;
+0059 
+0060       <span class="comment">% close math mode before e so the latex interpreter keeps e upright</span>
+0061       aQbstr = sprintf(<span class="string">'-d$Q$/d$t$ = %.fe$^{%.f}Q^{%.2f}$'</span>, <span class="keyword">...</span>
+0062          abase, aexp, ab(2));
+0063 
+0064       <span class="comment">% build the Q(tau) string. This formats tau0 as an integer (%d).</span>
+0065       <span class="keyword">if</span> isempty(tau0)
+0066          tau0str = <span class="string">'$\tau_0$'</span>;
+0067       <span class="keyword">else</span>
+0068          tau0str = sprintf(<span class="string">'%d'</span>, tau0);
+0069       <span class="keyword">end</span>
+0070       Qtaustr = sprintf(<span class="string">'$Q^* = [\\tau$/%s]$^{-\\alpha}$ $(b=%.2f)$'</span>, <span class="keyword">...</span>
+0071          tau0str, ab(2));
+0072    <span class="keyword">else</span>
+0073       <span class="comment">% get the symbolic aQb label from baseflow.getstring so the helpers</span>
+0074       <span class="comment">% match. getstring has no Q* label.</span>
+0075       aQbstr = baseflow.getstring(<span class="string">'aQb'</span>);
+0076       Qtaustr = <span class="string">'$Q^* = [\tau$/$\tau_0$]$^{-\alpha}$'</span>;
+0077    <span class="keyword">end</span>
+0078 
+0079    <span class="comment">% convert to tex because Octave does not support the latex interpreter</span>
+0080    <span class="keyword">if</span> isoctave
+0081       aQbstr = latex2tex(aQbstr);
+0082       Qtaustr = latex2tex(Qtaustr);
+0083    <span class="keyword">end</span>
+0084 <span class="keyword">end</span>
+0085 
+0086 <span class="comment">%% INPUT PARSER</span>
+0087 <a name="_sub1" href="#_subfunctions" class="code">function [ab, tau0, printvalues] = parseinputs(mfilename, varargin)</a>
+0088 
+0089    parser = inputParser;
+0090    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0091    parser.addOptional(<span class="string">'ab'</span>, [], @isnumeric);
+0092    parser.addOptional(<span class="string">'tau0'</span>, [], @isnumeric);
+0093    parser.addParameter(<span class="string">'printvalues'</span>, false, @islogical);
+0094    parser.parse(varargin{:});
+0095 
+0096    ab = parser.Results.ab;
+0097    tau0 = parser.Results.tau0;
+0098    printvalues = parser.Results.printvalues;
+0099 
+0100    <span class="comment">%    printvalues  = false;</span>
+0101    <span class="comment">%    Q0 = nan;</span>
+0102    <span class="comment">%    if nargin == 1</span>
+0103    <span class="comment">%       ab  = varargin{1};</span>
+0104    <span class="comment">%    elseif nargin == 2</span>
+0105    <span class="comment">%       ab  = [varargin{1};varargin{2}];</span>
+0106    <span class="comment">%    elseif nargin == 3</span>
+0107    <span class="comment">%       ab  = [varargin{1};varargin{2}];</span>
+0108    <span class="comment">%       Q0  = varargin{3};</span>
+0109    <span class="comment">%    elseif nargin == 4</span>
+0110    <span class="comment">%       ab  = [varargin{1};varargin{2}];</span>
+0111    <span class="comment">%       Q0  = varargin{3};</span>
+0112    <span class="comment">%       printvalues = varargin{4};</span>
+0113    <span class="comment">%    end</span>
+0114 
+0115 <span class="keyword">end</span></pre></div>
 </body>
 </html>

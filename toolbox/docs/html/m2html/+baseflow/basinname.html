@@ -47,7 +47,7 @@
      basinname string as input to load data for that basin.
 
 
- See also: baseflow.<a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a> baseflow.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> baseflow.<a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a>
+ See also: baseflow.<a href="loadbasins.html" class="code" title="function [Basins,Meta,Poly] = loadbasins(basinname,varargin)">loadbasins</a> baseflow.<a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a> baseflow.<a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>
  baseflow.<a href="stationlist.html" class="code" title="function stations = stationlist()">stationlist</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
@@ -65,10 +65,7 @@ This function is called by:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
 <li><a href="loadbasins.html" class="code" title="function [Basins,Meta,Poly] = loadbasins(basinname,varargin)">loadbasins</a>	LOADBASINS Load boundary object for basin specified by basinname.</li>
-<li><a href="loadcalm.html" class="code" title="function [Calm,Meta] = loadcalm(basinname,varargin)">loadcalm</a>	LOADCALM Load CALM ALT data for a basin in the Bounds struct.</li>
 <li><a href="loadflow.html" class="code" title="function [Flow,Meta] = loadflow(basinname,varargin)">loadflow</a>	LOADFLOW Load timeseries of streamflow and metadata for basin.</li>
-<li><a href="loadghcnd.html" class="code" title="function GHCN = loadghcnd(basinname,varargin)">loadghcnd</a>	LOADGHCND Read in a global hydroclimatology network database file.</li>
-<li><a href="loadgrace.html" class="code" title="function [Grace, Meta] = loadgrace(varargin)">loadgrace</a>	LOADGRACE Load grace data for basin in baseflow basin database.</li>
 <li><a href="loadmeta.html" class="code" title="function Meta = loadmeta(basinname,varargin)">loadmeta</a>	LOADMETA Load metadata for basin indicated by basinname.</li>
 <li><a href="loadprops.html" class="code" title="function [Dd,A,L,D] = loadprops(basinname, varargin)">loadprops</a>	LOADPROPS Load basin properties from metadata table.</li></ul>
 <!-- crossreference -->
@@ -100,7 +97,7 @@ This function is called by:
 0019    <span class="comment">%     basinname string as input to load data for that basin.</span>
 0020    <span class="comment">%</span>
 0021    <span class="comment">%</span>
-0022    <span class="comment">% See also: baseflow.loadcalm baseflow.loadflow baseflow.loadgrace</span>
+0022    <span class="comment">% See also: baseflow.loadbasins baseflow.loadflow baseflow.loadmeta</span>
 0023    <span class="comment">% baseflow.stationlist</span>
 0024    <span class="comment">%</span>
 0025    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>

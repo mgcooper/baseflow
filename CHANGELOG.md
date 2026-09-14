@@ -4,7 +4,7 @@ This file lists notable changes to the baseflow toolbox. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 semantic versioning.
 
-## [1.1.0] - 2026-09-13
+## [1.1.0] - 2026-09-14
 
 ### Added
 
@@ -27,10 +27,13 @@ semantic versioning.
 - `struct2varargin` converts a name-value struct to a cell array.
   `trendplot` and `formatPlotMarkers` call it in place of
   `namedargs2cell`.
-- `nonnansegments` accepts a matrix or a cell array of vectors. For a
-  matrix, the `option` input selects one result per column (`'each'`,
-  the default), the rows where every column is non-nan (`'all'`), or the
-  rows where any column is non-nan (`'any'`).
+- `nonnansegments` accepts a vector, a matrix, or a cell array whose
+  elements are vectors or matrices, and applies the same rules to each
+  element. For a matrix, the `option` input selects one result per
+  column (`'each'`, the default), the rows where every column is non-nan
+  (`'all'`), or the rows where any column is non-nan (`'any'`).
+- `tests/test_eqstrings.m` checks the value and symbolic labels of
+  `aQbString`, `QtString`, and `QtauString`.
 - `fitab` fits the `'ols'` method on GNU Octave. A weighted
   least-squares solve with t-based confidence intervals replaces the
   Curve Fitting Toolbox `fit` and `confint` calls, and on MATLAB the
@@ -56,8 +59,8 @@ semantic versioning.
     `fitphidist`, and `aQbString`;
   - `test_dependencies`: core-chain self-containment, declared
     products, the option outputs, the `'resolve'` file copies, the
-    `plfitb` known-external classification, and the pending entry points
-    that `Setup('dependencies')` reports;
+    `plfitb` known-external classification, the `loadflow` parked
+    reader, and the `Setup('dependencies')` report;
   - `test_version`: every version source agrees.
 - The demo scripts run under the suite (`tests/test_demos.m`). The
   theory demos skip when the Symbolic Math Toolbox is not installed.
@@ -85,9 +88,23 @@ semantic versioning.
   `addpath(fullfile(pwd, 'toolbox'))` and `Setup('addpath')`. It sourced
   `Setup.m`, which is a function file in `toolbox/`, so Octave started in
   the repository root did not add the toolbox to the path.
-- Getting Started lists the `baseflow.setopts` defaults and names the
-  defaults that differ for direct name-value calls (`getevents` fmax,
-  rmin, rmnochange, rmrain; `globalfit` aquiferslope). It no longer
+- `eventfinder` detects hydrograph troughs again. In 1.0.0 its
+  Octave-compatible `islocalmin` and `islocalmax` wrappers called
+  `peakfinder` with a threshold of 0, which dropped every minimum of
+  positive flow and every negative local maximum of dQ/dt. The wrappers
+  apply no threshold, which restores the v0.1.0 behavior of the MATLAB
+  `islocalmax` and `islocalmin` functions, and the vendored `peakfinder`
+  keeps a single interior peak when endpoints are excluded. Event counts
+  change: the example data gives 287 events with the `setopts` defaults
+  (327 in 1.0.0). The Kuparuk annual workflow gives 230 events and a
+  global b of 1.3541, which matches the published 1.3540 (1.3519 in
+  1.0.0).
+- `QtString` and `QtauString` value labels showed an italic "e" with the
+  latex interpreter and printed the wrong mantissa for a >= 10 (for
+  example 1250000e^{3} for a = 1250). They build the label the way
+  `aQbString` does.
+- Getting Started lists the `baseflow.setopts` defaults, which direct
+  name-value calls also use. It no longer
   labels `plotdqdt` deprecated. The `eventfinder` help and the
   `setopts` fitevents option list match their parsers.
 - Continuous integration did not trigger: YAML parsed the
@@ -148,6 +165,23 @@ semantic versioning.
 
 ### Changed
 
+- `getevents`, `eventfinder`, and `wrapevents` take their name-value
+  defaults from `baseflow.setopts('getevents')`, the values that produced
+  the published results and that the demos use. A direct call without an
+  options struct uses `fmax` = 1, `rmin` = 1, `rmnochange` = true, and
+  `rmrain` = true. In 1.0.0 these parsers used `fmax` = 2, `rmin` = 0,
+  and `rmrain` = false (and `rmnochange` = false in `getevents` and
+  `eventfinder`), so direct-call results change.
+- `globalfit` defaults `aquiferslope` to 0, the `setopts` value. `globalfit`
+  does not use this input, so results do not change.
+- `getevents` and `eventfinder` require `rmax` > 1. The `rmnochange`
+  filter counts each nan as a run of length 1, so `rmax` <= 1 rejected
+  every day.
+- `aQbString`, `QtString`, and `QtauString` share one help layout, input
+  parser, and label format. Their symbolic labels come from
+  `baseflow.getstring`.
+- The `runlength` and `isminlength` help state that each nan is a run of
+  length 1 and that callers use nan to break runs.
 - `getdqdt` method `'CTS'` (`private/fitcts.m`) is complete. It computes
   dQ/dt with six finite-difference stencils. The `ctsmethod` option
   selects `B1` (backward, first order, the default), `B2`, `F1`, `F2`,
@@ -172,12 +206,10 @@ semantic versioning.
   `undeclared_products`. The comparison ignores the Signal Processing
   Toolbox and Symbolic Math Toolbox entries that
   `requiredFilesAndProducts` reports for code that does not call them.
-- The `'missing'` and `'check'` reports list the entry points
-  `loadcalm`, `loadghcnd`, `loadgrace`, `mapbasins`, and `mapgages` in
-  `pending_decision`. These functions await a decision on their
-  external references.
 - The dependency report lists `r_plfit` in `known_external` whenever it
-  analyzes `plfitb`, and does not count `r_plfit` as missing.
+  analyzes `plfitb`, and does not count `r_plfit` as missing. It does not
+  count the matfunclib `getlist` chain as missing either; only the parked
+  `readflow` function in `loadflow` reaches it.
 - `Setup('dependencies')` and `Setup('install')` run the live
   dependency check. The `dependencies_checked` preference is true only
   when no required file is missing. A failed check points to the
@@ -191,14 +223,14 @@ semantic versioning.
   `.octaverc` load the installed name, and `DESCRIPTION` lists
   `statistics-resampling` and `financial`.
 - README requirements list the Statistics and Machine Learning and
-  Curve Fitting toolboxes, plus the Mapping Toolbox for `mapbasins` and
-  `mapgages`. They also list the six Octave packages the toolbox loads.
+  Curve Fitting toolboxes. They also list the six Octave packages the
+  toolbox loads.
 - README states that Octave support covers the core analysis functions
   and the demos. It states that `tests/octave_smoke.m` verifies the core
   workflow on GNU Octave 11.3.0, and that the toolbox ran on Octave 8.2.0
   in 2023. It lists the install commands for the six Octave packages and
   their `io` and `datatypes` dependencies.
-- README lists the nine public functions that need data files or
+- README lists the four public functions that need data files or
   functions that the toolbox does not ship.
 - README documents the external `r_plfit` requirement of the `plfitb`
   method `'hanel'`. `r_plfit` has no license grant, so the toolbox does
@@ -219,9 +251,6 @@ semantic versioning.
   names a value that a reader cannot identify, such as a non-obvious
   expected value or a tolerance. A comment says what each case
   checks. Option sweeps use parameterized test classes.
-- The `loadcalm` help documents the Kuparuk nine-site selection for the
-  default `'current'` version. The selection keeps the output
-  reproducible against the published results.
 - Every version source reads 1.1.0: `baseflow.internal.version`,
   `DESCRIPTION`, `CITATION.cff`, `.zenodo.json`, and `toolbox/info.xml`.
 - `CITATION.cff` cites the Zenodo concept DOI, which covers all versions.
@@ -247,6 +276,18 @@ semantic versioning.
   `fitmethod`, `pickmethod`, `plotfits`, and `eventID`.
 - The `Contents.m` manifests and the m2html function pages are
   regenerated for 1.1.0.
+
+### Removed
+
+- `loadcalm`, `loadghcnd`, `loadgrace`, `mapbasins`, and `mapgages`.
+  They need data files and functions that the toolbox does not ship, and
+  no demo, test, or core function uses them. The analysis project
+  (mgcooper/arctic_baseflow) keeps working copies.
+- The `pending_decision` field of the `baseflow.internal.dependencies`
+  report and of `Setup('dependencies')`.
+- The Mapping Toolbox from the `DESCRIPTION` `MatlabProducts` line, the
+  README requirements, Getting Started, and the `Setup` preferences. No
+  toolbox function calls a Mapping Toolbox function.
 
 ## [1.0.0] - 2023-10-02
 

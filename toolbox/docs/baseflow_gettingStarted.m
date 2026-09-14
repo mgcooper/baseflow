@@ -30,8 +30,6 @@
 % * <https://www.mathworks.com/products/statistics.html Statistics and Machine 
 % Learning Toolbox>™. 
 % * <https://www.mathworks.com/products/curvefitting.html Curve Fitting Toolbox>™.
-% * <https://www.mathworks.com/products/mapping.html Mapping Toolbox>™, only
-% for the |mapbasins| and |mapgages| functions.
 %% Accessing Help
 % Need help? To see a list of toolbox functions, at the command window type: 
 %%
@@ -84,10 +82,8 @@
 % The API specification for the toolbox is defined below and is also defined 
 % in the |setopts| function documentation.
 % 
-% Each table lists the |baseflow.setopts| defaults. These defaults apply when
-% you pass an options struct created by |baseflow.setopts|. A direct name-value
-% call without that struct uses the defaults in the function input parser. The
-% note after each table lists each option whose direct-call default differs.
+% Each table lists the |baseflow.setopts| defaults. A direct name-value call
+% without an options struct from |baseflow.setopts| uses the same defaults.
 % 
 % API specification for |*getevents*|:
 %%
@@ -106,9 +102,7 @@
 %     asannual    :  (logical scalar) Flag indicating whether to detect events on an annual basis. Set true if pickevents true. Default = false.
 %
 %% 
-% A direct call to |getevents| without an options struct from |setopts| uses
-% these defaults: |fmax| = 2, |rmin| = 0, |rmnochange| = false, and |rmrain| =
-% false.
+% |nmin| must be greater than 2 and |rmax| must be greater than 1.
 % 
 % API specification for |*fitevents*|:
 %%
@@ -125,9 +119,6 @@
 %     ctsmethod      : (char) Finite-difference stencil for the CTS method: 'B1', 'B2', 'F1', 'F2', 'C2', or 'C4'. Default = 'B1'.
 %     fitopts        : (struct) baseflow.fitab options for every event fit: weights, order, quantile, refqtls, Nboot, alpha (numeric); mask, plotfit (logical). Fields override the same-named fitab options; weights and mask must be scalars. Default = struct().
 %
-%% 
-% A direct call to |fitevents| without an options struct from |setopts| uses
-% the same defaults.
 % 
 % API specification for |*globalfit*|:
 %%
@@ -148,9 +139,6 @@
 %       earlyqtls         : (numeric vector) Quantiles of Q and -dQ/dt for early reference lines (units: N/A). Default = [0.95 0.95].
 %       lateqtls          : (numeric vector) Quantiles of Q and -dQ/dt for late reference lines (units: N/A). Default = [0.50 0.50].
 %
-%% 
-% A direct call to |globalfit| without an options struct from |setopts| uses
-% |aquiferslope| = NaN.
 %% Toolbox Functions
 % Most |baseflow| workflows will revolve around calls to the three primary APIs 
 % described above, which implement the underlying methods of baseflow recession 
@@ -216,12 +204,6 @@
 % * |plotrefline| Add a reference line to a point cloud plot
 % * |plplotb| Plot the power law fit to the P(tau) Pareto distribution
 % * |checkevent| Plot detected recession event and fitted values
-%% 
-% Functions used for mapping (these require the Mapping Toolbox, plus
-% functions and data files that the toolbox does not ship):
-%% 
-% * |mapbasins| Map basin boundaries and color their faces by an attribute.
-% * |mapgages| Map a set of gage locations and color their faces by an attribute.
 %% 
 % Functions that simplify routine tasks:
 %% 
