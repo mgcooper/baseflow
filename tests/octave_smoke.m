@@ -1,8 +1,8 @@
 % OCTAVE_SMOKE Core-chain smoke test runnable in GNU Octave and MATLAB.
 %
 % Plain script with bare asserts: load the example data, detect events,
-% fit events, fit the a-b parameters with 'nls', then exercise the handle
-% allocation in the vendored arrow annotation, which has an
+% fit events, fit the a-b parameters with 'nls' and 'ols', then exercise
+% the handle allocation in the vendored arrow annotation, which has an
 % Octave-specific branch.
 % TestSuite.fromFolder skips this script (not a valid test file), so it
 % does not join the MATLAB suite. Run it directly with
@@ -31,7 +31,6 @@ assert(~isempty(EventFits.q) && ~isempty(EventFits.dqdt))
 assert(~isempty(FitsTable))
 
 % fit the event-scale recession equation -dq/dt = aQ^b with 'nls'
-% (fitab errors on Octave for 'ols': "not currently supported ... use nls")
 abFit = baseflow.fitab(EventFits.q, EventFits.dqdt, 'nls');
 
 % Require a struct whose 'ab' field holds two finite coefficients (a and
@@ -42,6 +41,20 @@ assert(isfield(abFit, 'ab'))
 assert(isnumeric(abFit.ab))
 assert(numel(abFit.ab) == 2)
 assert(all(isfinite(abFit.ab)))
+
+% fit the same equation with 'ols', which uses plain linear algebra and no
+% Curve Fitting Toolbox functions, so it also runs on Octave
+olsFit = baseflow.fitab(EventFits.q, EventFits.dqdt, 'ols');
+
+% Require the same usable estimate as the 'nls' block, plus finite
+% confidence bounds that bracket each coefficient
+assert(isstruct(olsFit))
+assert(isfield(olsFit, 'ab'))
+assert(isnumeric(olsFit.ab))
+assert(numel(olsFit.ab) == 2)
+assert(all(isfinite(olsFit.ab)))
+assert(olsFit.aL <= olsFit.a && olsFit.a <= olsFit.aH)
+assert(olsFit.bL <= olsFit.b && olsFit.b <= olsFit.bH)
 
 % exercise the vendored arrow handle allocation; close the figure the
 % call opens. arrow.m reads the MATLAB-only hidden axes property

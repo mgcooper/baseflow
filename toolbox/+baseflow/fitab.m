@@ -25,7 +25,8 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    %     mask     vector logical mask to exclude values from fitting
    %     order    scalar, exponent in -dq/dt = aQ^b
    %     refqtls  2x1 double, x/y quantiles used if 'method' == 'envelope'
-   %     quantile scalar double, quantile used if 'method' == 'qtl' (quantile regression)
+   %     quantile scalar double, quantile used if 'method' == 'qtl' (quantile
+   %              regression)
    %     Nboot    scalar double, bootstrap sample size for quantile regression
    %     plotfit  logical scalar indicating whether to make a plot or not
    %     fitopts  struct whose fields override the same-named options above
@@ -91,7 +92,7 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 
    switch method
       case 'ols'
-         [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave);
+         [ab,ci,ok] = fitOLS(logx,logy,weights,alpha);
       case 'qtl'
          [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave);
       case 'mle'
@@ -145,27 +146,37 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
 end
 
 % FITTING METHODS
-function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave)
+function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
    % ordinary least squares linear regression in log-log
+   %
+   % Solve weighted least squares with plain linear algebra, so the method
+   % runs on MATLAB and Octave. The result matches the Curve Fitting Toolbox
+   % confint(fit(logx,logy,'poly1'), alpha) with fitoptions Weights.
 
-   % TODO: replace this with octave compatible fitting
+   % Scale each row by the square root of its weight, so the unweighted
+   % solve minimizes sum(weights.*resid.^2). Masked points have zero weight
+   % and add nothing to the coefficients or the residuals.
+   sw = sqrt(weights);
+   X = [sw, sw.*logx];
+   [Qx,R] = qr(X,0);
+   ab = R \ (Qx'*(sw.*logy));
+   resid = sw.*logy - X*ab;
 
-   % Set up fittype and options.
-   if inoctave
-      error('ordinary least squares not currently supported in octave, use nls')
-   else
-      ft = fittype('poly1');
-      fopts = fitoptions( 'Method', 'LinearLeastSquares');
-      fopts.Weights = weights;
-      [f,~] = fit( logx, logy, ft, fopts );
-      ab = fliplr(coeffvalues(f));
-   end
+   % Compute coefficient standard errors from inv(X'*X) = inv(R)*inv(R)'.
+   % fit counts zero-weight (masked) points in the n-2 residual degrees of
+   % freedom, so count them here too to match confint.
+   dfe = numel(logy) - 2;
+   Rinv = R \ eye(2);
+   se = sqrt(diag(Rinv*Rinv') * sum(resid.^2) / dfe);
+
+   % Compute t-based intervals at confidence level alpha, one row per
+   % coefficient, in the order [intercept; slope]. This is the rot90(confint)
+   % layout, which is consistent with the stats functions.
+   tcrit = tinv((1 + alpha) / 2, dfe);
+   ci = [ab - tcrit*se, ab + tcrit*se];
 
    % transform a to linear space and package a/b
    ab = [exp(ab(1)); ab(2)];
-
-   % transpose ci to be consistent with stats functions
-   ci = rot90(confint(f,alpha));
    ci(1,:) = exp(ci(1,:));
 
    % generic failure check
@@ -173,8 +184,9 @@ function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha,inoctave)
 end
 
 function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)
-   % linear model fit in log-log, equivalent to forcing a line of slope 1 through
-   % the mean x-y, with option to control the slope using input parameter 'order'
+   % linear model fit in log-log, equivalent to forcing a line of slope 1
+   % through the mean x-y, with option to control the slope using input
+   % parameter 'order'
 
    % % not sure if this was ever functional
    % % check fitopts
@@ -206,8 +218,9 @@ end
 function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)
    % force a line of slope 'order' through the median x-y
 
-   % % not sure why this was here, order is passed in with default 1, maybe i was
-   % gonna do away wiht that or maybe i was testing here before implementing that
+   % % not sure why this was here, order is passed in with default 1, maybe i
+   % was gonna do away wiht that or maybe i was testing here before implementing
+   % that
    % order = 1;
    % if isfield(fitopts,'order')
    %    order = fitopts.order;
@@ -245,8 +258,8 @@ function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)
    % the vertical location of the line, set y refpoint higher or lower while
    % keeping x refpoint constant.
 
-   % note: require that quantiles are passed in rather than precomputed refpoints
-   % so this can use the log values or linear values
+   % note: require that quantiles are passed in rather than precomputed
+   % refpoints so this can use the log values or linear values
 
    % % removed fitopts for now
    %    % check fitopts
@@ -694,7 +707,8 @@ function ci = nlparci_octave(beta, CovB, alpha)
 
    n = length(beta); % Number of coefficients
    dof = n - 1; % Degrees of freedom
-   t_score = tinv(1 - (1 - alpha) / 2, dof); % t-score for desired confidence level
+   % t-score for desired confidence level
+   t_score = tinv(1 - (1 - alpha) / 2, dof);
    se = sqrt(diag(CovB)); % Standard errors of the coefficients
    ci_lower = beta' - t_score * se; % Lower bounds of the confidence intervals
    ci_upper = beta' + t_score * se; % Upper bounds of the confidence intervals

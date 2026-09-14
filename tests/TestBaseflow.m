@@ -11,6 +11,8 @@ classdef TestBaseflow < matlab.unittest.TestCase
    %     7) an equality test for aquifer storage estimation
    %     8) an equality test for aquifer thickness estimation
    %     9) an equality test for the fitevents 'ctsmethod' option
+   %    10) an equality test for the fitab 'ols' method against the Curve
+   %        Fitting Toolbox fit and confint
    %
    % Notes:
    %     A) A negative test verifies that the code errors/fails in an
@@ -271,6 +273,54 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
       %-------------------------------------------
       %-------------------------------------------
+      function test_fitab_ols_confint(testCase)
+
+         % The Curve Fitting Toolbox fit and confint give independent expected
+         % values for the 'ols' method, so skip the test without the toolbox
+         testCase.assumeFalse(isempty(ver('curvefit')), ...
+            'test_fitab_ols_confint requires the Curve Fitting Toolbox');
+
+         % generate nonlinear (b = 1.5) test data with deterministic
+         % scatter, unequal weights, and a mask that drops every fifth point
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+         k = (1:numel(q))';
+         q = q .* (1 + 0.2*sin(k));
+         weights = 1 + mod(k,3);
+         mask = mod(k,5) ~= 0;
+         alpha = 0.9;
+
+         % fit -dq/dt = aQ^b with the 'ols' method
+         Fit = baseflow.fitab(q,dqdt,'ols','weights',weights, ...
+            'mask',mask,'alpha',alpha);
+
+         % Expected values: a weighted poly1 fit of log(-dq/dt) on log(q).
+         % fitab documents that masked points get zero weight.
+         fopts = fitoptions('Method','LinearLeastSquares', ...
+            'Weights',weights.*mask);
+         f = fit(log(q),log(-dqdt),'poly1',fopts);
+
+         % coeffvalues is [slope intercept]. confint has rows [lower; upper]
+         % with the same column order. Fit stores a = exp(intercept).
+         p = coeffvalues(f);
+         pci = confint(f,alpha);
+         ab_expected = [exp(p(2)); p(1)];
+         ci_expected = [exp(pci(:,2)'); pci(:,1)'];
+
+         ab_returned = Fit.ab;
+         ci_returned = [Fit.aL Fit.aH; Fit.bL Fit.bH];
+
+         % Both are least-squares solutions, so allow rounding error only
+         tol = 1e-10;
+         testCase.verifyEqual(ab_returned,ab_expected,'RelTol',tol);
+         testCase.verifyEqual(ci_returned,ci_expected,'RelTol',tol);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
       function test_plotdqdt_labelplot(testCase)
 
          % generate nonlinear (b = 1.5) test data
@@ -490,9 +540,9 @@ classdef TestBaseflow < matlab.unittest.TestCase
          % expected and returned series (see numdiff below)
          maxdiff = 4;
 
-         % % Verify that the actual result matches the expected result to within a
-         % difference of up to two elements to account for the +/- 1 day criteria applied
-         % in the eventfinder filters.
+         % % Verify that the actual result matches the expected result to within
+         % a difference of up to two elements to account for the +/- 1 day
+         % criteria applied in the eventfinder filters.
          for n = 1:numel(t_returned)
             [commonT, ia, ib] = intersect(t_expected{n}, t_returned{n});
             numdiff = length(t_expected{n}) + length(t_returned{n}) ...
@@ -582,8 +632,8 @@ classdef TestBaseflow < matlab.unittest.TestCase
       function [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex)
 
          if RmConvex
-            % Find the points where the first derivative cos(t) is negative and the
-            % second derivative -sin(t) is positive.
+            % Find the points where the first derivative cos(t) is negative and
+            % the second derivative -sin(t) is positive.
             idxconcave = find(cos(t) < 0 & (-sin(t)) > 0);
             intervals = [find(diff(idxconcave) ~= 1)' numel(idxconcave)];
             starts = [idxconcave(1); idxconcave(intervals(1:end-1) + 1)];
