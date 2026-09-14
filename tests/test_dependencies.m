@@ -10,8 +10,7 @@ end
 function setupOnce(testCase)
    % Run the check once over the core workflow chain and share it across
    % the tests; the analysis is the slow part. The toolbox ships the core
-   % chain as self-contained. The data-loading and mapping functions
-   % (loadcalm, loadgrace, loadghcnd, mapbasins, mapgages) reference
+   % chain as self-contained. The loadflow data loader references
    % un-vendored sources; TODO.md tracks that decision.
    corechain = {'baseflow.getevents', 'baseflow.fitevents', ...
       'baseflow.fitab', 'baseflow.eventfinder', 'baseflow.eventtau', ...
@@ -30,8 +29,7 @@ function test_reportFields(testCase)
    % declaration-comparison results.
    returned = sort(fieldnames(testCase.TestData.report));
    expected = sort({'function_dependencies'; 'product_dependencies'; ...
-      'known_external'; 'missing_dependencies'; 'pending_decision'; ...
-      'undeclared_products'});
+      'known_external'; 'missing_dependencies'; 'undeclared_products'});
    testCase.verifyEqual(returned, expected)
    testCase.verifyNotEmpty(testCase.TestData.report.function_dependencies)
 end
@@ -169,41 +167,43 @@ end
 
 function test_plfitbClassification(testCase)
    % plfitb's r_plfit dependency stays external by decision, so the check
-   % lists it as known external on every machine and plfitb is not
-   % pending.
+   % lists it as known external on every machine.
    report = baseflow.internal.dependencies('baseflow.plfitb', 'check');
-   testCase.verifyEmpty(report.pending_decision)
    returned = sortedbasenames(report.known_external);
    expected = {'r_plfit.m'};
    testCase.verifyEqual(returned, expected)
 end
 
+function test_loadflowParkedReader(testCase)
+   % loadflow's parked readflow reaches matfunclib files only through dead
+   % code, so the check reports no missing dependency for loadflow.
+   report = baseflow.internal.dependencies('baseflow.loadflow', 'check');
+   returned = report.missing_dependencies;
+   expected = 'all dependencies are installed';
+   testCase.verifyEqual(returned, expected)
+end
+
 function test_setupDependencies(testCase)
    % Setup('dependencies') runs the whole-API live check headless, returns
-   % the report fields, prints the pending-references note, reports
-   % the full pending manifest, and records the dependencies_checked
-   % preference with the value the check produced.
+   % the report fields, and records the dependencies_checked preference
+   % with the value the check produced.
    prefgroup = 'baseflow';
    prefname = 'dependencies_checked';
    fields_expected = {'missing_dependencies', 'product_dependencies', ...
-      'undeclared_products', 'pending_decision'};
+      'undeclared_products'};
 
    % Restore any existing preference value after the check overwrites it.
    if ispref(prefgroup, prefname)
       prior = getpref(prefgroup, prefname);
       testCase.addTeardown(@() setpref(prefgroup, prefname, prior));
    end
-   [output_returned, msg_returned] = evalc('Setup(''dependencies'')');
+   [~, msg_returned] = evalc('Setup(''dependencies'')');
    testCase.verifyTrue(msg_returned.dependencies)
    testCase.verifyTrue(all(ismember(fields_expected, ...
       fieldnames(msg_returned))))
 
-   % The whole-API analysis reaches all five pending entry points.
-   pending_expected = sort({'loadcalm.m'; 'loadghcnd.m'; 'loadgrace.m'; ...
-      'mapbasins.m'; 'mapgages.m'});
-   testCase.verifyEqual(sort(msg_returned.pending_decision(:)), ...
-      pending_expected)
-   testCase.verifyTrue(contains(output_returned, 'pending a decision'))
+   % No entry point awaits a decision, so msg has no pending_decision field.
+   testCase.verifyFalse(isfield(msg_returned, 'pending_decision'))
 
    % The preference records the result of the check, not only its existence.
    pref_expected = ischar(msg_returned.missing_dependencies) && ...

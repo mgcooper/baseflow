@@ -17,7 +17,7 @@ function station = stationname(typenamehere)
    %  stationname string as input to load data for that station.
    %
    %
-   %  See also: baseflow.loadcalm baseflow.loadflow baseflow.loadgrace
+   %  See also: baseflow.loadbasins baseflow.loadflow baseflow.loadmeta
    %  baseflow.stationlist
 
    p = inputParser;

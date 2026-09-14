@@ -109,24 +109,20 @@ function report = dependencies(funcname, option)
    % plfitb's 'hanel' method calls r_plfit, which stays external by
    % decision (no license grant; README documents the requirement).
    % requiredFilesAndProducts omits r_plfit where it is not on the path,
-   % so list it whenever the analysis includes plfitb.
-   knownexternal = {'r_plfit.m'};
+   % so list it whenever the analysis includes plfitb. loadflow's parked
+   % readflow local function (its only call is commented out) calls the
+   % matfunclib getlist, which reaches the other four files. They resolve
+   % only on a machine with matfunclib on the path.
+   knownexternal = {'r_plfit.m', 'getlist.m', 'optionParser.m', ...
+      'fnamefromlist.m', 'rmdotfolders.m', 'showlist.m'};
    known = cellfun(@(f) ismember(basename(f), knownexternal), missing);
    knownfiles = missing(known);
    missing = missing(~known);
    analyzed = cellfun(@basename, funclist, 'UniformOutput', false);
-   if isempty(knownfiles) && ismember('plfitb.m', analyzed)
-      knownfiles = knownexternal;
+   if ~any(strcmp(cellfun(@basename, knownfiles, 'UniformOutput', false), ...
+         'r_plfit.m')) && ismember('plfitb.m', analyzed)
+      knownfiles = [knownfiles; {'r_plfit.m'}];
    end
-
-   % Entry points whose external references await the bfra-3kh.25
-   % vendor/gate/de-advertise decision (TODO.md, dependency section).
-   % requiredFilesAndProducts omits calls it cannot resolve. On a machine
-   % without the original sources, those references never appear in the
-   % analysis, so this list still reports these entry points on that machine.
-   pendingentries = {'loadcalm.m', 'loadghcnd.m', 'loadgrace.m', ...
-      'mapbasins.m', 'mapgages.m'};
-   pending = pendingentries(ismember(pendingentries, analyzed));
 
    switch option
 
@@ -143,7 +139,6 @@ function report = dependencies(funcname, option)
          report.function_dependencies = funclist;
          report.product_dependencies = prodnames;
          report.known_external = knownfiles;
-         report.pending_decision = pending;
          if isempty(missing)
             report.missing_dependencies = 'all dependencies are installed';
          else

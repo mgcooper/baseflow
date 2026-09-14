@@ -16,7 +16,6 @@ For an overview, see [Getting Started](https://mgcooper.github.io/baseflow/).
 - MATLAB&reg;, developed on version 9.9.0 (R2020b).
   - Mathworks Statistics and Machine Learning Toolbox.  
   - Mathworks Curve Fitting Toolbox.  
-  - Mathworks Mapping Toolbox, only for the mapbasins and mapgages functions.  
 - Octave: `tests/octave_smoke.m` verifies the core workflow (load example
   data, `getevents`, `fitevents`, `fitab` with `nls`) on version 11.3.0.
   The toolbox ran on version 8.2.0 in 2023.  
@@ -32,24 +31,15 @@ The core analysis chain (`getevents`, `fitevents`, `fitab`,
 `eventfinder`, `eventtau`, `globalfit`, `fitphi`) needs no functions or
 data files outside the toolbox.
 
-Nine public functions do not run with the toolbox files alone. The core
+Four public functions do not run with the toolbox files alone. The core
 analysis chain does not call them. The toolbox does not currently
 support these functions for public use.
 
-- `loadbasins`, `loadcalm`, `loadflow`, `loadgrace`, `loadmeta`, and
-  `loadprops` load `.mat` files from the folder that the
-  `BASEFLOW_DATA_PATH` environment variable names. The toolbox does not
-  ship these files.
-- `loadghcnd` requires `BASEFLOW_DATA_PATH` and calls `readGHCND`, which
-  the toolbox does not ship.
-- `mapbasins` and `mapgages` call `loadworldborders`, which the toolbox
-  does not ship.
-- `loadcalm` and `loadflow` also reference other functions that the
-  toolbox does not ship.
-
-`Setup('dependencies')` lists `loadcalm.m`, `loadghcnd.m`, `loadgrace.m`,
-`mapbasins.m`, and `mapgages.m` in `msg.pending_decision`. These
-functions await a decision on their external references.
+- `loadbasins`, `loadflow`, `loadmeta`, and `loadprops` load `.mat` files
+  from the folder that the `BASEFLOW_DATA_PATH` environment variable
+  names. The toolbox does not ship these files.
+- `loadflow` also references other functions that the toolbox does not
+  ship.
 
 One optional feature also has an external requirement: the
 `plfitb` method `'hanel'` calls `r_plfit`, the Hanel et al. (2017, PLOS
@@ -140,10 +130,9 @@ Running `Setup('install')` should only be necessary once (or not at all, if you 
 To run the dependency check at any time on MATLAB, use `msg = Setup('dependencies')`. The check stores these results in `msg`:
 
 - `missing_dependencies`: the required files that resolve outside the toolbox, or `'all dependencies are installed'`.
-- `pending_decision`: the entry points that await a decision on their external references. [Requirements](#requirements) lists their external needs.
 - `undeclared_products`: the detected MATLAB products that the `DESCRIPTION` `MatlabProducts` line does not list, or `'all products are declared'`.
 
-The analysis cannot see a call that does not resolve on the search path. On a machine without the external files, `missing_dependencies` can report `'all dependencies are installed'` while `pending_decision` still lists the entry points. The `dependencies_checked` preference is true only when `missing_dependencies` reports `'all dependencies are installed'`.
+The analysis cannot see a call that does not resolve on the search path. On a machine without the external files, `missing_dependencies` can report `'all dependencies are installed'` while a function still calls a file that the toolbox does not ship. The `dependencies_checked` preference is true only when `missing_dependencies` reports `'all dependencies are installed'`.
 
 <!-- Disabled this after moving all dependencies to package namespace folders and running built in matlab dependency report -->
  <!-- If for some reason a dependencies is found that is not on the search path, a message is printed to the screen. To see the list of missing dependencies, check the `msg` output. At any time, a dependencies check can be run using: -->

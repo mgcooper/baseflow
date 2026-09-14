@@ -54,15 +54,10 @@
 % * |help|               - open toolbox html help document in the MATLAB Help browser
 % * |hyetograph|         - plot a discharge rainfall hyetograph
 % * |loadbasins|         - load boundary object for basin specified by basinname
-% * |loadcalm|           - loads calm ALT data for a basin in the Bounds struct
 % * |loadExampleData|    - load toolbox example data
 % * |loadflow|           - load timeseries of streamflow and metadata for basin
-% * |loadghcnd|          - reads in a global hydroclimatology network database file
-% * |loadgrace|          - load grace data for basin in baseflow basin database
 % * |loadmeta|           - load metadata for basin indicated by basinname
 % * |loadprops|          - load basin properties from metadata table
-% * |mapbasins|          - map a set of basin boundaries and color their faces by an attribute
-% * |mapgages|           - map a set of gage locations and color their faces by an attribute
 % * |open|               - open package namespace function file in the Editor
 % * |phifitensemble|     - fit ensemble of phi estimates to all recession events in Fits
 % * |printtrend|         - print trends computed from columns in table Data to the screen

@@ -294,7 +294,7 @@ function msg = inittoolboxprefs(varargin)
    else
       prefs = {'installed','install_directory','octave_install', ...
          'dependencies_checked','Curve_Fitting_Toolbox', ...
-         'Statistics_Toolbox','MAP_Toolbox'};
+         'Statistics_Toolbox'};
    end
 
    for n = 1:numel(prefs)
@@ -362,7 +362,6 @@ function msg = checkdependencies(varargin)
    msg.missing_dependencies = report.missing_dependencies;
    msg.product_dependencies = report.product_dependencies;
    msg.undeclared_products = report.undeclared_products;
-   msg.pending_decision = report.pending_decision;
 
    if ischar(msg.missing_dependencies) && ...
          strcmp(msg.missing_dependencies,'all dependencies are installed')
@@ -382,19 +381,10 @@ function msg = checkdependencies(varargin)
       setpref('baseflow','dependencies_checked',false)
    end
 
-   % Either result can include periphery references that await the user
-   % decision recorded in TODO.md.
-   if ~isempty(msg.pending_decision)
-      fprintf([' * note: %d functions keep external references ' ...
-         'pending a decision; see TODO.md *\n'], ...
-         numel(msg.pending_decision));
-   end
-
    msg.dependencies = true;
 
    % add installed toolboxes to prefs
-   required_toolboxes = {'Curve_Fitting_Toolbox','Statistics_Toolbox', ...
-      'MAP_Toolbox'};
+   required_toolboxes = {'Curve_Fitting_Toolbox','Statistics_Toolbox'};
    for n = 1:numel(required_toolboxes)
       check = getFeatureName(required_toolboxes{n});
       if ispref('baseflow',required_toolboxes{n})
