@@ -136,8 +136,8 @@ This function is called by:
 0060          <span class="comment">%          Grace = renamevars(Grace,'Scsr','S');</span>
 0061          <span class="comment">%          Grace = removevars(Grace,'Sjpl');</span>
 0062          <span class="comment">%</span>
-0063          <span class="comment">%          % the other data is normalized to 2002-2020, but this data is</span>
-0064          <span class="comment">%          % not, so do that here</span>
+0063          <span class="comment">%          % the other data is normalized to 2002-2020, but this data</span>
+0064          <span class="comment">%          % is not, so do that here</span>
 0065          <span class="comment">%          Grace.S = Grace.S-nanmean(Grace.S);</span>
 0066          <span class="comment">%</span>
 0067          <span class="comment">%       else</span>
@@ -163,40 +163,41 @@ This function is called by:
 0087 
 0088          Grace.Properties.VariableUnits = {<span class="string">'cm'</span>};
 0089 
-0090          <span class="comment">% % for now I return monthly S, but this is what is returned in BFRA_drive</span>
-0091          <span class="comment">%          % Pull out the data</span>
-0092          <span class="comment">%          G.T = Grace.time;</span>
-0093          <span class="comment">%          G.S = Grace.Sa_avg(idx,:);</span>
-0094          <span class="comment">%          G.SL = Grace.Smin(idx,:);</span>
-0095          <span class="comment">%          G.SH = Grace.Smax(idx,:);</span>
-0096          <span class="comment">%          G.TL = Grace.tmin(idx,:);</span>
-0097          <span class="comment">%          G.TH = Grace.tmax(idx,:);</span>
-0098          <span class="comment">%          G.Tref = Grace.time_ref;</span>
-0099          <span class="comment">%          Grace = G;</span>
-0100       <span class="keyword">end</span>
-0101    <span class="keyword">end</span>
-0102 <span class="keyword">end</span>
-0103 
-0104 <span class="comment">%% INPUT PARSER</span>
-0105 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, t1, t2, regularize] = parseinputs(varargin)</a>
-0106 
-0107    parser = inputParser;
-0108    parser.FunctionName = <span class="string">'baseflow.loadgrace'</span>;
-0109    parser.addOptional(<span class="string">'basinname'</span>,<span class="string">'all'</span>,@ischar);
-0110    parser.addParameter(<span class="string">'t1'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
-0111    parser.addParameter(<span class="string">'t2'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
-0112    parser.addParameter(<span class="string">'regularize'</span>, true, @ischar);
-0113    parser.parse(varargin{:});
-0114 
-0115    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = parser.Results.basinname;
-0116    t1 = parser.Results.t1;
-0117    t2 = parser.Results.t2;
-0118    regularize = parser.Results.regularize;
-0119 
-0120    <span class="keyword">if</span> ~isdatetime(t1) <span class="comment">%#ok&lt;*NODEF&gt;</span>
-0121       t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
-0122       t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
-0123    <span class="keyword">end</span>
-0124 <span class="keyword">end</span></pre></div>
+0090          <span class="comment">% % for now I return monthly S, but this is what is returned in</span>
+0091          <span class="comment">% % BFRA_drive</span>
+0092          <span class="comment">%          % Pull out the data</span>
+0093          <span class="comment">%          G.T = Grace.time;</span>
+0094          <span class="comment">%          G.S = Grace.Sa_avg(idx,:);</span>
+0095          <span class="comment">%          G.SL = Grace.Smin(idx,:);</span>
+0096          <span class="comment">%          G.SH = Grace.Smax(idx,:);</span>
+0097          <span class="comment">%          G.TL = Grace.tmin(idx,:);</span>
+0098          <span class="comment">%          G.TH = Grace.tmax(idx,:);</span>
+0099          <span class="comment">%          G.Tref = Grace.time_ref;</span>
+0100          <span class="comment">%          Grace = G;</span>
+0101       <span class="keyword">end</span>
+0102    <span class="keyword">end</span>
+0103 <span class="keyword">end</span>
+0104 
+0105 <span class="comment">%% INPUT PARSER</span>
+0106 <a name="_sub1" href="#_subfunctions" class="code">function [basinname, t1, t2, regularize] = parseinputs(varargin)</a>
+0107 
+0108    parser = inputParser;
+0109    parser.FunctionName = <span class="string">'baseflow.loadgrace'</span>;
+0110    parser.addOptional(<span class="string">'basinname'</span>,<span class="string">'all'</span>,@ischar);
+0111    parser.addParameter(<span class="string">'t1'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
+0112    parser.addParameter(<span class="string">'t2'</span>,NaT,@(x) isdatetime(x) | isnumeric(x));
+0113    parser.addParameter(<span class="string">'regularize'</span>, true, @ischar);
+0114    parser.parse(varargin{:});
+0115 
+0116    <a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a> = parser.Results.basinname;
+0117    t1 = parser.Results.t1;
+0118    t2 = parser.Results.t2;
+0119    regularize = parser.Results.regularize;
+0120 
+0121    <span class="keyword">if</span> ~isdatetime(t1) <span class="comment">%#ok&lt;*NODEF&gt;</span>
+0122       t1 = datetime(t1,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0123       t2 = datetime(t2,<span class="string">'ConvertFrom'</span>,<span class="string">'datenum'</span>);
+0124    <span class="keyword">end</span>
+0125 <span class="keyword">end</span></pre></div>
 </body>
 </html>

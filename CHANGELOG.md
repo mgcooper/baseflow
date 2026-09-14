@@ -4,7 +4,7 @@ This file lists notable changes to the baseflow toolbox. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 semantic versioning.
 
-## [1.1.0] - Unreleased
+## [1.1.0] - 2026-09-13
 
 ### Added
 
@@ -27,8 +27,14 @@ semantic versioning.
 - `struct2varargin` converts a name-value struct to a cell array.
   `trendplot` and `formatPlotMarkers` call it in place of
   `namedargs2cell`.
-- `nonnansegments` accepts a matrix (one result per column) or a cell
-  array of vectors.
+- `nonnansegments` accepts a matrix or a cell array of vectors. For a
+  matrix, the `option` input selects one result per column (`'each'`,
+  the default), the rows where every column is non-nan (`'all'`), or the
+  rows where any column is non-nan (`'any'`).
+- `fitab` fits the `'ols'` method on GNU Octave. A weighted
+  least-squares solve with t-based confidence intervals replaces the
+  Curve Fitting Toolbox `fit` and `confint` calls, and on MATLAB the
+  results match them to rounding.
 - `toolbox/docs/baseflow_powerlaw_notation.m` maps the exponent
   notation of `plfit`, `r_plfit`, the MATLAB generalized Pareto
   distribution, and the toolbox `b` and `tau` conventions. It runs a
@@ -52,13 +58,18 @@ semantic versioning.
     products, the option outputs, the `'resolve'` file copies, the
     `plfitb` known-external classification, and the pending entry points
     that `Setup('dependencies')` reports;
-  - `test_internalfilelists`: `listfiles` and `mpackagefolders`;
   - `test_version`: every version source agrees.
 - The demo scripts run under the suite (`tests/test_demos.m`). The
   theory demos skip when the Symbolic Math Toolbox is not installed.
 - `tests/octave_smoke.m`, a plain script with bare asserts, runs the
   core workflow in GNU Octave and MATLAB: load the example data, then
-  `getevents`, `fitevents`, and `fitab` with `'nls'`.
+  `getevents`, `fitevents`, and `fitab` with `'nls'` and `'ols'`.
+- Plain unit tests of helpers that the toolbox vendors from matfunclib
+  (`nanmean`, `nanmedian`, `yorkfit`, `tocolumn`, `timetablereduce`,
+  `nonnansegments`, `withcd`, `listfiles`, and `mpackagefolders`) live
+  in the matfunclib library test folders, next to the source functions.
+  The matfunclib sources carry the help and fixes from the toolbox
+  copies.
 - `tests/closenewfigs.m` closes the figures a test opens, so a full
   suite run leaves zero open figures and keeps the figures a user had
   open.
@@ -70,6 +81,15 @@ semantic versioning.
 
 ### Fixed
 
+- The project `.octaverc` starts the toolbox with
+  `addpath(fullfile(pwd, 'toolbox'))` and `Setup('addpath')`. It sourced
+  `Setup.m`, which is a function file in `toolbox/`, so Octave started in
+  the repository root did not add the toolbox to the path.
+- Getting Started lists the `baseflow.setopts` defaults and names the
+  defaults that differ for direct name-value calls (`getevents` fmax,
+  rmin, rmnochange, rmrain; `globalfit` aquiferslope). It no longer
+  labels `plotdqdt` deprecated. The `eventfinder` help and the
+  `setopts` fitevents option list match their parsers.
 - Continuous integration did not trigger: YAML parsed the
   space-separated branch list as one branch named "main dev". The
   workflow runs on every push and pull request to `main` and `dev`.
@@ -121,7 +141,10 @@ semantic versioning.
 - The BSD 3-Clause text in `+internal/private/withcd.m` had corrupted
   characters. It matches the license template.
 - The suite builder skipped `tests/test_withcd.m` because the file
-  declared no test output. The file is a valid function-based suite.
+  declared no test output. That test now lives in matfunclib.
+- `test_conversions` checked the `b` to `k` conversion against the
+  reciprocal of the gpfit relation k = (1-b)/(b-2) at b = 1.5, where both
+  equal 1. It checks b = 1.4 and the inverse `k` to `b` conversion.
 
 ### Changed
 
@@ -196,8 +219,6 @@ semantic versioning.
   names a value that a reader cannot identify, such as a non-obvious
   expected value or a tolerance. A comment says what each case
   checks. Option sweeps use parameterized test classes.
-- `test_nonnansegements` is a function-based suite. It covers leading,
-  trailing, and interior nans, and cell and matrix input.
 - The `loadcalm` help documents the Kuparuk nine-site selection for the
   default `'current'` version. The selection keeps the output
   reproducible against the published results.

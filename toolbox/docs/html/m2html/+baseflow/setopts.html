@@ -52,7 +52,8 @@
 
      opts        :  structure containing any of the following fields
 
-     qmin        :  minimum flow value, below which values are set nan (m3/d)
+     qmin        :  minimum flow value, below which values are set nan
+                    (m3/d)
      nmin        :  minimum event length
      fmax        :  maximum # of missing values gap-filled
      rmax        :  maximum runlength of sequential constant values
@@ -70,17 +71,15 @@
      derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'
      fitmethod      : -dQ/dt = aQb fitting method
      fitorder       : fitting order (value of exponent b)
-     fitnmin        : minimum number of values required to fit -dQ/dt = aQb
      pickfits       : pick fits manually?
      pickmethod     : method to fit picks manually
      plotfits       : plot the fits?
-     savefitplots   : save plots of fits?
+     saveplots      : save plots of fits? fitevents parses this flag,
+                      but the flag has no effect.
      etsparam       : min flow length parameter for ETS algorithm
      vtsparam       : min flow length parameter for VTS algorithm
      ctsmethod      : finite-difference stencil for the CTS method:
                       'B1', 'B2', 'F1', 'F2', 'C2', or 'C4' (default 'B1')
-     drainagearea   : drainage area in m2
-     gageID         : station name or ID
      fitopts        : struct of baseflow.fitab options that fitevents
                       passes to every event fit (default: struct()).
                       Allowed fields: weights, order, quantile,
@@ -96,18 +95,20 @@
   Optional name-value inputs for type 'globalfit'
 
      drainagearea   : drainage area [m2]
-     drainagedens   : drainage density [km-1] = streamlength/drainagearea
+     drainagedensity: drainage density [km-1] = streamlength/drainagearea
      aquiferdepth   : reference aquifer thickness [m]
      streamlength   : effective channel length [m]
      aquiferslope   : effective aquifer slope
      aquiferbreadth : distance from channel to divide
-     drainableporos : drainable porosity
+     drainableporosity: drainable porosity
      isflat         : logical indicating true or false
      plotfits       : plot the various global fits?e
-     bootfit        : logical indicating whether to bootstrap the uncertainites
-     nreps          : number of reps for bootstrapping
+     bootfit        : logical indicating whether to bootstrap the
+                      uncertainites
+     bootreps       : number of reps for bootstrapping
      phimethod      : method used to fit drainable porosity
-     refqtls        : quantiles of Q and -dQ/dt for early/late reference lines
+     refqtls        : quantiles of Q and -dQ/dt for early/late reference
+                      lines
      earlyqtls      : quantiles of Q and -dQ/dt for early reference lines
      lateqtls       : quantiles of Q and -dQ/dt for late reference lines
 
@@ -169,145 +170,146 @@ This function is called by:
 0024    <span class="comment">%</span>
 0025    <span class="comment">%     opts        :  structure containing any of the following fields</span>
 0026    <span class="comment">%</span>
-0027    <span class="comment">%     qmin        :  minimum flow value, below which values are set nan (m3/d)</span>
-0028    <span class="comment">%     nmin        :  minimum event length</span>
-0029    <span class="comment">%     fmax        :  maximum # of missing values gap-filled</span>
-0030    <span class="comment">%     rmax        :  maximum runlength of sequential constant values</span>
-0031    <span class="comment">%     rmin        :  maximum allowable rainfall in mm/d</span>
-0032    <span class="comment">%     cmax        :  maximum run of sequential convex dQ/dt values</span>
-0033    <span class="comment">%     rmconvex    :  remove convex derivatives</span>
-0034    <span class="comment">%     rmnochange  :  remove consecutive constant derivates</span>
-0035    <span class="comment">%     rmrain      :  remove data on days with rainfall&gt;rmin</span>
-0036    <span class="comment">%     pickevents  :  option to manually pick events</span>
-0037    <span class="comment">%     plotevents  :  option to plot picked events</span>
-0038    <span class="comment">%     asannual    :  option to detect events on an annual basis</span>
-0039    <span class="comment">%</span>
-0040    <span class="comment">%  Optional name-value inputs for type 'fitevents'</span>
-0041    <span class="comment">%</span>
-0042    <span class="comment">%     derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'</span>
-0043    <span class="comment">%     fitmethod      : -dQ/dt = aQb fitting method</span>
-0044    <span class="comment">%     fitorder       : fitting order (value of exponent b)</span>
-0045    <span class="comment">%     fitnmin        : minimum number of values required to fit -dQ/dt = aQb</span>
+0027    <span class="comment">%     qmin        :  minimum flow value, below which values are set nan</span>
+0028    <span class="comment">%                    (m3/d)</span>
+0029    <span class="comment">%     nmin        :  minimum event length</span>
+0030    <span class="comment">%     fmax        :  maximum # of missing values gap-filled</span>
+0031    <span class="comment">%     rmax        :  maximum runlength of sequential constant values</span>
+0032    <span class="comment">%     rmin        :  maximum allowable rainfall in mm/d</span>
+0033    <span class="comment">%     cmax        :  maximum run of sequential convex dQ/dt values</span>
+0034    <span class="comment">%     rmconvex    :  remove convex derivatives</span>
+0035    <span class="comment">%     rmnochange  :  remove consecutive constant derivates</span>
+0036    <span class="comment">%     rmrain      :  remove data on days with rainfall&gt;rmin</span>
+0037    <span class="comment">%     pickevents  :  option to manually pick events</span>
+0038    <span class="comment">%     plotevents  :  option to plot picked events</span>
+0039    <span class="comment">%     asannual    :  option to detect events on an annual basis</span>
+0040    <span class="comment">%</span>
+0041    <span class="comment">%  Optional name-value inputs for type 'fitevents'</span>
+0042    <span class="comment">%</span>
+0043    <span class="comment">%     derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'</span>
+0044    <span class="comment">%     fitmethod      : -dQ/dt = aQb fitting method</span>
+0045    <span class="comment">%     fitorder       : fitting order (value of exponent b)</span>
 0046    <span class="comment">%     pickfits       : pick fits manually?</span>
 0047    <span class="comment">%     pickmethod     : method to fit picks manually</span>
 0048    <span class="comment">%     plotfits       : plot the fits?</span>
-0049    <span class="comment">%     savefitplots   : save plots of fits?</span>
-0050    <span class="comment">%     etsparam       : min flow length parameter for ETS algorithm</span>
-0051    <span class="comment">%     vtsparam       : min flow length parameter for VTS algorithm</span>
-0052    <span class="comment">%     ctsmethod      : finite-difference stencil for the CTS method:</span>
-0053    <span class="comment">%                      'B1', 'B2', 'F1', 'F2', 'C2', or 'C4' (default 'B1')</span>
-0054    <span class="comment">%     drainagearea   : drainage area in m2</span>
-0055    <span class="comment">%     gageID         : station name or ID</span>
-0056    <span class="comment">%     fitopts        : struct of baseflow.fitab options that fitevents</span>
-0057    <span class="comment">%                      passes to every event fit (default: struct()).</span>
-0058    <span class="comment">%                      Allowed fields: weights, order, quantile,</span>
-0059    <span class="comment">%                      refqtls, Nboot, alpha (numeric); mask, plotfit</span>
-0060    <span class="comment">%                      (logical). A fitopts field overrides the</span>
-0061    <span class="comment">%                      same-named fitab option, so fitopts.order</span>
-0062    <span class="comment">%                      overrides fitorder. weights and mask must be</span>
-0063    <span class="comment">%                      scalars (baseflow:fitevents:nonscalarFitopt).</span>
-0064    <span class="comment">%                      An unknown field raises</span>
-0065    <span class="comment">%                      baseflow:fitab:unknownFitopt. A field of the</span>
-0066    <span class="comment">%                      wrong type raises baseflow:fitab:invalidFitopt.</span>
-0067    <span class="comment">%</span>
-0068    <span class="comment">%  Optional name-value inputs for type 'globalfit'</span>
-0069    <span class="comment">%</span>
-0070    <span class="comment">%     drainagearea   : drainage area [m2]</span>
-0071    <span class="comment">%     drainagedens   : drainage density [km-1] = streamlength/drainagearea</span>
-0072    <span class="comment">%     aquiferdepth   : reference aquifer thickness [m]</span>
-0073    <span class="comment">%     streamlength   : effective channel length [m]</span>
-0074    <span class="comment">%     aquiferslope   : effective aquifer slope</span>
-0075    <span class="comment">%     aquiferbreadth : distance from channel to divide</span>
-0076    <span class="comment">%     drainableporos : drainable porosity</span>
-0077    <span class="comment">%     isflat         : logical indicating true or false</span>
-0078    <span class="comment">%     plotfits       : plot the various global fits?e</span>
-0079    <span class="comment">%     bootfit        : logical indicating whether to bootstrap the uncertainites</span>
-0080    <span class="comment">%     nreps          : number of reps for bootstrapping</span>
+0049    <span class="comment">%     saveplots      : save plots of fits? fitevents parses this flag,</span>
+0050    <span class="comment">%                      but the flag has no effect.</span>
+0051    <span class="comment">%     etsparam       : min flow length parameter for ETS algorithm</span>
+0052    <span class="comment">%     vtsparam       : min flow length parameter for VTS algorithm</span>
+0053    <span class="comment">%     ctsmethod      : finite-difference stencil for the CTS method:</span>
+0054    <span class="comment">%                      'B1', 'B2', 'F1', 'F2', 'C2', or 'C4' (default 'B1')</span>
+0055    <span class="comment">%     fitopts        : struct of baseflow.fitab options that fitevents</span>
+0056    <span class="comment">%                      passes to every event fit (default: struct()).</span>
+0057    <span class="comment">%                      Allowed fields: weights, order, quantile,</span>
+0058    <span class="comment">%                      refqtls, Nboot, alpha (numeric); mask, plotfit</span>
+0059    <span class="comment">%                      (logical). A fitopts field overrides the</span>
+0060    <span class="comment">%                      same-named fitab option, so fitopts.order</span>
+0061    <span class="comment">%                      overrides fitorder. weights and mask must be</span>
+0062    <span class="comment">%                      scalars (baseflow:fitevents:nonscalarFitopt).</span>
+0063    <span class="comment">%                      An unknown field raises</span>
+0064    <span class="comment">%                      baseflow:fitab:unknownFitopt. A field of the</span>
+0065    <span class="comment">%                      wrong type raises baseflow:fitab:invalidFitopt.</span>
+0066    <span class="comment">%</span>
+0067    <span class="comment">%  Optional name-value inputs for type 'globalfit'</span>
+0068    <span class="comment">%</span>
+0069    <span class="comment">%     drainagearea   : drainage area [m2]</span>
+0070    <span class="comment">%     drainagedensity: drainage density [km-1] = streamlength/drainagearea</span>
+0071    <span class="comment">%     aquiferdepth   : reference aquifer thickness [m]</span>
+0072    <span class="comment">%     streamlength   : effective channel length [m]</span>
+0073    <span class="comment">%     aquiferslope   : effective aquifer slope</span>
+0074    <span class="comment">%     aquiferbreadth : distance from channel to divide</span>
+0075    <span class="comment">%     drainableporosity: drainable porosity</span>
+0076    <span class="comment">%     isflat         : logical indicating true or false</span>
+0077    <span class="comment">%     plotfits       : plot the various global fits?e</span>
+0078    <span class="comment">%     bootfit        : logical indicating whether to bootstrap the</span>
+0079    <span class="comment">%                      uncertainites</span>
+0080    <span class="comment">%     bootreps       : number of reps for bootstrapping</span>
 0081    <span class="comment">%     phimethod      : method used to fit drainable porosity</span>
-0082    <span class="comment">%     refqtls        : quantiles of Q and -dQ/dt for early/late reference lines</span>
-0083    <span class="comment">%     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines</span>
-0084    <span class="comment">%     lateqtls       : quantiles of Q and -dQ/dt for late reference lines</span>
-0085    <span class="comment">%</span>
-0086    <span class="comment">% Example</span>
-0087    <span class="comment">%</span>
-0088    <span class="comment">%  Set default event detection options, then override one default:</span>
-0089    <span class="comment">%</span>
-0090    <span class="comment">%     opts = baseflow.setopts('getevents', 'rmconvex', true);</span>
-0091    <span class="comment">%     disp(opts)</span>
-0092    <span class="comment">%</span>
-0093    <span class="comment">% See also: fitevents, getdqdt, fitdqdt</span>
-0094    <span class="comment">%</span>
-0095    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
-0096 
-0097    <span class="comment">% if called with no input, open this file</span>
-0098    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0099 
-0100    <span class="comment">%% set default baseflow settings</span>
-0101 
-0102    p = inputParser;
-0103    p.FunctionName = <span class="string">'baseflow.setopts'</span>;
-0104 
-0105    p.addRequired(<span class="string">'funcname'</span>, @ischar);
-0106    parse(p,funcname);
-0107 
-0108    <span class="keyword">switch</span> funcname
-0109 
-0110       <span class="comment">% event detection - input options for getevents</span>
-0111       <span class="keyword">case</span> <span class="string">'getevents'</span>
-0112 
-0113          addParameter(p,   <span class="string">'qmin'</span>,        1,          @isnumericscalar );
-0114          addParameter(p,   <span class="string">'nmin'</span>,        4,          @isnumericscalar );
-0115          addParameter(p,   <span class="string">'fmax'</span>,        1,          @isnumericscalar );
-0116          addParameter(p,   <span class="string">'rmax'</span>,        2,          @isnumericscalar );
-0117          addParameter(p,   <span class="string">'rmin'</span>,        1,          @isnumericscalar );
-0118          addParameter(p,   <span class="string">'cmax'</span>,        2,          @isnumericscalar );
-0119          addParameter(p,   <span class="string">'rmconvex'</span>,    false,      @islogicalscalar );
-0120          addParameter(p,   <span class="string">'rmnochange'</span>,  true,       @islogicalscalar );
-0121          addParameter(p,   <span class="string">'rmrain'</span>,      true,       @islogicalscalar );
-0122          addParameter(p,   <span class="string">'pickevents'</span>,  false,      @islogicalscalar );
-0123          addParameter(p,   <span class="string">'plotevents'</span>,  false,      @islogicalscalar );
-0124          addParameter(p,   <span class="string">'asannual'</span>,    false,      @islogicalscalar );
-0125 
-0126          <span class="comment">% event fits - input options for fitevents</span>
-0127       <span class="keyword">case</span> <span class="string">'fitevents'</span>
-0128 
-0129          addParameter(p,   <span class="string">'derivmethod'</span>, <span class="string">'ETS'</span>,      @ischar           );
-0130          addParameter(p,   <span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,      @ischar           );
-0131          addParameter(p,   <span class="string">'fitorder'</span>,    nan,        @isnumericscalar  );
-0132          addParameter(p,   <span class="string">'pickfits'</span>,    false,      @islogicalscalar  );
-0133          addParameter(p,   <span class="string">'pickmethod'</span>,  <span class="string">'none'</span>,     @ischar           );
-0134          addParameter(p,   <span class="string">'plotfits'</span>,    false,      @islogicalscalar  );
-0135          addParameter(p,   <span class="string">'saveplots'</span>,   false,      @islogicalscalar  );
-0136          addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @isnumericscalar  );
-0137          addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @isnumericscalar  );
-0138          addParameter(p,   <span class="string">'ctsmethod'</span>,   <span class="string">'B1'</span>,       @ischar           );
-0139          addParameter(p,   <span class="string">'fitopts'</span>,     struct(),   @isstruct         );
-0140 
-0141          <span class="comment">% global fit - input to baseflow.globalfit</span>
-0142       <span class="keyword">case</span> <span class="string">'globalfit'</span>
-0143 
-0144          addParameter(p,   <span class="string">'drainagearea'</span>,      nan,        @isnumericscalar );
-0145          addParameter(p,   <span class="string">'drainagedensity'</span>,   0.8,        @isnumericscalar );
-0146          addParameter(p,   <span class="string">'aquiferdepth'</span>,      nan,        @isnumericscalar );
-0147          addParameter(p,   <span class="string">'streamlength'</span>,      nan,        @isnumericscalar );
-0148          addParameter(p,   <span class="string">'aquiferslope'</span>,      0.0,        @isnumericscalar );
-0149          addParameter(p,   <span class="string">'aquiferbreadth'</span>,    nan,        @isnumericscalar );
-0150          addParameter(p,   <span class="string">'drainableporosity'</span>, 0.1,        @isnumericscalar );
-0151          addParameter(p,   <span class="string">'isflat'</span>,            true,       @islogicalscalar );
-0152          addParameter(p,   <span class="string">'plotfits'</span>,          false,      @islogicalscalar );
-0153          addParameter(p,   <span class="string">'bootfit'</span>,           false,      @islogicalscalar );
-0154          addParameter(p,   <span class="string">'bootreps'</span>,          1000,       @isnumericscalar );
-0155          addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @ischar          );
-0156          addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @isnumericvector );
-0157          addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @isnumericvector );
-0158          addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @isnumericvector );
-0159    <span class="keyword">end</span>
-0160 
-0161    parse(p,funcname,varargin{:});
-0162 
-0163    opts = p.Results;
-0164    opts = rmfield(opts,<span class="string">'funcname'</span>);
-0165 
-0166 <span class="keyword">end</span></pre></div>
+0082    <span class="comment">%     refqtls        : quantiles of Q and -dQ/dt for early/late reference</span>
+0083    <span class="comment">%                      lines</span>
+0084    <span class="comment">%     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines</span>
+0085    <span class="comment">%     lateqtls       : quantiles of Q and -dQ/dt for late reference lines</span>
+0086    <span class="comment">%</span>
+0087    <span class="comment">% Example</span>
+0088    <span class="comment">%</span>
+0089    <span class="comment">%  Set default event detection options, then override one default:</span>
+0090    <span class="comment">%</span>
+0091    <span class="comment">%     opts = baseflow.setopts('getevents', 'rmconvex', true);</span>
+0092    <span class="comment">%     disp(opts)</span>
+0093    <span class="comment">%</span>
+0094    <span class="comment">% See also: fitevents, getdqdt, fitdqdt</span>
+0095    <span class="comment">%</span>
+0096    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
+0097 
+0098    <span class="comment">% if called with no input, open this file</span>
+0099    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0100 
+0101    <span class="comment">%% set default baseflow settings</span>
+0102 
+0103    p = inputParser;
+0104    p.FunctionName = <span class="string">'baseflow.setopts'</span>;
+0105 
+0106    p.addRequired(<span class="string">'funcname'</span>, @ischar);
+0107    parse(p,funcname);
+0108 
+0109    <span class="keyword">switch</span> funcname
+0110 
+0111       <span class="comment">% event detection - input options for getevents</span>
+0112       <span class="keyword">case</span> <span class="string">'getevents'</span>
+0113 
+0114          addParameter(p,   <span class="string">'qmin'</span>,        1,          @isnumericscalar );
+0115          addParameter(p,   <span class="string">'nmin'</span>,        4,          @isnumericscalar );
+0116          addParameter(p,   <span class="string">'fmax'</span>,        1,          @isnumericscalar );
+0117          addParameter(p,   <span class="string">'rmax'</span>,        2,          @isnumericscalar );
+0118          addParameter(p,   <span class="string">'rmin'</span>,        1,          @isnumericscalar );
+0119          addParameter(p,   <span class="string">'cmax'</span>,        2,          @isnumericscalar );
+0120          addParameter(p,   <span class="string">'rmconvex'</span>,    false,      @islogicalscalar );
+0121          addParameter(p,   <span class="string">'rmnochange'</span>,  true,       @islogicalscalar );
+0122          addParameter(p,   <span class="string">'rmrain'</span>,      true,       @islogicalscalar );
+0123          addParameter(p,   <span class="string">'pickevents'</span>,  false,      @islogicalscalar );
+0124          addParameter(p,   <span class="string">'plotevents'</span>,  false,      @islogicalscalar );
+0125          addParameter(p,   <span class="string">'asannual'</span>,    false,      @islogicalscalar );
+0126 
+0127          <span class="comment">% event fits - input options for fitevents</span>
+0128       <span class="keyword">case</span> <span class="string">'fitevents'</span>
+0129 
+0130          addParameter(p,   <span class="string">'derivmethod'</span>, <span class="string">'ETS'</span>,      @ischar           );
+0131          addParameter(p,   <span class="string">'fitmethod'</span>,   <span class="string">'nls'</span>,      @ischar           );
+0132          addParameter(p,   <span class="string">'fitorder'</span>,    nan,        @isnumericscalar  );
+0133          addParameter(p,   <span class="string">'pickfits'</span>,    false,      @islogicalscalar  );
+0134          addParameter(p,   <span class="string">'pickmethod'</span>,  <span class="string">'none'</span>,     @ischar           );
+0135          addParameter(p,   <span class="string">'plotfits'</span>,    false,      @islogicalscalar  );
+0136          addParameter(p,   <span class="string">'saveplots'</span>,   false,      @islogicalscalar  );
+0137          addParameter(p,   <span class="string">'etsparam'</span>,    0.2,        @isnumericscalar  );
+0138          addParameter(p,   <span class="string">'vtsparam'</span>,    1.0,        @isnumericscalar  );
+0139          addParameter(p,   <span class="string">'ctsmethod'</span>,   <span class="string">'B1'</span>,       @ischar           );
+0140          addParameter(p,   <span class="string">'fitopts'</span>,     struct(),   @isstruct         );
+0141 
+0142          <span class="comment">% global fit - input to baseflow.globalfit</span>
+0143       <span class="keyword">case</span> <span class="string">'globalfit'</span>
+0144 
+0145          addParameter(p,   <span class="string">'drainagearea'</span>,      nan,        @isnumericscalar );
+0146          addParameter(p,   <span class="string">'drainagedensity'</span>,   0.8,        @isnumericscalar );
+0147          addParameter(p,   <span class="string">'aquiferdepth'</span>,      nan,        @isnumericscalar );
+0148          addParameter(p,   <span class="string">'streamlength'</span>,      nan,        @isnumericscalar );
+0149          addParameter(p,   <span class="string">'aquiferslope'</span>,      0.0,        @isnumericscalar );
+0150          addParameter(p,   <span class="string">'aquiferbreadth'</span>,    nan,        @isnumericscalar );
+0151          addParameter(p,   <span class="string">'drainableporosity'</span>, 0.1,        @isnumericscalar );
+0152          addParameter(p,   <span class="string">'isflat'</span>,            true,       @islogicalscalar );
+0153          addParameter(p,   <span class="string">'plotfits'</span>,          false,      @islogicalscalar );
+0154          addParameter(p,   <span class="string">'bootfit'</span>,           false,      @islogicalscalar );
+0155          addParameter(p,   <span class="string">'bootreps'</span>,          1000,       @isnumericscalar );
+0156          addParameter(p,   <span class="string">'phimethod'</span>,      <span class="string">'pointcloud'</span>,  @ischar          );
+0157          addParameter(p,   <span class="string">'refqtls'</span>,        [0.50 0.50],   @isnumericvector );
+0158          addParameter(p,   <span class="string">'earlyqtls'</span>,      [0.95 0.95],   @isnumericvector );
+0159          addParameter(p,   <span class="string">'lateqtls'</span>,       [0.50 0.50],   @isnumericvector );
+0160    <span class="keyword">end</span>
+0161 
+0162    parse(p,funcname,varargin{:});
+0163 
+0164    opts = p.Results;
+0165    opts = rmfield(opts,<span class="string">'funcname'</span>);
+0166 
+0167 <span class="keyword">end</span></pre></div>
 </body>
 </html>

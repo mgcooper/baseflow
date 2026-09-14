@@ -84,6 +84,11 @@
 % The API specification for the toolbox is defined below and is also defined 
 % in the |setopts| function documentation.
 % 
+% Each table lists the |baseflow.setopts| defaults. These defaults apply when
+% you pass an options struct created by |baseflow.setopts|. A direct name-value
+% call without that struct uses the defaults in the function input parser. The
+% note after each table lists each option whose direct-call default differs.
+% 
 % API specification for |*getevents*|:
 %%
 % 
@@ -101,6 +106,10 @@
 %     asannual    :  (logical scalar) Flag indicating whether to detect events on an annual basis. Set true if pickevents true. Default = false.
 %
 %% 
+% A direct call to |getevents| without an options struct from |setopts| uses
+% these defaults: |fmax| = 2, |rmin| = 0, |rmnochange| = false, and |rmrain| =
+% false.
+% 
 % API specification for |*fitevents*|:
 %%
 % 
@@ -110,15 +119,16 @@
 %     pickfits       : (logical scalar) Flag indicating whether to pick fits manually. Default = false.
 %     pickmethod     : (char) Method to fit picks manually. Default = 'none'.
 %     plotfits       : (logical scalar) Flag indicating whether to plot the fits. Default = false.
-%     savefitplots   : (logical scalar) Flag indicating whether to save plots of fits. Default = false.
+%     saveplots      : (logical scalar) Flag to save plots of fits. fitevents parses this flag, but the flag has no effect. Default = false.
 %     etsparam       : (numeric scalar) Min flow length parameter for ETS algorithm [-]. Default = 0.2.
 %     vtsparam       : (numeric scalar) Min flow length parameter for VTS algorithm [-]. Default = 1.0.
 %     ctsmethod      : (char) Finite-difference stencil for the CTS method: 'B1', 'B2', 'F1', 'F2', 'C2', or 'C4'. Default = 'B1'.
-%     drainagearea   : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
-%     gageID         : (char) Station name or ID. Default = none.
 %     fitopts        : (struct) baseflow.fitab options for every event fit: weights, order, quantile, refqtls, Nboot, alpha (numeric); mask, plotfit (logical). Fields override the same-named fitab options; weights and mask must be scalars. Default = struct().
 %
 %% 
+% A direct call to |fitevents| without an options struct from |setopts| uses
+% the same defaults.
+% 
 % API specification for |*globalfit*|:
 %%
 % 
@@ -138,6 +148,9 @@
 %       earlyqtls         : (numeric vector) Quantiles of Q and -dQ/dt for early reference lines (units: N/A). Default = [0.95 0.95].
 %       lateqtls          : (numeric vector) Quantiles of Q and -dQ/dt for late reference lines (units: N/A). Default = [0.50 0.50].
 %
+%% 
+% A direct call to |globalfit| without an options struct from |setopts| uses
+% |aquiferslope| = NaN.
 %% Toolbox Functions
 % Most |baseflow| workflows will revolve around calls to the three primary APIs 
 % described above, which implement the underlying methods of baseflow recession 
@@ -198,7 +211,7 @@
 %% 
 % * |hyetograph| Plot a discharge rainfall hyetograph.
 % * |pointcloudplot| Plot a point-cloud diagram to estimate aquifer parameters
-% * |plotdqdt| (deprecated) Plot the log-log q vs -dq/dt point-cloud with options 
+% * |plotdqdt| Plot the log-log q vs -dq/dt point-cloud with options 
 % to select recession segments for fitting
 % * |plotrefline| Add a reference line to a point cloud plot
 % * |plplotb| Plot the power law fit to the P(tau) Pareto distribution

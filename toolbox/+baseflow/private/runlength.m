@@ -3,7 +3,8 @@ function rl = runlength(tf)
    %
    %  rl = runlength(tf) returns an array rl the size of tf. Each element
    %  of rl holds the length of the run of consecutive equal values that
-   %  contains it, computed down each column of tf.
+   %  contains it, computed down each column of tf. tf must be a column
+   %  vector or a matrix of column series. Pass a row vector as tf(:).
    
    diffs = diff(tf) ~= 0;  % find where values change
    ncols = size(diffs, 2); % pad jumps at start and end

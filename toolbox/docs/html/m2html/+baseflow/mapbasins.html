@@ -197,9 +197,9 @@ This function is called by:
 0112          <span class="comment">% ordered opposite the structure meaning patchobjs(1) = Basins(end),</span>
 0113          <span class="comment">% patchobjs(2) = Basins(end-1), and so on. The flipud and sorting takes</span>
 0114          <span class="comment">% care of all of the details. For testing, it was easier to not sort</span>
-0115          <span class="comment">% Basins in the sortrows call below, but for labeling points, its needed.</span>
-0116          <span class="comment">% Converting back to struct is only needed for consistency with other</span>
-0117          <span class="comment">% parts of the code which assumes it is a struct.</span>
+0115          <span class="comment">% Basins in the sortrows call below, but for labeling points, its</span>
+0116          <span class="comment">% needed. Converting back to struct is only needed for consistency with</span>
+0117          <span class="comment">% other parts of the code which assumes it is a struct.</span>
 0118 
 0119          Basins = flipud(struct2table(Basins));
 0120          [Basins,ii] = sortrows(Basins, <span class="string">'Area'</span>, <span class="string">'ascend'</span>);
@@ -224,8 +224,8 @@ This function is called by:
 0139             ax.Children = [patchobjs(ii); lineobjs];
 0140          <span class="keyword">end</span>
 0141 
-0142          <span class="comment">% this is not needed if we use 'ascend' to sort Area, but in other cases,</span>
-0143          <span class="comment">% flipping the patchobjs is needed when manipulating them.</span>
+0142          <span class="comment">% this is not needed if we use 'ascend' to sort Area, but in other</span>
+0143          <span class="comment">% cases, flipping the patchobjs is needed when manipulating them.</span>
 0144          <span class="comment">%ax.Children = flipud([patchobjs(idx);lineobjs]);</span>
 0145       <span class="keyword">end</span>
 0146 

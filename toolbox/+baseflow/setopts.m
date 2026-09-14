@@ -24,7 +24,8 @@ function opts = setopts(funcname,varargin)
    %
    %     opts        :  structure containing any of the following fields
    %
-   %     qmin        :  minimum flow value, below which values are set nan (m3/d)
+   %     qmin        :  minimum flow value, below which values are set nan
+   %                    (m3/d)
    %     nmin        :  minimum event length
    %     fmax        :  maximum # of missing values gap-filled
    %     rmax        :  maximum runlength of sequential constant values
@@ -42,17 +43,15 @@ function opts = setopts(funcname,varargin)
    %     derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'
    %     fitmethod      : -dQ/dt = aQb fitting method
    %     fitorder       : fitting order (value of exponent b)
-   %     fitnmin        : minimum number of values required to fit -dQ/dt = aQb
    %     pickfits       : pick fits manually?
    %     pickmethod     : method to fit picks manually
    %     plotfits       : plot the fits?
-   %     savefitplots   : save plots of fits?
+   %     saveplots      : save plots of fits? fitevents parses this flag,
+   %                      but the flag has no effect.
    %     etsparam       : min flow length parameter for ETS algorithm
    %     vtsparam       : min flow length parameter for VTS algorithm
    %     ctsmethod      : finite-difference stencil for the CTS method:
    %                      'B1', 'B2', 'F1', 'F2', 'C2', or 'C4' (default 'B1')
-   %     drainagearea   : drainage area in m2
-   %     gageID         : station name or ID
    %     fitopts        : struct of baseflow.fitab options that fitevents
    %                      passes to every event fit (default: struct()).
    %                      Allowed fields: weights, order, quantile,
@@ -68,18 +67,20 @@ function opts = setopts(funcname,varargin)
    %  Optional name-value inputs for type 'globalfit'
    %
    %     drainagearea   : drainage area [m2]
-   %     drainagedens   : drainage density [km-1] = streamlength/drainagearea
+   %     drainagedensity: drainage density [km-1] = streamlength/drainagearea
    %     aquiferdepth   : reference aquifer thickness [m]
    %     streamlength   : effective channel length [m]
    %     aquiferslope   : effective aquifer slope
    %     aquiferbreadth : distance from channel to divide
-   %     drainableporos : drainable porosity
+   %     drainableporosity: drainable porosity
    %     isflat         : logical indicating true or false
    %     plotfits       : plot the various global fits?e
-   %     bootfit        : logical indicating whether to bootstrap the uncertainites
-   %     nreps          : number of reps for bootstrapping
+   %     bootfit        : logical indicating whether to bootstrap the
+   %                      uncertainites
+   %     bootreps       : number of reps for bootstrapping
    %     phimethod      : method used to fit drainable porosity
-   %     refqtls        : quantiles of Q and -dQ/dt for early/late reference lines
+   %     refqtls        : quantiles of Q and -dQ/dt for early/late reference
+   %                      lines
    %     earlyqtls      : quantiles of Q and -dQ/dt for early reference lines
    %     lateqtls       : quantiles of Q and -dQ/dt for late reference lines
    %

@@ -33,7 +33,8 @@ every item.
 
 ### Done
 
-- [x] `tests/test_withcd.m` repair. Provenance: the file declared
+- [x] `tests/test_withcd.m` repair (the test moved to matfunclib
+  `libsys/test/testWithcd.m` on 2026-09-13). Provenance: the file declared
   `function test_withcd` with no output, so `functiontests` never built a
   suite and `TestSuite.fromFolder` skipped the file silently; it called
   `withcd`, which is unreachable from `tests/` because private functions
@@ -276,7 +277,8 @@ every item.
 
 ### Done
 
-- [x] tests/test_nonnansegements.m, 12 asserts in 4 parked edge-nan
+- [x] tests/test_nonnansegements.m (moved to matfunclib
+  `libspatial/test/testNonnansegments.m` on 2026-09-13), 12 asserts in 4 parked edge-nan
   cases: RE-ENABLED by fixing the function. The parked comment was
   accurate: the old toolbox nonnansegments errored on leading or
   trailing nans (verified: 3 of the 4 cases errored, 1 returned wrong

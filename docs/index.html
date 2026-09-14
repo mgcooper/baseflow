@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>Getting Started with the Baseflow Toolbox</title>
 <meta name="generator" content="MATLAB 25.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2026-09-13">
+<meta name="DC.date" content="2026-09-14">
 <meta name="DC.source" content="baseflow_gettingStarted.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -104,16 +104,16 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <a href="#23">API Specification</a>
 </li>
 <li>
-<a href="#29">Toolbox Functions</a>
+<a href="#30">Toolbox Functions</a>
 </li>
 <li>
-<a href="#45">Toolbox Structure</a>
+<a href="#46">Toolbox Structure</a>
 </li>
 <li>
-<a href="#47">Authors &amp; Sources</a>
+<a href="#48">Authors &amp; Sources</a>
 </li>
 <li>
-<a href="#49">Acknowledgements</a>
+<a href="#50">Acknowledgements</a>
 </li>
 </ul>
 </div>
@@ -182,6 +182,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <p>Both of these user-interfaces are demonstrated in the example live-scripts in the <tt>demos</tt> folder.</p>
 <h2 id="23">API Specification</h2>
 <p>The API specification for the toolbox is defined below and is also defined in the <tt>setopts</tt> function documentation.</p>
+<p>Each table lists the <tt>baseflow.setopts</tt> defaults. These defaults apply when you pass an options struct created by <tt>baseflow.setopts</tt>. A direct name-value call without that struct uses the defaults in the function input parser. The note after each table lists each option whose direct-call default differs.</p>
 <p>API specification for <tt><b>getevents</b></tt>:</p>
 <pre>   qmin        :  (numeric scalar) Minimum flow value, below which values are set nan [m3/d]. Default = 1.
    nmin        :  (numeric scalar) Minimum event length. Events with fewer than nmin data values are ignored [#]. Default = 4;
@@ -195,6 +196,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
    pickevents  :  (logical scalar) Flag indicating whether to manually pick events (true) or use automated detection (false). Default = false.
    plotevents  :  (logical scalar) Flag indicating whether to plot picked events. Default = false.
    asannual    :  (logical scalar) Flag indicating whether to detect events on an annual basis. Set true if pickevents true. Default = false.</pre>
+<p>A direct call to <tt>getevents</tt> without an options struct from <tt>setopts</tt> uses these defaults: <tt>fmax</tt> = 2, <tt>rmin</tt> = 0, <tt>rmnochange</tt> = false, and <tt>rmrain</tt> = false.</p>
 <p>API specification for <tt><b>fitevents</b></tt>:</p>
 <pre>   derivmethod    : (char) derivative (dQ/dt) method. Default = 'ETS'.
    fitmethod      : (char) -dQ/dt = aQb fitting method. Default = 'nls'.
@@ -202,13 +204,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
    pickfits       : (logical scalar) Flag indicating whether to pick fits manually. Default = false.
    pickmethod     : (char) Method to fit picks manually. Default = 'none'.
    plotfits       : (logical scalar) Flag indicating whether to plot the fits. Default = false.
-   savefitplots   : (logical scalar) Flag indicating whether to save plots of fits. Default = false.
+   saveplots      : (logical scalar) Flag to save plots of fits. fitevents parses this flag, but the flag has no effect. Default = false.
    etsparam       : (numeric scalar) Min flow length parameter for ETS algorithm [-]. Default = 0.2.
    vtsparam       : (numeric scalar) Min flow length parameter for VTS algorithm [-]. Default = 1.0.
    ctsmethod      : (char) Finite-difference stencil for the CTS method: 'B1', 'B2', 'F1', 'F2', 'C2', or 'C4'. Default = 'B1'.
-   drainagearea   : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
-   gageID         : (char) Station name or ID. Default = none.
    fitopts        : (struct) baseflow.fitab options for every event fit: weights, order, quantile, refqtls, Nboot, alpha (numeric); mask, plotfit (logical). Fields override the same-named fitab options; weights and mask must be scalars. Default = struct().</pre>
+<p>A direct call to <tt>fitevents</tt> without an options struct from <tt>setopts</tt> uses the same defaults.</p>
 <p>API specification for <tt><b>globalfit</b></tt>:</p>
 <pre>     drainagearea      : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
      drainagedensity   : (numeric scalar) Drainage density = streamlength/drainagearea [km-1]. Default = 0.8.
@@ -225,7 +226,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
      refqtls           : (numeric vector) Quantiles of Q and -dQ/dt for early/late reference lines (units: N/A). Default = [0.50 0.50].
      earlyqtls         : (numeric vector) Quantiles of Q and -dQ/dt for early reference lines (units: N/A). Default = [0.95 0.95].
      lateqtls          : (numeric vector) Quantiles of Q and -dQ/dt for late reference lines (units: N/A). Default = [0.50 0.50].</pre>
-<h2 id="29">Toolbox Functions</h2>
+<p>A direct call to <tt>globalfit</tt> without an options struct from <tt>setopts</tt> uses <tt>aquiferslope</tt> = NaN.</p>
+<h2 id="30">Toolbox Functions</h2>
 <p>Most <tt>baseflow</tt> workflows will revolve around calls to the three primary APIs described above, which implement the underlying methods of baseflow recession analysis by calling both public and private toolbox functions. These functions are described below, organized around the three main toolbox features: event-detection, event-scale curve fitting, and population-scale distribution fitting.</p>
 <p>Event-detection is the process of identifying periods of declining flow in streamflow timeseries, known as "recession events". Curve-fitting refers to parameter estimation from individual recession events. Aquifer properties can be estimated from individual recession event parameters, or from distribution fits to parameter samples estimated from many events, depending on data availability and the intended application.</p>
 <p>Functions that support event detection:</p>
@@ -301,7 +303,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <li>
 <tt>pointcloudplot</tt> Plot a point-cloud diagram to estimate aquifer parameters</li>
 <li>
-<tt>plotdqdt</tt> (deprecated) Plot the log-log q vs -dq/dt point-cloud with options to select recession segments for fitting</li>
+<tt>plotdqdt</tt> Plot the log-log q vs -dq/dt point-cloud with options to select recession segments for fitting</li>
 <li>
 <tt>plotrefline</tt> Add a reference line to a point cloud plot</li>
 <li>
@@ -361,7 +363,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <tt>generateTestData</tt> Generate test data.</li>
 </ul>
 </div>
-<h2 id="45">Toolbox Structure</h2>
+<h2 id="46">Toolbox Structure</h2>
 <p>All user accessible and documented functions in this toolbox are defined inside the <tt>+baseflow</tt> namespace package. This avoids naming conflicts with built-in or user-defined matlab functions. Functions inside <tt>+baseflow/private</tt> are available only to functions in the parent <tt>+baseflow</tt> folder and are not meant to be called by users. Functions inside the +baseflow/+deps folder are third-party dependencies and are not meant to be called by users.</p>
 <pre>+baseflow/ - The package, with all documented, user accessible functions.
    +deps/ - Third-party functions called by package functions.
@@ -374,7 +376,7 @@ demos/ - Example live scripts.
 docs/ - Documentation.
 functionSignatures.json - function signatures to enable auto-completion.
 Setup.m - user-facing installation function.</pre>
-<h2 id="47">Authors &amp; Sources</h2>
+<h2 id="48">Authors &amp; Sources</h2>
 <p>The code was written by Matt Cooper (&lt;mailto:matt.cooper@pnnl.gov <a href="mailto:matt.cooper@pnnl.gov">matt.cooper@pnnl.gov</a>&gt;). The exponential time step method implementation was inspired by Clement Roques' exponential time step matlab code (available on request from Clement). The underlying theory is based on idealized solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Details can be found in the following papers:</p>
 <div>
 <ul>
@@ -383,7 +385,7 @@ Setup.m - user-facing installation function.</pre>
 <li>Rupp D E and Selker J S 2006 On the use of the Boussinesq equation for interpreting recession hydrographs from sloping aquifers Water Resour. Res. 42 W12421.</li>
 </ul>
 </div>
-<h2 id="49">Acknowledgements</h2>
+<h2 id="50">Acknowledgements</h2>
 <p>The Interdisciplinary Research for Arctic Coastal Environments (InteRFACE) project funded this work through the United States Department of Energy, Office of Science, Biological and Environmental Research (BER) Regional and Global Model Analysis (RGMA) program. Awarded under contract grant # 89233218CNA000001 to Triad National Security, LLC (&ldquo;Triad&rdquo;).</p>
 <p class="footer">
 <br>
@@ -479,6 +481,11 @@ Setup.m - user-facing installation function.</pre>
 % The API specification for the toolbox is defined below and is also defined 
 % in the |setopts| function documentation.
 % 
+% Each table lists the |baseflow.setopts| defaults. These defaults apply when
+% you pass an options struct created by |baseflow.setopts|. A direct name-value
+% call without that struct uses the defaults in the function input parser. The
+% note after each table lists each option whose direct-call default differs.
+% 
 % API specification for |*getevents*|:
 %%
 % 
@@ -496,6 +503,10 @@ Setup.m - user-facing installation function.</pre>
 %     asannual    :  (logical scalar) Flag indicating whether to detect events on an annual basis. Set true if pickevents true. Default = false.
 %
 %% 
+% A direct call to |getevents| without an options struct from |setopts| uses
+% these defaults: |fmax| = 2, |rmin| = 0, |rmnochange| = false, and |rmrain| =
+% false.
+% 
 % API specification for |*fitevents*|:
 %%
 % 
@@ -505,15 +516,16 @@ Setup.m - user-facing installation function.</pre>
 %     pickfits       : (logical scalar) Flag indicating whether to pick fits manually. Default = false.
 %     pickmethod     : (char) Method to fit picks manually. Default = 'none'.
 %     plotfits       : (logical scalar) Flag indicating whether to plot the fits. Default = false.
-%     savefitplots   : (logical scalar) Flag indicating whether to save plots of fits. Default = false.
+%     saveplots      : (logical scalar) Flag to save plots of fits. fitevents parses this flag, but the flag has no effect. Default = false.
 %     etsparam       : (numeric scalar) Min flow length parameter for ETS algorithm [-]. Default = 0.2.
 %     vtsparam       : (numeric scalar) Min flow length parameter for VTS algorithm [-]. Default = 1.0.
 %     ctsmethod      : (char) Finite-difference stencil for the CTS method: 'B1', 'B2', 'F1', 'F2', 'C2', or 'C4'. Default = 'B1'.
-%     drainagearea   : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
-%     gageID         : (char) Station name or ID. Default = none.
 %     fitopts        : (struct) baseflow.fitab options for every event fit: weights, order, quantile, refqtls, Nboot, alpha (numeric); mask, plotfit (logical). Fields override the same-named fitab options; weights and mask must be scalars. Default = struct().
 %
 %% 
+% A direct call to |fitevents| without an options struct from |setopts| uses
+% the same defaults.
+% 
 % API specification for |*globalfit*|:
 %%
 % 
@@ -533,6 +545,9 @@ Setup.m - user-facing installation function.</pre>
 %       earlyqtls         : (numeric vector) Quantiles of Q and -dQ/dt for early reference lines (units: N/A). Default = [0.95 0.95].
 %       lateqtls          : (numeric vector) Quantiles of Q and -dQ/dt for late reference lines (units: N/A). Default = [0.50 0.50].
 %
+%% 
+% A direct call to |globalfit| without an options struct from |setopts| uses
+% |aquiferslope| = NaN.
 %% Toolbox Functions
 % Most |baseflow| workflows will revolve around calls to the three primary APIs 
 % described above, which implement the underlying methods of baseflow recession 
@@ -593,7 +608,7 @@ Setup.m - user-facing installation function.</pre>
 %% 
 % * |hyetograph| Plot a discharge rainfall hyetograph.
 % * |pointcloudplot| Plot a point-cloud diagram to estimate aquifer parameters
-% * |plotdqdt| (deprecated) Plot the log-log q vs -dq/dt point-cloud with options 
+% * |plotdqdt| Plot the log-log q vs -dq/dt point-cloud with options 
 % to select recession segments for fitting
 % * |plotrefline| Add a reference line to a point cloud plot
 % * |plplotb| Plot the power law fit to the P(tau) Pareto distribution

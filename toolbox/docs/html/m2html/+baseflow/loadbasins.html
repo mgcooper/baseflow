@@ -35,13 +35,13 @@
 
  Description
 
-     Basins = baseflow.loadbasins(basinname) returns struct Basins containing
-     the spatial basin boundary information.
+     Basins = baseflow.loadbasins(basinname) returns struct Basins
+     containing the spatial basin boundary information.
 
-     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally returns
-     table Meta containing the basin metadata information and geoshape Poly
-     containing a computational geometry object representation of the basin
-     boundary.
+     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally
+     returns table Meta containing the basin metadata information and
+     geoshape Poly containing a computational geometry object representation
+     of the basin boundary.
 
      [Basins,Meta,Poly] = baseflow.loadbasins(___,'projection',projtype)
      specifies whether to return the basin boundary in geographic or
@@ -87,13 +87,13 @@ This function is called by:
 0007    <span class="comment">%</span>
 0008    <span class="comment">% Description</span>
 0009    <span class="comment">%</span>
-0010    <span class="comment">%     Basins = baseflow.loadbasins(basinname) returns struct Basins containing</span>
-0011    <span class="comment">%     the spatial basin boundary information.</span>
+0010    <span class="comment">%     Basins = baseflow.loadbasins(basinname) returns struct Basins</span>
+0011    <span class="comment">%     containing the spatial basin boundary information.</span>
 0012    <span class="comment">%</span>
-0013    <span class="comment">%     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally returns</span>
-0014    <span class="comment">%     table Meta containing the basin metadata information and geoshape Poly</span>
-0015    <span class="comment">%     containing a computational geometry object representation of the basin</span>
-0016    <span class="comment">%     boundary.</span>
+0013    <span class="comment">%     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally</span>
+0014    <span class="comment">%     returns table Meta containing the basin metadata information and</span>
+0015    <span class="comment">%     geoshape Poly containing a computational geometry object representation</span>
+0016    <span class="comment">%     of the basin boundary.</span>
 0017    <span class="comment">%</span>
 0018    <span class="comment">%     [Basins,Meta,Poly] = baseflow.loadbasins(___,'projection',projtype)</span>
 0019    <span class="comment">%     specifies whether to return the basin boundary in geographic or</span>
@@ -108,11 +108,11 @@ This function is called by:
 0028    <span class="comment">% if called with no input, open this file</span>
 0029    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
 0030 
-0031    <span class="comment">% TODO: accept stationname. see loadcalm, it worked as soon as i added support</span>
-0032    <span class="comment">% for stationname to baseflow.loadmeta meaning it relies entirely on the basinname</span>
-0033    <span class="comment">% returend by loadmeta, whereas this does not, because the Calm database has an</span>
-0034    <span class="comment">% entry for the basins or the index in Meta, so maybe doing that with boundaries</span>
-0035    <span class="comment">% would simplify thigns here.</span>
+0031    <span class="comment">% TODO: accept stationname. see loadcalm, it worked as soon as i added</span>
+0032    <span class="comment">% support for stationname to baseflow.loadmeta meaning it relies entirely on</span>
+0033    <span class="comment">% the basinname returend by loadmeta, whereas this does not, because the Calm</span>
+0034    <span class="comment">% database has an entry for the basins or the index in Meta, so maybe doing</span>
+0035    <span class="comment">% that with boundaries would simplify thigns here.</span>
 0036 
 0037    <span class="comment">% parse inputs</span>
 0038    [<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>, version, projection] = <a href="#_sub1" class="code" title="subfunction [basinname, version, projection] = parseinputs(basinname,varargin)">parseinputs</a>(<a href="basinname.html" class="code" title="function basin = basinname(typenamehere)">basinname</a>,varargin{:});

@@ -12,9 +12,11 @@ function [ypred, yconf] = predictlm(stats, x, alpha, type, option)
    %
    %     [ypred, yconf] = predictlm(stats, x) evaluates the linear model in
    %     stats at the values x and returns the predicted response ypred and
-   %     the confidence bounds yconf = [lower upper]. stats is a fitlm model
+   %     the confidence bounds yconf = [lower upper]. stats is a
+   %     single-predictor linear model with an intercept: a fitlm model
    %     object, or an Octave regression struct with fields coeffs, vcov,
-   %     and mse.
+   %     and mse. x holds the predictor values used to fit the model,
+   %     because the bounds use numel(x)-2 residual degrees of freedom.
    %
    %     [ypred, yconf] = predictlm(stats, x, alpha, type, option) uses
    %     significance level alpha (default 0.05). type is 'confidence'

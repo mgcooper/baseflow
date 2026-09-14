@@ -32,8 +32,8 @@
  Syntax
 
   [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau);
-  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of
-              Qexp/Q0 relative to the input Q
+  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles
+              of Qexp/Q0 relative to the input Q
 
  See also: <a href="aquifertrend.html" class="code" title="function [D,dDdt,dDadt,C] = aquifertrend(tau,phi,N,Qb,dQbdt)">aquifertrend</a>, <a href="baseflowtrend.html" class="code" title="function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)">baseflowtrend</a>
 
@@ -69,8 +69,8 @@ This function is called by:
 0004    <span class="comment">% Syntax</span>
 0005    <span class="comment">%</span>
 0006    <span class="comment">%  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau);</span>
-0007    <span class="comment">%  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles of</span>
-0008    <span class="comment">%              Qexp/Q0 relative to the input Q</span>
+0007    <span class="comment">%  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles</span>
+0008    <span class="comment">%              of Qexp/Q0 relative to the input Q</span>
 0009    <span class="comment">%</span>
 0010    <span class="comment">% See also: aquifertrend, baseflowtrend</span>
 0011    <span class="comment">%</span>
@@ -184,8 +184,8 @@ This function is called by:
 0119 <span class="comment">% % Q0^(1-b2)/a1</span>
 0120 <span class="comment">% % Q0 = a2*tau0)</span>
 0121 <span class="comment">%</span>
-0122 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a1 and b=b1</span>
-0123 <span class="comment">% % where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:</span>
+0122 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a1 and</span>
+0123 <span class="comment">% % b=b1 where b1=3 and a1 is the early-time fit, then tau0 = Q0^(1-b1)/a1:</span>
 0124 <span class="comment">% b1    = 3;</span>
 0125 <span class="comment">% b2    = b;</span>
 0126 <span class="comment">% a1    = baseflow.pointcloudintercept(q,dqdt,b1,'envelope','refqtls',[0.95 0.95]);</span>
@@ -208,10 +208,10 @@ This function is called by:
 0143 <span class="comment">% plot([Q0 Q0],ylim,'Color','g')</span>
 0144 <span class="comment">% plot([Qexp Qexp],ylim,'Color','g')</span>
 0145 <span class="comment">%</span>
-0146 <span class="comment">% % NOTE: this is the way I did it originally but this is the case where it can be</span>
-0147 <span class="comment">% % shown to only be true for b=3 therefore the version above is correct.</span>
-0148 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a2 and b=b2</span>
-0149 <span class="comment">% % where a2 and b2 are the late-time fits, then tau0 = Q0^(1-b2)/a2:</span>
+0146 <span class="comment">% % NOTE: this is the way I did it originally but this is the case where it can</span>
+0147 <span class="comment">% % be shown to only be true for b=3 therefore the version above is correct.</span>
+0148 <span class="comment">% % if we believe that tau0 is the onset of recession at which time a=a2 and</span>
+0149 <span class="comment">% % b=b2 where a2 and b2 are the late-time fits, then tau0 = Q0^(1-b2)/a2:</span>
 0150 <span class="comment">% Q0    = (a2*tau0)^(1/(1-b2));</span>
 0151 <span class="comment">% Qexp  = Q0*(2-b2)/(3-b2);</span>
 0152 <span class="comment">%</span>
@@ -231,8 +231,8 @@ This function is called by:
 0166 <span class="comment">% % (7) tau0 = tau*(3-bhat)/(2-bhat)^(1-bhat)</span>
 0167 <span class="comment">%</span>
 0168 <span class="comment">% % (6) implies that tau0/tau should equal ((3-b)/(2-b))^(1-b) = 0.748 ... very</span>
-0169 <span class="comment">% % close to the ratio I found examining the troch solutions whcih i interpret as</span>
-0170 <span class="comment">% % a discontinuity at b-3. It also implies we can get tau0 this way:</span>
+0169 <span class="comment">% % close to the ratio I found examining the troch solutions whcih i interpret</span>
+0170 <span class="comment">% % as a discontinuity at b-3. It also implies we can get tau0 this way:</span>
 0171 <span class="comment">% % tau0 = tau*((3-b)/(2-b))^(1-b)</span>
 0172 <span class="comment">% % but that doesn't match tau0 from the pareto fit, so</span>
 0173 <span class="comment">%</span>

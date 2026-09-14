@@ -46,13 +46,14 @@
      userab   =  2x1 double indicating a user-defined intercept,slope pair
      labels   =  logical indicating whether to add labels
      refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
-     plotline =  logical indicating whether to add the line plot (for some cases
-                 this function can be used to return the a/b values only)
+     plotline =  logical indicating whether to add the line plot (for some
+                 cases this function can be used to return the a/b values
+                 only)
      linecolor = rgb triplet indicating the line color
-     precision = scalar double indicating the precision in the x data, used to
-                 compute the 'lower envelope'
-     timestep  = scalar double indicating the timestep of the x data, used to
-                 compute the 'lower envelope'
+     precision = scalar double indicating the precision in the x data, used
+                 to compute the 'lower envelope'
+     timestep  = scalar double indicating the timestep of the x data, used
+                 to compute the 'lower envelope'
      ax       =  graphic axis to plot into
 
  See also: <a href="fitab.html" class="code" title="function [Fit,ok] = fitab(q,dqdt,method,varargin)">fitab</a>, <a href="pointcloudintercept.html" class="code" title="function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)">pointcloudintercept</a>, <a href="pointcloudplot.html" class="code" title="function varargout = pointcloudplot(q,dqdt,varargin)">pointcloudplot</a>
@@ -104,230 +105,233 @@ This function is called by:
 0018    <span class="comment">%     userab   =  2x1 double indicating a user-defined intercept,slope pair</span>
 0019    <span class="comment">%     labels   =  logical indicating whether to add labels</span>
 0020    <span class="comment">%     refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'</span>
-0021    <span class="comment">%     plotline =  logical indicating whether to add the line plot (for some cases</span>
-0022    <span class="comment">%                 this function can be used to return the a/b values only)</span>
-0023    <span class="comment">%     linecolor = rgb triplet indicating the line color</span>
-0024    <span class="comment">%     precision = scalar double indicating the precision in the x data, used to</span>
-0025    <span class="comment">%                 compute the 'lower envelope'</span>
-0026    <span class="comment">%     timestep  = scalar double indicating the timestep of the x data, used to</span>
-0027    <span class="comment">%                 compute the 'lower envelope'</span>
-0028    <span class="comment">%     ax       =  graphic axis to plot into</span>
-0029    <span class="comment">%</span>
-0030    <span class="comment">% See also: fitab, pointcloudintercept, pointcloudplot</span>
-0031    <span class="comment">%</span>
-0032    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0033 
-0034    <span class="comment">% NOTE: y comes in as -dq/dt, send it to baseflow.fitab as -y, and to refline as y</span>
-0035 
-0036    <span class="comment">% if called with no input, open this file</span>
-0037    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0038 
-0039    <span class="comment">% PARSE INPUTS</span>
-0040    [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, <span class="keyword">...</span>
-0041       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin{:});
-0042 
-0043    <span class="comment">% need options for how/if to apply the mask - e.g., we might want to show the</span>
-0044    <span class="comment">% 'bestfit' to all data, and use the mask for late-time fit. also keep in mind</span>
-0045    <span class="comment">% baseflow.eventphi calls this. mask is default true in parsing.</span>
-0046 
-0047    <span class="comment">% use this to find the equation of the line</span>
-0048    axb = @(a,x,b) a.*x.^b;
-0049 
-0050    <span class="comment">% keep track of the original axis limits</span>
-0051    <span class="keyword">if</span> plotline == true
-0052       <span class="keyword">if</span> isempty(ax)
-0053          ax = gca;
-0054       <span class="keyword">end</span>
-0055       hold on;
-0056       xlims = get(ax,<span class="string">'XLim'</span>);
-0057       ylims = get(ax,<span class="string">'YLim'</span>);
-0058    <span class="keyword">end</span>
-0059 
-0060    <span class="keyword">switch</span> refline
+0021    <span class="comment">%     plotline =  logical indicating whether to add the line plot (for some</span>
+0022    <span class="comment">%                 cases this function can be used to return the a/b values</span>
+0023    <span class="comment">%                 only)</span>
+0024    <span class="comment">%     linecolor = rgb triplet indicating the line color</span>
+0025    <span class="comment">%     precision = scalar double indicating the precision in the x data, used</span>
+0026    <span class="comment">%                 to compute the 'lower envelope'</span>
+0027    <span class="comment">%     timestep  = scalar double indicating the timestep of the x data, used</span>
+0028    <span class="comment">%                 to compute the 'lower envelope'</span>
+0029    <span class="comment">%     ax       =  graphic axis to plot into</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">% See also: fitab, pointcloudintercept, pointcloudplot</span>
+0032    <span class="comment">%</span>
+0033    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0034 
+0035    <span class="comment">% NOTE: y comes in as -dq/dt, send it to baseflow.fitab as -y, and to refline</span>
+0036    <span class="comment">% as y</span>
+0037 
+0038    <span class="comment">% if called with no input, open this file</span>
+0039    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0040 
+0041    <span class="comment">% PARSE INPUTS</span>
+0042    [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, <span class="keyword">...</span>
+0043       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin{:});
+0044 
+0045    <span class="comment">% need options for how/if to apply the mask - e.g., we might want to show the</span>
+0046    <span class="comment">% 'bestfit' to all data, and use the mask for late-time fit. also keep in</span>
+0047    <span class="comment">% mind baseflow.eventphi calls this. mask is default true in parsing.</span>
+0048 
+0049    <span class="comment">% use this to find the equation of the line</span>
+0050    axb = @(a,x,b) a.*x.^b;
+0051 
+0052    <span class="comment">% keep track of the original axis limits</span>
+0053    <span class="keyword">if</span> plotline == true
+0054       <span class="keyword">if</span> isempty(ax)
+0055          ax = gca;
+0056       <span class="keyword">end</span>
+0057       hold on;
+0058       xlims = get(ax,<span class="string">'XLim'</span>);
+0059       ylims = get(ax,<span class="string">'YLim'</span>);
+0060    <span class="keyword">end</span>
 0061 
-0062       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
-0063          b = 1;               <span class="comment">% slope = 1</span>
-0064          a = 2/timestep;      <span class="comment">% for daily, intercept = 2</span>
-0065       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
-0066          b = 0;                           <span class="comment">% slope = 0 unless stage precision is known</span>
-0067          a = precision*3600*24/timestep;  <span class="comment">% 1 m3/s converted to m3/timestep with timestep in days</span>
-0068       <span class="keyword">case</span> <span class="string">'linear'</span>
-0069          F = baseflow.fitab(x(mask), -y(mask), <span class="string">'ols'</span>, <span class="string">'order'</span>, 1);
-0070          a = F.ab(1);
-0071          b = F.ab(2);
-0072       <span class="keyword">case</span> <span class="string">'bestfit'</span>
-0073          F = baseflow.fitab(x(mask), -y(mask), <span class="string">'nls'</span>);
-0074          a = F.ab(1);
-0075          b = F.ab(2);
-0076       <span class="keyword">case</span> <span class="string">'userfit'</span>
-0077          a = userab(1);
-0078          b = userab(2);
-0079       <span class="keyword">case</span> <span class="string">'envelope'</span>
-0080          F = baseflow.fitab(x(mask), -y(mask), <span class="keyword">...</span>
-0081             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, refqtls, <span class="string">'order'</span>, refslope);
-0082          a = F.ab(1);
-0083          b = F.ab(2);
-0084       <span class="keyword">case</span> <span class="string">'earlytime'</span>
-0085          <span class="keyword">if</span> refslope == 1; refslope = 3; <span class="keyword">end</span>
-0086          F = baseflow.fitab(x, -y, <span class="keyword">...</span>
-0087             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, [0.95 0.95], <span class="string">'order'</span>, refslope);
-0088          a = F.ab(1);
-0089          b = F.ab(2);
-0090       <span class="keyword">case</span> <span class="string">'latetime'</span>
-0091          F = baseflow.fitab(x(mask), -y(mask), <span class="keyword">...</span>
-0092             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, [0.5 0.5], <span class="string">'order'</span>, refslope);
-0093          a = F.ab(1);
-0094          b = F.ab(2);
-0095       <span class="keyword">otherwise</span>
-0096          <span class="comment">% use upper envelope</span>
-0097          b = 1;               <span class="comment">% slope = 1</span>
-0098          a = 2/timestep;      <span class="comment">% for daily, intercept = 2</span>
-0099    <span class="keyword">end</span>
-0100 
-0101    <span class="comment">% send back the ab</span>
-0102    href = []; <span class="comment">% this gets sent back in case plotline false</span>
-0103    ab = [a;b];
-0104 
-0105    <span class="comment">% Below here only needed if plot is requested</span>
-0106    <span class="keyword">if</span> plotline == true
-0107 
-0108       xref = linspace(xlims(1),xlims(2),100);
-0109       yref = axb(a,xref,b);
-0110 
-0111       <span class="keyword">switch</span> refline
-0112          <span class="keyword">case</span> <span class="string">'bestfit'</span>
-0113             href = loglog(xref,yref,<span class="string">':'</span>,<span class="string">'LineWidth'</span>,1,<span class="string">'Color'</span>,linecolor);
-0114          <span class="keyword">case</span> <span class="string">'userfit'</span>
-0115             href = loglog(xref,yref,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,1,<span class="string">'Color'</span>,linecolor);
-0116          <span class="keyword">otherwise</span>
-0117             href = loglog(xref,yref,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'Color'</span>,linecolor);
-0118       <span class="keyword">end</span>
-0119 
-0120       <span class="comment">% reset the x,ylims</span>
-0121       set(ax,<span class="string">'XLim'</span>,xlims,<span class="string">'YLim'</span>,ylims,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'tex'</span>)
-0122       setlogticks(ax);
-0123 
-0124       <span class="keyword">if</span> labels == true
-0125          <a href="#_sub1" class="code" title="subfunction addlabels(a,b,refline)">addlabels</a>(a,b,refline)
-0126       <span class="keyword">end</span>
-0127    <span class="keyword">end</span>
-0128    <span class="comment">% if discharge were measured directly, then the lower envelope would be</span>
-0129    <span class="comment">% the precision of the measurements, here I assume that it is 1 m3/s, and</span>
-0130    <span class="comment">% this lower envelope would appear as a horizontal line, also at</span>
-0131    <span class="comment">% integer multiples of it.</span>
-0132    
-0133    <span class="keyword">switch</span> nargout
-0134       <span class="keyword">case</span> 1
-0135          varargout{1} = href;
-0136       <span class="keyword">case</span> 2
+0062    <span class="keyword">switch</span> refline
+0063 
+0064       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
+0065          b = 1;               <span class="comment">% slope = 1</span>
+0066          a = 2/timestep;      <span class="comment">% for daily, intercept = 2</span>
+0067       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
+0068          b = 0;                           <span class="comment">% slope = 0 unless stage precision is known</span>
+0069          a = precision*3600*24/timestep;  <span class="comment">% 1 m3/s converted to m3/timestep with timestep in days</span>
+0070       <span class="keyword">case</span> <span class="string">'linear'</span>
+0071          F = baseflow.fitab(x(mask), -y(mask), <span class="string">'ols'</span>, <span class="string">'order'</span>, 1);
+0072          a = F.ab(1);
+0073          b = F.ab(2);
+0074       <span class="keyword">case</span> <span class="string">'bestfit'</span>
+0075          F = baseflow.fitab(x(mask), -y(mask), <span class="string">'nls'</span>);
+0076          a = F.ab(1);
+0077          b = F.ab(2);
+0078       <span class="keyword">case</span> <span class="string">'userfit'</span>
+0079          a = userab(1);
+0080          b = userab(2);
+0081       <span class="keyword">case</span> <span class="string">'envelope'</span>
+0082          F = baseflow.fitab(x(mask), -y(mask), <span class="keyword">...</span>
+0083             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, refqtls, <span class="string">'order'</span>, refslope);
+0084          a = F.ab(1);
+0085          b = F.ab(2);
+0086       <span class="keyword">case</span> <span class="string">'earlytime'</span>
+0087          <span class="keyword">if</span> refslope == 1; refslope = 3; <span class="keyword">end</span>
+0088          F = baseflow.fitab(x, -y, <span class="keyword">...</span>
+0089             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, [0.95 0.95], <span class="string">'order'</span>, refslope);
+0090          a = F.ab(1);
+0091          b = F.ab(2);
+0092       <span class="keyword">case</span> <span class="string">'latetime'</span>
+0093          F = baseflow.fitab(x(mask), -y(mask), <span class="keyword">...</span>
+0094             <span class="string">'envelope'</span>, <span class="string">'refqtls'</span>, [0.5 0.5], <span class="string">'order'</span>, refslope);
+0095          a = F.ab(1);
+0096          b = F.ab(2);
+0097       <span class="keyword">otherwise</span>
+0098          <span class="comment">% use upper envelope</span>
+0099          b = 1;               <span class="comment">% slope = 1</span>
+0100          a = 2/timestep;      <span class="comment">% for daily, intercept = 2</span>
+0101    <span class="keyword">end</span>
+0102 
+0103    <span class="comment">% send back the ab</span>
+0104    href = []; <span class="comment">% this gets sent back in case plotline false</span>
+0105    ab = [a;b];
+0106 
+0107    <span class="comment">% Below here only needed if plot is requested</span>
+0108    <span class="keyword">if</span> plotline == true
+0109 
+0110       xref = linspace(xlims(1),xlims(2),100);
+0111       yref = axb(a,xref,b);
+0112 
+0113       <span class="keyword">switch</span> refline
+0114          <span class="keyword">case</span> <span class="string">'bestfit'</span>
+0115             href = loglog(xref,yref,<span class="string">':'</span>,<span class="string">'LineWidth'</span>,1,<span class="string">'Color'</span>,linecolor);
+0116          <span class="keyword">case</span> <span class="string">'userfit'</span>
+0117             href = loglog(xref,yref,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,1,<span class="string">'Color'</span>,linecolor);
+0118          <span class="keyword">otherwise</span>
+0119             href = loglog(xref,yref,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'Color'</span>,linecolor);
+0120       <span class="keyword">end</span>
+0121 
+0122       <span class="comment">% reset the x,ylims</span>
+0123       set(ax,<span class="string">'XLim'</span>,xlims,<span class="string">'YLim'</span>,ylims,<span class="string">'TickLabelInterpreter'</span>,<span class="string">'tex'</span>)
+0124       setlogticks(ax);
+0125 
+0126       <span class="keyword">if</span> labels == true
+0127          <a href="#_sub1" class="code" title="subfunction addlabels(a,b,refline)">addlabels</a>(a,b,refline)
+0128       <span class="keyword">end</span>
+0129    <span class="keyword">end</span>
+0130    <span class="comment">% if discharge were measured directly, then the lower envelope would be</span>
+0131    <span class="comment">% the precision of the measurements, here I assume that it is 1 m3/s, and</span>
+0132    <span class="comment">% this lower envelope would appear as a horizontal line, also at</span>
+0133    <span class="comment">% integer multiples of it.</span>
+0134    
+0135    <span class="keyword">switch</span> nargout
+0136       <span class="keyword">case</span> 1
 0137          varargout{1} = href;
-0138          varargout{2} = ab;
-0139    <span class="keyword">end</span>
-0140 <span class="keyword">end</span>
-0141 
-0142 <span class="comment">%% LOCAL FUNCTIONS</span>
-0143 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(a,b,refline)</a>
-0144 
-0145    <span class="comment">% for early and late, we use the early-time form to get the y position</span>
-0146    ylims = ylim;
-0147    xlims = xlim;
-0148 
-0149    <span class="comment">% use the number of decades to place the labels</span>
-0150    ndecsy = log10(ylims(2))-log10(ylims(1));
-0151    ndecsx = log10(xlims(2))-log10(xlims(1));
-0152 
-0153    <span class="comment">% place the label 1/2 way b/w the first and second decade</span>
-0154    ya = 10^(log10(ylims(1))+ndecsy/20);
-0155 
-0156    <span class="keyword">switch</span> refline
+0138       <span class="keyword">case</span> 2
+0139          varargout{1} = href;
+0140          varargout{2} = ab;
+0141    <span class="keyword">end</span>
+0142 <span class="keyword">end</span>
+0143 
+0144 <span class="comment">%% LOCAL FUNCTIONS</span>
+0145 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(a,b,refline)</a>
+0146 
+0147    <span class="comment">% for early and late, we use the early-time form to get the y position</span>
+0148    ylims = ylim;
+0149    xlims = xlim;
+0150 
+0151    <span class="comment">% use the number of decades to place the labels</span>
+0152    ndecsy = log10(ylims(2))-log10(ylims(1));
+0153    ndecsx = log10(xlims(2))-log10(xlims(1));
+0154 
+0155    <span class="comment">% place the label 1/2 way b/w the first and second decade</span>
+0156    ya = 10^(log10(ylims(1))+ndecsy/20);
 0157 
-0158       <span class="comment">%case {'latetime','earlytime','userfit','bestfit'}</span>
-0159       <span class="keyword">case</span> {<span class="string">'latetime'</span>,<span class="string">'earlytime'</span>,<span class="string">'userfit'</span>}
-0160          xa = (ya/a)^(1/b);
-0161 
-0162          <span class="comment">% make the arrow span 1/10th or so of the total number of decades</span>
-0163          xa = [xa 10^(log10(xa)+ndecsx/15)];
-0164          ya = [ya ya];
-0165 
-0166          <span class="keyword">if</span> strcmp(refline, <span class="string">'userfit'</span>)
-0167             ta = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>,b);
-0168          <span class="keyword">elseif</span> b==1 || b==3
-0169             ta = sprintf(<span class="string">'$b=%.0f$'</span>,b);
-0170          <span class="keyword">elseif</span> b==3/2
-0171             ta = sprintf(<span class="string">'$b=%.1f$'</span>,b);
-0172          <span class="keyword">else</span>
-0173             ta = sprintf(<span class="string">'$b=%.2f$'</span>,b);
-0174          <span class="keyword">end</span>
-0175 
-0176          <span class="keyword">if</span> ~isoctave
-0177             baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
-0178                <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10);
-0179             text(1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
-0180                <span class="string">'fontsize'</span>,13,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
-0181          <span class="keyword">end</span>
-0182 
-0183       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
+0158    <span class="keyword">switch</span> refline
+0159 
+0160       <span class="comment">%case {'latetime','earlytime','userfit','bestfit'}</span>
+0161       <span class="keyword">case</span> {<span class="string">'latetime'</span>,<span class="string">'earlytime'</span>,<span class="string">'userfit'</span>}
+0162          xa = (ya/a)^(1/b);
+0163 
+0164          <span class="comment">% make the arrow span 1/10th or so of the total number of decades</span>
+0165          xa = [xa 10^(log10(xa)+ndecsx/15)];
+0166          ya = [ya ya];
+0167 
+0168          <span class="keyword">if</span> strcmp(refline, <span class="string">'userfit'</span>)
+0169             ta = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>,b);
+0170          <span class="keyword">elseif</span> b==1 || b==3
+0171             ta = sprintf(<span class="string">'$b=%.0f$'</span>,b);
+0172          <span class="keyword">elseif</span> b==3/2
+0173             ta = sprintf(<span class="string">'$b=%.1f$'</span>,b);
+0174          <span class="keyword">else</span>
+0175             ta = sprintf(<span class="string">'$b=%.2f$'</span>,b);
+0176          <span class="keyword">end</span>
+0177 
+0178          <span class="keyword">if</span> ~isoctave
+0179             baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
+0180                <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10);
+0181             text(1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
+0182                <span class="string">'fontsize'</span>,13,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0183          <span class="keyword">end</span>
 0184 
-0185          axpos = baseflow.deps.plotboxpos(gca); <span class="comment">% only works with correct axes position</span>
-0186          <span class="comment">% xtxt = exp(mean(log(xlim)));</span>
-0187 
-0188          xlims = log10(xlim);
-0189          xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
-0190          ytxt = 2*xtxt;
-0191          rtxt = 0.98;
-0192 
-0193          <span class="comment">% some values of rtxt that work for different types of plots</span>
-0194          <span class="comment">% 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)</span>
-0195          <span class="comment">% 0.22   not sure (note said 0.22 works with tiledlayout)</span>
-0196          <span class="comment">% 3.8    not sure (note said i think 3.8 works with subplot)</span>
-0197          <span class="comment">% 0.86   the standard point cloud plot (standard figure size)</span>
-0198          <span class="comment">% 1.07   not sure but this was</span>
-0199          <span class="comment">% 0.98   used this in the final point cloud plot</span>
-0200 
-0201          rotatedLogLogText(xtxt,ytxt,<span class="string">'upper envelope'</span>,rtxt,axpos,<span class="string">'FontSize'</span>,11);
-0202 
-0203       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
-0204          <span class="comment">% for now, add this after the fact</span>
-0205          <span class="comment">%</span>
-0206          <span class="comment">%          xlims    = log10(xlim);</span>
-0207          <span class="comment">%          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);</span>
-0208          <span class="comment">%          ytxt     = 2*xtxt;</span>
-0209    <span class="keyword">end</span>
-0210 <span class="keyword">end</span>
-0211 
-0212 <span class="comment">%% INPUT PARSER</span>
-0213 <a name="_sub2" href="#_subfunctions" class="code">function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, </a><span class="keyword">...</span>
-0214       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
-0215    parser = inputParser;
-0216    parser.FunctionName = <span class="string">'baseflow.plotrefline'</span>;
-0217 
-0218    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
-0219    parser.addRequired(<span class="string">'y'</span>, @isnumeric);
-0220    parser.addParameter(<span class="string">'mask'</span>, true(size(x)), @islogical);
-0221    parser.addParameter(<span class="string">'refline'</span>, <span class="string">'none'</span>, @ischar);
-0222    parser.addParameter(<span class="string">'refslope'</span>, 1, @isnumeric);
-0223    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
-0224    parser.addParameter(<span class="string">'labels'</span>, false, @islogical);
-0225    parser.addParameter(<span class="string">'refqtls'</span>, nan, @isnumeric);
-0226    parser.addParameter(<span class="string">'plotline'</span>, true, @islogical);
-0227    parser.addParameter(<span class="string">'linecolor'</span>, [0 0 0], @isnumeric);
-0228    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric); <span class="comment">% default = 1 m3/s</span>
-0229    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric); <span class="comment">% default = 1 day</span>
-0230    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
-0231 
-0232    parser.parse(x, y, varargin{:});
-0233 
-0234    mask        = parser.Results.mask;
-0235    refline     = parser.Results.refline;
-0236    refslope    = parser.Results.refslope;
-0237    userab      = parser.Results.userab;
-0238    labels      = parser.Results.labels;
-0239    refqtls     = parser.Results.refqtls;
-0240    plotline    = parser.Results.plotline;
-0241    linecolor   = parser.Results.linecolor;
-0242    precision   = parser.Results.precision;
-0243    timestep    = parser.Results.timestep;
-0244    ax          = parser.Results.ax;   
-0245 <span class="keyword">end</span></pre></div>
+0185       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
+0186 
+0187          <span class="comment">% only works with correct axes position</span>
+0188          axpos = baseflow.deps.plotboxpos(gca);
+0189          <span class="comment">% xtxt = exp(mean(log(xlim)));</span>
+0190 
+0191          xlims = log10(xlim);
+0192          xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
+0193          ytxt = 2*xtxt;
+0194          rtxt = 0.98;
+0195 
+0196          <span class="comment">% some values of rtxt that work for different types of plots</span>
+0197          <span class="comment">% 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)</span>
+0198          <span class="comment">% 0.22   not sure (note said 0.22 works with tiledlayout)</span>
+0199          <span class="comment">% 3.8    not sure (note said i think 3.8 works with subplot)</span>
+0200          <span class="comment">% 0.86   the standard point cloud plot (standard figure size)</span>
+0201          <span class="comment">% 1.07   not sure but this was</span>
+0202          <span class="comment">% 0.98   used this in the final point cloud plot</span>
+0203 
+0204          rotatedLogLogText(xtxt,ytxt,<span class="string">'upper envelope'</span>,rtxt,axpos,<span class="string">'FontSize'</span>,11);
+0205 
+0206       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
+0207          <span class="comment">% for now, add this after the fact</span>
+0208          <span class="comment">%</span>
+0209          <span class="comment">%          xlims    = log10(xlim);</span>
+0210          <span class="comment">%          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);</span>
+0211          <span class="comment">%          ytxt     = 2*xtxt;</span>
+0212    <span class="keyword">end</span>
+0213 <span class="keyword">end</span>
+0214 
+0215 <span class="comment">%% INPUT PARSER</span>
+0216 <a name="_sub2" href="#_subfunctions" class="code">function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, </a><span class="keyword">...</span>
+0217       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
+0218    parser = inputParser;
+0219    parser.FunctionName = <span class="string">'baseflow.plotrefline'</span>;
+0220 
+0221    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
+0222    parser.addRequired(<span class="string">'y'</span>, @isnumeric);
+0223    parser.addParameter(<span class="string">'mask'</span>, true(size(x)), @islogical);
+0224    parser.addParameter(<span class="string">'refline'</span>, <span class="string">'none'</span>, @ischar);
+0225    parser.addParameter(<span class="string">'refslope'</span>, 1, @isnumeric);
+0226    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
+0227    parser.addParameter(<span class="string">'labels'</span>, false, @islogical);
+0228    parser.addParameter(<span class="string">'refqtls'</span>, nan, @isnumeric);
+0229    parser.addParameter(<span class="string">'plotline'</span>, true, @islogical);
+0230    parser.addParameter(<span class="string">'linecolor'</span>, [0 0 0], @isnumeric);
+0231    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric); <span class="comment">% default = 1 m3/s</span>
+0232    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric); <span class="comment">% default = 1 day</span>
+0233    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
+0234 
+0235    parser.parse(x, y, varargin{:});
+0236 
+0237    mask        = parser.Results.mask;
+0238    refline     = parser.Results.refline;
+0239    refslope    = parser.Results.refslope;
+0240    userab      = parser.Results.userab;
+0241    labels      = parser.Results.labels;
+0242    refqtls     = parser.Results.refqtls;
+0243    plotline    = parser.Results.plotline;
+0244    linecolor   = parser.Results.linecolor;
+0245    precision   = parser.Results.precision;
+0246    timestep    = parser.Results.timestep;
+0247    ax          = parser.Results.ax;   
+0248 <span class="keyword">end</span></pre></div>
 </body>
 </html>

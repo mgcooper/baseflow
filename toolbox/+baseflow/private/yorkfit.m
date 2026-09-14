@@ -29,7 +29,10 @@ function [ab, stats] = yorkfit(X,Y,sigX,sigY,rxy,alpha)
 % Outputs:
 %   ab      = [a; b], y-intercept a and slope b
 %   stats   = struct with a, b, standard errors, confidence bounds,
-%             p-values, fitted values, and residuals
+%             p-values, fitted values, and residuals. When sigX and sigY
+%             are both zero, or every York weight denominator is zero,
+%             yorkfit returns the ordinary least-squares fit and stats
+%             holds only a and b.
 
 
 %% INPUT CHECKS

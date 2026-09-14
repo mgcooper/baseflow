@@ -5,7 +5,6 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %
    %     [T,Q,R,Info] = eventfinder(t,q,r)
    %     [T,Q,R,Info] = eventfinder(t,q,r,opts)
-   %     [T,Q,R,Info] = eventfinder(_, 'qmin', qmin)
    %     [T,Q,R,Info] = eventfinder(_, 'nmin', nmin)
    %     [T,Q,R,Info] = eventfinder(_, 'fmax', fmax)
    %     [T,Q,R,Info] = eventfinder(_, 'rmax', rmax)
@@ -29,13 +28,13 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %
    % Optional name-value inputs
    %
-   %     opts        (optional) structure containing the following fields:
-   %     qmin        minimum flow magnitude
+   %     opts        (optional) structure with any of the fields below. It
+   %                 must not contain other fields, so a
+   %                 baseflow.setopts('getevents') struct is rejected.
    %     nmin        minimum event length
    %     fmax        maximum # of missing values gap-filled
    %     rmax        maximum run of sequential constant values
    %     rmin        minimum rainfall required to censor flow (mm/day?)
-   %     cmax        maximum run of sequential constant values
    %     rmconvex    remove convex derivatives
    %     rmnochange  remove consecutive constant derivates
    %     rmrain      remove rainfall

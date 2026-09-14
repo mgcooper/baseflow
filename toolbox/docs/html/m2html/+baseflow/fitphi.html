@@ -113,8 +113,8 @@
  the two soln options dictate the early-time expression for 'a'. the
  late-time value is dictated by 'blate', but warn the user in case
 
- NOTE: I don't think L is involved in any of the standard solutions. it appears
- in PK62-BS04 but I think it cancels.</pre></div>
+ NOTE: I don't think L is involved in any of the standard solutions. it
+ appears in PK62-BS04 but I think it cancels.</pre></div>
 
 
 <!-- crossreference -->
@@ -229,8 +229,8 @@ This function is called by:
 0085    <span class="comment">% the two soln options dictate the early-time expression for 'a'. the</span>
 0086    <span class="comment">% late-time value is dictated by 'blate', but warn the user in case</span>
 0087    <span class="comment">%</span>
-0088    <span class="comment">% NOTE: I don't think L is involved in any of the standard solutions. it appears</span>
-0089    <span class="comment">% in PK62-BS04 but I think it cancels.</span>
+0088    <span class="comment">% NOTE: I don't think L is involved in any of the standard solutions. it</span>
+0089    <span class="comment">% appears in PK62-BS04 but I think it cancels.</span>
 0090 
 0091    <span class="comment">% if called with no input, open this file</span>
 0092    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
@@ -327,274 +327,278 @@ This function is called by:
 0183 
 0184             <span class="comment">% phi = c1c2/a1a2;</span>
 0185 
-0186             <span class="comment">% % this is in aquiferprops. probably better to use that, but should combine.</span>
-0187             <span class="comment">% trouble is that it all deepends what is known a priori (phi, D, or K)</span>
-0188             <span class="comment">% % once phi is known, this can be used to compute kD in units m/d</span>
-0189             <span class="comment">% % (should be around 100 m/d at most):</span>
-0190             <span class="comment">% k1 = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time</span>
-0191             <span class="comment">% k2 = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time</span>
-0192             <span class="comment">%</span>
-0193             <span class="comment">% % this method is based on the same method used to estimate phi, by</span>
-0194             <span class="comment">% % equating early- and late-time and isolating k, but assumes D is known</span>
-0195             <span class="comment">%</span>
-0196             <span class="comment">% % this c1/c2 are as defined in my derivation in overleaf.</span>
-0197             <span class="comment">% c1 = fR1/(D^3*L^2);</span>
-0198             <span class="comment">% c2 = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));</span>
-0199             <span class="comment">% k = ((c1/c2)*(a2/a1))^((n+2)/(n+3));</span>
-0200 
-0201          <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>        <span class="comment">% Polubarinova-Kochina, 1962 (early-time, b = 3)</span>
-0202             <span class="comment">% Boussinesq, 1904 (late-time, b = 1.5)</span>
-0203             <span class="comment">% see Troch et al. 1993</span>
-0204 
-0205             c1c2 = (1.133^(1/3))/D * (4.804^(2/3))/A;
-0206             a1a2 = a1^(1/3)*a2^(2/3);
-0207 
-0208             <span class="comment">% phi = c1c2/a1a2;</span>
-0209 
-0210             <span class="comment">% multiply by *100/86400 to go from m/d to cm/s</span>
-0211             k1 = 1.133/(D^3*L^2*a1*c1c2/a1a2);   <span class="comment">% early</span>
-0212             k2 = ((a2*A^(3/2)*c1c2/a1a2)/(4.804*L))^2;
+0186             <span class="comment">% % this is in aquiferprops. probably better to use that, but should</span>
+0187             <span class="comment">% % combine.</span>
+0188             <span class="comment">% trouble is that it all deepends what is known a priori (phi, D, or</span>
+0189             <span class="comment">% K)</span>
+0190             <span class="comment">% % once phi is known, this can be used to compute kD in units m/d</span>
+0191             <span class="comment">% % (should be around 100 m/d at most):</span>
+0192             <span class="comment">% k1 = fR1/(D^3*L^2*a1*c1c2/a1a2); % uses early-time</span>
+0193             <span class="comment">% k2 = (c1c2/a1a2*a2/fR2)^n2*(2^n*n1*D^n*A^(n+3))/L^2; % late time</span>
+0194             <span class="comment">%</span>
+0195             <span class="comment">% % this method is based on the same method used to estimate phi, by</span>
+0196             <span class="comment">% % equating early- and late-time and isolating k, but assumes D is</span>
+0197             <span class="comment">% % known</span>
+0198             <span class="comment">%</span>
+0199             <span class="comment">% % this c1/c2 are as defined in my derivation in overleaf.</span>
+0200             <span class="comment">% c1 = fR1/(D^3*L^2);</span>
+0201             <span class="comment">% c2 = fR2*(L^2/(2^n*(n+1)*D^n*(A^(n+3))))^(1/(n+2));</span>
+0202             <span class="comment">% k = ((c1/c2)*(a2/a1))^((n+2)/(n+3));</span>
+0203 
+0204          <span class="comment">% Polubarinova-Kochina, 1962 (early-time, b = 3)</span>
+0205          <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>
+0206             <span class="comment">% Boussinesq, 1904 (late-time, b = 1.5)</span>
+0207             <span class="comment">% see Troch et al. 1993</span>
+0208 
+0209             c1c2 = (1.133^(1/3))/D * (4.804^(2/3))/A;
+0210             a1a2 = a1^(1/3)*a2^(2/3);
+0211 
+0212             <span class="comment">% phi = c1c2/a1a2;</span>
 0213 
-0214             <span class="comment">% compute Q0</span>
-0215             Q0 = 3.448*k1*D^2*L^2/A; <span class="comment">% or: 3.448*k1*D^2*Dd*L if Dd is used</span>
-0216 
-0217             <span class="comment">% once phi and k are known, we can check D</span>
-0218 
-0219             <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0214             <span class="comment">% multiply by *100/86400 to go from m/d to cm/s</span>
+0215             k1 = 1.133/(D^3*L^2*a1*c1c2/a1a2);   <span class="comment">% early</span>
+0216             k2 = ((a2*A^(3/2)*c1c2/a1a2)/(4.804*L))^2;
+0217 
+0218             <span class="comment">% compute Q0</span>
+0219             Q0 = 3.448*k1*D^2*L^2/A; <span class="comment">% or: 3.448*k1*D^2*Dd*L if Dd is used</span>
 0220 
-0221          <span class="keyword">case</span> <span class="string">'PK62_BS03'</span>        <span class="comment">% Polubarinova-Kochina, 1962 (early-time)</span>
-0222             <span class="comment">% Boussinesq, 1903 (late-time)</span>
-0223             p = 1/3;
-0224             c1c2 = sqrt(1.133*p)*pi/(D*A);
-0225             a1a2 = sqrt(a1*a2);
-0226 
-0227             <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
-0228       <span class="keyword">end</span>
-0229 
-0230       <span class="comment">% no square roots are taken, but this must hold to restrict phi to 0-1</span>
-0231       <span class="keyword">if</span> c1c2 &gt; a1a2
-0232          warning(<span class="string">'phi = %.2f'</span>,c1c2/a1a2)
-0233       <span class="keyword">end</span>
-0234 
-0235       phi(m) = c1c2/a1a2;
-0236 
-0237       <span class="keyword">if</span> dispfit == true
-0238          fprintf([soln <span class="string">', phi = %.3f\n'</span>],phi(m))
-0239       <span class="keyword">end</span>
-0240    <span class="keyword">end</span>
-0241 <span class="keyword">end</span>
-0242 
-0243 <a name="_sub1" href="#_subfunctions" class="code">function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)</a>
-0244 
-0245    <span class="comment">% option to get all solutions</span>
-0246    <span class="keyword">if</span> strcmp(soln1,<span class="string">'all'</span>) &amp;&amp; strcmp(soln2,<span class="string">'all'</span>)
-0247       [soln,desc] = <a href="#_sub2" class="code" title="subfunction [combos,descriptions] = allcombos()">allcombos</a>();
-0248       <span class="keyword">return</span>;
-0249    <span class="keyword">end</span>
-0250 
-0251    <span class="comment">% early time</span>
-0252    <span class="keyword">switch</span> soln1
-0253       <span class="keyword">case</span> <span class="string">'Polubarinova-Kochina, 1962'</span>
-0254          soln1 = <span class="string">'PK62'</span>;
-0255       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2005'</span>
-0256          soln1 = <span class="string">'RS05'</span>;
-0257       <span class="keyword">case</span> <span class="string">'Brutsaert, 1994'</span>
-0258          soln1 = <span class="string">'BR94'</span>;
-0259    <span class="keyword">end</span>
-0260 
-0261    <span class="comment">% late time</span>
-0262    <span class="keyword">switch</span> soln2
-0263       <span class="keyword">case</span> <span class="string">'Boussinesq, 1904 b=3/2'</span>
-0264          soln2 = <span class="string">'BS04'</span>;
-0265       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2005 b=f(n)'</span>
-0266          soln2 = <span class="string">'RS05'</span>;
-0267       <span class="keyword">case</span> <span class="string">'Boussinesq, 1903 b=1'</span>
-0268          soln2 = <span class="string">'BS03'</span>;
-0269       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2006 b=1'</span>
-0270          soln2 = <span class="string">'RS06b1'</span>;
-0271       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2006 b=f(n)'</span>
-0272          soln2 = <span class="string">'RS06'</span>;
-0273    <span class="keyword">end</span>
-0274 
-0275 
-0276    <span class="comment">% not sure if we want this</span>
-0277    <span class="keyword">if</span> b2 &lt; 1
-0278       b2 = 1;
-0279    <span class="keyword">end</span>
-0280 
-0281    <span class="keyword">if</span> isflat == true
-0282 
-0283       <span class="comment">% late-time RS05 is valid for 1.5 &lt;= b &lt; 2, but the solution appears</span>
-0284       <span class="comment">% valid for 1&lt;b&lt;2, except that 1&lt;b&lt;1.5 corresponds to an inverted</span>
-0285       <span class="comment">% water table</span>
-0286       <span class="comment">% if strcmp(soln2,'RS05') &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)</span>
-0287       <span class="keyword">if</span> strcmp(soln2,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt;= 1 || b2&gt;=2)
-0288          warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
-0289          soln2 = <span class="string">'BS03'</span>;
-0290 
-0291          <span class="comment">% late-time B04 has b = 3/2</span>
-0292       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
-0293          warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
-0294          b2 = 3/2;
-0295 
-0296          <span class="comment">% late-time B03 has b = 1</span>
-0297       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
-0298          warning(<span class="string">'Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1'</span>)
-0299          b2 = 1;
-0300       <span class="keyword">end</span>
-0301    <span class="keyword">else</span>
-0302       <span class="keyword">if</span> strcmp(soln1,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)
-0303          warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
-0304          soln2 = <span class="string">'BS03'</span>;
-0305 
-0306       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
-0307          warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
-0308          b2 = 3/2;
+0221             <span class="comment">% once phi and k are known, we can check D</span>
+0222 
+0223             <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0224 
+0225          <span class="keyword">case</span> <span class="string">'PK62_BS03'</span>        <span class="comment">% Polubarinova-Kochina, 1962 (early-time)</span>
+0226             <span class="comment">% Boussinesq, 1903 (late-time)</span>
+0227             p = 1/3;
+0228             c1c2 = sqrt(1.133*p)*pi/(D*A);
+0229             a1a2 = sqrt(a1*a2);
+0230 
+0231             <span class="comment">% conforms to 1/DA(c1/a1)^m1*(c2/a2)^m2</span>
+0232       <span class="keyword">end</span>
+0233 
+0234       <span class="comment">% no square roots are taken, but this must hold to restrict phi to 0-1</span>
+0235       <span class="keyword">if</span> c1c2 &gt; a1a2
+0236          warning(<span class="string">'phi = %.2f'</span>,c1c2/a1a2)
+0237       <span class="keyword">end</span>
+0238 
+0239       phi(m) = c1c2/a1a2;
+0240 
+0241       <span class="keyword">if</span> dispfit == true
+0242          fprintf([soln <span class="string">', phi = %.3f\n'</span>],phi(m))
+0243       <span class="keyword">end</span>
+0244    <span class="keyword">end</span>
+0245 <span class="keyword">end</span>
+0246 
+0247 <a name="_sub1" href="#_subfunctions" class="code">function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)</a>
+0248 
+0249    <span class="comment">% option to get all solutions</span>
+0250    <span class="keyword">if</span> strcmp(soln1,<span class="string">'all'</span>) &amp;&amp; strcmp(soln2,<span class="string">'all'</span>)
+0251       [soln,desc] = <a href="#_sub2" class="code" title="subfunction [combos,descriptions] = allcombos()">allcombos</a>();
+0252       <span class="keyword">return</span>;
+0253    <span class="keyword">end</span>
+0254 
+0255    <span class="comment">% early time</span>
+0256    <span class="keyword">switch</span> soln1
+0257       <span class="keyword">case</span> <span class="string">'Polubarinova-Kochina, 1962'</span>
+0258          soln1 = <span class="string">'PK62'</span>;
+0259       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2005'</span>
+0260          soln1 = <span class="string">'RS05'</span>;
+0261       <span class="keyword">case</span> <span class="string">'Brutsaert, 1994'</span>
+0262          soln1 = <span class="string">'BR94'</span>;
+0263    <span class="keyword">end</span>
+0264 
+0265    <span class="comment">% late time</span>
+0266    <span class="keyword">switch</span> soln2
+0267       <span class="keyword">case</span> <span class="string">'Boussinesq, 1904 b=3/2'</span>
+0268          soln2 = <span class="string">'BS04'</span>;
+0269       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2005 b=f(n)'</span>
+0270          soln2 = <span class="string">'RS05'</span>;
+0271       <span class="keyword">case</span> <span class="string">'Boussinesq, 1903 b=1'</span>
+0272          soln2 = <span class="string">'BS03'</span>;
+0273       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2006 b=1'</span>
+0274          soln2 = <span class="string">'RS06b1'</span>;
+0275       <span class="keyword">case</span> <span class="string">'Rupp and Selker, 2006 b=f(n)'</span>
+0276          soln2 = <span class="string">'RS06'</span>;
+0277    <span class="keyword">end</span>
+0278 
+0279 
+0280    <span class="comment">% not sure if we want this</span>
+0281    <span class="keyword">if</span> b2 &lt; 1
+0282       b2 = 1;
+0283    <span class="keyword">end</span>
+0284 
+0285    <span class="keyword">if</span> isflat == true
+0286 
+0287       <span class="comment">% late-time RS05 is valid for 1.5 &lt;= b &lt; 2, but the solution appears</span>
+0288       <span class="comment">% valid for 1&lt;b&lt;2, except that 1&lt;b&lt;1.5 corresponds to an inverted</span>
+0289       <span class="comment">% water table</span>
+0290       <span class="comment">% if strcmp(soln2,'RS05') &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)</span>
+0291       <span class="keyword">if</span> strcmp(soln2,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt;= 1 || b2&gt;=2)
+0292          warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
+0293          soln2 = <span class="string">'BS03'</span>;
+0294 
+0295          <span class="comment">% late-time B04 has b = 3/2</span>
+0296       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
+0297          warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
+0298          b2 = 3/2;
+0299 
+0300          <span class="comment">% late-time B03 has b = 1</span>
+0301       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
+0302          warning(<span class="string">'Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1'</span>)
+0303          b2 = 1;
+0304       <span class="keyword">end</span>
+0305    <span class="keyword">else</span>
+0306       <span class="keyword">if</span> strcmp(soln1,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)
+0307          warning(<span class="string">'Requested late-time solution (Rupp and Selker, 2005) is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>)
+0308          soln2 = <span class="string">'BS03'</span>;
 0309 
-0310       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
-0311          warning(<span class="string">'Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1'</span>)
-0312          b2 = 1;
-0313       <span class="keyword">end</span>
-0314 
-0315    <span class="keyword">end</span>
-0316 
-0317    <span class="comment">% concatenate the early-time and late-time solution</span>
-0318    soln = strcat(soln1,[<span class="string">'_'</span> soln2]);
-0319 
-0320    <span class="comment">% The remapping branches above can produce a pair with no derived phi</span>
-0321    <span class="comment">% formula, for example RS05 early with the BS03 late fallback when</span>
-0322    <span class="comment">% b2 &lt;= 1. The switches below then return unassigned outputs, so raise</span>
-0323    <span class="comment">% an error first. knowncombos holds the six pairs that the solver switch</span>
-0324    <span class="comment">% implements (the '*' entries in the header notes). allcombos() also</span>
-0325    <span class="comment">% lists four pairs with no formula, so it is not the allowlist.</span>
-0326    knowncombos = {<span class="string">'PK62_BS04'</span>, <span class="string">'PK62_BS03'</span>, <span class="string">'RS05_RS05'</span>, <span class="keyword">...</span>
-0327       <span class="string">'BR94_BR94'</span>, <span class="string">'BR94_RS06'</span>, <span class="string">'BR94_RS06b1'</span>};
-0328    <span class="keyword">if</span> ~ismember(soln, knowncombos)
-0329       error(<span class="string">'baseflow:fitphi:unsupportedSolution'</span>, <span class="keyword">...</span>
-0330          <span class="string">'no derived solution for the pair %s; supported pairs: %s'</span>, <span class="keyword">...</span>
-0331          soln, strjoin(knowncombos, <span class="string">', '</span>));
-0332    <span class="keyword">end</span>
-0333 
-0334    <span class="keyword">switch</span> soln
-0335       <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>
-0336          desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: BS04, flat + constant k(z) + nonlinear'</span>};
-0337       <span class="keyword">case</span> <span class="string">'PK62_BS03'</span>
-0338          desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: BS03, flat + constant k(z) + linearized'</span>};
-0339       <span class="keyword">case</span> <span class="string">'PK62_RS05'</span>
-0340          desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
-0341       <span class="keyword">case</span> <span class="string">'RS05_RS05'</span>
-0342          desc = {<span class="string">'early: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
-0343       <span class="keyword">case</span> <span class="string">'BR94_BR94'</span>
-0344          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BR94, sloped + constant k(z) + linearized'</span>};
-0345       <span class="keyword">case</span> <span class="string">'BR94_RS06'</span>
-0346          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'</span>};
-0347       <span class="keyword">case</span> <span class="string">'BR94_RS06b1'</span>
-0348          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS06b1, sloped + constant k(z) + nonlinear'</span>};
-0349       <span class="keyword">case</span> <span class="string">'BR94_BS04'</span>
-0350          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BS04, flat + constant k(z) + nonlinear'</span>};
-0351       <span class="keyword">case</span> <span class="string">'BR94_BS03'</span>
-0352          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BS03, flat + constant k(z) + linearized'</span>};
-0353       <span class="keyword">case</span> <span class="string">'BR94_RS05'</span>
-0354          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
-0355    <span class="keyword">end</span>
-0356 
-0357    soln = cellstr(soln);
-0358 <span class="keyword">end</span>
-0359 
-0360 <a name="_sub2" href="#_subfunctions" class="code">function [combos,descriptions] = allcombos()</a>
-0361    <span class="comment">% in summary, all possible combos:</span>
-0362    earlysolns  = {<span class="string">'PK62'</span>,<span class="string">'PK62'</span>,<span class="string">'PK62'</span>,<span class="string">'RS05'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>};
-0363    latesolns   = {<span class="string">'BS04'</span>,<span class="string">'BS03'</span>,<span class="string">'RS05'</span>,<span class="string">'RS05'</span>,<span class="string">'BR94'</span>,<span class="string">'RS06'</span>,<span class="string">'RS06b1'</span>,<span class="string">'BS04'</span>,<span class="string">'BS03'</span>,<span class="string">'RS05'</span>};
-0364    descriptions= {<span class="string">'flat + constant k(z) + nonlinear early, flat + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
-0365                   <span class="string">'flat + constant k(z) + nonlinear early, flat + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
-0366                   <span class="string">'flat + constant k(z) + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late'</span>,<span class="keyword">...</span>
-0367                   <span class="string">'flat + k(z)=(Z/D)^n + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late'</span>, <span class="keyword">...</span>
-0368                   <span class="string">'sloped + constant k(z) + linearized early, sloped + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
-0369                   <span class="string">'sloped + constant k(z) + linearized early, sloped + k(z)=(Z/D)^n + nonlinear late'</span>, <span class="keyword">...</span>
-0370                   <span class="string">'sloped + constant k(z) + linearized early, sloped + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
-0371                   <span class="string">'sloped + constant k(z) + linearized early, flat + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
-0372                   <span class="string">'sloped + constant k(z) + linearized early, flat + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
-0373                   <span class="string">'sloped + constant k(z) + linearized early, flat + k(z)=(Z/D)^n + nonlinear late'</span>};
-0374                
-0375    combos = cell(10,1); 
-0376    <span class="keyword">for</span> n = 1:numel(earlysolns)
-0377       combos{n} = [earlysolns{n} <span class="string">'_'</span> latesolns{n}];
-0378    <span class="keyword">end</span>
-0379 <span class="keyword">end</span>
-0380 
-0381 <span class="comment">%% INPUT PARSER</span>
-0382 <a name="_sub3" href="#_subfunctions" class="code">function [a1, a2, b2, A, D, L, theta, isflat, dispfit, soln1, soln2] = </a><span class="keyword">...</span>
-0383       parseinputs(a1, a2, b2, A, D, L, varargin)
+0310       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
+0311          warning(<span class="string">'Requested late-time solution (Boussinesq, 1904) implies b=3/2, using b=3/2'</span>)
+0312          b2 = 3/2;
+0313 
+0314       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
+0315          warning(<span class="string">'Requested late-time solution (Boussinesq, 1903) implies b=1, using b=1'</span>)
+0316          b2 = 1;
+0317       <span class="keyword">end</span>
+0318 
+0319    <span class="keyword">end</span>
+0320 
+0321    <span class="comment">% concatenate the early-time and late-time solution</span>
+0322    soln = strcat(soln1,[<span class="string">'_'</span> soln2]);
+0323 
+0324    <span class="comment">% The remapping branches above can produce a pair with no derived phi</span>
+0325    <span class="comment">% formula, for example RS05 early with the BS03 late fallback when</span>
+0326    <span class="comment">% b2 &lt;= 1. The switches below then return unassigned outputs, so raise</span>
+0327    <span class="comment">% an error first. knowncombos holds the six pairs that the solver switch</span>
+0328    <span class="comment">% implements (the '*' entries in the header notes). allcombos() also</span>
+0329    <span class="comment">% lists four pairs with no formula, so it is not the allowlist.</span>
+0330    knowncombos = {<span class="string">'PK62_BS04'</span>, <span class="string">'PK62_BS03'</span>, <span class="string">'RS05_RS05'</span>, <span class="keyword">...</span>
+0331       <span class="string">'BR94_BR94'</span>, <span class="string">'BR94_RS06'</span>, <span class="string">'BR94_RS06b1'</span>};
+0332    <span class="keyword">if</span> ~ismember(soln, knowncombos)
+0333       error(<span class="string">'baseflow:fitphi:unsupportedSolution'</span>, <span class="keyword">...</span>
+0334          <span class="string">'no derived solution for the pair %s; supported pairs: %s'</span>, <span class="keyword">...</span>
+0335          soln, strjoin(knowncombos, <span class="string">', '</span>));
+0336    <span class="keyword">end</span>
+0337 
+0338    <span class="keyword">switch</span> soln
+0339       <span class="keyword">case</span> <span class="string">'PK62_BS04'</span>
+0340          desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: BS04, flat + constant k(z) + nonlinear'</span>};
+0341       <span class="keyword">case</span> <span class="string">'PK62_BS03'</span>
+0342          desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: BS03, flat + constant k(z) + linearized'</span>};
+0343       <span class="keyword">case</span> <span class="string">'PK62_RS05'</span>
+0344          desc = {<span class="string">'early: PK62, flat + constant k(z) + nonlinear'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
+0345       <span class="keyword">case</span> <span class="string">'RS05_RS05'</span>
+0346          desc = {<span class="string">'early: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
+0347       <span class="keyword">case</span> <span class="string">'BR94_BR94'</span>
+0348          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BR94, sloped + constant k(z) + linearized'</span>};
+0349       <span class="keyword">case</span> <span class="string">'BR94_RS06'</span>
+0350          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS06, sloped + k(z)=(Z/D)^n + nonlinear'</span>};
+0351       <span class="keyword">case</span> <span class="string">'BR94_RS06b1'</span>
+0352          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS06b1, sloped + constant k(z) + nonlinear'</span>};
+0353       <span class="keyword">case</span> <span class="string">'BR94_BS04'</span>
+0354          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BS04, flat + constant k(z) + nonlinear'</span>};
+0355       <span class="keyword">case</span> <span class="string">'BR94_BS03'</span>
+0356          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: BS03, flat + constant k(z) + linearized'</span>};
+0357       <span class="keyword">case</span> <span class="string">'BR94_RS05'</span>
+0358          desc = {<span class="string">'early: BR94, sloped + constant k(z) + linearized'</span>;<span class="string">'late: RS05, flat + k(z)=(Z/D)^n + nonlinear'</span>};
+0359    <span class="keyword">end</span>
+0360 
+0361    soln = cellstr(soln);
+0362 <span class="keyword">end</span>
+0363 
+0364 <a name="_sub2" href="#_subfunctions" class="code">function [combos,descriptions] = allcombos()</a>
+0365    <span class="comment">% in summary, all possible combos:</span>
+0366    earlysolns  = {<span class="string">'PK62'</span>,<span class="string">'PK62'</span>,<span class="string">'PK62'</span>,<span class="string">'RS05'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>,<span class="string">'BR94'</span>};
+0367    latesolns   = {<span class="string">'BS04'</span>,<span class="string">'BS03'</span>,<span class="string">'RS05'</span>,<span class="string">'RS05'</span>,<span class="string">'BR94'</span>,<span class="string">'RS06'</span>,<span class="string">'RS06b1'</span>,<span class="string">'BS04'</span>,<span class="string">'BS03'</span>,<span class="string">'RS05'</span>};
+0368    descriptions= {<span class="string">'flat + constant k(z) + nonlinear early, flat + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
+0369                   <span class="string">'flat + constant k(z) + nonlinear early, flat + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
+0370                   <span class="string">'flat + constant k(z) + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late'</span>,<span class="keyword">...</span>
+0371                   <span class="string">'flat + k(z)=(Z/D)^n + nonlinear early, flat + k(z)=(Z/D)^n + nonlinear late'</span>, <span class="keyword">...</span>
+0372                   <span class="string">'sloped + constant k(z) + linearized early, sloped + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
+0373                   <span class="string">'sloped + constant k(z) + linearized early, sloped + k(z)=(Z/D)^n + nonlinear late'</span>, <span class="keyword">...</span>
+0374                   <span class="string">'sloped + constant k(z) + linearized early, sloped + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
+0375                   <span class="string">'sloped + constant k(z) + linearized early, flat + constant k(z) + nonlinear late'</span>, <span class="keyword">...</span>
+0376                   <span class="string">'sloped + constant k(z) + linearized early, flat + constant k(z) + linearized late'</span>, <span class="keyword">...</span>
+0377                   <span class="string">'sloped + constant k(z) + linearized early, flat + k(z)=(Z/D)^n + nonlinear late'</span>};
+0378                
+0379    combos = cell(10,1); 
+0380    <span class="keyword">for</span> n = 1:numel(earlysolns)
+0381       combos{n} = [earlysolns{n} <span class="string">'_'</span> latesolns{n}];
+0382    <span class="keyword">end</span>
+0383 <span class="keyword">end</span>
 0384 
-0385    parser = inputParser;
-0386    parser.StructExpand = false;
-0387    parser.FunctionName = <span class="string">'baseflow.fitphi'</span>;
+0385 <span class="comment">%% INPUT PARSER</span>
+0386 <a name="_sub3" href="#_subfunctions" class="code">function [a1, a2, b2, A, D, L, theta, isflat, dispfit, soln1, soln2] = </a><span class="keyword">...</span>
+0387       parseinputs(a1, a2, b2, A, D, L, varargin)
 0388 
-0389    parser.addRequired(<span class="string">'a1'</span>, @isnumeric);
-0390    parser.addRequired(<span class="string">'a2'</span>, @isnumeric);
-0391    parser.addRequired(<span class="string">'b2'</span>, @isnumeric);
-0392    parser.addRequired(<span class="string">'A'</span>, @isnumeric);
-0393    parser.addRequired(<span class="string">'D'</span>, @isnumeric);
-0394    parser.addRequired(<span class="string">'L'</span>, @isnumeric);
-0395    parser.addParameter(<span class="string">'theta'</span>, 0, @isnumeric);
-0396    parser.addParameter(<span class="string">'isflat'</span>, true, @islogical);
-0397    parser.addParameter(<span class="string">'dispfit'</span>, false, @islogical);
-0398    parser.addParameter(<span class="string">'soln1'</span>, <span class="string">'RS05'</span>, @ischar);
-0399    parser.addParameter(<span class="string">'soln2'</span>, <span class="string">'RS05'</span>, @ischar);
-0400 
-0401    parser.parse(a1, a2, b2, A, D, L, varargin{:});
-0402 
-0403    theta = parser.Results.theta;
-0404    soln1 = parser.Results.soln1;
-0405    soln2 = parser.Results.soln2;
-0406    isflat = parser.Results.isflat;
-0407    dispfit = parser.Results.dispfit;
-0408 <span class="keyword">end</span>
-0409 
-0410 <span class="comment">% note that at early time, the solutions do not depend on k(z) (b=3 for all</span>
-0411 <span class="comment">% solutions used here), so it would seem appropriate to use a constant k(z)</span>
-0412 <span class="comment">% solution for early time and non-constant at late time. Also, as flow</span>
-0413 <span class="comment">% progresses, the influence of slope diminishes, and the effective</span>
-0414 <span class="comment">% catchment may very well be the lowest-slope, effectively flat areas, so</span>
-0415 <span class="comment">% it would also seem appropriate to use sloped solution for early time and</span>
-0416 <span class="comment">% flat for late. HOWEVER, I have not verified the validity of all possible</span>
-0417 <span class="comment">% combinations and there are surely mathematical incompatibilities.</span>
-0418 
-0419 <span class="comment">% % THIS IS A BETTER WAY BUT NOT IMPLEMENTED</span>
-0420 <span class="comment">% % define:</span>
-0421 <span class="comment">% % flat         = 0, sloped       = 1</span>
-0422 <span class="comment">% % constant kz  = 0, non-constnat = 1,</span>
-0423 <span class="comment">% % linearized   = 0, nonlinear    = 1</span>
-0424 <span class="comment">% % we have:</span>
-0425 <span class="comment">% modelstruct = [   0,0,1,0,0,1;</span>
-0426 <span class="comment">%                   0,0,1,0,0,0;</span>
-0427 <span class="comment">%                   0,0,1,0,1,1;</span>
-0428 <span class="comment">%                   0,1,1,0,1,1;</span>
-0429 <span class="comment">%                   1,0,1,1,0,0;</span>
-0430 <span class="comment">%                   1,0,1,1,1,1;</span>
-0431 <span class="comment">%                   1,0,1,1,0,1;</span>
-0432 <span class="comment">%                   1,0,1,0,0,1;</span>
-0433 <span class="comment">%                   1,0,1,0,0,0;</span>
-0434 <span class="comment">%                   1,0,1,0,1,1    ];</span>
-0435 <span class="comment">% % could use this to build the 'descriptions'</span>
-0436 <span class="comment">% modopts     = {'flat','sloped';'k(z)=c','k(z)=(Z/D)^n';'linearized','nonlinear'};</span>
-0437 
-0438 <span class="comment">% can't use this becaue we don't want all combos</span>
-0439 <span class="comment">% slope          = {'flat','sloped'};</span>
-0440 <span class="comment">% conductivity   = {'k(z)=c','k(z)=(Z/D)^n'};</span>
-0441 <span class="comment">% solutiontype   = {'linearized','nonlinear'};</span>
-0442 <span class="comment">% ensemble       = ensembleList(slope,conductivity,solutiontype);</span>
-0443 
-0444 <span class="comment">% % started to build this</span>
-0445 <span class="comment">% for n = 1:size(modopts,1)*2</span>
-0446 <span class="comment">%    for m = 1:size(modelopts,2)</span>
-0447 <span class="comment">%       switch m</span>
-0448 <span class="comment">%          case 0</span>
-0449 <span class="comment">%             modopt = 'flat ';</span>
-0450 <span class="comment">%          case 1</span>
-0451 <span class="comment">%       end</span>
-0452 <span class="comment">%    end</span>
-0453 <span class="comment">% end</span>
-0454</pre></div>
+0389    parser = inputParser;
+0390    parser.StructExpand = false;
+0391    parser.FunctionName = <span class="string">'baseflow.fitphi'</span>;
+0392 
+0393    parser.addRequired(<span class="string">'a1'</span>, @isnumeric);
+0394    parser.addRequired(<span class="string">'a2'</span>, @isnumeric);
+0395    parser.addRequired(<span class="string">'b2'</span>, @isnumeric);
+0396    parser.addRequired(<span class="string">'A'</span>, @isnumeric);
+0397    parser.addRequired(<span class="string">'D'</span>, @isnumeric);
+0398    parser.addRequired(<span class="string">'L'</span>, @isnumeric);
+0399    parser.addParameter(<span class="string">'theta'</span>, 0, @isnumeric);
+0400    parser.addParameter(<span class="string">'isflat'</span>, true, @islogical);
+0401    parser.addParameter(<span class="string">'dispfit'</span>, false, @islogical);
+0402    parser.addParameter(<span class="string">'soln1'</span>, <span class="string">'RS05'</span>, @ischar);
+0403    parser.addParameter(<span class="string">'soln2'</span>, <span class="string">'RS05'</span>, @ischar);
+0404 
+0405    parser.parse(a1, a2, b2, A, D, L, varargin{:});
+0406 
+0407    theta = parser.Results.theta;
+0408    soln1 = parser.Results.soln1;
+0409    soln2 = parser.Results.soln2;
+0410    isflat = parser.Results.isflat;
+0411    dispfit = parser.Results.dispfit;
+0412 <span class="keyword">end</span>
+0413 
+0414 <span class="comment">% note that at early time, the solutions do not depend on k(z) (b=3 for all</span>
+0415 <span class="comment">% solutions used here), so it would seem appropriate to use a constant k(z)</span>
+0416 <span class="comment">% solution for early time and non-constant at late time. Also, as flow</span>
+0417 <span class="comment">% progresses, the influence of slope diminishes, and the effective</span>
+0418 <span class="comment">% catchment may very well be the lowest-slope, effectively flat areas, so</span>
+0419 <span class="comment">% it would also seem appropriate to use sloped solution for early time and</span>
+0420 <span class="comment">% flat for late. HOWEVER, I have not verified the validity of all possible</span>
+0421 <span class="comment">% combinations and there are surely mathematical incompatibilities.</span>
+0422 
+0423 <span class="comment">% % THIS IS A BETTER WAY BUT NOT IMPLEMENTED</span>
+0424 <span class="comment">% % define:</span>
+0425 <span class="comment">% % flat         = 0, sloped       = 1</span>
+0426 <span class="comment">% % constant kz  = 0, non-constnat = 1,</span>
+0427 <span class="comment">% % linearized   = 0, nonlinear    = 1</span>
+0428 <span class="comment">% % we have:</span>
+0429 <span class="comment">% modelstruct = [   0,0,1,0,0,1;</span>
+0430 <span class="comment">%                   0,0,1,0,0,0;</span>
+0431 <span class="comment">%                   0,0,1,0,1,1;</span>
+0432 <span class="comment">%                   0,1,1,0,1,1;</span>
+0433 <span class="comment">%                   1,0,1,1,0,0;</span>
+0434 <span class="comment">%                   1,0,1,1,1,1;</span>
+0435 <span class="comment">%                   1,0,1,1,0,1;</span>
+0436 <span class="comment">%                   1,0,1,0,0,1;</span>
+0437 <span class="comment">%                   1,0,1,0,0,0;</span>
+0438 <span class="comment">%                   1,0,1,0,1,1    ];</span>
+0439 <span class="comment">% % could use this to build the 'descriptions'</span>
+0440 <span class="comment">% modopts     = {'flat','sloped';'k(z)=c','k(z)=(Z/D)^n';'linearized','nonlinear'};</span>
+0441 
+0442 <span class="comment">% can't use this becaue we don't want all combos</span>
+0443 <span class="comment">% slope          = {'flat','sloped'};</span>
+0444 <span class="comment">% conductivity   = {'k(z)=c','k(z)=(Z/D)^n'};</span>
+0445 <span class="comment">% solutiontype   = {'linearized','nonlinear'};</span>
+0446 <span class="comment">% ensemble       = ensembleList(slope,conductivity,solutiontype);</span>
+0447 
+0448 <span class="comment">% % started to build this</span>
+0449 <span class="comment">% for n = 1:size(modopts,1)*2</span>
+0450 <span class="comment">%    for m = 1:size(modelopts,2)</span>
+0451 <span class="comment">%       switch m</span>
+0452 <span class="comment">%          case 0</span>
+0453 <span class="comment">%             modopt = 'flat ';</span>
+0454 <span class="comment">%          case 1</span>
+0455 <span class="comment">%       end</span>
+0456 <span class="comment">%    end</span>
+0457 <span class="comment">% end</span>
+0458</pre></div>
 </body>
 </html>
