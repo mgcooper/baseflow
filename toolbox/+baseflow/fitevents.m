@@ -18,8 +18,7 @@ function [Fits,Results] = fitevents(Events,varargin)
    %
    % Required inputs
    %
-   %     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted
-   %     daily)
+   %     Events: output of baseflow.getevents (flow in m3 d-1 posted daily)
    %
    % Optional inputs
    %
@@ -129,8 +128,6 @@ function [Fits,Results] = fitevents(Events,varargin)
          );
    end
 
-   debugflag = false;
-
    % compute the recession constants
    for thisEvent = 1:numEvents
 
@@ -218,7 +215,7 @@ end
 % GET FITS
 function [Fits, K, fitcount] = saveFit(T, q, dqdt, dt, tq, derivmethod, ...
       fitmethod, fitorder, eventdate, eventtag, fittag, fitcount, K, ...
-      Fits, iFit, savevars, ok) %#ok<INUSD> 
+      Fits, iFit, savevars, ok) %#ok<INUSD>
 
    % if fitting failed, set this event nan, otherwise save the fit
    if ok == true

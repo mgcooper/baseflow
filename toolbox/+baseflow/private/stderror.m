@@ -24,8 +24,7 @@ function [SE,CI,PM,mu,sig] = stderror(data,varargin)
    % parse inputs
    [data, dim, alpha] = parseinputs(data, mfilename, varargin{:});
 
-   % assume data is oriented columnwise, and we want the mean +/- stderr of each
-   % row
+   % assume data is oriented by column, and we want the mean+/-se across rows
 
    % check for vector vs matrix input
    [r,c,p] = size(data);

@@ -73,7 +73,6 @@ function b = convert2b(inputvalue,inputvarname,isflat)
          b = 2-1./d;
       case 'k'
          k = inputvalue;
-         % Invert k = (1-b)/(b-2) to get b (see convertb)
          b = (2.*k+1)./(k+1);
       case 'a' % conversion between -dQ/dt = aQ^b and Q = cS^d
          % a = inputvalue;
@@ -114,13 +113,14 @@ function varargout = convertb(b,outputvarname,isflat)
    %                 d,    from Q = cS^d, where d = 1/(2-b)
    %                 n,    from k(z) = kD(z/D)^n,
    %                 k,    from P(Q) ~ Q^-(1+1/k)
+   %
+   % k is the gpfit shape parameter: the gpd tail pdf ~ x^-(1+1/k) equals the
+   % timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).
 
    alpha = 1./(b-1);       % power law exponent alpha
    beta  = 1./(b-2);
    gamma = 1./(2.*b-3);
    d     = 1./(2-b);
-   % gpfit shape parameter k: the gpd tail pdf ~ x^-(1+1/k) equals the
-   % timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).
    k     = (1-b)./(b-2);
 
    switch isflat
@@ -167,8 +167,10 @@ function [inputvalue, inputvarname, outputvarname, isflat] = parseinputs( ...
    parser.FunctionName = 'baseflow.conversions';
 
    parser.addRequired('inputvalue', @isnumeric);
-   parser.addRequired('inputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
-   parser.addRequired('outputvarname', @(x) ~isempty(validatestring(x, validvarnames)));
+   parser.addRequired('inputvarname', ...
+      @(x) ~isempty(validatestring(x, validvarnames)));
+   parser.addRequired('outputvarname', ...
+      @(x) ~isempty(validatestring(x, validvarnames)));
    parser.addParameter('isflat', true, @islogical);
 
    parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});

@@ -1,22 +1,21 @@
-function [ DataOut ] = setnan(Data,varargin)
+function DataOut = setnan(Data,varargin)
    %SETNAN sets logical indices in Data to nan
    %
-   %  [ DataOut ] = setnan(Data) sets all values in Data nan
+   %  DataOut = setnan(Data) sets all values in Data nan
    %
-   %  [ DataOut ] = setnan(Data,nanval) sets values in Data that equal nanval
-   %  nan
+   %  DataOut = setnan(Data,nanval) sets values in Data that equal nanval nan
    %
-   %  [ DataOut ] = setnan(Data,[],naninds) sets naninds indices of Data nan
+   %  DataOut = setnan(Data,[],naninds) sets naninds indices of Data nan
    %
    % See also: rmnan, replacevars
 
    % parse inputs
    [Data, nanval, naninds] = parseinputs(Data, mfilename, varargin{:});
 
-   % Note: below I detect which columns are numeric but i don't convert
-   % from cell to numeric so if a table is imported with mixed data and it
-   % should all be numeric, this won't work as expected (e.g. when reading
-   % in new data for the first time and setting a known value nan)
+   % Note: below I detect which columns are numeric but i don't convert from
+   % cell to numeric so if a table is imported with mixed data and it should all
+   % be numeric, this won't work as expected (e.g. when reading in new data for
+   % the first time and setting a known value nan)
 
    wastable = isa(Data, 'table');           % was a table
    wastimetable = isa(Data, 'timetable');   % was a timetable
@@ -48,8 +47,8 @@ function [ DataOut ] = setnan(Data,varargin)
 
       inumeric = cellfun(@isnumeric, table2cell(Data(1, :)));
       DataOut = table2array(Data(:, inumeric));
-      % i was gonna use iTime to remove the time column but only works if
-      % it is always called 'Time'
+      % i was gonna use iTime to remove the time column but only works if it is
+      % always called 'Time'
    else
       DataOut = Data;
    end
@@ -78,13 +77,15 @@ function [ DataOut ] = setnan(Data,varargin)
    if useinds == true
 
       % we dont check if a scalar true is passed in because that makes no sense
-      if numel(DataOut)==numel(nanval)
+      if numel(DataOut) == numel(nanval)
          DataOut(nanval) = nan;
 
-      elseif (size(DataOut, 1) == size(nanval, 1)) && (size(DataOut, 2) ~= size(nanval, 2))
+      elseif (size(DataOut, 1) == size(nanval, 1)) ...
+            && (size(DataOut, 2) ~= size(nanval, 2))
          DataOut(nanval, :) = nan;
 
-      elseif (size(DataOut, 2) == size(nanval, 2)) && (size(DataOut, 1) ~= size(nanval, 1))
+      elseif (size(DataOut, 2) == size(nanval, 2)) ...
+            && (size(DataOut, 1) ~= size(nanval, 1))
          DataOut(:, nanval) = nan;
       end
 
@@ -130,9 +131,9 @@ function [Data, nanval, naninds] = parseinputs(Data, funcname, varargin)
    p.addRequired( 'Data' );
    p.addOptional( 'nanval', nan, @isnumeric);
    p.addOptional( 'naninds', false, @islogical);
-   % p.addOptional( 'nanval',   nan,   @(x) isnumeric(x) | islogical(x));
-   % p.addParameter( 'nanval',   nan,   @isnumeric);
-   % p.addParameter( 'naninds',  false, @islogical);
+   % p.addOptional( 'nanval', nan, @(x) isnumeric(x) | islogical(x));
+   % p.addParameter( 'nanval', nan, @isnumeric); p.addParameter( 'naninds',
+   % false, @islogical);
    p.parse(Data, varargin{:});
 
    Data = p.Results.Data;
