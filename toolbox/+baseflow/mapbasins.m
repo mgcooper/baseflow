@@ -112,9 +112,9 @@ function h = mapbasins(Basins, varargin)
          % ordered opposite the structure meaning patchobjs(1) = Basins(end),
          % patchobjs(2) = Basins(end-1), and so on. The flipud and sorting takes
          % care of all of the details. For testing, it was easier to not sort
-         % Basins in the sortrows call below, but for labeling points, its needed.
-         % Converting back to struct is only needed for consistency with other
-         % parts of the code which assumes it is a struct.
+         % Basins in the sortrows call below, but for labeling points, its
+         % needed. Converting back to struct is only needed for consistency with
+         % other parts of the code which assumes it is a struct.
 
          Basins = flipud(struct2table(Basins));
          [Basins,ii] = sortrows(Basins, 'Area', 'ascend');
@@ -139,8 +139,8 @@ function h = mapbasins(Basins, varargin)
             ax.Children = [patchobjs(ii); lineobjs];
          end
 
-         % this is not needed if we use 'ascend' to sort Area, but in other cases,
-         % flipping the patchobjs is needed when manipulating them.
+         % this is not needed if we use 'ascend' to sort Area, but in other
+         % cases, flipping the patchobjs is needed when manipulating them.
          %ax.Children = flipud([patchobjs(idx);lineobjs]);
       end
 

@@ -79,7 +79,8 @@ function [Calm,Meta] = loadcalm(basinname,varargin)
    %       [Calm,Meta] = aggregateCalm(Calm,Meta,minlength,mincoverage,minoverlap,maxdiff);
    % end
 
-   % if case 'avg' with timetablereduce is problematic, this was the original method
+   % if case 'avg' with timetablereduce is problematic, this was the original
+   % method
    %Time  = Calm.Time;
    %Dc    = nanmean(table2array(Calm),2);
    %Calm  = array2timetable(Dc,'RowTimes',Time);

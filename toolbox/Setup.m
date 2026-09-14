@@ -9,7 +9,8 @@ function varargout = Setup(varargin)
    %  getpref('baseflow').
    %
    %  msg = Setup('uninstall') removes all toolbox paths from the search path
-   %  and unsets baseflow toolbox preferences. Does not delete the toolbox directory.
+   %  and unsets baseflow toolbox preferences. Does not delete the toolbox
+   %  directory.
    %
    %  msg = Setup('dependencies') generates a list of function and toolbox
    %  dependencies and determines which ones are not on the current search path.
@@ -333,9 +334,11 @@ function msg = checkdependencies(varargin)
 
    % display message
    if isfield(msg,'install') && msg.install == true
-      fprintf(' * checking dependencies ... this can be slow *\n'); % intermediate
+      % intermediate
+      fprintf(' * checking dependencies ... this can be slow *\n');
    else
-      fprintf('\n * checking dependencies ... this can be slow *\n'); % entry point
+      % entry point
+      fprintf('\n * checking dependencies ... this can be slow *\n');
    end
 
    % add toolbox paths (also sets the install_directory preference)
@@ -402,8 +405,8 @@ function msg = checkdependencies(varargin)
    end
 
    % % for users - if the required_toolboxes check fails, it is possible that on
-   % your machine the second output of getFeatureName is different than
-   % the two defined above. In that case, run the loop below and raise an issue on
+   % your machine the second output of getFeatureName is different than the two
+   % defined above. In that case, run the loop below and raise an issue on
    % github or submit a pull request using the fork,clone,branch workflow.
 
    % v = ver % Get all your version info into one variable.

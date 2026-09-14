@@ -18,20 +18,22 @@ function varargout = plotrefline(x,y,varargin)
    %     userab   =  2x1 double indicating a user-defined intercept,slope pair
    %     labels   =  logical indicating whether to add labels
    %     refqtls  =  2x1 double, x/y quantiles used if 'method' == 'envelope'
-   %     plotline =  logical indicating whether to add the line plot (for some cases
-   %                 this function can be used to return the a/b values only)
+   %     plotline =  logical indicating whether to add the line plot (for some
+   %                 cases this function can be used to return the a/b values
+   %                 only)
    %     linecolor = rgb triplet indicating the line color
-   %     precision = scalar double indicating the precision in the x data, used to
-   %                 compute the 'lower envelope'
-   %     timestep  = scalar double indicating the timestep of the x data, used to
-   %                 compute the 'lower envelope'
+   %     precision = scalar double indicating the precision in the x data, used
+   %                 to compute the 'lower envelope'
+   %     timestep  = scalar double indicating the timestep of the x data, used
+   %                 to compute the 'lower envelope'
    %     ax       =  graphic axis to plot into
    %
    % See also: fitab, pointcloudintercept, pointcloudplot
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
-   % NOTE: y comes in as -dq/dt, send it to baseflow.fitab as -y, and to refline as y
+   % NOTE: y comes in as -dq/dt, send it to baseflow.fitab as -y, and to refline
+   % as y
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -41,8 +43,8 @@ function varargout = plotrefline(x,y,varargin)
       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin{:});
 
    % need options for how/if to apply the mask - e.g., we might want to show the
-   % 'bestfit' to all data, and use the mask for late-time fit. also keep in mind
-   % baseflow.eventphi calls this. mask is default true in parsing.
+   % 'bestfit' to all data, and use the mask for late-time fit. also keep in
+   % mind baseflow.eventphi calls this. mask is default true in parsing.
 
    % use this to find the equation of the line
    axb = @(a,x,b) a.*x.^b;
@@ -182,7 +184,8 @@ function addlabels(a,b,refline)
 
       case 'upperenvelope'
 
-         axpos = baseflow.deps.plotboxpos(gca); % only works with correct axes position
+         % only works with correct axes position
+         axpos = baseflow.deps.plotboxpos(gca);
          % xtxt = exp(mean(log(xlim)));
 
          xlims = log10(xlim);

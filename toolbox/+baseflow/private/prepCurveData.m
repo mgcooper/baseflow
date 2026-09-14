@@ -22,14 +22,15 @@ function [varargout] = prepCurveData( varargin )
    %
    %  [X,Y] = PREPCURVEDATA(X,Y) prepare X and Y for fitCurveData
    %
-   %  [X,Y,W] = PREPCURVEDATA(X,Y,W) prepare X, Y, and weights W for fitCurveData
+   %  [X,Y,W] = PREPCURVEDATA(X,Y,W) prepare X, Y, and weights W for
+   %  fitCurveData
    %
    %  Data = PREPCURVEDATA('default') return default curve data for linear model
    %
    %  Data = PREPCURVEDATA(modeltype) return default curve data for model type
    %  specified by char/string-scalar `modeltype`. Valid options are
-   %  'linear','exponential','power','semilogx','semilogy'. 'semilogy' is the same
-   %  as 'exponential'.
+   %  'linear','exponential','power','semilogx','semilogy'. 'semilogy' is the
+   %  same as 'exponential'.
    %
    %
    % Example
@@ -43,12 +44,14 @@ function [varargout] = prepCurveData( varargin )
    % parse inputs
    [x, y, w] = parseinputs(mfilename, varargin{:});
 
-   % If x is empty then replace it by an index vector the same size and shape as y
+   % If x is empty then replace it by an index vector the same size and shape
+   % as y
    if isempty(x)
       x = reshape(1:numel(y), size(y));
    end
 
-   % If weights is empty then return a vector of ones the same size and shape as y
+   % If weights is empty then return a vector of ones the same size and shape
+   % as y
    if isempty(w)
       try
          w = ones(size(y));

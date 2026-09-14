@@ -22,8 +22,8 @@ function [D,dDdt,dDadt,C] = aquifertrend(tau,phi,N,Qb,dQbdt)
    %     N = 3-2*b, b = exponent in -dQ/dt = aQ^b, scalar [unitless]
    %     Qb = baseflow timeseries, posted annually [cm/day] (could be any
    %     length scale unit per day)
-   %     dQbdt (optional) = baseflow rate of change timeseries [cm/day/year] (could
-   %     be any length scale per day per any timescale)
+   %     dQbdt (optional) = baseflow rate of change timeseries [cm/day/year]
+   %     (could be any length scale per day per any timescale)
    %
    % See also: baseflowtrend, aquiferthickness
    %

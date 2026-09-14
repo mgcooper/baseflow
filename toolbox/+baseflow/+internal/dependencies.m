@@ -246,32 +246,4 @@ function report = resolvedependencies(missing, funclist, prodnames, tbroot)
    % Parked WIP: per-function dependency attribution.
    % any functions listed in dependentFunctions may be required for some fringe
    % behavior in the toolbox but the core functionality should
-
-   %%
-
-   % % if the commented loop in baseflow.dependencies.m is used, this is required
-   % dependentFunctions = unique(vertcat(allDependencies.function_dependencies{:}));
-
-   % % nearly certain it isn't necessary to cycle over all functions, I may have
-   % % added this to figure out which functions were responsible for some
-   % % functions that were returned as required but sholdn't be like the Cupid
-   % % toolbox
-   %
-   % Depends = cell(numel(funclist),3);
-   % for n = 1:numel(funclist)
-   %
-   %    % this is needed if getlist is used
-   %    % thisfunc = [funcpath filesep funclist(n).name];
-   %
-   %    thisfunc = funclist{n};
-   %    [fl,pl] = matlab.codetools.requiredFilesAndProducts(thisfunc);
-   %    fl = transpose(fl);
-   %
-   %    Depends{n,1} = thisfunc;
-   %    Depends{n,2} = fl;
-   %    Depends{n,3} = {pl(:).Name}';
-   % end
-   %
-   % Depends = cell2table(Depends,'VariableNames',...
-   %    {'function_name','function_dependencies','product_dependencies'});
 end

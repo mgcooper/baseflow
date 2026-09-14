@@ -18,7 +18,8 @@ function [Fits,Results] = fitevents(Events,varargin)
    %
    % Required inputs
    %
-   %     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted daily)
+   %     Events: output of baseflow.getevents (flow comes in as m3 d-1 posted
+   %     daily)
    %
    % Optional inputs
    %

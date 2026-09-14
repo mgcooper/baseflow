@@ -7,11 +7,11 @@ function [T,Q,R,numyears,timestep] = preparecalendar(T,Q,R)
    %  calendar is regular, timestep is T(2)-T(1); an irregular calendar
    %  with leap days raises a warning.
 
-   % This was the original check in getevents, then moved to wrapevents, but it's
-   % not necessary there so I simplified it and moved it here for future conversion
-   % to a proper function that allows more flexible inputs to the core algorithm
-   % e.g. including leap inds, irregular calendars, water year vs calendar year,
-   % non-daily data, etc.
+   % This was the original check in getevents, then moved to wrapevents, but
+   % it's not necessary there so I simplified it and moved it here for future
+   % conversion to a proper function that allows more flexible inputs to the
+   % core algorithm e.g. including leap inds, irregular calendars, water year vs
+   % calendar year, non-daily data, etc.
 
    hasleap = any(month(T)==2 & day(T)==29);
 
@@ -24,8 +24,8 @@ function [T,Q,R,numyears,timestep] = preparecalendar(T,Q,R)
          if isregular(timetable(T,'RowTimes',T),'time')
             timestep = T(2)-T(1);
          else
-            % if leap inds are already removed, the time won't be regular, so only
-            % warn if time includes leap inds
+            % if leap inds are already removed, the time won't be regular, so
+            % only warn if time includes leap inds
             if any(hasleap)
                warning('irregular calendar, results may be inconsistent')
             end

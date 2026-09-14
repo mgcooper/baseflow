@@ -145,10 +145,10 @@ end
 %
 %
 % % sigma is the standard error, alpha the significance, getting s is the hard
-% % part, but ztest is evaluating whehter s comes from a normal distribution with
-% % mean 0 and standard deviation sigma, so my guss is that s is the distribuiton
-% % of slopes, and if the mean value of the slopes is zero, then the trend is not
-% % signficanct
+% % part, but ztest is evaluating whehter s comes from a normal distribution
+% % with mean 0 and standard deviation sigma, so my guss is that s is the
+% % distribuiton of slopes, and if the mean value of the slopes is zero, then
+% % the trend is not signficanct
 % [h, sig] = ztest(s,0,sigma,alpha);
 
 

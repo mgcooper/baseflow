@@ -23,7 +23,8 @@ function varargout = plfitb(x,varargin)
    %     range    the range of scaling parameters considered (see plfit.m)
    %     limit    scalar double that sets the upper bound of fitted exponent
    %     method   char indicating one of two algorithms (Clauset's or Hanel's)
-   %     bootfit  logical indicating whether to bootstrap the uncertainties (slow)
+   %     bootfit  logical indicating whether to bootstrap the uncertainties
+   %              (slow)
    %     bootreps scalar double indicating how many replicates in the boot fit
    %     plotfit  logical indicating whether to call plplot
    %

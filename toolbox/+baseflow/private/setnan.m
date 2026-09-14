@@ -3,7 +3,8 @@ function [ DataOut ] = setnan(Data,varargin)
    %
    %  [ DataOut ] = setnan(Data) sets all values in Data nan
    %
-   %  [ DataOut ] = setnan(Data,nanval) sets values in Data that equal nanval nan
+   %  [ DataOut ] = setnan(Data,nanval) sets values in Data that equal nanval
+   %  nan
    %
    %  [ DataOut ] = setnan(Data,[],naninds) sets naninds indices of Data nan
    %
@@ -53,8 +54,8 @@ function [ DataOut ] = setnan(Data,varargin)
       DataOut = Data;
    end
 
-   % determine if nanval or naninds will be used, if the latter, assign naninds to
-   % nanval b/c the final part below uses nanval for everything
+   % determine if nanval or naninds will be used, if the latter, assign naninds
+   % to nanval b/c the final part below uses nanval for everything
    useval = false;
    useinds = false;
    if isscalar(naninds) && naninds == false && ~isnan(nanval)
@@ -70,9 +71,10 @@ function [ DataOut ] = setnan(Data,varargin)
    % update jan 2022, commented out stuff shouldn't be needed with new table
    % checks above
 
-   % assume nanval is a logical vector denoting where to set Data nan, but we need
-   % to determine if the vector matches the size of Data or the size of the rows or
-   % columns of Data. For the latter, assume it should be applied to all rows/cols.
+   % assume nanval is a logical vector denoting where to set Data nan, but we
+   % need to determine if the vector matches the size of Data or the size of the
+   % rows or columns of Data. For the latter, assume it should be applied to all
+   % rows/cols.
    if useinds == true
 
       % we dont check if a scalar true is passed in because that makes no sense

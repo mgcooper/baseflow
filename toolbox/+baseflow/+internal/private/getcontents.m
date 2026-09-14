@@ -133,7 +133,8 @@ function [cont,dirflag] = main(directory,str)
    %MAIN get the contents
 
    list = struct2cell(dir(directory));
-   dirbool = cell2mat(list(cellfun(@islogical,list(:,1)),:)); % return directory flags
+   % return directory flags
+   dirbool = cell2mat(list(cellfun(@islogical,list(:,1)),:));
    list = list(1,:); % keep only file names
    X = ~strncmp(list, '.', 1); % remove hidden files (those starting '.')
    list = list(X);

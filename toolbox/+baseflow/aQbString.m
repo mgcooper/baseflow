@@ -44,7 +44,8 @@ function [aQbstr,Qtstr] = aQbString(varargin)
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    
-   % TODO: merge this with baseflow.strings. See note below about $ after = sign.
+   % TODO: merge this with baseflow.strings. See note below about $ after =
+   % sign.
 
    % parse inputs
    [ab, Q0, printvalues] = parseinputs(varargin{:});

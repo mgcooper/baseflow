@@ -123,10 +123,10 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
          % temporary method to send back a0 for method 'cooper'
          ahat = [ahat a0];
 
-         % here xbar/ybar are identical to 'envelope'. use this to show that ahat
-         % returned by this function is identical to the case where a0 is returned
-         % by this function usine method 'envelope' and then passed to the a(a0...)
-         % function from baseflow.getfunction('aofa0')
+         % here xbar/ybar are identical to 'envelope'. use this to show that
+         % ahat returned by this function is identical to the case where a0 is
+         % returned by this function usine method 'envelope' and then passed to
+         % the a(a0...) function from baseflow.getfunction('aofa0')
          % xbar = quantile(q(mask),qtls(1),'Method','approximate');
          % ybar = quantile(-dqdt(mask),qtls(2),'Method','approximate');
    end

@@ -7,13 +7,13 @@ function [Basins,Meta,Poly] = loadbasins(basinname,varargin)
    %
    % Description
    %
-   %     Basins = baseflow.loadbasins(basinname) returns struct Basins containing
-   %     the spatial basin boundary information.
+   %     Basins = baseflow.loadbasins(basinname) returns struct Basins
+   %     containing the spatial basin boundary information.
    %
-   %     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally returns
-   %     table Meta containing the basin metadata information and geoshape Poly
-   %     containing a computational geometry object representation of the basin
-   %     boundary.
+   %     [Basins,Meta,Poly] = baseflow.loadbasins(basinname) additionally
+   %     returns table Meta containing the basin metadata information and
+   %     geoshape Poly containing a computational geometry object representation
+   %     of the basin boundary.
    %
    %     [Basins,Meta,Poly] = baseflow.loadbasins(___,'projection',projtype)
    %     specifies whether to return the basin boundary in geographic or
@@ -28,11 +28,11 @@ function [Basins,Meta,Poly] = loadbasins(basinname,varargin)
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-   % TODO: accept stationname. see loadcalm, it worked as soon as i added support
-   % for stationname to baseflow.loadmeta meaning it relies entirely on the basinname
-   % returend by loadmeta, whereas this does not, because the Calm database has an
-   % entry for the basins or the index in Meta, so maybe doing that with boundaries
-   % would simplify thigns here.
+   % TODO: accept stationname. see loadcalm, it worked as soon as i added
+   % support for stationname to baseflow.loadmeta meaning it relies entirely on
+   % the basinname returend by loadmeta, whereas this does not, because the Calm
+   % database has an entry for the basins or the index in Meta, so maybe doing
+   % that with boundaries would simplify thigns here.
 
    % parse inputs
    [basinname, version, projection] = parseinputs(basinname,varargin{:});

@@ -3,8 +3,8 @@ function station = stationname(typenamehere)
    %
    %  Syntax
    %
-   %  station = baseflow.stationname(<tab complete basin name>), returns the station
-   %  name string as it exists in the baseflow basin database
+   %  station = baseflow.stationname(<tab complete basin name>), returns the
+   %  station name string as it exists in the baseflow basin database
    %
    %  stationname = baseflow.stationname('ALL_STATIONS'), returns string all
    %  'ALL_STATIONS' which can be passed into other functions that require the
@@ -17,7 +17,8 @@ function station = stationname(typenamehere)
    %  stationname string as input to load data for that station.
    %
    %
-   %  See also: baseflow.loadcalm baseflow.loadflow baseflow.loadgrace baseflow.stationlist
+   %  See also: baseflow.loadcalm baseflow.loadflow baseflow.loadgrace
+   %  baseflow.stationlist
 
    p = inputParser;
    p.FunctionName = 'baseflow.stationname';

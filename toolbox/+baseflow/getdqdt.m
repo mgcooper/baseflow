@@ -72,8 +72,8 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
    % Tip: this accepts pre-selected events, not raw timeseries. Use
-   % baseflow.findevents to pick Events, then baseflow.getdqdt to fit the events.
-   % This is a wrapper for multi-year, final analysis.
+   % baseflow.findevents to pick Events, then baseflow.getdqdt to fit the
+   % events. This is a wrapper for multi-year, final analysis.
 
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
@@ -98,10 +98,10 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
          [q,dqdt,dt,tq,rq] = fitcts(T,Q,R,ctsmethod);
    end
 
-   % this is where islineconvex and/or islinepositive to q and/or dqdt would be to
-   % catch all cases regardless of fit method, but if the fitxxx functions are
-   % called outside of this function, those cases wouldn't be caught, so either
-   % move those functions to private/ or add checks to them.
+   % this is where islineconvex and/or islinepositive to q and/or dqdt would be
+   % to catch all cases regardless of fit method, but if the fitxxx functions
+   % are called outside of this function, those cases wouldn't be caught, so
+   % either move those functions to private/ or add checks to them.
 
    % this is the case where dQ/dt and q are returned without fitting a/b
    if strcmp(fitmethod,'none') || strcmp(pickmethod,'none')
@@ -109,11 +109,12 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
       varargout{2} = nan;
       return
    else
-      % if pickmethod = "none", we don't need anything else so we could stop here, but
-      % fitSelector will repackage the event as a cell array which is consistent with
-      % the case where pickmethod ~= "none" which are the options to subdivide events
-      % into segments, for example early-time and late-time. It also returns Info
-      % which is needed to parse sub-event picks.
+      % if pickmethod = "none", we don't need anything else so we could stop
+      % here, but fitSelector will repackage the event as a cell array which is
+      % consistent with the case where pickmethod ~= "none" which are the
+      % options to subdivide events into segments, for example early-time and
+      % late-time. It also returns Info which is needed to parse sub-event
+      % picks.
 
       [hFits,Picks] = baseflow.plotdqdt(q,dqdt,'fitmethod',fitmethod,'pickmethod',...
          pickmethod,'plotfits',plotfits,'eventID',eventID,'rain',rq);
@@ -128,17 +129,17 @@ end
 % PACKAGEFITS
 function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)
 
-   % this unpacks the Picks structure and repackages the T,Q,dQdt for each picked
-   % fit as individual cell arrays. I am not sure why I don't just do:
+   % this unpacks the Picks structure and repackages the T,Q,dQdt for each
+   % picked fit as individual cell arrays. I am not sure why I don't just do:
    % Q = Picks.Q;
    % dQdt = Picks.dQdt;
    % and so on. But, Picks does not include T, and maybe I wanted to distinguish
    % the og T,Q from the ets/vts fit t,q.
    % EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function
    % abve, I confirmed that things work up to this point meaning I can still
-   % select events in plotdqdt and they get sent here, but I think the way i deal
-   % wtih retiming in ETS now throws off the istart/stop, so will need to figure
-   % out if it's being done correctly if I use manual or auto picking.
+   % select events in plotdqdt and they get sent here, but I think the way i
+   % deal wtih retiming in ETS now throws off the istart/stop, so will need to
+   % figure out if it's being done correctly if I use manual or auto picking.
 
 
    % if no events are found, return nan

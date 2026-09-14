@@ -26,12 +26,13 @@ function h = plplotb(x,xmin,alpha,varargin)
    %
    %     alphaci  = 2x1 double of lower and upper confidence intervals for alpha
    %     xminci   = 2x1 double of lower and upper confidence intervals for xmin
-   %     varsym   = char in latex format representing the data symbol, used for plot
+   %     varsym   = char in latex format representing the data symbol, used for
+   %                 plot
    %     trimline = logical scalar indicating whether to 'trim' the fitted line
    %                 similar to 'axis tight' option (b/c power law data is often
    %                 covering many orders of magnitude)
-   %     labelplot = logical scalar indicating whether to add a label showing the
-   %                 value of xmin and the expected value of x
+   %     labelplot = logical scalar indicating whether to add a label showing
+   %                 the value of xmin and the expected value of x
    %     ax       =  graphic axis to plot into
    %
    % See also: plfit, plfitb, gpfitb, eventtau

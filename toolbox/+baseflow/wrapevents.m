@@ -6,20 +6,20 @@ function [EventsData, Info] = wrapevents(T,Q,R,varargin)
    %     [EventsData, Info] = baseflow.wrapevents(T, Q, R)
    %     [EventsData, Info] = baseflow.wrapevents(T, Q, R, Name, Value)
    %
-   % This function is a wrapper around baseflow.getevents to detect recession events
-   % on an annual basis, passing one year of a multi-year timeseries of T, Q,
-   % and R at a time to eventfinder, rather than passing the entire timeseries
-   % to eventfinder. The main difference is that when one year of data is used
-   % at a time, the Savitsky Golay measurement noise filter can be effectively
-   % applied prior to passing the data to eventfinder, because that filter needs
-   % information about the measurement variability. TODO: construct an adaptive
-   % sgolay filter that adjusts the filter parameters on an annual (or shorter)
-   % basis.
+   % This function is a wrapper around baseflow.getevents to detect recession
+   % events on an annual basis, passing one year of a multi-year timeseries of
+   % T, Q, and R at a time to eventfinder, rather than passing the entire
+   % timeseries to eventfinder. The main difference is that when one year of
+   % data is used at a time, the Savitsky Golay measurement noise filter can be
+   % effectively applied prior to passing the data to eventfinder, because that
+   % filter needs information about the measurement variability. TODO: construct
+   % an adaptive sgolay filter that adjusts the filter parameters on an annual
+   % (or shorter) basis.
    %
    % Required inputs:
    %   T          =  nx1 array of dates
-   %   Q          =  nxm array of daily flow in units m3/day, organized as calendar
-   %                 years, meaning n/365 = # of years
+   %   Q          =  nxm array of daily flow in units m3/day, organized as
+   %                 calendar years, meaning n/365 = # of years
    %   R          =  nxm array of daily rainfall in (mm/day?)
    %
    % Optional name-value inputs:

@@ -14,11 +14,12 @@ function NewData = timetablereduce(Data,varargin)
    Data = renametimetabletimevar(Data);
    Time = Data.Time;
 
-   % if the table has one column this returns the same data but renames the column
-   % header 'mu' and imputes nan for all other statistics. mainly for convencience
-   % if this function is used in a loop over tables of differing size, some of
-   % whcih may have only one column so data reduction is not meaningful but the
-   % table headers need to be consistent for other parts of the code
+   % if the table has one column this returns the same data but renames the
+   % column header 'mu' and imputes nan for all other statistics. mainly for
+   % convencience if this function is used in a loop over tables of differing
+   % size, some of whcih may have only one column so data reduction is not
+   % meaningful but the table headers need to be consistent for other parts of
+   % the code
    if width(Data) == 1 && keeptime == true
       NewData = Data;
       NewData.Properties.VariableNames = {'mu'};

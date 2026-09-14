@@ -21,7 +21,8 @@ function [D,S] = aquiferthickness(b,tau,phi,Qb,varargin)
    % Required inputs
    %
    %     b (dimensionless) = baseflow recession parameter b in -dQ/dt = aQ^b
-   %     tau (Time) = aquifer drainage timescale, dQ/dS, where S = aquifer storage
+   %     tau (Time) = aquifer drainage timescale, dQ/dS, where S = aquifer
+   %     storage
    %     phi (Length/Length) = drainable porosity
    %     Qb (Length/Time) = baseflow
    %

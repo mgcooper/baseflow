@@ -60,8 +60,8 @@ function [Grace, Meta] = loadgrace(varargin)
          %          Grace = renamevars(Grace,'Scsr','S');
          %          Grace = removevars(Grace,'Sjpl');
          %
-         %          % the other data is normalized to 2002-2020, but this data is
-         %          % not, so do that here
+         %          % the other data is normalized to 2002-2020, but this data
+         %          % is not, so do that here
          %          Grace.S = Grace.S-nanmean(Grace.S);
          %
          %       else
@@ -87,7 +87,8 @@ function [Grace, Meta] = loadgrace(varargin)
 
          Grace.Properties.VariableUnits = {'cm'};
 
-         % % for now I return monthly S, but this is what is returned in BFRA_drive
+         % % for now I return monthly S, but this is what is returned in
+         % % BFRA_drive
          %          % Pull out the data
          %          G.T = Grace.time;
          %          G.S = Grace.Sa_avg(idx,:);

@@ -13,17 +13,20 @@ function varargout = pointcloudplot(q,dqdt,varargin)
    % Optional name-value inputs
    %
    %     mask        =  vector logical mask to exclude values from fitting
-   %     reflines    =  cell array of chars indicating what type of reflines to plot
+   %     reflines    =  cell array of chars indicating what type of reflines to
+   %                    plot
    %     reflabels   =  logical indicating whether to add labels
    %     blate       =  late-time b parameter in -dqdt = aq^b (dimensionless)
-   %     userab      =  2x1 double indicating a user-defined intercept,slope pair
-   %     precision   =  scalar double indicating the precision in the x data, used to
-   %                    compute the 'lower envelope'
-   %     timestep    =  scalar double indicating the timestep of the x data, used to
-   %                    compute the 'lower envelope'
+   %     userab      =  2x1 double indicating a user-defined intercept,slope
+   %                    pair
+   %     precision   =  scalar double indicating the precision in the x data,
+   %                    used to compute the 'lower envelope'
+   %     timestep    =  scalar double indicating the timestep of the x data,
+   %                    used to compute the 'lower envelope'
    %     addlegend   =  logical indicating whether to add a legend or not
-   %     usertext    =  char that gets added to the legend if refline 'userfit' (to
-   %                    indicate what is being plotted, maybe a custom user model)
+   %     usertext    =  char that gets added to the legend if refline 'userfit'
+   %                    (to indicate what is being plotted, maybe a custom user
+   %                    model)
    %     rain        =  vector double of rainfall (mm/time)
    %     ax          =  graphic axis to plot into
    %

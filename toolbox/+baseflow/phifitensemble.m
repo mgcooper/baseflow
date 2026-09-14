@@ -12,10 +12,11 @@ function PhiFit = phifitensemble(Results, Fits, A, D, L, bhat, lateqtls, ...
    %     PhiFit =
    %     phifitensemble(Results,Fits,A,D,L,bhat,lateqtls,earlyqtls,showfit) fits
    %     an ensemble of drainable porosity values using the event-scale
-   %     recession data in structs Results and Fits returned by baseflow.fitevents.
-   %     Uses the method of Troch, Troch, and Brutsaert, 1993 to compute
-   %     drainable porosity from early-time and late-time recession parameters
-   %     and aquifer properties area A, depth D, and channel lenght L.
+   %     recession data in structs Results and Fits returned by
+   %     baseflow.fitevents. Uses the method of Troch, Troch, and Brutsaert,
+   %     1993 to compute drainable porosity from early-time and late-time
+   %     recession parameters and aquifer properties area A, depth D, and
+   %     channel lenght L.
    %
    % See also: fitphi, eventphi
    %

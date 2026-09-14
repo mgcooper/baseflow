@@ -41,7 +41,8 @@ end
 %% PARSE INPUTS
 function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)
    parser = inputParser;
-   parser.StructExpand = true; % this has to be true to use autocomplete fieldname
+   % this has to be true to use autocomplete fieldname
+   parser.StructExpand = true;
    parser.FunctionName = 'baseflow.printtrend';
    parser.addRequired('Data', @istimetable);
    parser.addParameter('var', 'Qb', @ischar);

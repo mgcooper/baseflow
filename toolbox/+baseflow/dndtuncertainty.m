@@ -168,10 +168,11 @@ end
 % % dq/dt.
 %
 % % FsigX2 is for two variables: lambda and dq/dt, so it uses Flambda(X) within
-% % the function to compute the value of lambda, but accepts the scalar values for
-% % dq/dt (Fx2) and sig_dq/dt (sig_x2). It would be clearer to replace this with
-% % the scalar valued version, because this is just used to combine the lambda
-% % uncertainty from worstcase with the linear regression dq/dt uncertainty.
+% % the function to compute the value of lambda, but accepts the scalar values
+% % for dq/dt (Fx2) and sig_dq/dt (sig_x2). It would be clearer to replace this
+% % with the scalar valued version, because this is just used to combine the
+% % lambda uncertainty from worstcase with the linear regression dq/dt
+% % uncertainty.
 %
 % % Methods that use Fdndt require the same format that is used in the main
 % % function, so it is not redefined here
@@ -229,11 +230,13 @@ end
 % val(4) = M*dbfdt;
 % sig(4) = FsigX2(X,FdndtX,FlamX,sig_lam,dbfdt,sig_dbfdt);
 %
-% % for reference, compare what worstcase and sig_lam above do to expicit versions:
+% % for reference, compare what worstcase and sig_lam above do to expicit
+% % versions:
 % % [sig(8)  dndt*sqrt((sig_lam/Flambda(X))^2 + (sig_dbfdt/dbfdt)^2)]
 % % [sig_lam lambda*sqrt((sig_lam/Flambda(X))^2)]
 %
-% % if the first two outputs of worstcase are returned, this shows what they mean:
+% % if the first two outputs of worstcase are returned, this shows what they
+% % mean:
 % % [v1,v2,L,M,H] = worstcase(FlamX,X(1:3),sigX(1:3)); % lambda L/M/H
 % % [Flambda(v1) L]
 % % [Flambda(v2) H]
@@ -287,8 +290,8 @@ end
 %
 % % this was after propUncertSym, in case the varnanmes matter. at this point i
 % % think i noticed the correlation doesn't change the uncertainty by much so i
-% % probably jus twanted to also show it doesn't change the uncertainty on lambda
-% % by much
+% % probably jus twanted to also show it doesn't change the uncertainty on
+% % lambda by much
 % % % this shows that the correlation also doesn't change sig_lambda
 % % Fsym = tausym./(phisym.*(4-2.*bsym));
 % % Xsym = [tausym phisym bsym];

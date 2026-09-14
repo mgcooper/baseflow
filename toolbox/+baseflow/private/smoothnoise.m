@@ -38,7 +38,8 @@ function [y, win] = smoothnoise(x, varargin)
          % reshape the input lists to matrices
          x = reshape(x, numyears, []);
          sz = size(x);
-         dim = find(sz == 365); % dim = 2; should be 2 but for 3+ dimensions not sure
+         % dim = 2; should be 2 but for 3+ dimensions not sure
+         dim = find(sz == 365);
       end
       y = nan(size(x));
       win = nan(numyears, 1);

@@ -29,7 +29,8 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    %     into the Events structure.
    %
    %     EVENTS = GETEVENTS(_, OPTS) Uses user-defined options in struct OPTS.
-   %     Use baseflow.setopts to set default OPTS struct and custom optional values.
+   %     Use baseflow.setopts to set default OPTS struct and custom optional
+   %     values.
    %
    %     [EVENTS, INFO] = GETEVENTS(_) Also returns struct INFO which contains
    %     the indices of the identified local maxima, minima, convex points,
@@ -207,7 +208,8 @@ function [qmin, nmin, fmax, rmax, rmin, cmax, rmconvex, rmnochange, rmrain, ...
    % Convert datetime to double if datetime was passed in
    T = todatenum(T);
 
-   % Require T and Q same size but allow empty R (syntax: getevents(T,Q,[],...) )
+   % Require T and Q same size but allow empty R
+   % (syntax: getevents(T,Q,[],...) )
    validateattributes(T, {'double'}, {'size', size(Q)}, mfilename, 'T', 1)
    validateattributes(nmin, {'double'}, {'>', 2}, mfilename, 'nmin', 4)
    if isempty(R)
