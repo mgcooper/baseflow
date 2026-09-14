@@ -1,4 +1,9 @@
-source('toolbox/Setup.m')
+# Add the toolbox to the path. Setup.m is a function in toolbox/, so add
+# that folder first, as an absolute path so the entry stays valid after a
+# script changes the working folder. Setup('addpath') adds the package
+# folders and loads the Octave packages below.
+addpath(fullfile(pwd, 'toolbox'));
+Setup('addpath');
 
 pkg load struct
 pkg load statistics

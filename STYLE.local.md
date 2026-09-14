@@ -35,9 +35,9 @@ merged into it).
 - Use parameterized `classdef` suites to sweep parameter values and keep test
   code compact. `TestBaseflow.m` is the existing example.
 - Always prefer parameterized tests over function-based tests.
-- Write unit tests as function-based `matlab.unittest` suites:
-  `tests/test_<name>.m` starting with
-  `function tests = test_<name>` and `tests = functiontests(localfunctions);`.
+- When a function-based suite is the right form (no parameter sweep), write
+  it as `tests/test_<name>.m` starting with `function tests = test_<name>`
+  and `tests = functiontests(localfunctions);`.
 - Never use a function-based test when a parameterized `classdef` suite can
   test the same code with wider and more efficient parameter coverage.
 - Name the actual result `returned` and the expectation `expected`, per the

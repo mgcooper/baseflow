@@ -1,6 +1,6 @@
 Name: baseflow
 Version: 1.1.0
-Date: 2026-08-30
+Date: 2026-09-13
 Author: Matt Cooper <mguycooper@gmail.com>
 Maintainer: Matt Cooper <mguycooper@gmail.com>
 Title: baseflow: a MATLAB and GNU Octave package for baseflow recession analysis
