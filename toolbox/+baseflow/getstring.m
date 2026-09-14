@@ -24,7 +24,8 @@ function str = getstring(request, varargin)
    %               returned string. Default is false.
    %
    %     'interpreter' - A string specifying the interpreter for the output
-   %                     string. Valid options are 'tex' (default) and 'latex'.
+   %                     string. Valid options are 'tex' and 'latex'
+   %                     (default). Octave always uses 'tex'.
    %
    % Output
    %
@@ -51,7 +52,7 @@ function str = getstring(request, varargin)
    %     str = getstring('Q', 'units', true)
    %     % Returns: '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$'
    %
-   % See also baseflow.aQbString
+   % See also: baseflow.aQbString, baseflow.QtString, baseflow.QtauString
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
 
@@ -85,7 +86,7 @@ function str = getStringWithUnits(request)
    switch request
       case 'Q'
          str = '$Q \quad [\mathrm{m}^3 \;\mathrm{d}^{-1}]$';
-         
+
       case 't'
          str = '$t \quad [d]$';
 
@@ -129,7 +130,7 @@ function str = getStringWithoutUnits(request)
    switch request
       case 'Q'
          str = '$Q$';
-         
+
       case 't'
          str = '$t$';
 
@@ -149,8 +150,7 @@ function str = getStringWithoutUnits(request)
          str = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
 
       case {'Q(t)','q(t)'}
-         str = '$Q = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}$';
-         %str = '$Q(t) = [Q_0^{-(b-1)}+at(b-1)]^{-1/(b-1)}$';
+         str = '$Q(t) = [Q_0^{-(b-1)}+a(b-1)t]^{-1/(b-1)}$';
 
       case {'tau','Tau'}
          str = '$\tau$';
@@ -162,6 +162,7 @@ end
 
 %% Input Parser
 function [request, units, interpreter] = parseinputs(request, varargin)
+
    parser = inputParser;
    parser.FunctionName = 'baseflow.getstring';
    parser.CaseSensitive = false;
@@ -169,6 +170,7 @@ function [request, units, interpreter] = parseinputs(request, varargin)
    parser.addParameter('units', false, @islogical);
    parser.addParameter('interpreter', 'latex', @ischar);
    parser.parse(request, varargin{:});
+
    units = parser.Results.units;
    interpreter = parser.Results.interpreter;
 

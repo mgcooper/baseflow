@@ -13,6 +13,7 @@
 %   test_corechain         - Core-workflow coverage for eventtau, globalfit, fitphi, gpfitb, fitphidist, aQbString
 %   test_demos             - Run every demo script in toolbox/demos/mfiles headless
 %   test_dependencies      - Test the dependency tooling and list agreement
+%   test_eqstrings         - Test the equation label helpers
 %   test_fitcts            - Test the constant-time-step dq/dt method
 %   test_fitopts           - Test the fitab fitopts pass-through
 %   test_internal          - Test the toolbox internal functions

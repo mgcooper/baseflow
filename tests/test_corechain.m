@@ -174,7 +174,7 @@ function test_aQbStringNominal(testCase)
    % aQbString builds the latex label for the recession equation.
    ab = [1e-2 1.5];
    returned = baseflow.aQbString(ab);
-   expected = '-d$Q$/d$t = aQ^b$';
+   expected = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
    testCase.verifyEqual(returned, expected)
 end
 
