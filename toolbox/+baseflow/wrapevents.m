@@ -35,6 +35,8 @@ function [EventsData, Info] = wrapevents(T,Q,R,varargin)
    %  opts        =  structure containing the fields listed above, in lieu of
    %                 entering them individually
    %
+   % Each option default is the baseflow.setopts('getevents') value.
+   %
    % Note: flow comes in as m3/day/day
    %
    % Example
@@ -203,6 +205,9 @@ end
 %% INPUT PARSER
 function [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)
 
+   % Take the option defaults from setopts so that getevents, wrapevents,
+   % and eventfinder use the same values.
+   defaults = baseflow.setopts('getevents');
    parser = inputParser;
    parser.FunctionName = ['baseflow.' mfilename];
    parser.StructExpand = true;
@@ -211,18 +216,18 @@ function [T, Q, R, opts] = parseinputs(T, Q, R, mfilename, varargin)
    parser.addRequired('Q', @(x) isnumeric(x) & numel(x)==numel(T));
    parser.addRequired('R', @isnumeric);
 
-   parser.addParameter('qmin', 1, @isnumericscalar);
-   parser.addParameter('nmin', 4, @isnumericscalar);
-   parser.addParameter('fmax', 2, @isnumericscalar);
-   parser.addParameter('rmax', 2, @isnumericscalar);
-   parser.addParameter('rmin', 0, @isnumericscalar);
-   parser.addParameter('cmax', 2, @isnumericscalar);
-   parser.addParameter('rmconvex', false, @islogical);
-   parser.addParameter('rmnochange', true, @islogical);
-   parser.addParameter('rmrain', false, @islogical);
-   parser.addParameter('pickevents', false, @islogical);
-   parser.addParameter('plotevents', false, @islogical);
-   parser.addParameter('asannual', false, @islogical);
+   parser.addParameter('qmin', defaults.qmin, @isnumericscalar);
+   parser.addParameter('nmin', defaults.nmin, @isnumericscalar);
+   parser.addParameter('fmax', defaults.fmax, @isnumericscalar);
+   parser.addParameter('rmax', defaults.rmax, @isnumericscalar);
+   parser.addParameter('rmin', defaults.rmin, @isnumericscalar);
+   parser.addParameter('cmax', defaults.cmax, @isnumericscalar);
+   parser.addParameter('rmconvex', defaults.rmconvex, @islogical);
+   parser.addParameter('rmnochange', defaults.rmnochange, @islogical);
+   parser.addParameter('rmrain', defaults.rmrain, @islogical);
+   parser.addParameter('pickevents', defaults.pickevents, @islogical);
+   parser.addParameter('plotevents', defaults.plotevents, @islogical);
+   parser.addParameter('asannual', defaults.asannual, @islogical);
 
    parser.parse(T, Q, R, varargin{:});
    opts = parser.Results;

@@ -185,6 +185,8 @@ function [peakInds,peakMags] = peakfinder(x0, sel, thresh, extrema, includeEndpo
 
    % mgc error here when includEndpoints is false and len == 2, so I changed > to
    % >= and it works for a simple case.
+   % Local change: the monotone branch below also differs from upstream for
+   % len == 1.
    if len >= 2 % Function with peaks and valleys
       % Set initial parameters for loop
       tempMag = minMag;
@@ -291,7 +293,12 @@ function [peakInds,peakMags] = peakfinder(x0, sel, thresh, extrema, includeEndpo
       end
    else % This is a monotone function where an endpoint is the only peak
       [peakMags,xInd] = max(x);
+      % Local change: when includeEndpoints is false and len == 1, x is one
+      % interior peak or valley, not an endpoint. Keep it if it is a peak.
       if includeEndpoints && peakMags > minMag + sel
+         peakInds = ind(xInd);
+      elseif ~includeEndpoints && len == 1 && ...
+            peakMags > max(x0(1), x0(end)) + sel
          peakInds = ind(xInd);
       else
          peakMags = [];

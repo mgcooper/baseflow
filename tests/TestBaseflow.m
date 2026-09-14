@@ -13,6 +13,11 @@ classdef TestBaseflow < matlab.unittest.TestCase
    %     9) an equality test for the fitevents 'ctsmethod' option
    %    10) an equality test for the fitab 'ols' method against the Curve
    %        Fitting Toolbox fit and confint
+   %    11) an equality test for the private islocalmax and islocalmin
+   %        against the MATLAB islocalmax and islocalmin functions
+   %    12) an equality test for the getevents, eventfinder, and wrapevents
+   %        defaults against baseflow.setopts('getevents'), and a negative
+   %        test for rmax <= 1
    %
    % Notes:
    %     A) A negative test verifies that the code errors/fails in an
@@ -36,6 +41,18 @@ classdef TestBaseflow < matlab.unittest.TestCase
       BasinName = {'ALL_BASINS','KUPARUK R NR DEADHORSE AK'};
       MinEventDuration = {3,6,9};
       RmConvex = {false, true};
+
+      % Short signals with one peak, one valley, or several extrema. The
+      % one-extremum signals check the peakfinder monotone branch.
+      ExtremaSignal = struct( ...
+         'onepeak', [1 2 3 2 1], ...
+         'peakthenfall', [2 3 1 0 -1], ...
+         'threepoints', [0 1 0], ...
+         'twopeaks', [1 2 3 2 5 1], ...
+         'peakvalleypeak', [10 12 15 13 11 12 11], ...
+         'onevalley', [10 9 8 9 10]);
+      ExtremaFunction = {'islocalmax', 'islocalmin'};
+      EventFunction = {'getevents', 'eventfinder', 'wrapevents'};
    end
 
    properties (Access = private)
@@ -532,8 +549,9 @@ classdef TestBaseflow < matlab.unittest.TestCase
          end
 
          % get the actual result. The synthetic signal has no rainfall record.
+         % rmnochange is false, so rmax has no effect, but it must be > 1.
          [t_returned,q_returned] = baseflow.eventfinder(t,q,[], ...
-            'nmin',MinEventDuration,'fmax',0,'rmax',0,'rmin',0, ...
+            'nmin',MinEventDuration,'fmax',0,'rmax',2,'rmin',0, ...
             'rmconvex',RmConvex,'rmnochange',false,'rmrain',false);
 
          % Largest allowed count of event times that are in only one of the
@@ -600,9 +618,10 @@ classdef TestBaseflow < matlab.unittest.TestCase
          q_expected = [];
 
          % figure; plot(t_expected, q_expected, '-o')
-         % The synthetic signal has no rainfall record.
+         % The synthetic signal has no rainfall record. rmnochange is false,
+         % so rmax has no effect, but it must be > 1.
          [t_returned,q_returned] = baseflow.eventfinder(t, q, [], 'nmin', ...
-            MinEventDuration, 'fmax', 0, 'rmax', 0, 'rmin', 0, 'rmconvex', ...
+            MinEventDuration, 'fmax', 0, 'rmax', 2, 'rmin', 0, 'rmconvex', ...
             RmConvex, 'rmnochange', false, 'rmrain', false);
 
          testCase.verifyEqual(t_returned, t_expected);
@@ -610,6 +629,57 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
          % eventfinder returns empty, not an error, for an event shorter than
          % nmin; the equality checks above cover that case.
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_islocalextrema(testCase, ExtremaSignal, ExtremaFunction)
+
+         % The private peakfinder wrappers must find the same interior
+         % extrema as the MATLAB functions of the same name
+         customfunction = baseflow.privatefunction(ExtremaFunction);
+         expected = feval(ExtremaFunction, ExtremaSignal);
+         returned = customfunction(ExtremaSignal);
+         testCase.verifyEqual(returned, expected)
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_eventdefaults(testCase, EventFunction)
+
+         % A call without options must use the setopts('getevents')
+         % defaults. wrapevents needs complete calendar years, so all three
+         % functions use the Kuparuk data. eventfinder rejects the setopts
+         % fields that it does not parse, so remove them from its struct.
+         [T, Q, R] = baseflow.loadExampleData('kuparuk');
+         opts = baseflow.setopts('getevents');
+         if strcmp(EventFunction, 'eventfinder')
+            opts = rmfield(opts, {'qmin', 'cmax', 'pickevents', ...
+               'plotevents', 'asannual'});
+         end
+
+         % Compare the first two outputs: events and Info, or event times
+         % and flows for eventfinder
+         eventfunction = str2func(['baseflow.' EventFunction]);
+         expected = cell(1, 2);
+         returned = cell(1, 2);
+         [expected{:}] = eventfunction(T, Q, R, opts);
+         [returned{:}] = eventfunction(T, Q, R);
+         testCase.verifyEqual(returned, expected)
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_rmaxguard(testCase, EventFunction)
+
+         % rmax must be greater than 1, because each nan counts as a run of
+         % length 1 and rmnochange would reject every day. wrapevents
+         % passes rmax to getevents, which raises the error.
+         [T, Q, R] = baseflow.loadExampleData('kuparuk');
+         eventfunction = str2func(['baseflow.' EventFunction]);
+         validator = strrep(EventFunction, 'wrapevents', 'getevents');
+         testCase.verifyError(@() eventfunction(T, Q, R, 'rmax', 1), ...
+            ['MATLAB:' validator ':notGreater'])
       end
 
    end

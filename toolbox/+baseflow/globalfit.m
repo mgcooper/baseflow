@@ -155,7 +155,7 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, ...
    parser.addParameter('drainagedensity', 0.8, @isnumericscalar);
    parser.addParameter('aquiferdepth', nan, @isnumericscalar);
    parser.addParameter('streamlength', nan, @isnumericscalar);
-   parser.addParameter('aquiferslope', nan, @isnumericscalar);
+   parser.addParameter('aquiferslope', 0, @isnumericscalar);
    parser.addParameter('aquiferbreadth', nan, @isnumericscalar);
    parser.addParameter('drainableporosity', 0.1, @isnumericscalar);
    parser.addParameter('isflat', true, @islogicalscalar);
