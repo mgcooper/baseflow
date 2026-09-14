@@ -7,20 +7,24 @@ function [S, E, L] = nonnansegments(x, nmin, option)
    %  [S, E, L] = nonnansegments(x, nmin) returns only segments of length
    %  nmin or more. nmin defaults to 1.
    %
-   %  [S, E, L] = nonnansegments(x, nmin, option) sets how a matrix x is
-   %  segmented. option has no effect on vector or cell array input.
+   %  [S, E, L] = nonnansegments(x, nmin, option) sets how a matrix x, or
+   %  each matrix element of a cell array x, is segmented. option has no
+   %  effect on a vector x or on a vector element of a cell array x.
    %
    %  Inputs
    %     X - data. If X is a vector, S, E, L are numeric column vectors. If X
-   %     is a matrix with more than one column, OPTION sets the output. If X
-   %     is a cell array, the algorithm segments each element and returns
-   %     S, E, L as cell arrays the size of X. Each cell element must be a
-   %     vector. Leading and trailing nans are allowed.
+   %     is a matrix that is not a vector, OPTION sets the output. If X is a
+   %     cell array, the algorithm segments each element as a vector or as a
+   %     matrix and returns S, E, L as cell arrays the size of X. Each cell of
+   %     S, E, L holds the output for that element of X. For example, a
+   %     matrix element with OPTION 'each' gives a cell that holds
+   %     per-column cell arrays. Leading and trailing nans are allowed.
    %
    %     NMIN - minimum number of non-nan values to be returned as a valid
    %     segment; segments shorter than nmin are removed (default 1)
    %
-   %     OPTION - segmentation of a matrix X (default 'each'):
+   %     OPTION - segmentation of a matrix X (default 'each'). For a cell
+   %     array X, these rules apply to each matrix element of X:
    %        'each' - segment each column of X on its own and return S, E, L
    %                 as 1-by-size(X, 2) cell arrays.
    %        'all'  - return numeric S, E, L of the row segments where every
@@ -44,13 +48,31 @@ function [S, E, L] = nonnansegments(x, nmin, option)
    end
    option = validatestring(option, {'each', 'all', 'any'}, mfilename);
 
-   % Segment each cell element on its own. This case assumes each element of
-   % x is a vector.
-   if iscell(x)
-      [S, E, L] = cellfun(@(v) processOneVector(isnan(v), nmin), x, ...
-         'Uniform', 0);
-      return
+   % Cast non-cell input to a one-element cell. Then one algorithm segments
+   % a vector, a matrix, and each element of a cell array in the same way.
+   wascell = iscell(x);
+   if ~wascell
+      x = {x};
    end
+   [S, E, L] = cellfun(@(v) processOneElement(v, nmin, option), x, ...
+      'Uniform', 0);
+
+   % Return non-cell input in its own form: numeric S, E, L for a vector or
+   % for 'all' and 'any', and per-column cell arrays for 'each'.
+   if ~wascell
+      S = S{1};
+      E = E{1};
+      L = L{1};
+   end
+end
+
+function [S, E, L] = processOneElement(x, nmin, option)
+   %PROCESSONEELEMENT Segment one vector or matrix under the option rule.
+   %
+   %  X is a vector or a matrix, not a cell array. A vector returns numeric
+   %  column vectors S, E, L for every option. A matrix returns per-column
+   %  cell arrays for 'each', and numeric column vectors of the row segments
+   %  for 'all' and 'any'. processOneVector does the segmentation.
 
    % A vector has one nan mask, so every option gives the same result.
    if isvector(x)
@@ -97,7 +119,7 @@ function [S, E, L] = processOneVector(n, nmin)
    E = reshape(E, [], 1);
    L = E - S + 1;                            % segment lengths
 
-   % Remove segments shorter than nmin (eventfinder depends on this).
+   % Remove segments shorter than nmin (the bfra eventfinder depends on this).
    S = S(L >= nmin);
    E = E(L >= nmin);
    L = L(L >= nmin);
