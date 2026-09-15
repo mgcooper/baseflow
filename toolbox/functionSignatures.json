@@ -15,7 +15,6 @@
       "inputs":
       [
          {"name":"ab",           "kind":"ordered","type":["vector","double"]},
-         {"name":"Q0",           "kind":"ordered","type":["scalar","double"]},
          {"name":"printvalues",  "kind":"namevalue", "type":["logical", "scalar"],"purpose":"Option"}
       ]
    },
@@ -576,8 +575,8 @@
    {
       "inputs":
       [
-         {"name":"ab",           "kind":"ordered", "type":["double","double"]},
-         {"name":"tau0",         "kind":"ordered", "type":["double","double"]},
+         {"name":"ab",           "kind":"ordered", "type":["vector","double"]},
+         {"name":"tau0",         "kind":"ordered", "type":["scalar","double"]},
          {"name":"printvalues",  "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
@@ -585,8 +584,8 @@
    {
       "inputs":
       [
-         {"name":"ab",           "kind":"ordered", "type":["double","double"]},
-         {"name":"Q0",           "kind":"ordered", "type":["double","double"]},
+         {"name":"ab",           "kind":"ordered", "type":["vector","double"]},
+         {"name":"Q0",           "kind":"ordered", "type":["scalar","double"]},
          {"name":"printvalues",  "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },

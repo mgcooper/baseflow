@@ -10,6 +10,11 @@ function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)
    %     h = checkevent(T,Q,q,dqdt,r,alltags,eventtag) makes a four-panel plot
    %     of event identified by eventtag.
    %
+   %     checkevent always opens a new figure for the four panels, so it
+   %     takes no axes input. Panel 2 plots the fitted Q(t) curve and labels
+   %     it with baseflow.QtString. Panel 3 plots the fitted -dQ/dt curve and
+   %     labels it with baseflow.aQbString.
+   %
    % Required inputs
    %
    %  q        approximated Q, e.g. Fits.q
@@ -18,6 +23,9 @@ function h = checkevent(T,Q,q,dqdt,r,alltags,eventtag,varargin)
    %  event    event tag (1:number of events, = max(tags))
    %  T        time array, 1:number of time steps (not reshaped version)
    %  Q        flow array, 1:number of time steps (not reshaped version)
+   %
+   %  Error messages name Q as Qobs and q as qapprox, because the Octave
+   %  input parser compares argument names without case.
    %
    %
    % See also eventplotter
@@ -217,6 +225,7 @@ function [tfit, qfit, dqfit, Qtstr, aQbstr, qfit0, dqfit0, Qtstr0, ...
 
    % fit ab using nonlin
    if all(isnan(eventq))
+      tfit = nan;
       qfit = nan;dqfit = nan;Qtstr = 'nan';aQbstr = 'nan';ab = nan;qfit0 = nan;
       dqfit0 = nan;Qtstr0 = 'nan';aQbstr0 = 'nan';rsq0 = nan;
       return
@@ -228,7 +237,11 @@ function [tfit, qfit, dqfit, Qtstr, aQbstr, qfit0, dqfit0, Qtstr0, ...
 
    % predicted Q from non-lin free
    [qfit,dqfit] = baseflow.Qnonlin(ab(1),ab(2),Q0,tfit-tfit(1));
-   [Qtstr,aQbstr] = baseflow.QtauString(ab,'printvalues',true);
+
+   % build the Q(t) and -dQ/dt = aQ^b legend labels for the free fit. Q0 is
+   % left symbolic because QtString formats a numeric Q0 as an integer.
+   Qtstr = baseflow.QtString(ab,'printvalues',true);
+   aQbstr = baseflow.aQbString(ab,'printvalues',true);
 
    % if requested, fit with a fixed b value and get predicted Q and dQ/dt
    if fixb == true
@@ -236,7 +249,8 @@ function [tfit, qfit, dqfit, Qtstr, aQbstr, qfit0, dqfit0, Qtstr0, ...
       ab0 = Fit.ab;
       rsq0 = Fit.rsq;
       [qfit0,dqfit0] = baseflow.Qnonlin(ab0(1),ab0(2),Q0,tfit-tfit(1));
-      [Qtstr0,aQbstr0] = baseflow.QtauString(ab0,'printvalues',true);
+      Qtstr0 = baseflow.QtString(ab0,'printvalues',true);
+      aQbstr0 = baseflow.aQbString(ab0,'printvalues',true);
    else
       ab0 = nan;
       rsq0 = nan;
@@ -265,20 +279,19 @@ function [T, Q, q, dqdt, r, alltags, eventtag, order] = parseinputs( ...
    parser = inputParser;
    parser.FunctionName = 'baseflow.checkevent';
    parser.addRequired('T', @(x) isnumeric(x) | isdatetime(x));
-   parser.addRequired('Q', @isnumeric);
-   parser.addRequired('q', @isnumeric);
+   parser.addRequired('Qobs', @isnumeric);
+   parser.addRequired('qapprox', @isnumeric);
    parser.addRequired('dqdt', @isnumeric);
    parser.addRequired('r', @isnumeric);
    parser.addRequired('alltags', @isnumeric);
    parser.addRequired('eventtag', @isnumeric);
    parser.addParameter('order', nan, @isnumeric);
-   parser.addParameter('ax', gca, @isaxis);
-   
+
    parser.parse(T, Q, q, dqdt, r, alltags, eventtag, varargin{:});
 
    T = parser.Results.T;
-   Q = parser.Results.Q;
-   q = parser.Results.q;
+   Q = parser.Results.Qobs;
+   q = parser.Results.qapprox;
    r = parser.Results.r;
    dqdt = parser.Results.dqdt;
    order = parser.Results.order;
