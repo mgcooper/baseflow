@@ -41,19 +41,30 @@ jobs:
             Optimization_Toolbox
             Mapping_Toolbox
 
-      # Runs a set of commands using the runners shell
+      # Build the suite from the tests folder. matlab-actions/run-tests
+      # builds it with testsuite(pwd), which at the root of a MATLAB
+      # project (bfra.prj) returns only project files labeled Test, so it
+      # runs zero tests. The empty-suite assert keeps that failure visible.
       - name: Run tests and generate artifacts
-        uses: matlab-actions/run-tests@v3
+        uses: matlab-actions/run-command@v3
         with:
-          source-folder: toolbox
-          # select-by-tag: Unit
-          select-by-folder: tests
-          test-results-junit: test-results/results.xml
-          code-coverage-cobertura: test-results/coverage.xml # mgc put them in one folder
-          # code-coverage-cobertura: code-coverage/coverage.xml
-          # test-results-pdf: test-results/results.pdf # supported on macOS with R2020b and later
-          # output-detail: concise # none, terse, concise, detailed, or verbose, default is detailed for fails and concise otherwise
-          # logging-level: terse # same as above
+          command: >-
+            addpath('toolbox'); Setup('addpath');
+            import matlab.unittest.TestRunner matlab.unittest.TestSuite
+            matlab.unittest.plugins.XMLPlugin
+            matlab.unittest.plugins.CodeCoveragePlugin
+            matlab.unittest.plugins.codecoverage.CoberturaFormat;
+            suite = TestSuite.fromFolder('tests');
+            [~, ~] = mkdir('test-results');
+            runner = TestRunner.withTextOutput;
+            runner.addPlugin(XMLPlugin.producingJUnitFormat(
+            fullfile('test-results', 'results.xml')));
+            runner.addPlugin(CodeCoveragePlugin.forFolder('toolbox',
+            'IncludingSubfolders', true, 'Producing',
+            CoberturaFormat(fullfile('test-results', 'coverage.xml'))));
+            results = runner.run(suite); display(results);
+            assert(~isempty(results), 'The test suite is empty.');
+            assertSuccess(results);
 
       # Publish the JUnit results and Cobertura coverage the previous step
       # produced. if: always() keeps the evidence for failing runs too.
@@ -64,8 +75,3 @@ jobs:
           name: test-results
           path: test-results
 
-      # As an alternative to run-tests, you can use run-command to execute a MATLAB script, function, or statement.
-      #- name: Run all tests
-      #  uses: matlab-actions/run-command@v3
-      #  with:
-      #    command: addpath('code'); results = runtests('IncludeSubfolders', true); assertSuccess(results);

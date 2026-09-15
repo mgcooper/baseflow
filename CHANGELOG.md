@@ -41,6 +41,11 @@ semantic versioning.
 - `fitab` and `loadflow` call the shared private helpers in place of
   local copies.
 - The GitHub Actions workflow uses action versions that run on Node.js 24.
+- The GitHub Actions `Tests` workflow runs the test suite. With the
+  project file `bfra.prj` at the repository root, `matlab-actions/run-tests`
+  selected zero tests, and the runs in 1.1.0 passed without running a
+  test. The workflow builds the suite from `tests/` and fails when the
+  suite is empty.
 - `makedocs` copies the Getting Started equation images to `docs/`, so
   `docs/index.html` shows its equations.
 - `makedocs('demos')` does not overwrite the Octave m-files in
