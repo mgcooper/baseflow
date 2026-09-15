@@ -41,18 +41,20 @@ function [Fits,Results] = fitevents(Events,varargin)
    %
    % Examples
    %
-   %  Fit all events individually using a linear reservoir model:
+   %  Detect events, then fit each event with a linear reservoir model:
    %
+   %     [T, Q, R] = baseflow.loadExampleData();
+   %     opts = baseflow.setopts('getevents');
+   %     Events = baseflow.getevents(T, Q, R, opts);
    %     opts = baseflow.setopts('fitevents', 'fitorder', 1);
-   %     [EventFits, FitsTable] = baseflow.fitevents(EventData, opts);
+   %     [EventFits, Results] = baseflow.fitevents(Events, opts);
    %
    %  Note: to fit all events simultaneously, use baseflow.fitab on the
    %  point cloud. To fit the point cloud with a linear reservoir model:
    %
-   %     abFit = baseflow.fitab( ...
-   %        EventFits.q, ...
-   %        EventFits.dqdt, 'order', 1, ...
-   %        'plotfit', true);
+   %     abFit = baseflow.fitab(EventFits.q, EventFits.dqdt, 'nls', ...
+   %        'order', 1, 'plotfit', true);
+   %     fprintf('a = %.4f, b = %.2f\n', abFit.a, abFit.b)
    %
    %
    % See also getevents, getdqdt, fitdqdt
@@ -88,11 +90,6 @@ function [Fits,Results] = fitevents(Events,varargin)
    eventTags = Events.eventTags;
    numEvents = max(eventTags);
 
-   % try
-   %    T = datetime(T,'ConvertFrom','datenum');
-   % catch
-   % end
-
    % initialize output structure and output arrays
    Fits.eventTime = Events.eventTime;            % event-times
    Fits.eventFlow = Events.eventFlow;            % detected event-Q
@@ -113,6 +110,11 @@ function [Fits,Results] = fitevents(Events,varargin)
    savevars = {'a','b','aL','aH','bL','bH','rsq','pvalue','N'};
 
    % manage warnings
+   % Nonlinear fits to recession events raise these expected warnings. If
+   % dQ/dt increases as Q decreases, nlinfit raises rankDeficientMatrix or
+   % ModelConstantWRTParam. A convex Q vs -dQ/dt relation does not fit the
+   % model form, so nlinfit raises IllConditionedJacobian. Both cases can
+   % also raise IterationLimitExceeded.
    if isoctave
       %warning('off','Octave:invalid-fun-call');
       withwarnoff({ ...
@@ -217,7 +219,8 @@ function [Fits, K, fitcount] = saveFit(T, q, dqdt, dt, tq, derivmethod, ...
       fitmethod, fitorder, eventdate, eventtag, fittag, fitcount, K, ...
       Fits, iFit, savevars, ok) %#ok<INUSD>
 
-   % if fitting failed, set this event nan, otherwise save the fit
+   % Save the fit only if fitting succeeded. initFitTable fills K with nan,
+   % and fitevents removes the unused nan rows after the event loop.
    if ok == true
 
       fitcount = fitcount+1;
@@ -250,29 +253,6 @@ function [Fits, K, fitcount] = saveFit(T, q, dqdt, dt, tq, derivmethod, ...
       % eventTag and fitTag only span the rows with valid data, but as-is, we
       % should have eventTag equal to the raw data, and since the fitted data is
       % nan elsewhere, this might be better
-
-   else
-
-      % this shouldn't be necessary since they're initialized to nan
-
-      %    K.a(fitcount) = nan;
-      %    K.b(fitcount) = nan;
-      %    K.aL(fitcount) = nan;
-      %    K.bL(fitcount) = nan;
-      %    K.aH(fitcount) = nan;
-      %    K.bH(fitcount) = nan;
-      %    K.rsq(fitcount) = nan;
-      %    K.pvalue(fitcount) = nan;
-      %    K.N(fitcount) = nan;
-      %    K.eventTag(fitcount) = eventtag;
-      %    K.fitTag(fitcount) = fittag;
-
-      % K(idx).method = method;
-      % K(idx).order = order;
-      % K(idx).deriv = deriv;
-      % K(idx).station = station;
-      % K(idx).date = date;
-
    end
 end
 

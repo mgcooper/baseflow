@@ -14,6 +14,9 @@ function h = plotaquifertrend(t,Db,sigDb,varargin)
    %     h = plotaquifertrend(t,Db,sigDb,Dc,sigDc) also plots annual values of
    %     measured active layer thickness Dc and measurement uncertainty sigDc.
    %
+   %     h = plotaquifertrend(t,Db,sigDb,Dc,sigDc,Dg) also plots annual values
+   %     of GRACE active layer thickness Dg, without errorbars.
+   %
    % See also: prepalttrend
 
    % if called with no input, open this file
@@ -94,7 +97,7 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
 
    lobj = [p1.plot p2.plot p3.plot p1.trend p2.trend p3.trend];
    ltxt = {ctxt; btxt; strrep(gtxt, '\\', '\'); str6; str7; str8};
-   legend(lobj, ltxt, 'numcolumns', 2, 'Interpreter', 'latex',' location', ...
+   legend(lobj, ltxt, 'numcolumns', 2, 'Interpreter', 'latex', 'location', ...
       'northwest', 'AutoUpdate', 'off');
 
    p1.bounds.FaceAlpha = 0.15;
@@ -109,7 +112,7 @@ function h = plotgraceperiod(t, Db, sigDb, Dc, sigDc, Dg, method)
    h.figure = f;
    h.baseflow.trendplot1 = p1;
    h.baseflow.trendplot2 = p2;
-   h.baseflow.trendplot2 = p3;
+   h.baseflow.trendplot3 = p3;
 
 end
 
