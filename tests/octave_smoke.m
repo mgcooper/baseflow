@@ -56,6 +56,17 @@ assert(all(isfinite(olsFit.ab)))
 assert(olsFit.aL <= olsFit.a && olsFit.a <= olsFit.aH)
 assert(olsFit.bL <= olsFit.b && olsFit.b <= olsFit.bH)
 
+% fit an 'ols' trend line with a non-default alpha. trendplot calls fitlm,
+% coefCI, and predict, which the Octave statistics package also provides.
+% Require a finite trend and bounds that bracket the fitted line.
+t = transpose(datetime(1990:2020, 7, 1));
+y = transpose(0.3 * (1:31) + sin(1:31));
+htrend = baseflow.trendplot(t, y, 'method', 'ols', 'alpha', 0.1, ...
+   'anomalies', false, 'showfig', false);
+close(htrend.figure);
+assert(all(isfinite(htrend.ab)))
+assert(all(htrend.yci(:, 1) <= htrend.yfit & htrend.yfit <= htrend.yci(:, 2)))
+
 % exercise the vendored arrow handle allocation; close the figure the
 % call opens. arrow.m reads the MATLAB-only hidden axes property
 % WarpToFill (arrow_WarpToFill) and errors on Octave before it reaches

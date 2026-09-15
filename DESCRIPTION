@@ -9,5 +9,5 @@ License: BSD-3-Clause
 Problems: Incomplete test coverage. Some Octave incompatibilities may exist.
 Url: https://github.com/mgcooper/baseflow
 Categories: hydrology
-Depends: octave (>= 4.0.0), struct, optim, statistics, tablicious, statistics-resampling, financial
+Depends: octave (>= 4.0.0), struct, optim, statistics (>= 1.9.1), tablicious, statistics-resampling, financial
 MatlabProducts: Statistics and Machine Learning Toolbox, Curve Fitting Toolbox

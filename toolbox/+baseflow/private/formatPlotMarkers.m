@@ -142,7 +142,7 @@ function h = formatPlotMarkers(varargin)
                fillspacing = max(1,numPoints/10); % if <10 points fill them all
             end
             numfill = fix(numPoints/fillspacing);
-            markerIdx = round(linspace(1,numPoints,numfill),0);
+            markerIdx = round(linspace(1,numPoints,numfill));
          else
             % fill all points, use smaller symbol size
             markerIdx = 1:numPoints;
