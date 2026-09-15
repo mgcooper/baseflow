@@ -119,6 +119,31 @@ classdef test_fitcts < matlab.unittest.TestCase
             R_gapped), expected)
       end
 
+      function test_singleSample(testCase, stencil)
+         % One sample has no time step. Every stencil returns nan q, dqdt,
+         % dt, dq, and tqmid with one element, and tq and rq post on the
+         % input sample.
+         method = stencil{1};
+         T_single = 0;
+         Q_single = 5;
+         R_single = 0;
+         nan_expected = nan;
+         tq_expected = T_single;
+         rq_expected = R_single;
+
+         [q_returned, dqdt_returned, dt_returned, tq_returned, ...
+            rq_returned, dq_returned, tqmid_returned] = ...
+            testCase.fitcts(T_single, Q_single, R_single, method);
+
+         testCase.verifyEqual(q_returned, nan_expected)
+         testCase.verifyEqual(dqdt_returned, nan_expected)
+         testCase.verifyEqual(dt_returned, nan_expected)
+         testCase.verifyEqual(dq_returned, nan_expected)
+         testCase.verifyEqual(tqmid_returned, nan_expected)
+         testCase.verifyEqual(tq_returned, tq_expected)
+         testCase.verifyEqual(rq_returned, rq_expected)
+      end
+
       function test_unknownMethodErrors(testCase)
          % An unrecognized stencil name raises the validatestring error.
          expected = 'MATLAB:fitcts:unrecognizedStringChoice';

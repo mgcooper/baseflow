@@ -4,9 +4,10 @@ function varargout = getplotdata(varargin)
    %  [xdata, ydata, zdata] = getplotdata(ax) returns the XData, YData, and
    %  ZData of the children of axes ax. It returns one of these, in order,
    %  for each requested output. With no input, ax is the current axes (gca).
-   %  Every child of ax must have XData, YData, and ZData (for example
-   %  lines, scatter, and surfaces). A child such as a Text annotation
-   %  raises an error.
+   %  Each output holds the data of the children that have that property.
+   %  getplotdata skips a child without it, for example a Text annotation
+   %  (no XData) or an image (no ZData). If more than one child has the
+   %  property, the output is a cell array with one element for each child.
 
    if nargin == 0
       ax = gca;
@@ -14,10 +15,12 @@ function varargout = getplotdata(varargin)
       ax = varargin{1};
    end
 
+   % Read each property only from the children that have it, so an
+   % annotation or image child does not raise an error.
    childs   = get(ax,'Children');
-   xdata    = get(childs, 'XData');
-   ydata    = get(childs, 'YData');
-   zdata    = get(childs, 'ZData');
+   xdata    = get(findobj(childs, 'flat', '-property', 'XData'), 'XData');
+   ydata    = get(findobj(childs, 'flat', '-property', 'YData'), 'YData');
+   zdata    = get(findobj(childs, 'flat', '-property', 'ZData'), 'ZData');
 
    switch nargout
       case 1

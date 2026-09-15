@@ -3,8 +3,9 @@ function rl = runlength(tf)
    %
    %  rl = runlength(tf) returns an array rl the size of tf. Each element
    %  of rl holds the length of the run of consecutive equal values that
-   %  contains it, computed down each column of tf. tf must be a column
-   %  vector or a matrix of column series. Pass a row vector as tf(:).
+   %  contains it, computed down each column of tf. tf is a vector or a
+   %  matrix of column series. A row vector gives the run lengths of its
+   %  column form, returned as a row.
    %
    %  NaN never equals NaN, so each NaN is a run of length 1. For example,
    %  runlength([1;1;NaN;NaN;NaN;2;2]) returns [2;2;1;1;1;2;2]. Callers use
@@ -14,6 +15,13 @@ function rl = runlength(tf)
    %  pass a minimum length test and join the runs on each side.
    %
    %  See also: isminlength
+
+   % Count a row vector as a column. diff would otherwise work along the
+   % row, and the column-wise indexing below needs one series per column.
+   sz = size(tf);
+   if isrow(tf)
+      tf = tf(:);
+   end
 
    diffs = diff(tf) ~= 0;  % find where values change
    ncols = size(diffs, 2); % pad jumps at start and end
@@ -34,4 +42,5 @@ function rl = runlength(tf)
    drl(i2) = drl(i2) - rl;
    
    rl = cumsum(drl(1:end-1, :)); % remove last row and sum
+   rl = reshape(rl, sz);         % return a row for a row vector input
 end
