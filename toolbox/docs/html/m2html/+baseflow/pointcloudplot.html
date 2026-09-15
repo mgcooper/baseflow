@@ -329,96 +329,87 @@ This function is called by:
 0231       L = legend(hleg,ltxt, <span class="string">'location'</span>, <span class="string">'northwest'</span>, <span class="string">'interpreter'</span>, <span class="string">'tex'</span>, <span class="keyword">...</span>
 0232          <span class="string">'AutoUpdate'</span>, <span class="string">'off'</span>);
 0233 
-0234       <span class="comment">% if isoctave</span>
-0235       <span class="comment">%    ltxt = strrep(ltxt,'$','');</span>
-0236       <span class="comment">%    l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...</span>
-0237       <span class="comment">%       'AutoUpdate','off');</span>
-0238       <span class="comment">% else</span>
-0239       <span class="comment">%    l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...</span>
-0240       <span class="comment">%       'AutoUpdate','off');</span>
-0241       <span class="comment">% end</span>
-0242 
-0243    <span class="keyword">else</span>
-0244       L = nan;
-0245    <span class="keyword">end</span>
-0246    <span class="comment">% package the output</span>
-0247    <span class="keyword">if</span> nargout == 1
-0248       out.fig        = fig;
-0249       out.scatter    = h0;
-0250       out.mask       = h1;
-0251       out.reflines   = h;
-0252       out.ax         = gca;
-0253       out.hrain      = hrain;
-0254       out.legend     = L;
-0255       
-0256       varargout{1} = out;
-0257    <span class="keyword">end</span>
-0258 <span class="keyword">end</span>
-0259 
-0260 <span class="comment">%% LOCAL FUNCTIONS</span>
-0261 <a name="_sub1" href="#_subfunctions" class="code">function hrain = plotrain(ax,h,rain,x,y)</a>
-0262 
-0263    <span class="comment">% ax is the axis to plot into</span>
-0264    <span class="comment">% h is the handle of the plotted q/dqdt to get the marker size to scale</span>
-0265    <span class="comment">% the rain circles</span>
-0266    <span class="comment">% x and y are q -dqdt</span>
-0267 
-0268    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
-0269    <span class="comment">% the plotted circles</span>
-0270    <span class="keyword">if</span> sum(rain)==0
-0271       hrain = nan;
-0272    <span class="keyword">else</span>
+0234    <span class="keyword">else</span>
+0235       L = nan;
+0236    <span class="keyword">end</span>
+0237    <span class="comment">% package the output</span>
+0238    <span class="keyword">if</span> nargout == 1
+0239       out.fig        = fig;
+0240       out.scatter    = h0;
+0241       out.mask       = h1;
+0242       out.reflines   = h;
+0243       out.ax         = gca;
+0244       out.hrain      = hrain;
+0245       out.legend     = L;
+0246       
+0247       varargout{1} = out;
+0248    <span class="keyword">end</span>
+0249 <span class="keyword">end</span>
+0250 
+0251 <span class="comment">%% LOCAL FUNCTIONS</span>
+0252 <a name="_sub1" href="#_subfunctions" class="code">function hrain = plotrain(ax,h,rain,x,y)</a>
+0253 
+0254    <span class="comment">% ax is the axis to plot into</span>
+0255    <span class="comment">% h is the handle of the plotted q/dqdt to get the marker size to scale</span>
+0256    <span class="comment">% the rain circles</span>
+0257    <span class="comment">% x and y are q -dqdt</span>
+0258 
+0259    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
+0260    <span class="comment">% the plotted circles</span>
+0261    <span class="keyword">if</span> sum(rain)==0
+0262       hrain = nan;
+0263    <span class="keyword">else</span>
+0264 
+0265       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
+0266       <span class="comment">% sz = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
+0267       <span class="comment">% scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
+0268 
+0269       <span class="comment">% this mimics the way scatter scales the circles</span>
+0270       sz = get(h,<span class="string">'MarkerSize'</span>) + sqrt(pi.*(rain(rain&gt;0)).^2);
+0271       x = x(rain&gt;0);
+0272       y = y(rain&gt;0);
 0273 
-0274       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
-0275       <span class="comment">% sz = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
-0276       <span class="comment">% scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
-0277 
-0278       <span class="comment">% this mimics the way scatter scales the circles</span>
-0279       sz = get(h,<span class="string">'MarkerSize'</span>) + sqrt(pi.*(rain(rain&gt;0)).^2);
-0280       x = x(rain&gt;0);
-0281       y = y(rain&gt;0);
-0282 
-0283       hold on;
-0284       <span class="keyword">for</span> n = numel(sz):-1:1
-0285          hrain(n) = plot(ax,x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,sz(n), <span class="keyword">...</span>
-0286             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
-0287       <span class="keyword">end</span>
-0288    <span class="keyword">end</span>
-0289 <span class="keyword">end</span>
-0290 
-0291 <span class="comment">%% INPUT PARSER</span>
-0292 <a name="_sub2" href="#_subfunctions" class="code">function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, </a><span class="keyword">...</span>
-0293       timestep, addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin)
-0294    
-0295    parser = inputParser;
-0296    parser.addRequired(<span class="string">'q'</span>, @isnumeric);
-0297    parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
-0298    parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
-0299    parser.addParameter(<span class="string">'reflines'</span>, {<span class="string">'bestfit'</span>}, @iscell);
-0300    parser.addParameter(<span class="string">'reflabels'</span>, false, @islogical);
-0301    parser.addParameter(<span class="string">'blate'</span>, 1, @isnumeric);
-0302    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
-0303    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric);
-0304    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric);
-0305    parser.addParameter(<span class="string">'addlegend'</span>, true, @islogical);
-0306    parser.addParameter(<span class="string">'usertext'</span>, <span class="string">''</span>, @ischar);
-0307    parser.addParameter(<span class="string">'rain'</span>, nan, @isnumeric);
-0308    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
-0309    parser.FunctionName = <span class="string">'baseflow.pointcloudplot'</span>;
-0310    
-0311    parser.parse(q, dqdt, varargin{:});
-0312 
-0313    mask = parser.Results.mask;
-0314    reflines = parser.Results.reflines;
-0315    reflabels = parser.Results.reflabels;
-0316    blate = parser.Results.blate;
-0317    userab = parser.Results.userab;
-0318    precision = parser.Results.precision;
-0319    timestep = parser.Results.timestep;
-0320    addlegend = parser.Results.addlegend;
-0321    usertext = parser.Results.usertext;
-0322    rain = parser.Results.rain;
-0323    ax = parser.Results.ax;
-0324 <span class="keyword">end</span></pre></div>
+0274       hold on;
+0275       <span class="keyword">for</span> n = numel(sz):-1:1
+0276          hrain(n) = plot(ax,x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,sz(n), <span class="keyword">...</span>
+0277             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
+0278       <span class="keyword">end</span>
+0279    <span class="keyword">end</span>
+0280 <span class="keyword">end</span>
+0281 
+0282 <span class="comment">%% INPUT PARSER</span>
+0283 <a name="_sub2" href="#_subfunctions" class="code">function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, </a><span class="keyword">...</span>
+0284       timestep, addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin)
+0285    
+0286    parser = inputParser;
+0287    parser.addRequired(<span class="string">'q'</span>, @isnumeric);
+0288    parser.addRequired(<span class="string">'dqdt'</span>, @isnumeric);
+0289    parser.addParameter(<span class="string">'mask'</span>, true(size(q)), @islogical);
+0290    parser.addParameter(<span class="string">'reflines'</span>, {<span class="string">'bestfit'</span>}, @iscell);
+0291    parser.addParameter(<span class="string">'reflabels'</span>, false, @islogical);
+0292    parser.addParameter(<span class="string">'blate'</span>, 1, @isnumeric);
+0293    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
+0294    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric);
+0295    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric);
+0296    parser.addParameter(<span class="string">'addlegend'</span>, true, @islogical);
+0297    parser.addParameter(<span class="string">'usertext'</span>, <span class="string">''</span>, @ischar);
+0298    parser.addParameter(<span class="string">'rain'</span>, nan, @isnumeric);
+0299    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
+0300    parser.FunctionName = <span class="string">'baseflow.pointcloudplot'</span>;
+0301    
+0302    parser.parse(q, dqdt, varargin{:});
+0303 
+0304    mask = parser.Results.mask;
+0305    reflines = parser.Results.reflines;
+0306    reflabels = parser.Results.reflabels;
+0307    blate = parser.Results.blate;
+0308    userab = parser.Results.userab;
+0309    precision = parser.Results.precision;
+0310    timestep = parser.Results.timestep;
+0311    addlegend = parser.Results.addlegend;
+0312    usertext = parser.Results.usertext;
+0313    rain = parser.Results.rain;
+0314    ax = parser.Results.ax;
+0315 <span class="keyword">end</span></pre></div>
 </body>
 </html>

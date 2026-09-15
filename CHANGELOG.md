@@ -6,17 +6,48 @@ semantic versioning.
 
 ## [Unreleased]
 
+### Added
+
+- `cloudphi` accepts a `plotfit` option (default true). With `plotfit`
+  false it computes phi and draws no figure.
+- `tools/m2html` holds a copy of M2HTML (rochefort-lab/m2html at
+  3821fb8, GPL-2.0-or-later) for the docs build.
+  `tools/m2html/VENDORED.md` records its source, license, local changes,
+  and refresh steps. `CONTRIBUTING.md` explains how to build the docs.
+
 ### Changed
 
 - `aQbString`, `QtString`, and `QtauString` each return one label.
   `aQbString` returns the -dQ/dt = aQ^b label and has no `Q0` input.
   Call `QtString` for the Q(t) label.
 - `checkevent` has no `ax` option. It always opens its own figure.
-- `private/fitlm_octmat` computes 100(1-`alpha`)% coefficient confidence
-  intervals on MATLAB. In 1.1.0 its MATLAB path returned 95% intervals
-  for every `alpha`.
+- `dndtuncertainty` computes its regression interval at the `alpha`
+  level, the same level as its parameter uncertainties. In 1.1.0 the
+  regression interval was 95% for every `alpha`. The default `alpha`
+  0.05 gives the same result.
+- `dndtuncertainty` accepts `alpha` 0.05 or 0.32 only, because its
+  parameter uncertainties support only these two levels. Its help
+  documents `alpha` and `testflag`.
 - `DESCRIPTION` requires the Octave `statistics` package 1.9.1 or later.
-  `trendplot` and `private/fitlm_octmat` use its `fitlm` model object.
+  `trendplot` and `dndtuncertainty` use its `fitlm` model object.
+- `baseflow.internal.makedocs('functions')` builds the function pages
+  with the M2HTML copy in `tools/m2html` and needs no separate M2HTML
+  install. `makedocs` restores the MATLAB path when it returns.
+- The demo scripts and live scripts do not call `close all`, so a demo
+  keeps the figures a user has open. `makedocs('demos')` deletes the
+  figures each demo export opens.
+- `hyetograph` opens a new figure unless an axes handle is passed, so it
+  does not resize or redraw a figure the user has open. With an axes
+  handle, it draws in that axes.
+- The Getting Started guide, the citing page, and the function
+  documentation template give the contact address
+  matt@sierracrestanalytics.com.
+
+### Removed
+
+- The private helpers `fitlm_octmat` and `predictlm`. `dndtuncertainty`
+  calls `fitlm` and `coefCI`, which MATLAB and the Octave `statistics`
+  package both provide.
 
 ### Fixed
 
@@ -24,8 +55,19 @@ semantic versioning.
   `Q` and `q` inputs distinct names. The Octave parser compares names
   without case, and the MATLAB parser does so by default.
 - `checkevent` draws an event that has no valid flow.
-- `trendplot` and `private/fitlm_octmat` run on Octave, so the Kuparuk
-  demo runs on Octave.
+- `globalfit` with `plotfits` false opens no figure.
+- `fitphidist` with `showfit` false leaves no hidden figure open, so
+  `phifitensemble`, `dndtuncertainty`, and `globalfit` do not accumulate
+  figures. Its `'probplot'` plot type runs without an input error and
+  follows `showfit`. Its help documents `'probplot'` and `showfit`.
+- `plotaquifertrend` plots the GRACE period without a legend error and
+  returns the third trend handle as `trendplot3`. Its help documents the
+  GRACE input.
+- `trendplot` and `dndtuncertainty` run on Octave, so the Kuparuk demo
+  runs on Octave.
+- The `fitevents` help example runs as written.
+- `private/siUnitsToTex` wraps each negative exponent once, so labels
+  such as 'm3 d-1' in `hyetograph` show the correct superscript.
 - `private/fillnans` fills only interior nan runs of length `fmax` or
   less and accepts a row vector.
 - `private/smoothnoise` keeps each year together on the 'annual' path
@@ -33,7 +75,6 @@ semantic versioning.
 - `private/setrainnan` accepts vector input.
 - `private/preparecalendar` assigns `timestep` for every calendar.
 - `private/fitcts` returns nan for a single sample.
-- `private/predictlm` uses the residual degrees of freedom of the fit.
 - `private/runlength` and `private/anomaly` accept row vectors.
 - `private/getplotdata` skips axes children that have no `XData`.
 - `private/formatPlotMarkers` calls `round` with one input, which Octave
@@ -46,8 +87,10 @@ semantic versioning.
   selected zero tests, and the runs in 1.1.0 passed without running a
   test. The workflow builds the suite from `tests/` and fails when the
   suite is empty.
-- `makedocs` copies the Getting Started equation images to `docs/`, so
-  `docs/index.html` shows its equations.
+- The `cloudphi` and `fitphi` help describe `dispfit` correctly: it
+  prints each phi value.
+- The Getting Started function list shows dQ/dt as italic text, not as
+  oversized equation images, and its author email is one mailto link.
 - `makedocs('demos')` does not overwrite the Octave m-files in
   `demos/mfiles`, and the demo pages show the output of the current code.
 - The m2html dependency graph matches the current functions.

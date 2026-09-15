@@ -434,234 +434,227 @@ This function is called by:
 0338    <span class="keyword">if</span> labelplot == true
 0339       <a href="#_sub4" class="code" title="subfunction labelReflines(h)">labelReflines</a>(h)
 0340    <span class="keyword">end</span>
-0341 
-0342    <span class="comment">% axpos = baseflow.deps.plotboxpos(gca);</span>
-0343    <span class="comment">% only works with correct axes position</span>
-0344    <span class="comment">% xtext = exp(mean(log(xlimkeep)));</span>
-0345    <span class="comment">% addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);</span>
-0346    <span class="comment">% addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);</span>
-0347    <span class="comment">% addRotatedText(1*xtext,axb(aMax,1*xtext,bMax),'upper envelope',1.5,axpos);</span>
-0348 <span class="keyword">end</span>
+0341 <span class="keyword">end</span>
+0342 
+0343 <span class="comment">%%</span>
+0344 <a name="_sub4" href="#_subfunctions" class="code">function labelReflines(h)</a>
+0345 
+0346    <span class="comment">% Use the axis limits and the number of decades to place the labels</span>
+0347    ylims = ylim;
+0348    xlims = xlim;
 0349 
-0350 <span class="comment">%%</span>
-0351 <a name="_sub4" href="#_subfunctions" class="code">function labelReflines(h)</a>
+0350    ndecsy = log10(ylims(2)) - log10(ylims(1));
+0351    ndecsx = log10(xlims(2)) - log10(xlims(1));
 0352 
-0353    <span class="comment">% Use the axis limits and the number of decades to place the labels</span>
-0354    ylims = ylim;
-0355    xlims = xlim;
-0356 
-0357    ndecsy = log10(ylims(2)) - log10(ylims(1));
-0358    ndecsx = log10(xlims(2)) - log10(xlims(1));
-0359 
-0360    <span class="comment">% Place the late-time arrow above the first decade</span>
-0361    factor = 10;
-0362    ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
-0363    xa = (ya / h.aLate) ^ (1 / h.bLate);
+0353    <span class="comment">% Place the late-time arrow above the first decade</span>
+0354    factor = 10;
+0355    ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
+0356    xa = (ya / h.aLate) ^ (1 / h.bLate);
+0357 
+0358    <span class="comment">% If xa is off the chart, adjust y and recompute</span>
+0359    <span class="keyword">while</span> xa &lt; xlims(1)
+0360       factor = factor - 1;
+0361       ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
+0362       xa = (ya / h.aLate) ^ (1 / h.bLate);
+0363    <span class="keyword">end</span>
 0364 
-0365    <span class="comment">% If xa is off the chart, adjust y and recompute</span>
-0366    <span class="keyword">while</span> xa &lt; xlims(1)
-0367       factor = factor - 1;
-0368       ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
-0369       xa = (ya / h.aLate) ^ (1 / h.bLate);
-0370    <span class="keyword">end</span>
+0365    <span class="comment">% Make the arrow span 1/10th or so of the total number of decades</span>
+0366    xa = [xa 10 ^ (log10(xa) + ndecsx/factor)];
+0367    ya = [ya ya];
+0368 
+0369    <span class="comment">% Convert from data units to normalized figure units</span>
+0370    [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
 0371 
-0372    <span class="comment">% Make the arrow span 1/10th or so of the total number of decades</span>
-0373    xa = [xa 10 ^ (log10(xa) + ndecsx/factor)];
-0374    ya = [ya ya];
-0375 
-0376    <span class="comment">% Convert from data units to normalized figure units</span>
-0377    [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
+0372    <span class="comment">% Place the arrow. When headwidth is adjusted the arrow tip is slightly</span>
+0373    <span class="comment">% elongated, so adjust normX a tad bit</span>
+0374    normX(2) = normX(2)*1.02;
+0375    annotation(<span class="string">'arrow'</span>, normX, normY, <span class="string">'HeadStyle'</span>, <span class="string">'plain'</span>, <span class="string">'HeadWidth'</span>, 4, <span class="keyword">...</span>
+0376       <span class="string">'HeadLength'</span>, 8, <span class="string">'LineWidth'</span>, 1)
+0377 
 0378 
-0379    <span class="comment">% Place the arrow. When headwidth is adjusted the arrow tip is slightly</span>
-0380    <span class="comment">% elongated, so adjust normX a tad bit</span>
-0381    normX(2) = normX(2)*1.02;
-0382    annotation(<span class="string">'arrow'</span>, normX, normY, <span class="string">'HeadStyle'</span>, <span class="string">'plain'</span>, <span class="string">'HeadWidth'</span>, 4, <span class="keyword">...</span>
-0383       <span class="string">'HeadLength'</span>, 8, <span class="string">'LineWidth'</span>, 1)
-0384 
-0385 
-0386    <span class="comment">% Add the label</span>
-0387    <span class="keyword">if</span> isoctave
-0388       ta = sprintf(<span class="string">'b=%.2f'</span>, h.bLate);
-0389       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
-0390          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>)
-0391    <span class="keyword">else</span>
-0392       ta = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>, h.bLate);
-0393       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
-0394          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
-0395    <span class="keyword">end</span>
-0396 
-0397    <span class="comment">% Draw the early-time arrow</span>
-0398    xa = (ya(1) / h.aEarly) ^ (1 / h.bEarly);
-0399    xa = [xa 10^(log10(xa) + ndecsx/factor)];
-0400 
-0401    <span class="comment">% Convert from data units to normalized figure units</span>
-0402    [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
-0403    normX(2) = normX(2)*1.01;
-0404 
-0405    <span class="comment">% Place the arrow</span>
-0406    annotation(<span class="string">'arrow'</span>, normX, normY, <span class="string">'HeadStyle'</span>, <span class="string">'plain'</span>, <span class="string">'HeadWidth'</span>, 4, <span class="keyword">...</span>
-0407       <span class="string">'HeadLength'</span>, 10, <span class="string">'LineWidth'</span>, 1)
-0408 
-0409    <span class="comment">% Add the label</span>
-0410    <span class="keyword">if</span> isoctave
-0411       ta = sprintf(<span class="string">'b=%.0f'</span>, h.bEarly);
-0412       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
-0413          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>)
-0414    <span class="keyword">else</span>
-0415       ta = sprintf(<span class="string">'$b=%.0f$'</span>, h.bEarly);
-0416       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
-0417          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
-0418    <span class="keyword">end</span>
-0419 <span class="keyword">end</span>
-0420 
-0421 <span class="comment">%%</span>
-0422 <a name="_sub5" href="#_subfunctions" class="code">function h = plotrain(h,rain,x,y)</a>
-0423 
-0424    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
-0425    <span class="comment">% the plotted circles</span>
-0426    <span class="keyword">if</span> sum(rain)==0
-0427       h.hrain = nan;
-0428    <span class="keyword">else</span>
-0429 
-0430       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
-0431       <span class="comment">%sz    = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
-0432       <span class="comment">%scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
-0433 
-0434       <span class="comment">% this mimics the way scatter scales the circles</span>
-0435       s = h.scatter.MarkerSize + sqrt(pi.*(rain(rain&gt;0)).^2);
-0436       x = x(rain&gt;0);
-0437       y = y(rain&gt;0);
-0438 
-0439       hold on;
-0440       <span class="keyword">for</span> n = 1:numel(s)
-0441          h.hrain(n) = plot(x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,s(n), <span class="keyword">...</span>
-0442             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
-0443       <span class="keyword">end</span>
-0444    <span class="keyword">end</span>
-0445 <span class="keyword">end</span>
-0446 
-0447 <span class="comment">%%</span>
-0448 <a name="_sub6" href="#_subfunctions" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos) </a><span class="comment">%#ok&lt;*DEFNU&gt;</span>
-0449 
-0450    <span class="comment">% https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib</span>
+0379    <span class="comment">% Add the label</span>
+0380    <span class="keyword">if</span> isoctave
+0381       ta = sprintf(<span class="string">'b=%.2f'</span>, h.bLate);
+0382       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
+0383          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>)
+0384    <span class="keyword">else</span>
+0385       ta = sprintf(<span class="string">'$b=%.2f$ ($\\hat{b}$)'</span>, h.bLate);
+0386       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
+0387          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+0388    <span class="keyword">end</span>
+0389 
+0390    <span class="comment">% Draw the early-time arrow</span>
+0391    xa = (ya(1) / h.aEarly) ^ (1 / h.bEarly);
+0392    xa = [xa 10^(log10(xa) + ndecsx/factor)];
+0393 
+0394    <span class="comment">% Convert from data units to normalized figure units</span>
+0395    [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
+0396    normX(2) = normX(2)*1.01;
+0397 
+0398    <span class="comment">% Place the arrow</span>
+0399    annotation(<span class="string">'arrow'</span>, normX, normY, <span class="string">'HeadStyle'</span>, <span class="string">'plain'</span>, <span class="string">'HeadWidth'</span>, 4, <span class="keyword">...</span>
+0400       <span class="string">'HeadLength'</span>, 10, <span class="string">'LineWidth'</span>, 1)
+0401 
+0402    <span class="comment">% Add the label</span>
+0403    <span class="keyword">if</span> isoctave
+0404       ta = sprintf(<span class="string">'b=%.0f'</span>, h.bEarly);
+0405       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
+0406          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>)
+0407    <span class="keyword">else</span>
+0408       ta = sprintf(<span class="string">'$b=%.0f$'</span>, h.bEarly);
+0409       text(1.05 * xa(2), ya(2), ta, <span class="keyword">...</span>
+0410          <span class="string">'HorizontalAlignment'</span>, <span class="string">'left'</span>, <span class="string">'Interpreter'</span>, <span class="string">'latex'</span>)
+0411    <span class="keyword">end</span>
+0412 <span class="keyword">end</span>
+0413 
+0414 <span class="comment">%%</span>
+0415 <a name="_sub5" href="#_subfunctions" class="code">function h = plotrain(h,rain,x,y)</a>
+0416 
+0417    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
+0418    <span class="comment">% the plotted circles</span>
+0419    <span class="keyword">if</span> sum(rain)==0
+0420       h.hrain = nan;
+0421    <span class="keyword">else</span>
+0422 
+0423       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
+0424       <span class="comment">%sz    = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
+0425       <span class="comment">%scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
+0426 
+0427       <span class="comment">% this mimics the way scatter scales the circles</span>
+0428       s = h.scatter.MarkerSize + sqrt(pi.*(rain(rain&gt;0)).^2);
+0429       x = x(rain&gt;0);
+0430       y = y(rain&gt;0);
+0431 
+0432       hold on;
+0433       <span class="keyword">for</span> n = 1:numel(s)
+0434          h.hrain(n) = plot(x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,s(n), <span class="keyword">...</span>
+0435             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
+0436       <span class="keyword">end</span>
+0437    <span class="keyword">end</span>
+0438 <span class="keyword">end</span>
+0439 
+0440 <span class="comment">%%</span>
+0441 <a name="_sub6" href="#_subfunctions" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos) </a><span class="comment">%#ok&lt;*DEFNU&gt;</span>
+0442 
+0443    <span class="comment">% https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib</span>
+0444 
+0445    <span class="comment">% to add text, need the slope in figure space</span>
+0446    xlims = xlim;
+0447    ylims = ylim;
+0448    xfact = axpos(1)/(log(xlims(2))-log(xlims(1)));
+0449    yfact = axpos(2)/(log(ylims(2))-log(ylims(1)));   <span class="comment">% slope adjustment</span>
+0450    atext = slope*atand(yfact/xfact);           <span class="comment">% adjust angle</span>
 0451 
-0452    <span class="comment">% to add text, need the slope in figure space</span>
-0453    xlims = xlim;
-0454    ylims = ylim;
-0455    xfact = axpos(1)/(log(xlims(2))-log(xlims(1)));
-0456    yfact = axpos(2)/(log(ylims(2))-log(ylims(1)));   <span class="comment">% slope adjustment</span>
-0457    atext = slope*atand(yfact/xfact);           <span class="comment">% adjust angle</span>
+0452    text( xtxt,ytxt,txt,                   <span class="keyword">...</span>
+0453       <span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,     <span class="keyword">...</span>
+0454       <span class="string">'VerticalAlignment'</span>, <span class="string">'bottom'</span>,      <span class="keyword">...</span>
+0455       <span class="string">'FontSize'</span>,12,                      <span class="keyword">...</span>
+0456       <span class="string">'rotation'</span>,atext);
+0457 <span class="keyword">end</span>
 0458 
-0459    text( xtxt,ytxt,txt,                   <span class="keyword">...</span>
-0460       <span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,     <span class="keyword">...</span>
-0461       <span class="string">'VerticalAlignment'</span>, <span class="string">'bottom'</span>,      <span class="keyword">...</span>
-0462       <span class="string">'FontSize'</span>,12,                      <span class="keyword">...</span>
-0463       <span class="string">'rotation'</span>,atext);
-0464 <span class="keyword">end</span>
-0465 
-0466 <span class="comment">%% PLOT EVENT</span>
-0467 <a name="_sub7" href="#_subfunctions" class="code">function pickFig = eventPlotter(q,dqdt)</a>
-0468    pickFig = figure;
-0469    scatter(q,dqdt,36,[0,0.447,0.741],<span class="string">'filled'</span>);
-0470 <span class="keyword">end</span>
-0471 
-0472 <span class="comment">%% DETECT TRANSITION</span>
-0473 <a name="_sub8" href="#_subfunctions" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a>
-0474 
-0475    nPicks   = numel(istart);
-0476    rlengths = istop-istart+1;
-0477 
-0478    <span class="keyword">if</span> nPicks == 3
-0479       <span class="comment">% if rlengths(1)&gt;rlengths(2) &amp;&amp; rlengths(3)&gt;rlengths(2)</span>
+0459 <span class="comment">%% PLOT EVENT</span>
+0460 <a name="_sub7" href="#_subfunctions" class="code">function pickFig = eventPlotter(q,dqdt)</a>
+0461    pickFig = figure;
+0462    scatter(q,dqdt,36,[0,0.447,0.741],<span class="string">'filled'</span>);
+0463 <span class="keyword">end</span>
+0464 
+0465 <span class="comment">%% DETECT TRANSITION</span>
+0466 <a name="_sub8" href="#_subfunctions" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a>
+0467 
+0468    nPicks   = numel(istart);
+0469    rlengths = istop-istart+1;
+0470 
+0471    <span class="keyword">if</span> nPicks == 3
+0472       <span class="comment">% if rlengths(1)&gt;rlengths(2) &amp;&amp; rlengths(3)&gt;rlengths(2)</span>
+0473 
+0474       q1    = q(istart(1):istop(1));
+0475       q2    = q(istart(2):istop(2));
+0476       q3    = q(istart(3):istop(3));
+0477       dq1   = dqdt(istart(1):istop(1));
+0478       dq2   = dqdt(istart(2):istop(2));
+0479       dq3   = dqdt(istart(3):istop(3));
 0480 
-0481       q1    = q(istart(1):istop(1));
-0482       q2    = q(istart(2):istop(2));
-0483       q3    = q(istart(3):istop(3));
-0484       dq1   = dqdt(istart(1):istop(1));
-0485       dq2   = dqdt(istart(2):istop(2));
-0486       dq3   = dqdt(istart(3):istop(3));
-0487 
-0488       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
-0489       <span class="comment">% Not sure if this is supposed to be &quot;ols&quot; or a weighted version.</span>
-0490       <span class="comment">% ab1   = baseflow.wols(log(q1), log(-dq1));</span>
-0491       <span class="comment">% ab2   = baseflow.wols(log(q2), log(-dq2));</span>
-0492       <span class="comment">% ab3   = baseflow.wols(log(q3), log(-dq3));</span>
-0493 
-0494       <span class="comment">% three cases we want to :</span>
-0495       <span class="comment">% 1: a flat period between two recessions</span>
-0496       <span class="comment">% 2: a flat period followed by another one then a recession</span>
-0497       <span class="comment">% 2: a recession followed by two flat periods</span>
-0498 
-0499       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
-0500       <span class="comment">% if ab1(2)&gt;1 &amp;&amp; ab2(2)&lt;1 &amp;&amp; ab3(2)&gt;1</span>
-0501       <span class="comment">%    istart(2)   = [];</span>
-0502       <span class="comment">%    istop(2)    = [];</span>
-0503       <span class="comment">% end</span>
-0504       <span class="comment">%end</span>
-0505    <span class="keyword">end</span>
+0481       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
+0482       <span class="comment">% Not sure if this is supposed to be &quot;ols&quot; or a weighted version.</span>
+0483       <span class="comment">% ab1   = baseflow.wols(log(q1), log(-dq1));</span>
+0484       <span class="comment">% ab2   = baseflow.wols(log(q2), log(-dq2));</span>
+0485       <span class="comment">% ab3   = baseflow.wols(log(q3), log(-dq3));</span>
+0486 
+0487       <span class="comment">% three cases we want to :</span>
+0488       <span class="comment">% 1: a flat period between two recessions</span>
+0489       <span class="comment">% 2: a flat period followed by another one then a recession</span>
+0490       <span class="comment">% 2: a recession followed by two flat periods</span>
+0491 
+0492       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
+0493       <span class="comment">% if ab1(2)&gt;1 &amp;&amp; ab2(2)&lt;1 &amp;&amp; ab3(2)&gt;1</span>
+0494       <span class="comment">%    istart(2)   = [];</span>
+0495       <span class="comment">%    istop(2)    = [];</span>
+0496       <span class="comment">% end</span>
+0497       <span class="comment">%end</span>
+0498    <span class="keyword">end</span>
+0499 <span class="keyword">end</span>
+0500 
+0501 <span class="comment">%% Initialize output</span>
+0502 <a name="_sub9" href="#_subfunctions" class="code">function [hFits, Fits, Picks] = initOutput()</a>
+0503    Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
+0504    Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
+0505    Picks.nPicks = nan; hFits = nan;
 0506 <span class="keyword">end</span>
 0507 
-0508 <span class="comment">%% Initialize output</span>
-0509 <a name="_sub9" href="#_subfunctions" class="code">function [hFits, Fits, Picks] = initOutput()</a>
-0510    Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
-0511    Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
-0512    Picks.nPicks = nan; hFits = nan;
-0513 <span class="keyword">end</span>
-0514 
-0515 <span class="comment">%% INPUT PARSER</span>
-0516 <a name="_sub10" href="#_subfunctions" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, </a><span class="keyword">...</span>
-0517       rain, ax, blate, precision, timestep, eventID, labelplot] = parseinputs(<span class="keyword">...</span>
-0518       q, dqdt, mfilename, varargin)
-0519 
-0520    parser = inputParser;
-0521    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
-0522    parser.CaseSensitive = false;
-0523    parser.addRequired(<span class="string">'q'</span>);
-0524    parser.addRequired(<span class="string">'dqdt'</span>);
-0525    parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>);
-0526    parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>);
-0527    parser.addParameter(<span class="string">'plotfits'</span>, true);
-0528    parser.addParameter(<span class="string">'showfig'</span>, true, @islogical);
-0529    parser.addParameter(<span class="string">'weights'</span>, ones(size(q)));
-0530    parser.addParameter(<span class="string">'rain'</span>, zeros(size(q)));
-0531    parser.addParameter(<span class="string">'ax'</span>, <span class="string">'none'</span>);
-0532    parser.addParameter(<span class="string">'blate'</span>, 1.0);
-0533    parser.addParameter(<span class="string">'precision'</span>, 1);
-0534    parser.addParameter(<span class="string">'timestep'</span>, 1);
-0535    parser.addParameter(<span class="string">'eventID'</span>, <span class="string">''</span>, @ischar);
-0536    parser.addParameter(<span class="string">'labelplot'</span>, false, @islogical);
-0537 
-0538    parser.parse(q, dqdt, varargin{:});
-0539 
-0540    q = parser.Results.q;
-0541    ax = parser.Results.ax;
-0542    dqdt = parser.Results.dqdt;
-0543    rain = parser.Results.rain;
-0544    blate = parser.Results.blate;
-0545    showfig = parser.Results.showfig;
-0546    weights = parser.Results.weights;
-0547    eventID = parser.Results.eventID;
-0548    timestep = parser.Results.timestep;
-0549    plotfits = parser.Results.plotfits;
-0550    labelplot = parser.Results.labelplot;
-0551    precision = parser.Results.precision;
-0552    fitmethod = parser.Results.fitmethod;
-0553    pickmethod = parser.Results.pickmethod;
-0554 
-0555    <span class="keyword">if</span> ~ischar(ax)
-0556       validateattributes(ax, {<span class="string">'matlab.graphics.axis.Axes'</span>},{<span class="string">'scalar'</span>}, mfilename);
-0557    <span class="keyword">end</span>
-0558 
-0559    validateattributes(q, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'q'</span>);
-0560    validateattributes(dqdt, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'dqdt'</span>);
-0561    validateattributes(rain, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
-0562    validateattributes(blate, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'scalar'</span>}, mfilename);
-0563    validateattributes(weights, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
-0564    validateattributes(timestep, {<span class="string">'numeric'</span>, <span class="string">'duration'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
-0565    validateattributes(plotfits, {<span class="string">'logical'</span>}, {<span class="string">'scalar'</span>}, mfilename);
-0566    validateattributes(precision, {<span class="string">'numeric'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
-0567    validateattributes(fitmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'scalartext'</span>}, mfilename);
-0568    validateattributes(pickmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'scalartext'</span>}, mfilename);
-0569 <span class="keyword">end</span></pre></div>
+0508 <span class="comment">%% INPUT PARSER</span>
+0509 <a name="_sub10" href="#_subfunctions" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, </a><span class="keyword">...</span>
+0510       rain, ax, blate, precision, timestep, eventID, labelplot] = parseinputs(<span class="keyword">...</span>
+0511       q, dqdt, mfilename, varargin)
+0512 
+0513    parser = inputParser;
+0514    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0515    parser.CaseSensitive = false;
+0516    parser.addRequired(<span class="string">'q'</span>);
+0517    parser.addRequired(<span class="string">'dqdt'</span>);
+0518    parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>);
+0519    parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>);
+0520    parser.addParameter(<span class="string">'plotfits'</span>, true);
+0521    parser.addParameter(<span class="string">'showfig'</span>, true, @islogical);
+0522    parser.addParameter(<span class="string">'weights'</span>, ones(size(q)));
+0523    parser.addParameter(<span class="string">'rain'</span>, zeros(size(q)));
+0524    parser.addParameter(<span class="string">'ax'</span>, <span class="string">'none'</span>);
+0525    parser.addParameter(<span class="string">'blate'</span>, 1.0);
+0526    parser.addParameter(<span class="string">'precision'</span>, 1);
+0527    parser.addParameter(<span class="string">'timestep'</span>, 1);
+0528    parser.addParameter(<span class="string">'eventID'</span>, <span class="string">''</span>, @ischar);
+0529    parser.addParameter(<span class="string">'labelplot'</span>, false, @islogical);
+0530 
+0531    parser.parse(q, dqdt, varargin{:});
+0532 
+0533    q = parser.Results.q;
+0534    ax = parser.Results.ax;
+0535    dqdt = parser.Results.dqdt;
+0536    rain = parser.Results.rain;
+0537    blate = parser.Results.blate;
+0538    showfig = parser.Results.showfig;
+0539    weights = parser.Results.weights;
+0540    eventID = parser.Results.eventID;
+0541    timestep = parser.Results.timestep;
+0542    plotfits = parser.Results.plotfits;
+0543    labelplot = parser.Results.labelplot;
+0544    precision = parser.Results.precision;
+0545    fitmethod = parser.Results.fitmethod;
+0546    pickmethod = parser.Results.pickmethod;
+0547 
+0548    <span class="keyword">if</span> ~ischar(ax)
+0549       validateattributes(ax, {<span class="string">'matlab.graphics.axis.Axes'</span>},{<span class="string">'scalar'</span>}, mfilename);
+0550    <span class="keyword">end</span>
+0551 
+0552    validateattributes(q, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'q'</span>);
+0553    validateattributes(dqdt, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'dqdt'</span>);
+0554    validateattributes(rain, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
+0555    validateattributes(blate, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'scalar'</span>}, mfilename);
+0556    validateattributes(weights, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
+0557    validateattributes(timestep, {<span class="string">'numeric'</span>, <span class="string">'duration'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
+0558    validateattributes(plotfits, {<span class="string">'logical'</span>}, {<span class="string">'scalar'</span>}, mfilename);
+0559    validateattributes(precision, {<span class="string">'numeric'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
+0560    validateattributes(fitmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'scalartext'</span>}, mfilename);
+0561    validateattributes(pickmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'scalartext'</span>}, mfilename);
+0562 <span class="keyword">end</span></pre></div>
 </body>
 </html>

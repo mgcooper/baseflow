@@ -29,6 +29,11 @@ replace the status words: `[x]` done, `[ ]` todo and deferred, plain
 bullets for excluded and other rows. Line-number references stay on
 every item.
 
+Note (2026-09-15, R6 and R7): a row resolved in R6 or R7 keeps its
+original category heading. Its `[x]` records the resolution, and a dated
+resolution sub-bullet gives the evidence. The totals above describe the
+2026-09-13 state and are not recounted.
+
 ## Test infrastructure (bfra-3kh.8 stub)
 
 ### Done
@@ -54,7 +59,7 @@ every item.
 
 ### Deferred
 
-- [ ] the demo scripts' `close all` headers. Provenance:
+- [x] the demo scripts' `close all` headers. Provenance:
   `toolbox/demos/mfiles/*.m` open with `clearvars`, `close all`, `clc`;
   with the demos running under the suite (tests/test_demos.m), the
   `close all` would close figures a user had open before an interactive
@@ -74,6 +79,15 @@ every item.
     mfiles hold it at `baseflow_linear_theory.m:80` and
     `baseflow_nonlinear_theory.m:86`. This correction supersedes "the next
     time the mfiles are regenerated from their .mlx sources".
+  - resolution (2026-09-14): the six demo mfiles in
+    `toolbox/demos/mfiles/` and the six `toolbox/demos/*.mlx` sources
+    hold no `close all`. The edit to each .mlx source keeps the saved
+    outputs aligned with their code lines, so a regeneration does not
+    write the line back. `baseflow.internal.makedocs('demos')` deletes
+    the figures that each export opens (`makedocs.m:65-86` and its
+    local function `cleanupdemofigures`). The
+    `tests/test_demos.m` comments match this behavior. This resolution
+    supersedes both recommendations above.
 
 ## Dependency tooling and self-containment (bfra-3kh.6 stub)
 
@@ -123,7 +137,7 @@ reaches as known external. The rows below record the earlier state.
 
 ### Todo
 
-- [ ] (user decision, bead bfra-3kh.25) periphery self-containment.
+- [x] (user decision, bead bfra-3kh.25) periphery self-containment.
   Provenance: the repaired live check found 31 files that resolve
   outside the toolbox with no vendored copy, all reached from the
   data-loading and mapping periphery: `loadcalm` (the matfunclib
@@ -156,6 +170,13 @@ reaches as known external. The rows below record the earlier state.
     `pending_decision` and 31 files in `missing_dependencies`. This
     correction supersedes "`dependencies.m:144-145` lists `loadflow.m` in
     `pendingentries`".
+  - resolution (2026-09-14, bead bfra-3kh.25): commit 259c294 removed
+    `loadcalm`, `loadghcnd`, `loadgrace`, `mapbasins`, and `mapgages`
+    from the toolbox; the analysis project keeps copies.
+    `baseflow.internal.dependencies('', 'check')` reports no missing
+    dependencies. It lists the `r_plfit` and `loadflow` `getlist` chains
+    in `known_external` (`dependencies.m:108-117`). This resolution
+    supersedes the options above.
 
 ## Example sections (bfra-3kh.13 stub)
 
@@ -177,6 +198,16 @@ reaches as known external. The rows below record the earlier state.
     pending. With the 16 above, 23 of the 66 public functions carry
     Example sections. This correction supersedes "fitevents and
     conversions already had them".
+  - correction (2026-09-14): the fitevents example
+    (`fitevents.m:42-57`) is repaired. It loads the data with
+    `baseflow.loadExampleData`, detects events with `baseflow.getevents`,
+    fits them with `baseflow.fitevents`, and passes `'nls'` as the
+    `baseflow.fitab` method. It runs verbatim headless on R2025b and
+    prints a = 0.0963, b = 1.00. By `grep -l '% Example'
+    toolbox/+baseflow/*.m`, 24 of the 61 public functions carry Example
+    sections (the 61 exclude `Contents.m`; `help.m` counts). This
+    correction supersedes "The fitevents example repair is pending" and
+    "23 of the 66 public functions carry Example sections".
 
 ### Deferred
 
@@ -200,12 +231,28 @@ reaches as known external. The rows below record the earlier state.
     stationlist, stationname, trendplot. This correction supersedes "the
     remaining 44 public functions" and "The per-function list is in the
     bead bfra-3kh.13 report".
+  - correction (2026-09-14): 37 of the 61 public functions have no
+    Example section (the 61 exclude `Contents.m`). Commit 259c294
+    removed loadcalm, loadghcnd, loadgrace, mapbasins, and mapgages, and
+    commit 152da3c added Example sections to QtString and QtauString.
+    `grep -L '% Example' toolbox/+baseflow/*.m`, less `Contents.m`,
+    gives: aquiferprops, aquiferstorage, aquiferthickness, aquifertrend,
+    basinlist, basinname, characteristicTime, checkevent, cloudphi,
+    dndtuncertainty, eventphi, eventpicker, eventplotter, expectedQ,
+    fdcurve, fitphidist, getEventsData, getFitsData, getfunction,
+    loadbasins, loadflow, loadmeta, loadprops, open, phifitensemble,
+    plotaquifertrend, plotrefline, plplotb, pointcloudintercept,
+    prepfits, printtrend, privatefunction, Qnonlin, specialfunctions,
+    stationlist, stationname, trendplot. The row stays deferred: not
+    every function needs an Example section. This correction supersedes
+    the count 44 in the row title, "43 public functions remain", and the
+    list above.
 
 ## Core-chain coverage (bfra-3kh.9 stub)
 
 ### Todo
 
-- [ ] `globalfit` opens one figure even with `plotfits` false. Provenance:
+- [x] `globalfit` opens one figure even with `plotfits` false. Provenance:
   found by tests/test_corechain.m (bead .9); the default `'pointcloud'`
   phimethod estimates phi through `pointcloudplot`, which always draws
   (pointcloudplot.m creates a figure when no axis is passed).
@@ -222,6 +269,13 @@ reaches as known external. The rows below record the earlier state.
     `plotfits` is false. Then tighten the test_corechain figure assertion
     to zero. This correction supersedes "estimates phi through
     `pointcloudplot`" and the refactor recommendation above.
+  - resolution (2026-09-14): `cloudphi` takes a `'plotfit'` name-value
+    option (default true). When it is false, cloudphi skips the
+    `pointcloudplot` figure and the phi legend (`cloudphi.m:95-111`).
+    `globalfit` passes its `plotfits` flag to cloudphi
+    (`globalfit.m:91-93`). `tests/test_corechain.m` requires zero new
+    figures from a global fit with `plotfits` false, and
+    `test_cloudphiPlotfit` covers both flag values.
 
 ## Sandbox rehabilitation (bfra-3kh.20 stub, W2)
 
@@ -307,6 +361,21 @@ reaches as known external. The rows below record the earlier state.
     `test_minimumLength` covers the nmin filter. This correction
     supersedes "takes the same (x, nmin) signature, so it is vendored
     over".
+  - correction (2026-09-14): the toolbox copy
+    `toolbox/+baseflow/private/nonnansegments.m` and matfunclib
+    `libspatial/polygon/nonnansegments.m` are identical (bfra commit
+    8e9e6bb, matfunclib commit 8d38db5). Both apply the nmin filter in
+    `processOneVector` (`private/nonnansegments.m:122-125`), which
+    `eventfinder.m:67` depends on. Neither calls `rmleadingnans` or
+    `rmtrailingnans`; padding the nan mask handles leading and trailing
+    nans, and an all-nan input returns zeros(0, 1). The tests are in
+    matfunclib `libspatial/test/testNonnansegments.m`, and
+    `testMinimumLength` covers nmin. This correction supersedes "the
+    toolbox copy is a modified matfunclib version", "The matfunclib
+    source accepts nmin and ignores it", "The toolbox copy also calls
+    the shared private `rmleadingnans` and `rmtrailingnans`", the
+    `private/nonnansegments.m:117-122` and `eventfinder.m:62` anchors,
+    and "`tests/test_nonnansegements.m` `test_minimumLength`".
 - [x] tests/test_islocalmax.m:86, three-way peak-index agreement:
   RE-ENABLED as a live verification (the three implementations agree on
   the fixture data).
@@ -380,6 +449,11 @@ rows this bead adjudicates.
     until a Contents.m regeneration reads the H1 line. This correction
     supersedes "(splinefit, slmengine)" and "accurately listed as not
     implemented".
+  - correction (2026-09-14): `toolbox/docs/baseflow_contents.m:102` and
+    `toolbox/+baseflow/Contents.m:141` say "Not implemented". This
+    correction supersedes `baseflow_contents.m:107`, `Contents.m:147`,
+    and "lists the commented signature until a Contents.m regeneration
+    reads the H1 line".
 
 ## Power-law notation explainer (bfra-3kh.31 stub)
 
@@ -412,13 +486,17 @@ rows this bead adjudicates.
 
 ### Deferred
 
-- [ ] optional site-selection name-value input for
+- [x] optional site-selection name-value input for
   `toolbox/+baseflow/loadcalm.m`. Provenance: the Kuparuk nine-site pin
   (loadcalm.m, documented under bead .27 per the R2 settled decision:
   the CALM source data changed and the published results must stay
   reproducible). An input to control site selection is welcome; it is
   deferred because loadcalm needs the author-machine data paths (bead
   bfra-3kh.25 periphery decision) before the option is testable.
+  - resolution (2026-09-14): moot in bfra. Commit 259c294 moved
+    loadcalm out of the toolbox to the analysis project
+    (mgcooper/arctic_baseflow). File the site-selection option in that
+    project's tracker if it is still wanted.
 
 ## Octave smoke verification (bfra-3kh.15 stub)
 
@@ -450,6 +528,10 @@ class "vendored and private helper behavior".
 - [x] `private/predictlm.m` degrees of freedom. Provenance: finding
   helpers#6. The interval uses N-2 of the query points, not the
   residual degrees of freedom of the fit.
+  - resolution (2026-09-14): the toolbox copy `private/predictlm.m` is
+    removed as dead code; no toolbox function called it. The matfunclib
+    copy `libstats/predictlm.m` keeps the degrees-of-freedom fix and its
+    test.
 - [x] `eventfinder.m` local `islocalmax`. Provenance: finding
   helpers#12. The local function is identical to
   `private/islocalmax.m`. Rec: remove the local copy and call the
@@ -566,6 +648,13 @@ selectable. R3-A covers part of item 6: the CHANGELOG heading reads
 'Unreleased' until J2 sets the date. Items 1, 2, 3, 4, and 8 wait for
 the user's review.
 
+Correction (2026-09-14): R3-A covered part of item 6. CHANGELOG,
+DESCRIPTION, CITATION.cff, and .zenodo.json give the 1.1.0 release date
+as 2026-09-14. The user decided items 1, 2, 3, 4, and 8 after review;
+each checkbox records the decision and its date. This correction
+supersedes "the CHANGELOG heading reads 'Unreleased' until J2 sets the
+date" and "Items 1, 2, 3, 4, and 8 wait for the user's review".
+
 ---
 
 ## W1 sandbox TODO and notes inventory — baseflow toolbox
@@ -657,6 +746,13 @@ paper items, and debugger-time workspace fragments.
   current pointcloudplot.m, so the mechanism may have been removed or lives
   elsewhere. — Intent: re-activate an existing point-cloud figure instead of opening
   new ones. — Rec: keep parked; re-verify before deleting the snippet.
+  - correction (2026-09-14): `pointcloudplot.m` sets no figure Tag, and
+    no `findall(groot, ...)` lookup by Tag exists under
+    `toolbox/+baseflow`. Only `hyetograph.m:39` tags its own figure
+    (`HyetographFigure`). No tracked commit adds the snippet to toolbox
+    code, so the code does not support the author DONE mark. Re-adding
+    the tag is feature work (defer). The `[x]` records the author mark.
+    This correction supersedes the verification-gap sentence above.
 - [x] **L111-134** — batch of 24 DONE WRR paper items (phi uncertainty, figure sizes,
   equation refs, pareto figure, flow chart, GRACE handling, trend significance,
   etc.) — Rec: delete (paper published; the record lives in the paper).
@@ -687,12 +783,21 @@ paper items, and debugger-time workspace fragments.
 
 ### Todo
 
-- [ ] **L13** — "compare behavior of corr and corrcoef for two column vectors"
+- [x] **L13** — "compare behavior of corr and corrcoef for two column vectors"
   — Evidence still live: toolbox/+baseflow/dndtuncertainty.m:148,155 uses `corr`;
   private/nancorr.m:25-29 branches between `corrcoef` (2 args) and `corr`. — Intent:
   confirm the two give identical results for the two-column case so the toolbox can
   drop the Statistics Toolbox dependency where possible. — Rec: implement as a small
   unit test in tests/.
+  - resolution (2026-09-14): for two column vectors, `corrcoef(x, y)`
+    returns a 2x2 matrix, and its off-diagonal element equals the scalar
+    `corr(x, y)` (Pearson; difference 0 on R2025b). The `nancorr` Octave
+    branch (`nancorr.m:24-25`) returns the 2x2 matrix, but no supported
+    path reaches it: `dndtuncertainty.m:98-102` returns on Octave before
+    the `nancorr` calls at `dndtuncertainty.m:126-128`. To drop the
+    Statistics Toolbox `corr` dependency, `dndtuncertainty.m:172,179`
+    also need a change, because those lines call `corr` on a matrix
+    (defer).
 - [ ] **L16-22** — baseflow.help/open shadowing: debugging a package function prompts a
   path change, and a package function named `help` breaks built-in help —
   Evidence: toolbox/+baseflow/help.m and open.m exist, so the shadowing scenario is
@@ -717,10 +822,14 @@ paper items, and debugger-time workspace fragments.
   dimensions documentation. — Intent: make the dimensional-analysis rules (units of
   a, dQ/dt, S, c) part of the toolbox itself. — Rec: implement — fold into
   baseflow.conversions help or a docs page (see the bfra_dimensions.m rows below).
-- [ ] **L43** — "remove inputParser from non-entry-point functions" —
+- [x] **L43** — "remove inputParser from non-entry-point functions" —
   Evidence: 64 files under toolbox/+baseflow still use inputParser. — Intent: reduce
   parsing overhead and complexity in internal code paths (STYLE prefers arguments
   blocks). — Rec: implement incrementally, entry points last.
+  - resolution (2026-09-14): won't do. `STYLE.local.md` keeps
+    inputParser for Octave compatibility (see the 2026-09-13 correction
+    under Cross-cutting observations item 2). This resolution supersedes
+    the Rec above.
 - [ ] **L44** — "change prepfits to preparedata and add more cases like getevents" —
   Evidence: toolbox/+baseflow/prepfits.m still exists under the old name.
   — Intent: generalize data preparation into one function. — Rec: keep parked until
@@ -1236,6 +1345,14 @@ replication.
   - eventplotter/checkevent confirmation — **todo** — Rec: formalize as tests in
     tests/ for eventplotter and checkevent.
   - private-move commit — **done** — Rec: delete (record only).
+  - correction (2026-09-14): checkevent confirmation is done
+    (`tests/test_checkevent.m`). eventplotter confirmation stays todo; no
+    test in `tests/` covers eventplotter (defer). The two trailing
+    comment lines of `checkevent.m`, which called the nonexistent
+    `baseflow_quickfit` and `baseflow_Qlin`, are removed. The "extra
+    stuff" debugging block at the end of `checkevent.m` (306-329) stays
+    parked. This correction supersedes "eventplotter/checkevent
+    confirmation — **todo**".
 
 ### Done
 
@@ -1304,6 +1421,14 @@ replication.
   and prefs management (inittoolboxprefs, Setup.m:135-144). Toolbox-availability
   checks: not found — that half remains open. — Rec: keep parked; split out the
   toolbox-checks half if Octave support work resumes.
+  - correction (2026-09-14): the toolbox-availability check is done on
+    MATLAB. `checkdependencies` (`Setup.m:320`, called at
+    `Setup.m:148-149` on install) records Curve Fitting and Statistics
+    Toolbox license availability as prefs (`Setup.m:386-395`). On
+    Octave, Setup loads the required packages (`Setup.m:95-107`), and
+    `checkdependencies` skips the check (`Setup.m:328-333`). Rec: delete
+    (record only). This correction supersedes "Toolbox-availability
+    checks: not found — that half remains open" and the Rec above.
 - [x] **L170-180** — commit choreography batch (git diff for prefix edits, staged
   commits, regenerate Contents.m/functionSignatures/docs; commit +deps/+test/+util,
   Contents, function docs, docsearchdb) — all DONE — Rec: delete.
@@ -1339,6 +1464,10 @@ replication.
   (n=3, event 8 was debugger state). — Intent: guard fitab against non-recession
   input that slips past event filters. — Rec: implement the guard in fitab;
   reproduce via generateTestData rather than the lost case.
+  - correction (2026-09-14): the check is still only a parked comment,
+    at `private/fitNLS_matlab.m:198-199` (case `'linear'`). This
+    correction supersedes `fitab.m:592`. The item stays open, because
+    the guard needs a design decision.
 - [ ] **L153** — "fitets might need an islinepositive check on q and/or dq/dt also
   islineconvex" — Same thread as L16-21; no such check visible in
   private/fitets.m. — Rec: implement with the fitab guard, or record the decision
@@ -1347,6 +1476,12 @@ replication.
   baseflow_kuparuk" — Evidence: private/prepalttrend.m still exists;
   usage unverified. — Intent: dead-code audit candidate. — Rec: verify callers; if
   none, recommend removal in a cleanup pass (do not delete now).
+  - correction (2026-09-14): verified, no callers. `prepalttrend`
+    appears only in `Contents.m`, `functionSignatures.json`,
+    `docs/baseflow_contents.m`, and the `plotaquifertrend` See also line
+    (`plotaquifertrend.m:20`). The demo inlines the logic. Removal stays
+    a user decision (`bd human`, per the WIP preservation policy). This
+    correction supersedes "usage unverified".
 
 ### Deferred
 
@@ -1389,6 +1524,10 @@ replication.
   Intent: user-facing documentation of expected warnings; reads as finished prose
   with no home. — Rec: formalize — paste into fitab.m or fitNLS_matlab.m help (or
   the docs FAQ); this is done writing awaiting placement.
+  - correction (2026-09-14): a short why-comment that summarizes this
+    note sits under `% manage warnings` in `fitevents.m:112-117`. The
+    row stays open for user-facing placement in the fitab or fitNLS
+    help.
 
 ## sandbox/notes/stash-notes.txt
 
@@ -1472,6 +1611,10 @@ replication.
   prepareCurveData -> bfra.util.prepCurveData; try-catch and PartialMatching
   removals for Octave — Evidence: private/prepCurveData.m exists;
   private/fitets.m handles both paths. — Rec: delete (record only).
+  - resolution (2026-09-14): the commented
+    `datetime(T,'ConvertFrom','datenum')` try/catch scratch block is
+    removed from `fitevents.m`. The commented datetime lines in
+    `private/fitets.m` stay parked.
 - [x] **L26-27** — "PICK UP HERE - omitnan is not supported by movmean [in Octave],
   need a replacement b/c it will very much change the result (I get 325 events on
   octave and around 230 on matlab)" — Evidence:
@@ -1479,6 +1622,12 @@ replication.
   whether the nanmovmean branch actually reconciles the 325-vs-230 event count was
   never re-verified in these notes. — Rec: formalize a cross-platform event-count
   check in tests/ if Octave support is still claimed; otherwise delete.
+  - correction (2026-09-14): the Octave branch is the if/else at
+    `eventfinder.m:129-133`. Default `getevents` on the example data
+    finds 285 events on Octave 11.3.0 and 287 on MATLAB R2025b, so the
+    `nanmovmean` branch closes the 325-vs-230 gap. Rec: delete (record
+    only). This correction supersedes `eventfinder.m:117-119`, the
+    Residual, and the Rec above.
 - [x] **L103-186** — request to rewrite hyetograph with plotyy instead of yyaxis, with
   the old yyaxis implementation pasted — Evidence: hyetograph.m:66 uses
   plotyy; the yyaxis version survives as comments in that file (hyetograph.m:179+).
@@ -1609,6 +1758,14 @@ replication.
    above). Working-tree anchor for fitab.m:592: fitab.m:602. This
    correction supersedes "inputParser removal (64 files)" and
    "per-function examples (7/67)".
+   Correction (2026-09-14): after commit 259c294, 24 of the 61 public
+   functions carry an Example section by `grep -l '% Example'` (help.m
+   counts), and 37 remain. `useax` remains in trendplot.m and
+   plotaquifertrend.m, and plotdqdt.m, plotrefline.m, and
+   pointcloudplot.m declare an `ax` parameter. Copyright lines: 1/61
+   (trendplot.m:6). The fitab.m:602 anchor is
+   private/fitNLS_matlab.m:198. This correction supersedes "23 of the
+   66", "43 remain", "(4 files)", "(1/67)", and "fitab.m:602".
 3. Two pieces of finished writing await placement, not work:
    notes_warnings_nlinfit.m (nlinfit warning explanation) and
    submission_notes.txt L1 (R2021a replication caveat).
@@ -1662,6 +1819,9 @@ references (listed at the bottom). Demos contain no genuine markers.
     persistent cache; direct call won.
   - **recommendation**: delete-the-marker (and the dead cache block with it) —
     one call per `bootstrapci` invocation cannot matter; no fragility encoded.
+  - resolution (2026-09-14): the marker and the commented persistent
+    cache block are removed. `bootstrapci` calls `isoctave` directly,
+    and `private/isoctave.m` caches its result in a persistent variable.
 
 - [x] **toolbox/+baseflow/private/fitcts.m:71** `rq = []; % TODO`
   - **resolved (2026-08-30, bead bfra-3kh.23)**: fitcts is implemented;
@@ -1701,6 +1861,10 @@ references (listed at the bottom). Demos contain no genuine markers.
   - **recommendation**: keep parked until deliberately resolved — the marker
     flags that Kuparuk output depends on this override; deleting the marker
     without a decision would hide a reproducibility-sensitive filter.
+  - correction (2026-09-14, bead bfra-3kh.25): commit 259c294 removed
+    `loadcalm.m` from the toolbox. The Kuparuk nine-site pin lives in
+    the mgcooper/arctic_baseflow copy. This row matches no file in
+    `toolbox/`.
 
 ### Todo
 
@@ -1744,6 +1908,8 @@ references (listed at the bottom). Demos contain no genuine markers.
     `xbar`/`ybar`, so one function owns the fit.
   - **recommendation**: keep parked — the marker encodes why the duplication is
     fragile (silent method divergence); do not delete without the refactor.
+  - working-tree anchor (2026-09-14): `pointcloudintercept.m:48`. This
+    anchor supersedes 22.
 
 - [ ] **toolbox/+baseflow/+internal/dependencies.m:212** `% TODO: add method to clone from https://github.com/mgcooper/matfunclib`
   - **marker**: `% TODO: add method to clone from https://github.com/mgcooper/matfunclib`
@@ -1761,8 +1927,10 @@ references (listed at the bottom). Demos contain no genuine markers.
     `dependencies.m:367`, inside `resolvedependencies`.
   - **working-tree anchor (2026-09-13, R3 repair)**: `dependencies.m:225`,
     inside `resolvedependencies`. This anchor supersedes 367.
+  - working-tree anchor (2026-09-14): `dependencies.m:221`. This anchor
+    supersedes 225.
 
-- [ ] **toolbox/+baseflow/aQbString.m:47** `% TODO: merge this with baseflow.strings. See note below about $ after = sign.`
+- [x] **toolbox/+baseflow/aQbString.m:47** `% TODO: merge this with baseflow.strings. See note below about $ after = sign.`
   - **marker**: `% TODO: merge this with baseflow.strings. See note below about $ after = sign.`
   - **context**: `aQbString` builds the latex string for -dQ/dt = aQ^b
     annotations; a sibling latex-string builder exists as
@@ -1775,6 +1943,9 @@ references (listed at the bottom). Demos contain no genuine markers.
     latex conventions live in one place.
   - **recommendation**: keep parked — update the stale name to `getstring` if
     touched; the `$`-placement note is trap knowledge worth keeping.
+  - resolution (2026-09-14, commit 152da3c): the marker is removed.
+    aQbString keeps its value label by design and takes the symbolic
+    label from `baseflow.getstring('aQb')` (`aQbString.m:58-71`).
 
 - [ ] **toolbox/+baseflow/fitevents.m:48** `% TODO: move subfunctions to private/ to manage warnings, input parsing, and special-case fitting routines including octave compatibility once, here. This will be most problematic for fitab, because it is useful as a standalone function ...`
   - **marker**: `% TODO: move subfunctions to private/ to manage warnings, input parsing, and special-case fitting routines including octave compatibility once, here. This will be most problematic for fitab, because it is useful as a standalone function ...`
@@ -1786,12 +1957,18 @@ references (listed at the bottom). Demos contain no genuine markers.
     private layer without demoting `fitab` from the public API.
   - **recommendation**: keep parked — the fitab constraint is the trap; any
     future refactor should start from this note.
+  - working-tree anchor (2026-09-14): `fitevents.m:64`. This anchor
+    supersedes 48. The refactor is not done, and the marker stays.
 
 All five markers are upstream FIXMEs in a vendored Octave-Forge function
 (Copyright 2013 Erik Kjellson, GPL). Note: the only call site in the toolbox
 is commented out (`private/smoothflow.m:13`); the Octave branch uses
 `nanmovmean` instead, and the MATLAB branch uses `smoothdata`. The file is
 currently dead code kept for a possible Octave sgolay path.
+
+Correction (2026-09-14): the commented call is at
+`private/smoothflow.m:19`. This correction supersedes
+`private/smoothflow.m:13`.
 
 - [ ] **toolbox/+baseflow/private/smooth.m:218** `%# FIXME: Check how Matlab takes care of the beginning and the end. Reduce polynomial degree?`
   - **marker**: `%# FIXME: Check how Matlab takes care of the beginning and the end. Reduce polynomial degree?`
@@ -1804,6 +1981,8 @@ currently dead code kept for a possible Octave sgolay path.
     trusting sgolay output near series boundaries.
   - **recommendation**: keep parked — this is trap-avoidance knowledge about
     edge effects; revisit only if `smoothflow` re-enables this code path.
+  - working-tree anchor (2026-09-14): `smooth.m:219`. This anchor
+    supersedes 218.
 
 - [ ] **toolbox/+baseflow/private/smooth.m:248** `%# FIXME: implement smoothing method 'lowess'`
   - **marker**: `%# FIXME: implement smoothing method 'lowess'`
@@ -1814,6 +1993,8 @@ currently dead code kept for a possible Octave sgolay path.
   - **inferred intent**: port MATLAB's lowess smoother to the Octave function.
   - **recommendation**: keep parked — the error path is the correct behavior
     until someone needs lowess under Octave.
+  - working-tree anchor (2026-09-14): `smooth.m:250`. This anchor
+    supersedes 248.
 
 - [ ] **toolbox/+baseflow/private/smooth.m:253** `%# FIXME: implement smoothing method 'loess'`
   - **marker**: `%# FIXME: implement smoothing method 'loess'`
@@ -1822,6 +2003,8 @@ currently dead code kept for a possible Octave sgolay path.
   - **classification rationale**: same upstream gap, unused method.
   - **inferred intent**: implement loess under Octave.
   - **recommendation**: keep parked.
+  - working-tree anchor (2026-09-14): `smooth.m:255`. This anchor
+    supersedes 253.
 
 - [ ] **toolbox/+baseflow/private/smooth.m:258** `%# FIXME: implement smoothing method 'rlowess'`
   - **marker**: `%# FIXME: implement smoothing method 'rlowess'`
@@ -1829,6 +2012,8 @@ currently dead code kept for a possible Octave sgolay path.
   - **classification rationale**: same upstream gap, unused method.
   - **inferred intent**: implement robust lowess under Octave.
   - **recommendation**: keep parked.
+  - working-tree anchor (2026-09-14): `smooth.m:260`. This anchor
+    supersedes 258.
 
 - [ ] **toolbox/+baseflow/private/smooth.m:263** `%# FIXME: implement smoothing method 'rloess'`
   - **marker**: `%# FIXME: implement smoothing method 'rloess'`
@@ -1836,6 +2021,8 @@ currently dead code kept for a possible Octave sgolay path.
   - **classification rationale**: same upstream gap, unused method.
   - **inferred intent**: implement robust loess under Octave.
   - **recommendation**: keep parked.
+  - working-tree anchor (2026-09-14): `smooth.m:265`. This anchor
+    supersedes 263.
 
 - [ ] **toolbox/+baseflow/globalfit.m:33** `% TODO make the inputs more general, rather than these hard-coded structures and tables`
   - **marker**: `% TODO make the inputs more general, rather than these hard-coded structures and tables`
@@ -1848,6 +2035,8 @@ currently dead code kept for a possible Octave sgolay path.
     the packaged Events/Fits pipeline.
   - **recommendation**: keep parked — revisit with any interface redesign
     (pairs with the `aquiferprops.m:126` marker).
+  - working-tree anchor (2026-09-14): `globalfit.m:48`. This anchor
+    supersedes 33.
 
 - [ ] **toolbox/+baseflow/eventpicker.m:29** `% TODO: compare subfunction eventPlotter here to baseflow.eventplotter and to versions in dev-bk. Cursory glance - eventPlotter includes option to plot rain, but does not include 3rd subplot of d2q/dt in baseflow.eventplotter`
   - **marker**: `% TODO: compare subfunction eventPlotter here to baseflow.eventplotter and to versions in dev-bk. Cursory glance - eventPlotter includes option to plot rain, but does not include 3rd subplot of d2q/dt in baseflow.eventplotter`
@@ -1861,8 +2050,15 @@ currently dead code kept for a possible Octave sgolay path.
   - **recommendation**: keep parked — the marker already records the feature
     diff between the two implementations; drop the `dev-bk` clause whenever the
     comment is next touched.
+  - correction (2026-09-14): dev-bk is the old untracked dev directory
+    that commit 5053c25 added to history
+    (`BFRA_Events/backup/plotevents_bk/`). The clause points to those
+    plotter versions. Do not drop it; if the comment is reworded, cite
+    commit 5053c25 instead. This correction supersedes "no `dev-bk`
+    exists anywhere in the repository" and the drop-the-clause
+    recommendation.
 
-- [ ] **toolbox/+baseflow/loadgrace.m:41** `%       % temporary hack to get the 2022 data`
+- [x] **toolbox/+baseflow/loadgrace.m:41** `%       % temporary hack to get the 2022 data`
   - **marker**: `%       % temporary hack to get the 2022 data`
   - **context**: a fully commented-out block in `loadgrace` that loaded a
     Kuparuk-specific 2022 GRACE file, renamed/removed variables, and
@@ -1876,6 +2072,9 @@ currently dead code kept for a possible Octave sgolay path.
   - **recommendation**: keep parked — the normalization mismatch note is
     trap-avoidance knowledge; deleting the block without integrating 2022 data
     properly would lose it.
+  - resolution (2026-09-14, commit 259c294, bead bfra-3kh.25): moot.
+    `loadgrace.m` left the toolbox; the analysis project
+    mgcooper/arctic_baseflow keeps the copy and its 2022-data note.
 
 - [ ] **toolbox/+baseflow/aquiferprops.m:126** `% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and possibly phi, try to combine with fitphi for two paths - either D is known or phi is known`
   - **marker**: `% TODO move 'soln' before or after phi, accept opts.globalfit for A,D,L, and possibly phi, try to combine with fitphi for two paths - either D is known or phi is known`
@@ -1905,7 +2104,7 @@ currently dead code kept for a possible Octave sgolay path.
     (char -> cellstr) is a compatibility break for every sentinel consumer;
     the marker records that coupling.
 
-- [ ] **toolbox/+baseflow/fitab.m:141** `% TODO: replace this with octave compatible fitting`
+- [x] **toolbox/+baseflow/fitab.m:141** `% TODO: replace this with octave compatible fitting`
   - **marker**: `% TODO: replace this with octave compatible fitting`
   - **context**: inside subfunction `fitOLS` (ordinary least squares in
     log-log space); under Octave it raises
@@ -1917,6 +2116,9 @@ currently dead code kept for a possible Octave sgolay path.
     primitives so the `ols` method works under Octave.
   - **recommendation**: keep parked — implement if Octave parity becomes a
     goal; the error guard keeps current behavior honest.
+  - resolution (2026-09-14, commit 86a44b5): `fitOLS` uses plain linear
+    algebra (`fitab.m:149-184`) and runs on Octave.
+    `tests/TestBaseflow.m` and `tests/octave_smoke.m` cover it.
 
 - [ ] **toolbox/+baseflow/+deps/ktaub.m:120** `%  Note:  if data are not temporally evenly spaced, Sen's slope becomes inaccurate (a future TODO).`
   - **marker**: `%  Note:  if data are not temporally evenly spaced, Sen's slope becomes inaccurate (a future TODO).`
@@ -1941,6 +2143,8 @@ currently dead code kept for a possible Octave sgolay path.
     filter that adapts its parameters to local variability.
   - **recommendation**: keep parked — the marker documents the rationale for
     the wrapper's whole design; keep until an adaptive filter exists.
+  - working-tree anchor (2026-09-14): `wrapevents.m:15`. This anchor
+    supersedes 10.
 
 ### Excluded
 
@@ -1956,6 +2160,18 @@ currently dead code kept for a possible Octave sgolay path.
     an older stylistic preference.
   - **recommendation**: delete-the-marker — the marked work no longer reflects
     preferred practice and encodes no trap knowledge.
+  - correction (2026-09-14): commit 88ce3a0 added this marker with the
+    Octave early return in `plotgraceperiod`
+    (`plotaquifertrend.m:43-46`). The marker records the set/get work
+    that would let the GRACE branch run on Octave, as the flow and CALM
+    branches do. It is not only a style preference. The GRACE branch
+    also errored on every MATLAB call: it passed `' location'`, with a
+    leading space, to `legend`, and it assigned
+    `h.baseflow.trendplot2` twice, which lost the `p2` handle. Both
+    defects are fixed (`plotaquifertrend.m:100,114-115`) and covered by
+    `tests/test_plotaquifertrend.m`. The marker stays, at
+    `plotaquifertrend.m:76`. This correction supersedes the obsolete
+    classification and the delete-the-marker recommendation.
 
 ## Excluded matches (false positives)
 
@@ -1964,6 +2180,8 @@ currently dead code kept for a possible Octave sgolay path.
 - `toolbox/+baseflow/+deps/arrow.m:1012` — comment explaining an in-place
   workaround for a MATLAB 6.x OpenGL defect in third-party code; historical,
   not actionable WIP.
+  - working-tree anchor (2026-09-14): `arrow.m:1015`. This anchor
+    supersedes 1012.
 - `toolbox/+baseflow/+internal/dependencies.m:106,114` — prose referencing
   the `TODO.md` tracking file (vendor-or-remove decision, bead bfra-3kh.25),
   not markers themselves.
@@ -1979,6 +2197,10 @@ currently dead code kept for a possible Octave sgolay path.
     reference is the prose at `dependencies.m:122-126`, and the
     `r_plfit` comment is at `dependencies.m:108-112`. These anchors
     supersede 137-143 and 160-166.
+  - correction (2026-09-14, commit 259c294, bead bfra-3kh.25):
+    `dependencies.m` holds no `TODO.md` reference; the `pendingentries`
+    prose left with the removed loaders. The `r_plfit` comment anchor
+    `dependencies.m:108-112` stays valid. This row matches no marker.
 - `toolbox/Setup.m:349` — the word "bug" in prose describing a defect in
   MATLAB's built-in `requiredFilesAndProducts` (over-reports products); an
   explanation, not a work marker.
@@ -1986,6 +2208,8 @@ currently dead code kept for a possible Octave sgolay path.
     `Setup.m:368`.
   - working-tree anchor (2026-09-13, R3 repair): `Setup.m:355`. This
     anchor supersedes 368.
+  - working-tree anchor (2026-09-14): `Setup.m:356`. This anchor
+    supersedes 355.
 - `toolbox/Setup.m:377,380` — prose and a printed user message referencing
   `TODO.md`; not markers.
   - correction (2026-09-13, R3 sweep dependencies#11): `Setup.m` holds no
@@ -1999,6 +2223,12 @@ currently dead code kept for a possible Octave sgolay path.
     issues page. This correction supersedes "`Setup.m` holds no
     `TODO.md` reference" and "This row matches no line in the working
     tree".
+  - correction (2026-09-14, commit 259c294): `Setup.m` holds no
+    `TODO.md` reference; the pending-decision note left with the removed
+    loaders. The not-satisfied message at `Setup.m:375-380` points to
+    matfunclib and the baseflow issues page. This correction supersedes
+    "`Setup.m` holds two `TODO.md` references", the 382-386 anchors, and
+    373-378.
 - `toolbox/demos/baseflow_demo_1.mlx`, `baseflow_demo_kuparuk.mlx` — grep
   hits inside base64-encoded output blobs in the zipped live-script XML; not
   text markers (the plain `.m` twins in `toolbox/demos/mfiles/` contain no
@@ -2006,6 +2236,10 @@ currently dead code kept for a possible Octave sgolay path.
 - `toolbox/docs/html/**` — m2html-generated HTML copies of the source
   docstrings above plus binary search-index files; duplicates of already
   inventoried markers, and generated output is out of scope.
+- `toolbox/+baseflow/private/fitsts.m:4` (added 2026-09-14) — prose that
+  points to the fitsts entry in `TODO.md` (the fitsts row under "fitcts
+  and fitsts assessment"); not a marker. If that entry moves, update
+  this pointer in the same change.
 
 ## W1 disabled-block inventory — baseflow toolbox
 
@@ -2098,7 +2332,7 @@ tidy comments; every recommendation here defaults to keep parked.
 
 ### Deferred
 
-- [ ] **dependencies.m:241-262** Loop over `funclist` calling "matlab.codetools.requiredFilesAndProducts(thisfunc)" and building a per-function `Depends` table. Known parked WIP per the W1 task statement.
+- [x] **dependencies.m:241-262** Loop over `funclist` calling "matlab.codetools.requiredFilesAndProducts(thisfunc)" and building a per-function `Depends` table. Known parked WIP per the W1 task statement.
   - inferred intent: Per-function dependency attribution, used to trace spurious requirements ("functions that were returned as required but sholdn't be like the Cupid toolbox"). Companion 2-line block at 238-239.
   - recommendation: keep parked
   - correction (2026-09-13, R3 sweep records#0 and dependencies#11): the
@@ -2116,6 +2350,10 @@ tidy comments; every recommendation here defaults to keep parked.
     `dependentFunctions` block at 252-253, the "Cupid toolbox" rationale
     comment at 255-258, and the `Depends` loop at 260-276. These anchors
     supersede 384-414, 390-391, 393-396, and 398-414.
+  - resolution (2026-09-14): commit 08bfc7e removed the commented block.
+    The 2026-09-14 cleanup removed the leftover "Parked WIP" comment
+    lines, so no part of the block remains in `resolvedependencies`.
+    This resolution supersedes the keep-parked recommendation.
 
 ## toolbox/Setup.m
 
@@ -2146,6 +2384,8 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — superseded by the live inputParser (33-48)
   - inferred intent: Pre-inputParser argument handling.
   - recommendation: delete
+  - resolution (2026-09-14): the commented manual parsing block is
+    removed; the live inputParser replaces it.
 
 ### checkevent.m
 
@@ -2191,6 +2431,9 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live parser (120-133) omits them by design
   - inferred intent: Record of the removed sloped-aquifer/method options.
   - recommendation: delete
+  - resolution (2026-09-14): the commented parser parameters are
+    removed, and so are the stale `theta` and `isflat` entries in the
+    eventphi help.
 
 ### eventplotter.m
 
@@ -2243,6 +2486,10 @@ tidy comments; every recommendation here defaults to keep parked.
     from deferred to done. The disabled block stays in fitLIN as
     provenance; W3 reviews whether to retire it.
   - working-tree anchor (2026-09-13, R3 sweep records#14): 179-183.
+  - resolution (2026-09-14): the disabled `fitopts.order` check is
+    removed from fitLIN, because fitab applies the fitopts overrides
+    before dispatch. This resolution supersedes "The disabled block
+    stays in fitLIN as provenance".
 - [x] **199-204** In fitMED: same `fitopts.order` check plus "% not sure why this was here, order is passed in with default 1".
   - inferred intent: Same fitopts override for the median fit.
   - recommendation: keep parked (with 282-291)
@@ -2250,6 +2497,10 @@ tidy comments; every recommendation here defaults to keep parked.
     centralized fitopts parser; see 169-173. The disabled block stays
     in fitMED as provenance.
   - working-tree anchor (2026-09-13, R3 sweep records#14): 209-214.
+  - resolution (2026-09-14): the disabled `order = 1` and
+    `fitopts.order` check is removed from fitMED, for the same reason as
+    the fitLIN row. This resolution supersedes "The disabled block stays
+    in fitMED as provenance".
 - [x] **241-249** "% removed fitopts for now": `fitopts.order` and `fitopts.quantile` overrides for the quantile-regression path.
   - inferred intent: Same fitopts mechanism for fitQTL.
   - recommendation: keep parked (with 282-291)
@@ -2261,6 +2512,9 @@ tidy comments; every recommendation here defaults to keep parked.
     centralized fitopts parser; see 169-173. The disabled block stays
     in fitENV as provenance.
   - working-tree anchor (2026-09-13, R3 sweep records#14): 251-259.
+  - resolution (2026-09-14): the "removed fitopts for now" block is
+    removed from fitENV; the live refqtls note stays. This resolution
+    supersedes "The disabled block stays in fitENV as provenance".
 - [x] **282-291** "% If fitopts is abandoned, need to figure out how to deal with extra parameters for quantile regression." — fitopts-based `qtl`/`order`/`Nboot` extraction; live code (293-294) applies default `qtl = 0.05`.
   - class rationale: — this block is the decision record for the whole fitopts question
   - inferred intent: Pass quantile-regression tuning through one options struct.
@@ -2274,6 +2528,10 @@ tidy comments; every recommendation here defaults to keep parked.
     the end of the fitab input parser.
   - working-tree anchor (2026-09-13, R3 sweep records#14): 292-301; the
     live default `qtl = 0.05` is at 303-305.
+  - resolution (2026-09-14): the "If fitopts is abandoned" extraction
+    block is removed from fitQTL; the live `qtl` default stays. This
+    resolution supersedes "The disabled block stays in fitQTL as
+    provenance".
 
 #### Deferred
 
@@ -2290,10 +2548,16 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — `initFitStruct` (269-277) preallocates nan
   - inferred intent: Defensive re-initialization from before preallocation existed.
   - recommendation: delete
+  - resolution (2026-09-14): the `saveFit` `else` branch with the
+    commented nan assignments is removed. The comment above the block
+    explains that `initFitTable` fills K with nan and that fitevents
+    removes the unused nan rows after the event loop.
 - [x] **257-261** "K(idx).method = method;" struct-array style assignments.
   - class rationale: — the flat preallocated struct replaced the struct-array design
   - inferred intent: Older output layout.
   - recommendation: delete
+  - resolution (2026-09-14): the commented `K(idx)` assignments are
+    removed with the `saveFit` `else` branch (see the row above).
 
 #### Todo
 
@@ -2367,6 +2631,9 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live function builds the same figure with two overlaid axes `ax(1)`/`ax(2)` and returns `H = [fig ax(1) h1 h2]` (through line 118)
   - inferred intent: First-generation hyetograph rendering.
   - recommendation: delete
+  - resolution (2026-09-14): the old yyaxis implementation at the end of
+    the file is removed; the function draws the figure with `plotyy`
+    (`hyetograph.m:69`).
 
 ### loadbasins.m
 
@@ -2384,13 +2651,18 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live line 57 calls `aggregateCalm(Calm, Meta, aggfunc, ...)` unconditionally and the local function (81+) switches internally
   - inferred intent: Pre-refactor aggregation dispatch.
   - recommendation: delete
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `loadcalm.m` from the toolbox.
 
 #### Todo
 
-- [ ] **210-218** "% make a shapefile": site stats via `stderror`, subset `MetaCalm(Points.inpolyb,:)`, rename LAT/LON, "S = geopoint(S);".
+- [x] **210-218** "% make a shapefile": site stats via `stderror`, subset `MetaCalm(Points.inpolyb,:)`, rename LAT/LON, "S = geopoint(S);".
   - inferred intent: Export CALM sites with mean/std as a geopoint/shapefile layer; pairs with the live idea note (207-208) about buffer-based site selection.
   - recommendation: keep parked
   - flags: URC — `Data`, `MetaCalm`, `Points` are debugger-time variables of a deleted workflow
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `loadcalm.m` from the toolbox. The analysis project
+    mgcooper/arctic_baseflow keeps a synced copy.
 
 ### loadghcnd.m
 
@@ -2400,25 +2672,35 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — readGHCND owns unit assignment
   - inferred intent: Pre-readGHCND unit bookkeeping.
   - recommendation: delete
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `loadghcnd.m` from the toolbox.
 - [x] **181-194** "% old method:" — `load` from hardcoded "/Users/coop558/mydata/interface/weather/matfiles/", Kuparuk-only rename/retime pipeline.
   - class rationale: — superseded by the live readGHCND-based load; the path is machine-specific and dead
   - inferred intent: First-generation rain-data ingest.
   - recommendation: delete
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `loadghcnd.m` from the toolbox.
 
 ### loadgrace.m
 
 #### Todo
 
-- [ ] **74-83** "% for now I return monthly S, but this is what is returned in BFRA_drive": richer `G` struct with `S`, `SL`, `SH`, `TL`, `TH`, `Tref`.
+- [x] **74-83** "% for now I return monthly S, but this is what is returned in BFRA_drive": richer `G` struct with `S`, `SL`, `SH`, `TL`, `TH`, `Tref`.
   - inferred intent: Return GRACE storage with uncertainty bounds and reference time, matching the BFRA_drive interface.
   - recommendation: keep parked
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `loadgrace.m` from the toolbox. The analysis project
+    mgcooper/arctic_baseflow keeps a synced copy.
 
 #### Deferred
 
-- [ ] **41-55** "% temporary hack to get the 2022 data": Kuparuk-specific `load([pathdata 'grace_kuparuk'],'Grace')`, variable renames, re-normalization "Grace.S = Grace.S-nanmean(Grace.S);".
+- [x] **41-55** "% temporary hack to get the 2022 data": Kuparuk-specific `load([pathdata 'grace_kuparuk'],'Grace')`, variable renames, re-normalization "Grace.S = Grace.S-nanmean(Grace.S);".
   - class rationale: — the live line 57 says "% delete this and replace w/above if using 2022 data"; this is a deliberate data-version toggle
   - inferred intent: Swap in the extended-2022 GRACE series for the Kuparuk basin.
   - recommendation: keep parked
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `loadgrace.m` from the toolbox. The analysis project
+    mgcooper/arctic_baseflow keeps a synced copy.
 
 ### mapbasins.m
 
@@ -2428,19 +2710,29 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — live 187-188 draws all outlines at once via `polyjoin` + `plotm`
   - inferred intent: Outline drawing before the polyjoin optimization, plus a one-off sort check.
   - recommendation: delete
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `mapbasins.m` from the toolbox.
 - [x] **264-271** Label-position experiments: `quantile`, `mean`, `median`, `min`/`max` of basin Lon/Lat.
   - class rationale: — live 261-262 places labels with the precomputed `xpos(n)`/`ypos(n)`
   - inferred intent: Tuning history for basin-label placement.
   - recommendation: delete
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `mapbasins.m` from the toolbox.
 
 #### Deferred
 
-- [ ] **66-73** "OTHER METHODS": `worldmap('North America')`, `usamap('ak')`, `worldmap([45 90],[-58 -165])`, plus setm limit calls.
+- [x] **66-73** "OTHER METHODS": `worldmap('North America')`, `usamap('ak')`, `worldmap([45 90],[-58 -165])`, plus setm limit calls.
   - inferred intent: Alternative map-projection setups kept for reference next to the live axesm/plotm path (63).
   - recommendation: keep parked
-- [ ] **300-311** "% Now change the ColorBinding back" — colorbar `Face.ColorBinding` toggling, colormap swap, re-applying alpha to `Texture.CData`.
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `mapbasins.m` from the toolbox. The analysis project
+    mgcooper/arctic_baseflow keeps a synced copy.
+- [x] **300-311** "% Now change the ColorBinding back" — colorbar `Face.ColorBinding` toggling, colormap swap, re-applying alpha to `Texture.CData`.
   - inferred intent: Second half of the transparent-colorbar hack (live-adjacent 297 keeps the 'discrete' line commented too); undocumented-graphics territory, version-sensitive.
   - recommendation: keep parked
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `mapbasins.m` from the toolbox. The analysis project
+    mgcooper/arctic_baseflow keeps a synced copy.
 
 ### mapgages.m
 
@@ -2450,6 +2742,8 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — live 39-40 uses the migrated axesm/plotm setup
   - inferred intent: Pre-migration map setup.
   - recommendation: delete
+  - resolution (2026-09-14): moot. Commit 259c294 (R5) removed
+    `mapgages.m` from the toolbox.
 
 ### phifitensemble.m
 
@@ -2489,6 +2783,15 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — `addRotatedText` is not defined anywhere in the toolbox
   - inferred intent: Slope-line labeling; the equivalent live capability is `rotatedLogLogText` in plotrefline.m.
   - recommendation: delete
+  - resolution (2026-09-14): the commented rotated in-axis label calls
+    are removed.
+  - correction (2026-09-14): `addRotatedText` is an unreferenced local
+    function (`plotdqdt.m:441`), and `private/rotatedLogLogText.m`
+    supersedes it (`plotrefline` calls it). The local function and its
+    file-wide `DEFNU` suppression stay, because the suppression also
+    covers the parked, uncalled `detectTransition`. This correction
+    supersedes "`addRotatedText` is not defined anywhere in the
+    toolbox".
 - **476-480** "ab1   = baseflow.wols(log(q1), log(-dq1));" per segment; live note: "Jul 2024 - commented out b/c 'wols' is not a function in the toolbox. Not sure if this is supposed to be 'ols' or a weighted version."
   - class rationale: — `wols` does not exist in the toolbox (verified)
   - inferred intent: Slope-based classification of three consecutive segments (flat vs recession).
@@ -2526,6 +2829,9 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live legend call (219-220) uses 'tex' unconditionally
   - inferred intent: Interpreter selection from the Octave-compat pass.
   - recommendation: delete
+  - resolution (2026-09-14): the commented Octave/MATLAB
+    legend-interpreter branch is removed; the live legend call uses
+    'tex' on both platforms.
 
 ### printtrend.m
 
@@ -2535,6 +2841,9 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live body prints one unified CI string (36-38)
   - inferred intent: Metric-dependent trend printing. Note: the live parser still accepts the now-unused 'metric' parameter (line 49).
   - recommendation: delete
+  - resolution (2026-09-14): the commented metric machinery is removed.
+    The parser keeps the unused `'metric'` parameter, because callers
+    can pass it.
 
 ### privatefunction.m
 
@@ -2544,6 +2853,8 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — live 13-16 uses `validatestring` over `completions('private')` plus `str2func`
   - inferred intent: Manual dispatch before the generic mechanism.
   - recommendation: delete
+  - resolution (2026-09-14): the commented `switch` dispatch is removed;
+    `validatestring` and `str2func` replace it.
 
 ### specialfunctions.m
 
@@ -2564,14 +2875,22 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live conversion above has been in service; the author pre-authorized deletion once it was accepted
   - inferred intent: Prior time-axis normalization.
   - recommendation: delete
+  - resolution (2026-09-14): the block is removed, and so is its pointer
+    comment in `prepInput` ("see old method that checked for months at
+    end").
 - [x] **203-207** Explanation plus one disabled probe: "legobj = findobj(gcf,'Type','Legend');" — why the figure-parented legend cannot be found this way with subplots.
   - class rationale: — live 209-210 walks `get(gcf,'Children')`/`findobj('Type','Axes')` instead
   - inferred intent: Records why the obvious findobj approach fails; documentation value.
   - recommendation: keep parked (or fold the why-not into a comment on the live code)
+  - resolution (2026-09-14): the disabled `findobj` probe line is
+    removed; it duplicated the live check. The explanation stays on the
+    live check.
 - [x] **254-261** "% this is the original" errorbounds line-index computation.
   - class rationale: — live 247-252 computes `thislineidx`
   - inferred intent: Pre-refactor color-order indexing.
   - recommendation: delete
+  - resolution (2026-09-14): the commented original `errorbounds`
+    line-index computation is removed.
 
 #### Deferred
 
@@ -2588,9 +2907,13 @@ tidy comments; every recommendation here defaults to keep parked.
 
 #### Todo
 
-- [ ] **26-30** "% Just call isoctave. TODO: check if function overhead matters." — persistent `inoctave` caching.
+- [x] **26-30** "% Just call isoctave. TODO: check if function overhead matters." — persistent `inoctave` caching.
   - inferred intent: Cache the isoctave probe if profiling shows overhead.
   - recommendation: keep parked
+  - resolution (2026-09-14): the marker and the commented cache block
+    are removed. bootstrapci calls `isoctave` once per invocation, and
+    `private/isoctave.m` caches its result (see the
+    `bootstrapci.m:26` row under "Markers by category").
 
 ### fitets.m
 
@@ -2606,9 +2929,17 @@ tidy comments; every recommendation here defaults to keep parked.
 
 #### Todo
 
-- [ ] **49-53** Extra output fields: "Fit.Predictor = x; Fit.Response = y; ... Fit.Design = [ones(N,1), x(:)];".
+- [x] **49-53** Extra output fields: "Fit.Predictor = x; Fit.Response = y; ... Fit.Design = [ones(N,1), x(:)];".
   - inferred intent: Return the design matrix and inputs with the fit for downstream use.
   - recommendation: keep parked (implement if a caller needs them)
+  - resolution (2026-09-14): `private/fitlm_octmat.m` and
+    `tests/test_fitlm_octmat.m` are removed. `dndtuncertainty` calls
+    `fitlm` and `coefCI` directly. Its regression interval uses the
+    function's `alpha` (`coefCI(mdl, alpha)`), which matches the alpha
+    0.32 handling of the other uncertainty terms. The parked extra
+    `Fit` fields (`fitlm_octmat.m:40-44`) went with the file, per the
+    user's direction to simplify. Four of them repeated live fields
+    under older names; only `Fit.Design` was a new idea.
 
 ### fitsts.m / fitcts.m (owned by bead bfra-3kh.23)
 
@@ -2628,6 +2959,12 @@ tidy comments; every recommendation here defaults to keep parked.
   - adjudication (2026-08-30, bead bfra-3kh.23): implemented, with the
     C4 stencil repaired and tests/test_fitcts.m shipped; the commented
     /dt variants stay parked with the author's note.
+  - correction (2026-09-14): `fitcts.m` has 131 lines. The commented
+    `/dt` variants are at 79-82, and the author note is at 84-85. `rq`
+    is `rq = R;` (`fitcts.m:125`; see the `fitcts.m:71` marker row), and
+    the live caller is `getdqdt.m:98`. This correction supersedes "78
+    lines", "27-34", "`rq = []; % TODO`", "Partial stub", and
+    "getdqdt.m:63".
 
 ### fitvts.m
 
@@ -2644,6 +2981,9 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — syntactically broken; the live comment at 96-99 preserves the notation idea
   - inferred intent: Aborted readability rewrite of the 4*dt check.
   - recommendation: delete
+  - resolution (2026-09-14): the broken fragment and the trailing blank
+    lines are removed. The C-criteria note at `fitvts.m:91-99` keeps the
+    notation idea.
 
 ### formatPlotMarkers.m
 
@@ -2668,9 +3008,13 @@ tidy comments; every recommendation here defaults to keep parked.
 
 #### Deferred
 
-- [ ] **54-58** "% For reference:" — `stats.coeffs` column map: sderr (2), confi (3:4), tstat (5), pvals (6).
+- [x] **54-58** "% For reference:" — `stats.coeffs` column map: sderr (2), confi (3:4), tstat (5), pvals (6).
   - inferred intent: Record the regstats coefficient-matrix layout the function depends on.
   - recommendation: keep parked (or fold into the docstring)
+  - resolution (2026-09-14): `private/predictlm.m` and
+    `tests/test_predictlm.m` are removed as dead code; no toolbox
+    function called predictlm. matfunclib `libstats/predictlm.m` keeps
+    the `stats.coeffs` column map.
 
 ### preparecalendar.m
 
@@ -2689,6 +3033,11 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — live line 116 calls `bootstrapci(x,y,ab,Frho,Nboot,alpha,opts)`
   - inferred intent: Pre-extraction bootstrap code; the method-selection and timing notes are the durable content.
   - recommendation: delete after migrating the timing/method notes into bootstrapci.m's header
+  - resolution (2026-09-14): a comment above the bootci type branch
+    (`bootstrapci.m:59-63`) records the notes: type 'bca' fails in its
+    jackknife step, the 'norm', 'per', 'cper', and 'stud' timings, and
+    the rejected Student-t interval. The old bootstrap block is removed
+    from `quantreg.m`.
 
 #### Todo
 
@@ -2703,6 +3052,8 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — disowned by the author and broken (`kk` undefined)
   - inferred intent: Unknown; polynomial transform inversion.
   - recommendation: delete
+  - resolution (2026-09-14): the commented `invtranspoly` and its "not
+    sure where this came from" note are removed.
 
 ### setnan.m
 
@@ -2712,6 +3063,9 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live body above (through 106) handles table and non-table inputs
   - inferred intent: First-generation table handling.
   - recommendation: delete
+  - resolution (2026-09-14): the commented row-wise table loop and its
+    "update jan 2022" note are removed from the toolbox copy and from
+    matfunclib `libarrays/setnan.m`.
 
 ### siUnitsToTex.m
 
@@ -2721,6 +3075,13 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — live 50-51 strrep pipeline does the conversion; the adjacent live note (62-63) records why texlabel fails
   - inferred intent: Exponent TeX-ification, first attempt.
   - recommendation: delete
+  - resolution (2026-09-14): one `regexprep(unit, '(-?\d+)', '^{$1}')`
+    pass wraps each exponent once, positive or negative
+    (`siUnitsToTex.m:39`). This fixes the double-wrapped negative
+    exponent in both copies: the toolbox `private/siUnitsToTex.m` and
+    matfunclib `libtext/siUnitsToTex.m`, which has a test
+    (`libtext/test/testSiUnitsToTex.m`). The commented strrep block and
+    its "My original approach" note are removed.
 
 ### smooth.m (vendored, Octave-style)
 
@@ -2744,6 +3105,8 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — live 30 does it with one `reshape(transpose([fieldnames(S) struct2cell(S)]),1,[])`
   - inferred intent: Pre-vectorization implementation.
   - recommendation: delete
+  - resolution (2026-09-14): the commented old loop is removed from the
+    toolbox copy and from matfunclib `functools/struct2varargin.m`.
 
 ### struct2vec.m
 
@@ -2753,10 +3116,16 @@ tidy comments; every recommendation here defaults to keep parked.
   - class rationale: — the live body (through 88) implements the chosen method
   - inferred intent: Alternative implementations plus the shape reasoning.
   - recommendation: formalize — fold the ordering/shape caveats into the docstring, then retire the code
+  - resolution (2026-09-14): the NOTES block is removed from the toolbox
+    copy and from matfunclib `libstruct/struct2vec.m`. The help examples
+    show that struct2vec keeps field order and returns column-major
+    output, and code comments explain the row and column handling.
 - [x] **109-114** "% This method does not preserve the original order of the vectors." — struct2cell + ismember reorder sketch.
   - class rationale: — same supersession; the order warning is the content
   - inferred intent: Rejected ordering-unsafe variant.
   - recommendation: formalize with 91-107
+  - resolution (2026-09-14): the order-unsafe struct2cell and ismember
+    sketch is removed from both copies (see the 91-107 row).
 
 ### yorkfit.m
 
@@ -2777,7 +3146,15 @@ parked code, and get no inventory row above:
 - `fitab.m:438-444` and `private/fitNLS_matlab.m:41-47` — "Summary of the
   method" pseudocode describing the live rsq-cascade fit selection
   (duplicated between the two files; a consolidation candidate, not WIP).
+  - correction (2026-09-14): `private/fitNLS_matlab.m:39-47` and
+    `private/fitNLS_octave.m:22-27` hold the "Summary of the method"
+    pseudocode for each helper's rsq-cascade fit selection. Commit
+    db7754d removed the fitab.m copy with the local fitNLS copies. This
+    correction supersedes `fitab.m:438-444` and "duplicated between the
+    two files".
 - `loadghcnd.m:168-178` — sub-5-line gap-fill spot-check fragments.
+  - resolution (2026-09-14): moot. Commit 259c294 removed `loadghcnd.m`
+    from the toolbox.
 - `private/fitets.m:154+` — prose note on the older m-truncation method.
 - 28 function help headers (docstring position) matched by the comment-run
   scan and excluded after verification; list available from the scan script.
@@ -2813,5 +3190,13 @@ parked code, and get no inventory row above:
   quantreg.m, plfitb.m) all reference an external error-propagation kit
   (`PropError`, `propUncertSym`, `propUncertCD`) that is not in the toolbox.
   Restoring or vendoring that kit is a precondition for reviving any of them.
+  - correction (2026-09-14): only dndtuncertainty.m and expectedQ.m
+    reference the kit; quantreg.m and plfitb.m do not. This correction
+    supersedes "(dndtuncertainty.m, expectedQ.m, quantreg.m, plfitb.m)
+    all reference".
 - `printtrend.m` still parses a `'metric'` parameter (line 49) whose result
   is unused (dead option surfaced by row printtrend.m:63-86).
+- The docs build uses a vendored copy of m2html in `tools/m2html` (see
+  `tools/m2html/VENDORED.md`, added 2026-09-14).
+  `baseflow.internal.makedocs` adds `tools/m2html` to the path for the
+  build (`makedocs.m:132-142`).
