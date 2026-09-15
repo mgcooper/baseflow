@@ -8,7 +8,8 @@ function makedocs(varargin)
    % docs pages (also copies the Getting Started page and its equation
    %    images to docs/index.html and docs/)
    % demos
-   % function docs
+   % function docs (the 'functions' option uses the vendored m2html in
+   %    tools/m2html and needs Graphviz dot)
    % re-build docsearch database
    %
    % See also: 
@@ -61,9 +62,28 @@ function makedocs(varargin)
          [~, filename] = fileparts(demofile);
          htmlfile = fullfile(htmlpath, [filename '.html']);
 
+         % The demos do not close figures. Snapshot the open figures before
+         % the export, so the cleanup below deletes only the new figures.
+         % Hide their handles during the export, so a demo that draws into
+         % the current figure (gcf) cannot draw into a figure the user has
+         % open.
+         figsbefore = findall(groot, 'Type', 'figure');
+         visibility = get(figsbefore, {'HandleVisibility'});
+         set(figsbefore, 'HandleVisibility', 'off')
+
+         % Register the cleanup before the export, so it also runs when a
+         % demo errors. The cleanup deletes the figures the export opened,
+         % so figures do not accumulate during the docs build, and restores
+         % the handle visibility of the other figures.
+         figcleanup = onCleanup(@() cleanupdemofigures( ...
+            figsbefore, visibility));
+
          % Run each live script so the html shows outputs from the current
          % code, not the outputs saved in the mlx file.
          export(demofile, htmlfile, 'Run', true);
+
+         % Run the cleanup before the next demo.
+         clear figcleanup
       end
 
       % The Octave-compatible m-files in demos/mfiles are maintained by
@@ -96,21 +116,30 @@ function makedocs(varargin)
          fullfile(indexpath, 'index.html'));
 
       % index.html links the equation images by file name. Copy them next
-      % to index.html, or the landing page shows broken images.
-      copyfile(fullfile(htmlpath, 'baseflow_gettingStarted_eq*.png'), ...
-         indexpath);
+      % to index.html, or the landing page shows broken images. copyfile
+      % errors when no file matches, so skip the copy for a page with no
+      % equations.
+      eqimages = fullfile(htmlpath, 'baseflow_gettingStarted_eq*.png');
+      if ~isempty(dir(eqimages))
+         copyfile(eqimages, indexpath);
+      end
    end
 
    %% publish the function documentation using m2html
 
    if opts.functions == true
 
-      % activate m2html
-      try
-         activate m2html_rochefort
-      catch e
-         rethrow(e)
-      end
+      % Put the vendored m2html first on the path for this build, so the
+      % build does not depend on a local m2html install. m2html finds its
+      % templates next to m2html.m, so tools/m2html keeps the upstream
+      % layout. restorepath restores the original path when makedocs returns.
+      m2htmltool = fullfile(projectpath(), 'tools', 'm2html');
+      assert(isfile(fullfile(m2htmltool, 'm2html.m')), ...
+         'baseflow:makedocs:missingM2html', ...
+         'The vendored m2html is missing: %s', m2htmltool)
+      origpath = path();
+      restorepath = onCleanup(@() path(origpath));
+      addpath(m2htmltool);
 
       % run m2html from the project base directory (one dir above this one)
       job = withcd(toolboxpath()); %#ok<NASGU>
@@ -128,8 +157,8 @@ function makedocs(varargin)
          mkdir(m2htmlpath)
       end
 
-      % The dependency graph needs Graphviz dot (m2html looks in
-      % /usr/local/bin and /opt/homebrew/bin). Without dot, graph.png goes
+      % The dependency graph needs Graphviz dot (tools/m2html/m2html.m looks
+      % in /usr/local/bin and /opt/homebrew/bin). Without dot, graph.png goes
       % stale, so install Graphviz before regenerating the function pages.
       m2html( ...
          'mfiles', mfilepath, ...             % source dir where the files live
@@ -146,4 +175,19 @@ function makedocs(varargin)
          'verbose', 'on' ...
          );
    end
+end
+
+function cleanupdemofigures(figsbefore, visibility)
+   %CLEANUPDEMOFIGURES Delete new figures and restore hidden figure handles.
+   %
+   %  cleanupdemofigures(figsbefore, visibility) deletes every figure that
+   %  is not in figsbefore and sets the HandleVisibility of the figures in
+   %  figsbefore back to the saved values in visibility.
+
+   % Delete only the figures opened after the snapshot, then restore the
+   % handles makedocs hid during the export.
+   openfigs = findall(groot, 'Type', 'figure');
+   delete(openfigs(~ismember(openfigs, figsbefore)))
+   isopen = isgraphics(figsbefore);
+   set(figsbefore(isopen), {'HandleVisibility'}, visibility(isopen))
 end

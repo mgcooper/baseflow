@@ -77,7 +77,6 @@
 % Define the symbolic variables and their properties
 
 clearvars
-close all
 clc
 
 syms c1 a Q Q0 Qmin Qmax t; assume([a c1 Q Q0 Qmin Qmax t],'clear')

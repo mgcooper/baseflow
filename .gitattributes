@@ -26,3 +26,6 @@
 *.pdf binary
 *.png binary
 *.xlsx binary
+
+## Vendored third-party code (excluded from GitHub language statistics)
+tools/m2html/** linguist-vendored

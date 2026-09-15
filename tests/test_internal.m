@@ -67,3 +67,22 @@ function test_internalversion(testCase)
    returned = baseflow.internal.version();
    testCase.verifyTrue(ischar(returned))
 end
+
+function test_vendoredm2html(testCase)
+   % makedocs builds the function pages with the m2html copy in
+   % tools/m2html. Check the entry point, the template class, and the
+   % baseflow template that makedocs names.
+   m2htmlfolder = fullfile(fileparts(baseflow.internal.basepath()), ...
+      'tools', 'm2html');
+   vendoredfiles = {
+      'm2html.m'
+      fullfile('@template', 'template.m')
+      fullfile('templates', 'blue2_baseflow', 'master.tpl')
+      };
+
+   for n = 1:numel(vendoredfiles)
+      testCase.verifyTrue( ...
+         isfile(fullfile(m2htmlfolder, vendoredfiles{n})), ...
+         ['Expected tools/m2html/' vendoredfiles{n} ' to exist.']);
+   end
+end

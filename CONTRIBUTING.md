@@ -43,6 +43,21 @@ message.
 5. CI runs the suite on every push and pull request to `main` and
    `dev`. Maintainers merge a pull request only after its CI run passes.
 
+## Build the docs
+
+Run the docs build from MATLAB in the repository root:
+
+    addpath('toolbox'); Setup('addpath'); baseflow.internal.makedocs()
+
+The demo pages run every live script, and the two theory demos need the
+Symbolic Math Toolbox. Without it, build the other parts with
+`baseflow.internal.makedocs('functions', 'docpages', 'docsearch')`.
+The function reference pages need Graphviz for the dependency graph.
+On macOS, install it with `brew install graphviz`. The build uses the
+copy of m2html in `tools/m2html`. m2html is licensed under
+GPL-2.0-or-later and is not part of the toolbox. See
+`tools/m2html/VENDORED.md`.
+
 ## Octave
 
 The toolbox targets GNU Octave compatibility. Branch Octave-specific
