@@ -17,8 +17,15 @@ function [Fit,h] = fitphidist(phi,varargin)
    %     where default 'PD' is the Probability Distribution object.
    %
    %     Fit = baseflow.fitphidist(__,plottype) returns any of the prior options
-   %     plus a figure showing the fit. plottype can be 'cdf' or 'pdf'. default
-   %     is 'none'.
+   %     plus a figure showing the fit. plottype can be 'cdf', 'pdf', or
+   %     'probplot'. default is 'none'. 'pdf' draws no figure. 'probplot' is
+   %     MATLAB-only.
+   %
+   %     [Fit, h] = baseflow.fitphidist(__,plottype,showfit) also returns the
+   %     figure handles in struct h for the 'cdf' and 'probplot' types. For
+   %     'cdf', h also holds the bootstrap mean (mu) and error (pm) of phi.
+   %     showfit is a logical flag (default true). With showfit false, these
+   %     two types delete their figure. For 'pdf', h is an empty struct.
    %
    % See also: eventphi, fitphi, fitphidist
    %
@@ -50,6 +57,8 @@ function [Fit,h] = fitphidist(phi,varargin)
       case 'probplot'
          h = probplotphi(phi, PD, showfit);
       case 'pdf'
+         % 'pdf' draws no figure, so return an empty struct for h.
+         h = struct();
    end
 
    % package output
@@ -124,22 +133,30 @@ function h = cdfplotphi(phi, PD, showfit)
    h.ax = gca;
    h.mu = mu;
    h.pm = pm;
+
+   % The bootstrap standard error above needs the fit, but a caller with
+   % showfit false wants no figure. Delete the hidden figure, so repeated
+   % calls from phifitensemble and globalfit do not leave figures open.
+   if showfit == false
+      delete(h.figure)
+   end
 end
 
-function h = probplotphi(phi,PD)
+function h = probplotphi(phi, PD, showfit)
 
    if isoctave
       error([mfilename ': probplot not implemented in Octave. Use ''cdf''.'])
    end
 
-   % Create the figure
-   h.figure = figure;
+   % Create the figure. It is hidden when showfit is false.
+   h.figure = figure('Visible', showfit);
 
    % plot the data, suppressing the normal plot with 'noref'
    h.data = probplot('normal', phi, [], [], 'noref'); hold on;
 
-   % add the fit
-   h.fit = probplot(gca, PD);
+   % add the fit. probplot needs a distribution object, and PD is a struct
+   % of the fitted beta parameters, so build the beta distribution.
+   h.fit = probplot(gca, makedist('Beta', 'a', PD.a, 'b', PD.b));
 
    % format the symbols
    c  = [0 0.447 0.741];
@@ -151,6 +168,12 @@ function h = probplotphi(phi,PD)
    title('')
    set(gca, 'XLim', [0 0.2])
    h.ax = gca;
+
+   % A caller with showfit false wants no figure, so delete the hidden
+   % figure, as cdfplotphi does.
+   if showfit == false
+      delete(h.figure)
+   end
 end
 
 %% INPUT PARSER

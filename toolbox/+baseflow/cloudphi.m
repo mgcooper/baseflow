@@ -41,7 +41,11 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    %                 solution is applicable
    %     soln1       optional early-time theoretical solution
    %     soln2       optional late-time theoretical solution
-   %     dispfit     logical flag indicating whether to plot the result
+   %     dispfit     logical flag indicating whether fitphi prints each phi
+   %                 value. Default is false.
+   %     plotfit     logical flag indicating whether to draw the point cloud,
+   %                 the early-time and fitted late-time lines, and the phi
+   %                 legend. Default is true.
    %
    % See also: eventphi, fitphi, fitphidist
    %
@@ -55,7 +59,7 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 
    % parse inputs
    [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ...
-      ~, isflat, ~, ~, dispfit] = parseinputs(q, dqdt, blate, ...
+      ~, isflat, ~, ~, dispfit, plotfit] = parseinputs(q, dqdt, blate, ...
       A, D, L, method, varargin{:});
 
    % the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could
@@ -88,24 +92,30 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    end
    a = a2;
 
-   % make a dummy handle for the legend and print the value of phi
-   baseflow.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
-      {'early','userfit'},'userab',[a2 blate],'reflabels',true);
-   hdum = plot(0,0,'Color','none','HandleVisibility','off');
+   % Skip the figure when plotfit is false. globalfit passes its plotfits
+   % flag here, so a global fit with plotfits false opens no figure.
+   if plotfit
+      % make a dummy handle for the legend and print the value of phi
+      baseflow.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
+         {'early','userfit'},'userab',[a2 blate],'reflabels',true);
+      hdum = plot(0,0,'Color','none','HandleVisibility','off');
 
-   if isoctave
-      txt = sprintf('\\phi = %.2f',phi);
-      legend(hdum,txt,'Interpreter','tex','Location','northwest','box','off');
-   else
-      txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
-      legend(hdum,txt,'Interpreter','latex','Location','northwest','box','off');
+      if isoctave
+         txt = sprintf('\\phi = %.2f',phi);
+         legend(hdum,txt,'Interpreter','tex','Location','northwest', ...
+            'box','off');
+      else
+         txt = sprintf('$\\phi_{b=%.2f}=%.3f$',b2,phi);
+         legend(hdum,txt,'Interpreter','latex','Location','northwest', ...
+            'box','off');
+      end
    end
 end
 
 %% input parser
 function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ...
-      theta, isflat, soln1, soln2, dispfit] = parseinputs(q, dqdt, blate, ...
-      A, D, L, method, varargin)
+      theta, isflat, soln1, soln2, dispfit, plotfit] = parseinputs(q, dqdt, ...
+      blate, A, D, L, method, varargin)
 
    parser = inputParser;
    parser.StructExpand = false;
@@ -127,6 +137,7 @@ function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ..
    addParameter(parser,'soln1', 'RS05', @ischar);
    addParameter(parser,'soln2', 'RS05', @ischar);
    addParameter(parser,'dispfit', false, @islogical);
+   addParameter(parser,'plotfit', true, @islogical);
 
    parse(parser,q,dqdt,blate,A,D,L,method,varargin{:});
 
@@ -139,6 +150,7 @@ function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ..
    soln1       = parser.Results.soln1;
    soln2       = parser.Results.soln2;
    dispfit     = parser.Results.dispfit;
+   plotfit     = parser.Results.plotfit;
 end
 
 %%

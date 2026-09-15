@@ -5,6 +5,8 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    % Syntax
    %
    %  [sig_dndt,sig_lamda] = dndtuncertainty(T,Qb,Results,Fits,GlobalFit,opts)
+   %  [sig_dndt,sig_lamda] = dndtuncertainty(_,alpha)
+   %  [sig_dndt,sig_lamda] = dndtuncertainty(_,alpha,testflag)
    %
    % Description
    %
@@ -25,6 +27,14 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    %  solutions to the one-dimensional groundwater flow equation for a
    %  Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
    %
+   %  alpha is the significance level of the uncertainty: 0.05 (default, a
+   %  95% interval) or 0.32 (about one standard error). For 0.32 the
+   %  regression interval uses alpha, and the parameter uncertainties are
+   %  halved. Other values raise an error, because the parameter
+   %  uncertainties have no scaling for them. testflag true asks for a
+   %  comparison of uncertainty methods, which is not supported and raises
+   %  a warning.
+   %
    % See also: aquifertrend, aquiferthickness
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
@@ -40,6 +50,15 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    elseif nargin == 8
       alpha = varargin{1};
       testflag = varargin{2};
+   end
+
+   % The parameter uncertainties scale only for these two levels (see the
+   % alpha == 0.32 block below), so reject any other level instead of
+   % mixing confidence levels in the combined uncertainty.
+   supportedalpha = [0.05, 0.32];
+   if ~ismember(alpha, supportedalpha)
+      error('baseflow:dndtuncertainty:unsupportedAlpha', ...
+         'alpha must be 0.05 or 0.32')
    end
 
    % Convert time in days to years
@@ -63,10 +82,15 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    % Regress baseflow in units cm/day/year to get uncertainty on dq/dt
    Qb = Qb./365.25;                          % cm/yr -> cm/day
 
-   [~, mdl] = fitlm_octmat(T, Qb);
+   % fitlm returns a LinearModel in MATLAB and in the Octave statistics
+   % package, so one call serves both. The Coefficients table has no CI
+   % column, so coefCI computes the intervals at the alpha level, the same
+   % level as the parameter uncertainties below. Row 2 is the slope.
+   mdl = fitlm(T, Qb);
       dbfdt = mdl.Coefficients.Estimate(2);  % cm/day/year
    se_dbfdt = mdl.Coefficients.SE(2);        % standard error
-   CI_dbfdt = mdl.Coefficients.CI(2, :);     % 95% CI's
+   CI_coefs = coefCI(mdl, alpha);            % 100(1-alpha)% CI's
+   CI_dbfdt = CI_coefs(2, :);
    sig_dbfdt = CI_dbfdt(2) - dbfdt;          % they're symetric so just take one
 
    % In octave, the full Jacobian/Covariance Matrix method is not supported, but

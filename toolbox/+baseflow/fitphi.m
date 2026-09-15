@@ -27,7 +27,7 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
    %     isflat   logical flag indicating horizontal or sloped aquifer solution
    %     soln1    optional early-time theoretical solution
    %     soln2    optional late-time theoretical solution
-   %     dispfit  logical flag indicating whether to plot the result
+   %     dispfit  logical flag indicating whether to print each phi value
    %
    % Example
    %
