@@ -66,10 +66,6 @@ function DataOut = setnan(Data,varargin)
       nanval = naninds;
    end
 
-
-   % update jan 2022, commented out stuff shouldn't be needed with new table
-   % checks above
-
    % assume nanval is a logical vector denoting where to set Data nan, but we
    % need to determine if the vector matches the size of Data or the size of the
    % rows or columns of Data. For the latter, assume it should be applied to all
@@ -107,18 +103,6 @@ function DataOut = setnan(Data,varargin)
       DataOut = table2timetable(DataOut, 'RowTimes', Time);
       DataOut.Properties = props;
    end
-
-
-   % if istimetable(dataout) || istable(dataout)
-   %    naninds = find(nanval(:,1));
-   %    for i = 1:height(dataout)
-   %       if ismember(i,naninds)
-   %          dataout(i,:) = table(nan);
-   %       end
-   %    end
-   % else
-   %    dataout(nanval) = nan;
-   % end
 end
 
 %% Input Parser

@@ -231,15 +231,6 @@ function varargout = pointcloudplot(q,dqdt,varargin)
       L = legend(hleg,ltxt, 'location', 'northwest', 'interpreter', 'tex', ...
          'AutoUpdate', 'off');
 
-      % if isoctave
-      %    ltxt = strrep(ltxt,'$','');
-      %    l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
-      %       'AutoUpdate','off');
-      % else
-      %    l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...
-      %       'AutoUpdate','off');
-      % end
-
    else
       L = nan;
    end

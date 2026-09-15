@@ -84,19 +84,4 @@ function [ab, tau0, printvalues] = parseinputs(mfilename, varargin)
    tau0 = parser.Results.tau0;
    printvalues = parser.Results.printvalues;
 
-   %    printvalues  = false;
-   %    Q0 = nan;
-   %    if nargin == 1
-   %       ab  = varargin{1};
-   %    elseif nargin == 2
-   %       ab  = [varargin{1};varargin{2}];
-   %    elseif nargin == 3
-   %       ab  = [varargin{1};varargin{2}];
-   %       Q0  = varargin{3};
-   %    elseif nargin == 4
-   %       ab  = [varargin{1};varargin{2}];
-   %       Q0  = varargin{3};
-   %       printvalues = varargin{4};
-   %    end
-
 end

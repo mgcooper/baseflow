@@ -33,9 +33,6 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    %                 late-time line is forced to pass through.
    %     earlyqtls   Quantiles of Q and -dQ/dt on point cloud through which
    %                 early-time line is forced to pass through.
-   %     theta       Effective slope of basin contributing area.
-   %     isflat      Logical scalar indicating horizontal or sloped aquifer
-   %                 solution.
    %     soln1       String indicating early-time theoretical solution.
    %     soln2       String indicating late-time theoretical solution.
    %
@@ -134,12 +131,4 @@ function [Results, Fits, A, D, L, b2, earlyqtls, lateqtls, soln1, soln2] = ...
    soln2 = parser.Results.soln2;
    lateqtls = parser.Results.lateqtls;
    earlyqtls = parser.Results.earlyqtls;
-
-   % % No longer supported
-   % parser.addParameter('method', 'envelope', @ischar);
-   % parser.addParameter('theta', 0, @isnumeric);
-   % parser.addParameter('isflat', true, @islogical);
-   % theta = parser.Results.theta;
-   % method = parser.Results.method;
-   % isflat = parser.Results.isflat;
 end

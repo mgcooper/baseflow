@@ -327,6 +327,3 @@ end
 %     figure; plot(q,-dqdt,'-o');legend('obs');
 %     figure; plot(qfit,dqfit,'-o'); legend('fit function');
 %     figure; plot(q,-dqtst,'-o'); legend('fit test');
-
-%abl = baseflow_quickfit(q,dqdt,'lin');
-%[q,dqdt] = baseflow_Qlin(a,b,Q0,t)

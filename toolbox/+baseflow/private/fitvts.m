@@ -97,14 +97,6 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
    % event, and then count forward from there for each dQ, where the number of
    % timesteps counting forward would be ti, and the variable dt would be
    % ti_j, and then I could check that ti_j<=ti/4
-
-   %    tn    =   t(n);
-   %    tn_m  =   t(n-m);
-   %
-   %    if 4*(tn-tn_m)
-   %    if 4*(t(n) - t(n-m));
-
-
 end
 
 %% INPUT PARSER

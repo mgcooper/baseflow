@@ -338,13 +338,6 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
    if labelplot == true
       labelReflines(h)
    end
-
-   % axpos = baseflow.deps.plotboxpos(gca);
-   % only works with correct axes position
-   % xtext = exp(mean(log(xlimkeep)));
-   % addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);
-   % addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);
-   % addRotatedText(1*xtext,axb(aMax,1*xtext,bMax),'upper envelope',1.5,axpos);
 end
 
 %%

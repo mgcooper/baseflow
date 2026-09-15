@@ -211,11 +211,12 @@ function report = resolvedependencies(missing, funclist, prodnames, tbroot)
    % copy the missing dependent functions into the vendored private folder
 
    % NOTE: this is for private use, it won't work if you don't have the
-   % functions on your local computer. Please contact me at matt.cooper@pnnl.gov
-   % if you have any trouble running this toolbox or if any function
-   % dependencies are missing from the toolbox. Alternatively, look for the
-   % missing functions in https://github.com/mgcooper/matfunclib (I suggest the
-   % dev branch). Thank you.
+   % functions on your local computer. Please contact me at
+   % matt@sierracrestanalytics.com if you have any trouble running this
+   % toolbox or if any function dependencies are missing from the toolbox.
+   % Alternatively, look for the missing functions in
+   % https://github.com/mgcooper/matfunclib (I suggest the dev branch).
+   % Thank you.
 
    % TODO: add method to clone from https://github.com/mgcooper/matfunclib
 
@@ -237,8 +238,4 @@ function report = resolvedependencies(missing, funclist, prodnames, tbroot)
    for n = find(~mfiles(:)')
       copyfile(missing{n}, fullfile(tbroot, 'data'));
    end
-
-   % Parked WIP: per-function dependency attribution.
-   % any functions listed in dependentFunctions may be required for some fringe
-   % behavior in the toolbox but the core functionality should
 end

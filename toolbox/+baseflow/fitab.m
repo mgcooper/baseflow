@@ -188,12 +188,6 @@ function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)
    % through the mean x-y, with option to control the slope using input
    % parameter 'order'
 
-   % % not sure if this was ever functional
-   % % check fitopts
-   % if isfield(fitopts,'order')
-   %    if isnumeric(fitopts.order); order = fitopts.order; end
-   % end
-
    % apply the mask / weights
    logx = logx(weights>0);
    logy = logy(weights>0);
@@ -217,14 +211,6 @@ end
 
 function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)
    % force a line of slope 'order' through the median x-y
-
-   % % not sure why this was here, order is passed in with default 1, maybe i
-   % was gonna do away wiht that or maybe i was testing here before implementing
-   % that
-   % order = 1;
-   % if isfield(fitopts,'order')
-   %    order = fitopts.order;
-   % end
 
    % apply the mask / weights
    logx = logx(weights>0);
@@ -261,16 +247,6 @@ function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)
    % note: require that quantiles are passed in rather than precomputed
    % refpoints so this can use the log values or linear values
 
-   % % removed fitopts for now
-   %    % check fitopts
-   %       if isfield(fitopts,'order')
-   %          if isnumeric(fitopts.order); order = fitopts.order; end
-   %       end
-   %
-   %       if isfield(fitopts,'quantile')
-   %          quantile = fitopts.quantile;
-   %       end
-
    % apply the mask / weights
    logx = logx(weights>0);
    logy = logy(weights>0);
@@ -301,17 +277,6 @@ function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)
    if inoctave
       error('quantile regression not currently supported in octave, use nls')
    end
-
-   % % If fitopts is abandoned, need to figure out how to deal with extra
-   % parameters for quantile regression.
-   % if isfield(fitopts,'qtl')
-   %    qtl = fitopts.pctl;
-   %    order = fitopts.order; % 1=linear regression
-   %    Nboot = fitopts.Nboot;
-   %    % alpha = fitopts.alpha;
-   % elseif isnan(qtl)
-   %    qtl = 0.05;
-   % end
 
    if isnan(qtl)
       qtl = 0.05;
