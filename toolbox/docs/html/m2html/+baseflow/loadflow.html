@@ -162,7 +162,7 @@ This function is called by:
 0081    <span class="comment">% (kuparuk flow is missing the last two months (Nov/Dec 2020))</span>
 0082 
 0083    <span class="keyword">if</span> ~isnan(units)
-0084       cms2cmd = @(x) x.*86400;
+0084       <span class="comment">% convert m3/s to m3/d with private/cms2cmd, then scale by area</span>
 0085       aream2 = Meta.darea.*1e6;
 0086       <span class="keyword">switch</span> units
 0087          <span class="keyword">case</span> <span class="string">'mm/d'</span>

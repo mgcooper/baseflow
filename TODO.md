@@ -443,29 +443,42 @@ class "vendored and private helper behavior".
 
 ### Todo
 
-- [ ] `private/smoothnoise.m` 'annual' path. Provenance: finding
+- [x] `private/smoothnoise.m` 'annual' path. Provenance: finding
   helpers#3. The path reshapes rows in column-major order, which mixes
   years. It also misreads sizes and returns a column.
   `smoothnoise(x)` with no method errors.
-- [ ] `private/predictlm.m` degrees of freedom. Provenance: finding
+- [x] `private/predictlm.m` degrees of freedom. Provenance: finding
   helpers#6. The interval uses N-2 of the query points, not the
   residual degrees of freedom of the fit.
-- [ ] `eventfinder.m` local `islocalmax`. Provenance: finding
+- [x] `eventfinder.m` local `islocalmax`. Provenance: finding
   helpers#12. The local function is identical to
   `private/islocalmax.m`. Rec: remove the local copy and call the
   shared helper with unchanged results.
-- [ ] `fitab.m` local fitNLS copies. Provenance: finding helpers#13.
+- [x] `fitab.m` local fitNLS copies. Provenance: finding helpers#13.
   The local `fitNLS_matlab`, `fitNLS_octave`, and `nlparci_octave`
   shadow the private files. Rec: remove the local copies and call the
   shared helpers with unchanged results.
-- [ ] `loadflow.m` anonymous `cms2cmd`. Provenance: finding helpers#20.
+- [x] `loadflow.m` anonymous `cms2cmd`. Provenance: finding helpers#20.
   The anonymous function shadows `private/cms2cmd.m`.
-- [ ] `private/preparecalendar.m` timestep. Provenance: finding
+- [x] `private/preparecalendar.m` timestep. Provenance: finding
   helpers#21. The function never assigns `timestep` for a leap-free or
   irregular calendar.
 
 Acceptance: each defect gets a fix and a test that covers the changed
 behavior. A fix that changes analysis results waits for a user decision.
+
+Resolution (2026-09-14, bead bfra-3kh.40): every item above and every
+item in the bead notes has a fix and a test. The notes items are
+`private/fillnans` help and edge runs, `private/setrainnan` vector
+input, `private/smoothnoise` `none`, `runlength` and `anomaly` row
+vectors, `getplotdata` children without `XData`, and the single-sample
+`fitcts` guard. The matfunclib copies of `predictlm`, `runlength`, and
+`getplotdata` have the same fixes. The matfunclib `anomaly` accepts row
+vectors in its own code. Per the R4 decision, the `runlength` and
+`getplotdata` tests are in matfunclib (`testRunlength` and
+`testGetplotdata`). They run the matfunclib copies, which use the same
+algorithm as the toolbox copies. The toolbox copy of `anomaly` has
+different code, so `tests/test_anomaly.m` tests it.
 
 ## Generated-doc defects from the R3 sweep (bfra-3kh.41 stub)
 
@@ -475,22 +488,29 @@ class "generated and published documentation that contradicts the code".
 
 ### Todo
 
-- [ ] m2html dependency graph out of date. Provenance: finding docs#3.
+- [x] m2html dependency graph out of date. Provenance: finding docs#3.
   `toolbox/docs/html/m2html/+baseflow/graph.png` and `graph.map` are
   the 2023 render, because Graphviz `dot` is not installed. The image
   shows edges that the regenerated `graph.dot` does not have. Rec:
   install Graphviz and rerun `makedocs('functions')`, or turn the graph
   off.
-- [ ] demo 2 published outputs out of date. Provenance: finding
+- [x] demo 2 published outputs out of date. Provenance: finding
   docs#12. `toolbox/docs/html/baseflow_demo_2.html` prints
   `GlobalFit.b` 1.2764 and alpha 3.6175. The demo code gives 1.2777 and
   3.6004. HEAD has the same mismatch. Rec:
   export the demo again with Run true and without `convertlivescripts`.
-- [ ] `toolbox/GettingStarted.mlx` out of sync. Provenance: finding
+- [x] `toolbox/GettingStarted.mlx` out of sync. Provenance: finding
   docs#8. The live script does not match
   `toolbox/docs/baseflow_gettingStarted.m` (Mapping, the fitopts row,
   the mapping section, and the function-name fixes). Rec: regenerate
   the live script from the source after the source is final.
+
+Resolution (2026-09-14, bead bfra-3kh.41): Graphviz is installed, and
+`makedocs('functions')` renders `graph.png` and `graph.map` from the
+current `graph.dot`. The demo 2 page shows GlobalFit.b 1.2663 and alpha
+3.7554, the values that `demos/mfiles/baseflow_demo_2.m` prints. An
+export of `GettingStarted.mlx` differs from `baseflow_gettingStarted.m`
+in line wrapping only.
 
 ## User decisions from the R3 sweep (bfra-3kh.42 stub)
 

@@ -5,7 +5,8 @@ function makedocs(varargin)
    % publishes index.html using jekyll. For custom builds, use a .nojekyll file
    %
    % Publish options:
-   % docs pages
+   % docs pages (also copies the Getting Started page and its equation
+   %    images to docs/index.html and docs/)
    % demos
    % function docs
    % re-build docsearch database
@@ -60,11 +61,14 @@ function makedocs(varargin)
          [~, filename] = fileparts(demofile);
          htmlfile = fullfile(htmlpath, [filename '.html']);
 
-         export(demofile, htmlfile);
+         % Run each live script so the html shows outputs from the current
+         % code, not the outputs saved in the mlx file.
+         export(demofile, htmlfile, 'Run', true);
       end
 
-      % To convert to m-files, use convertlivescripts
-      convertlivescripts();
+      % The Octave-compatible m-files in demos/mfiles are maintained by
+      % hand, so this step does not overwrite them. To convert the live
+      % scripts to m-files, run convertlivescripts and review the diff.
    end
 
    %% build a doc search database
@@ -90,6 +94,11 @@ function makedocs(varargin)
       copyfile( ...
          fullfile(htmlpath, 'baseflow_gettingStarted.html'), ...
          fullfile(indexpath, 'index.html'));
+
+      % index.html links the equation images by file name. Copy them next
+      % to index.html, or the landing page shows broken images.
+      copyfile(fullfile(htmlpath, 'baseflow_gettingStarted_eq*.png'), ...
+         indexpath);
    end
 
    %% publish the function documentation using m2html
@@ -119,6 +128,9 @@ function makedocs(varargin)
          mkdir(m2htmlpath)
       end
 
+      % The dependency graph needs Graphviz dot (m2html looks in
+      % /usr/local/bin and /opt/homebrew/bin). Without dot, graph.png goes
+      % stale, so install Graphviz before regenerating the function pages.
       m2html( ...
          'mfiles', mfilepath, ...             % source dir where the files live
          'htmldir', m2htmlpath, ...           % dest dir where the html files go

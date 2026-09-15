@@ -192,10 +192,11 @@ The `.octaverc` file loads the required packages with `pkg load`. Depending on y
 Limitations when running in Octave:
 
 - The live scripts in the `toolbox/demos/` folder will not work on Octave. Use the `.m` files in `toolbox/demos/mfiles` instead.
-- On Octave 11.3.0, `baseflow_demo_1`, `baseflow_demo_2`, and `baseflow_demo_3` run. `baseflow_demo_kuparuk` errors in `trendplot` at its `fitlm` call. The theory demos need the `symbolic` package.
+- On Octave 11.3.0 with the `statistics` package 1.9.1, `baseflow_demo_1`, `baseflow_demo_2`, `baseflow_demo_3`, and `baseflow_demo_kuparuk` run. The theory demos need the `symbolic` package.
 - Functions relying on `datetime` objects may not work on Octave.
 - Graphics objects are not supported in Octave, including `gobjects` which may cause errors.
 - The vendored `+deps/arrow` function errors on Octave because it reads the MATLAB-only `WarpToFill` axes property. The arrow annotations in `gpfitb`, `plplotb`, `plotrefline`, and `fitphidist` call it.
+- `checkevent` and `eventpicker` call `yyaxis`, which Octave does not implement.
 - Latex interpreter is not supported in Octave.
 - The `+internal` maintenance tooling and its private helpers are MATLAB-only. `Setup('dependencies')` skips the analysis on Octave.
 

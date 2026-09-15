@@ -24,36 +24,35 @@
 <div class="box"><strong>QTSTRING Return latex-formatted string for Q(t) function.</strong></div>
 
 <h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="box"><strong>function [Qtstr,aQbstr] = QtString(varargin) </strong></div>
+<div class="box"><strong>function Qtstr = QtString(varargin) </strong></div>
 
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment">QTSTRING Return latex-formatted string for Q(t) function.
 
  Syntax
 
-     [Qtstr, aQbstr] = baseflow.QtString(ab)
-     [Qtstr, aQbstr] = baseflow.QtString(ab, Q0)
-     [Qtstr, aQbstr] = baseflow.QtString(_, 'printvalues', true)
+     Qtstr = baseflow.QtString(ab)
+     Qtstr = baseflow.QtString(ab, Q0)
+     Qtstr = baseflow.QtString(_, 'printvalues', true)
 
  Description
 
-     [Qtstr, aQbstr] = baseflow.QtString(ab, Q0) returns latex strings
-     for the Q(t) solution and the recession equation -dQ/dt = aQ^b.
-     When 'printvalues' is true, the strings include the values of the
-     optional inputs ab = [a b] and the initial flow Q0. Otherwise the
-     strings contain symbols only.
+     Qtstr = baseflow.QtString(ab, Q0) returns a latex string for the
+     Q(t) solution of the recession equation -dQ/dt = aQ^b. When
+     'printvalues' is true, the string includes the value of b from the
+     optional input ab = [a b] and the initial flow Q0. Otherwise the
+     string contains symbols only.
 
  Optional inputs
 
      one input: array [a,b]
      two input: array [a,b], scalar Q0
-     'printvalues': logical, true includes the values of ab and Q0 in
-     the strings. The default is false.
+     'printvalues': logical, true includes the values of b and Q0 in
+     the string. The default is false.
 
  Output
 
      Qtstr: formatted latex string for equation Q(t) = f(a,b,Q0)
-     aQbstr: formatted latex string for equation dQdt = aQb
 
  Example
 
@@ -61,12 +60,12 @@
  b = 2;
  baseflow.QtString([a, b], &quot;printvalues&quot;,true)
 
- Also return Q(t) with a value for Q0:
+ Include a value for Q0:
 
  Qtstr = baseflow.QtString([a, b], 1000, &quot;printvalues&quot;,true)
 
- See also: baseflow.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>, baseflow.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>, baseflow.<a href="QtauString.html" class="code" title="function [Qtaustr,aQbstr] = QtauString(varargin)">QtauString</a>,
- baseflow.<a href="aQbString.html" class="code" title="function [aQbstr,Qtstr] = aQbString(varargin)">aQbString</a>
+ See also: baseflow.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>, baseflow.<a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>, baseflow.<a href="QtauString.html" class="code" title="function Qtaustr = QtauString(varargin)">QtauString</a>,
+ baseflow.<a href="aQbString.html" class="code" title="function aQbstr = aQbString(varargin)">aQbString</a>
 
  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</pre></div>
 
@@ -94,103 +93,92 @@ This function is called by:
 
 
 <h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
-<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function [Qtstr,aQbstr] = QtString(varargin)</a>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function Qtstr = QtString(varargin)</a>
 0002    <span class="comment">%QTSTRING Return latex-formatted string for Q(t) function.</span>
 0003    <span class="comment">%</span>
 0004    <span class="comment">% Syntax</span>
 0005    <span class="comment">%</span>
-0006    <span class="comment">%     [Qtstr, aQbstr] = baseflow.QtString(ab)</span>
-0007    <span class="comment">%     [Qtstr, aQbstr] = baseflow.QtString(ab, Q0)</span>
-0008    <span class="comment">%     [Qtstr, aQbstr] = baseflow.QtString(_, 'printvalues', true)</span>
+0006    <span class="comment">%     Qtstr = baseflow.QtString(ab)</span>
+0007    <span class="comment">%     Qtstr = baseflow.QtString(ab, Q0)</span>
+0008    <span class="comment">%     Qtstr = baseflow.QtString(_, 'printvalues', true)</span>
 0009    <span class="comment">%</span>
 0010    <span class="comment">% Description</span>
 0011    <span class="comment">%</span>
-0012    <span class="comment">%     [Qtstr, aQbstr] = baseflow.QtString(ab, Q0) returns latex strings</span>
-0013    <span class="comment">%     for the Q(t) solution and the recession equation -dQ/dt = aQ^b.</span>
-0014    <span class="comment">%     When 'printvalues' is true, the strings include the values of the</span>
-0015    <span class="comment">%     optional inputs ab = [a b] and the initial flow Q0. Otherwise the</span>
-0016    <span class="comment">%     strings contain symbols only.</span>
+0012    <span class="comment">%     Qtstr = baseflow.QtString(ab, Q0) returns a latex string for the</span>
+0013    <span class="comment">%     Q(t) solution of the recession equation -dQ/dt = aQ^b. When</span>
+0014    <span class="comment">%     'printvalues' is true, the string includes the value of b from the</span>
+0015    <span class="comment">%     optional input ab = [a b] and the initial flow Q0. Otherwise the</span>
+0016    <span class="comment">%     string contains symbols only.</span>
 0017    <span class="comment">%</span>
 0018    <span class="comment">% Optional inputs</span>
 0019    <span class="comment">%</span>
 0020    <span class="comment">%     one input: array [a,b]</span>
 0021    <span class="comment">%     two input: array [a,b], scalar Q0</span>
-0022    <span class="comment">%     'printvalues': logical, true includes the values of ab and Q0 in</span>
-0023    <span class="comment">%     the strings. The default is false.</span>
+0022    <span class="comment">%     'printvalues': logical, true includes the values of b and Q0 in</span>
+0023    <span class="comment">%     the string. The default is false.</span>
 0024    <span class="comment">%</span>
 0025    <span class="comment">% Output</span>
 0026    <span class="comment">%</span>
 0027    <span class="comment">%     Qtstr: formatted latex string for equation Q(t) = f(a,b,Q0)</span>
-0028    <span class="comment">%     aQbstr: formatted latex string for equation dQdt = aQb</span>
-0029    <span class="comment">%</span>
-0030    <span class="comment">% Example</span>
-0031    <span class="comment">%</span>
-0032    <span class="comment">% a = 1250;</span>
-0033    <span class="comment">% b = 2;</span>
-0034    <span class="comment">% baseflow.QtString([a, b], &quot;printvalues&quot;,true)</span>
-0035    <span class="comment">%</span>
-0036    <span class="comment">% Also return Q(t) with a value for Q0:</span>
-0037    <span class="comment">%</span>
-0038    <span class="comment">% Qtstr = baseflow.QtString([a, b], 1000, &quot;printvalues&quot;,true)</span>
-0039    <span class="comment">%</span>
-0040    <span class="comment">% See also: baseflow.getstring, baseflow.Qnonlin, baseflow.QtauString,</span>
-0041    <span class="comment">% baseflow.aQbString</span>
-0042    <span class="comment">%</span>
-0043    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0044 
-0045    <span class="comment">% if called with no input, open this file</span>
-0046    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0047 
-0048    <span class="comment">% parse inputs</span>
-0049    [ab, Q0, printvalues] = <a href="#_sub1" class="code" title="subfunction [ab, Q0, printvalues] = parseinputs(mfilename, varargin)">parseinputs</a>(mfilename, varargin{:});
-0050 
-0051    <span class="comment">% main function. Each helper builds its own labels with values by design.</span>
-0052    <span class="comment">% baseflow.getstring holds the symbolic labels.</span>
-0053    <span class="keyword">if</span> printvalues == true
-0054 
-0055       <span class="comment">% build the aQb string</span>
-0056       aexp = floor(log10(ab(1)));
-0057       abase = ab(1) * 10 ^ -aexp;
-0058 
-0059       <span class="comment">% close math mode before e so the latex interpreter keeps e upright</span>
-0060       aQbstr = sprintf(<span class="string">'-d$Q$/d$t$ = %.fe$^{%.f}Q^{%.2f}$'</span>, <span class="keyword">...</span>
-0061          abase, aexp, ab(2));
-0062 
-0063       <span class="comment">% build the Q(t) string. This formats Q0 as an integer (%d).</span>
-0064       <span class="keyword">if</span> isempty(Q0)
-0065          Q0str = <span class="string">'Q_0'</span>;
-0066       <span class="keyword">else</span>
-0067          Q0str = sprintf(<span class="string">'%d'</span>, Q0);
-0068       <span class="keyword">end</span>
-0069       Qtstr = sprintf(<span class="string">'$Q(t) = [%s^{-(b-1)}+a(b-1)t]^{-1/(b-1)} (b=%.2f)$'</span>, <span class="keyword">...</span>
-0070          Q0str, ab(2));
-0071    <span class="keyword">else</span>
-0072       <span class="comment">% get the symbolic labels from baseflow.getstring so the helpers match</span>
-0073       aQbstr = baseflow.getstring(<span class="string">'aQb'</span>);
-0074       Qtstr = baseflow.getstring(<span class="string">'Q(t)'</span>);
-0075    <span class="keyword">end</span>
-0076 
-0077    <span class="comment">% convert to tex because Octave does not support the latex interpreter</span>
-0078    <span class="keyword">if</span> isoctave
-0079       aQbstr = latex2tex(aQbstr);
-0080       Qtstr = latex2tex(Qtstr);
-0081    <span class="keyword">end</span>
-0082 <span class="keyword">end</span>
-0083 
-0084 <span class="comment">%% INPUT PARSER</span>
-0085 <a name="_sub1" href="#_subfunctions" class="code">function [ab, Q0, printvalues] = parseinputs(mfilename, varargin)</a>
+0028    <span class="comment">%</span>
+0029    <span class="comment">% Example</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">% a = 1250;</span>
+0032    <span class="comment">% b = 2;</span>
+0033    <span class="comment">% baseflow.QtString([a, b], &quot;printvalues&quot;,true)</span>
+0034    <span class="comment">%</span>
+0035    <span class="comment">% Include a value for Q0:</span>
+0036    <span class="comment">%</span>
+0037    <span class="comment">% Qtstr = baseflow.QtString([a, b], 1000, &quot;printvalues&quot;,true)</span>
+0038    <span class="comment">%</span>
+0039    <span class="comment">% See also: baseflow.getstring, baseflow.Qnonlin, baseflow.QtauString,</span>
+0040    <span class="comment">% baseflow.aQbString</span>
+0041    <span class="comment">%</span>
+0042    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0043 
+0044    <span class="comment">% if called with no input, open this file</span>
+0045    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0046 
+0047    <span class="comment">% parse inputs</span>
+0048    [ab, Q0, printvalues] = <a href="#_sub1" class="code" title="subfunction [ab, Q0, printvalues] = parseinputs(mfilename, varargin)">parseinputs</a>(mfilename, varargin{:});
+0049 
+0050    <span class="comment">% main function. Each helper builds its own label with values by design.</span>
+0051    <span class="comment">% baseflow.getstring holds the symbolic labels.</span>
+0052    <span class="keyword">if</span> printvalues == true
+0053 
+0054       <span class="comment">% build the Q(t) string. This formats Q0 as an integer (%d).</span>
+0055       <span class="keyword">if</span> isempty(Q0)
+0056          Q0str = <span class="string">'Q_0'</span>;
+0057       <span class="keyword">else</span>
+0058          Q0str = sprintf(<span class="string">'%d'</span>, Q0);
+0059       <span class="keyword">end</span>
+0060       Qtstr = sprintf(<span class="string">'$Q(t) = [%s^{-(b-1)}+a(b-1)t]^{-1/(b-1)} (b=%.2f)$'</span>, <span class="keyword">...</span>
+0061          Q0str, ab(2));
+0062    <span class="keyword">else</span>
+0063       <span class="comment">% get the symbolic label from baseflow.getstring so the helpers match</span>
+0064       Qtstr = baseflow.getstring(<span class="string">'Q(t)'</span>);
+0065    <span class="keyword">end</span>
+0066 
+0067    <span class="comment">% convert to tex because Octave does not support the latex interpreter</span>
+0068    <span class="keyword">if</span> isoctave
+0069       Qtstr = latex2tex(Qtstr);
+0070    <span class="keyword">end</span>
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%% INPUT PARSER</span>
+0074 <a name="_sub1" href="#_subfunctions" class="code">function [ab, Q0, printvalues] = parseinputs(mfilename, varargin)</a>
+0075 
+0076    parser = inputParser;
+0077    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0078    parser.addOptional(<span class="string">'ab'</span>, [], @isnumeric);
+0079    parser.addOptional(<span class="string">'Q0'</span>, [], @isnumeric);
+0080    parser.addParameter(<span class="string">'printvalues'</span>, false, @islogical);
+0081    parser.parse(varargin{:});
+0082 
+0083    ab = parser.Results.ab;
+0084    Q0 = parser.Results.Q0;
+0085    printvalues = parser.Results.printvalues;
 0086 
-0087    parser = inputParser;
-0088    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
-0089    parser.addOptional(<span class="string">'ab'</span>, [], @isnumeric);
-0090    parser.addOptional(<span class="string">'Q0'</span>, [], @isnumeric);
-0091    parser.addParameter(<span class="string">'printvalues'</span>, false, @islogical);
-0092    parser.parse(varargin{:});
-0093 
-0094    ab = parser.Results.ab;
-0095    Q0 = parser.Results.Q0;
-0096    printvalues = parser.Results.printvalues;
-0097 
-0098 <span class="keyword">end</span></pre></div>
+0087 <span class="keyword">end</span></pre></div>
 </body>
 </html>

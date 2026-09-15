@@ -4,6 +4,49 @@ This file lists notable changes to the baseflow toolbox. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 semantic versioning.
 
+## [Unreleased]
+
+### Changed
+
+- `aQbString`, `QtString`, and `QtauString` each return one label.
+  `aQbString` returns the -dQ/dt = aQ^b label and has no `Q0` input.
+  Call `QtString` for the Q(t) label.
+- `checkevent` has no `ax` option. It always opens its own figure.
+- `private/fitlm_octmat` computes 100(1-`alpha`)% coefficient confidence
+  intervals on MATLAB. In 1.1.0 its MATLAB path returned 95% intervals
+  for every `alpha`.
+- `DESCRIPTION` requires the Octave `statistics` package 1.9.1 or later.
+  `trendplot` and `private/fitlm_octmat` use its `fitlm` model object.
+
+### Fixed
+
+- `checkevent` runs without an input parser error. The parser gives the
+  `Q` and `q` inputs distinct names. The Octave parser compares names
+  without case, and the MATLAB parser does so by default.
+- `checkevent` draws an event that has no valid flow.
+- `trendplot` and `private/fitlm_octmat` run on Octave, so the Kuparuk
+  demo runs on Octave.
+- `private/fillnans` fills only interior nan runs of length `fmax` or
+  less and accepts a row vector.
+- `private/smoothnoise` keeps each year together on the 'annual' path
+  and accepts a call with no method input.
+- `private/setrainnan` accepts vector input.
+- `private/preparecalendar` assigns `timestep` for every calendar.
+- `private/fitcts` returns nan for a single sample.
+- `private/predictlm` uses the residual degrees of freedom of the fit.
+- `private/runlength` and `private/anomaly` accept row vectors.
+- `private/getplotdata` skips axes children that have no `XData`.
+- `private/formatPlotMarkers` calls `round` with one input, which Octave
+  requires.
+- `fitab` and `loadflow` call the shared private helpers in place of
+  local copies.
+- The GitHub Actions workflow uses action versions that run on Node.js 24.
+- `makedocs` copies the Getting Started equation images to `docs/`, so
+  `docs/index.html` shows its equations.
+- `makedocs('demos')` does not overwrite the Octave m-files in
+  `demos/mfiles`, and the demo pages show the output of the current code.
+- The m2html dependency graph matches the current functions.
+
 ## [1.1.0] - 2026-09-14
 
 ### Added
