@@ -119,21 +119,23 @@ This function is called by:
 0047    [PD(3), h3] = baseflow.fitphidist(phidist(:, 3), <span class="string">'PD'</span>, <span class="string">'cdf'</span>, showfit);
 0048    [PD(4), h4] = baseflow.fitphidist(phicombo, <span class="string">'PD'</span>, <span class="string">'cdf'</span>, showfit);
 0049 
-0050    <span class="comment">% put the mean and standard errors in an array</span>
+0050    <span class="comment">% put the mean, the standard errors, and the 95% half-widths in arrays</span>
 0051    mu = [h1.mu; h2.mu; h3.mu; h4.mu];
 0052    pm = [h1.pm; h2.pm; h3.pm; h4.pm];
-0053 
-0054    PhiFit.phidist = phidist;
-0055    PhiFit.phi12   = phicombo;
-0056    PhiFit.PD      = PD;
-0057    PhiFit.mu      = mu;
-0058    PhiFit.pm      = pm;
-0059 
-0060    <span class="comment">% [F1,h1]  = baseflow.fitphidist(phi1,'PD','cdf');</span>
-0061    <span class="comment">% [F2,h2]  = baseflow.fitphidist(phi2,'PD','cdf');</span>
-0062    <span class="comment">% [F3,h3]  = baseflow.fitphidist(phi3,'PD','cdf');</span>
-0063    <span class="comment">% [F4,h4]  = baseflow.fitphidist(phi4,'PD','cdf');</span>
-0064    <span class="comment">% [F,h]    = baseflow.fitphidist([phi1;phi2],'PD','cdf');</span>
-0065 <span class="keyword">end</span></pre></div>
+0053    se = [h1.se; h2.se; h3.se; h4.se];
+0054 
+0055    PhiFit.phidist = phidist;
+0056    PhiFit.phi12   = phicombo;
+0057    PhiFit.PD      = PD;
+0058    PhiFit.mu      = mu;
+0059    PhiFit.pm      = pm;
+0060    PhiFit.se      = se;
+0061 
+0062    <span class="comment">% [F1,h1]  = baseflow.fitphidist(phi1,'PD','cdf');</span>
+0063    <span class="comment">% [F2,h2]  = baseflow.fitphidist(phi2,'PD','cdf');</span>
+0064    <span class="comment">% [F3,h3]  = baseflow.fitphidist(phi3,'PD','cdf');</span>
+0065    <span class="comment">% [F4,h4]  = baseflow.fitphidist(phi4,'PD','cdf');</span>
+0066    <span class="comment">% [F,h]    = baseflow.fitphidist([phi1;phi2],'PD','cdf');</span>
+0067 <span class="keyword">end</span></pre></div>
 </body>
 </html>

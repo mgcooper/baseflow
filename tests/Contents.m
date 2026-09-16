@@ -18,15 +18,20 @@
 %   test_eqstrings         - Test the equation label helpers
 %   test_fillnans          - Test the private fillnans helper
 %   test_fitcts            - Test the constant-time-step dq/dt method
+%   test_fitevents         - Test the fitevents plotfits option
 %   test_fitopts           - Test the fitab fitopts pass-through
+%   test_getdqdt           - Test the getdqdt fit-plot option
 %   test_hyetograph        - Test the figure that baseflow.hyetograph draws in
 %   test_internal          - Test the toolbox internal functions
 %   test_islocalmax        - Test baseflow/private/islocalmax.m
 %   test_loadflow          - Test the loadflow unit conversions
+%   test_nstaruncertainty  - Test the private nstaruncertainty helper
 %   test_peakfinder        - Test the vendored +deps/peakfinder function
 %   test_plfitb_hanel      - Test the r_plfit arguments plfitb's 'hanel' passes
 %   test_plotaquifertrend  - Test the plotaquifertrend branch handles
+%   test_plotrefline       - Test the plotrefline label position
 %   test_preparecalendar   - Test the private preparecalendar helper
+%   test_rotatedLogLogText - Test the rotated log-log label angle
 %   test_setrainnan        - Test the private setrainnan helper
 %   test_siUnitsToTex      - Test the private siUnitsToTex unit label helper
 %   test_smoothnoise       - Test the private smoothnoise helper

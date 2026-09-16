@@ -51,7 +51,8 @@
 
      [Fit, h] = baseflow.fitphidist(__,plottype,showfit) also returns the
      figure handles in struct h for the 'cdf' and 'probplot' types. For
-     'cdf', h also holds the bootstrap mean (mu) and error (pm) of phi.
+     'cdf', h also holds the bootstrap mean (mu) of phi, its standard
+     error (se), and the 95% half-width pm = 1.96*se.
      showfit is a logical flag (default true). With showfit false, these
      two types delete their figure. For 'pdf', h is an empty struct.
 
@@ -110,176 +111,179 @@ This function is called by:
 0023    <span class="comment">%</span>
 0024    <span class="comment">%     [Fit, h] = baseflow.fitphidist(__,plottype,showfit) also returns the</span>
 0025    <span class="comment">%     figure handles in struct h for the 'cdf' and 'probplot' types. For</span>
-0026    <span class="comment">%     'cdf', h also holds the bootstrap mean (mu) and error (pm) of phi.</span>
-0027    <span class="comment">%     showfit is a logical flag (default true). With showfit false, these</span>
-0028    <span class="comment">%     two types delete their figure. For 'pdf', h is an empty struct.</span>
-0029    <span class="comment">%</span>
-0030    <span class="comment">% See also: eventphi, fitphi, fitphidist</span>
-0031    <span class="comment">%</span>
-0032    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
-0033 
-0034    <span class="comment">% if called with no input, open this file</span>
-0035    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0036 
-0037    <span class="comment">% PARSE INPUTS</span>
-0038    [phi, outputtype, plottype, showfit] = <a href="#_sub3" class="code" title="subfunction [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)">parseinputs</a>(phi, varargin{:});
-0039 
-0040    <span class="comment">% Force all inputs to be column vectors</span>
-0041    phi = phi(:);
-0042 
-0043    <span class="comment">% Fit the beta distribution</span>
-0044    [PARAMHAT, PARAMCI] = betafit(phi);
-0045    [M, V] = betastat(PARAMHAT(1), PARAMHAT(2));
-0046    PD.paramEst = PARAMHAT;
-0047    PD.paramCI = PARAMCI;
-0048    PD.a = PARAMHAT(1);
-0049    PD.b = PARAMHAT(2);
-0050    PD.mean = M;
-0051    PD.std = sqrt(V);
-0052 
-0053    <span class="comment">% Create the figure</span>
-0054    <span class="keyword">switch</span> plottype
-0055       <span class="keyword">case</span> <span class="string">'cdf'</span>
-0056          h = <a href="#_sub1" class="code" title="subfunction h = cdfplotphi(phi, PD, showfit)">cdfplotphi</a>(phi, PD, showfit);
-0057       <span class="keyword">case</span> <span class="string">'probplot'</span>
-0058          h = <a href="#_sub2" class="code" title="subfunction h = probplotphi(phi, PD, showfit)">probplotphi</a>(phi, PD, showfit);
-0059       <span class="keyword">case</span> <span class="string">'pdf'</span>
-0060          <span class="comment">% 'pdf' draws no figure, so return an empty struct for h.</span>
-0061          h = struct();
-0062    <span class="keyword">end</span>
-0063 
-0064    <span class="comment">% package output</span>
-0065    <span class="keyword">switch</span> outputtype
-0066       <span class="keyword">case</span> <span class="string">'PD'</span>
-0067          <span class="comment">% send back the probability distribution</span>
-0068          Fit = PD;
-0069       <span class="keyword">case</span> <span class="string">'mean'</span>
-0070          <span class="comment">% send back the mean</span>
-0071          Fit = PD.mean;
-0072       <span class="keyword">case</span> <span class="string">'std'</span>
-0073          <span class="comment">% send back the mean</span>
-0074          Fit = PD.std;
-0075    <span class="keyword">end</span>
-0076 <span class="keyword">end</span>
-0077 
-0078 <a name="_sub1" href="#_subfunctions" class="code">function h = cdfplotphi(phi, PD, showfit)</a>
-0079 
-0080    <span class="comment">% Get the cdf</span>
-0081    [cdfY, cdfX] = ecdf(phi, <span class="string">'Function'</span>, <span class="string">'cdf'</span>);
-0082    
-0083    <span class="comment">% Create the figure</span>
-0084    h.figure = figure(<span class="string">'Visible'</span>, showfit);
-0085    h.data = plot(cdfX, cdfY, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, [0 0.447 0.741], <span class="keyword">...</span>
-0086       <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>, <span class="string">'Visible'</span>, showfit); hold on;
-0087 
-0088    <span class="comment">% Create grid where function will be computed</span>
-0089    XLims = get(gca, <span class="string">'XLim'</span>);
-0090    XLims = XLims + [-1 1] * 0.01 * diff(XLims);
-0091    XGrid = linspace(XLims(1), XLims(2), 100);
-0092 
-0093    <span class="comment">% plot the cdf</span>
-0094    phifit = betacdf(XGrid, PD.a, PD.b);
-0095    h.fit = plot(XGrid, phifit, <span class="string">'k'</span>);
-0096    set(gca, <span class="string">'XLim'</span>, [0 max(phi)])
-0097 
-0098    <span class="comment">% bootstrap standard error / CI's</span>
-0099    booterr = true;
-0100    N = 1000;
-0101    <span class="keyword">if</span> booterr == true
-0102       reps = bootstrp(N, @betafit, phi);
-0103       mureps = reps(:, 1) ./ (sum(reps, 2));
-0104       sigreps = sqrt(prod(reps, 2) ./ ((sum(reps, 2)+1) .* (sum(reps, 2)).^2));
-0105    <span class="keyword">end</span>
-0106 
-0107    <span class="comment">% this slightly overestimates the error, which is fine (conservative)</span>
-0108    mu = mean(mureps);
-0109    sg = mean(sigreps);
-0110    pm = std(mureps) * 1.96; <span class="comment">% or: mean(sigreps)/sqrt(N)*1.96</span>
-0111 
-0112    <span class="keyword">if</span> showfit == true &amp;&amp; ~isoctave
-0113       
-0114       <span class="comment">% compose legend text and arrow text</span>
-0115       ltxt = {<span class="string">'\phi'</span>, sprintf(<span class="string">'Beta (\\alpha=%.2f,\\beta=%.1f)'</span>, PD.a, PD.b)};
-0116       arrowtxt = sprintf(<span class="string">'\\langle\\phi\\rangle=%.3f\\pm%.3f'</span>, mu, round(pm, 3));
-0117 
-0118       <span class="comment">% add xlabel and legend</span>
-0119       xlabel(<span class="string">'x'</span>);
-0120       ylabel(<span class="string">'P(\phi \leq x)'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
-0121       
-0122       xarrow = [PD.mean 1.3*PD.mean];
-0123       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
-0124       baseflow.deps.arrow([xarrow(2), yarrow(2)],[xarrow(1), yarrow(1)], <span class="keyword">...</span>
-0125          <span class="string">'BaseAngle'</span>, 90, <span class="string">'Length'</span>, 8, <span class="string">'TipAngle'</span>, 10)
-0126       text(0.95*xarrow(2), yarrow(2), arrowtxt, <span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>)
-0127 
-0128       h.legend = legend(ltxt, <span class="string">'Location'</span>, <span class="string">'east'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
-0129       h.legend.Position(2) = 0.68*h.legend.Position(2);
-0130       h.legend.Position(1) = 0.85*h.legend.Position(1);
-0131    <span class="keyword">end</span>
-0132 
-0133    h.ax = gca;
-0134    h.mu = mu;
-0135    h.pm = pm;
-0136 
-0137    <span class="comment">% The bootstrap standard error above needs the fit, but a caller with</span>
-0138    <span class="comment">% showfit false wants no figure. Delete the hidden figure, so repeated</span>
-0139    <span class="comment">% calls from phifitensemble and globalfit do not leave figures open.</span>
-0140    <span class="keyword">if</span> showfit == false
-0141       delete(h.figure)
-0142    <span class="keyword">end</span>
-0143 <span class="keyword">end</span>
-0144 
-0145 <a name="_sub2" href="#_subfunctions" class="code">function h = probplotphi(phi, PD, showfit)</a>
-0146 
-0147    <span class="keyword">if</span> isoctave
-0148       error([mfilename <span class="string">': probplot not implemented in Octave. Use ''cdf''.'</span>])
-0149    <span class="keyword">end</span>
-0150 
-0151    <span class="comment">% Create the figure. It is hidden when showfit is false.</span>
-0152    h.figure = figure(<span class="string">'Visible'</span>, showfit);
+0026    <span class="comment">%     'cdf', h also holds the bootstrap mean (mu) of phi, its standard</span>
+0027    <span class="comment">%     error (se), and the 95% half-width pm = 1.96*se.</span>
+0028    <span class="comment">%     showfit is a logical flag (default true). With showfit false, these</span>
+0029    <span class="comment">%     two types delete their figure. For 'pdf', h is an empty struct.</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">% See also: eventphi, fitphi, fitphidist</span>
+0032    <span class="comment">%</span>
+0033    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
+0034 
+0035    <span class="comment">% if called with no input, open this file</span>
+0036    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0037 
+0038    <span class="comment">% PARSE INPUTS</span>
+0039    [phi, outputtype, plottype, showfit] = <a href="#_sub3" class="code" title="subfunction [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)">parseinputs</a>(phi, varargin{:});
+0040 
+0041    <span class="comment">% Force all inputs to be column vectors</span>
+0042    phi = phi(:);
+0043 
+0044    <span class="comment">% Fit the beta distribution</span>
+0045    [PARAMHAT, PARAMCI] = betafit(phi);
+0046    [M, V] = betastat(PARAMHAT(1), PARAMHAT(2));
+0047    PD.paramEst = PARAMHAT;
+0048    PD.paramCI = PARAMCI;
+0049    PD.a = PARAMHAT(1);
+0050    PD.b = PARAMHAT(2);
+0051    PD.mean = M;
+0052    PD.std = sqrt(V);
+0053 
+0054    <span class="comment">% Create the figure</span>
+0055    <span class="keyword">switch</span> plottype
+0056       <span class="keyword">case</span> <span class="string">'cdf'</span>
+0057          h = <a href="#_sub1" class="code" title="subfunction h = cdfplotphi(phi, PD, showfit)">cdfplotphi</a>(phi, PD, showfit);
+0058       <span class="keyword">case</span> <span class="string">'probplot'</span>
+0059          h = <a href="#_sub2" class="code" title="subfunction h = probplotphi(phi, PD, showfit)">probplotphi</a>(phi, PD, showfit);
+0060       <span class="keyword">case</span> <span class="string">'pdf'</span>
+0061          <span class="comment">% 'pdf' draws no figure, so return an empty struct for h.</span>
+0062          h = struct();
+0063    <span class="keyword">end</span>
+0064 
+0065    <span class="comment">% package output</span>
+0066    <span class="keyword">switch</span> outputtype
+0067       <span class="keyword">case</span> <span class="string">'PD'</span>
+0068          <span class="comment">% send back the probability distribution</span>
+0069          Fit = PD;
+0070       <span class="keyword">case</span> <span class="string">'mean'</span>
+0071          <span class="comment">% send back the mean</span>
+0072          Fit = PD.mean;
+0073       <span class="keyword">case</span> <span class="string">'std'</span>
+0074          <span class="comment">% send back the mean</span>
+0075          Fit = PD.std;
+0076    <span class="keyword">end</span>
+0077 <span class="keyword">end</span>
+0078 
+0079 <a name="_sub1" href="#_subfunctions" class="code">function h = cdfplotphi(phi, PD, showfit)</a>
+0080 
+0081    <span class="comment">% Get the cdf</span>
+0082    [cdfY, cdfX] = ecdf(phi, <span class="string">'Function'</span>, <span class="string">'cdf'</span>);
+0083    
+0084    <span class="comment">% Create the figure</span>
+0085    h.figure = figure(<span class="string">'Visible'</span>, showfit);
+0086    h.data = plot(cdfX, cdfY, <span class="string">'o'</span>, <span class="string">'MarkerFaceColor'</span>, [0 0.447 0.741], <span class="keyword">...</span>
+0087       <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>, <span class="string">'Visible'</span>, showfit); hold on;
+0088 
+0089    <span class="comment">% Create grid where function will be computed</span>
+0090    XLims = get(gca, <span class="string">'XLim'</span>);
+0091    XLims = XLims + [-1 1] * 0.01 * diff(XLims);
+0092    XGrid = linspace(XLims(1), XLims(2), 100);
+0093 
+0094    <span class="comment">% plot the cdf</span>
+0095    phifit = betacdf(XGrid, PD.a, PD.b);
+0096    h.fit = plot(XGrid, phifit, <span class="string">'k'</span>);
+0097    set(gca, <span class="string">'XLim'</span>, [0 max(phi)])
+0098 
+0099    <span class="comment">% bootstrap standard error / CI's</span>
+0100    booterr = true;
+0101    N = 1000;
+0102    <span class="keyword">if</span> booterr == true
+0103       reps = bootstrp(N, @betafit, phi);
+0104       mureps = reps(:, 1) ./ (sum(reps, 2));
+0105       sigreps = sqrt(prod(reps, 2) ./ ((sum(reps, 2)+1) .* (sum(reps, 2)).^2));
+0106    <span class="keyword">end</span>
+0107 
+0108    <span class="comment">% this slightly overestimates the error, which is fine (conservative)</span>
+0109    mu = mean(mureps);
+0110    sg = mean(sigreps);
+0111    se = std(mureps); <span class="comment">% standard error of the mean of phi</span>
+0112    pm = se * 1.96; <span class="comment">% 95% half-width. or: mean(sigreps)/sqrt(N)*1.96</span>
+0113 
+0114    <span class="keyword">if</span> showfit == true &amp;&amp; ~isoctave
+0115       
+0116       <span class="comment">% compose legend text and arrow text</span>
+0117       ltxt = {<span class="string">'\phi'</span>, sprintf(<span class="string">'Beta (\\alpha=%.2f,\\beta=%.1f)'</span>, PD.a, PD.b)};
+0118       arrowtxt = sprintf(<span class="string">'\\langle\\phi\\rangle=%.3f\\pm%.3f'</span>, mu, round(pm, 3));
+0119 
+0120       <span class="comment">% add xlabel and legend</span>
+0121       xlabel(<span class="string">'x'</span>);
+0122       ylabel(<span class="string">'P(\phi \leq x)'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0123       
+0124       xarrow = [PD.mean 1.3*PD.mean];
+0125       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
+0126       baseflow.deps.arrow([xarrow(2), yarrow(2)],[xarrow(1), yarrow(1)], <span class="keyword">...</span>
+0127          <span class="string">'BaseAngle'</span>, 90, <span class="string">'Length'</span>, 8, <span class="string">'TipAngle'</span>, 10)
+0128       text(0.95*xarrow(2), yarrow(2), arrowtxt, <span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>)
+0129 
+0130       h.legend = legend(ltxt, <span class="string">'Location'</span>, <span class="string">'east'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0131       h.legend.Position(2) = 0.68*h.legend.Position(2);
+0132       h.legend.Position(1) = 0.85*h.legend.Position(1);
+0133    <span class="keyword">end</span>
+0134 
+0135    h.ax = gca;
+0136    h.mu = mu;
+0137    h.pm = pm;
+0138    h.se = se;
+0139 
+0140    <span class="comment">% The bootstrap standard error above needs the fit, but a caller with</span>
+0141    <span class="comment">% showfit false wants no figure. Delete the hidden figure, so repeated</span>
+0142    <span class="comment">% calls from phifitensemble and globalfit do not leave figures open.</span>
+0143    <span class="keyword">if</span> showfit == false
+0144       delete(h.figure)
+0145    <span class="keyword">end</span>
+0146 <span class="keyword">end</span>
+0147 
+0148 <a name="_sub2" href="#_subfunctions" class="code">function h = probplotphi(phi, PD, showfit)</a>
+0149 
+0150    <span class="keyword">if</span> isoctave
+0151       error([mfilename <span class="string">': probplot not implemented in Octave. Use ''cdf''.'</span>])
+0152    <span class="keyword">end</span>
 0153 
-0154    <span class="comment">% plot the data, suppressing the normal plot with 'noref'</span>
-0155    h.data = probplot(<span class="string">'normal'</span>, phi, [], [], <span class="string">'noref'</span>); hold on;
+0154    <span class="comment">% Create the figure. It is hidden when showfit is false.</span>
+0155    h.figure = figure(<span class="string">'Visible'</span>, showfit);
 0156 
-0157    <span class="comment">% add the fit. probplot needs a distribution object, and PD is a struct</span>
-0158    <span class="comment">% of the fitted beta parameters, so build the beta distribution.</span>
-0159    h.fit = probplot(gca, makedist(<span class="string">'Beta'</span>, <span class="string">'a'</span>, PD.a, <span class="string">'b'</span>, PD.b));
-0160 
-0161    <span class="comment">% format the symbols</span>
-0162    c  = [0 0.447 0.741];
-0163    set(h.data, <span class="string">'MarkerFaceColor'</span>, c, <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerSize'</span>, 6, <span class="keyword">...</span>
-0164       <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>);
-0165    set(h.fit, <span class="string">'Color'</span>, <span class="string">'k'</span>, <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="string">'LineWidth'</span>, 2);
-0166 
-0167    ylabel(<span class="string">'P(\phi\leq x)'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
-0168    title(<span class="string">''</span>)
-0169    set(gca, <span class="string">'XLim'</span>, [0 0.2])
-0170    h.ax = gca;
-0171 
-0172    <span class="comment">% A caller with showfit false wants no figure, so delete the hidden</span>
-0173    <span class="comment">% figure, as cdfplotphi does.</span>
-0174    <span class="keyword">if</span> showfit == false
-0175       delete(h.figure)
-0176    <span class="keyword">end</span>
-0177 <span class="keyword">end</span>
-0178 
-0179 <span class="comment">%% INPUT PARSER</span>
-0180 <a name="_sub3" href="#_subfunctions" class="code">function [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)</a>
+0157    <span class="comment">% plot the data, suppressing the normal plot with 'noref'</span>
+0158    h.data = probplot(<span class="string">'normal'</span>, phi, [], [], <span class="string">'noref'</span>); hold on;
+0159 
+0160    <span class="comment">% add the fit. probplot needs a distribution object, and PD is a struct</span>
+0161    <span class="comment">% of the fitted beta parameters, so build the beta distribution.</span>
+0162    h.fit = probplot(gca, makedist(<span class="string">'Beta'</span>, <span class="string">'a'</span>, PD.a, <span class="string">'b'</span>, PD.b));
+0163 
+0164    <span class="comment">% format the symbols</span>
+0165    c  = [0 0.447 0.741];
+0166    set(h.data, <span class="string">'MarkerFaceColor'</span>, c, <span class="string">'Marker'</span>, <span class="string">'o'</span>, <span class="string">'MarkerSize'</span>, 6, <span class="keyword">...</span>
+0167       <span class="string">'MarkerEdgeColor'</span>, <span class="string">'none'</span>);
+0168    set(h.fit, <span class="string">'Color'</span>, <span class="string">'k'</span>, <span class="string">'LineStyle'</span>, <span class="string">'-'</span>, <span class="string">'LineWidth'</span>, 2);
+0169 
+0170    ylabel(<span class="string">'P(\phi\leq x)'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);
+0171    title(<span class="string">''</span>)
+0172    set(gca, <span class="string">'XLim'</span>, [0 0.2])
+0173    h.ax = gca;
+0174 
+0175    <span class="comment">% A caller with showfit false wants no figure, so delete the hidden</span>
+0176    <span class="comment">% figure, as cdfplotphi does.</span>
+0177    <span class="keyword">if</span> showfit == false
+0178       delete(h.figure)
+0179    <span class="keyword">end</span>
+0180 <span class="keyword">end</span>
 0181 
-0182    validoutput = @(x) any(validatestring(x, {<span class="string">'PD'</span>, <span class="string">'mean'</span>, <span class="string">'std'</span>}));
-0183    validplottype = @(x) any(validatestring(x, {<span class="string">'cdf'</span>, <span class="string">'pdf'</span>, <span class="string">'probplot'</span>}));
+0182 <span class="comment">%% INPUT PARSER</span>
+0183 <a name="_sub3" href="#_subfunctions" class="code">function [phi, outputtype, plottype, showfit] = parseinputs(phi, varargin)</a>
 0184 
-0185    parser = inputParser;
-0186    parser.FunctionName = <span class="string">'baseflow.fitphidist'</span>;
-0187    parser.addRequired(<span class="string">'phi'</span>, @isvector);
-0188    parser.addOptional(<span class="string">'outputtype'</span>, <span class="string">'PD'</span>, validoutput);
-0189    parser.addOptional(<span class="string">'plottype'</span>, <span class="string">'none'</span>, validplottype);
-0190    parser.addOptional(<span class="string">'showfit'</span>, true, @islogical);
-0191    parser.parse(phi, varargin{:});
-0192 
-0193    outputtype = parser.Results.outputtype;
-0194    plottype = parser.Results.plottype;
-0195    showfit = parser.Results.showfit;
-0196 <span class="keyword">end</span></pre></div>
+0185    validoutput = @(x) any(validatestring(x, {<span class="string">'PD'</span>, <span class="string">'mean'</span>, <span class="string">'std'</span>}));
+0186    validplottype = @(x) any(validatestring(x, {<span class="string">'cdf'</span>, <span class="string">'pdf'</span>, <span class="string">'probplot'</span>}));
+0187 
+0188    parser = inputParser;
+0189    parser.FunctionName = <span class="string">'baseflow.fitphidist'</span>;
+0190    parser.addRequired(<span class="string">'phi'</span>, @isvector);
+0191    parser.addOptional(<span class="string">'outputtype'</span>, <span class="string">'PD'</span>, validoutput);
+0192    parser.addOptional(<span class="string">'plottype'</span>, <span class="string">'none'</span>, validplottype);
+0193    parser.addOptional(<span class="string">'showfit'</span>, true, @islogical);
+0194    parser.parse(phi, varargin{:});
+0195 
+0196    outputtype = parser.Results.outputtype;
+0197    plottype = parser.Results.plottype;
+0198    showfit = parser.Results.showfit;
+0199 <span class="keyword">end</span></pre></div>
 </body>
 </html>

@@ -10,6 +10,9 @@ semantic versioning.
 
 - `cloudphi` accepts a `plotfit` option (default true). With `plotfit`
   false it computes phi and draws no figure.
+- `fitphidist` returns the phi standard error as `h.se` for the 'cdf'
+  plot type, and `phifitensemble` returns it as `PhiFit.se`. `h.pm` and
+  `PhiFit.pm` keep the 95% half-width.
 - `tools/m2html` holds a copy of M2HTML (rochefort-lab/m2html at
   3821fb8, GPL-2.0-or-later) for the docs build.
   `tools/m2html/VENDORED.md` records its source, license, local changes,
@@ -21,13 +24,31 @@ semantic versioning.
   `aQbString` returns the -dQ/dt = aQ^b label and has no `Q0` input.
   Call `QtString` for the Q(t) label.
 - `checkevent` has no `ax` option. It always opens its own figure.
-- `dndtuncertainty` computes its regression interval at the `alpha`
-  level, the same level as its parameter uncertainties. In 1.1.0 the
-  regression interval was 95% for every `alpha`. The default `alpha`
-  0.05 gives the same result.
-- `dndtuncertainty` accepts `alpha` 0.05 or 0.32 only, because its
-  parameter uncertainties support only these two levels. Its help
-  documents `alpha` and `testflag`.
+- `dndtuncertainty` combines standard errors and multiplies the result
+  by the coverage factor `norminv(1-alpha/2)`, so it accepts any `alpha`
+  in (0, 1). Each input term is one standard error: the bootstrap
+  standard error for phi, the `GlobalFit` bootstrap bounds, and the
+  standard error of the regression. On Octave it returns that regression
+  term after scaling, as it did in 1.1.0. The 1.1.0 terms mixed two levels.
+
+  - The phi and regression terms were 95% half-widths.
+  - The tau and b terms were standard errors.
+  - `alpha` 0.32 halved every term except the regression term, which
+    stayed at 95%.
+
+  With `bootfit` false on the example data, `sig_dndt` at the default
+  `alpha` changes by 0.02%. Its help documents `alpha` and `testflag`.
+- `plfitb` warns with `baseflow:plfitb:tauPoleReplicates` when a
+  bootstrap replicate has alpha at or below 2. tau has its pole at
+  alpha 2 and is negative below it, so such a replicate makes `tau_sig`,
+  `tau_L`, and `tau_H` meaningless.
+- `getdqdt` with `plotfits` true draws the event figure for
+  `pickmethod` 'none', its default, and for a `fitmethod` other than
+  'none'.
+- `DESCRIPTION` gives the contact address matt@sierracrestanalytics.com.
+- `.gitattributes` gives `.m` files the rule `text eol=lf`. This release
+  converts the 14 `.m` files that used CRLF. A checkout writes LF for
+  every `.m` file.
 - `DESCRIPTION` requires the Octave `statistics` package 1.9.1 or later.
   `trendplot` and `dndtuncertainty` use its `fitlm` model object.
 - `baseflow.internal.makedocs('functions')` builds the function pages
@@ -51,6 +72,42 @@ semantic versioning.
 
 ### Fixed
 
+- `plotrefline` places the upper-envelope label on the line. The label
+  sat at `2*x`, which ignores the intercept `a = 2/timestep`, so it
+  drifted from the line for any timestep other than one day.
+- `private/rotatedLogLogText` draws its label at the angle of the line.
+  It had three defects. It read the axes offsets where it needed the
+  axes size. It applied the slope outside the arctangent. It worked in
+  figure-normalized units. No single value of its `rtxt` factor served
+  every layout. The new private helper `loglogangle` computes the angle
+  from the axes size in pixels and the axis limits. In a live MATLAB
+  figure, a listener keeps the angle correct after a resize or a limit
+  change. Octave installs no
+  listener, and a figure saved with `savefig` keeps its saved angle.
+  `rotatedLogLogText` takes the axes and the slope in place of `rtxt`.
+- `getdqdt` on MATLAB keeps the random stream of its caller. `plotdqdt`
+  fits the point cloud to draw its line. A 'qtl' fit bootstraps, so
+  `getdqdt` saves and restores the stream around the plot call.
+- `+deps/plvar` keeps the random seed a caller sets. It called
+  `rng('shuffle')` on its first call in a session, so a seeded script
+  could not reproduce its bootstrap uncertainties.
+- `dndtuncertainty` propagates the uncertainty of b to N* = 1/(4-2b)
+  with the derivative 2/(4-2b)^2, in the new private helper
+  `nstaruncertainty`. The plain factor 2 holds only for b = 3/2. The
+  1.1.0 term was (4-2b)^2 times too large, which is 1.7 at the Kuparuk
+  global b of 1.3541. The term is zero when `globalfit` runs with
+  `bootfit` false.
+- `dndtuncertainty` holds the dq/dt trend uncorrelated with the
+  event-scale variables. Its column is constant, and `corr` returns nan
+  for a constant column.
+- `fitevents` passes `plotfits` to `getdqdt`, which draws one figure per
+  event for a `fitmethod` other than 'none'. `fitevents` parsed the
+  option and ignored it.
+- `plotrefline` draws its reference line and its label in the axes a
+  caller supplies. It gives the caller back its current figure and
+  current axes. On MATLAB the arrow of the late-time, early-time, and
+  user-fit labels goes to the same axes. Octave draws no arrow and no
+  label text for those three labels.
 - `checkevent` runs without an input parser error. The parser gives the
   `Q` and `q` inputs distinct names. The Octave parser compares names
   without case, and the MATLAB parser does so by default.

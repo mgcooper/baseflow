@@ -231,106 +231,115 @@ This function is called by:
 0105 
 0106    <span class="comment">% this is the case where dQ/dt and q are returned without fitting a/b</span>
 0107    <span class="keyword">if</span> strcmp(fitmethod,<span class="string">'none'</span>) || strcmp(pickmethod,<span class="string">'none'</span>)
-0108       varargout{1} = nan;
-0109       varargout{2} = nan;
-0110       <span class="keyword">return</span>
-0111    <span class="keyword">else</span>
-0112       <span class="comment">% if pickmethod = &quot;none&quot;, we don't need anything else so we could stop</span>
-0113       <span class="comment">% here, but fitSelector will repackage the event as a cell array which is</span>
-0114       <span class="comment">% consistent with the case where pickmethod ~= &quot;none&quot; which are the</span>
-0115       <span class="comment">% options to subdivide events into segments, for example early-time and</span>
-0116       <span class="comment">% late-time. It also returns Info which is needed to parse sub-event</span>
-0117       <span class="comment">% picks.</span>
-0118 
-0119       [hFits,Picks] = baseflow.plotdqdt(q,dqdt,<span class="string">'fitmethod'</span>,fitmethod,<span class="string">'pickmethod'</span>,<span class="keyword">...</span>
-0120          pickmethod,<span class="string">'plotfits'</span>,plotfits,<span class="string">'eventID'</span>,eventID,<span class="string">'rain'</span>,rq);
-0121 
-0122       [q,dqdt,dt,tq,rq,Info] = <a href="#_sub1" class="code" title="subfunction [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)">packagefits</a>(Picks,q,dqdt,dt,tq,R);
-0123 
-0124       varargout{1} = Info;
-0125       varargout{2} = hFits;
-0126    <span class="keyword">end</span>
-0127 <span class="keyword">end</span>
-0128 
-0129 <span class="comment">% PACKAGEFITS</span>
-0130 <a name="_sub1" href="#_subfunctions" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a>
-0131 
-0132    <span class="comment">% this unpacks the Picks structure and repackages the T,Q,dQdt for each</span>
-0133    <span class="comment">% picked fit as individual cell arrays. I am not sure why I don't just do:</span>
-0134    <span class="comment">% Q = Picks.Q;</span>
-0135    <span class="comment">% dQdt = Picks.dQdt;</span>
-0136    <span class="comment">% and so on. But, Picks does not include T, and maybe I wanted to distinguish</span>
-0137    <span class="comment">% the og T,Q from the ets/vts fit t,q.</span>
-0138    <span class="comment">% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function</span>
-0139    <span class="comment">% abve, I confirmed that things work up to this point meaning I can still</span>
-0140    <span class="comment">% select events in plotdqdt and they get sent here, but I think the way i</span>
-0141    <span class="comment">% deal wtih retiming in ETS now throws off the istart/stop, so will need to</span>
-0142    <span class="comment">% figure out if it's being done correctly if I use manual or auto picking.</span>
-0143 
-0144 
-0145    <span class="comment">% if no events are found, return nan</span>
-0146    <span class="keyword">if</span> ~iscell(Picks.Q) &amp;&amp; isnan(Picks.Q)
-0147       T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; <span class="keyword">return</span>
-0148    <span class="keyword">end</span>
-0149 
-0150    numPicks = numel(Picks.Q);
-0151    T = cell(numPicks,1);
-0152    Q = cell(numPicks,1);
-0153    R = cell(numPicks,1);
-0154    dT = cell(numPicks,1);
-0155    dQdT = cell(numPicks,1);
-0156 
-0157    <span class="keyword">for</span> m = 1:numPicks
+0108 
+0109       <span class="comment">% Draw the event when the caller asks for the fit plots. plotdqdt</span>
+0110       <span class="comment">% finds no picks for pickmethod 'none', so Info stays nan.</span>
+0111       hFits = nan;
+0112       <span class="keyword">if</span> plotfits == true
+0113          hFits = baseflow.plotdqdt(q, dqdt, <span class="string">'fitmethod'</span>, fitmethod, <span class="keyword">...</span>
+0114             <span class="string">'pickmethod'</span>, pickmethod, <span class="string">'plotfits'</span>, plotfits, <span class="keyword">...</span>
+0115             <span class="string">'eventID'</span>, eventID, <span class="string">'rain'</span>, rq);
+0116       <span class="keyword">end</span>
+0117       varargout{1} = nan;
+0118       varargout{2} = hFits;
+0119       <span class="keyword">return</span>
+0120    <span class="keyword">else</span>
+0121       <span class="comment">% if pickmethod = &quot;none&quot;, we don't need anything else so we could stop</span>
+0122       <span class="comment">% here, but fitSelector will repackage the event as a cell array which is</span>
+0123       <span class="comment">% consistent with the case where pickmethod ~= &quot;none&quot; which are the</span>
+0124       <span class="comment">% options to subdivide events into segments, for example early-time and</span>
+0125       <span class="comment">% late-time. It also returns Info which is needed to parse sub-event</span>
+0126       <span class="comment">% picks.</span>
+0127 
+0128       [hFits,Picks] = baseflow.plotdqdt(q,dqdt,<span class="string">'fitmethod'</span>,fitmethod,<span class="string">'pickmethod'</span>,<span class="keyword">...</span>
+0129          pickmethod,<span class="string">'plotfits'</span>,plotfits,<span class="string">'eventID'</span>,eventID,<span class="string">'rain'</span>,rq);
+0130 
+0131       [q,dqdt,dt,tq,rq,Info] = <a href="#_sub1" class="code" title="subfunction [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)">packagefits</a>(Picks,q,dqdt,dt,tq,R);
+0132 
+0133       varargout{1} = Info;
+0134       varargout{2} = hFits;
+0135    <span class="keyword">end</span>
+0136 <span class="keyword">end</span>
+0137 
+0138 <span class="comment">% PACKAGEFITS</span>
+0139 <a name="_sub1" href="#_subfunctions" class="code">function [Q,dQdT,dT,T,R,Info] = packagefits(Picks,q,dqdt,dt,tq,rq)</a>
+0140 
+0141    <span class="comment">% this unpacks the Picks structure and repackages the T,Q,dQdt for each</span>
+0142    <span class="comment">% picked fit as individual cell arrays. I am not sure why I don't just do:</span>
+0143    <span class="comment">% Q = Picks.Q;</span>
+0144    <span class="comment">% dQdt = Picks.dQdt;</span>
+0145    <span class="comment">% and so on. But, Picks does not include T, and maybe I wanted to distinguish</span>
+0146    <span class="comment">% the og T,Q from the ets/vts fit t,q.</span>
+0147    <span class="comment">% EITHER WAY, after moving fitdqdt calls to fitets/fitvts into this function</span>
+0148    <span class="comment">% abve, I confirmed that things work up to this point meaning I can still</span>
+0149    <span class="comment">% select events in plotdqdt and they get sent here, but I think the way i</span>
+0150    <span class="comment">% deal wtih retiming in ETS now throws off the istart/stop, so will need to</span>
+0151    <span class="comment">% figure out if it's being done correctly if I use manual or auto picking.</span>
+0152 
+0153 
+0154    <span class="comment">% if no events are found, return nan</span>
+0155    <span class="keyword">if</span> ~iscell(Picks.Q) &amp;&amp; isnan(Picks.Q)
+0156       T=nan;Q=nan;R=nan;dT=nan;dQdT=nan;Info=nan; <span class="keyword">return</span>
+0157    <span class="keyword">end</span>
 0158 
-0159       istart = Picks.istart(m);
-0160       istop = Picks.istop(m);
-0161 
-0162       <span class="comment">% previously these were put into Fits structure but I</span>
-0163       Q{m} = q(istart:istop);
-0164       dQdT{m} = dqdt(istart:istop);
-0165       dT{m} = dt(istart:istop);
-0166       T{m} = tq(istart:istop);
-0167       R = rq(istart:istop);
-0168 
-0169       Info.istart(m) = istart;
-0170       Info.istop(m) = istop;
-0171       Info.runlengths(m) = Picks.runlengths(m);
-0172    <span class="keyword">end</span>
-0173 <span class="keyword">end</span>
-0174 
-0175 <span class="comment">%% INPUT PARSER</span>
-0176 <a name="_sub2" href="#_subfunctions" class="code">function [T,vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = </a><span class="keyword">...</span>
-0177       parseinputs(T,Q,R,derivmethod,funcname,varargin)
-0178 
-0179    <span class="keyword">persistent</span> parser
-0180    <span class="keyword">if</span> isempty(parser)
-0181       parser = inputParser;
-0182       parser.CaseSensitive = true;
-0183       parser.addRequired(<span class="string">'T'</span>, @isdatelike);
-0184       parser.addRequired(<span class="string">'Q'</span>, @isnumericvector);
-0185       parser.addRequired(<span class="string">'R'</span>, @isnumeric);
-0186       parser.addRequired(<span class="string">'derivmethod'</span>, @ischar);
-0187       parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>, @ischar);
-0188       parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>, @ischar);
-0189       parser.addParameter(<span class="string">'ctsmethod'</span>, <span class="string">'B1'</span>, @ischar);
-0190       parser.addParameter(<span class="string">'vtsparam'</span>, 1, @isnumericscalar);
-0191       parser.addParameter(<span class="string">'etsparam'</span>, 0.2, @isnumericscalar);
-0192       parser.addParameter(<span class="string">'plotfits'</span>, false, @islogicalscalar);
-0193       parser.addParameter(<span class="string">'eventID'</span>, <span class="string">'none'</span>, @ischar);
-0194    <span class="keyword">end</span>
-0195    parser.FunctionName = funcname;
-0196    parser.parse(T,Q,R,derivmethod,varargin{:});
-0197 
-0198    vtsparam    = parser.Results.vtsparam;
-0199    etsparam    = parser.Results.etsparam;
-0200    ctsmethod   = parser.Results.ctsmethod;
-0201    pickmethod  = parser.Results.pickmethod;
-0202    fitmethod   = parser.Results.fitmethod;
-0203    plotfits    = parser.Results.plotfits;
-0204    eventID     = parser.Results.eventID;
-0205 
-0206    <span class="comment">% Convert datetime to double if datetime was passed in</span>
-0207    T = todatenum(T);
-0208 <span class="keyword">end</span></pre></div>
+0159    numPicks = numel(Picks.Q);
+0160    T = cell(numPicks,1);
+0161    Q = cell(numPicks,1);
+0162    R = cell(numPicks,1);
+0163    dT = cell(numPicks,1);
+0164    dQdT = cell(numPicks,1);
+0165 
+0166    <span class="keyword">for</span> m = 1:numPicks
+0167 
+0168       istart = Picks.istart(m);
+0169       istop = Picks.istop(m);
+0170 
+0171       <span class="comment">% previously these were put into Fits structure but I</span>
+0172       Q{m} = q(istart:istop);
+0173       dQdT{m} = dqdt(istart:istop);
+0174       dT{m} = dt(istart:istop);
+0175       T{m} = tq(istart:istop);
+0176       R = rq(istart:istop);
+0177 
+0178       Info.istart(m) = istart;
+0179       Info.istop(m) = istop;
+0180       Info.runlengths(m) = Picks.runlengths(m);
+0181    <span class="keyword">end</span>
+0182 <span class="keyword">end</span>
+0183 
+0184 <span class="comment">%% INPUT PARSER</span>
+0185 <a name="_sub2" href="#_subfunctions" class="code">function [T,vtsparam,etsparam,ctsmethod,pickmethod,fitmethod,plotfits,eventID] = </a><span class="keyword">...</span>
+0186       parseinputs(T,Q,R,derivmethod,funcname,varargin)
+0187 
+0188    <span class="keyword">persistent</span> parser
+0189    <span class="keyword">if</span> isempty(parser)
+0190       parser = inputParser;
+0191       parser.CaseSensitive = true;
+0192       parser.addRequired(<span class="string">'T'</span>, @isdatelike);
+0193       parser.addRequired(<span class="string">'Q'</span>, @isnumericvector);
+0194       parser.addRequired(<span class="string">'R'</span>, @isnumeric);
+0195       parser.addRequired(<span class="string">'derivmethod'</span>, @ischar);
+0196       parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>, @ischar);
+0197       parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>, @ischar);
+0198       parser.addParameter(<span class="string">'ctsmethod'</span>, <span class="string">'B1'</span>, @ischar);
+0199       parser.addParameter(<span class="string">'vtsparam'</span>, 1, @isnumericscalar);
+0200       parser.addParameter(<span class="string">'etsparam'</span>, 0.2, @isnumericscalar);
+0201       parser.addParameter(<span class="string">'plotfits'</span>, false, @islogicalscalar);
+0202       parser.addParameter(<span class="string">'eventID'</span>, <span class="string">'none'</span>, @ischar);
+0203    <span class="keyword">end</span>
+0204    parser.FunctionName = funcname;
+0205    parser.parse(T,Q,R,derivmethod,varargin{:});
+0206 
+0207    vtsparam    = parser.Results.vtsparam;
+0208    etsparam    = parser.Results.etsparam;
+0209    ctsmethod   = parser.Results.ctsmethod;
+0210    pickmethod  = parser.Results.pickmethod;
+0211    fitmethod   = parser.Results.fitmethod;
+0212    plotfits    = parser.Results.plotfits;
+0213    eventID     = parser.Results.eventID;
+0214 
+0215    <span class="comment">% Convert datetime to double if datetime was passed in</span>
+0216    T = todatenum(T);
+0217 <span class="keyword">end</span></pre></div>
 </body>
 </html>

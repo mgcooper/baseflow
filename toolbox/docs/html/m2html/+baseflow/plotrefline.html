@@ -79,7 +79,7 @@ This function is called by:
 <h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
-<li><a href="#_sub1" class="code">function addlabels(a,b,refline)</a></li>
+<li><a href="#_sub1" class="code">function addlabels(ax,a,b,refline)</a></li>
 <li><a href="#_sub2" class="code">function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline,</a></li></ul>
 
 
@@ -211,7 +211,7 @@ This function is called by:
 0124       setlogticks(ax);
 0125 
 0126       <span class="keyword">if</span> labels == true
-0127          <a href="#_sub1" class="code" title="subfunction addlabels(a,b,refline)">addlabels</a>(a,b,refline)
+0127          <a href="#_sub1" class="code" title="subfunction addlabels(ax,a,b,refline)">addlabels</a>(ax,a,b,refline)
 0128       <span class="keyword">end</span>
 0129    <span class="keyword">end</span>
 0130    <span class="comment">% if discharge were measured directly, then the lower envelope would be</span>
@@ -229,11 +229,11 @@ This function is called by:
 0142 <span class="keyword">end</span>
 0143 
 0144 <span class="comment">%% LOCAL FUNCTIONS</span>
-0145 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(a,b,refline)</a>
+0145 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(ax,a,b,refline)</a>
 0146 
 0147    <span class="comment">% for early and late, we use the early-time form to get the y position</span>
-0148    ylims = ylim;
-0149    xlims = xlim;
+0148    ylims = ylim(ax);
+0149    xlims = xlim(ax);
 0150 
 0151    <span class="comment">% use the number of decades to place the labels</span>
 0152    ndecsy = log10(ylims(2))-log10(ylims(1));
@@ -265,73 +265,65 @@ This function is called by:
 0178          <span class="keyword">if</span> ~isoctave
 0179             baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], <span class="keyword">...</span>
 0180                <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10);
-0181             text(1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
+0181             text(ax,1.03*xa(2),ya(2),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>, <span class="keyword">...</span>
 0182                <span class="string">'fontsize'</span>,13,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
 0183          <span class="keyword">end</span>
 0184 
 0185       <span class="keyword">case</span> <span class="string">'upperenvelope'</span>
 0186 
-0187          <span class="comment">% only works with correct axes position</span>
-0188          axpos = baseflow.deps.plotboxpos(gca);
-0189          <span class="comment">% xtxt = exp(mean(log(xlim)));</span>
-0190 
-0191          xlims = log10(xlim);
-0192          xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
-0193          ytxt = 2*xtxt;
-0194          rtxt = 0.98;
+0187          <span class="comment">% xtxt = exp(mean(log(xlim)));</span>
+0188 
+0189          <span class="comment">% place the label halfway across the x range, on the line. a is</span>
+0190          <span class="comment">% 2/timestep, so a*xtxt^b holds the label on the line for any</span>
+0191          <span class="comment">% timestep, not only the daily case where a is 2</span>
+0192          xlims = log10(xlim(ax));
+0193          xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
+0194          ytxt = a*xtxt^b;
 0195 
-0196          <span class="comment">% some values of rtxt that work for different types of plots</span>
-0197          <span class="comment">% 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)</span>
-0198          <span class="comment">% 0.22   not sure (note said 0.22 works with tiledlayout)</span>
-0199          <span class="comment">% 3.8    not sure (note said i think 3.8 works with subplot)</span>
-0200          <span class="comment">% 0.86   the standard point cloud plot (standard figure size)</span>
-0201          <span class="comment">% 1.07   not sure but this was</span>
-0202          <span class="comment">% 0.98   used this in the final point cloud plot</span>
-0203 
-0204          rotatedLogLogText(xtxt,ytxt,<span class="string">'upper envelope'</span>,rtxt,axpos,<span class="string">'FontSize'</span>,11);
-0205 
-0206       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
-0207          <span class="comment">% for now, add this after the fact</span>
-0208          <span class="comment">%</span>
-0209          <span class="comment">%          xlims    = log10(xlim);</span>
-0210          <span class="comment">%          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);</span>
-0211          <span class="comment">%          ytxt     = 2*xtxt;</span>
-0212    <span class="keyword">end</span>
-0213 <span class="keyword">end</span>
-0214 
-0215 <span class="comment">%% INPUT PARSER</span>
-0216 <a name="_sub2" href="#_subfunctions" class="code">function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, </a><span class="keyword">...</span>
-0217       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
-0218    parser = inputParser;
-0219    parser.FunctionName = <span class="string">'baseflow.plotrefline'</span>;
-0220 
-0221    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
-0222    parser.addRequired(<span class="string">'y'</span>, @isnumeric);
-0223    parser.addParameter(<span class="string">'mask'</span>, true(size(x)), @islogical);
-0224    parser.addParameter(<span class="string">'refline'</span>, <span class="string">'none'</span>, @ischar);
-0225    parser.addParameter(<span class="string">'refslope'</span>, 1, @isnumeric);
-0226    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
-0227    parser.addParameter(<span class="string">'labels'</span>, false, @islogical);
-0228    parser.addParameter(<span class="string">'refqtls'</span>, nan, @isnumeric);
-0229    parser.addParameter(<span class="string">'plotline'</span>, true, @islogical);
-0230    parser.addParameter(<span class="string">'linecolor'</span>, [0 0 0], @isnumeric);
-0231    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric); <span class="comment">% default = 1 m3/s</span>
-0232    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric); <span class="comment">% default = 1 day</span>
-0233    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
-0234 
-0235    parser.parse(x, y, varargin{:});
-0236 
-0237    mask        = parser.Results.mask;
-0238    refline     = parser.Results.refline;
-0239    refslope    = parser.Results.refslope;
-0240    userab      = parser.Results.userab;
-0241    labels      = parser.Results.labels;
-0242    refqtls     = parser.Results.refqtls;
-0243    plotline    = parser.Results.plotline;
-0244    linecolor   = parser.Results.linecolor;
-0245    precision   = parser.Results.precision;
-0246    timestep    = parser.Results.timestep;
-0247    ax          = parser.Results.ax;   
-0248 <span class="keyword">end</span></pre></div>
+0196          rotatedLogLogText(ax,xtxt,ytxt,<span class="string">'upper envelope'</span>,b,<span class="string">'FontSize'</span>,11);
+0197 
+0198       <span class="keyword">case</span> <span class="string">'lowerenvelope'</span>
+0199          <span class="comment">% for now, add this after the fact</span>
+0200          <span class="comment">%</span>
+0201          <span class="comment">%          xlims    = log10(xlim);</span>
+0202          <span class="comment">%          xtxt     = 10^(xlims(1)+(xlims(2)-xlims(1))/2);</span>
+0203          <span class="comment">%          ytxt     = 2*xtxt;</span>
+0204    <span class="keyword">end</span>
+0205 <span class="keyword">end</span>
+0206 
+0207 <span class="comment">%% INPUT PARSER</span>
+0208 <a name="_sub2" href="#_subfunctions" class="code">function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, </a><span class="keyword">...</span>
+0209       linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
+0210    parser = inputParser;
+0211    parser.FunctionName = <span class="string">'baseflow.plotrefline'</span>;
+0212 
+0213    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
+0214    parser.addRequired(<span class="string">'y'</span>, @isnumeric);
+0215    parser.addParameter(<span class="string">'mask'</span>, true(size(x)), @islogical);
+0216    parser.addParameter(<span class="string">'refline'</span>, <span class="string">'none'</span>, @ischar);
+0217    parser.addParameter(<span class="string">'refslope'</span>, 1, @isnumeric);
+0218    parser.addParameter(<span class="string">'userab'</span>, [1 1], @isnumeric);
+0219    parser.addParameter(<span class="string">'labels'</span>, false, @islogical);
+0220    parser.addParameter(<span class="string">'refqtls'</span>, nan, @isnumeric);
+0221    parser.addParameter(<span class="string">'plotline'</span>, true, @islogical);
+0222    parser.addParameter(<span class="string">'linecolor'</span>, [0 0 0], @isnumeric);
+0223    parser.addParameter(<span class="string">'precision'</span>, 1, @isnumeric); <span class="comment">% default = 1 m3/s</span>
+0224    parser.addParameter(<span class="string">'timestep'</span>, 1, @isnumeric); <span class="comment">% default = 1 day</span>
+0225    parser.addParameter(<span class="string">'ax'</span>, emptyaxes(), @isaxis);
+0226 
+0227    parser.parse(x, y, varargin{:});
+0228 
+0229    mask        = parser.Results.mask;
+0230    refline     = parser.Results.refline;
+0231    refslope    = parser.Results.refslope;
+0232    userab      = parser.Results.userab;
+0233    labels      = parser.Results.labels;
+0234    refqtls     = parser.Results.refqtls;
+0235    plotline    = parser.Results.plotline;
+0236    linecolor   = parser.Results.linecolor;
+0237    precision   = parser.Results.precision;
+0238    timestep    = parser.Results.timestep;
+0239    ax          = parser.Results.ax;   
+0240 <span class="keyword">end</span></pre></div>
 </body>
 </html>
