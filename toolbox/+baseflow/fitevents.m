@@ -139,16 +139,15 @@ function [Fits,Results] = fitevents(Events,varargin)
       eventR = eventRain(eventI);
       eventDate = mean(eventT); % keep track of the event date
 
-      % if this is activated, need method to plot in getdqdt
-      % if thisEvent == 1 && plotfits == true
-      %    figure('Position',[1 1 658  576]); ax = gca;
-      % end
-
-      % get the q, dq/dt estimates (H = Hat)
+      % get the q, dq/dt estimates (H = Hat). getdqdt passes plotfits to
+      % plotdqdt, which draws one figure per event. plotdqdt fits the
+      % point cloud with its own defaults to draw the line, so the drawn
+      % line uses fitmethod alone, not fitorder or fitopts.
 
       [qH,dH,dtH,tH] = baseflow.getdqdt(eventT, eventQ, eventR, derivmethod,   ...
          'pickmethod', pickmethod, 'fitmethod', fitmethod, 'etsparam', ...
-         etsparam, 'vtsparam', vtsparam, 'ctsmethod', ctsmethod);
+         etsparam, 'vtsparam', vtsparam, 'ctsmethod', ctsmethod, ...
+         'plotfits', plotfits, 'eventID', sprintf('%d', thisEvent));
 
       % undocumented feature
       if saveplots == true
