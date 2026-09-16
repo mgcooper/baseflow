@@ -54,7 +54,7 @@ function varargout = plotrefline(x,y,varargin)
       if isempty(ax)
          ax = gca;
       end
-      hold on;
+      hold(ax, 'on');
       xlims = get(ax,'XLim');
       ylims = get(ax,'YLim');
    end
@@ -112,11 +112,11 @@ function varargout = plotrefline(x,y,varargin)
 
       switch refline
          case 'bestfit'
-            href = loglog(xref,yref,':','LineWidth',1,'Color',linecolor);
+            href = loglog(ax,xref,yref,':','LineWidth',1,'Color',linecolor);
          case 'userfit'
-            href = loglog(xref,yref,'-','LineWidth',1,'Color',linecolor);
+            href = loglog(ax,xref,yref,'-','LineWidth',1,'Color',linecolor);
          otherwise
-            href = loglog(xref,yref,'-','LineWidth',0.5,'Color',linecolor);
+            href = loglog(ax,xref,yref,'-','LineWidth',0.5,'Color',linecolor);
       end
 
       % reset the x,ylims
@@ -124,7 +124,7 @@ function varargout = plotrefline(x,y,varargin)
       setlogticks(ax);
 
       if labels == true
-         addlabels(a,b,refline)
+         addlabels(ax,a,b,refline)
       end
    end
    % if discharge were measured directly, then the lower envelope would be
@@ -142,11 +142,11 @@ function varargout = plotrefline(x,y,varargin)
 end
 
 %% LOCAL FUNCTIONS
-function addlabels(a,b,refline)
+function addlabels(ax,a,b,refline)
 
    % for early and late, we use the early-time form to get the y position
-   ylims = ylim;
-   xlims = xlim;
+   ylims = ylim(ax);
+   xlims = xlim(ax);
 
    % use the number of decades to place the labels
    ndecsy = log10(ylims(2))-log10(ylims(1));
@@ -176,32 +176,37 @@ function addlabels(a,b,refline)
          end
 
          if ~isoctave
+
+            % arrow draws in the current axes of the current figure, so
+            % make both current for the call, then give the caller its
+            % current figure and current axes back.
+            fig = ancestor(ax, 'figure');
+            currentfig = get(groot, 'CurrentFigure');
+            currentax = get(fig, 'CurrentAxes');
+            restorefig = onCleanup(@() set(groot, ...
+               'CurrentFigure', currentfig));
+            restoreax = onCleanup(@() set(fig, 'CurrentAxes', currentax));
+            set(groot, 'CurrentFigure', fig);
+            set(fig, 'CurrentAxes', ax);
+
             baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
                'BaseAngle',90,'Length',8,'TipAngle',10);
-            text(1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
+            text(ax,1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
                'fontsize',13,'Interpreter','latex');
          end
 
       case 'upperenvelope'
 
-         % only works with correct axes position
-         axpos = baseflow.deps.plotboxpos(gca);
          % xtxt = exp(mean(log(xlim)));
 
-         xlims = log10(xlim);
+         % place the label halfway across the x range, on the line. a is
+         % 2/timestep, so a*xtxt^b holds the label on the line for any
+         % timestep, not only the daily case where a is 2
+         xlims = log10(xlim(ax));
          xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
-         ytxt = 2*xtxt;
-         rtxt = 0.98;
+         ytxt = a*xtxt^b;
 
-         % some values of rtxt that work for different types of plots
-         % 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)
-         % 0.22   not sure (note said 0.22 works with tiledlayout)
-         % 3.8    not sure (note said i think 3.8 works with subplot)
-         % 0.86   the standard point cloud plot (standard figure size)
-         % 1.07   not sure but this was
-         % 0.98   used this in the final point cloud plot
-
-         rotatedLogLogText(xtxt,ytxt,'upper envelope',rtxt,axpos,'FontSize',11);
+         rotatedLogLogText(ax,xtxt,ytxt,'upper envelope',b,'FontSize',11);
 
       case 'lowerenvelope'
          % for now, add this after the fact

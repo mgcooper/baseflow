@@ -67,6 +67,21 @@ close(htrend.figure);
 assert(all(isfinite(htrend.ab)))
 assert(all(htrend.yci(:, 1) <= htrend.yfit & htrend.yfit <= htrend.yci(:, 2)))
 
+% draw a reference line with its rotated label. plotrefline calls the
+% private rotatedLogLogText, which computes the drawn angle of the line.
+% Octave has no MarkedClean listener, so the label keeps the angle it
+% gets at creation.
+figref = figure('Visible', 'off');
+axref = axes(figref);
+set(axref, 'XScale', 'log', 'YScale', 'log')
+qref = transpose(logspace(0, 3, 50));
+baseflow.plotrefline(qref, qref, 'refline', 'upperenvelope', ...
+   'ax', axref, 'labels', true);
+htxt = findobj(axref, 'Type', 'text');
+assert(~isempty(htxt))
+assert(isfinite(get(htxt(1), 'Rotation')))
+close(figref);
+
 % exercise the vendored arrow handle allocation; close the figure the
 % call opens. arrow.m reads the MATLAB-only hidden axes property
 % WarpToFill (arrow_WarpToFill) and errors on Octave before it reaches
