@@ -27,13 +27,19 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    %  solutions to the one-dimensional groundwater flow equation for a
    %  Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
    %
-   %  alpha is the significance level of the uncertainty: 0.05 (default, a
-   %  95% interval) or 0.32 (about one standard error). For 0.32 the
-   %  regression interval uses alpha, and the parameter uncertainties are
-   %  halved. Other values raise an error, because the parameter
-   %  uncertainties have no scaling for them. testflag true asks for a
-   %  comparison of uncertainty methods, which is not supported and raises
-   %  a warning.
+   %  alpha is the significance level of the returned uncertainty (default
+   %  0.05, a 95% interval). Each input uncertainty is a standard error
+   %  (one sigma): the drainable porosity from the phi bootstrap, and tau
+   %  and b from the GlobalFit bootstrap bounds. The function combines them
+   %  with the Jacobian and the correlation matrix, then multiplies the
+   %  combined standard uncertainty by the coverage factor
+   %  norminv(1-alpha/2). alpha 0.32 therefore gives about one sigma.
+   %  testflag true asks for a comparison of uncertainty methods, which is
+   %  not supported and raises a warning.
+   %
+   %  Note: globalfit with bootfit false returns tau_L = tau_H = tau and
+   %  b_L = b_H = b, so the tau and b terms are zero and the combined
+   %  uncertainty holds only the phi and regression terms.
    %
    % See also: aquifertrend, aquiferthickness
    %
@@ -52,14 +58,13 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
       testflag = varargin{2};
    end
 
-   % The parameter uncertainties scale only for these two levels (see the
-   % alpha == 0.32 block below), so reject any other level instead of
-   % mixing confidence levels in the combined uncertainty.
-   supportedalpha = [0.05, 0.32];
-   if ~ismember(alpha, supportedalpha)
-      error('baseflow:dndtuncertainty:unsupportedAlpha', ...
-         'alpha must be 0.05 or 0.32')
+   % alpha sets the coverage factor applied to the combined standard
+   % uncertainty at the end of the function.
+   if ~isnumeric(alpha) || ~isscalar(alpha) || alpha <= 0 || alpha >= 1
+      error('baseflow:dndtuncertainty:invalidAlpha', ...
+         'alpha must be a scalar in the interval (0, 1)')
    end
+   coveragefactor = norminv(1 - alpha/2);
 
    % Convert time in days to years
    if isdatetime(T)
@@ -83,20 +88,17 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    Qb = Qb./365.25;                          % cm/yr -> cm/day
 
    % fitlm returns a LinearModel in MATLAB and in the Octave statistics
-   % package, so one call serves both. The Coefficients table has no CI
-   % column, so coefCI computes the intervals at the alpha level, the same
-   % level as the parameter uncertainties below. Row 2 is the slope.
+   % package, so one call serves both. Row 2 is the slope. Keep the
+   % standard error, because every term of the combined uncertainty below
+   % is one sigma.
    mdl = fitlm(T, Qb);
       dbfdt = mdl.Coefficients.Estimate(2);  % cm/day/year
-   se_dbfdt = mdl.Coefficients.SE(2);        % standard error
-   CI_coefs = coefCI(mdl, alpha);            % 100(1-alpha)% CI's
-   CI_dbfdt = CI_coefs(2, :);
-   sig_dbfdt = CI_dbfdt(2) - dbfdt;          % they're symetric so just take one
+   sig_dbfdt = mdl.Coefficients.SE(2);       % standard error
 
    % In octave, the full Jacobian/Covariance Matrix method is not supported, but
    % the uncertainty is dominated by the linear regression, so return that.
    if isoctave
-      sig_dndt = sig_dbfdt;
+      sig_dndt = coveragefactor * sig_dbfdt;
       sig_lamda = nan;
       return
    end
@@ -137,21 +139,15 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
 
    % define the uncertainties (standard errors)
    % if we averaged phi1 and phi2, then the combined uncertainty would be:
-   sig_phi1 = PhiFit.pm(1);
-   sig_phi2 = PhiFit.pm(2);
+   sig_phi1 = PhiFit.se(1);
+   sig_phi2 = PhiFit.se(2);
    sig_phi = rho_phi12*sig_phi1*sig_phi2;
    sig_phi = sqrt((0.5 * sig_phi1)^2 + (0.5 * sig_phi2)^2 + 2*0.5*0.5*sig_phi);
    sig_tau = mean([GlobalFit.tau_H - GlobalFit.tau, GlobalFit.tau - GlobalFit.tau_L]);
    sig_b = mean([GlobalFit.b_H - GlobalFit.b, GlobalFit.b - GlobalFit.b_L]);
-   sig_Np1 = 2*sig_b; % uncertainty on 1/(4-2*b) OR 1/(1-2*b) is 2*sig(b)
+   % Nstar = 1/(4-2b), so its uncertainty is dNstar/db times sig_b.
+   sig_Np1 = nstaruncertainty(GlobalFit.b, sig_b);
    % the 0.5 on sig_phi1/2 is from the averaging procedure which divides by 2
-
-   if alpha == 0.32
-      sig_phi = sig_phi/2;
-      sig_tau = sig_tau/2;
-      sig_b = sig_b/2;
-      sig_Np1 = sig_Np1/2;    % uncertainty on 1/(N+1) = 2*sig(b)
-   end
 
    % Mean values of parameters
    tauhat = GlobalFit.tau;                      % days
@@ -164,20 +160,25 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    dndt = Fdndt(tauhat, phihat, bhat, dbfdt);   % cm/yr
 
    % Compute the jacobian
-   dqdtv = dbfdt.*ones(size(tau));
    J = [dndt./tauhat, -dndt./phihat, dndt./Nhat, dndt./dbfdt];
 
-   % Construct the covariance matrix and compute the combined uncertainty
+   % Construct the covariance matrix and compute the combined uncertainty.
+   % dq/dt comes from the annual regression, so it has no event-scale
+   % sample to correlate against the three event variables. A constant
+   % column makes corr return nan, so build the correlation matrix from
+   % the event variables and hold dq/dt uncorrelated with them.
    u = [sig_tau, sig_phi, sig_Np1, sig_dbfdt];
-   V = corr([tau, phi, Np1, dqdtv]) .* u .* u';
-   sig_dndt = sqrt(J * V * J');
+   C = eye(4);
+   C(1:3, 1:3) = corr([tau, phi, Np1]);
+   V = C .* u .* u';
+   sig_dndt = coveragefactor * sqrt(J * V * J');
    % w/o correlated errors: sqrt(sum((J .* u).^2))
 
    % Compute the uncertainty on lambda (repeat above steps)
    J = [lambda./tauhat, -lambda./phihat, lambda./Nhat];
    u = [sig_tau, sig_phi, sig_Np1];
    V = corr([tau, phi, Np1]) .* u .* u';
-   sig_lamda = sqrt(J * V * J');
+   sig_lamda = coveragefactor * sqrt(J * V * J');
    % w/o correlated errors: sqrt(sum((J .* u).^2))
 
    if testflag == true

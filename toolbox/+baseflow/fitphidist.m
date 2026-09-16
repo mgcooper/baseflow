@@ -23,7 +23,8 @@ function [Fit,h] = fitphidist(phi,varargin)
    %
    %     [Fit, h] = baseflow.fitphidist(__,plottype,showfit) also returns the
    %     figure handles in struct h for the 'cdf' and 'probplot' types. For
-   %     'cdf', h also holds the bootstrap mean (mu) and error (pm) of phi.
+   %     'cdf', h also holds the bootstrap mean (mu) of phi, its standard
+   %     error (se), and the 95% half-width pm = 1.96*se.
    %     showfit is a logical flag (default true). With showfit false, these
    %     two types delete their figure. For 'pdf', h is an empty struct.
    %
@@ -107,7 +108,8 @@ function h = cdfplotphi(phi, PD, showfit)
    % this slightly overestimates the error, which is fine (conservative)
    mu = mean(mureps);
    sg = mean(sigreps);
-   pm = std(mureps) * 1.96; % or: mean(sigreps)/sqrt(N)*1.96
+   se = std(mureps); % standard error of the mean of phi
+   pm = se * 1.96; % 95% half-width. or: mean(sigreps)/sqrt(N)*1.96
 
    if showfit == true && ~isoctave
       
@@ -133,6 +135,7 @@ function h = cdfplotphi(phi, PD, showfit)
    h.ax = gca;
    h.mu = mu;
    h.pm = pm;
+   h.se = se;
 
    % The bootstrap standard error above needs the fit, but a caller with
    % showfit false wants no figure. Delete the hidden figure, so repeated

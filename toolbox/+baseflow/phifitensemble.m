@@ -47,15 +47,17 @@ function PhiFit = phifitensemble(Results, Fits, A, D, L, bhat, lateqtls, ...
    [PD(3), h3] = baseflow.fitphidist(phidist(:, 3), 'PD', 'cdf', showfit);
    [PD(4), h4] = baseflow.fitphidist(phicombo, 'PD', 'cdf', showfit);
 
-   % put the mean and standard errors in an array
+   % put the mean, the standard errors, and the 95% half-widths in arrays
    mu = [h1.mu; h2.mu; h3.mu; h4.mu];
    pm = [h1.pm; h2.pm; h3.pm; h4.pm];
+   se = [h1.se; h2.se; h3.se; h4.se];
 
    PhiFit.phidist = phidist;
    PhiFit.phi12   = phicombo;
    PhiFit.PD      = PD;
    PhiFit.mu      = mu;
    PhiFit.pm      = pm;
+   PhiFit.se      = se;
 
    % [F1,h1]  = baseflow.fitphidist(phi1,'PD','cdf');
    % [F2,h2]  = baseflow.fitphidist(phi2,'PD','cdf');

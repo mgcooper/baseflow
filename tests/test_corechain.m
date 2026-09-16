@@ -212,13 +212,12 @@ function test_fitphidistNominal(testCase)
 end
 
 function test_dndtuncertaintyAlpha(testCase)
-   % dndtuncertainty computes the regression interval at the alpha level.
-   % Baseflow with a large oscillation makes the regression term dominate
-   % the combined uncertainty. alpha 0.32 then scales the result by the
-   % ratio of the 84th and 97.5th t quantiles (about 0.5); a result that
-   % ignores alpha keeps a ratio near 1. The same random seed gives both
-   % calls the same phi bootstrap. The teardown closes any figure a failed
-   % run leaves open.
+   % dndtuncertainty multiplies its combined standard uncertainty by the
+   % coverage factor norminv(1-alpha/2), so the result for alpha 0.32
+   % equals the result for alpha 0.05 times the ratio of those factors. A
+   % result that ignores alpha keeps a ratio of 1. The same random seed
+   % gives both calls the same phi bootstrap. The teardown closes any
+   % figure a failed run leaves open.
    figsbefore = findall(0, 'Type', 'figure');
    testCase.addTeardown(@() closenewfigs(figsbefore));
    gopts = baseflow.setopts('globalfit', ...
@@ -251,11 +250,14 @@ function test_dndtuncertaintyAlpha(testCase)
       testCase.TestData.FitsTable, testCase.TestData.Fits, GlobalFit, ...
       gopts, alpha_onesigma);
 
-   dfe = nyears - 2;
-   ratio_expected = tinv(1 - alpha_onesigma/2, dfe) ...
-      / tinv(1 - alpha_default/2, dfe);
+   ratio_expected = norminv(1 - alpha_onesigma/2) ...
+      / norminv(1 - alpha_default/2);
    ratio_returned = sig_onesigma / sig_default;
    testCase.verifyEqual(ratio_returned, ratio_expected, 'RelTol', tol)
+
+   % The dq/dt column is constant, so the correlation matrix holds it
+   % uncorrelated with the event variables and the result stays finite.
+   testCase.verifyTrue(isfinite(sig_default))
 
    % dndtuncertainty leaves no figure open.
    newfigs_returned = numel(findall(0, 'Type', 'figure')) - numel(figsbefore);
@@ -263,13 +265,12 @@ function test_dndtuncertaintyAlpha(testCase)
    testCase.verifyEqual(newfigs_returned, newfigs_expected)
 end
 
-function test_dndtuncertaintyUnsupportedAlpha(testCase)
-   % dndtuncertainty rejects an alpha other than 0.05 or 0.32 before it
-   % uses the other inputs, so empty placeholders suffice.
-   alpha_unsupported = 0.1;
+function test_dndtuncertaintyInvalidAlpha(testCase)
+   % dndtuncertainty rejects an alpha outside (0, 1) before it uses the
+   % other inputs, so empty placeholders suffice.
+   alpha_invalid = 1.5;
    testCase.verifyError(@() baseflow.dndtuncertainty([], [], [], [], ...
-      [], [], alpha_unsupported), ...
-      'baseflow:dndtuncertainty:unsupportedAlpha')
+      [], [], alpha_invalid), 'baseflow:dndtuncertainty:invalidAlpha')
 end
 
 function test_fitphidistProbplot(testCase)
