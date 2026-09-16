@@ -25,6 +25,8 @@ function h = plplotb(x,xmin,alpha,varargin)
    % Optional inputs
    %
    %     alphaci  = 2x1 double of lower and upper confidence intervals for alpha
+   %                 The legend prints this interval and names no coverage
+   %                 level, because the caller sets the level.
    %     xminci   = 2x1 double of lower and upper confidence intervals for xmin
    %     varsym   = char in latex format representing the data symbol, used for
    %                 plot
@@ -87,7 +89,10 @@ function h = plplotb(x,xmin,alpha,varargin)
    if ~isnan(alphaci)
       bL = baseflow.conversions(alphaci(1),'alpha','b');
       bH = baseflow.conversions(alphaci(2),'alpha','b');
-      l2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)',b,bL,bH);
+      % The caller supplies alphaci and its coverage level is unknown here,
+      % so the label states the interval and names no level. plfitb passes
+      % one bootstrap standard deviation, which is not a 95% interval.
+      l2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]$ CI)',b,bL,bH);
    else
       l2 = sprintf('MLE fit ($b=%.2f$)',baseflow.conversions(alpha,'alpha','b'));
       bL = nan;
@@ -99,7 +104,7 @@ function h = plplotb(x,xmin,alpha,varargin)
 
    if isoctave
       l1 = latex2tex(l1);
-      l2 = sprintf('MLE fit (b=%.2f [%.2f,%.2f] 95%% CI)',b,bL,bH);
+      l2 = sprintf('MLE fit (b=%.2f [%.2f,%.2f] CI)',b,bL,bH);
       xlabel(latex2tex(xtext),'Interpreter','tex');
       ylabel(latex2tex(ytext),'Interpreter','tex');
       h.legend = legend({l1,l2},'interpreter','tex','location','southwest');

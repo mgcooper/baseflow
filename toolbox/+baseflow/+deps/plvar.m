@@ -150,7 +150,11 @@ function [alpha,xmin,n,bof]=plvar(x,varargin)
    if isempty(rand_state)
       rand_state = cputime;
       %rand('twister',sum(100*clock));
-      rng('shuffle', 'twister'); % mgc replaced with recommended state
+      % mgc 15-Sep-2026: this block sets only the persistent first-call
+      % marker. The commented upstream line above, and the mgc replacement
+      % rng('shuffle', 'twister'), both discard a seed the caller sets. A
+      % discarded seed makes the first bootstrap in a MATLAB session
+      % impossible to reproduce. The caller controls the generator state.
    end
    if isempty(Bt), Bt = 1000; end
    N   = length(x);
