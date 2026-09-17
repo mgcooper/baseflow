@@ -204,6 +204,10 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
 end
 
 function addlabels(Fit,xmin,yref)
+   %ADDLABELS add an arrow pointing to tau0 and tau_exp
+   %
+   % drawarrow draws in the current axes, which is the axes the caller
+   % plotted into, as the text calls below do.
 
    % tau0
    xminc = (Fit.tau0H-Fit.tau0+Fit.tau0-Fit.tau0L)/2;
@@ -212,8 +216,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',xmin,xminc);
 
-   baseflow.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
+   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 
    % use these to put the text on the right side of the curve
@@ -229,8 +232,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 
-   baseflow.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
+   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 end
 

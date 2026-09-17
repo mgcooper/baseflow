@@ -502,14 +502,17 @@ rows this bead adjudicates.
 
 ### Deferred
 
-- [ ] vendored `toolbox/+baseflow/+deps/arrow.m` reads the MATLAB-only
-  hidden axes property WarpToFill (arrow_WarpToFill) and errors on
-  Octave before it reaches the handle allocation. `tests/octave_smoke.m`
-  runs its arrow section on MATLAB only. The sandbox/ReplaceArrowNotes.m
-  section lists the functions that use arrow (plotrefline, fitphidist,
-  gpfitb, plplotb, plotdqdt); their Octave behavior on those paths is
-  unverified. Rec: guard the WarpToFill read on Octave or replace arrow
-  with a built-in annotation.
+- [x] vendored `toolbox/+baseflow/+deps/arrow.m` read the MATLAB-only
+  hidden axes property WarpToFill (arrow_WarpToFill) and errored on
+  Octave before it reached the handle allocation. The private helper
+  `drawarrow` replaces it. It builds the shaft and the head in pixels
+  from the drawn plot box, so it draws in both languages, and it is
+  correct when the plot-box aspect ratio is manual, where the vendored
+  function took a branch its own comments call untested and drew a shaft
+  across the whole axis. Every caller the sandbox/ReplaceArrowNotes.m
+  section listed (plotrefline, fitphidist, gpfitb, plplotb, plotdqdt)
+  now calls `drawarrow`, and `toolbox/+baseflow/+deps/arrow.m` is
+  removed.
 
 ## Helper defects from the R3 sweep (bfra-3kh.40 stub)
 

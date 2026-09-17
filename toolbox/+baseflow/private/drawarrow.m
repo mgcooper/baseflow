@@ -22,6 +22,10 @@ function harrow = drawarrow(ax, tail, head, varargin)
    %     when the arrow is drawn. A later resize leaves the head at the
    %     size it was given.
    %
+   %     A log axis cannot show a value at or below zero, so an arrow with
+   %     such an endpoint draws nothing and raises
+   %     baseflow:drawarrow:nonpositiveLogCoordinate.
+   %
    % Optional name-value inputs
    %
    %     Color     = color of the shaft and the head. Default black.
@@ -40,6 +44,20 @@ function harrow = drawarrow(ax, tail, head, varargin)
    ylims = get(ax, 'YLim');
    xlog = strcmp(get(ax, 'XScale'), 'log');
    ylog = strcmp(get(ax, 'YScale'), 'log');
+
+   % A log axis has no place for a value at or below zero. log10 of such a
+   % value is complex, and a complex coordinate draws the arrow at the
+   % value reflected through the origin, which names a point the data never
+   % reaches. Draw nothing, and say so.
+   if (xlog && any([tail(1) head(1)] <= 0)) ...
+         || (ylog && any([tail(2) head(2)] <= 0))
+      warning('baseflow:drawarrow:nonpositiveLogCoordinate', ...
+         ['drawarrow drew no arrow: a log axis cannot show the point ' ...
+         '(%g, %g) or the point (%g, %g).'], ...
+         tail(1), tail(2), head(1), head(2));
+      harrow = [];
+      return
+   end
 
    % Work in pixels measured from the lower-left corner of the box. The
    % corner offset cancels in every difference below, so leave it out.
@@ -113,9 +131,9 @@ end
 %% INPUT PARSER
 function [color, headlength, tipangle, linewidth] = parseinputs(varargin)
 
-   % The head size in pixels, and the half angle at its point. These are
-   % close to the values the vendored arrow was called with, which reads a
-   % length in points, so the arrow keeps the shape it had.
+   % The head size in pixels, and the half angle at its point. A head of
+   % this size reads as an arrow beside a label without covering the line
+   % it points at.
    defaultheadlength = 8;
    defaulttipangle = 10;
 

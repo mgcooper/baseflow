@@ -211,8 +211,8 @@ This function is called by:
 0123       
 0124       xarrow = [PD.mean 1.3*PD.mean];
 0125       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
-0126       baseflow.deps.arrow([xarrow(2), yarrow(2)],[xarrow(1), yarrow(1)], <span class="keyword">...</span>
-0127          <span class="string">'BaseAngle'</span>, 90, <span class="string">'Length'</span>, 8, <span class="string">'TipAngle'</span>, 10)
+0126       <span class="comment">% the head points left, at the mean, from a tail to its right</span>
+0127       drawarrow(gca, [xarrow(2), yarrow(2)], [xarrow(1), yarrow(1)])
 0128       text(0.95*xarrow(2), yarrow(2), arrowtxt, <span class="string">'HorizontalAlignment'</span>,<span class="string">'left'</span>)
 0129 
 0130       h.legend = legend(ltxt, <span class="string">'Location'</span>, <span class="string">'east'</span>, <span class="string">'Interpreter'</span>, <span class="string">'tex'</span>);

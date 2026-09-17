@@ -142,7 +142,8 @@ end
 function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
    %ADDLABELS add an arrow pointing to tau0 and tau_exp
 
-   % 'arrow' is not octave compatible afaik
+   % The labels are latex, and Octave has no latex text interpreter, so it
+   % would draw the markup. drawarrow itself runs in both languages.
    if isoctave
       return
    end
@@ -162,9 +163,9 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',tau0,xminc);
    end
 
-   % draw the arrow
-   baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
+   % draw the arrow in the current axes, which is the axes the caller
+   % plotted into, as the text call below uses
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 
@@ -191,8 +192,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
    end
 
-   baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 end

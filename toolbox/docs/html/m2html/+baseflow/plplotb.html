@@ -239,57 +239,57 @@ This function is called by:
 0142 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)</a>
 0143    <span class="comment">%ADDLABELS add an arrow pointing to tau0 and tau_exp</span>
 0144 
-0145    <span class="comment">% 'arrow' is not octave compatible afaik</span>
-0146    <span class="keyword">if</span> isoctave
-0147       <span class="keyword">return</span>
-0148    <span class="keyword">end</span>
-0149 
-0150    <span class="comment">% tau0</span>
-0151    xminc = (tau0H-tau0+tau0-tau0L)/2;
-0152    xlims = xlim;
-0153    ndecx = log10(xlims(2))-log10(xlims(1));
-0154    xarrw = [10^(log10(tau0)-ndecx/10) tau0];
-0155    yarrw = yfit(find(xfit&gt;=xarrw(1),1,<span class="string">'first'</span>));
-0156    yarrw = [yarrw yarrw];
-0157 
-0158    <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
-0159    <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
-0160       ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f$ days'</span>,tau0);
-0161    <span class="keyword">else</span>
-0162       ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,tau0,xminc);
-0163    <span class="keyword">end</span>
-0164 
-0165    <span class="comment">% draw the arrow</span>
-0166    baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], <span class="keyword">...</span>
-0167       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
-0168    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
-0169       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
-0170 
-0171    <span class="comment">% % tauExp</span>
-0172    <span class="comment">%----------------------------------------------------------------------------</span>
-0173    <span class="comment">% test using the new xminL/H</span>
-0174    <span class="comment">% deactivate this and reactive the two lines below to go back</span>
-0175    xexp = tau0*(2-b)/(3-2*b);
-0176    tauL = tau0L*(2-b)/(3-2*b);
-0177    tauH = tau0H*(2-b)/(3-2*b);
-0178    xexpc = (tauH-tauL)/2;
-0179    <span class="comment">% xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);</span>
-0180    <span class="comment">% xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));</span>
-0181    <span class="comment">%----------------------------------------------------------------------------</span>
-0182 
-0183    xarrw = [10^(log10(xexp)-ndecx/10) xexp];
-0184    yarrw = yfit(find(xfit&gt;=xarrw(2),1,<span class="string">'first'</span>));
-0185    yarrw = [yarrw yarrw];
-0186 
-0187    <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
-0188    <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
-0189       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f$ days'</span>,xexp);
-0190    <span class="keyword">else</span>
-0191       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
-0192    <span class="keyword">end</span>
-0193 
-0194    baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], <span class="keyword">...</span>
-0195       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
+0145    <span class="comment">% The labels are latex, and Octave has no latex text interpreter, so it</span>
+0146    <span class="comment">% would draw the markup. drawarrow itself runs in both languages.</span>
+0147    <span class="keyword">if</span> isoctave
+0148       <span class="keyword">return</span>
+0149    <span class="keyword">end</span>
+0150 
+0151    <span class="comment">% tau0</span>
+0152    xminc = (tau0H-tau0+tau0-tau0L)/2;
+0153    xlims = xlim;
+0154    ndecx = log10(xlims(2))-log10(xlims(1));
+0155    xarrw = [10^(log10(tau0)-ndecx/10) tau0];
+0156    yarrw = yfit(find(xfit&gt;=xarrw(1),1,<span class="string">'first'</span>));
+0157    yarrw = [yarrw yarrw];
+0158 
+0159    <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
+0160    <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
+0161       ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f$ days'</span>,tau0);
+0162    <span class="keyword">else</span>
+0163       ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,tau0,xminc);
+0164    <span class="keyword">end</span>
+0165 
+0166    <span class="comment">% draw the arrow in the current axes, which is the axes the caller</span>
+0167    <span class="comment">% plotted into, as the text call below uses</span>
+0168    drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+0169    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
+0170       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
+0171 
+0172    <span class="comment">% % tauExp</span>
+0173    <span class="comment">%----------------------------------------------------------------------------</span>
+0174    <span class="comment">% test using the new xminL/H</span>
+0175    <span class="comment">% deactivate this and reactive the two lines below to go back</span>
+0176    xexp = tau0*(2-b)/(3-2*b);
+0177    tauL = tau0L*(2-b)/(3-2*b);
+0178    tauH = tau0H*(2-b)/(3-2*b);
+0179    xexpc = (tauH-tauL)/2;
+0180    <span class="comment">% xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);</span>
+0181    <span class="comment">% xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));</span>
+0182    <span class="comment">%----------------------------------------------------------------------------</span>
+0183 
+0184    xarrw = [10^(log10(xexp)-ndecx/10) xexp];
+0185    yarrw = yfit(find(xfit&gt;=xarrw(2),1,<span class="string">'first'</span>));
+0186    yarrw = [yarrw yarrw];
+0187 
+0188    <span class="comment">% build the string with plus/minus if tau0L/H is provided</span>
+0189    <span class="keyword">if</span> tau0==tau0L &amp;&amp; tau0==tau0H
+0190       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f$ days'</span>,xexp);
+0191    <span class="keyword">else</span>
+0192       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
+0193    <span class="keyword">end</span>
+0194 
+0195    drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
 0196    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
 0197       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
 0198 <span class="keyword">end</span>

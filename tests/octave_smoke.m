@@ -1,9 +1,9 @@
 % OCTAVE_SMOKE Core-chain smoke test runnable in GNU Octave and MATLAB.
 %
 % Plain script with bare asserts: load the example data, detect events,
-% fit events, fit the a-b parameters with 'nls' and 'ols', then exercise
-% the handle allocation in the vendored arrow annotation, which has an
-% Octave-specific branch.
+% fit events, fit the a-b parameters with 'nls' and 'ols', then draw the
+% point cloud, the event-scale fit plot, and a labeled reference line,
+% which are the figures with an Octave-specific branch.
 % TestSuite.fromFolder skips this script (not a valid test file), so it
 % does not join the MATLAB suite. Run it directly with
 % run('tests/octave_smoke.m') in either language. The script closes the
@@ -139,26 +139,5 @@ nshafts = numel(findall(axarrow, 'Tag', 'refarrowshaft'));
 close(figarrow);
 assert(nheads == 1)
 assert(nshafts == 1)
-
-% exercise the vendored arrow handle allocation; close the figure the
-% call opens. arrow.m reads the MATLAB-only hidden axes property
-% WarpToFill (arrow_WarpToFill) and errors on Octave before it reaches
-% the handle allocation. This section therefore runs on MATLAB only.
-% TODO.md records the arrow Octave incompatibility.
-if exist('OCTAVE_VERSION', 'builtin') == 0
-   fig = figure('Visible', 'off');
-   % close the figure on failure too, so no run leaves a figure open
-   try
-      axis([0 1 0 1]);
-      harrow = baseflow.deps.arrow([0.2 0.2], [0.8 0.8]);
-      assert(~isempty(harrow))
-   catch arrowerror
-      close(fig);
-      rethrow(arrowerror);
-   end
-   close(fig);
-else
-   disp('octave_smoke: skipping arrow (WarpToFill is MATLAB-only)')
-end
 
 disp('octave_smoke: all asserts passed')

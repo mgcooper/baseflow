@@ -289,54 +289,56 @@ This function is called by:
 0204 <span class="keyword">end</span>
 0205 
 0206 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(Fit,xmin,yref)</a>
-0207 
-0208    <span class="comment">% tau0</span>
-0209    xminc = (Fit.tau0H-Fit.tau0+Fit.tau0-Fit.tau0L)/2;
-0210    xa = [xmin-xmin/2 xmin];
-0211    ya = Fit.gpdist.cdf(0,<span class="string">'upper'</span>)*yref;
-0212    ya = [ya ya];
-0213    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,xmin,xminc);
-0214 
-0215    baseflow.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], <span class="keyword">...</span>
-0216       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
-0217    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
+0207    <span class="comment">%ADDLABELS add an arrow pointing to tau0 and tau_exp</span>
+0208    <span class="comment">%</span>
+0209    <span class="comment">% drawarrow draws in the current axes, which is the axes the caller</span>
+0210    <span class="comment">% plotted into, as the text calls below do.</span>
+0211 
+0212    <span class="comment">% tau0</span>
+0213    xminc = (Fit.tau0H-Fit.tau0+Fit.tau0-Fit.tau0L)/2;
+0214    xa = [xmin-xmin/2 xmin];
+0215    ya = Fit.gpdist.cdf(0,<span class="string">'upper'</span>)*yref;
+0216    ya = [ya ya];
+0217    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,xmin,xminc);
 0218 
-0219    <span class="comment">% use these to put the text on the right side of the curve</span>
-0220    <span class="comment">% xa = [xmin+xmin/2 xmin];</span>
-0221    <span class="comment">% text(1.05*xa(1),ya(1),ta)</span>
-0222 
-0223    <span class="comment">% tauExp</span>
-0224    xexp = Fit.tauExp; <span class="comment">% just use xmin to keep syntax</span>
-0225    xexpc = (Fit.tauExpH-Fit.tauExp+Fit.tauExp-Fit.tauExpL)/2;
-0226    xa = [xexp-xexp/2 xexp];
-0227 
-0228    ya = Fit.gpdist.cdf(xexp-xmin,<span class="string">'upper'</span>)*yref;
-0229    ya = [ya ya];
-0230    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
-0231 
-0232    baseflow.deps.arrow([xa(1),ya(1)],[xa(2),ya(2)], <span class="keyword">...</span>
-0233       <span class="string">'BaseAngle'</span>,90,<span class="string">'Length'</span>,8,<span class="string">'TipAngle'</span>,10)
-0234    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
-0235 <span class="keyword">end</span>
-0236 
-0237 <span class="comment">%% INPUT PARSER</span>
-0238 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)</a>
-0239    
-0240    parser = inputParser;
-0241    parser.FunctionName = <span class="string">'baseflow.gpfitb'</span>;
-0242    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
-0243    parser.addParameter(<span class="string">'xmin'</span>, 0, @isnumeric);
-0244    parser.addParameter(<span class="string">'varsym'</span>, <span class="string">'\tau'</span>, @ischar);
-0245    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogical);
-0246    parser.addParameter(<span class="string">'plotfit'</span>, true, @islogical);
-0247    parser.addParameter(<span class="string">'labelplot'</span>, true, @islogical);
-0248    parser.parse(x, varargin{:});
-0249 
-0250    xmin     = parser.Results.xmin;
-0251    varsymb  = parser.Results.varsym;
-0252    bootfit  = parser.Results.bootfit;
-0253    plotfit  = parser.Results.plotfit;
-0254    labelplot = parser.Results.labelplot;
-0255 <span class="keyword">end</span></pre></div>
+0219    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+0220    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
+0221 
+0222    <span class="comment">% use these to put the text on the right side of the curve</span>
+0223    <span class="comment">% xa = [xmin+xmin/2 xmin];</span>
+0224    <span class="comment">% text(1.05*xa(1),ya(1),ta)</span>
+0225 
+0226    <span class="comment">% tauExp</span>
+0227    xexp = Fit.tauExp; <span class="comment">% just use xmin to keep syntax</span>
+0228    xexpc = (Fit.tauExpH-Fit.tauExp+Fit.tauExp-Fit.tauExpL)/2;
+0229    xa = [xexp-xexp/2 xexp];
+0230 
+0231    ya = Fit.gpdist.cdf(xexp-xmin,<span class="string">'upper'</span>)*yref;
+0232    ya = [ya ya];
+0233    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
+0234 
+0235    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+0236    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
+0237 <span class="keyword">end</span>
+0238 
+0239 <span class="comment">%% INPUT PARSER</span>
+0240 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)</a>
+0241    
+0242    parser = inputParser;
+0243    parser.FunctionName = <span class="string">'baseflow.gpfitb'</span>;
+0244    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
+0245    parser.addParameter(<span class="string">'xmin'</span>, 0, @isnumeric);
+0246    parser.addParameter(<span class="string">'varsym'</span>, <span class="string">'\tau'</span>, @ischar);
+0247    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogical);
+0248    parser.addParameter(<span class="string">'plotfit'</span>, true, @islogical);
+0249    parser.addParameter(<span class="string">'labelplot'</span>, true, @islogical);
+0250    parser.parse(x, varargin{:});
+0251 
+0252    xmin     = parser.Results.xmin;
+0253    varsymb  = parser.Results.varsym;
+0254    bootfit  = parser.Results.bootfit;
+0255    plotfit  = parser.Results.plotfit;
+0256    labelplot = parser.Results.labelplot;
+0257 <span class="keyword">end</span></pre></div>
 </body>
 </html>

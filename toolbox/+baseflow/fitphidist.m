@@ -123,8 +123,8 @@ function h = cdfplotphi(phi, PD, showfit)
       
       xarrow = [PD.mean 1.3*PD.mean];
       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
-      baseflow.deps.arrow([xarrow(2), yarrow(2)],[xarrow(1), yarrow(1)], ...
-         'BaseAngle', 90, 'Length', 8, 'TipAngle', 10)
+      % the head points left, at the mean, from a tail to its right
+      drawarrow(gca, [xarrow(2), yarrow(2)], [xarrow(1), yarrow(1)])
       text(0.95*xarrow(2), yarrow(2), arrowtxt, 'HorizontalAlignment','left')
 
       h.legend = legend(ltxt, 'Location', 'east', 'Interpreter', 'tex');

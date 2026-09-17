@@ -184,6 +184,74 @@ function test_gpfitbNominal(testCase)
    testCase.verifyEqual(nfigs_returned, nfigs_expected)
 end
 
+function test_gpfitbLabelDrawsAnArrow(testCase)
+   % gpfitb labels tau0 and the mean tau with an arrow, which drawarrow
+   % draws as a tagged head patch and a tagged shaft line. The exponent
+   % is above the tau pole at alpha 2, so the mean tau is positive and
+   % both labels have a point on the axes to name.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 5000;
+   pdfexponent = 2.5;
+   xmin = 1;
+   nlabels_expected = 2;
+
+   u = ((1:nsamples)' - 0.5)/nsamples;
+   x = (1 - u).^(-1/(pdfexponent - 1));
+   baseflow.gpfitb(x, 'xmin', xmin, 'plotfit', true, 'bootfit', false, ...
+      'labelplot', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowshaft'), ...
+      nlabels_expected)
+end
+
+function test_plplotbLabelDrawsAnArrow(testCase)
+   % plplotb labels tau0 and the mean tau with the same arrow.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 5000;
+   pdfexponent = 2.5;
+   xmin = 1;
+   nlabels_expected = 2;
+
+   u = ((1:nsamples)' - 0.5)/nsamples;
+   x = (1 - u).^(-1/(pdfexponent - 1));
+   baseflow.plplotb(x, xmin, pdfexponent, 'labelplot', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowshaft'), ...
+      nlabels_expected)
+end
+
+function test_fitphidistLabelDrawsAnArrow(testCase)
+   % The 'cdf' plot type labels the mean of phi with one arrow, which
+   % points left at the mean from a tail to its right.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 500;
+   phimean = 0.05;
+   phistd = 0.01;
+   phifloor = 1e-3;
+   phiceil = 0.2;
+   nlabels_expected = 1;
+   phid = min(max(phimean + phistd*randn(nsamples, 1), phifloor), phiceil);
+
+   baseflow.fitphidist(phid, 'PD', 'cdf', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   hhead = findall(ax, 'Tag', 'refarrowhead');
+   hshaft = findall(ax, 'Tag', 'refarrowshaft');
+   testCase.verifyLessThan(min(get(hhead, 'XData')), ...
+      min(get(hshaft, 'XData')))
+end
+
 function test_fitphidistNominal(testCase)
    % fitphidist recovers the mean of a synthetic phi sample, and with
    % showfit false it leaves no figure open. The teardown closes any

@@ -90,6 +90,12 @@ semantic versioning.
 
 ### Removed
 
+- The vendored `+deps/arrow`. Every figure that drew an arrow now calls
+  the private `drawarrow`, which draws the same arrow, runs on Octave,
+  and stays correct when the plot-box aspect ratio is manual. A caller
+  of `baseflow.deps.arrow` has no replacement in the toolbox: it was a
+  copy of the File Exchange ARROW by Erik A. Johnson, which is still
+  available there.
 - The private helpers `fitlm_octmat` and `predictlm`. `dndtuncertainty`
   calls `fitlm` and `coefCI`, which MATLAB and the Octave `statistics`
   package both provide.
@@ -104,6 +110,14 @@ semantic versioning.
 - `pointcloudplot` writes its legend in latex on MATLAB, so the legend of
   the point cloud and the legend of the fit plot set Q and t alike.
   Octave has no latex text interpreter, so it keeps the tex form.
+- `gpfitb`, `plplotb` and `fitphidist` draw their arrows with
+  `drawarrow`. The vendored arrow drew a point at or below zero on a log
+  axis at that value reflected through the origin, because it took the
+  real part of its complex logarithm. `gpfitb` reaches that case with a
+  negative tauExp, which the tail of a power law below alpha 2 gives it,
+  so the label pointed at a place the data never reaches. `drawarrow`
+  draws no arrow there and warns with
+  `baseflow:drawarrow:nonpositiveLogCoordinate`.
 - `plotrefline` and `plotdqdt` draw the arrow of a reference-line label
   in the new private helper `drawarrow`, which builds the head from the
   drawn plot box and needs no MATLAB-only axes property. The vendored

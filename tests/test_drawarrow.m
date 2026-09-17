@@ -4,9 +4,8 @@ classdef test_drawarrow < matlab.unittest.TestCase
    % drawarrow is private, so the tests reach it with
    % baseflow.privatefunction. The head is a triangle of a fixed size in
    % pixels, built from the drawn plot box, so the arrow keeps its shape on
-   % a log axis and on an axes whose plot-box aspect ratio is manual. The
-   % vendored +deps/arrow reads the undocumented WarpToFill instead, which
-   % axis square turns off.
+   % a log axis and on an axes whose plot-box aspect ratio is manual, which
+   % axis square sets.
 
    properties (TestParameter)
       % Axis scales the arrow must draw on.
@@ -195,6 +194,35 @@ classdef test_drawarrow < matlab.unittest.TestCase
          testCase.verifyEqual( ...
             get(findall(ax, 'Tag', 'refarrowhead'), 'FaceColor'), ...
             color_expected)
+      end
+
+      function test_nonpositiveLogCoordinateDrawsNothing(testCase)
+         % log10 of a value at or below zero is complex, and a complex
+         % coordinate draws the arrow reflected through the origin, at a
+         % point the data never reaches. gpfitb reaches this with a
+         % negative tauExp, which the tail of a power law below alpha 2
+         % gives it.
+         ax = testCase.testaxes('log', 'log');
+         negativepoint = [-10 1e3];
+
+         returned = testCase.verifyWarning( ...
+            @() testCase.drawarrow(ax, [1e6 1e3], negativepoint), ...
+            'baseflow:drawarrow:nonpositiveLogCoordinate');
+
+         testCase.verifyEmpty(returned)
+         testCase.verifyEmpty(findall(ax, 'Tag', 'refarrowhead'))
+         testCase.verifyEmpty(findall(ax, 'Tag', 'refarrowshaft'))
+      end
+
+      function test_nonpositiveValueDrawsOnALinearAxis(testCase)
+         % A linear axis shows a negative value, so the guard applies to a
+         % log axis only.
+         ax = testCase.testaxes('linear', 'linear');
+         set(ax, 'XLim', [-100 100], 'YLim', [-100 100])
+
+         testCase.drawarrow(ax, [50 0], [-50 0]);
+
+         testCase.verifyNotEmpty(findall(ax, 'Tag', 'refarrowhead'))
       end
 
       function test_zeroLengthArrowDrawsNothing(testCase)
