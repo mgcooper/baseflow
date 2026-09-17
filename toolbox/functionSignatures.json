@@ -472,7 +472,14 @@
          {"name":"precision", "kind":"namevalue",  "type":["scalar","double"]},
          {"name":"timestep",  "kind":"namevalue",  "type":["scalar","double"]},      
          {"name":"eventID",   "kind":"namevalue",  "type":["char"]},
-         {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+         {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"reflines",  "kind":"namevalue",  "type":["cell", "choices={'upperenvelope','lowerenvelope','late','early'}"]},
+         {"name":"axislimits","kind":"namevalue",  "type":["char", "choices={'snap','decades','none'}"],"purpose":"Option"},
+         {"name":"labelcolor","kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelfontsize","kind":"namevalue","type":["scalar","double"]},
+         {"name":"labelstyle","kind":"namevalue",  "type":["char", "choices={'arrow','line'}"],"purpose":"Option"},
+         {"name":"fontsize",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"legendfontsize","kind":"namevalue","type":["scalar","double"]}
       ]
    },
    "baseflow.plotrefline":
@@ -489,6 +496,9 @@
          {"name":"refqtls",   "kind":"namevalue",  "type":["vector","double"]},
          {"name":"plotline",  "kind":"namevalue",  "type":["logical","scalar"]},
          {"name":"linecolor", "kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelcolor","kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelfontsize","kind":"namevalue","type":["scalar","double"]},
+         {"name":"labelstyle","kind":"namevalue",  "type":["char", "choices={'arrow','line'}"],"purpose":"Option"},
          {"name":"precision", "kind":"namevalue",  "type":["scalar","double"]},
          {"name":"timestep",  "kind":"namevalue",  "type":[["scalar","double"],["scalar","duration"]]},
          {"name":"ax",        "kind":"namevalue",  "type":["matlab.graphics.axis.Axes"]}
@@ -524,6 +534,12 @@
          {"name":"timestep",  "kind":"namevalue",  "type":[["scalar","double"],["scalar","duration"]]},
          {"name":"addlegend", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rain",      "kind":"namevalue",  "type":["vector","double"]},
+         {"name":"axislimits","kind":"namevalue",  "type":["char", "choices={'snap','decades','none'}"],"purpose":"Option"},
+         {"name":"labelstyle","kind":"namevalue",  "type":["char", "choices={'arrow','line'}"],"purpose":"Option"},
+         {"name":"labelcolor","kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelfontsize","kind":"namevalue","type":["scalar","double"]},
+         {"name":"fontsize",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"legendfontsize","kind":"namevalue","type":["scalar","double"]},
          {"name":"ax",        "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]}
       ]
    },
@@ -734,22 +750,12 @@
    {
       "inputs":
       [
-         {"name":"m",      "kind":"required",   "type":["numeric"]},
-         {"name":"n",      "kind":"required",   "type":["numeric"]},
-         {"name":"p",      "kind":"required",   "type":["numeric"]},
-         {"name":"gap",    "kind":"namevalue",  "type":["numeric"]},
-         {"name":"marw",   "kind":"namevalue",  "type":["numeric"]},
-         {"name":"marh",   "kind":"namevalue",  "type":["numeric"]},
-         {"name":"style",  "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"}
-      ]
-   },
-   "+baseflow/private/subtight":
-   {
-      "inputs":
-      [
          {"name":"m",        "kind":"required",   "type":["numeric"]},
          {"name":"n",        "kind":"required",   "type":["numeric"]},
          {"name":"p",        "kind":"required",   "type":["numeric"]},
+         {"name":"gap",      "kind":"namevalue",  "type":["numeric"]},
+         {"name":"marw",     "kind":"namevalue",  "type":["numeric"]},
+         {"name":"marh",     "kind":"namevalue",  "type":["numeric"]},
          {"name":"gapstyle", "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},
          {"name":"wstyle",   "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},
          {"name":"hstyle",   "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},

@@ -67,6 +67,43 @@ close(htrend.figure);
 assert(all(isfinite(htrend.ab)))
 assert(all(htrend.yci(:, 1) <= htrend.yfit & htrend.yfit <= htrend.yci(:, 2)))
 
+% draw the point cloud. pointcloudplot formats its markers through the
+% private formatPlotMarkers, and puts the rain circles in the legend
+% through the private islinehandle. Both take the numeric graphics handle
+% that Octave returns for a plotted line. One positive rain value draws one
+% circle, which the legend must name.
+[Fits, FitsTable] = baseflow.fitevents(EventData, opts_fitevents);
+[~, qtau, dqdttau] = baseflow.eventtau(FitsTable, EventData, Fits);
+raintau = zeros(size(qtau));
+raintau(1) = 5;
+hcloud = baseflow.pointcloudplot(qtau, dqdttau, 'rain', raintau, ...
+   'reflines', {'upperenvelope', 'late'}, 'reflabels', true);
+% read the drawn lines and the legend, then close, so a failed assert
+% leaves no figure open
+ncloudlines = numel(findobj(hcloud.ax, 'Type', 'line'));
+legendtext = get(hcloud.legend, 'String');
+close(ancestor(hcloud.ax, 'figure'));
+assert(ncloudlines > 0)
+assert(any(strcmp(legendtext, 'rain')))
+
+% draw the event-scale fit plot with rain. plotdqdt scales its rain
+% circles from the marker size of the plotted line, which it must read
+% with get, because Octave returns a numeric handle. The legend then names
+% the rain through the same islinehandle guard the point cloud uses.
+rainfit = zeros(size(EventFits.q));
+rainfit(1) = 5;
+% The 'line' label style draws no arrow, so it labels the reference lines
+% on Octave, where the vendored arrow cannot draw. Its text carries the
+% angle of the line.
+hfits = baseflow.plotdqdt(EventFits.q, EventFits.dqdt, 'rain', rainfit, ...
+   'labelplot', true, 'labelstyle', 'line');
+fitlegendtext = get(hfits.leg, 'String');
+fitlabels = findobj(hfits.ax, 'Type', 'text');
+nfitlabels = numel(fitlabels);
+close(ancestor(hfits.ax, 'figure'));
+assert(any(strcmp(fitlegendtext, 'rain')))
+assert(nfitlabels > 0)
+
 % draw a reference line with its rotated label. plotrefline calls the
 % private rotatedLogLogText, which computes the drawn angle of the line.
 % Octave has no MarkedClean listener, so the label keeps the angle it
@@ -77,10 +114,17 @@ set(axref, 'XScale', 'log', 'YScale', 'log')
 qref = transpose(logspace(0, 3, 50));
 baseflow.plotrefline(qref, qref, 'refline', 'upperenvelope', ...
    'ax', axref, 'labels', true);
+% read the label and its angle, then close, for the same reason
 htxt = findobj(axref, 'Type', 'text');
-assert(~isempty(htxt))
-assert(isfinite(get(htxt(1), 'Rotation')))
+nlabels = numel(htxt);
+if nlabels > 0
+   labelrotation = get(htxt(1), 'Rotation');
+else
+   labelrotation = nan;
+end
 close(figref);
+assert(nlabels > 0)
+assert(isfinite(labelrotation))
 
 % exercise the vendored arrow handle allocation; close the figure the
 % call opens. arrow.m reads the MATLAB-only hidden axes property

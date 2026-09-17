@@ -347,12 +347,14 @@ classdef TestBaseflow < matlab.unittest.TestCase
          t = 1:100;
          [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
 
-         % Count refline arrows by their annotation class
-         arrowclass = 'matlab.graphics.shape.Arrow';
+         % Count refline arrows. labelrefline draws each one as a patch
+         % with HandleVisibility off, so findall finds it and findobj does
+         % not.
+         arrowtype = 'patch';
 
-         % 'labelplot' defaults to false: no refline arrow annotations
-         baseflow.plotdqdt(q,dqdt);
-         narrows_returned = numel(findall(gcf,'-isa',arrowclass));
+         % 'labelplot' defaults to false: no refline arrows
+         h = baseflow.plotdqdt(q,dqdt);
+         narrows_returned = numel(findall(h.ax,'Type',arrowtype));
          narrows_expected = 0;
          testCase.verifyEqual(narrows_returned,narrows_expected);
          % Close only the figure this test created, so a pre-existing user
@@ -361,8 +363,8 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
          % 'labelplot' true draws at least one refline arrow (see
          % labelReflines)
-         baseflow.plotdqdt(q,dqdt,'labelplot',true);
-         nlabeled_returned = numel(findall(gcf,'-isa',arrowclass));
+         h = baseflow.plotdqdt(q,dqdt,'labelplot',true);
+         nlabeled_returned = numel(findall(h.ax,'Type',arrowtype));
          testCase.verifyGreaterThan(nlabeled_returned,0);
       end
 
