@@ -4,7 +4,7 @@ This file lists notable changes to the baseflow toolbox. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 semantic versioning.
 
-## [Unreleased]
+## [1.2.0] - 2026-09-17
 
 ### Added
 
@@ -554,5 +554,6 @@ semantic versioning.
 The JOSS release: Cooper and Zhou (2023), Journal of Open Source
 Software, 8(90), 5492. https://doi.org/10.21105/joss.05492
 
+[1.2.0]: https://github.com/mgcooper/baseflow/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/mgcooper/baseflow/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/mgcooper/baseflow/releases/tag/v1.0.0

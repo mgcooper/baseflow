@@ -4,7 +4,7 @@ function varargout = version(option)
    %  v = version()
    %
    % See also:
-   v = '1.1.0';
+   v = '1.2.0';
 
    if nargin < 1
       option = 'verbose';
