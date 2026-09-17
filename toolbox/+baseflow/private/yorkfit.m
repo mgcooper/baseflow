@@ -153,7 +153,10 @@ function [ab, stats] = yorkfit(X, Y, sigX, sigY, rxy, alpha)
    %
    %  N = 2 determines the line exactly, so the error statistics are undefined
    %  rather than unknown. YORKFIT returns a and b, sets every quantity derived
-   %  from N-2 to NaN, and warns.
+   %  from N-2 to NaN, and warns. The one exception is a singular weight: two
+   %  points with RXY = +-1 can put the seed slope on the singular slope of one
+   %  of them, and YORKFIT then raises the unbounded-weight error instead,
+   %  because it never reaches the statistics.
    %
    %  b = 0 describes a horizontal line, which has no x-intercept, so xintercept
    %  is NaN and rsq is 0.
@@ -448,19 +451,43 @@ function [a, b, iter, converged, best] = bestcandidate(seeds, X, Y, wX, ...
    b = [];
    iter = 0;
    converged = false;
-   firsterror = [];
+
+   % Track why the candidates failed, not just that they did. degenerate means
+   % a candidate reached a slope where EVERY weight is unbounded, which is the
+   % perfectly correlated case yorkfit answers with ordinary least squares.
+   % badpoints names the points for the error message otherwise.
+   degenerate = false;
+   badpoints = [];
 
    for k = 1:numel(seeds)
-      % A failure disqualifies this candidate, not the whole fit: one seed
-      % can pass through an unbounded weight while the other never does.
-      try
-         [bk, iterk, convk] = yorkiterate(seeds(k), X, Y, wX, wY, sigX, ...
-            sigY, rxy, ratioXY, ratioYX, useXY, abstol, reltol, maxiter);
-         [ak, Sk, fitk] = yorkfinal(bk, X, Y, wX, wY, sigX, sigY, rxy, ...
-            ratioXY, ratioYX, useXY);
-      catch err
-         if isempty(firsterror)
-            firsterror = err;
+      [bk, iterk, convk, unbounded] = yorkiterate(seeds(k), X, Y, wX, wY, ...
+         sigX, sigY, rxy, ratioXY, ratioYX, useXY, abstol, reltol, maxiter);
+
+      % A candidate that ran into an unbounded weight is disqualified, not the
+      % whole fit: one seed can pass through such a slope while the other never
+      % does. Record what kind of failure it was, at the slope where it
+      % happened, so nothing downstream has to reconstruct that slope.
+      if any(unbounded)
+         % Every weight unbounded is the degenerate case only when the errors
+         % are perfectly correlated, which is the one configuration where a
+         % single slope zeroes every denominator. Weights that all went
+         % non-finite for another reason, such as an exact y value at a zero
+         % slope, are a failure to report rather than a line to substitute.
+         degenerate = degenerate || (all(unbounded) && all(abs(rxy) == 1));
+         if isempty(badpoints)
+            badpoints = find(unbounded);
+         end
+         continue
+      end
+
+      [ak, Sk, fitk, unbounded] = yorkfinal(bk, X, Y, wX, wY, sigX, sigY, ...
+         rxy, ratioXY, ratioYX, useXY);
+
+      % the iteration can converge onto a singular slope, so check again here
+      if any(unbounded)
+         degenerate = degenerate || (all(unbounded) && all(abs(rxy) == 1));
+         if isempty(badpoints)
+            badpoints = find(unbounded);
          end
          continue
       end
@@ -489,44 +516,50 @@ function [a, b, iter, converged, best] = bestcandidate(seeds, X, Y, wX, ...
       return
    end
 
-   % Every candidate failed. Report it, unless one slope zeroes every
-   % denominator, which is the degenerate case yorkfit answers with ordinary
-   % least squares. A single singular point among ordinary ones is not that
-   % case: its fit still has a York cost. Each denominator vanishes at
-   % sigY/(rxy*sigX), so that slope must be common to all.
-   singularslope = sigY ./ (rxy .* sigX);
-   degenerate = all(abs(rxy) == 1) ...
-      && all(singularslope == singularslope(1)) ...
-      && ~isempty(firsterror) ...
-      && strcmp(firsterror.identifier, 'matfunclib:yorkfit:unboundedWeight');
+   % Every candidate failed. An empty best plus degenerate tells yorkfit to
+   % answer with ordinary least squares. Anything else is reported.
    if degenerate
       return
    end
 
-   if isempty(firsterror)
+   if isempty(badpoints)
       error('matfunclib:yorkfit:noFiniteSolution', ...
          ['yorkfit found no finite solution from any starting slope. ' ...
          'Check sigX, sigY and rxy.'])
    end
-   rethrow(firsterror)
+
+   error('matfunclib:yorkfit:unboundedWeight', ...
+      ['the York weight is not finite at point(s) %s, because the step-3 ' ...
+      'denominator vanished there. Two inputs produce that: a zero sigY ' ...
+      'with a slope at or near zero, and an rxy of +-1 with a slope at or ' ...
+      'near sigY/sigX. For the first, assign a small nonzero sigY, which ' ...
+      'converges on the same line. For the second, move rxy away from ' ...
+      '+-1.'], mat2str(badpoints'))
 end
 
-function [b, iter, converged] = yorkiterate(b, X, Y, wX, wY, sigX, ...
-      sigY, rxy, ratioXY, ratioYX, useXY, abstol, reltol, maxiter)
+function [b, iter, converged, unbounded] = yorkiterate(b, X, Y, wX, wY, ...
+      sigX, sigY, rxy, ratioXY, ratioYX, useXY, abstol, reltol, maxiter)
    %YORKITERATE York (2004) steps 3 to 6, iterated from one seed slope.
    %
-   %  [b, ITER, CONVERGED] = YORKITERATE(b, ...) refines the slope b until two
-   %  successive values agree to within max(ABSTOL, RELTOL*|b|), or until
-   %  MAXITER iterations have run. CONVERGED reports which of the two ended the
-   %  loop.
+   %  [b, ITER, CONVERGED, UNBOUNDED] = YORKITERATE(b, ...) refines the slope
+   %  b until two successive values agree to within max(ABSTOL, RELTOL*|b|), or
+   %  until MAXITER iterations have run. CONVERGED reports which of the two
+   %  ended the loop.
    %
-   %  The weighted sum of squares can hold more than one local minimum, and this
-   %  iteration stays in the basin of its seed. yorkfit therefore calls it once
-   %  per candidate seed and ranks the results, preferring a candidate that
-   %  converged over one that reached MAXITER.
+   %  UNBOUNDED is the mask yorksums returned at the slope the loop stopped at.
+   %  Any of it being true means the loop stopped because a weight was not
+   %  finite, rather than for either reason above, and b is the slope where
+   %  that happened. Returning the mask from the slope that produced it is what
+   %  saves the caller from reconstructing that slope afterwards.
+   %
+   %  The weighted sum of squares can hold more than one local minimum, and
+   %  this iteration stays in the basin of its seed. yorkfit therefore calls it
+   %  once per candidate seed and ranks the results, preferring a candidate
+   %  that converged over one that reached MAXITER.
 
    iter = 0;
    converged = false;
+   unbounded = false(size(X));
 
    while ~converged && iter < maxiter
       iter = iter + 1;
@@ -534,8 +567,15 @@ function [b, iter, converged] = yorkiterate(b, X, Y, wX, wY, sigX, ...
 
       % the loop needs only the weights and the centered data. sumWi, barX and
       % barY belong to the recompute at the converged slope.
-      [Wi, ~, ~, ~, Ui, Vi, beta] = ...
+      [Wi, ~, ~, ~, Ui, Vi, beta, unbounded] = ...
          yorksums(X, Y, wX, wY, sigX, sigY, rxy, ratioXY, ratioYX, useXY, bi);
+
+      % stop at the slope where the weights went unbounded, and report it
+      if any(unbounded)
+         b = bi;
+         return
+      end
+
       Wibeta = Wi .* beta;
       b = sum(Wibeta .* Vi) / sum(Wibeta .* Ui);   % step 5
       dif = abs(b - bi);                           % step 6
@@ -543,7 +583,7 @@ function [b, iter, converged] = yorkiterate(b, X, Y, wX, wY, sigX, ...
    end
 end
 
-function [a, S, fit] = yorkfinal(b, X, Y, wX, wY, sigX, sigY, rxy, ...
+function [a, S, fit, unbounded] = yorkfinal(b, X, Y, wX, wY, sigX, sigY, rxy, ...
       ratioXY, ratioYX, useXY)
    %YORKFINAL York (2004) steps 7 to 9 at the final slope.
    %
@@ -559,8 +599,18 @@ function [a, S, fit] = yorkfinal(b, X, Y, wX, wY, sigX, sigY, rxy, ...
    %  when the iteration hit its limit. yorkfit also compares S across candidate
    %  seeds, which is why this returns it.
 
-   [Wi, sumWi, barX, barY, ~, ~, beta] = ...
+   [Wi, sumWi, barX, barY, ~, ~, beta, unbounded] = ...
       yorksums(X, Y, wX, wY, sigX, sigY, rxy, ratioXY, ratioYX, useXY, b);
+
+   % The iteration can converge onto a singular slope, so this can be reached
+   % with a mask the caller has not seen. Report it the same way yorksums
+   % does and let bestcandidate decide, rather than asserting here.
+   if any(unbounded)
+      a = [];
+      S = Inf;
+      fit = [];
+      return
+   end
 
    a = barY - b .* barX;                     % step 7
    fit.Wi = Wi;
@@ -644,7 +694,7 @@ function Wi = yorkweights(wX, wY, denom, useXY)
    Wi(~useXY) = wX(~useXY) ./ denom(~useXY);
 end
 
-function [Wi, sumWi, barX, barY, Ui, Vi, beta] = yorksums( ...
+function [Wi, sumWi, barX, barY, Ui, Vi, beta, unbounded] = yorksums( ...
       X, Y, wX, wY, sigX, sigY, rxy, ratioXY, ratioYX, useXY, b)
    %YORKSUMS York (2004) step-3 and step-4 quantities at one slope.
    %
@@ -663,17 +713,24 @@ function [Wi, sumWi, barX, barY, Ui, Vi, beta] = yorksums( ...
    Wi = yorkweights(wX, wY, denom, useXY);
 
    % A vanishing denominator makes Wi infinite, which would propagate NaN
-   % through the weighted means below. Report it and name both causes. The
-   % help's Known bound paragraph says why yorkfit does not take the limit.
-   unbounded = ~all(isfinite(Wi));
-   if unbounded
-      error('matfunclib:yorkfit:unboundedWeight', ...
-         ['the York weight is not finite at point(s) %s, because the ' ...
-         'step-3 denominator vanished there. Two inputs produce that: a ' ...
-         'zero sigY with a slope at or near zero, and an rxy of +-1 with ' ...
-         'a slope at or near sigY/sigX. For the first, assign a small ' ...
-         'nonzero sigY, which converges on the same line. For the second, ' ...
-         'move rxy away from +-1.'], mat2str(find(~isfinite(Wi))'))
+   % through the weighted means below. Report which points that happened at
+   % and return, rather than raising here.
+   %
+   % The mask carries everything the caller needs. any(unbounded) says the
+   % slope is unusable, all(unbounded) says every point is singular at once,
+   % which is the degenerate case yorkfit answers with ordinary least
+   % squares, and find(unbounded) names the points for the message. Deciding
+   % that here, at the slope where it happened, is what keeps the caller from
+   % reconstructing the slope afterwards and asking about a neighbouring one.
+   unbounded = ~isfinite(Wi);
+   if any(unbounded)
+      sumWi = NaN;
+      barX = NaN;
+      barY = NaN;
+      Ui = [];
+      Vi = [];
+      beta = [];
+      return
    end
 
    sumWi = sum(Wi);
