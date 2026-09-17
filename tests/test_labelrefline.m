@@ -150,6 +150,40 @@ classdef test_labelrefline < matlab.unittest.TestCase
             get(findobj(ax, 'Type', 'text'), 'Color'), color_expected)
       end
 
+      function test_arrowDrawsInBothLanguages(testCase)
+         % drawarrow builds the head from the drawn plot box, so it needs
+         % no MATLAB-only axes property and labels a line on Octave.
+         nheads_expected = 1;
+         nshafts_expected = 1;
+         ax = testCase.loglogaxes();
+
+         testCase.labelrefline(ax, testCase.intercept, 1, 'label');
+
+         testCase.verifyNumElements( ...
+            findall(ax, 'Tag', 'refarrowhead'), nheads_expected)
+         testCase.verifyNumElements( ...
+            findall(ax, 'Tag', 'refarrowshaft'), nshafts_expected)
+      end
+
+      function test_squareAxesKeepsTheArrowShort(testCase, slope)
+         % axis square gives the axes a manual plot-box aspect ratio, and
+         % the drawn box is then smaller than the axes Position. The arrow
+         % must measure its head against the drawn box, so the tail stays
+         % the length it is asked for.
+         ax = testCase.loglogaxes();
+         axis(ax, 'square')
+
+         testCase.labelrefline(ax, testCase.intercept, slope, 'label');
+
+         [xhead, ~, xtail] = testCase.arrowhead(ax);
+         ndecsx = log10(testCase.xlims(2)) - log10(testCase.xlims(1));
+         taildecades_returned = log10(xtail/xhead) / ndecsx;
+         testCase.verifyGreaterThan(taildecades_returned, ...
+            testCase.tailbounds(1))
+         testCase.verifyLessThan(taildecades_returned, ...
+            testCase.tailbounds(2))
+      end
+
       function test_lineStyleWritesOnTheLineWithoutAnArrow(testCase, slope)
          % The line style lifts the text onto the line and turns it to the
          % drawn angle, so a label needs no arrow and Octave can draw it.
@@ -159,7 +193,7 @@ classdef test_labelrefline < matlab.unittest.TestCase
          testCase.labelrefline(ax, testCase.intercept, slope, 'label', ...
             'Style', 'line');
 
-         testCase.verifyNumElements(findall(ax, 'Type', 'patch'), ...
+         testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
             narrows_expected)
          htext = findobj(ax, 'Type', 'text');
          position_returned = get(htext, 'Position');
@@ -192,14 +226,17 @@ classdef test_labelrefline < matlab.unittest.TestCase
 
       function [xhead, yhead, xtail] = arrowhead(testCase, ax)
          % Return the point of the arrow and the right end of its tail.
-         % The patch holds both, and the head is its leftmost vertex.
-         harrow = findall(ax, 'Type', 'patch');
-         testCase.assertNumElements(harrow, 1)
-         xdata = get(harrow, 'XData');
-         ydata = get(harrow, 'YData');
+         % drawarrow tags the head patch and the shaft line, and the point
+         % is the leftmost vertex of the head.
+         hhead = findall(ax, 'Tag', 'refarrowhead');
+         hshaft = findall(ax, 'Tag', 'refarrowshaft');
+         testCase.assertNumElements(hhead, 1)
+         testCase.assertNumElements(hshaft, 1)
+         xdata = get(hhead, 'XData');
+         ydata = get(hhead, 'YData');
          [xhead, ihead] = min(xdata);
          yhead = ydata(ihead);
-         xtail = max(xdata);
+         xtail = max(get(hshaft, 'XData'));
       end
    end
 end

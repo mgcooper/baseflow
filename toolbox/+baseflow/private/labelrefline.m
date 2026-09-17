@@ -24,11 +24,10 @@ function labelrefline(ax, a, b, txt, varargin)
    %     FontSize    = font size of the text. Default 10.
    %     Interpreter = text interpreter. Default 'latex'.
    %
-   %     The arrow reads a MATLAB-only axes property, so the 'arrow' style
-   %     draws neither arrow nor text on Octave. The 'line' style draws in
-   %     both languages.
+   %     Both styles draw in MATLAB and in GNU Octave.
    %
-   % See also: plotrefline, plotdqdt, labelanchor, rotatedLogLogText
+   % See also: plotrefline, plotdqdt, labelanchor, drawarrow,
+   % rotatedLogLogText
 
    % The arrow tail spans this fraction of the drawn x decades. A longer
    % tail reads as a rule across the axes instead of as an arrow.
@@ -63,28 +62,14 @@ function labelrefline(ax, a, b, txt, varargin)
             'Interpreter', interpreter);
 
       case 'arrow'
-         % The vendored arrow reads a MATLAB-only axes property.
-         if isoctave
-            return
-         end
-
-         % arrow draws in the current axes of the current figure, so make
-         % both current for the call, then give the caller its current
-         % figure and current axes back.
-         fig = ancestor(ax, 'figure');
-         currentfig = get(groot, 'CurrentFigure');
-         currentax = get(fig, 'CurrentAxes');
-         restorefig = onCleanup(@() set(groot, 'CurrentFigure', currentfig));
-         restoreax = onCleanup(@() set(fig, 'CurrentAxes', currentax));
-         set(groot, 'CurrentFigure', fig);
-         set(fig, 'CurrentAxes', ax);
-
-         % Set the color of the arrow patch and of the text. Without an
-         % explicit color the text ColorMode stays auto, and a dark figure
-         % theme draws the label light grey while the line keeps its color.
-         baseflow.deps.arrow([xtail, yhead], [xhead, yhead], ...
-            'BaseAngle', 90, 'Length', 8, 'TipAngle', 10, ...
-            'EdgeColor', color, 'FaceColor', color);
+         % drawarrow builds the head in the axes it is given, from the
+         % drawn plot box, so it needs no current figure and no current
+         % axes, and it draws the same arrow in both languages.
+         %
+         % Set the color of the arrow and of the text. Without an explicit
+         % color the text ColorMode stays auto, and a dark figure theme
+         % draws the label light grey while the line keeps its color.
+         drawarrow(ax, [xtail, yhead], [xhead, yhead], 'Color', color);
          text(ax, xtext, yhead, txt, ...
             'HorizontalAlignment', 'left', 'FontSize', fontsize, ...
             'Color', color, 'Interpreter', interpreter);

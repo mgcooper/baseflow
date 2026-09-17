@@ -19,7 +19,7 @@ function theta = loglogangle(ax, b)
    %     The drawn angle therefore depends on the size of the axes and on
    %     the axis limits, not on b alone.
    %
-   % See also: rotatedLogLogText, plotrefline
+   % See also: rotatedLogLogText, axespixelbox, plotrefline
 
    % b is a power-law exponent, so both scales must be log for the rise to
    % be b decades of y per decade of x.
@@ -28,23 +28,9 @@ function theta = loglogangle(ax, b)
          'ax must use a log scale on both the x axis and the y axis')
    end
 
-   % The drawn plot box in pixels. The pixel box carries the figure aspect
-   % ratio, which a normalized box drops. With an automatic aspect ratio,
-   % the drawn box is the axes Position, which getpixelposition reads
-   % without touching the axes. A manual aspect ratio, as axis square and
-   % axis equal set, draws a smaller box, so read that box with plotboxpos
-   % and restore the units of the caller. Setting Units marks the axes
-   % dirty, so this function does it only when the axes needs it.
-   ismanual = strcmp(get(ax, 'DataAspectRatioMode'), 'manual') ...
-      || strcmp(get(ax, 'PlotBoxAspectRatioMode'), 'manual');
-   if ismanual
-      axunits = get(ax, 'Units');
-      restoreunits = onCleanup(@() set(ax, 'Units', axunits));
-      set(ax, 'Units', 'pixels');
-      axpos = baseflow.deps.plotboxpos(ax);
-   else
-      axpos = getpixelposition(ax);
-   end
+   % The drawn plot box in pixels. drawarrow measures its head against the
+   % same box, so a label and the arrow beside it follow one geometry.
+   axpos = axespixelbox(ax);
 
    xlims = log10(get(ax, 'XLim'));
    ylims = log10(get(ax, 'YLim'));

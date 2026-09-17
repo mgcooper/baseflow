@@ -126,6 +126,20 @@ close(figref);
 assert(nlabels > 0)
 assert(isfinite(labelrotation))
 
+% draw a reference line with an arrow label. drawarrow builds the head
+% from the drawn plot box, so the arrow style labels a line on Octave. It
+% tags the head patch and the shaft line.
+figarrow = figure('Visible', 'off');
+axarrow = axes(figarrow);
+set(axarrow, 'XScale', 'log', 'YScale', 'log')
+baseflow.plotrefline(qref, qref, 'refline', 'latetime', ...
+   'ax', axarrow, 'labels', true, 'labelstyle', 'arrow');
+nheads = numel(findall(axarrow, 'Tag', 'refarrowhead'));
+nshafts = numel(findall(axarrow, 'Tag', 'refarrowshaft'));
+close(figarrow);
+assert(nheads == 1)
+assert(nshafts == 1)
+
 % exercise the vendored arrow handle allocation; close the figure the
 % call opens. arrow.m reads the MATLAB-only hidden axes property
 % WarpToFill (arrow_WarpToFill) and errors on Octave before it reaches
