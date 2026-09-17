@@ -9,7 +9,7 @@ To make changes, update the MATLAB code and republish this document.
 <title>Getting Started with the Baseflow Toolbox</title>
 <meta name="generator" content="MATLAB 25.2">
 <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
-<meta name="DC.date" content="2026-09-14">
+<meta name="DC.date" content="2026-09-17">
 <meta name="DC.source" content="baseflow_gettingStarted.m">
 <style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
@@ -238,13 +238,13 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <tt>eventplotter</tt> Plot recession events detected by <tt>eventfinder</tt> or <tt>eventpicker</tt>
 </li>
 <li>
-<tt>getdqdt</tt> Estimate the rate of change of discharge <img src="baseflow_gettingStarted_eq07082324664117114337.png" alt="$dQ/dt$"> prior to curve fitting using one of several numerical differentiation options.</li>
+<tt>getdqdt</tt> Estimate the rate of change of discharge <i>dQ/dt</i> prior to curve fitting using one of several numerical differentiation options.</li>
 <li>
-<tt>fitets</tt> Apply the exponential time step method to estimate the numerical derivative <img src="baseflow_gettingStarted_eq07082324664117114337.png" alt="$dQ/dt$">.</li>
+<tt>fitets</tt> Apply the exponential time step method to estimate the numerical derivative <i>dQ/dt</i>.</li>
 <li>
-<tt>fitcts</tt> Apply the constant time step method to estimate the numerical derivative <img src="baseflow_gettingStarted_eq07082324664117114337.png" alt="$dQ/dt$">.</li>
+<tt>fitcts</tt> Apply the constant time step method to estimate the numerical derivative <i>dQ/dt</i>.</li>
 <li>
-<tt>fitvts</tt> Apply the variable time step method to estimate the numerical derivative <img src="baseflow_gettingStarted_eq07082324664117114337.png" alt="$dQ/dt$">.</li>
+<tt>fitvts</tt> Apply the variable time step method to estimate the numerical derivative <i>dQ/dt</i>.</li>
 </ul>
 </div>
 <p>Functions that support aquifer-property estimation:</p>
@@ -365,7 +365,7 @@ docs/ - Documentation.
 functionSignatures.json - function signatures to enable auto-completion.
 Setup.m - user-facing installation function.</pre>
 <h2 id="44">Authors &amp; Sources</h2>
-<p>The code was written by Matt Cooper (&lt;mailto:matt.cooper@pnnl.gov <a href="mailto:matt.cooper@pnnl.gov">matt.cooper@pnnl.gov</a>&gt;). The exponential time step method implementation was inspired by Clement Roques' exponential time step matlab code (available on request from Clement). The underlying theory is based on idealized solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Details can be found in the following papers:</p>
+<p>The code was written by Matt Cooper (<a href="mailto:matt@sierracrestanalytics.com">matt@sierracrestanalytics.com</a>). The exponential time step method implementation was inspired by Clement Roques' exponential time step matlab code (available on request from Clement). The underlying theory is based on idealized solutions to the one-dimensional (lateral) groundwater flow equation ("Boussinesq equation"). Details can be found in the following papers:</p>
 <div>
 <ul>
 <li>Brutsaert W and Nieber J L 1977 Regionalized drought flow hydrographs from a mature glaciated plateau Water Resour. Res. 13 637&ndash;43.</li>
@@ -543,14 +543,14 @@ Setup.m - user-facing installation function.</pre>
 % * |eventfinder| The algorithm called by |getevents| to detect recession events.
 % * |eventpicker| Pick events manually, rather than automatically using |eventfinder|.
 % * |eventplotter| Plot recession events detected by |eventfinder| or |eventpicker|
-% * |getdqdt| Estimate the rate of change of discharge $dQ/dt$ prior to curve 
+% * |getdqdt| Estimate the rate of change of discharge _dQ/dt_ prior to curve 
 % fitting using one of several numerical differentiation options.
 % * |fitets| Apply the exponential time step method to estimate the numerical 
-% derivative $dQ/dt$.
+% derivative _dQ/dt_.
 % * |fitcts| Apply the constant time step method to estimate the numerical derivative 
-% $dQ/dt$.
+% _dQ/dt_.
 % * |fitvts| Apply the variable time step method to estimate the numerical derivative 
-% $dQ/dt$.
+% _dQ/dt_.
 %% 
 % Functions that support aquifer-property estimation:
 %% 
@@ -638,7 +638,7 @@ Setup.m - user-facing installation function.</pre>
 %  Setup.m - user-facing installation function.
 %
 %% Authors & Sources
-% The code was written by Matt Cooper (<mailto:matt.cooper@pnnl.gov matt.cooper@pnnl.gov>). 
+% The code was written by Matt Cooper (matt@sierracrestanalytics.com). 
 % The exponential time step method implementation was inspired by Clement Roques' 
 % exponential time step matlab code (available on request from Clement). The underlying 
 % theory is based on idealized solutions to the one-dimensional (lateral) groundwater 

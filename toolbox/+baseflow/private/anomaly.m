@@ -5,7 +5,7 @@ function [ anoms,norms,pctdif,pctanom ] = anomaly( data, norms )
    %  column normals norms from data to compute the anomalies anoms.
    %  Without norms, anomaly uses the nan-omitted mean of each column.
    %  pctdif is the anomaly as a percent of the normal, and pctanom is
-   %  100 + pctdif.
+   %  100 + pctdif. A row or column vector data gives column outputs.
 
    % also see climatology.m and season.m in CDT
 
@@ -13,7 +13,7 @@ function [ anoms,norms,pctdif,pctanom ] = anomaly( data, norms )
    [r,c,p] = size(data);
    if p>1
       error('input must be a vector or an array organized as columns')
-   elseif c == 1
+   elseif r == 1
       data = data(:); % for the case of one row, make it a column
    elseif c>r
       data = data';

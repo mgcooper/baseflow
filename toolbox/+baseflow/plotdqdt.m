@@ -18,6 +18,30 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
    %
    %     labelplot = logical, default false. When true, draw the b-value
    %                 refline arrows and labels (see labelReflines).
+   %     reflines  = cell array of chars naming the reference lines to draw.
+   %                 The members are 'upperenvelope', 'lowerenvelope',
+   %                 'late', and 'early'. The default draws all four. Pass a
+   %                 shorter list to leave a line out, for example
+   %                 {'upperenvelope', 'late', 'early'} to drop the
+   %                 measurement-precision line at the foot of the cloud.
+   %     axislimits = char, one of 'snap' (default), 'decades', or 'none'.
+   %                 'snap' moves an axis limit out to its decade when that
+   %                 decade is within a quarter decade, so the axis corner
+   %                 carries a tick. 'decades' moves every limit out to its
+   %                 decade. 'none' keeps the limits the data sets.
+   %     labelcolor = rgb triplet for the label text and the label arrow.
+   %                 Default black, so a figure theme does not recolor them.
+   %     labelfontsize = scalar double, the label font size. Default 10, the
+   %                 factory axes font size, so a startup file that raises
+   %                 the axes font size does not enlarge the labels.
+   %     labelstyle = char, 'arrow' (default) or 'line'. 'arrow' points an
+   %                 arrow at each labeled reference line and writes the
+   %                 label beside it. 'line' writes the label along the
+   %                 line, as the upper-envelope label is written.
+   %     fontsize  = scalar double, the axes font size, which sets the tick
+   %                 labels and the axis labels. Default 12, the size
+   %                 pointcloudplot uses.
+   %     legendfontsize = scalar double, the legend font size. Default 12.
    %
    % Example
    %
@@ -47,8 +71,9 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 
    % PARSE INPUTS
    [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, rain, ax, ...
-      blate, precision, timestep, ~, labelplot] = parseinputs( ...
-      q, dqdt, mfilename, varargin{:});
+      blate, precision, timestep, ~, labelplot, reflines, axislimits, ...
+      labelcolor, labelfontsize, labelstyle, fontsize, legendfontsize] = ...
+      parseinputs(q, dqdt, mfilename, varargin{:});
 
    % INIT OUTPUT
    [hFits, Fits, Picks] = initOutput();
@@ -69,7 +94,9 @@ function [hFits,Picks,Fits] = plotdqdt(q,dqdt,varargin)
 
    % plot the fits
    hFits = plotFits(Fits, Picks, fitmethod, ax, plotfits,         ...
-      showfig, blate, timestep, precision, labelplot);
+      showfig, blate, timestep, precision, labelplot, reflines,    ...
+      axislimits, labelcolor, labelfontsize, labelstyle, fontsize, ...
+      legendfontsize);
 end
 
 %% SELECT FITS
@@ -192,16 +219,17 @@ end
 
 %% PLOT FITS
 function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
-      showfig,blate,timestep,precision,labelplot)
+      showfig,blate,timestep,precision,labelplot,reflines,axislimits, ...
+      labelcolor,labelfontsize,labelstyle,fontsize,legendfontsize)
 
    if plotfits == true
       if showfig == true
          if strcmp(ax, 'none')
-            figure('Position',[1 1 658 576]);
+            sizefigure(figure());
             ax = gca;
          end
       else
-         figure('Position',[1 1 658  576],'visible','off');
+         sizefigure(figure('visible','off'));
          ax = gca;
       end
       h.ax = ax;
@@ -226,7 +254,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
    x = exp(Picks.Q{end});
    y = exp(Picks.dQdt{end});
    rain = Picks.Rain{end};
-   hold on;
+   hold(ax, 'on');
 
    % Plot the entire event and get ax lims before setting log scale. Note: in
    % an earlier version this was moved after the 1:nPlot loop for the case
@@ -267,7 +295,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
    ytext = baseflow.getstring('dQdt','units',true);
 
    % Format the figure
-   axis tight; axis square;
+   axis(h.ax, 'tight'); axis(h.ax, 'square');
    set(h.ax, 'XScale', 'log', 'YScale', 'log');
 
    if isoctave
@@ -279,142 +307,158 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
       interpreter = 'latex';
    end
 
-   xlabel(xtext, 'Interpreter', interpreter);
-   ylabel(ytext, 'Interpreter', interpreter);
+   % Set the axes font size, which sets the tick labels, and set the axis
+   % labels to the same size. A startup file can raise the axes font size,
+   % and the tick labels then crowd the axes.
+   set(h.ax, 'FontSize', fontsize);
+   xlabel(h.ax, xtext, 'Interpreter', interpreter, 'FontSize', fontsize);
+   ylabel(h.ax, ytext, 'Interpreter', interpreter, 'FontSize', fontsize);
 
-   xlimkeep = get(gca, 'XLim');
-   ylimkeep = get(gca, 'YLim');
+   xlimkeep = get(h.ax, 'XLim');
+   ylimkeep = get(h.ax, 'YLim');
 
-   % Add reference lines
-   [hUpper,abUpper] = baseflow.plotrefline(x,y, ...
-      'refline',  'upperenvelope',  ...
-      'timestep', timestep );
+   % Keep the data range. The upper-envelope y limit below evaluates the
+   % envelope at the largest x of the data, not at a widened axis limit.
+   xdatalim = xlimkeep;
 
-   [hLower,abLower]  = baseflow.plotrefline(x,y, ...
-      'refline',  'lowerenvelope',  ...
-      'precision',precision ); %#ok<*ASGLU> 
+   % Widen x here, before the reference lines are drawn across this range.
+   % plotrefline restores the limits it finds, so a later widening would
+   % leave every line short of the axis edge.
+   xlimkeep = snaploglims(xlimkeep, [1 1], axislimits);
+   set(h.ax, 'XLim', xlimkeep);
 
-   [hLate,abLate] = baseflow.plotrefline(x,y, ...
-      'refline', 'latetime', ...
-      'refslope', blate );
+   % Add reference lines. abUpper and abLower stay empty when the caller
+   % leaves that line out, and the y limits below then use the data range.
+   abUpper = [];
+   abLower = [];
+   for n = 1:numel(reflines)
 
-   [hEarly,abEarly] = baseflow.plotrefline(x,y, ...
-      'refline', 'earlytime' );
+      switch reflines{n}
+         case 'upperenvelope'
+            [~,abUpper] = baseflow.plotrefline(x,y, ...
+               'refline',  'upperenvelope',  ...
+               'timestep', timestep, ...
+               'ax', h.ax );
 
-   % add the ref-point a/b values
-   h.aEarly = abEarly(1);
-   h.bEarly = abEarly(2);
-   h.aLate  = abLate(1);
-   h.bLate  = abLate(2);
+         case 'lowerenvelope'
+            % Pass timestep. plotrefline computes the intercept as
+            % precision*3600*24/timestep, so its own default of one day
+            % draws the line at the wrong height for another timestep.
+            [~,abLower]  = baseflow.plotrefline(x,y, ...
+               'refline',  'lowerenvelope',  ...
+               'precision',precision, ...
+               'timestep', timestep, ...
+               'ax', h.ax );
+
+         case 'late'
+            [~,abLate] = baseflow.plotrefline(x,y, ...
+               'refline', 'latetime', ...
+               'refslope', blate, ...
+               'ax', h.ax );
+
+            % add the ref-point a/b values
+            h.aLate  = abLate(1);
+            h.bLate  = abLate(2);
+
+         case 'early'
+            [~,abEarly] = baseflow.plotrefline(x,y, ...
+               'refline', 'earlytime', ...
+               'ax', h.ax );
+
+            % add the ref-point a/b values
+            h.aEarly = abEarly(1);
+            h.bEarly = abEarly(2);
+      end
+   end
 
    % make the ylimits span the minimum dq/dt to the upper envelope at max Q
    if timestep >= 1
-      ylowlim = min(0.8 * abLower(1), min(ylimkeep));
-      yupplim = abUpper(1) * max(xlimkeep)^abUpper(2);
+      ylowlim = min(ylimkeep);
+      yupplim = max(ylimkeep);
+      if not(isempty(abLower))
+         ylowlim = min(0.8 * abLower(1), ylowlim);
+      end
+      if not(isempty(abUpper))
+         yupplim = abUpper(1) * max(xdatalim)^abUpper(2);
+      end
 
-      set(gca, 'YLim', [ylowlim yupplim]);
+      % ylowlim already carries the 0.8 factor, so pass no padding.
+      set(h.ax, 'YLim', snaploglims([ylowlim yupplim], [1 1], axislimits));
+   else
+
+      % A subdaily timestep draws the envelopes where the daily intercept
+      % does not describe the record, so the y limits stay at the data
+      % range instead of reaching the upper envelope. Apply the limit
+      % policy to that range.
+      set(h.ax, 'YLim', snaploglims( ...
+         [min(ylimkeep) max(ylimkeep)], [1 1], axislimits));
    end
+
+   % plotrefline set the ticks from the limits that were current when each
+   % line was drawn, so every decade the limits above add needs a new tick.
+   % Name each axis, because setlogticks skips an axis in manual tick mode.
+   setlogticks(h.ax, 'axset', 'x');
+   setlogticks(h.ax, 'axset', 'y');
+
+   % A label written along a line was rotated with the limits that were
+   % current when it was drawn. Reset each angle to the final limits,
+   % because Octave installs no listener to do it.
+   relayoutloglogtext(h.ax);
 
    h = plotrain(h, rain, x, y);
 
-   % I added this so rain is in the legend
-   if ~isoctave
-      withwarnoff('MATLAB:legend:IgnoringExtraEntries');
+   % I added this so rain is in the legend. plotrain returns the handles of
+   % the rain circles, or nan when no rain is plotted, so the guard tests
+   % islinehandle. isaxis is true only for an Axes, so it kept the rain
+   % entry out of the legend and left the entry count short.
+   if isfield(h, 'hrain') && islinehandle(h.hrain)
+      ltext = [ltext(:); {'rain'}];
+      hleg = [h.plots{:} h.hrain(1)];
+   else
+      hleg = [h.plots{:}];
    end
 
-   if isfield(h, 'hrain') && isaxis(h.hrain)
-      ltext = [ltext 'rain'];
-      h.leg = legend( [h.plots{:} h.hrain(1)], ltext, ...
-         'Location', 'northwest', 'Interpreter', interpreter, ...
-         'FontSize', 13, 'AutoUpdate', 'off');
-   else
-      h.leg = legend( [h.plots{:} hUpper], ltext, ...
-         'Location', 'northwest', 'Interpreter', interpreter, ...
-         'FontSize', 13, 'AutoUpdate', 'off');
-   end
-   grid off
+   h.leg = legend( hleg, ltext, ...
+      'Location', 'northwest', 'Interpreter', interpreter, ...
+      'FontSize', legendfontsize, 'AutoUpdate', 'off');
+   grid(h.ax, 'off')
 
    % fprintf('%.f picks selected to plot\n',numel(ltext))
    if labelplot == true
-      labelReflines(h)
+      labelReflines(h, labelcolor, labelfontsize, labelstyle)
    end
-
-   % axpos = baseflow.deps.plotboxpos(gca);
-   % only works with correct axes position
-   % xtext = exp(mean(log(xlimkeep)));
-   % addRotatedText(4*xtext,axb(aEarly,4*xtext,bEarly),'b=3',bEarly,axpos);
-   % addRotatedText(2*xtext,axb(aLate,2*xtext,bLate),'b=1',1.5,axpos);
-   % addRotatedText(1*xtext,axb(aMax,1*xtext,bMax),'upper envelope',1.5,axpos);
 end
 
 %%
-function labelReflines(h)
+function labelReflines(h, labelcolor, labelfontsize, labelstyle)
 
-   % Use the axis limits and the number of decades to place the labels
-   ylims = ylim;
-   xlims = xlim;
-
-   ndecsy = log10(ylims(2)) - log10(ylims(1));
-   ndecsx = log10(xlims(2)) - log10(xlims(1));
-
-   % Place the late-time arrow above the first decade
-   factor = 10;
-   ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
-   xa = (ya / h.aLate) ^ (1 / h.bLate);
-
-   % If xa is off the chart, adjust y and recompute
-   while xa < xlims(1)
-      factor = factor - 1;
-      ya = 10 ^ ( log10(ylims(1)) + ndecsy/factor );
-      xa = (ya / h.aLate) ^ (1 / h.bLate);
+   % Label a line only when plotFits drew it. The reflines option selects
+   % the lines, so one or both of these pairs can be absent. labelrefline
+   % draws the same arrow plotrefline draws for the point cloud.
+   % Octave has no latex text interpreter.
+   if isoctave
+      interpreter = 'tex';
+   else
+      interpreter = 'latex';
    end
 
-   % Make the arrow span 1/10th or so of the total number of decades
-   xa = [xa 10 ^ (log10(xa) + ndecsx/factor)];
-   ya = [ya ya];
+   % The late-time and early-time slopes are reference values, not fits,
+   % so neither label carries b-hat. plotrefline labels the user fit of
+   % the point cloud with b-hat through the same helper.
+   isestimate = false;
 
-   % Convert from data units to normalized figure units
-   [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
-
-   % Place the arrow. When headwidth is adjusted the arrow tip is slightly
-   % elongated, so adjust normX a tad bit
-   normX(2) = normX(2)*1.02;
-   annotation('arrow', normX, normY, 'HeadStyle', 'plain', 'HeadWidth', 4, ...
-      'HeadLength', 8, 'LineWidth', 1)
-
-
-   % Add the label
-   if isoctave
-      ta = sprintf('b=%.2f', h.bLate);
-      text(1.05 * xa(2), ya(2), ta, ...
-         'HorizontalAlignment', 'left', 'Interpreter', 'tex')
-   else
-      ta = sprintf('$b=%.2f$ ($\\hat{b}$)', h.bLate);
-      text(1.05 * xa(2), ya(2), ta, ...
-         'HorizontalAlignment', 'left', 'Interpreter', 'latex')
+   if isfield(h, 'aLate')
+      labelrefline(h.ax, h.aLate, h.bLate, ...
+         breflinetext(h.bLate, isestimate, interpreter), ...
+         'Style', labelstyle, 'Color', labelcolor, ...
+         'FontSize', labelfontsize, 'Interpreter', interpreter);
    end
 
-   % Draw the early-time arrow
-   xa = (ya(1) / h.aEarly) ^ (1 / h.bEarly);
-   xa = [xa 10^(log10(xa) + ndecsx/factor)];
-
-   % Convert from data units to normalized figure units
-   [normX, normY] = normalizeDataCoordinates(gca, flip(xa), ya);
-   normX(2) = normX(2)*1.01;
-
-   % Place the arrow
-   annotation('arrow', normX, normY, 'HeadStyle', 'plain', 'HeadWidth', 4, ...
-      'HeadLength', 10, 'LineWidth', 1)
-
-   % Add the label
-   if isoctave
-      ta = sprintf('b=%.0f', h.bEarly);
-      text(1.05 * xa(2), ya(2), ta, ...
-         'HorizontalAlignment', 'left', 'Interpreter', 'tex')
-   else
-      ta = sprintf('$b=%.0f$', h.bEarly);
-      text(1.05 * xa(2), ya(2), ta, ...
-         'HorizontalAlignment', 'left', 'Interpreter', 'latex')
+   if isfield(h, 'aEarly')
+      labelrefline(h.ax, h.aEarly, h.bEarly, ...
+         breflinetext(h.bEarly, isestimate, interpreter), ...
+         'Style', labelstyle, 'Color', labelcolor, ...
+         'FontSize', labelfontsize, 'Interpreter', interpreter);
    end
 end
 
@@ -431,14 +475,17 @@ function h = plotrain(h,rain,x,y)
       %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
       %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
 
-      % this mimics the way scatter scales the circles
-      s = h.scatter.MarkerSize + sqrt(pi.*(rain(rain>0)).^2);
+      % this mimics the way scatter scales the circles. Read the size with
+      % get, because Octave returns a numeric handle, which takes no dot.
+      s = get(h.scatter, 'MarkerSize') + sqrt(pi.*(rain(rain>0)).^2);
       x = x(rain>0);
       y = y(rain>0);
 
-      hold on;
-      for n = 1:numel(s)
-         h.hrain(n) = plot(x(n),y(n),'o','MarkerSize',s(n), ...
+      hold(h.ax, 'on');
+
+      % Count down so the handle array takes its size on the first pass.
+      for n = numel(s):-1:1
+         h.hrain(n) = plot(h.ax,x(n),y(n),'o','MarkerSize',s(n), ...
             'MarkerFaceColor','none','Color','m','LineWidth',1);
       end
    end
@@ -514,8 +561,28 @@ end
 
 %% INPUT PARSER
 function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
-      rain, ax, blate, precision, timestep, eventID, labelplot] = parseinputs(...
+      rain, ax, blate, precision, timestep, eventID, labelplot, reflines, ...
+      axislimits, labelcolor, labelfontsize, labelstyle, fontsize, ...
+      legendfontsize] = parseinputs(...
       q, dqdt, mfilename, varargin)
+
+   % The reference lines plotFits draws. The names are the ones
+   % pointcloudplot uses, so one value means the same line in both
+   % functions, and the default draws the set this function always drew.
+   defaultreflines = {'upperenvelope', 'lowerenvelope', 'late', 'early'};
+
+   % The axis-limit policies snaploglims accepts, with the default first.
+   axislimitvalues = {'snap', 'decades', 'none'};
+
+   % The label styles labelrefline draws, with the default first.
+   labelstyles = {'arrow', 'line'};
+
+   % The MATLAB factory axes font size. A startup file can raise the axes
+   % font size, so the labels take their size from this value instead.
+   defaultfontsize = 10;
+
+   % The axes font size this function sets, which pointcloudplot also uses.
+   defaultaxesfontsize = 12;
 
    parser = inputParser;
    parser.FunctionName = ['baseflow.' mfilename];
@@ -534,6 +601,17 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    parser.addParameter('timestep', 1);
    parser.addParameter('eventID', '', @ischar);
    parser.addParameter('labelplot', false, @islogical);
+   parser.addParameter('reflines', defaultreflines, @iscell);
+   parser.addParameter('axislimits', axislimitvalues{1}, ...
+      @(policy) any(validatestring(policy, axislimitvalues)));
+   parser.addParameter('labelcolor', [0 0 0], @islabelcolor);
+   parser.addParameter('labelfontsize', defaultfontsize, @(x) isnumericscalar(x) && x > 0);
+   parser.addParameter('labelstyle', labelstyles{1}, ...
+      @(style) any(validatestring(style, labelstyles)));
+   parser.addParameter('fontsize', defaultaxesfontsize, ...
+      @(value) isnumericscalar(value) && value > 0);
+   parser.addParameter('legendfontsize', defaultaxesfontsize, ...
+      @(value) isnumericscalar(value) && value > 0);
 
    parser.parse(q, dqdt, varargin{:});
 
@@ -551,6 +629,21 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    precision = parser.Results.precision;
    fitmethod = parser.Results.fitmethod;
    pickmethod = parser.Results.pickmethod;
+   reflines = parser.Results.reflines;
+   labelcolor = parser.Results.labelcolor;
+
+   % islabelcolor accepts empty, which asks for the default label color.
+   if isempty(labelcolor)
+      labelcolor = [0 0 0];
+   end
+   labelfontsize = parser.Results.labelfontsize;
+
+   % validatestring returns the member of the list, so a partial value such
+   % as 'dec' reaches snaploglims as 'decades'.
+   axislimits = validatestring(parser.Results.axislimits, axislimitvalues);
+   labelstyle = validatestring(parser.Results.labelstyle, labelstyles);
+   fontsize = parser.Results.fontsize;
+   legendfontsize = parser.Results.legendfontsize;
 
    if ~ischar(ax)
       validateattributes(ax, {'matlab.graphics.axis.Axes'},{'scalar'}, mfilename);
@@ -564,6 +657,9 @@ function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, ...
    validateattributes(timestep, {'numeric', 'duration'}, {'nonempty'}, mfilename);
    validateattributes(plotfits, {'logical'}, {'scalar'}, mfilename);
    validateattributes(precision, {'numeric'}, {'nonempty'}, mfilename);
-   validateattributes(fitmethod, {'char', 'string'}, {'scalartext'}, mfilename);
-   validateattributes(pickmethod, {'char', 'string'}, {'scalartext'}, mfilename);
+   % Require text, and check the value itself below. The Octave
+   % validateattributes has no 'scalartext' attribute, and plotdqdt runs
+   % on Octave through getdqdt with plotfits true.
+   validateattributes(fitmethod, {'char', 'string'}, {'nonempty'}, mfilename);
+   validateattributes(pickmethod, {'char', 'string'}, {'nonempty'}, mfilename);
 end

@@ -3,10 +3,11 @@ function tests = test_corechain
    %
    % The other core-chain functions (getevents, fitevents, fitab,
    % eventfinder) have coverage in TestBaseflow, test_fitopts, and the
-   % smoke script. This file tests eventtau, globalfit, and fitphi on the
-   % example data, and gpfitb, fitphidist, and aQbString on synthetic
-   % inputs. The chain runs once on the shipped example data in setupOnce;
-   % the constants are the Kuparuk basin values the demos use.
+   % smoke script. This file tests eventtau, globalfit, cloudphi, fitphi,
+   % and dndtuncertainty on the example data, and gpfitb, fitphidist, and
+   % aQbString on synthetic inputs. The chain runs once on the shipped
+   % example data in setupOnce; the constants are the Kuparuk basin values
+   % the demos use.
    tests = functiontests(localfunctions);
 end
 
@@ -16,6 +17,7 @@ function setupOnce(testCase)
    Events = baseflow.getevents(T, Q, R, baseflow.setopts('getevents'));
    [Fits, FitsTable] = baseflow.fitevents(Events, ...
       baseflow.setopts('fitevents'));
+   testCase.TestData.T = T;
    testCase.TestData.Events = Events;
    testCase.TestData.Fits = Fits;
    testCase.TestData.FitsTable = FitsTable;
@@ -61,10 +63,9 @@ end
 
 function test_globalfitNominal(testCase)
    % globalfit produces physically plausible global parameters on the
-   % example data. Limitation: the default 'pointcloud' phi method
-   % estimates phi through pointcloudplot, which always draws. One figure
-   % appears even with plotfits false (TODO.md records the refactor). The
-   % teardown closes it.
+   % example data. The default 'pointcloud' phi method passes plotfits to
+   % cloudphi, so a fit with plotfits false opens no figure. The teardown
+   % closes any figure a failed run leaves open.
    figsbefore = findall(0, 'Type', 'figure');
    testCase.addTeardown(@() closenewfigs(figsbefore));
    bmin = 1;
@@ -89,8 +90,40 @@ function test_globalfitNominal(testCase)
    testCase.verifyGreaterThan(returned.phi, phimin)
    testCase.verifyLessThan(returned.phi, phimax)
    newfigs_returned = numel(findall(0, 'Type', 'figure')) - numel(figsbefore);
+   newfigs_expected = 0;
+   testCase.verifyEqual(newfigs_returned, newfigs_expected)
+end
+
+function test_cloudphiPlotfit(testCase)
+   % cloudphi draws one point-cloud figure by default and no figure with
+   % plotfit false. The plotfit flag controls only the figure, so both
+   % calls return the same phi. The late-time exponent is the linear
+   % (b = 1) value, which selects the PK62 / BS03 solution pair.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   A = testCase.TestData.A;
+   D = testCase.TestData.D;
+   L = testCase.TestData.L;
+   blate = testCase.TestData.b2_linear;
+   [~, q, dqdt] = baseflow.eventtau(testCase.TestData.FitsTable, ...
+      testCase.TestData.Events, testCase.TestData.Fits, 'usefits', false);
+
+   % The default call draws one figure.
+   phi_expected = baseflow.cloudphi(q, dqdt, blate, A, D, L, 'envelope');
+   newfigs_returned = numel(findall(0, 'Type', 'figure')) ...
+      - numel(figsbefore);
    newfigs_expected = 1;
-   testCase.verifyLessThanOrEqual(newfigs_returned, newfigs_expected)
+   testCase.verifyEqual(newfigs_returned, newfigs_expected)
+
+   % The plotfit false call draws no figure and returns the same phi.
+   figsplotted = findall(0, 'Type', 'figure');
+   phi_returned = baseflow.cloudphi(q, dqdt, blate, A, D, L, 'envelope', ...
+      'plotfit', false);
+   newfigs_returned = numel(findall(0, 'Type', 'figure')) ...
+      - numel(figsplotted);
+   newfigs_expected = 0;
+   testCase.verifyEqual(newfigs_returned, newfigs_expected)
+   testCase.verifyEqual(phi_returned, phi_expected)
 end
 
 function test_fitphiNominal(testCase)
@@ -151,10 +184,78 @@ function test_gpfitbNominal(testCase)
    testCase.verifyEqual(nfigs_returned, nfigs_expected)
 end
 
+function test_gpfitbLabelDrawsAnArrow(testCase)
+   % gpfitb labels tau0 and the mean tau with an arrow, which drawarrow
+   % draws as a tagged head patch and a tagged shaft line. The exponent
+   % is above the tau pole at alpha 2, so the mean tau is positive and
+   % both labels have a point on the axes to name.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 5000;
+   pdfexponent = 2.5;
+   xmin = 1;
+   nlabels_expected = 2;
+
+   u = ((1:nsamples)' - 0.5)/nsamples;
+   x = (1 - u).^(-1/(pdfexponent - 1));
+   baseflow.gpfitb(x, 'xmin', xmin, 'plotfit', true, 'bootfit', false, ...
+      'labelplot', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowshaft'), ...
+      nlabels_expected)
+end
+
+function test_plplotbLabelDrawsAnArrow(testCase)
+   % plplotb labels tau0 and the mean tau with the same arrow.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 5000;
+   pdfexponent = 2.5;
+   xmin = 1;
+   nlabels_expected = 2;
+
+   u = ((1:nsamples)' - 0.5)/nsamples;
+   x = (1 - u).^(-1/(pdfexponent - 1));
+   baseflow.plplotb(x, xmin, pdfexponent, 'labelplot', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowshaft'), ...
+      nlabels_expected)
+end
+
+function test_fitphidistLabelDrawsAnArrow(testCase)
+   % The 'cdf' plot type labels the mean of phi with one arrow, which
+   % points left at the mean from a tail to its right.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 500;
+   phimean = 0.05;
+   phistd = 0.01;
+   phifloor = 1e-3;
+   phiceil = 0.2;
+   nlabels_expected = 1;
+   phid = min(max(phimean + phistd*randn(nsamples, 1), phifloor), phiceil);
+
+   baseflow.fitphidist(phid, 'PD', 'cdf', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   hhead = findall(ax, 'Tag', 'refarrowhead');
+   hshaft = findall(ax, 'Tag', 'refarrowshaft');
+   testCase.verifyLessThan(min(get(hhead, 'XData')), ...
+      min(get(hshaft, 'XData')))
+end
+
 function test_fitphidistNominal(testCase)
-   % fitphidist recovers the mean of a synthetic phi sample. The function
-   % draws its distribution figure by design (every plottype produces
-   % one), so the teardown closes it.
+   % fitphidist recovers the mean of a synthetic phi sample, and with
+   % showfit false it leaves no figure open. The teardown closes any
+   % figure a failed run leaves open.
    figsbefore = findall(0, 'Type', 'figure');
    testCase.addTeardown(@() closenewfigs(figsbefore));
    nsamples = 500;
@@ -168,6 +269,97 @@ function test_fitphidistNominal(testCase)
    phid = min(max(phimean + phistd*randn(nsamples, 1), phifloor), phiceil);
    returned = baseflow.fitphidist(phid, 'mean', 'cdf', showfit);
    testCase.verifyEqual(returned, expected, 'AbsTol', tol)
+
+   % The 'pdf' type draws no figure and returns an empty struct for h.
+   [~, h_returned] = baseflow.fitphidist(phid, 'PD', 'pdf', showfit);
+   h_expected = struct();
+   testCase.verifyEqual(h_returned, h_expected)
+   newfigs_returned = numel(findall(0, 'Type', 'figure')) - numel(figsbefore);
+   newfigs_expected = 0;
+   testCase.verifyEqual(newfigs_returned, newfigs_expected)
+end
+
+function test_dndtuncertaintyAlpha(testCase)
+   % dndtuncertainty multiplies its combined standard uncertainty by the
+   % coverage factor norminv(1-alpha/2), so the result for alpha 0.32
+   % equals the result for alpha 0.05 times the ratio of those factors. A
+   % result that ignores alpha keeps a ratio of 1. The same random seed
+   % gives both calls the same phi bootstrap. The teardown closes any
+   % figure a failed run leaves open.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   gopts = baseflow.setopts('globalfit', ...
+      'drainagearea', testCase.TestData.A, ...
+      'drainagedensity', testCase.TestData.drainagedensity, ...
+      'streamlength', testCase.TestData.L, ...
+      'aquiferdepth', testCase.TestData.D, ...
+      'isflat', true, 'plotfits', false, 'bootfit', false);
+   GlobalFit = baseflow.globalfit(testCase.TestData.FitsTable, ...
+      testCase.TestData.Events, testCase.TestData.Fits, gopts);
+
+   % One annual baseflow value per year of the example record.
+   T = testCase.TestData.T;
+   nyears = numel(unique(year(T)));
+   trendslope = 0.01;
+   oscillation = 5;
+   years = transpose(1:nyears);
+   Qb = trendslope*years + oscillation*sin(3*years);
+   alpha_default = 0.05;
+   alpha_onesigma = 0.32;
+   seed = 1;
+   tol = 0.01;
+
+   rng(seed)
+   sig_default = baseflow.dndtuncertainty(T, Qb, ...
+      testCase.TestData.FitsTable, testCase.TestData.Fits, GlobalFit, ...
+      gopts, alpha_default);
+   rng(seed)
+   sig_onesigma = baseflow.dndtuncertainty(T, Qb, ...
+      testCase.TestData.FitsTable, testCase.TestData.Fits, GlobalFit, ...
+      gopts, alpha_onesigma);
+
+   ratio_expected = norminv(1 - alpha_onesigma/2) ...
+      / norminv(1 - alpha_default/2);
+   ratio_returned = sig_onesigma / sig_default;
+   testCase.verifyEqual(ratio_returned, ratio_expected, 'RelTol', tol)
+
+   % The dq/dt column is constant, so the correlation matrix holds it
+   % uncorrelated with the event variables and the result stays finite.
+   testCase.verifyTrue(isfinite(sig_default))
+
+   % dndtuncertainty leaves no figure open.
+   newfigs_returned = numel(findall(0, 'Type', 'figure')) - numel(figsbefore);
+   newfigs_expected = 0;
+   testCase.verifyEqual(newfigs_returned, newfigs_expected)
+end
+
+function test_dndtuncertaintyInvalidAlpha(testCase)
+   % dndtuncertainty rejects an alpha outside (0, 1) before it uses the
+   % other inputs, so empty placeholders suffice.
+   alpha_invalid = 1.5;
+   testCase.verifyError(@() baseflow.dndtuncertainty([], [], [], [], ...
+      [], [], alpha_invalid), 'baseflow:dndtuncertainty:invalidAlpha')
+end
+
+function test_fitphidistProbplot(testCase)
+   % fitphidist draws the 'probplot' figure with the fitted beta
+   % distribution line when showfit is true, and leaves no figure when
+   % showfit is false. The teardown closes the figure.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 200;
+   phimean = 0.05;
+   phistd = 0.01;
+   phifloor = 1e-3;
+   phiceil = 0.2;
+   phid = min(max(phimean + phistd*randn(nsamples, 1), phifloor), phiceil);
+   [~, returned] = baseflow.fitphidist(phid, 'PD', 'probplot', true);
+   testCase.verifyTrue(isgraphics(returned.fit))
+   closenewfigs(figsbefore)
+   baseflow.fitphidist(phid, 'PD', 'probplot', false);
+   newfigs_returned = numel(findall(0, 'Type', 'figure')) - numel(figsbefore);
+   newfigs_expected = 0;
+   testCase.verifyEqual(newfigs_returned, newfigs_expected)
 end
 
 function test_aQbStringNominal(testCase)

@@ -60,28 +60,3 @@ function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)
    alpha = parser.Results.alpha;
    method = parser.Results.method;
 end
-
-% no longer used:
-% metric = parser.Results.metric;
-
-%    if alpha == 0.05 || alpha == 0.95
-%       metric   = 'CI';
-%       err      = coefCI(mdl,alpha)*cf;
-%       CI       = mdl.coefCI;                    % 95% CI's
-%       CI       = CI(2,:);
-%       CI2      = CI(2)-ddt;                     % CI half-width
-%    elseif alpha == 0.32 || alpha == 0.68
-%       metric = 'SE';
-%       SE       = mdl.Coefficients.SE(2);        % standard error
-%    else
-%       metric = 'userdefined';
-%    end
-%
-%    switch metric
-%       case 'SE'
-%          fprintf(['\n d' var '/dt = %.2f ' char(177) ' %.2f (68% CI) \n'],ddt,err);
-%       case 'CI'
-%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (95% CI) \n'],ddt*cf,CI2*cf);
-%       case 'userdefined'
-%          fprintf(['\n dQ/dt = %.2f ' char(177) ' %.2f (' alpha '%CI) \n'],ddt*cf,CI2*cf);
-%    end

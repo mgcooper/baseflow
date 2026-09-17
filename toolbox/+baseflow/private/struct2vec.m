@@ -86,29 +86,3 @@ function V = cellflatten(C)
       V = vertcat(C{:});
    end
 end
-
-
-% % NOTES:
-%    % Use cellfun to ensure the vector is comprised of each field in order.
-%    cellvec = cellfun(@(f) S.(f)(:), fields, 'UniformOutput', false);
-%
-%    % cellvec is a 1xN cell array, with N = numel(fields). If all fields of S
-%    % are row vectors, then each element of cellvec is a row vector, and
-%    % horzcat works. If all fields of S are column vectors, then each element
-%    % of cellvec is a column vector, and vertcat works.
-%    cellvec = cellflatten(cellfun(@(c) c(:), cellvec, 'un', 0));
-%    vec = [cellvec{:}];
-%
-%    % This is what cellflatten does:
-%    try
-%       vec = vertcat(cellvec{:});
-%    catch
-%       vec = horzcat(cellvec{:})';
-%    end
-
-%    % This method does not preserve the original order of the vectors.
-%    vec = struct2cell(S);
-%    [~, loc] = ismember(fieldnames(S), fields);
-%    vec = vec(loc(loc>0));
-%    % here would need to reoreder vec by loc
-%    vec = vertcat(vec{:});

@@ -2,7 +2,7 @@
 % <<baseflow_diagram.jpg>>
 % 
 % The Baseflow Recession Analysis Toolbox was developed by Matt Cooper
-% (matt.cooper@pnnl.gov). 
+% (matt@sierracrestanalytics.com). 
 % 
 % BFRA is free of charge under the BSD 3-Clause license. If you use BFRA
 % in a publication, please cite:

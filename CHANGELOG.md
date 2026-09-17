@@ -4,6 +4,266 @@ This file lists notable changes to the baseflow toolbox. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 semantic versioning.
 
+## [1.2.0] - 2026-09-17
+
+### Added
+
+- `plotrefline` accepts `labelcolor`, `labelfontsize`, and `labelstyle`.
+  `labelcolor` defaults to the line color, `labelfontsize` to 10, and
+  `labelstyle` selects `'arrow'` or `'line'` for the late-time,
+  early-time, and user-fit labels. `'line'` writes the label along the
+  line, as the upper-envelope label does.
+- `plotdqdt` accepts `labelcolor` and `labelfontsize` for its own labels,
+  and a `reflines` option that selects the reference lines it draws, with
+  the same values `pointcloudplot` takes.
+- `plotdqdt` and `pointcloudplot` accept `labelstyle`, which `plotrefline`
+  takes: `'arrow'`, the default, points an arrow at each labeled
+  reference line, and `'line'` writes the label along the line. The
+  `'line'` style draws no arrow, so it labels the lines on Octave.
+- `pointcloudplot` accepts `labelcolor` and `labelfontsize` and passes
+  both to `plotrefline`.
+- `plotdqdt` and `pointcloudplot` accept `fontsize` for the axes, which
+  sets the tick labels and the axis labels, and `legendfontsize` for the
+  legend. Both default to 12.
+- `pointcloudplot` and `plotdqdt` accept an `axislimits` option: `'snap'`
+  (the default) rounds a limit out to its decade when the decade is
+  within 0.25 decades, `'decades'` always rounds out, and `'none'` keeps
+  the data limits.
+- The private helpers `snaploglims`, `labelanchor`, `islabelcolor`,
+  `islinehandle`, `labelrefline`, `breflinetext`, `sizefigure`,
+  `relayoutloglogtext`, `drawarrow`, and `axespixelbox`.
+- `cloudphi` accepts a `plotfit` option (default true). With `plotfit`
+  false it computes phi and draws no figure.
+- `fitphidist` returns the phi standard error as `h.se` for the 'cdf'
+  plot type, and `phifitensemble` returns it as `PhiFit.se`. `h.pm` and
+  `PhiFit.pm` keep the 95% half-width.
+- `tools/m2html` holds a copy of M2HTML (rochefort-lab/m2html at
+  3821fb8, GPL-2.0-or-later) for the docs build.
+  `tools/m2html/VENDORED.md` records its source, license, local changes,
+  and refresh steps. `CONTRIBUTING.md` explains how to build the docs.
+
+### Changed
+
+- `aQbString`, `QtString`, and `QtauString` each return one label.
+  `aQbString` returns the -dQ/dt = aQ^b label and has no `Q0` input.
+  Call `QtString` for the Q(t) label.
+- `checkevent` has no `ax` option. It always opens its own figure.
+- `dndtuncertainty` combines standard errors and multiplies the result
+  by the coverage factor `norminv(1-alpha/2)`, so it accepts any `alpha`
+  in (0, 1). Each input term is one standard error: the bootstrap
+  standard error for phi, the `GlobalFit` bootstrap bounds, and the
+  standard error of the regression. On Octave it returns that regression
+  term after scaling, as it did in 1.1.0. The 1.1.0 terms mixed two levels.
+
+  - The phi and regression terms were 95% half-widths.
+  - The tau and b terms were standard errors.
+  - `alpha` 0.32 halved every term except the regression term, which
+    stayed at 95%.
+
+  With `bootfit` false on the example data, `sig_dndt` at the default
+  `alpha` changes by 0.02%. Its help documents `alpha` and `testflag`.
+- `plfitb` warns with `baseflow:plfitb:tauPoleReplicates` when a
+  bootstrap replicate has alpha at or below 2. tau has its pole at
+  alpha 2 and is negative below it, so such a replicate makes `tau_sig`,
+  `tau_L`, and `tau_H` meaningless.
+- `getdqdt` with `plotfits` true draws the event figure for
+  `pickmethod` 'none', its default, and for a `fitmethod` other than
+  'none'.
+- `DESCRIPTION` gives the contact address matt@sierracrestanalytics.com.
+- `.gitattributes` gives `.m` files the rule `text eol=lf`. This release
+  converts the 14 `.m` files that used CRLF. A checkout writes LF for
+  every `.m` file.
+- `DESCRIPTION` requires the Octave `statistics` package 1.9.1 or later.
+  `trendplot` and `dndtuncertainty` use its `fitlm` model object.
+- `baseflow.internal.makedocs('functions')` builds the function pages
+  with the M2HTML copy in `tools/m2html` and needs no separate M2HTML
+  install. `makedocs` restores the MATLAB path when it returns.
+- The demo scripts and live scripts do not call `close all`, so a demo
+  keeps the figures a user has open. `makedocs('demos')` deletes the
+  figures each demo export opens.
+- `hyetograph` opens a new figure unless an axes handle is passed, so it
+  does not resize or redraw a figure the user has open. With an axes
+  handle, it draws in that axes.
+- The Getting Started guide, the citing page, and the function
+  documentation template give the contact address
+  matt@sierracrestanalytics.com.
+
+### Removed
+
+- The vendored `+deps/arrow`. Every figure that drew an arrow now calls
+  the private `drawarrow`, which draws the same arrow, runs on Octave,
+  and stays correct when the plot-box aspect ratio is manual. A caller
+  of `baseflow.deps.arrow` has no replacement in the toolbox: it was a
+  copy of the File Exchange ARROW by Erik A. Johnson, which is still
+  available there.
+- The private helpers `fitlm_octmat` and `predictlm`. `dndtuncertainty`
+  calls `fitlm` and `coefCI`, which MATLAB and the Octave `statistics`
+  package both provide.
+
+### Fixed
+
+- `plotdqdt` labels its late-time line `b = 1`, the value of the `blate`
+  reference slope. It labeled that line as an estimate, with b-hat beside
+  the value and two decimals, which names the fitted line of the point
+  cloud. The new private helper `breflinetext` writes the label of both
+  functions, so a reference slope reads the same in each.
+- `pointcloudplot` writes its legend in latex on MATLAB, so the legend of
+  the point cloud and the legend of the fit plot set Q and t alike.
+  Octave has no latex text interpreter, so it keeps the tex form.
+- `gpfitb`, `plplotb` and `fitphidist` draw their arrows with
+  `drawarrow`. The vendored arrow drew a point at or below zero on a log
+  axis at that value reflected through the origin, because it took the
+  real part of its complex logarithm. `gpfitb` reaches that case with a
+  negative tauExp, which the tail of a power law below alpha 2 gives it,
+  so the label pointed at a place the data never reaches. `drawarrow`
+  draws no arrow there and warns with
+  `baseflow:drawarrow:nonpositiveLogCoordinate`.
+- `plotrefline` and `plotdqdt` draw the arrow of a reference-line label
+  in the new private helper `drawarrow`, which builds the head from the
+  drawn plot box and needs no MATLAB-only axes property. The vendored
+  `+deps/arrow` reads the undocumented `WarpToFill`, and an axes with a
+  manual plot-box aspect ratio, which `axis square` sets in `plotdqdt`,
+  turns that property off and sends the vendored function into a branch
+  its own comments call untested. The shaft then spanned the whole axis.
+  The arrow keeps the head size and angle it had, and it draws on Octave,
+  so the `'arrow'` label style works in both languages. `axespixelbox`
+  reads the drawn box for `drawarrow` and for `loglogangle`.
+- `plotdqdt` labels its reference lines with the arrow `pointcloudplot`
+  draws, in the new private helper `labelrefline`. It drew its own arrow,
+  which scaled its length by the factor that raises the label anchor, so
+  an arrow could span the whole x range, and its head could stop left of
+  the axes instead of on the line. The arrow of both figures now spans a
+  twenty-fifth of the drawn x decades and points at the line.
+- `pointcloudplot` and `plotdqdt` reset the angle of a label written
+  along a line after they set the final axis limits, in the new private
+  helper `relayoutloglogtext`. The angle of a line on a log-log plot
+  follows the limits, and a MATLAB listener keeps it current, but Octave
+  has no such event, so an envelope that raised the y limit left the
+  Octave label off its line.
+- `plotrefline` writes its labels in tex on Octave, which has no latex
+  text interpreter. It asked for latex, so a point cloud drawn on Octave
+  with `reflabels` true showed the math delimiters.
+- `functionSignatures.json` lists the `labelstyle`, `labelcolor`,
+  `labelfontsize`, `fontsize`, and `legendfontsize` options, so name-value
+  completion offers them. Its two `+baseflow/private/subtight` entries are
+  one entry that names every option the function parses.
+- `plotrefline` starts a label a twentieth of the x decades inside the
+  left limit, in `labelanchor`. A label of a line that reaches the anchor
+  height near the left limit sat against the y axis.
+- `pointcloudplot` and `plotdqdt` open a figure where the window manager
+  puts it. They pinned the figure to [0 0] and [1 1], the bottom-left
+  corner of the screen, where the dock covers the axis labels. Both take
+  their size, 640 by 600 points, from the new private helper
+  `sizefigure`, so the axis labels fit.
+- `pointcloudplot` and `plotdqdt` set the axis ticks after the final axis
+  limits, so every decade inside the limits carries a tick.
+- `pointcloudplot` passes `precision` and `timestep` to its envelope
+  lines. The envelope intercept ignored both, so it always described a
+  one-day timestep and a precision of one.
+- `pointcloudplot` draws in the axes a caller supplies: it keeps the size
+  of the parent figure, and `setlogticks` handles an axis whose data
+  reach zero.
+- `plotdqdt` draws in its own axes. It drew through the current axes, so
+  a caller with another axes current split the figure.
+- `plotdqdt` and `pointcloudplot` list rain in their legends. The
+  `plotdqdt` guard tested for an axes, and both guards tested `isobject`,
+  which is false for the numeric handle Octave returns from `plot`, so
+  the rain entry never appeared on Octave. The new private helper
+  `islinehandle` takes the handle of either language. `pointcloudplot`
+  gives rain one entry for its several circles, and keeps the entry of
+  each reference line it names, for a `reflines` row or column.
+- `plotdqdt` runs on Octave, so `getdqdt` with `plotfits` true draws its
+  event figure there. Its input parser asked `validateattributes` for the
+  `scalartext` attribute, which Octave does not define, and it read the
+  marker size of the plotted line with dot indexing, which a numeric
+  handle does not take.
+- `plotrefline` and `plotdqdt` give their labels an explicit color and
+  font size, so a figure theme does not recolor them and a large axes
+  font does not enlarge them. The label font size falls from 13 and 11
+  points to 10.
+- `plotrefline` raises a label anchor that falls left of the axes, in the
+  shared private helper `labelanchor`. A late-time label drew its arrow
+  across the left spine and its text over the leftmost markers.
+- `plotrefline` places the upper-envelope label on the line. The label
+  sat at `2*x`, which ignores the intercept `a = 2/timestep`, so it
+  drifted from the line for any timestep other than one day.
+- `private/rotatedLogLogText` draws its label at the angle of the line.
+  It had three defects. It read the axes offsets where it needed the
+  axes size. It applied the slope outside the arctangent. It worked in
+  figure-normalized units. No single value of its `rtxt` factor served
+  every layout. The new private helper `loglogangle` computes the angle
+  from the axes size in pixels and the axis limits. In a live MATLAB
+  figure, a listener keeps the angle correct after a resize or a limit
+  change. Octave installs no
+  listener, and a figure saved with `savefig` keeps its saved angle.
+  `rotatedLogLogText` takes the axes and the slope in place of `rtxt`.
+- `getdqdt` on MATLAB keeps the random stream of its caller. `plotdqdt`
+  fits the point cloud to draw its line. A 'qtl' fit bootstraps, so
+  `getdqdt` saves and restores the stream around the plot call.
+- `+deps/plvar` keeps the random seed a caller sets. It called
+  `rng('shuffle')` on its first call in a session, so a seeded script
+  could not reproduce its bootstrap uncertainties.
+- `dndtuncertainty` propagates the uncertainty of b to N* = 1/(4-2b)
+  with the derivative 2/(4-2b)^2, in the new private helper
+  `nstaruncertainty`. The plain factor 2 holds only for b = 3/2. The
+  1.1.0 term was (4-2b)^2 times too large, which is 1.7 at the Kuparuk
+  global b of 1.3541. The term is zero when `globalfit` runs with
+  `bootfit` false.
+- `dndtuncertainty` holds the dq/dt trend uncorrelated with the
+  event-scale variables. Its column is constant, and `corr` returns nan
+  for a constant column.
+- `fitevents` passes `plotfits` to `getdqdt`, which draws one figure per
+  event for a `fitmethod` other than 'none'. `fitevents` parsed the
+  option and ignored it.
+- `plotrefline` draws its reference line and its label in the axes a
+  caller supplies. It gives the caller back its current figure and
+  current axes. On MATLAB the arrow of the late-time, early-time, and
+  user-fit labels goes to the same axes. Octave draws no arrow and no
+  label text for those three labels.
+- `checkevent` runs without an input parser error. The parser gives the
+  `Q` and `q` inputs distinct names. The Octave parser compares names
+  without case, and the MATLAB parser does so by default.
+- `checkevent` draws an event that has no valid flow.
+- `globalfit` with `plotfits` false opens no figure.
+- `fitphidist` with `showfit` false leaves no hidden figure open, so
+  `phifitensemble`, `dndtuncertainty`, and `globalfit` do not accumulate
+  figures. Its `'probplot'` plot type runs without an input error and
+  follows `showfit`. Its help documents `'probplot'` and `showfit`.
+- `plotaquifertrend` plots the GRACE period without a legend error and
+  returns the third trend handle as `trendplot3`. Its help documents the
+  GRACE input.
+- `trendplot` and `dndtuncertainty` run on Octave, so the Kuparuk demo
+  runs on Octave.
+- The `fitevents` help example runs as written.
+- `private/siUnitsToTex` wraps each negative exponent once, so labels
+  such as 'm3 d-1' in `hyetograph` show the correct superscript.
+- `private/fillnans` fills only interior nan runs of length `fmax` or
+  less and accepts a row vector.
+- `private/smoothnoise` keeps each year together on the 'annual' path
+  and accepts a call with no method input.
+- `private/setrainnan` accepts vector input.
+- `private/preparecalendar` assigns `timestep` for every calendar.
+- `private/fitcts` returns nan for a single sample.
+- `private/runlength` and `private/anomaly` accept row vectors.
+- `private/getplotdata` skips axes children that have no `XData`.
+- `private/formatPlotMarkers` calls `round` with one input, which Octave
+  requires.
+- `fitab` and `loadflow` call the shared private helpers in place of
+  local copies.
+- The GitHub Actions workflow uses action versions that run on Node.js 24.
+- The GitHub Actions `Tests` workflow runs the test suite. With the
+  project file `bfra.prj` at the repository root, `matlab-actions/run-tests`
+  selected zero tests, and the runs in 1.1.0 passed without running a
+  test. The workflow builds the suite from `tests/` and fails when the
+  suite is empty.
+- The `cloudphi` and `fitphi` help describe `dispfit` correctly: it
+  prints each phi value.
+- The Getting Started function list shows dQ/dt as italic text, not as
+  oversized equation images, and its author email is one mailto link.
+- `makedocs('demos')` does not overwrite the Octave m-files in
+  `demos/mfiles`, and the demo pages show the output of the current code.
+- The m2html dependency graph matches the current functions.
+
 ## [1.1.0] - 2026-09-14
 
 ### Added
@@ -294,5 +554,6 @@ semantic versioning.
 The JOSS release: Cooper and Zhou (2023), Journal of Open Source
 Software, 8(90), 5492. https://doi.org/10.21105/joss.05492
 
+[1.2.0]: https://github.com/mgcooper/baseflow/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/mgcooper/baseflow/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/mgcooper/baseflow/releases/tag/v1.0.0

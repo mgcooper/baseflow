@@ -33,11 +33,10 @@ function tex_labels = siUnitsToTex(units)
       % Replace spaces with '\cdot' for TeX multiplication
       % unit = strrep(unit, ' ', ' \cdot ');
 
-      % Replace negative powers with LaTeX-style exponents
-      unit = regexprep(unit, '(-\d+)', '^{$1}');
-
-      % Replace positive powers with LaTeX-style exponents
-      unit = regexprep(unit, '(\d+)', '^{$1}');
+      % Replace positive and negative powers with LaTeX-style exponents.
+      % Match the optional minus sign in the same pass so that each exponent
+      % gets one pair of braces.
+      unit = regexprep(unit, '(-?\d+)', '^{$1}');
 
       if isoctave
          tex_labels{i} = unit;
@@ -49,15 +48,6 @@ function tex_labels = siUnitsToTex(units)
 
    % Replace '\{cdot}' with '\cdot' for proper TeX syntax
    tex_labels = cellfun(@(x) strrep(x,'\{cdot}','\cdot'), tex_labels, 'Uni', 0);
-
-   % % My original approach - got complicated to detect positive versus negative
-   % exponents e.g. m3 versus m-3
-   % for n = 1:5
-   %    fndstr = ['-' num2str(n)];
-   %    repstr = ['^{-' num2str(n) '}'];
-   %    units = cellfun(@(x) strrep(x,fndstr,repstr),units,'UniformOutput',false);
-   % end
-   % units = cellfun(@texlabel,units,'UniformOutput',false);
 
    % This doesn't work b/c texlabel doesn't add the {} around the entire
    % exponent

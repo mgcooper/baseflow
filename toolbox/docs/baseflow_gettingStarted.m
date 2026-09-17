@@ -158,14 +158,14 @@
 % * |eventfinder| The algorithm called by |getevents| to detect recession events.
 % * |eventpicker| Pick events manually, rather than automatically using |eventfinder|.
 % * |eventplotter| Plot recession events detected by |eventfinder| or |eventpicker|
-% * |getdqdt| Estimate the rate of change of discharge $dQ/dt$ prior to curve 
+% * |getdqdt| Estimate the rate of change of discharge _dQ/dt_ prior to curve 
 % fitting using one of several numerical differentiation options.
 % * |fitets| Apply the exponential time step method to estimate the numerical 
-% derivative $dQ/dt$.
+% derivative _dQ/dt_.
 % * |fitcts| Apply the constant time step method to estimate the numerical derivative 
-% $dQ/dt$.
+% _dQ/dt_.
 % * |fitvts| Apply the variable time step method to estimate the numerical derivative 
-% $dQ/dt$.
+% _dQ/dt_.
 %% 
 % Functions that support aquifer-property estimation:
 %% 
@@ -253,7 +253,7 @@
 %  Setup.m - user-facing installation function.
 %
 %% Authors & Sources
-% The code was written by Matt Cooper (<mailto:matt.cooper@pnnl.gov matt.cooper@pnnl.gov>). 
+% The code was written by Matt Cooper (matt@sierracrestanalytics.com). 
 % The exponential time step method implementation was inspired by Clement Roques' 
 % exponential time step matlab code (available on request from Clement). The underlying 
 % theory is based on idealized solutions to the one-dimensional (lateral) groundwater 

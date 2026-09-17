@@ -6,6 +6,9 @@ function H = hyetograph(time, flow, prec, varargin)
    %  H = hyetograph(time,flow,ppt,t1,t2) plots hyetograph using data in flow
    %  and ppt for time period bounded by datetimes t1 and t2
    %
+   %  hyetograph opens a new figure, unless an axes handle is passed as an
+   %  input. Then it draws in the figure that holds that axes.
+   %
    % Example, how to later access the plot objects
    %  H = hyetograph(...);
    %
@@ -147,8 +150,15 @@ function [time, flow, prec, t1, t2, units, fig] = parseinputs(funcname, ...
       ax = varargin{tf};
       fig = get(ax, 'Parent');
       varargin = varargin(~tf);
+
+      % plotyy draws into the current axes, so make the supplied axes and
+      % its figure current.
+      set(groot, 'CurrentFigure', fig);
+      set(fig, 'CurrentAxes', ax);
    else
-      fig = gcf;
+      % Open a new figure. hyetograph resizes and retags its figure, so
+      % it must not take over a figure the user has open.
+      fig = figure;
    end
    
    set(fig, 'Position', [0 0 700 400]);
@@ -173,43 +183,3 @@ function [time, flow, prec, t1, t2, units, fig] = parseinputs(funcname, ...
    
    time = todatenum(time);
 end
-
-% =======================================
-% Create plot
-% yyaxis left;
-% h1 = plot(time,flow,'-o','MarkerSize',4,'MarkerFaceColor',colors(1,:), ...
-%    'MarkerEdgeColor','none','Tag','StreamflowPlot');
-% ax = gca;
-% set(ax,'Tag','HyetographAxis');
-%
-% % % With yyaxis, there is only one axis, so I don't track them separately
-% % ax1 = gca;
-% % ax1.Tag = 'StreamflowAxis';
-%
-% % Set the remaining axes properties
-% set(ax,'XMinorGrid','on','YMinorGrid','on');
-% grid(ax,'on');
-%
-% % hacky way to make space so the precip bars do not obscure the streamflow
-% % ylim([ax.YLim(1),1.5*ax.YLim(2)]);
-%
-% % Create ylabel
-% ylabel(['Streamflow (' units{1} ')'],'Color',colors(1,:),'Interpreter','tex');
-%
-% % Create second plot
-% yyaxis right; % varargin{:} goes on bar if needed
-% h2 = bar(time,prec,'FaceColor',colors(2,:),'EdgeColor','none',...
-%    'Tag','PrecipitationPlot');
-%
-% % % With yyaxis, there is only one axis, so I don't track them separately
-% % ax2 = gca;
-% % ax2.Tag = 'PrecipitationAxis';
-%
-% % Create ylabel
-% ylabel(['Precipitation (' units{2} ')'],'Color',colors(2,:),'Interpreter','tex');
-% axis(ax,'ij');
-%
-% % return control to left axis
-% yyaxis left
-% =======================================
-

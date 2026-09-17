@@ -19,9 +19,11 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
    %
    %     [q,dqdt,dt,tq,rq,Info,hFits] = baseflow.getdqdt(_) also returns the
    %     pick information and the fit handles from plotdqdt. getdqdt calls
-   %     plotdqdt only when neither fitmethod nor pickmethod is 'none'. In
-   %     that case, q, dqdt, dt, and tq are cell arrays with one cell per
-   %     pick. Otherwise, Info and hFits are nan.
+   %     plotdqdt when neither fitmethod nor pickmethod is 'none', and then
+   %     q, dqdt, dt, and tq are cell arrays with one cell per pick. With
+   %     pickmethod 'none' and plotfits true, getdqdt calls plotdqdt to
+   %     draw the event and returns its handles in hFits, and Info is nan.
+   %     Otherwise Info and hFits are nan.
    %
    % Required inputs
    %
@@ -51,7 +53,10 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
    %        segments: 'none', 'auto', or 'manual'. 'none' skips the fit.
    %        Default: 'none'.
    %     plotfits: logical, scalar, indicates whether plotdqdt plots the
-   %        fits. Default: false.
+   %        fits. With pickmethod 'none', getdqdt draws the event and
+   %        returns the plotdqdt handles as the second optional output.
+   %        fitmethod 'none' draws nothing, because plotdqdt fits the
+   %        point cloud to draw the line. Default: false.
    %     eventID: char, event label that getdqdt passes to plotdqdt.
    %        Default: 'none'.
    %
@@ -105,8 +110,33 @@ function [q,dqdt,dt,tq,rq,varargout] = getdqdt(T,Q,R,derivmethod,varargin)
 
    % this is the case where dQ/dt and q are returned without fitting a/b
    if strcmp(fitmethod,'none') || strcmp(pickmethod,'none')
+
+      % Draw the event when the caller asks for the fit plots. plotdqdt
+      % finds no picks for pickmethod 'none', so Info stays nan. plotdqdt
+      % fits the point cloud to draw the fit line, so skip the plot for
+      % fitmethod 'none', which asks for no fit.
+      hFits = nan;
+      if plotfits == true && ~strcmp(fitmethod, 'none')
+
+         % plotdqdt fits the point cloud to draw its line. The 'qtl'
+         % method bootstraps, so save the random stream and restore it
+         % after the call. Otherwise a display fit changes the replicates
+         % of the analysis fit that follows it.
+         rngstate = [];
+         if ~isoctave
+            rngstate = rng;
+         end
+
+         hFits = baseflow.plotdqdt(q, dqdt, 'fitmethod', fitmethod, ...
+            'pickmethod', pickmethod, 'plotfits', plotfits, ...
+            'eventID', eventID, 'rain', rq);
+
+         if ~isempty(rngstate)
+            rng(rngstate);
+         end
+      end
       varargout{1} = nan;
-      varargout{2} = nan;
+      varargout{2} = hFits;
       return
    else
       % if pickmethod = "none", we don't need anything else so we could stop

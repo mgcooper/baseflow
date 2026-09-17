@@ -45,7 +45,8 @@ function opts = setopts(funcname,varargin)
    %     fitorder       : fitting order (value of exponent b)
    %     pickfits       : pick fits manually?
    %     pickmethod     : method to fit picks manually
-   %     plotfits       : plot the fits?
+   %     plotfits       : plot each event fit? fitevents passes this flag
+   %                      to getdqdt, which draws one figure per event.
    %     saveplots      : save plots of fits? fitevents parses this flag,
    %                      but the flag has no effect.
    %     etsparam       : min flow length parameter for ETS algorithm
@@ -74,7 +75,7 @@ function opts = setopts(funcname,varargin)
    %     aquiferbreadth : distance from channel to divide
    %     drainableporosity: drainable porosity
    %     isflat         : logical indicating true or false
-   %     plotfits       : plot the various global fits?e
+   %     plotfits       : plot the various global fits?
    %     bootfit        : logical indicating whether to bootstrap the
    %                      uncertainites
    %     bootreps       : number of reps for bootstrapping

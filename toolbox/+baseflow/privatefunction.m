@@ -17,11 +17,4 @@ function funcHandle = privatefunction(funcName)
    
    % use this to confirm correct scoping
    % functions(funcHandle)
-   
-   % switch funcName
-   %    case 'todatenum'
-   %       funcHandle = @todatenum;
-   %    otherwise
-   %       error('Unknown function name.');
-   % end
 end

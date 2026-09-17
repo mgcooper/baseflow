@@ -7,8 +7,11 @@ merged into it).
 
 - Public functions in `+baseflow` use short all-lowercase names
   (`fitab`, `getevents`, `eventfinder`), per the canonical MATLAB rule.
-- Test files use `tests/test_<snake_case>.m`. Test classes use PascalCase
-  (`TestBaseflow.m`).
+- Name a test of one function `tests/test_<function_name>.m`, so the test
+  name matches the function name.
+- Give a class suite the same name as its file (`test_fitab`).
+- `TestBaseflow.m` is the integration suite for the toolbox workflow, so
+  it keeps its PascalCase name.
 - Variables use short lowercase or camelCase names (`q`, `dqdt`, `gotopath`).
 
 ## Formatting

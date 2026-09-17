@@ -24,16 +24,19 @@ function h = plplotb(x,xmin,alpha,varargin)
    %
    % Optional inputs
    %
-   %     alphaci  = 2x1 double of lower and upper confidence intervals for alpha
-   %     xminci   = 2x1 double of lower and upper confidence intervals for xmin
-   %     varsym   = char in latex format representing the data symbol, used for
-   %                 plot
-   %     trimline = logical scalar indicating whether to 'trim' the fitted line
+   %     alphaci   = 2x1 double of lower and upper confidence intervals for
+   %                 alpha. The legend prints this interval and names no
+   %                 coverage level, because the caller sets the level.
+   %     xminci    = 2x1 double of lower and upper confidence intervals for
+   %                 xmin.
+   %     varsym    = char in latex format representing the data symbol, used for
+   %                 plot.
+   %     trimline  = logical scalar indicating whether to 'trim' the fitted line
    %                 similar to 'axis tight' option (b/c power law data is often
-   %                 covering many orders of magnitude)
+   %                 covering many orders of magnitude).
    %     labelplot = logical scalar indicating whether to add a label showing
-   %                 the value of xmin and the expected value of x
-   %     ax       =  graphic axis to plot into
+   %                 the value of xmin and the expected value of x.
+   %     ax        = graphic axis to plot into.
    %
    % See also: plfit, plfitb, gpfitb, eventtau
    %
@@ -87,7 +90,10 @@ function h = plplotb(x,xmin,alpha,varargin)
    if ~isnan(alphaci)
       bL = baseflow.conversions(alphaci(1),'alpha','b');
       bH = baseflow.conversions(alphaci(2),'alpha','b');
-      l2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)',b,bL,bH);
+      % The caller supplies alphaci and its coverage level is unknown here,
+      % so the label states the interval and names no level. plfitb passes
+      % one bootstrap standard deviation, which is not a 95% interval.
+      l2 = sprintf('MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]$ CI)',b,bL,bH);
    else
       l2 = sprintf('MLE fit ($b=%.2f$)',baseflow.conversions(alpha,'alpha','b'));
       bL = nan;
@@ -99,7 +105,7 @@ function h = plplotb(x,xmin,alpha,varargin)
 
    if isoctave
       l1 = latex2tex(l1);
-      l2 = sprintf('MLE fit (b=%.2f [%.2f,%.2f] 95%% CI)',b,bL,bH);
+      l2 = sprintf('MLE fit (b=%.2f [%.2f,%.2f] CI)',b,bL,bH);
       xlabel(latex2tex(xtext),'Interpreter','tex');
       ylabel(latex2tex(ytext),'Interpreter','tex');
       h.legend = legend({l1,l2},'interpreter','tex','location','southwest');
@@ -136,7 +142,8 @@ end
 function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
    %ADDLABELS add an arrow pointing to tau0 and tau_exp
 
-   % 'arrow' is not octave compatible afaik
+   % The labels are latex, and Octave has no latex text interpreter, so it
+   % would draw the markup. drawarrow itself runs in both languages.
    if isoctave
       return
    end
@@ -156,9 +163,9 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',tau0,xminc);
    end
 
-   % draw the arrow
-   baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
+   % draw the arrow in the current axes, which is the axes the caller
+   % plotted into, as the text call below uses
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 
@@ -185,8 +192,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
    end
 
-   baseflow.deps.arrow([xarrw(1),yarrw(1)],[xarrw(2),yarrw(2)], ...
-      'BaseAngle',90,'Length',8,'TipAngle',10)
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 end

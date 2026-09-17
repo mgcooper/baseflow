@@ -81,7 +81,7 @@ function [Flow,Meta] = loadflow(basinname,varargin)
    % (kuparuk flow is missing the last two months (Nov/Dec 2020))
 
    if ~isnan(units)
-      cms2cmd = @(x) x.*86400;
+      % convert m3/s to m3/d with private/cms2cmd, then scale by area
       aream2 = Meta.darea.*1e6;
       switch units
          case 'mm/d'

@@ -16,7 +16,6 @@
 % Start with a clean workspace. 
 
 clearvars
-close all
 clc
 %% 
 % Use tab-completion to set the argument to the |basinname| function.

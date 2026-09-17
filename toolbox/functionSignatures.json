@@ -15,7 +15,6 @@
       "inputs":
       [
          {"name":"ab",           "kind":"ordered","type":["vector","double"]},
-         {"name":"Q0",           "kind":"ordered","type":["scalar","double"]},
          {"name":"printvalues",  "kind":"namevalue", "type":["logical", "scalar"],"purpose":"Option"}
       ]
    },
@@ -84,7 +83,8 @@
          {"name":"isflat",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','Brutsaert, 1994','PK62','RS05','BR94'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
          {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','Brutsaert, 1994','Rupp and Selker, 2006 b=1','Rupp and Selker, 2006 b=f(n)','BS04','BS03','BR94','RS06b1','RS06','RS05'}"],"default":"'RS05bn'","purpose":"Option"},
-         {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
+         {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
+         {"name":"plotfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
    },
    "baseflow.conversions":
@@ -472,7 +472,14 @@
          {"name":"precision", "kind":"namevalue",  "type":["scalar","double"]},
          {"name":"timestep",  "kind":"namevalue",  "type":["scalar","double"]},      
          {"name":"eventID",   "kind":"namevalue",  "type":["char"]},
-         {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+         {"name":"labelplot", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"reflines",  "kind":"namevalue",  "type":["cell", "choices={'upperenvelope','lowerenvelope','late','early'}"]},
+         {"name":"axislimits","kind":"namevalue",  "type":["char", "choices={'snap','decades','none'}"],"purpose":"Option"},
+         {"name":"labelcolor","kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelfontsize","kind":"namevalue","type":["scalar","double"]},
+         {"name":"labelstyle","kind":"namevalue",  "type":["char", "choices={'arrow','line'}"],"purpose":"Option"},
+         {"name":"fontsize",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"legendfontsize","kind":"namevalue","type":["scalar","double"]}
       ]
    },
    "baseflow.plotrefline":
@@ -489,6 +496,9 @@
          {"name":"refqtls",   "kind":"namevalue",  "type":["vector","double"]},
          {"name":"plotline",  "kind":"namevalue",  "type":["logical","scalar"]},
          {"name":"linecolor", "kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelcolor","kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelfontsize","kind":"namevalue","type":["scalar","double"]},
+         {"name":"labelstyle","kind":"namevalue",  "type":["char", "choices={'arrow','line'}"],"purpose":"Option"},
          {"name":"precision", "kind":"namevalue",  "type":["scalar","double"]},
          {"name":"timestep",  "kind":"namevalue",  "type":[["scalar","double"],["scalar","duration"]]},
          {"name":"ax",        "kind":"namevalue",  "type":["matlab.graphics.axis.Axes"]}
@@ -524,6 +534,12 @@
          {"name":"timestep",  "kind":"namevalue",  "type":[["scalar","double"],["scalar","duration"]]},
          {"name":"addlegend", "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rain",      "kind":"namevalue",  "type":["vector","double"]},
+         {"name":"axislimits","kind":"namevalue",  "type":["char", "choices={'snap','decades','none'}"],"purpose":"Option"},
+         {"name":"labelstyle","kind":"namevalue",  "type":["char", "choices={'arrow','line'}"],"purpose":"Option"},
+         {"name":"labelcolor","kind":"namevalue",  "type":["vector","double"]},
+         {"name":"labelfontsize","kind":"namevalue","type":["scalar","double"]},
+         {"name":"fontsize",  "kind":"namevalue",  "type":["scalar","double"]},
+         {"name":"legendfontsize","kind":"namevalue","type":["scalar","double"]},
          {"name":"ax",        "kind":"namevalue",  "type":[["matlab.graphics.axis.Axes"],["char"]]}
       ]
    },
@@ -576,8 +592,8 @@
    {
       "inputs":
       [
-         {"name":"ab",           "kind":"ordered", "type":["double","double"]},
-         {"name":"tau0",         "kind":"ordered", "type":["double","double"]},
+         {"name":"ab",           "kind":"ordered", "type":["vector","double"]},
+         {"name":"tau0",         "kind":"ordered", "type":["scalar","double"]},
          {"name":"printvalues",  "kind":"namevalue", "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
@@ -585,8 +601,8 @@
    {
       "inputs":
       [
-         {"name":"ab",           "kind":"ordered", "type":["double","double"]},
-         {"name":"Q0",           "kind":"ordered", "type":["double","double"]},
+         {"name":"ab",           "kind":"ordered", "type":["vector","double"]},
+         {"name":"Q0",           "kind":"ordered", "type":["scalar","double"]},
          {"name":"printvalues",  "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },
@@ -734,22 +750,12 @@
    {
       "inputs":
       [
-         {"name":"m",      "kind":"required",   "type":["numeric"]},
-         {"name":"n",      "kind":"required",   "type":["numeric"]},
-         {"name":"p",      "kind":"required",   "type":["numeric"]},
-         {"name":"gap",    "kind":"namevalue",  "type":["numeric"]},
-         {"name":"marw",   "kind":"namevalue",  "type":["numeric"]},
-         {"name":"marh",   "kind":"namevalue",  "type":["numeric"]},
-         {"name":"style",  "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"}
-      ]
-   },
-   "+baseflow/private/subtight":
-   {
-      "inputs":
-      [
          {"name":"m",        "kind":"required",   "type":["numeric"]},
          {"name":"n",        "kind":"required",   "type":["numeric"]},
          {"name":"p",        "kind":"required",   "type":["numeric"]},
+         {"name":"gap",      "kind":"namevalue",  "type":["numeric"]},
+         {"name":"marw",     "kind":"namevalue",  "type":["numeric"]},
+         {"name":"marh",     "kind":"namevalue",  "type":["numeric"]},
          {"name":"gapstyle", "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},
          {"name":"wstyle",   "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},
          {"name":"hstyle",   "kind":"namevalue",  "type":["char","choices={'tight','loose','fitted','userdef'}","scalar"], "default":"'userdef'","purpose":"Option"},

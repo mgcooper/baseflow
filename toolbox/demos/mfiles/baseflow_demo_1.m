@@ -22,7 +22,6 @@
 % Start with a clean workspace, then set the sitename. 
 
 clearvars
-close all
 clc
 %% 
 % Use tab-completion to set the argument to the |basinname| function.

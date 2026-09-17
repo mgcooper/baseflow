@@ -23,12 +23,6 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
    % TODO
    % add a check if x has a column of ones and add one if not
 
-   % Just call isoctave. TODO: check if function overhead matters.
-   % persistent inoctave
-   % if isempty(inoctave)
-   %    inoctave = isoctave();
-   % end
-
    %if nargin<4, Fcost = @(r)sum(abs(r.*(tau-(r<0)))); end
    if nargin<6, alpha=0.05; end % confidence level
 
@@ -62,6 +56,11 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
 
    % bootstrapped confidence intervals on ab. the transpose makes x*ab work.
    Fci = {@(bootr)fminsearch(@(ab)Fcost(yhat+bootr-x*ab),ab0,opts)',resid};
+   % MATLAB uses 'cper' because type 'bca', the bootci default, fails in its
+   % jackknife step with this bootstrap function. In one timing test, types
+   % 'norm', 'per', and 'cper' each took 0.75 s to 0.78 s. Type 'stud' took
+   % about 67 s and needs more advanced setup. The function uses bootstrap
+   % intervals, not a Student-t interval from the bootstrap standard error.
    if isoctave
       abci = bootci(Nboot,Fci,'type','bca','alpha',alpha);
    else

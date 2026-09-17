@@ -22,6 +22,16 @@ function varargout = plotrefline(x,y,varargin)
    %                 cases this function can be used to return the a/b values
    %                 only)
    %     linecolor = rgb triplet indicating the line color
+   %     labelcolor = rgb triplet indicating the color of the label text and
+   %                 the label arrow. Defaults to the value of linecolor, so
+   %                 a label matches the line it annotates in any figure
+   %                 theme. Pass [] for the same default.
+   %     labelfontsize = scalar double indicating the label font size
+   %     labelstyle = char indicating how to draw the labels of the
+   %                 'latetime', 'earlytime', and 'userfit' lines. 'arrow',
+   %                 the default, draws an arrow with the text beside it.
+   %                 'line' draws the text along the line. The
+   %                 'upperenvelope' label is along the line for both values.
    %     precision = scalar double indicating the precision in the x data, used
    %                 to compute the 'lower envelope'
    %     timestep  = scalar double indicating the timestep of the x data, used
@@ -40,7 +50,8 @@ function varargout = plotrefline(x,y,varargin)
 
    % PARSE INPUTS
    [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
-      linecolor, precision, timestep, ax] = parseinputs(x, y, varargin{:});
+      linecolor, labelcolor, labelfontsize, labelstyle, precision, ...
+      timestep, ax] = parseinputs(x, y, varargin{:});
 
    % need options for how/if to apply the mask - e.g., we might want to show the
    % 'bestfit' to all data, and use the mask for late-time fit. also keep in
@@ -54,7 +65,7 @@ function varargout = plotrefline(x,y,varargin)
       if isempty(ax)
          ax = gca;
       end
-      hold on;
+      hold(ax, 'on');
       xlims = get(ax,'XLim');
       ylims = get(ax,'YLim');
    end
@@ -112,11 +123,11 @@ function varargout = plotrefline(x,y,varargin)
 
       switch refline
          case 'bestfit'
-            href = loglog(xref,yref,':','LineWidth',1,'Color',linecolor);
+            href = loglog(ax,xref,yref,':','LineWidth',1,'Color',linecolor);
          case 'userfit'
-            href = loglog(xref,yref,'-','LineWidth',1,'Color',linecolor);
+            href = loglog(ax,xref,yref,'-','LineWidth',1,'Color',linecolor);
          otherwise
-            href = loglog(xref,yref,'-','LineWidth',0.5,'Color',linecolor);
+            href = loglog(ax,xref,yref,'-','LineWidth',0.5,'Color',linecolor);
       end
 
       % reset the x,ylims
@@ -124,7 +135,7 @@ function varargout = plotrefline(x,y,varargin)
       setlogticks(ax);
 
       if labels == true
-         addlabels(a,b,refline)
+         addlabels(ax,a,b,refline,labelcolor,labelfontsize,labelstyle)
       end
    end
    % if discharge were measured directly, then the lower envelope would be
@@ -142,66 +153,45 @@ function varargout = plotrefline(x,y,varargin)
 end
 
 %% LOCAL FUNCTIONS
-function addlabels(a,b,refline)
-
-   % for early and late, we use the early-time form to get the y position
-   ylims = ylim;
-   xlims = xlim;
-
-   % use the number of decades to place the labels
-   ndecsy = log10(ylims(2))-log10(ylims(1));
-   ndecsx = log10(xlims(2))-log10(xlims(1));
-
-   % place the label 1/2 way b/w the first and second decade
-   ya = 10^(log10(ylims(1))+ndecsy/20);
+function addlabels(ax,a,b,refline,labelcolor,labelfontsize,labelstyle)
 
    switch refline
 
       %case {'latetime','earlytime','userfit','bestfit'}
       case {'latetime','earlytime','userfit'}
-         xa = (ya/a)^(1/b);
 
-         % make the arrow span 1/10th or so of the total number of decades
-         xa = [xa 10^(log10(xa)+ndecsx/15)];
-         ya = [ya ya];
-
-         if strcmp(refline, 'userfit')
-            ta = sprintf('$b=%.2f$ ($\\hat{b}$)',b);
-         elseif b==1 || b==3
-            ta = sprintf('$b=%.0f$',b);
-         elseif b==3/2
-            ta = sprintf('$b=%.1f$',b);
+         % Octave has no latex text interpreter.
+         if isoctave
+            interpreter = 'tex';
          else
-            ta = sprintf('$b=%.2f$',b);
+            interpreter = 'latex';
          end
 
-         if ~isoctave
-            baseflow.deps.arrow([xa(2),ya(2)],[xa(1),ya(1)], ...
-               'BaseAngle',90,'Length',8,'TipAngle',10);
-            text(1.03*xa(2),ya(2),ta,'HorizontalAlignment','left', ...
-               'fontsize',13,'Interpreter','latex');
-         end
+         % The user fit is an estimate, so its label carries b-hat. The
+         % early-time and late-time lines are reference slopes.
+         ta = breflinetext(b, strcmp(refline, 'userfit'), interpreter);
+
+         % labelrefline puts the head of the arrow on the line and the
+         % text beside its tail. plotdqdt labels its late-time and
+         % early-time lines through the same helper, so both figures
+         % label a line alike.
+         labelrefline(ax, a, b, ta, 'Style', labelstyle, ...
+            'Color', labelcolor, 'FontSize', labelfontsize, ...
+            'Interpreter', interpreter);
 
       case 'upperenvelope'
 
-         % only works with correct axes position
-         axpos = baseflow.deps.plotboxpos(gca);
          % xtxt = exp(mean(log(xlim)));
 
-         xlims = log10(xlim);
+         % place the label halfway across the x range, on the line. a is
+         % 2/timestep, so a*xtxt^b holds the label on the line for any
+         % timestep, not only the daily case where a is 2
+         xlims = log10(xlim(ax));
          xtxt = 10^(xlims(1)+(xlims(2)-xlims(1))/2);
-         ytxt = 2*xtxt;
-         rtxt = 0.98;
+         ytxt = a*xtxt^b;
 
-         % some values of rtxt that work for different types of plots
-         % 5.1    baseflow_checkevent2 figure (I used 5.22 in the final fig)
-         % 0.22   not sure (note said 0.22 works with tiledlayout)
-         % 3.8    not sure (note said i think 3.8 works with subplot)
-         % 0.86   the standard point cloud plot (standard figure size)
-         % 1.07   not sure but this was
-         % 0.98   used this in the final point cloud plot
-
-         rotatedLogLogText(xtxt,ytxt,'upper envelope',rtxt,axpos,'FontSize',11);
+         rotatedLogLogText(ax,xtxt,ytxt,'upper envelope',b, ...
+            'FontSize',labelfontsize,'Color',labelcolor);
 
       case 'lowerenvelope'
          % for now, add this after the fact
@@ -214,7 +204,18 @@ end
 
 %% INPUT PARSER
 function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
-      linecolor, precision, timestep, ax] = parseinputs(x, y, varargin)
+      linecolor, labelcolor, labelfontsize, labelstyle, precision, ...
+      timestep, ax] = parseinputs(x, y, varargin)
+
+   % The label styles addlabels can draw, with the default first. The parser
+   % validates against this list, and validatestring returns the member that
+   % addlabels switches on.
+   labelstyles = {'arrow', 'line'};
+
+   % The MATLAB factory axes font size. A startup file can raise the axes
+   % font size, so the labels take their size from this value instead.
+   defaultfontsize = 10;
+
    parser = inputParser;
    parser.FunctionName = 'baseflow.plotrefline';
 
@@ -228,6 +229,10 @@ function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
    parser.addParameter('refqtls', nan, @isnumeric);
    parser.addParameter('plotline', true, @islogical);
    parser.addParameter('linecolor', [0 0 0], @isnumeric);
+   parser.addParameter('labelcolor', [], @islabelcolor);
+   parser.addParameter('labelfontsize', defaultfontsize, @(x) isnumericscalar(x) && x > 0);
+   parser.addParameter('labelstyle', labelstyles{1}, ...
+      @(style) any(validatestring(style, labelstyles)));
    parser.addParameter('precision', 1, @isnumeric); % default = 1 m3/s
    parser.addParameter('timestep', 1, @isnumeric); % default = 1 day
    parser.addParameter('ax', emptyaxes(), @isaxis);
@@ -242,7 +247,16 @@ function [x, y, mask, refline, refslope, userab, labels, refqtls, plotline, ...
    refqtls     = parser.Results.refqtls;
    plotline    = parser.Results.plotline;
    linecolor   = parser.Results.linecolor;
+   labelcolor  = parser.Results.labelcolor;
+   labelfontsize = parser.Results.labelfontsize;
+   labelstyle  = validatestring(parser.Results.labelstyle, labelstyles);
    precision   = parser.Results.precision;
    timestep    = parser.Results.timestep;
-   ax          = parser.Results.ax;   
+   ax          = parser.Results.ax;
+
+   % An empty labelcolor means the caller stated no preference. Match the
+   % line, so the label and its line read as one object in any figure theme.
+   if isempty(labelcolor)
+      labelcolor = linecolor;
+   end
 end

@@ -89,7 +89,8 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
 
       case 'pointcloud'
          phi = baseflow.cloudphi(q, dqdt, bhat, A, D, L, 'envelope', ...
-            'lateqtls', refqtls, 'earlyqtls', earlyqtls, 'mask', itau);
+            'lateqtls', refqtls, 'earlyqtls', earlyqtls, 'mask', itau, ...
+            'plotfit', plotfits);
 
       case 'phicombo'
          phi1 = baseflow.eventphi(Results, Fits, A, D, L, 1, ...

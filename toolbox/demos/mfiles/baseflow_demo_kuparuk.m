@@ -18,7 +18,6 @@
 % * Then experiment with the 'globalfit' function and save the 'GlobalFit' data.
 
 clearvars
-close all
 clc
 %% 
 % Set the main options

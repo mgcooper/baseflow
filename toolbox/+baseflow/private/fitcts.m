@@ -30,7 +30,8 @@ function [q,dqdt,dt,tq,rq,dq,tqmid] = fitcts(T,Q,R,varargin)
    %     For B1, F1, C2, and C4, dqdt also estimates the derivative at
    %     tqmid. For B2 and F2, dqdt estimates the derivative at tq, and
    %     tqmid is half a step earlier (B2) or later (F2). Stencil edge
-   %     samples are nan.
+   %     samples are nan. A single sample has no time step, so q, dqdt,
+   %     dt, dq, and tqmid are nan.
    %
    % See also: fitets, fitvts, getdqdt
    %
@@ -62,12 +63,14 @@ function [q,dqdt,dt,tq,rq,dq,tqmid] = fitcts(T,Q,R,varargin)
    end
    dt = dt0 * ones(size(T));
 
-   % offset vectors to compute derivatives
+   % offset vectors to compute derivatives. Build the two-step offsets from
+   % the one-step offsets so each vector matches the length of Q, also for
+   % a single sample.
    Qi = Q;
    Qim1 = [nan; Qi(1:end-1)];       % i minus 1
-   Qim2 = [nan; nan; Qi(1:end-2)];  % i minus 2
+   Qim2 = [nan; Qim1(1:end-1)];     % i minus 2
    Qip1 = [Qi(2:end); nan];         % i plus 1
-   Qip2 = [Qi(3:end); nan; nan];    % i plus 2
+   Qip2 = [Qip1(2:end); nan];       % i plus 2
 
    Ti = T;                          % new
    Tim1 = [nan; Ti(1:end-1)];       % i minus 1

@@ -123,6 +123,10 @@ function varargout = plfitb(x,varargin)
    if plotfit == true
       alpha = Fit.alpha;
       xmin = Fit.tau0;
+      % plplotb converts alpha to b = 1+1/alpha, which decreases with
+      % alpha, so alpha_H maps to the lower b. Pass the alpha bounds
+      % reversed. With bootfit true, both intervals span one bootstrap
+      % standard deviation. With bootfit false they are degenerate.
       aci = [Fit.alpha_H Fit.alpha_L];
       xci = [Fit.tau0_L Fit.tau0_H];
       baseflow.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'xminci',xci);
@@ -161,6 +165,18 @@ function Fit = plbootfit(x,range,limit,nreps)
    reps.alpha  = repsmat(:,3);
    reps.b      = baseflow.conversions(reps.alpha,'alpha','b');
    reps.tau    = reps.tau0.*(2-reps.b)./(3-2.*reps.b);
+
+   % tau = tau0*(2-b)/(3-2*b) has a pole at b = 3/2, which is alpha = 2. A
+   % replicate at or below alpha = 2 returns a negative or unbounded tau.
+   % Such a replicate makes std(reps.tau) meaningless. Warn with the count,
+   % so the caller does not trust the reported tau_sig.
+   npole = sum(reps.alpha <= 2);
+   if npole > 0
+      warning('baseflow:plfitb:tauPoleReplicates', ...
+         ['%d of %d bootstrap replicates have alpha <= 2, where tau is ' ...
+         'unbounded. Treat tau_sig, tau_L, and tau_H as invalid.'], ...
+         npole, numel(reps.alpha))
+   end
 
    for n = 1:numel(vars)
       var = vars{n};

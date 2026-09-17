@@ -30,7 +30,7 @@ function h = formatPlotMarkers(varargin)
    addParameter( p,'markersize', 10, @(x)isnumeric(x) );
    addParameter( p,'fillspacing', nan, @(x)isscalar(x) );
    addParameter( p,'suppliedaxes', gca, @(x)any(isaxis));
-   addParameter( p,'suppliedline', nan, @(x)isobject(x) );
+   addParameter( p,'suppliedline', nan, @islinehandle );
 
    parse(p,varargin{:});
 
@@ -70,7 +70,8 @@ function h = formatPlotMarkers(varargin)
       end
 
       % use the supplied axis unless a specific line was supplied
-      if ~isobject(suppliedline) && isnan(suppliedline)
+      if isnumeric(suppliedline) && isscalar(suppliedline) && ...
+            isnan(suppliedline)
          % there is either a supplied axis, or we assigned gca to it
          Children = allchild(thisaxis);  % get the children to find lines
       else
@@ -142,7 +143,7 @@ function h = formatPlotMarkers(varargin)
                fillspacing = max(1,numPoints/10); % if <10 points fill them all
             end
             numfill = fix(numPoints/fillspacing);
-            markerIdx = round(linspace(1,numPoints,numfill),0);
+            markerIdx = round(linspace(1,numPoints,numfill));
          else
             % fill all points, use smaller symbol size
             markerIdx = 1:numPoints;
@@ -196,3 +197,4 @@ function h = formatPlotMarkers(varargin)
    % if isa(linesWithMarkers,'matlab.graphics.function.ImplicitFunctionLine.Type')
    % if isa(linesWithMarkers,'matlab.graphics.function.ParameterizedFunctionLine.Type')
    % if isa(linesWithMarkers,'matlab.graphics.chart.decoration.ConstantLine.Type')
+

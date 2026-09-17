@@ -28,6 +28,23 @@ function varargout = pointcloudplot(q,dqdt,varargin)
    %                    (to indicate what is being plotted, maybe a custom user
    %                    model)
    %     rain        =  vector double of rainfall (mm/time)
+   %     labelstyle  =  char, 'arrow' (default) or 'line'. 'arrow' points an
+   %                    arrow at each labeled reference line and writes the
+   %                    label beside it. 'line' writes the label along the
+   %                    line, as the upper-envelope label is written.
+   %     labelcolor  =  rgb triplet for the label text and the label arrow.
+   %                    Defaults to the line color.
+   %     labelfontsize = scalar double, the reference-line label font size.
+   %                    Default 10, the factory axes font size.
+   %     fontsize    =  scalar double, the axes font size, which sets the
+   %                    tick labels and the axis labels. Default 12.
+   %     legendfontsize = scalar double, the legend font size. Default 12.
+   %     axislimits  =  char, one of 'snap' (default), 'decades', or 'none'.
+   %                    'snap' moves an axis limit out to its decade when
+   %                    that decade is within a quarter decade, so the axis
+   %                    corner carries a tick. 'decades' moves every limit
+   %                    out to its decade. 'none' keeps the limits the data
+   %                    sets.
    %     ax          =  graphic axis to plot into
    %
    % Example
@@ -49,49 +66,69 @@ function varargout = pointcloudplot(q,dqdt,varargin)
    if nargin == 0; open(mfilename('fullpath')); return; end
 
    % PARSE INPUTS
-   [q, dqdt, mask, reflines, reflabels, blate, userab, ~, ~, ...
-      addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin{:});
+   [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
+      timestep, addlegend, usertext, rain, axislimits, labelstyle, ...
+      labelcolor, labelfontsize, fontsize, legendfontsize, ax] = ...
+      parseinputs(q, dqdt, varargin{:});
 
    % create the figure / axes
-   if not(isaxis(ax)) || isempty(ax)
+   suppliedaxes = isaxis(ax) && not(isempty(ax));
+   if not(suppliedaxes)
       figure;
       ax = gca;
    end
    fig = get(ax, 'Parent');
-   set(fig, 'Position', [0 0 550 510]);
+
+   % Size the figure only when this function created it. A caller that
+   % supplies an axes owns the figure and the layout of its panels.
+   % sizefigure keeps the position the figure was given, and plotdqdt
+   % takes its size from the same place.
+   if not(suppliedaxes)
+      sizefigure(fig);
+   end
 
    % plot the data
    h0 = loglog(ax, q, -dqdt, 'o');
-   formatPlotMarkers('markersize', 6);
-   hold on; grid off;
+   formatPlotMarkers('markersize', 6, 'suppliedline', h0);
+   hold(ax, 'on'); grid(ax, 'off');
 
    % add circles around the t>tau0 values if requested
    if sum(mask) < numel(q)
-      h1 = scatter(q(mask), -dqdt(mask), 'r');
+      h1 = scatter(ax, q(mask), -dqdt(mask), 'r');
    else
       h1 = [];
    end
 
    % add some space around the data
-   xlims = xlim;
-   ylims = ylim;
+   xlims = xlim(ax);
+   ylims = ylim(ax);
    ylowlim = min(ylims);
    yupplim = max(ylims);
 
-   xlim([xlims(1) * 0.9 xlims(2) * 1.1]);
+   % Widen x here, before the reference lines are drawn across this range.
+   % plotrefline restores the limits it finds, so a later widening would
+   % leave every line short of the axis edge. xlims keeps the data range,
+   % which the upper-envelope y limit below needs.
+   xlim(ax, snaploglims(xlims, [0.9 1.1], axislimits));
    % xlim([xlims(1)/(log10(xlims(2))-log10(xlims(1))) *.09 xlims(2)*1.1]);
+
+   % Set the axes font size, which sets the tick labels, and set the axis
+   % labels to the same size. A startup file can raise the axes font size,
+   % and the tick labels then crowd the axes.
+   set(ax, 'FontSize', fontsize);
 
    % set xylabels and init containers for reflines
    if isoctave
-      xlabel('Q (m^3 d^{-1})','FontSize',14, 'Interpreter', 'tex');
-      ylabel('-dQ/dt (m^3 d^{-2})','FontSize', 14, 'Interpreter', 'tex');
+      xlabel(ax, 'Q (m^3 d^{-1})','FontSize',fontsize, 'Interpreter', 'tex');
+      ylabel(ax, '-dQ/dt (m^3 d^{-2})','FontSize', fontsize, ...
+         'Interpreter', 'tex');
 
       h = zeros(numel(reflines),1);
    else
-      xlabel(baseflow.getstring('Q','units',true), ...
-         'FontSize', 14, 'Interpreter', 'latex');
-      ylabel(baseflow.getstring('dQdt','units',true), ...
-         'FontSize', 14, 'Interpreter', 'latex');
+      xlabel(ax, baseflow.getstring('Q','units',true), ...
+         'FontSize', fontsize, 'Interpreter', 'latex');
+      ylabel(ax, baseflow.getstring('dQdt','units',true), ...
+         'FontSize', fontsize, 'Interpreter', 'latex');
 
       h = gobjects(numel(reflines),1);
    end
@@ -109,7 +146,11 @@ function varargout = pointcloudplot(q,dqdt,varargin)
                               'refline','earlytime',        ...
                               'refslope',3,                 ...
                               'labels',reflabels,           ...
-                              'mask',mask                   ...
+                              'labelstyle',labelstyle,      ...
+                              'labelcolor',labelcolor,      ...
+                              'labelfontsize',labelfontsize,...
+                              'mask',mask,                  ...
+                              'ax',ax                       ...
                               );
             set(h(n),'LineWidth',1);
             
@@ -119,7 +160,11 @@ function varargout = pointcloudplot(q,dqdt,varargin)
                               'refline','latetime',         ...
                               'refslope',blate,             ...
                               'labels',reflabels,           ...
-                              'mask',mask                   ...
+                              'labelstyle',labelstyle,      ...
+                              'labelcolor',labelcolor,      ...
+                              'labelfontsize',labelfontsize,...
+                              'mask',mask,                  ...
+                              'ax',ax                       ...
                               );
             set(h(n),'LineWidth',1);
             
@@ -127,7 +172,12 @@ function varargout = pointcloudplot(q,dqdt,varargin)
             [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','upperenvelope',    ...
-                              'labels',reflabels            ...
+                              'labels',reflabels,           ...
+                              'labelstyle',labelstyle,      ...
+                              'labelcolor',labelcolor,      ...
+                              'labelfontsize',labelfontsize,...
+                              'timestep',timestep,          ...
+                              'ax',ax                       ...
                               );
             % make ylimits span the min dq/dt to the upper envelope at max Q
             yupplim = ab(n,1)*max(xlims)^ab(n,2);
@@ -136,7 +186,13 @@ function varargout = pointcloudplot(q,dqdt,varargin)
             [h(n),ab(n,:)] =  baseflow.plotrefline(             ...
                               q,-dqdt,                      ...
                               'refline','lowerenvelope',    ...
-                              'labels',reflabels            ...
+                              'labels',reflabels,           ...
+                              'labelstyle',labelstyle,      ...
+                              'labelcolor',labelcolor,      ...
+                              'labelfontsize',labelfontsize,...
+                              'precision',precision,        ...
+                              'timestep',timestep,          ...
+                              'ax',ax                       ...
                               );
             ylowlim = min(0.8.*ab(n,1),0.8*min(ylims));
             
@@ -144,7 +200,8 @@ function varargout = pointcloudplot(q,dqdt,varargin)
             [h(n),ab(n,:)] = baseflow.plotrefline(              ...
                               q,-dqdt,                      ...
                               'refline','bestfit',          ...
-                              'labels',false                ...
+                              'labels',false,               ...
+                              'ax',ax                       ...
                               );
             set(h(n),'LineWidth',2);
             
@@ -154,12 +211,30 @@ function varargout = pointcloudplot(q,dqdt,varargin)
                               'refline','userfit',          ...
                               'userab',userab,              ...
                               'labels',reflabels,           ...
-                              'mask',mask                   ...
+                              'labelstyle',labelstyle,      ...
+                              'labelcolor',labelcolor,      ...
+                              'labelfontsize',labelfontsize,...
+                              'mask',mask,                  ...
+                              'ax',ax                       ...
                               );
       end
       out.ab.(reflines{n}) = ab(n,:);
    end
-   set(gca,'YLim', [ylowlim yupplim]);
+
+   % ylowlim already carries the 0.8 factor set in the loop, so pass no
+   % padding. The limits keep the values above unless a decade is near.
+   set(ax,'YLim', snaploglims([ylowlim yupplim], [1 1], axislimits));
+
+   % plotrefline set the ticks from the limits that were current when each
+   % line was drawn, so every decade the limits above add needs a new tick.
+   % Name each axis, because setlogticks skips an axis in manual tick mode.
+   setlogticks(ax, 'axset', 'x');
+   setlogticks(ax, 'axset', 'y');
+
+   % A label written along a line was rotated with the limits that were
+   % current when it was drawn. Reset each angle to the final limits,
+   % because Octave installs no listener to do it.
+   relayoutloglogtext(ax);
 
    % plot rain if provided
    if all(~isnan(rain))
@@ -222,23 +297,33 @@ function varargout = pointcloudplot(q,dqdt,varargin)
          ltxt = reflines;
       end
 
-      if isobject(hrain)
-         hleg = [hleg hrain];
-         ltxt = {ltxt, 'rain'};
+      % plotrain returns the handles of the rain circles, or nan when no
+      % rain is plotted. Octave returns numeric handles, so use the shared
+      % islinehandle predicate rather than isobject.
+      if islinehandle(hrain)
+         % plotrain draws one circle per wet point, so one handle carries
+         % the legend entry. hleg is a row for a fit line and a column for
+         % the reference lines, and a caller can pass reflines as a row or
+         % a column, so concatenate both lists down a column. ltxt is a
+         % char for a fit line and a cell for the reference lines, so
+         % cellstr gives one list for both.
+         hleg = [hleg(:); hrain(1)];
+         ltxt = cellstr(ltxt);
+         ltxt = [ltxt(:); {'rain'}];
       end
 
-      ltxt = strrep(ltxt, '$', '');
-      L = legend(hleg,ltxt, 'location', 'northwest', 'interpreter', 'tex', ...
-         'AutoUpdate', 'off');
+      % aQbString returns the equation in latex. Octave has no latex text
+      % interpreter, so drop the math delimiters and read it as tex there.
+      if isoctave
+         ltxt = strrep(ltxt, '$', '');
+         interpreter = 'tex';
+      else
+         interpreter = 'latex';
+      end
 
-      % if isoctave
-      %    ltxt = strrep(ltxt,'$','');
-      %    l = legend(hleg,ltxt,'location','northwest','interpreter','tex', ...
-      %       'AutoUpdate','off');
-      % else
-      %    l = legend(hleg,ltxt,'location','northwest','interpreter','latex', ...
-      %       'AutoUpdate','off');
-      % end
+      L = legend(hleg, ltxt, 'location', 'northwest', ...
+         'interpreter', interpreter, 'FontSize', legendfontsize, ...
+         'AutoUpdate', 'off');
 
    else
       L = nan;
@@ -249,7 +334,7 @@ function varargout = pointcloudplot(q,dqdt,varargin)
       out.scatter    = h0;
       out.mask       = h1;
       out.reflines   = h;
-      out.ax         = gca;
+      out.ax         = ax;
       out.hrain      = hrain;
       out.legend     = L;
       
@@ -280,7 +365,7 @@ function hrain = plotrain(ax,h,rain,x,y)
       x = x(rain>0);
       y = y(rain>0);
 
-      hold on;
+      hold(ax, 'on');
       for n = numel(sz):-1:1
          hrain(n) = plot(ax,x(n),y(n),'o','MarkerSize',sz(n), ...
             'MarkerFaceColor','none','Color','m','LineWidth',1);
@@ -290,8 +375,21 @@ end
 
 %% INPUT PARSER
 function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
-      timestep, addlegend, usertext, rain, ax] = parseinputs(q, dqdt, varargin)
-   
+      timestep, addlegend, usertext, rain, axislimits, labelstyle, ...
+      labelcolor, labelfontsize, fontsize, legendfontsize, ax] = ...
+      parseinputs(q, dqdt, varargin)
+
+   % The axis-limit policies snaploglims accepts, with the default first.
+   axislimitvalues = {'snap', 'decades', 'none'};
+
+   % The label styles labelrefline draws, with the default first.
+   labelstyles = {'arrow', 'line'};
+
+   % The MATLAB factory axes font size, which the reference-line labels
+   % take, and the axes font size this function sets.
+   defaultlabelfontsize = 10;
+   defaultfontsize = 12;
+
    parser = inputParser;
    parser.addRequired('q', @isnumeric);
    parser.addRequired('dqdt', @isnumeric);
@@ -305,6 +403,17 @@ function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
    parser.addParameter('addlegend', true, @islogical);
    parser.addParameter('usertext', '', @ischar);
    parser.addParameter('rain', nan, @isnumeric);
+   parser.addParameter('axislimits', axislimitvalues{1}, ...
+      @(policy) any(validatestring(policy, axislimitvalues)));
+   parser.addParameter('labelstyle', labelstyles{1}, ...
+      @(style) any(validatestring(style, labelstyles)));
+   parser.addParameter('labelcolor', [], @islabelcolor);
+   parser.addParameter('labelfontsize', defaultlabelfontsize, ...
+      @(value) isnumericscalar(value) && value > 0);
+   parser.addParameter('fontsize', defaultfontsize, ...
+      @(value) isnumericscalar(value) && value > 0);
+   parser.addParameter('legendfontsize', defaultfontsize, ...
+      @(value) isnumericscalar(value) && value > 0);
    parser.addParameter('ax', emptyaxes(), @isaxis);
    parser.FunctionName = 'baseflow.pointcloudplot';
    
@@ -321,4 +430,14 @@ function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
    usertext = parser.Results.usertext;
    rain = parser.Results.rain;
    ax = parser.Results.ax;
+
+   labelcolor = parser.Results.labelcolor;
+   labelfontsize = parser.Results.labelfontsize;
+   fontsize = parser.Results.fontsize;
+   legendfontsize = parser.Results.legendfontsize;
+
+   % validatestring returns the member of the list, so a partial value such
+   % as 'dec' reaches snaploglims as 'decades'.
+   axislimits = validatestring(parser.Results.axislimits, axislimitvalues);
+   labelstyle = validatestring(parser.Results.labelstyle, labelstyles);
 end

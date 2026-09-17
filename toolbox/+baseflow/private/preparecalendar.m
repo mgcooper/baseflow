@@ -5,13 +5,17 @@ function [T,Q,R,numyears,timestep] = preparecalendar(T,Q,R)
    %  day (Feb 29) entries from time vector T and data vectors Q and R, and
    %  returns numyears = numel(T)/365. When T contains leap days and the
    %  calendar is regular, timestep is T(2)-T(1); an irregular calendar
-   %  with leap days raises a warning.
+   %  with leap days raises a warning. Otherwise timestep is empty.
 
    % This was the original check in getevents, then moved to wrapevents, but
    % it's not necessary there so I simplified it and moved it here for future
    % conversion to a proper function that allows more flexible inputs to the
    % core algorithm e.g. including leap inds, irregular calendars, water year vs
    % calendar year, non-daily data, etc.
+
+   % timestep is found only for a regular calendar with leap days, so
+   % assign it empty for every other calendar
+   timestep = [];
 
    hasleap = any(month(T)==2 & day(T)==29);
 

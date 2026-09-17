@@ -7,9 +7,9 @@ classdef test_demos < matlab.unittest.TestCase
    % 'clearvars' each demo issues, so the variables in the test method
    % survive.
    %
-   % Note: the demos also issue 'close all'. hidefigures hides pre-existing
-   % figure handles so that call cannot close them; TODO.md records the
-   % deferred edit to the generated demo mfiles themselves.
+   % Note: hidefigures hides the handles of figures that were open before
+   % the run, and the teardown deletes only the figures the demos open (see
+   % tests/closenewfigs.m).
 
    properties (TestParameter)
       % One test row per demo script. listdemos fills this list.
@@ -67,10 +67,10 @@ classdef test_demos < matlab.unittest.TestCase
 
    methods (TestClassSetup)
       function hidefigures(testCase)
-         % Snapshot open figures and hide their handles. The demos issue a
-         % plain 'close all', which skips figures whose HandleVisibility is
-         % 'off', so figures open before the run survive. restorefigures
-         % restores the saved visibility values.
+         % Snapshot open figures and hide their handles, so demo code that
+         % draws into or closes the current figure cannot change figures
+         % that were open before the run. restorefigures restores the saved
+         % visibility values.
          figs = findall(0, 'Type', 'figure');
          testCase.figsbefore = figs;
          testCase.visibility = get(figs, {'HandleVisibility'});

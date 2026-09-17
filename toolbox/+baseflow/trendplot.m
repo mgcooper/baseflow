@@ -56,8 +56,6 @@ function [tt,y,yerr] = prepInput(tt,y,yerr,anomalies,reference)
       tt = (tt - t0) / datenum([0, 0, 365.25]) + y0; % convert to decimal years
    end
 
-   % see old method that checked for months at end
-
    % convert to anomalies if requested
    if anomalies == true
       if ~isnan(reference)
@@ -115,19 +113,13 @@ function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)
                   abfit(n, :) = olsfit(t, y(:, n));
                else
 
-                  % Compute fitted line and CIs
-                  if isoctave
-                     [~, stats] = fitlm(t, y(:, n), "display", "off");
-                     % coeff = [lmmdl{2:3, 2}]; % this might work in matlab too
-                     coeff = stats.coeffs(:, 1);
-                     confi = stats.coeffs(:, 3:4);
-                     [yfit, yconf] = predictlm(stats, t);
-                  else
-                     mdl = fitlm(t, y(:,n));
-                     coeff = mdl.Coefficients.Estimate;
-                     confi = coefCI(mdl, alpha);
-                     [yfit, yconf] = predict(mdl, t, 'alpha', alpha);
-                  end
+                  % Compute fitted line and CIs. fitlm returns a
+                  % LinearModel in MATLAB and in the Octave statistics
+                  % package, so one call path serves both.
+                  mdl = fitlm(t, y(:,n));
+                  coeff = mdl.Coefficients.Estimate;
+                  confi = coefCI(mdl, alpha);
+                  [yfit, yconf] = predict(mdl, t, 'alpha', alpha);
 
                   abfit(n,:) = coeff;
                   error(n) = confi(2, 2) - abfit(n, 2); % symmetric for ols
@@ -170,16 +162,6 @@ function [abfit,error,yfit,yconf] = computeTrends(t,y,method,alpha,qtl)
    % print the bootstrapped slope plus or minus 1 stderr
    % [S.ab_boot(2)+S.se_boot(2) S.ab_boot(2)-S.se_boot(2)]
    % [S.ab_boot(2)+1.96*S.se_boot(2) S.ab_boot(2)-1.96*S.se_boot(2)]
-
-
-   % % this is an old note not sure
-   % % prior method, delete if above is considered best
-   %    if isregular(t,'months')
-   %       nmonths = numel(t);
-   %       t = years(t-t(1));
-   %    elseif isdatetime(t)
-   %       t = year(t);
-   %    end
 end
 
 % MAKE THE FIGURE
@@ -204,7 +186,6 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,~)
    % subplots, i can't just use findobj(gcf,'Type','Legend') to determine
    % if the current plot has a legend already, which i want because I want
    % to add the next trendplot trendline to the existing legend
-   % legobj = findobj(gcf,'Type','Legend');
 
    figchi = get(gcf, 'Children');
    axobjs = findobj(gcf, 'Type', 'Axes');
@@ -250,15 +231,6 @@ function [h,makeleg,legidx] = updateFigure(useax,showfig,figpos,~)
    else
       thislineidx = numlines+1;
    end
-
-   % % this is the original
-   % if errorbounds && mod(numchilds,2) == 1
-   %    numlines = (numchilds-1)/2;
-   %    thislineidx = numlines+1;
-   % else
-   %    numlines = numel(axchildren)/2;
-   %    thislineidx = numlines+1;
-   % end
 
    set(h.ax, 'ColorOrderIndex', thislineidx);
 
