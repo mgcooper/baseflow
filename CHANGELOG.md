@@ -8,6 +8,30 @@ semantic versioning.
 
 ### Added
 
+- `plotrefline` accepts `labelcolor`, `labelfontsize`, and `labelstyle`.
+  `labelcolor` defaults to the line color, `labelfontsize` to 10, and
+  `labelstyle` selects `'arrow'` or `'line'` for the late-time,
+  early-time, and user-fit labels. `'line'` writes the label along the
+  line, as the upper-envelope label does.
+- `plotdqdt` accepts `labelcolor` and `labelfontsize` for its own labels,
+  and a `reflines` option that selects the reference lines it draws, with
+  the same values `pointcloudplot` takes.
+- `plotdqdt` and `pointcloudplot` accept `labelstyle`, which `plotrefline`
+  takes: `'arrow'`, the default, points an arrow at each labeled
+  reference line, and `'line'` writes the label along the line. The
+  `'line'` style draws no arrow, so it labels the lines on Octave.
+- `pointcloudplot` accepts `labelcolor` and `labelfontsize` and passes
+  both to `plotrefline`.
+- `plotdqdt` and `pointcloudplot` accept `fontsize` for the axes, which
+  sets the tick labels and the axis labels, and `legendfontsize` for the
+  legend. Both default to 12.
+- `pointcloudplot` and `plotdqdt` accept an `axislimits` option: `'snap'`
+  (the default) rounds a limit out to its decade when the decade is
+  within 0.25 decades, `'decades'` always rounds out, and `'none'` keeps
+  the data limits.
+- The private helpers `snaploglims`, `labelanchor`, `islabelcolor`,
+  `islinehandle`, `labelrefline`, `breflinetext`, `sizefigure`, and
+  `relayoutloglogtext`.
 - `cloudphi` accepts a `plotfit` option (default true). With `plotfit`
   false it computes phi and draws no figure.
 - `fitphidist` returns the phi standard error as `h.se` for the 'cdf'
@@ -72,6 +96,70 @@ semantic versioning.
 
 ### Fixed
 
+- `plotdqdt` labels its late-time line `b = 1`, the value of the `blate`
+  reference slope. It labeled that line as an estimate, with b-hat beside
+  the value and two decimals, which names the fitted line of the point
+  cloud. The new private helper `breflinetext` writes the label of both
+  functions, so a reference slope reads the same in each.
+- `pointcloudplot` writes its legend in latex on MATLAB, so the legend of
+  the point cloud and the legend of the fit plot set Q and t alike.
+  Octave has no latex text interpreter, so it keeps the tex form.
+- `plotdqdt` labels its reference lines with the arrow `pointcloudplot`
+  draws, in the new private helper `labelrefline`. It drew its own arrow,
+  which scaled its length by the factor that raises the label anchor, so
+  an arrow could span the whole x range, and its head could stop left of
+  the axes instead of on the line. The arrow of both figures now spans a
+  twenty-fifth of the drawn x decades and points at the line.
+- `pointcloudplot` and `plotdqdt` reset the angle of a label written
+  along a line after they set the final axis limits, in the new private
+  helper `relayoutloglogtext`. The angle of a line on a log-log plot
+  follows the limits, and a MATLAB listener keeps it current, but Octave
+  has no such event, so an envelope that raised the y limit left the
+  Octave label off its line.
+- `plotrefline` writes its labels in tex on Octave, which has no latex
+  text interpreter. It asked for latex, so a point cloud drawn on Octave
+  with `reflabels` true showed the math delimiters.
+- `functionSignatures.json` lists the `labelstyle`, `labelcolor`,
+  `labelfontsize`, `fontsize`, and `legendfontsize` options, so name-value
+  completion offers them. Its two `+baseflow/private/subtight` entries are
+  one entry that names every option the function parses.
+- `plotrefline` starts a label a twentieth of the x decades inside the
+  left limit, in `labelanchor`. A label of a line that reaches the anchor
+  height near the left limit sat against the y axis.
+- `pointcloudplot` and `plotdqdt` open a figure where the window manager
+  puts it. They pinned the figure to [0 0] and [1 1], the bottom-left
+  corner of the screen, where the dock covers the axis labels. Both take
+  their size, 640 by 600 points, from the new private helper
+  `sizefigure`, so the axis labels fit.
+- `pointcloudplot` and `plotdqdt` set the axis ticks after the final axis
+  limits, so every decade inside the limits carries a tick.
+- `pointcloudplot` passes `precision` and `timestep` to its envelope
+  lines. The envelope intercept ignored both, so it always described a
+  one-day timestep and a precision of one.
+- `pointcloudplot` draws in the axes a caller supplies: it keeps the size
+  of the parent figure, and `setlogticks` handles an axis whose data
+  reach zero.
+- `plotdqdt` draws in its own axes. It drew through the current axes, so
+  a caller with another axes current split the figure.
+- `plotdqdt` and `pointcloudplot` list rain in their legends. The
+  `plotdqdt` guard tested for an axes, and both guards tested `isobject`,
+  which is false for the numeric handle Octave returns from `plot`, so
+  the rain entry never appeared on Octave. The new private helper
+  `islinehandle` takes the handle of either language. `pointcloudplot`
+  gives rain one entry for its several circles, and keeps the entry of
+  each reference line it names, for a `reflines` row or column.
+- `plotdqdt` runs on Octave, so `getdqdt` with `plotfits` true draws its
+  event figure there. Its input parser asked `validateattributes` for the
+  `scalartext` attribute, which Octave does not define, and it read the
+  marker size of the plotted line with dot indexing, which a numeric
+  handle does not take.
+- `plotrefline` and `plotdqdt` give their labels an explicit color and
+  font size, so a figure theme does not recolor them and a large axes
+  font does not enlarge them. The label font size falls from 13 and 11
+  points to 10.
+- `plotrefline` raises a label anchor that falls left of the axes, in the
+  shared private helper `labelanchor`. A late-time label drew its arrow
+  across the left spine and its text over the leftmost markers.
 - `plotrefline` places the upper-envelope label on the line. The label
   sat at `2*x`, which ignores the intercept `a = 2/timestep`, so it
   drifted from the line for any timestep other than one day.
