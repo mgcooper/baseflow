@@ -12,7 +12,10 @@ function ht = rotatedLogLogText(ax, xtxt, ytxt, txt, b, varargin)
    %  resize, a zoom, a pan, or a limit change. A figure saved with savefig
    %  loses the listener, and the reopened label keeps its saved angle.
    %
-   % See also: loglogangle, plotrefline, text
+   %  Octave installs no listener. The label carries its slope, so
+   %  relayoutloglogtext resets the angle there.
+   %
+   % See also: loglogangle, relayoutloglogtext, plotrefline, text
 
    % https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib
 
@@ -25,9 +28,14 @@ function ht = rotatedLogLogText(ax, xtxt, ytxt, txt, b, varargin)
       varargin{:} ...
       );
 
+   % Keep the slope on the label, so relayoutloglogtext can reset the angle
+   % after a caller sets the final axis limits. The tag names the labels
+   % that carry a slope.
+   set(ht, 'Tag', 'loglogslope', 'UserData', b);
+
    % Octave has no MarkedClean event, so the label keeps the angle it was
-   % drawn with. Octave figures in this toolbox are exported at the size
-   % they were drawn at.
+   % drawn with, and a caller that changes the limits afterwards calls
+   % relayoutloglogtext.
    if isoctave
       return
    end

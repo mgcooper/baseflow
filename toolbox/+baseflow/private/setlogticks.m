@@ -20,7 +20,7 @@ function setlogticks(ax,varargin)
       % Check for zeros. This may not work in general. Reset 0 to min value.
       if ismember(0, ylims)
          [~, ydata] = getplotdata(ax);
-         ylims = sort([min(ydata)/1.05 ylims(~ismember(ylims, 0))]);
+         ylims = replacezerolimit(ylims, ydata);
       end
       numdecy = log10(ylims(2))-log10(ylims(1));
       numticy = min(max(2,numdecy),5);
@@ -31,16 +31,19 @@ function setlogticks(ax,varargin)
       % Check for zeros. This may not work in general. Reset 0 to min value.
       if ismember(0, xlims)
          xdata = getplotdata(ax);
-         xlims = sort([min(xdata)/1.05 xlims(~ismember(xlims, 0))]);
+         xlims = replacezerolimit(xlims, xdata);
       end
       numdecx = log10(xlims(2))-log10(xlims(1));
       numticx = min(max(2,numdecx),5); % no idea if 5 is generally good
    end
 
 
+   % A decade tick needs two positive finite limits. An axis without them,
+   % for example a linear axis that spans zero, keeps the ticks it has.
+   skipx = not(islogrange(xlims));
+   skipy = not(islogrange(ylims));
+
    % need to check if get(ax,'XTickMode) or get(ax,'XTickLabelMode) is manual
-   skipx = false;
-   skipy = false;
    if strcmp(get(ax, 'XTickMode'), 'manual') && ~strcmp('x', opts.axset)
       skipx = true;
    end
@@ -65,23 +68,30 @@ function setlogticks(ax,varargin)
    % may be redundant or negate each other
 
    % use numticx to determine the new ticks
-   if isnumeric(xlims)
+   if skipx == false
       xticmin = ceil(log10(min(xlims)));
       xticmax = fix(log10(max(xlims)));
       xticdec = max(1,fix((xticmax-xticmin)/numticx));
       xticks = 10.^(xticmin:xticdec:xticmax);
-   else
-      skipx = true;
    end
 
-   if isnumeric(ylims)
+   if skipy == false
       yticmin = ceil(log10(min(ylims)));
       yticmax = fix(log10(max(ylims)));
       yticdec = max(1,fix((yticmax-yticmin)/numticy));
       yticks = 10.^(yticmin:yticdec:yticmax);
-   else
-      skipy = true;
    end
+
+   % Keep only the decades the limits hold. A range below one, for example
+   % [0.2 0.9], puts fix(log10(max)) at 0, which is the decade 1 outside
+   % the range.
+   xticks = xticks(xticks >= min(xlims) & xticks <= max(xlims));
+   yticks = yticks(yticks >= min(ylims) & yticks <= max(ylims));
+
+   % An axis that holds no complete decade, for example [2e4 9e4], produces
+   % no decade tick. Keep the ticks the axis has.
+   skipx = skipx || isempty(xticks);
+   skipy = skipy || isempty(yticks);
 
    switch opts.axset
       case 'xy'
@@ -119,6 +129,47 @@ function setlogticks(ax,varargin)
             set(ax,'YTick',yticks);
          end
    end
+end
+
+%% LOCAL FUNCTIONS
+function lims = replacezerolimit(lims, data)
+   %REPLACEZEROLIMIT Replace a zero axis limit with the smallest plotted value.
+   %
+   %  lims = replacezerolimit(lims, data) returns lims with its zero element
+   %  replaced by min(data)/1.05. data is the plotted data of one axis,
+   %  either numeric or the cell array getplotdata returns when more than one
+   %  child of the axes carries the property. lims comes back unchanged when
+   %  data holds no positive finite value, or when both limits are zero.
+   %
+   % See also: getplotdata, setlogticks
+
+   % Flatten the one cell per child getplotdata returns for several children,
+   % so min reads one numeric array.
+   if iscell(data)
+      data = cellfun(@(d) d(:).', data, 'UniformOutput', false);
+      data = [data{:}];
+   end
+
+   % Only a positive finite value gives a limit that log10 accepts.
+   data = data(isfinite(data) & data > 0);
+   keeplim = lims(~ismember(lims, 0));
+   if isempty(data) || numel(keeplim) ~= 1
+      return
+   end
+   lims = sort([min(data)/1.05 keeplim]);
+end
+
+function tf = islogrange(lims)
+   %ISLOGRANGE True when axis limits can hold a decade tick.
+   %
+   %  tf = islogrange(lims) returns true when lims holds two positive finite
+   %  values. A categorical axis, and a linear axis that spans zero or
+   %  negative values, has no decade to place a tick on.
+   %
+   % See also: setlogticks
+
+   tf = isnumeric(lims) && numel(lims) == 2 && all(isfinite(lims)) ...
+      && all(lims > 0);
 end
 
 %% Input Parser
