@@ -718,10 +718,15 @@ function [Wi, sumWi, barX, barY, Ui, Vi, beta, unbounded] = yorksums( ...
    %
    % The mask carries everything the caller needs. any(unbounded) says the
    % slope is unusable, all(unbounded) says every point is singular at once,
-   % which is the degenerate case yorkfit answers with ordinary least
-   % squares, and find(unbounded) names the points for the message. Deciding
-   % that here, at the slope where it happened, is what keeps the caller from
+   % and find(unbounded) names the points for the message. Deciding that here,
+   % at the slope where it happened, is what keeps the caller from
    % reconstructing the slope afterwards and asking about a neighbouring one.
+   %
+   % all(unbounded) alone does not identify the case yorkfit answers with
+   % ordinary least squares. Every sigY zero at a zero slope also sets it, and
+   % that is a failure to report. bestcandidate therefore requires perfectly
+   % correlated errors as well, which is the one configuration where a single
+   % slope zeroes every denominator.
    unbounded = ~isfinite(Wi);
    if any(unbounded)
       sumWi = NaN;
