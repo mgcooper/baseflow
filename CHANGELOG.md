@@ -30,8 +30,8 @@ semantic versioning.
   within 0.25 decades, `'decades'` always rounds out, and `'none'` keeps
   the data limits.
 - The private helpers `snaploglims`, `labelanchor`, `islabelcolor`,
-  `islinehandle`, `labelrefline`, `breflinetext`, `sizefigure`, and
-  `relayoutloglogtext`.
+  `islinehandle`, `labelrefline`, `breflinetext`, `sizefigure`,
+  `relayoutloglogtext`, `drawarrow`, and `axespixelbox`.
 - `cloudphi` accepts a `plotfit` option (default true). With `plotfit`
   false it computes phi and draws no figure.
 - `fitphidist` returns the phi standard error as `h.se` for the 'cdf'
@@ -104,6 +104,16 @@ semantic versioning.
 - `pointcloudplot` writes its legend in latex on MATLAB, so the legend of
   the point cloud and the legend of the fit plot set Q and t alike.
   Octave has no latex text interpreter, so it keeps the tex form.
+- `plotrefline` and `plotdqdt` draw the arrow of a reference-line label
+  in the new private helper `drawarrow`, which builds the head from the
+  drawn plot box and needs no MATLAB-only axes property. The vendored
+  `+deps/arrow` reads the undocumented `WarpToFill`, and an axes with a
+  manual plot-box aspect ratio, which `axis square` sets in `plotdqdt`,
+  turns that property off and sends the vendored function into a branch
+  its own comments call untested. The shaft then spanned the whole axis.
+  The arrow keeps the head size and angle it had, and it draws on Octave,
+  so the `'arrow'` label style works in both languages. `axespixelbox`
+  reads the drawn box for `drawarrow` and for `loglogangle`.
 - `plotdqdt` labels its reference lines with the arrow `pointcloudplot`
   draws, in the new private helper `labelrefline`. It drew its own arrow,
   which scaled its length by the factor that raises the label anchor, so

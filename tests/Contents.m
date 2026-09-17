@@ -16,6 +16,7 @@
 %   test_conversions       - Test baseflow.conversions
 %   test_corechain         - Core-workflow coverage for eventtau, globalfit, cloudphi, fitphi, dndtuncertainty, gpfitb, fitphidist, aQbString
 %   test_demos             - Run every demo script in toolbox/demos/mfiles headless
+%   test_drawarrow         - Test the arrow of a reference-line label
 %   test_dependencies      - Test the dependency tooling and list agreement
 %   test_eqstrings         - Test the equation label helpers
 %   test_fillnans          - Test the private fillnans helper
