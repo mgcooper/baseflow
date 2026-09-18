@@ -262,7 +262,7 @@ This function is called by:
 0165 
 0166    <span class="comment">% draw the arrow in the current axes, which is the axes the caller</span>
 0167    <span class="comment">% plotted into, as the text call below uses</span>
-0168    drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+0168    drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)]);
 0169    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
 0170       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
 0171 
@@ -289,7 +289,7 @@ This function is called by:
 0192       ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
 0193    <span class="keyword">end</span>
 0194 
-0195    drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+0195    drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)]);
 0196    text(0.95*xarrw(1),yarrw(1),ta, <span class="keyword">...</span>
 0197       <span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>,<span class="string">'FontSize'</span>,14,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>)
 0198 <span class="keyword">end</span>

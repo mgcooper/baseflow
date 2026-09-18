@@ -276,22 +276,22 @@ classdef test_plotdqdt < matlab.unittest.TestCase
          testCase.verifyTrue(any(strcmp(h.leg.String, 'rain')))
       end
 
-      function test_theFigureKeepsThePositionItWasGiven(testCase)
-         % A figure pinned to [1 1] opens in the bottom-left corner of the
+      function test_theFigureTakesTheSharedSize(testCase)
+         % The figure was pinned to [1 1], the bottom-left corner of the
          % screen, where the dock covers the axis labels. Only the size
          % belongs to this function, and pointcloudplot sizes its figure
-         % through the same private helper.
+         % through the same private helper. Its own suite,
+         % tests/test_sizefigure.m, covers the position that is kept: a
+         % window manager may move any figure to fit the screen, so a
+         % position read here says nothing.
+         sizefigure = baseflow.privatefunction('sizefigure');
          reference = figure('Visible', 'off');
          testCase.addTeardown(@close, reference)
-         position_expected = get(reference, 'Position');
-         sizefigure = baseflow.privatefunction('sizefigure');
          size_expected = get(sizefigure(reference), 'Position');
 
          h = baseflow.plotdqdt(testCase.q, testCase.dqdt);
 
          position_returned = get(ancestor(h.ax, 'figure'), 'Position');
-         testCase.verifyEqual(position_returned(1:2), ...
-            position_expected(1:2))
          testCase.verifyEqual(position_returned(3:4), size_expected(3:4))
       end
 

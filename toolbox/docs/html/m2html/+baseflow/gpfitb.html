@@ -301,7 +301,7 @@ This function is called by:
 0216    ya = [ya ya];
 0217    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,xmin,xminc);
 0218 
-0219    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+0219    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
 0220    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
 0221 
 0222    <span class="comment">% use these to put the text on the right side of the curve</span>
@@ -317,7 +317,7 @@ This function is called by:
 0232    ya = [ya ya];
 0233    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
 0234 
-0235    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+0235    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
 0236    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
 0237 <span class="keyword">end</span>
 0238 

@@ -374,6 +374,11 @@ function test_fitphiUnsupportedPairErrors(testCase)
    % b2 = 1 with the default RS05 solutions remaps to a pair with no
    % derived formula; the guard raises the documented error instead of
    % returning unassigned outputs.
+   % fitphi warns before it falls back, and this test asks for the pair
+   % that triggers the fallback, so the warning is expected output rather
+   % than a problem to print.
+   testCase.applyFixture(matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+      'baseflow:fitphi:incompatibleLateTimeSolution'));
    a1 = testCase.TestData.a1;
    a2 = testCase.TestData.a2;
    b2_linear = testCase.TestData.b2_linear;

@@ -21,6 +21,7 @@
 %   test_eqstrings         - Test the equation label helpers
 %   test_fillnans          - Test the private fillnans helper
 %   test_fitcts            - Test the constant-time-step dq/dt method
+%   test_figurevisibility  - Test the visibility of a figure asked to show
 %   test_fitevents         - Test the fitevents plotfits option
 %   test_fitopts           - Test the fitab fitopts pass-through
 %   test_getdqdt           - Test the getdqdt fit-plot option
@@ -46,6 +47,7 @@
 %   test_setlogticks       - Test the private setlogticks decade ticks
 %   test_setrainnan        - Test the private setrainnan helper
 %   test_siUnitsToTex      - Test the private siUnitsToTex unit label helper
+%   test_sizefigure        - Test the size of a point-cloud figure
 %   test_smoothnoise       - Test the private smoothnoise helper
 %   test_snaploglims       - Test the private snaploglims limit policy
 %   test_todatenum         - Test baseflow/private/todatenum

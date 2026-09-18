@@ -82,7 +82,7 @@ function h = cdfplotphi(phi, PD, showfit)
    [cdfY, cdfX] = ecdf(phi, 'Function', 'cdf');
    
    % Create the figure
-   h.figure = figure('Visible', showfit);
+   h.figure = figure('Visible', figurevisibility(showfit));
    h.data = plot(cdfX, cdfY, 'o', 'MarkerFaceColor', [0 0.447 0.741], ...
       'MarkerEdgeColor', 'none', 'Visible', showfit); hold on;
 
@@ -124,7 +124,7 @@ function h = cdfplotphi(phi, PD, showfit)
       xarrow = [PD.mean 1.3*PD.mean];
       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
       % the head points left, at the mean, from a tail to its right
-      drawarrow(gca, [xarrow(2), yarrow(2)], [xarrow(1), yarrow(1)])
+      drawarrow(gca, [xarrow(2), yarrow(2)], [xarrow(1), yarrow(1)]);
       text(0.95*xarrow(2), yarrow(2), arrowtxt, 'HorizontalAlignment','left')
 
       h.legend = legend(ltxt, 'Location', 'east', 'Interpreter', 'tex');
@@ -152,7 +152,7 @@ function h = probplotphi(phi, PD, showfit)
    end
 
    % Create the figure. It is hidden when showfit is false.
-   h.figure = figure('Visible', showfit);
+   h.figure = figure('Visible', figurevisibility(showfit));
 
    % plot the data, suppressing the normal plot with 'noref'
    h.data = probplot('normal', phi, [], [], 'noref'); hold on;

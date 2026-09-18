@@ -39,6 +39,14 @@ classdef test_getdqdt < matlab.unittest.TestCase
          % Close the figures each case opens.
          testCase.figsbefore = findall(0, 'Type', 'figure');
          testCase.addTeardown(@() closenewfigs(testCase.figsbefore));
+
+         % A nonlinear fit that stops at the iteration limit warns. The
+         % fit plots reach that limit on the example record, so the
+         % warning is expected output here rather than a problem to print.
+         % A user still sees it.
+         testCase.applyFixture( ...
+            matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+            'stats:nlinfit:IterationLimitExceeded'));
       end
    end
 

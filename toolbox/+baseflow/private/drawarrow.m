@@ -55,7 +55,9 @@ function harrow = drawarrow(ax, tail, head, varargin)
          ['drawarrow drew no arrow: a log axis cannot show the point ' ...
          '(%g, %g) or the point (%g, %g).'], ...
          tail(1), tail(2), head(1), head(2));
-      harrow = [];
+      if nargout > 0
+         harrow = [];
+      end
       return
    end
 
@@ -72,7 +74,9 @@ function harrow = drawarrow(ax, tail, head, varargin)
    % A zero-length arrow has no direction to point in. Octave has no
    % gobjects, so return the empty array both languages take.
    if shaftlength == 0
-      harrow = [];
+      if nargout > 0
+         harrow = [];
+      end
       return
    end
    backward = shaft / shaftlength;
@@ -104,7 +108,11 @@ function harrow = drawarrow(ax, tail, head, varargin)
    hhead = patch(ax, headx, heady, color, 'EdgeColor', color, ...
       'FaceColor', color, 'Tag', 'refarrowhead', 'HandleVisibility', 'off');
 
-   harrow = [hshaft, hhead];
+   % Assign the output only when the caller wants it, so a call without a
+   % semicolon does not print the handles.
+   if nargout > 0
+      harrow = [hshaft, hhead];
+   end
 end
 
 function pixel = datatopixel(value, lims, islog, npixels)

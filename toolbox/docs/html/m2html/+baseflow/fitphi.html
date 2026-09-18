@@ -435,40 +435,40 @@ This function is called by:
 0291       <span class="comment">% water table</span>
 0292       <span class="comment">% if strcmp(soln2,'RS05') &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)</span>
 0293       <span class="keyword">if</span> strcmp(soln2,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt;= 1 || b2&gt;=2)
-0294          warning( <span class="keyword">...</span>
+0294          warning(<span class="string">'baseflow:fitphi:incompatibleLateTimeSolution'</span>, <span class="keyword">...</span>
 0295             [<span class="string">'Requested late-time solution (Rupp and Selker, 2005) '</span> <span class="keyword">...</span>
 0296             <span class="string">'is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>])
 0297          soln2 = <span class="string">'BS03'</span>;
 0298 
 0299          <span class="comment">% late-time B04 has b = 3/2</span>
 0300       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
-0301          warning( <span class="keyword">...</span>
+0301          warning(<span class="string">'baseflow:fitphi:lateTimeSolutionImpliesB'</span>, <span class="keyword">...</span>
 0302             [<span class="string">'Requested late-time solution (Boussinesq, 1904) '</span> <span class="keyword">...</span>
 0303             <span class="string">'implies b=3/2, using b=3/2'</span>])
 0304          b2 = 3/2;
 0305 
 0306          <span class="comment">% late-time B03 has b = 1</span>
 0307       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
-0308          warning( <span class="keyword">...</span>
+0308          warning(<span class="string">'baseflow:fitphi:lateTimeSolutionImpliesB'</span>, <span class="keyword">...</span>
 0309             [<span class="string">'Requested late-time solution (Boussinesq, 1903) '</span> <span class="keyword">...</span>
 0310             <span class="string">'implies b=1, using b=1'</span>])
 0311          b2 = 1;
 0312       <span class="keyword">end</span>
 0313    <span class="keyword">else</span>
 0314       <span class="keyword">if</span> strcmp(soln1,<span class="string">'RS05'</span>) &amp;&amp; (b2 &lt; 3/2 || b2&gt;=2)
-0315          warning( <span class="keyword">...</span>
+0315          warning(<span class="string">'baseflow:fitphi:incompatibleLateTimeSolution'</span>, <span class="keyword">...</span>
 0316             [<span class="string">'Requested late-time solution (Rupp and Selker, 2005) '</span> <span class="keyword">...</span>
 0317             <span class="string">'is incompatible with b&lt;1.5 or b&gt;=2, using Boussinesq, 1903, b=1'</span>])
 0318          soln2 = <span class="string">'BS03'</span>;
 0319 
 0320       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS04'</span>) &amp;&amp; (b2 ~= 3/2)
-0321          warning( <span class="keyword">...</span>
+0321          warning(<span class="string">'baseflow:fitphi:lateTimeSolutionImpliesB'</span>, <span class="keyword">...</span>
 0322             [<span class="string">'Requested late-time solution (Boussinesq, 1904) '</span> <span class="keyword">...</span>
 0323             <span class="string">'implies b=3/2, using b=3/2'</span>])
 0324          b2 = 3/2;
 0325 
 0326       <span class="keyword">elseif</span> strcmp(soln2,<span class="string">'BS03'</span>) &amp;&amp; (b2 ~= 1)
-0327          warning( <span class="keyword">...</span>
+0327          warning(<span class="string">'baseflow:fitphi:lateTimeSolutionImpliesB'</span>, <span class="keyword">...</span>
 0328             [<span class="string">'Requested late-time solution (Boussinesq, 1903) '</span> <span class="keyword">...</span>
 0329             <span class="string">'implies b=1, using b=1'</span>])
 0330          b2 = 1;

@@ -4,6 +4,31 @@ This file lists notable changes to the baseflow toolbox. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 semantic versioning.
 
+## [Unreleased]
+
+### Fixed
+
+- `gpfitb`, `plplotb` and `fitphidist` print nothing when they label a
+  figure. The private `drawarrow` assigned its output whether or not the
+  caller asked for it, and no call site ended with a semicolon, so each
+  label printed a 1x2 graphics array.
+- `baseflow.internal.version` draws the version it reports. The banner
+  carried the digits of 1.1.0, and it now takes them from the version
+  string.
+- `baseflow.internal.runtests` draws test figures off screen, so a run on
+  the desktop opens no window for a test that closes its own figure. It
+  puts the figure default back on both exits.
+- `fitphidist` draws its figure off screen when the root asks for
+  invisible figures, through the new private `figurevisibility`. A figure
+  created with an explicit `'Visible'` of `'on'` ignores that default, so
+  `showfit` true opened a window during a test run.
+- The `fitphi` warnings carry identifiers,
+  `baseflow:fitphi:incompatibleLateTimeSolution` and
+  `baseflow:fitphi:lateTimeSolutionImpliesB`, so a caller can suppress or
+  catch one by name. The tests that ask for a solution pair `fitphi`
+  falls back from now suppress the warning they expect, as do the tests
+  that run a fit to the iteration limit of `nlinfit`.
+
 ## [1.2.0] - 2026-09-17
 
 ### Added

@@ -139,11 +139,13 @@ classdef test_pointcloudplot < matlab.unittest.TestCase
 
       function test_suppliedAxesKeepsTheFigureAndItsSibling(testCase)
          % A caller that supplies an axes owns the figure, so the figure
-         % keeps its size and the other panel keeps its own children.
-         position_expected = [1 1 1200 900];
+         % keeps its size and the other panel keeps its own children. Read
+         % the position back rather than asserting the one asked for: a
+         % window manager moves and resizes a figure to fit the screen.
          nlines_expected = 1;
-         fig = figure('Visible', 'off', 'Position', position_expected);
+         fig = figure('Visible', 'off', 'Position', [1 1 1200 900]);
          testCase.addTeardown(@close, fig)
+         position_expected = get(fig, 'Position');
          target = subplot(1, 2, 1, 'Parent', fig);
          other = subplot(1, 2, 2, 'Parent', fig);
          plot(other, 1:10, 1:10);
@@ -212,19 +214,22 @@ classdef test_pointcloudplot < matlab.unittest.TestCase
             legendfontsize_expected)
       end
 
-      function test_theFigureKeepsThePositionItWasGiven(testCase)
-         % A figure pinned to [0 0] opens in the bottom-left corner of the
+      function test_theFigureTakesTheSharedSize(testCase)
+         % The figure was pinned to [0 0], the bottom-left corner of the
          % screen, where the dock covers the axis labels. Only the size
-         % belongs to this function.
+         % belongs to this function, and sizefigure sets it. Its own suite,
+         % tests/test_sizefigure.m, covers the position that is kept: a
+         % window manager may move any figure to fit the screen, so a
+         % position read here says nothing.
+         sizefigure = baseflow.privatefunction('sizefigure');
          reference = figure('Visible', 'off');
          testCase.addTeardown(@close, reference)
-         position_expected = get(reference, 'Position');
+         size_expected = get(sizefigure(reference), 'Position');
 
          out = testCase.drawcloud();
 
          position_returned = get(ancestor(out.ax, 'figure'), 'Position');
-         testCase.verifyEqual(position_returned(1:2), ...
-            position_expected(1:2))
+         testCase.verifyEqual(position_returned(3:4), size_expected(3:4))
       end
 
       function test_rainJoinsTheLegend(testCase, rainreflines)

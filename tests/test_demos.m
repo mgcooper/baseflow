@@ -75,6 +75,14 @@ classdef test_demos < matlab.unittest.TestCase
          testCase.figsbefore = figs;
          testCase.visibility = get(figs, {'HandleVisibility'});
          set(figs, 'HandleVisibility', 'off')
+
+         % A nonlinear fit that stops at the iteration limit warns. Several
+         % demos reach that limit on the example record, so the warning is
+         % expected output here rather than a problem to print. A user
+         % running the demo still sees it.
+         testCase.applyFixture( ...
+            matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+            'stats:nlinfit:IterationLimitExceeded'));
       end
    end
 

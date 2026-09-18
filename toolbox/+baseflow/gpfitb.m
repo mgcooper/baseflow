@@ -216,7 +216,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',xmin,xminc);
 
-   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 
    % use these to put the text on the right side of the curve
@@ -232,7 +232,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 
-   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 end
 

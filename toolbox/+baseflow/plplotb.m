@@ -165,7 +165,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
 
    % draw the arrow in the current axes, which is the axes the caller
    % plotted into, as the text call below uses
-   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)]);
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 
@@ -192,7 +192,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
    end
 
-   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)]);
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 end
