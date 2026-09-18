@@ -19,9 +19,11 @@ function varargout = version(option)
    end
 
    if strcmp(option, 'verbose')
-      % The banner carries the version in two slots of two characters: the
-      % major number beside the v, and the minor and patch digits below it.
-      % Build them from v so the art cannot fall behind the version.
+      % The banner carries the version twice. These two slots of two
+      % characters, the major number beside the v and the minor and patch
+      % digits below it, are built from v, so they cannot fall behind it.
+      % The large letters to the right are drawn art: a release that
+      % changes a digit there redraws those four rows by hand.
       number = sscanf(v, '%d.%d.%d');
       majorslot = fitslot(sprintf('v%d', number(1)));
       minorslot = fitslot(sprintf('%d%d', number(2), number(3)));
@@ -32,8 +34,8 @@ function varargout = version(option)
       disp(['|.  ' majorslot '  /|  _  ||__ --||  -__||   _||  ||  _  ||  |  |  |   '])
       disp('|.  _   \|___._||_____||_____||__|  |__||_____||________|   ')
       disp(['|:  ' minorslot '   \              ____        ______      ______      '])
-      disp('|::.. .  /   .--.--.   |_   |      |      |    |      |     ')
-      disp('`-------''    |  |  |__  _|  |_  __ |  --  | __ |  --  |    ')
+      disp('|::.. .  /   .--.--.   |_   |      |__    |    |      |     ')
+      disp('`-------''    |  |  |__  _|  |_  __  ___|  | __ |  --  |    ')
       disp('              \___/|__||______||__||______||__||______|     ')
    end
 end

@@ -11,6 +11,21 @@ function teardown(testCase) %#ok<INUSD>
 
 end
 
+function test_versionBannerCarriesTheVersion(testCase)
+   % The verbose banner draws the version in two slots built from the
+   % version string, the major number beside the v and the minor and patch
+   % digits below it, so the art cannot fall behind a release.
+   v = baseflow.internal.version('silent');
+   number = sscanf(v, '%d.%d.%d');
+   majorslot_expected = sprintf('|.  v%d', number(1));
+   minorslot_expected = sprintf('|:  %d%d', number(2), number(3));
+
+   returned = evalc('baseflow.internal.version()');
+
+   testCase.verifySubstring(returned, majorslot_expected)
+   testCase.verifySubstring(returned, minorslot_expected)
+end
+
 function test_basepath(testCase)
    toolboxpath = baseflow.internal.basepath();
    [~, toolboxfolder] = fileparts(toolboxpath);

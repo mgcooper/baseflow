@@ -93,13 +93,14 @@ abFit = baseflow.fitab(EventFits.q, EventFits.dqdt, 'nls', 'plotfit', true);
 % The recession parameters _a_ and _b_ in the recession equation $-dQ/dt = aQ^b$ 
 % are available in the |abFit| struct.
 
-abFit.a
-abFit.b
+fprintf('a = %.4f\n', abFit.a)
+fprintf('b = %.4f\n', abFit.b)
 %% 
 % Print the fitted values to the screen using a latex-formatted character array. 
 % This is the same function used to format the legend in the point cloud plot 
 % shown above.
 
-baseflow.aQbString([abFit.a abFit.b], 'printvalues', true)
+fprintf('%s\n', baseflow.aQbString([abFit.a abFit.b], ...
+   'printvalues', true))
 %% 
 % The fitted value _b=1.2_ indicates the reservoir is mildly non-linear.

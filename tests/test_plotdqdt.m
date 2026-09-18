@@ -304,7 +304,9 @@ classdef test_plotdqdt < matlab.unittest.TestCase
          target = subplot(1, 2, 1, 'Parent', fig);
          other = subplot(1, 2, 2, 'Parent', fig);
          plot(other, 1:10, 1:10);
-         axes(other)
+         % Make the other panel current without axes(), which shows and
+         % raises the figure whatever the root default asks for.
+         set(fig, 'CurrentAxes', other)
          nfigs_expected = numel(findall(0, 'Type', 'figure'));
 
          h = baseflow.plotdqdt(testCase.q, testCase.dqdt, 'ax', target, ...

@@ -163,8 +163,8 @@ phi = baseflow.cloudphi(q,dqdt,bhat,A,D,L,'brutsaert','lateqtls',...
 Props = baseflow.aquiferprops(q, dqdt, ahat, bhat, 'RS05', phi, ...
    A, L, 'D', 0.5);
 
-Props.D
-Props.k
+fprintf('D = %.4f m\n', Props.D)
+fprintf('k = %.4f cm s-1\n', Props.k)
 %% 
 % Typically, values for _k_ obtained from baseflow recession analysis applied 
 % to streamflow records for catchments are 1-2 orders of magnitude larger than 

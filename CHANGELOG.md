@@ -12,12 +12,19 @@ semantic versioning.
   figure. The private `drawarrow` assigned its output whether or not the
   caller asked for it, and no call site ended with a semicolon, so each
   label printed a 1x2 graphics array.
-- `baseflow.internal.version` draws the version it reports. The banner
-  carried the digits of 1.1.0, and it now takes them from the version
-  string.
+- `baseflow.internal.version` draws the version it reports. The two
+  slots beside and below the v carried the digits of 1.1.0 and now come
+  from the version string. The large letters, which are drawn art, read
+  1.2.0.
 - `baseflow.internal.runtests` draws test figures off screen, so a run on
   the desktop opens no window for a test that closes its own figure. It
   puts the figure default back on both exits.
+- Three tests made an axes current with `axes()`, which shows and raises
+  its figure whatever the root default asks for, so a window still opened
+  during a run. They name the current axes through the figure instead.
+- The demos print each value with its name. `baseflow_demo_1`,
+  `baseflow_demo_2` and `baseflow_demo_3` displayed bare results, which
+  reach the screen as `ans`.
 - `fitphidist` draws its figure off screen when the root asks for
   invisible figures, through the new private `figurevisibility`. A figure
   created with an explicit `'Visible'` of `'on'` ignores that default, so
