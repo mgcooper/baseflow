@@ -24,17 +24,17 @@ live in `STYLE.local.md`. Match surrounding code first; these are defaults.
 
 ## Comments and documentation
 
-Comment discipline is **strict and non-negotiable** — a hard requirement, not a
-preference.
+Comment discipline is **strict and non-negotiable**. It is a hard requirement,
+not a preference.
 
 - **Never write uncommented code.** Every new function gets a docstring/header, and
   every block of code gets an explanatory comment that says *why*, not just *what*.
   Do not skip a comment because the code looks trivial, simple, obvious, or
-  self-explanatory — that is not an exception. Uncommented code is incomplete and
+  self-explanatory. That is not an exception. Uncommented code is incomplete and
   must not be submitted.
 - **Never remove existing comments.** A comment may be removed *only* when the code it
   documents is itself removed. It is never acceptable to delete, trim, shorten,
-  summarize away, or "clean up" comments — not for brevity, not for tidiness, and not
+  summarize away, or "clean up" comments, whether for brevity, for tidiness, or
   because a comment seems obvious or redundant.
 - **Edit existing comments only for accuracy.** When you change code, update the
   affected comments and docstrings so they stay correct, preserving the information
@@ -87,6 +87,21 @@ project text:
   "replaced". Describe the code, not its history.
 - A comment longer than the code it explains.
 - A sentence that repeats another sentence.
+
+### Check before you finish
+
+Before you finish a change, check each new or changed comment, docstring,
+and prose sentence against these rules:
+
+- 20 words or fewer for an instruction, 25 or fewer for a description;
+- one instruction per sentence;
+- the active voice with a named actor;
+- verbs, not noun forms of verbs;
+- noun clusters of three words or fewer;
+- nothing from the "Do not write" list;
+- a comment that says why for every block of code.
+
+Fix each violation before you report the change as done.
 
 ### Never remove
 

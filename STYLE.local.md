@@ -78,3 +78,7 @@ as this:
 
 > This method fails when nmin is 0, and possibly when nmin is 1. runlength
 > returns 1 for consecutive nan values. See isminlength.
+
+## Other project conventions
+
+The New-test convention section defines this repository's additional test requirements.
