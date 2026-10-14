@@ -10,9 +10,11 @@ classdef TestBaseflow < matlab.unittest.TestCase
    %     1) the event-detection defaults and rmax guard of getevents,
    %        eventfinder, and wrapevents
    %     2) the published Kuparuk recession exponent (Cooper et al., 2023)
-   %     3) the tail, mean tau, and expected flows of globalfit
+   %     3) the tail, mean tau, and expected flows of globalfit, and its
+   %        check of a given streamlength against a given drainage density
    %     4) the baseflow trend at the expected-flow quantile
-   %     5) the aquifer thickness from that trend, and its uncertainty
+   %     5) the aquifer thickness from that trend, and its uncertainty on
+   %        calendars with and without leap days
    %     6) the BS04 and RS05 aquifer properties at b = 3/2, where the two
    %        solutions coincide
    %
@@ -209,6 +211,33 @@ classdef TestBaseflow < matlab.unittest.TestCase
          testCase.verifyLessThan(G.phi, 1)
       end
 
+      function test_streamlengthKeptUnlessInconsistent(testCase)
+         % globalfit replaces a given streamlength with A*Dd/1000 only when
+         % a given drainage density disagrees with it. So the Kuparuk fit
+         % raises no warning for a streamlength given alone. It also raises
+         % none for a streamlength that equals A*Dd/1000 up to the rounding
+         % of the product order. For an area of 3e9 and a density of 0.7,
+         % A*Dd/1000 and Dd/1000*A differ in the last bit.
+         C = testCase.Chain;
+         area = 3e9;
+         density = 0.7;
+         alone = C.opts;
+         alone.drainagedensity = nan;
+         alone.streamlength = testCase.A/1000;
+         rounded = C.opts;
+         rounded.drainagearea = area;
+         rounded.drainagedensity = density;
+         rounded.streamlength = area*density/1000;
+         inconsistent = alone;
+         inconsistent.drainagedensity = density;
+         fit = @(opts) baseflow.globalfit(C.K, C.Events, C.Fits, opts);
+
+         testCase.verifyWarningFree(@() fit(alone))
+         testCase.verifyWarningFree(@() fit(rounded))
+         testCase.verifyWarning(@() fit(inconsistent), ...
+            'baseflow:globalfit:inconsistentStreamlength')
+      end
+
       function test_baseflowTrendAtExpectedFlowQuantile(testCase)
          % baseflowtrend fits the pQexp quantile of the annual flow. So, within
          % one year, at most pQexp of the years lie strictly below its line,
@@ -262,6 +291,27 @@ classdef TestBaseflow < matlab.unittest.TestCase
             'RelTol', tol)
          testCase.verifyEmpty(setdiff(findall(0, 'Type', 'figure'), ...
             testCase.figsbefore))
+      end
+
+      function test_uncertaintyAcceptsLeapDays(testCase)
+         % dndtuncertainty uses T only for the calendar years of Qb. A daily
+         % calendar with leap days spans the same years as the Kuparuk
+         % record, which has none. So one seed gives the same uncertainty
+         % for both.
+         C = testCase.Chain;
+         years = year(C.T([1 end]));
+         Tleap = transpose(datetime(years(1), 1, 1):datetime(years(2), 12, 31));
+         rngstate = rng;
+         testCase.addTeardown(@() rng(rngstate));
+
+         rng(1)
+         expected = baseflow.dndtuncertainty(C.T, C.Qb.*365.25, C.K, ...
+            C.Fits, C.GlobalFit, C.opts);
+         rng(1)
+         returned = baseflow.dndtuncertainty(Tleap, C.Qb.*365.25, C.K, ...
+            C.Fits, C.GlobalFit, C.opts);
+
+         testCase.verifyEqual(returned, expected)
       end
 
       function test_aquiferPropsAgreeAtHomogeneousLimit(testCase)

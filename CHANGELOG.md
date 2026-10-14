@@ -121,6 +121,17 @@ semantic versioning.
   catch one by name. The tests that ask for a solution pair `fitphi`
   falls back from now suppress the warning they expect, as do the tests
   that run a fit to the iteration limit of `nlinfit`.
+- `globalfit` keeps a `streamlength` given without `drainagedensity`.
+  `setopts` and `globalfit` gave `drainagedensity` a default of 0.8,
+  which replaced that `streamlength` with A*0.8/1000 and warned. The
+  default is NaN. A `streamlength` within rounding of A*Dd/1000 raises no
+  warning, and the warning has the identifier
+  `baseflow:globalfit:inconsistentStreamlength`. The flat-aquifer phi
+  solutions do not use L, so no result changes.
+- `dndtuncertainty` accepts a daily calendar with leap days. It reshaped
+  the record into 365-day rows, which a leap day breaks. It takes the
+  years that T spans directly, so the result on a no-leap calendar is
+  unchanged.
 
 ## [1.2.0] - 2026-09-17
 

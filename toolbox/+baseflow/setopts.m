@@ -69,6 +69,9 @@ function opts = setopts(funcname,varargin)
    %
    %     drainagearea   : drainage area [m2]
    %     drainagedensity: drainage density [km-1] = streamlength/drainagearea
+   %                      (default nan). When both are given and differ,
+   %                      globalfit uses streamlength = drainagearea*
+   %                      drainagedensity/1000.
    %     aquiferdepth   : reference aquifer thickness [m]
    %     streamlength   : effective channel length [m]
    %     aquiferslope   : effective aquifer slope
@@ -144,7 +147,7 @@ function opts = setopts(funcname,varargin)
       case 'globalfit'
 
          addParameter(p,   'drainagearea',      nan,        @isnumericscalar );
-         addParameter(p,   'drainagedensity',   0.8,        @isnumericscalar );
+         addParameter(p,   'drainagedensity',   nan,        @isnumericscalar );
          addParameter(p,   'aquiferdepth',      nan,        @isnumericscalar );
          addParameter(p,   'streamlength',      nan,        @isnumericscalar );
          addParameter(p,   'aquiferslope',      0.0,        @isnumericscalar );

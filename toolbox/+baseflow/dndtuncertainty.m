@@ -27,6 +27,10 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    %  solutions to the one-dimensional groundwater flow equation for a
    %  Boussinesq aquifer, and parameter b from -dQ/dt = aQb.
    %
+   %  T is the daily time of the flow record (datetime or datenum), with or
+   %  without leap days. Qb holds one baseflow value in cm/yr for each
+   %  calendar year that T spans.
+   %
    %  alpha is the significance level of the returned uncertainty (default
    %  0.05, a 95% interval). Each input uncertainty is a standard error
    %  (one sigma): the drainable porosity from the phi bootstrap, and tau
@@ -66,15 +70,13 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    end
    coveragefactor = norminv(1 - alpha/2);
 
-   % Convert time in days to years
+   % Convert time in days to years. Qb holds one value per calendar year,
+   % so T reduces to the years it spans. A calendar with leap days does
+   % not split into 365-day rows, so take the years directly.
    if isdatetime(T)
       T = todatenum(T);
    end
-
-   t1 = datenum(year(T(1)), 1, 1);
-   t2 = datenum(year(T(end)), 12, 31);
-   [~, T] = padtimeseries(nan(size(T)), T, t1, t2, 1); %#ok<*DATNM>
-   T = transpose(year(mean(reshape(T, 365, numel(T)/365))));
+   T = transpose(year(T(1)):year(T(end)));
 
    if numel(T) ~= numel(Qb)
       error('size T must match size Qb')

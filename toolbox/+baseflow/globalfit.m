@@ -153,7 +153,7 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, ...
    parser.addRequired('Events', @isstruct);
    parser.addRequired('Fits', @isstruct);
    parser.addParameter('drainagearea', nan, @isnumericscalar);
-   parser.addParameter('drainagedensity', 0.8, @isnumericscalar);
+   parser.addParameter('drainagedensity', nan, @isnumericscalar);
    parser.addParameter('aquiferdepth', nan, @isnumericscalar);
    parser.addParameter('streamlength', nan, @isnumericscalar);
    parser.addParameter('aquiferslope', 0, @isnumericscalar);
@@ -189,9 +189,12 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, ...
    % if stream length and drainage density are both provided, check that they
    % are consistent with the provided area. note: Dd comes in as 1/km b/c that's
    % how it is almost always reported (km/km2). divide by 1000 to get 1/m.
+   % Both default to nan, so a default never replaces a provided L. The
+   % relative tolerance accepts the rounding of L = A*Dd/1000 computed in
+   % another order.
    if ~isnan(Dd) && ~isnan(L)
-      if Dd/1000*A ~= L        % 1/m * m^2 = m
-         warning( ...
+      if abs(Dd/1000*A - L) > sqrt(eps)*L        % 1/m * m^2 = m
+         warning('baseflow:globalfit:inconsistentStreamlength', ...
             'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd');
          L = Dd/1000*A;
       end
