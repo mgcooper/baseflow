@@ -2,8 +2,9 @@ function tests = test_corechain
    %TEST_CORECHAIN Core-workflow coverage for the analysis chain.
    %
    % The other core-chain functions (getevents, fitevents, fitab,
-   % eventfinder) have coverage in TestBaseflow, test_fitopts, and the
-   % smoke script. This file tests eventtau, globalfit, cloudphi, fitphi,
+   % eventfinder) have coverage in TestBaseflow, test_fitab,
+   % test_fitevents, test_eventfinder, test_fitopts, and the smoke
+   % script. This file tests eventtau, globalfit, cloudphi, fitphi,
    % and dndtuncertainty on the example data, and gpfitb, fitphidist, and
    % aQbString on synthetic inputs. The chain runs once on the shipped
    % example data in setupOnce; the constants are the Kuparuk basin values

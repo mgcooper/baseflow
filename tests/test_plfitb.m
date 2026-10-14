@@ -1,13 +1,14 @@
 classdef test_plfitb < matlab.unittest.TestCase
-   %TEST_PLFITB Test the plfitb bootstrap seed, tau pole, and plot legend.
+   %TEST_PLFITB Test the plfitb exponent, bootstrap seed, tau pole, and legend.
    %
-   % plfitb bootstraps with baseflow.deps.plvar, which resamples the data,
+   % plfitb recovers the exponent of a power-law sample. plfitb bootstraps with baseflow.deps.plvar, which resamples the data,
    % so a caller seed must fix the replicates. tau = tau0*(2-b)/(3-2*b) has
    % a pole at b = 3/2, which is alpha = 2, and plfitb warns when a
    % replicate reaches it. The legend plfitb draws through plplotb carries
    % one bootstrap standard deviation, so it must name no coverage level.
-   % Every sample is a deterministic Pareto draw, which leaves the
-   % bootstrap resampling as the only random step.
+   % Every sample except the exponent-recovery sample is a deterministic
+   % Pareto draw, which leaves the bootstrap resampling as the only random
+   % step.
    %
    % See also: test_plfitb_hanel
 
@@ -19,6 +20,9 @@ classdef test_plfitb < matlab.unittest.TestCase
       % Pareto exponents at and near the tau pole. Both put several of the
       % replicates at or below alpha = 2.
       poleexponent = struct('atpole', 2.00, 'nearpole', 2.05)
+
+      % Pareto exponents the exponent-recovery test samples.
+      PowerLawExponent = {1.5, 2.0, 2.5, 3.0, 3.5};
    end
 
    properties (Constant)
@@ -166,6 +170,25 @@ classdef test_plfitb < matlab.unittest.TestCase
             returned.tau - returned.BootFit.tau_sig)
          testCase.verifyEqual(returned.tau_H, ...
             returned.tau + returned.BootFit.tau_sig)
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_recoversExponent(testCase,PowerLawExponent)
+
+         % generate power-law distributed test data
+         x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
+
+         % compute the fit
+         [~,returned] = baseflow.plfitb(x); % the second output is alpha
+         expected = PowerLawExponent;
+
+         % The estimate from random samples varies. Allow 0.1 absolute error.
+         tol = 0.1;
+
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(returned,expected,'AbsTol',tol);
+
       end
 
       function test_noPoleWarningAwayFromPole(testCase)

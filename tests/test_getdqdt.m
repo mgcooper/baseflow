@@ -1,13 +1,18 @@
 classdef test_getdqdt < matlab.unittest.TestCase
-   %TEST_GETDQDT Test the getdqdt fit-plot option.
+   %TEST_GETDQDT Test the getdqdt derivative and fit-plot option.
    %
-   % getdqdt passes plotfits to plotdqdt, which fits the point cloud to
-   % draw its line. fitmethod 'none' asks for no fit, so getdqdt draws
-   % nothing for that method.
+   % The CTS derivative of baseflow.generateTestData output with the
+   % default stencil equals the backward difference of q. getdqdt passes
+   % plotfits to plotdqdt, which fits the point cloud to draw its line.
+   % fitmethod 'none' asks for no fit, so getdqdt draws nothing for that
+   % method.
 
    properties (TestParameter)
       % The fit method getdqdt passes to plotdqdt.
       fitmethod = struct('nls', 'nls', 'none', 'none')
+
+      % The derivative method of the backward-difference test.
+      DerivMethod = {'CTS'}; % {'ETS','VTS','CTS'}
    end
 
    properties
@@ -82,6 +87,36 @@ classdef test_getdqdt < matlab.unittest.TestCase
          end
          testCase.verifyEqual(newfigs_returned, newfigs_expected)
       end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_ctsBackwardDifference(testCase,DerivMethod)
+
+         % define the test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 1;
+         [t, q] = baseflow.generateTestData(a,b,q0);
+
+         % Calculate expected result for CTS method
+         dq = q-[nan; q(1:end-1)];
+         dt = (t(2)-t(1));
+         expected = dq./dt;
+
+         % Get the actual result. The test data has no rainfall record.
+         [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
+
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(returned,expected)
+
+         % for testing:
+         % DerivMethod = 'CTS';
+         % [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
+         % isequal(returned,expected)
+         % scatterfit(returned,expected)
+
+      end
+
    end
 
    methods (Access = private)

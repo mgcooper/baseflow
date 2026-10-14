@@ -6,6 +6,12 @@ semantic versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- The unit tests of `tests/TestBaseflow.m` live in per-function suites,
+  `tests/test_<function_name>.m`. `TestBaseflow` keeps the workflow
+  checks that span the event-detection entry points.
+
 ### Fixed
 
 - `gpfitb`, `plplotb` and `fitphidist` print nothing when they label a

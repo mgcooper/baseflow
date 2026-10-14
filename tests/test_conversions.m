@@ -26,6 +26,9 @@ classdef test_conversions < matlab.unittest.TestCase
          'MATLAB:unrecognizedStringChoice'}}, ...
          'unsupported_varname', {{1.5, 'unsupported', ...
          'MATLAB:unrecognizedStringChoice'}})
+
+      % Recession parameters with a literal expected conversion.
+      RecessionParameterNames = {'b','n','alpha'};
    end
 
    methods (Test)
@@ -48,6 +51,42 @@ classdef test_conversions < matlab.unittest.TestCase
          [inputvalue, inputname, expected] = badinput{:};
          testCase.verifyError( ...
             @() baseflow.conversions(inputvalue, inputname, 'n'), expected);
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_literalConversions(testCase,RecessionParameterNames)
+
+         switch RecessionParameterNames
+            case 'b'
+               % convert the recession exponent b to n for a flat aquifer
+               b = 1.5;
+               expected = 0; % n = (3 - 2b)/(b - 2)
+               returned = baseflow.conversions(b,'b','n','isflat',true);
+
+               % Verify that the actual result matches the expected result
+               testCase.verifyEqual(returned,expected);
+
+            case 'n'
+               % convert the conductivity exponent n to b for a flat aquifer
+               n = -1;
+               expected = 1; % b = (2n + 3)/(n + 2)
+               returned = baseflow.conversions(n,'n','b','isflat',true);
+
+               % Verify that the actual result matches the expected result
+               testCase.verifyEqual(returned,expected);
+
+            case 'alpha'
+               % convert the power law exponent alpha to b
+               alpha = 4.0;
+               expected = 1.25; % b = 1 + 1/alpha
+               returned = baseflow.conversions(alpha,'alpha','b', ...
+                  'isflat',true);
+
+               % Verify that the actual result matches the expected result
+               testCase.verifyEqual(returned,expected);
+         end
+
       end
    end
 end

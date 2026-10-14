@@ -12,6 +12,8 @@ merged into it).
 - Give a class suite the same name as its file (`test_fitab`).
 - `TestBaseflow.m` is the integration suite for the toolbox workflow, so
   it keeps its PascalCase name.
+- A suite that tests several functions together keeps a descriptive
+  name: `test_corechain`, `test_eqstrings`, and `test_internal`.
 - Variables use short lowercase or camelCase names (`q`, `dqdt`, `gotopath`).
 
 ## Formatting
