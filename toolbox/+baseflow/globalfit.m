@@ -97,7 +97,7 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
             'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
          phi2 = baseflow.eventphi(Results, Fits, A, D, L, 3/2, ...
             'lateqtls', lateqtls, 'earlyqtls', earlyqtls);
-         phid = vertcat(phi1, phi2); phid(phid>1) = nan; phid(phid<0) = nan;
+         phid = vertcat(phi1, phi2);
          phi = baseflow.fitphidist(phid, 'mean', 'cdf', plotfits);
    end
 

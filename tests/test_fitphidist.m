@@ -77,3 +77,19 @@ function test_fitphidistProbplot(testCase)
    newfigs_expected = 0;
    testCase.verifyEqual(newfigs_returned, newfigs_expected)
 end
+
+function test_phiOutsideUnitIntervalIsLeftOut(testCase)
+   % A phi outside [0, 1] is not a porosity, and the beta distribution
+   % cannot hold it. fitphidist leaves it out of the fit with a warning. So
+   % the mean equals the mean of the beta fit to the values inside [0, 1].
+   phi_inside = [0.02; 0.03; 0.04; 0.05; 0.06; 0.08];
+   phi_outside = [1.7; -0.2];
+   params = betafit(phi_inside);
+   expected = betastat(params(1), params(2));
+
+   returned = testCase.verifyWarning(@() baseflow.fitphidist( ...
+      [phi_inside; phi_outside], 'mean'), ...
+      'baseflow:fitphidist:phiOutsideUnitInterval');
+
+   testCase.verifyEqual(returned, expected)
+end

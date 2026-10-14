@@ -121,6 +121,14 @@ semantic versioning.
   catch one by name. The tests that ask for a solution pair `fitphi`
   falls back from now suppress the warning they expect, as do the tests
   that run a fit to the iteration limit of `nlinfit`.
+- `cloudphi` uses the `userab` line as the late-time line and still fits
+  the early-time line to the point cloud. A call with `userab` failed
+  with an undefined variable.
+- `fitphidist` leaves a phi outside [0, 1] out of the beta fit and warns
+  `baseflow:fitphidist:phiOutsideUnitInterval` with the count. `betafit`
+  errored on such a value, so `globalfit` 'distfit' failed when one event
+  gave a phi above 1. 'phicombo' set those values to NaN without a
+  warning, and it shares the `fitphidist` check.
 - `globalfit` keeps a `streamlength` given without `drainagedensity`.
   `setopts` and `globalfit` gave `drainagedensity` a default of 0.8,
   which replaced that `streamlength` with A*0.8/1000 and warned. The
@@ -128,10 +136,16 @@ semantic versioning.
   warning, and the warning has the identifier
   `baseflow:globalfit:inconsistentStreamlength`. The flat-aquifer phi
   solutions do not use L, so no result changes.
+- `aquiferstorage` runs on Octave. It rounded b with `round(b,2)`, and
+  the Octave `round` takes one argument.
 - `dndtuncertainty` accepts a daily calendar with leap days. It reshaped
   the record into 365-day rows, which a leap day breaks. It takes the
   years that T spans directly, so the result on a no-leap calendar is
   unchanged.
+- `fitab` 'mean' with no `order` returns b = 1, the slope of the line it
+  fits. It returned NaN. 'median' and 'envelope' document no default
+  slope, so without `order` they raise `baseflow:fitab:orderRequired`.
+  'median' failed in `signrank`, and 'envelope' returned NaN.
 
 ## [1.2.0] - 2026-09-17
 

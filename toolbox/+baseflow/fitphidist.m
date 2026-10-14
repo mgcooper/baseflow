@@ -28,6 +28,11 @@ function [Fit,h] = fitphidist(phi,varargin)
    %     showfit is a logical flag (default true). With showfit false, these
    %     two types delete their figure. For 'pdf', h is an empty struct.
    %
+   %     The beta fit uses the values of phi in [0, 1] and ignores nan.
+   %     fitphidist leaves a value outside [0, 1] out of the fit and raises
+   %     the warning baseflow:fitphidist:phiOutsideUnitInterval with the
+   %     count.
+   %
    % See also: eventphi, fitphi, fitphidist
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
@@ -40,6 +45,17 @@ function [Fit,h] = fitphidist(phi,varargin)
 
    % Force all inputs to be column vectors
    phi = phi(:);
+
+   % The beta distribution holds values in [0, 1], and a phi outside that
+   % interval is not a porosity. Leave those values out of the fit, and
+   % warn with their count so the caller knows the sample shrank.
+   outside = phi < 0 | phi > 1;
+   if any(outside)
+      warning('baseflow:fitphidist:phiOutsideUnitInterval', ...
+         ['%d of %d values of phi lie outside [0, 1], so the beta fit ' ...
+         'leaves them out.'], nnz(outside), numel(phi))
+      phi = phi(~outside);
+   end
 
    % Fit the beta distribution
    [PARAMHAT, PARAMCI] = betafit(phi);

@@ -19,8 +19,9 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-   % input checks
-   b = round(b,2);
+   % input checks. Round b to two decimals. Octave's round takes no digit
+   % count, so round 100*b and divide by 100.
+   b = round(100*b)/100;
    a = a(:);
    b = b(:);
    qmin = qmin(:);
