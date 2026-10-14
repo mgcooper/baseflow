@@ -151,9 +151,8 @@ semantic versioning.
   the record into 365-day rows, which a leap day breaks. It takes the
   years that T spans directly, so the result on a no-leap calendar is
   unchanged.
-- `fitab` 'mean' with no `order` returns b = 1, the slope of the line it
-  fits. It returned NaN. 'median' and 'envelope' document no default
-  slope, so without `order` they raise `baseflow:fitab:orderRequired`.
+- `fitab` 'mean', 'median', and 'envelope' fit a line of slope 1 when
+  `order` is not given, and return b = 1. 'mean' returned b = NaN,
   'median' failed in `signrank`, and 'envelope' returned NaN.
 
 ## [1.2.0] - 2026-09-17

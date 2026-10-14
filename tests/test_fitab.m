@@ -12,8 +12,8 @@ classdef test_fitab < matlab.unittest.TestCase
       RecessionExponent = {1.0,1.5}; % linear and non-linear
       OrderOption = struct('default', {{}}, 'order1', {{'order', 1}});
 
-      % The fixed-slope methods with no documented default slope.
-      FixedSlopeMethod = {'median','envelope'};
+      % The methods that fix the slope of the line, 1 by default.
+      FixedSlopeMethod = {'mean','median','envelope'};
    end
 
    methods (Test)
@@ -233,26 +233,24 @@ classdef test_fitab < matlab.unittest.TestCase
          testCase.verifyEqual(returned,expected)
       end
 
-      function test_meanDefaultsToSlopeOne(testCase)
-         % 'mean' with no 'order' is the mean difference of log -dq/dt and
-         % log q: the slope-1 line through the mean of the logs. So b = 1
-         % and a is the geometric mean of -dq/dt/q.
-         [~,q,dqdt] = baseflow.generateTestData(1e-2,1.5,100,1:100);
-         expected = [exp(mean(log(-dqdt./q))); 1];
+      function test_fixedSlopeDefaultsToOne(testCase,FixedSlopeMethod)
+         % A fixed-slope method with no 'order' fits a line of slope 1, so
+         % b = 1. Then log a is the center of log -dq/dt minus the center
+         % of log q. The center is the mean for 'mean', and the median for
+         % 'median' and for 'envelope' at its default refqtls [0.5 0.5].
+         % An odd number of points makes each median one of the points.
+         [~,q,dqdt] = baseflow.generateTestData(1e-2,1.5,100,1:101);
+         if strcmp(FixedSlopeMethod,'mean')
+            center = @mean;
+         else
+            center = @median;
+         end
+         expected = [exp(center(log(-dqdt)) - center(log(q))); 1];
          tol = 1e-12;
 
-         returned = baseflow.fitab(q,dqdt,'mean');
+         returned = baseflow.fitab(q,dqdt,FixedSlopeMethod);
 
          testCase.verifyEqual(returned.ab,expected,'RelTol',tol)
-      end
-
-      function test_fixedSlopeNeedsOrder(testCase,FixedSlopeMethod)
-         % 'median' and 'envelope' fix the slope of the line, and neither
-         % documents a default slope, so a call with no 'order' errors.
-         [~,q,dqdt] = baseflow.generateTestData(1e-2,1.5,100,1:100);
-
-         testCase.verifyError(@() baseflow.fitab(q,dqdt,FixedSlopeMethod), ...
-            'baseflow:fitab:orderRequired')
       end
    end
 end

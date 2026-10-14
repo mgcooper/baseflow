@@ -24,9 +24,8 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    %     weights  vector double of weights for the fitting algorithm
    %     mask     vector logical mask to exclude values from fitting
    %     order    scalar, exponent in -dq/dt = aQ^b. Methods 'mean',
-   %              'median', and 'envelope' fix the slope to order. 'mean'
-   %              uses order 1 when it is not given; 'median' and
-   %              'envelope' raise baseflow:fitab:orderRequired.
+   %              'median', and 'envelope' fix the slope to order, which
+   %              is 1 when it is not given.
    %     refqtls  2x1 double, x/y quantiles used if 'method' == 'envelope'
    %     quantile scalar double, quantile used if 'method' == 'qtl' (quantile
    %              regression)
@@ -456,15 +455,10 @@ function [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = ...
       end
    end
 
-   % 'mean' fits the slope-1 line through the mean of log q and log -dq/dt
-   % when 'order' is not given. 'median' and 'envelope' state no default
-   % slope, so they need 'order'.
-   if isnan(order) && strcmp(method, 'mean')
+   % 'mean', 'median', and 'envelope' fix the slope of the line. Without
+   % 'order' the slope is 1, the linear reservoir.
+   if isnan(order) && any(strcmp(method, {'mean', 'median', 'envelope'}))
       order = 1;
-   elseif isnan(order) && any(strcmp(method, {'median', 'envelope'}))
-      error('baseflow:fitab:orderRequired', ...
-         'method ''%s'' fixes the slope of the fit, so it needs ''order''', ...
-         method)
    end
 
    % Expand a scalar weight or mask to every point, because prepfits

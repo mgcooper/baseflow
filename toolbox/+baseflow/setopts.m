@@ -43,7 +43,8 @@ function opts = setopts(funcname,varargin)
    %     derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'
    %     fitmethod      : -dQ/dt = aQb fitting method
    %     fitorder       : fitting order (value of exponent b). fitmethod
-   %                      'median' or 'envelope' needs it; see fitab.
+   %                      'mean', 'median', or 'envelope' uses 1 when it
+   %                      is nan; see fitab.
    %     pickfits       : pick fits manually?
    %     pickmethod     : method to fit picks manually
    %     plotfits       : plot each event fit? fitevents passes this flag
