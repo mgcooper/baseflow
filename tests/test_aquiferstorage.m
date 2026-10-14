@@ -51,5 +51,23 @@ classdef test_aquiferstorage < matlab.unittest.TestCase
 
          testCase.verifyEqual([Smin_returned,Smax_returned],S_expected);
       end
+
+      function test_storageUsesUnroundedB(testCase)
+         % aquiferstorage rounds b to two decimals only to choose the
+         % formula. b = 1.567 takes the power-law storage q^(2-b)/(a*(2-b))
+         % with b itself. Rounding b to 1.57 in the formula would shift the
+         % storage of q = 1e4 by about 3.5%.
+         a = 1;
+         b = 1.567;
+         q = [1 1e4];
+         S_expected = q.^(2-b)/(a*(2-b));
+         tol = 1e-12;
+
+         [Smin_returned,Smax_returned] = baseflow.aquiferstorage( ...
+            a,b,q(1),q(2));
+
+         testCase.verifyEqual([Smin_returned,Smax_returned],S_expected, ...
+            'RelTol',tol);
+      end
    end
 end

@@ -141,9 +141,9 @@ close(figarrow);
 assert(nheads == 1)
 assert(nshafts == 1)
 
-% compute aquifer storage. aquiferstorage rounds b to two decimals with
-% the one-argument round, which Octave also provides. For b = 3/2, the
-% storage of flow q is q^(2-b)/(a*(2-b)).
+% compute aquifer storage. aquiferstorage rounds b to two decimals to
+% choose its formula, with the one-argument round, which Octave also
+% provides. For b = 3/2, the storage of flow q is q^(2-b)/(a*(2-b)).
 astore = 1e-2;
 bstore = 1.5;
 qstore = [1 4];

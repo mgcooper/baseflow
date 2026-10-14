@@ -19,9 +19,7 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
    % if called with no input, open this file
    if nargin == 0; open(mfilename('fullpath')); return; end
 
-   % input checks. Round b to two decimals. Octave's round takes no digit
-   % count, so round 100*b and divide by 100.
-   b = round(100*b)/100;
+   % input checks
    a = a(:);
    b = b(:);
    qmin = qmin(:);
@@ -64,10 +62,14 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
       Smin = nan(size(a));
       Smax = nan(size(a));
 
-      % find indices where b = 1, b = 2, and b! = 2
-      ib1 = b >= 0.95 & b <= 1.05;
-      ib2 = b >= 1.95 & b <= 2.05;
-      ib2p = b>2.05;
+      % find indices where b = 1, b = 2, and b! = 2. Round b to two
+      % decimals only to choose the formula; the power-law formulas use
+      % the unrounded b. Octave's round takes no digit count, so round
+      % 100*b and divide by 100.
+      bround = round(100*b)/100;
+      ib1 = bround >= 0.95 & bround <= 1.05;
+      ib2 = bround >= 1.95 & bround <= 2.05;
+      ib2p = bround>2.05;
       ib2m = true(size(b)); ib2m(ib1|ib2|ib2p) = false;
       b(ib1) = 1.0;
       b(ib2) = 2.0;

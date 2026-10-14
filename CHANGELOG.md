@@ -146,7 +146,10 @@ semantic versioning.
   `baseflow:globalfit:inconsistentStreamlength`. The flat-aquifer phi
   solutions do not use L, so no result changes.
 - `aquiferstorage` runs on Octave. It rounded b with `round(b,2)`, and
-  the Octave `round` takes one argument.
+  the Octave `round` takes one argument. It rounds b to two decimals
+  only to choose the formula, and the power-law formulas use the
+  unrounded b. At b = 1.567 the rounded b changed the storage by +2.1% at
+  q = 0.01 and -3.4% at q = 1e6.
 - `dndtuncertainty` accepts a daily calendar with leap days. It reshaped
   the record into 365-day rows, which a leap day breaks. It takes the
   years that T spans directly, so the result on a no-leap calendar is
