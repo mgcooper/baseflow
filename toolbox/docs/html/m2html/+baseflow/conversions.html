@@ -132,7 +132,7 @@ This function is called by:
 0050    <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
 0051    <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
 0052    <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
-0053    <span class="comment">%                 k,    from P(Q) ~ Q^-(1+1/k)</span>
+0053    <span class="comment">%                 k,    from p(tau) ~ tau^-(1+1/k)</span>
 0054    <span class="comment">%            isflat,    true if flat aquifer</span>
 0055    <span class="comment">%</span>
 0056    <span class="comment">%  Outputs:       b,    from dQ(t)=a*Q^b</span>
@@ -177,90 +177,94 @@ This function is called by:
 0095             <span class="keyword">case</span> false
 0096                b = 1-N;
 0097          <span class="keyword">end</span>
-0098    <span class="keyword">end</span>
-0099 <span class="keyword">end</span>
-0100 
-0101 <a name="_sub2" href="#_subfunctions" class="code">function varargout = convertb(b,outputvarname,isflat)</a>
-0102    <span class="comment">%BCONVERSIONS Convert the recession flow power law exponent b to any of</span>
-0103    <span class="comment">%several other recession flow parameters.</span>
-0104    <span class="comment">%</span>
-0105    <span class="comment">%  Inputs:        b,    from dQ(t)=a*Q^b</span>
-0106    <span class="comment">%            isflat,    true if flat aquifer</span>
-0107    <span class="comment">%</span>
-0108    <span class="comment">%  Outputs:   alpha,    from P(Q) ~ t*^-alpha</span>
-0109    <span class="comment">%              beta,    from Q ~ S^-beta (beta = -d)</span>
-0110    <span class="comment">%             gamma,    from 1/gamma = 1/alpha + 1/beta</span>
-0111    <span class="comment">%                 N,    from a = c1*D^N, where c1 is a coefficient</span>
-0112    <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
-0113    <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
-0114    <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
-0115    <span class="comment">%                 k,    from P(Q) ~ Q^-(1+1/k)</span>
-0116    <span class="comment">%</span>
-0117    <span class="comment">% k is the gpfit shape parameter: the gpd tail pdf ~ x^-(1+1/k) equals the</span>
-0118    <span class="comment">% timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).</span>
-0119 
-0120    alpha = 1./(b-1);       <span class="comment">% power law exponent alpha</span>
-0121    beta  = 1./(b-2);
-0122    gamma = 1./(2.*b-3);
-0123    d     = 1./(2-b);
-0124    k     = (1-b)./(b-2);
-0125 
-0126    <span class="keyword">switch</span> isflat
-0127       <span class="keyword">case</span> true
-0128          n = (3-2.*b)./(b-2);   <span class="comment">% saturated hyd. cond. power function exponent</span>
-0129          N = 3-2.*b;            <span class="comment">% scale parameter power law exponent N</span>
-0130          Nstar = 1./(4-2.*b);
-0131 
-0132       <span class="keyword">case</span> false
-0133          n = (1-b)./(b-2);
-0134          N = 1-b;
-0135          Nstar = 1./(2-b);
-0136    <span class="keyword">end</span>
-0137 
-0138    <span class="keyword">switch</span> outputvarname
-0139       <span class="keyword">case</span> <span class="string">'b'</span>
-0140          varargout{1} = b;
-0141       <span class="keyword">case</span> <span class="string">'alpha'</span>
-0142          varargout{1} = alpha;
-0143       <span class="keyword">case</span> <span class="string">'beta'</span>
-0144          varargout{1} = beta;
-0145       <span class="keyword">case</span> <span class="string">'gamma'</span>
-0146          varargout{1} = gamma;
-0147       <span class="keyword">case</span> <span class="string">'d'</span>
-0148          varargout{1} = d;
-0149       <span class="keyword">case</span> <span class="string">'k'</span>
-0150          varargout{1} = k;
-0151       <span class="keyword">case</span> <span class="string">'n'</span>
-0152          varargout{1} = n;
-0153       <span class="keyword">case</span> <span class="string">'N'</span>
-0154          varargout{1} = N;
-0155       <span class="keyword">case</span> <span class="string">'Nstar'</span>
-0156          varargout{1} = Nstar;
-0157    <span class="keyword">end</span>
-0158 <span class="keyword">end</span>
-0159 
-0160 <span class="comment">%% INPUT PARSER</span>
-0161 <a name="_sub3" href="#_subfunctions" class="code">function [inputvalue, inputvarname, outputvarname, isflat] = parseinputs( </a><span class="keyword">...</span>
-0162       inputvalue, inputvarname, outputvarname, varargin)
+0098 
+0099       <span class="keyword">case</span> <span class="string">'Nstar'</span>
+0100          <span class="comment">% N* = 1/(N+1), so convert through N</span>
+0101          b = <a href="#_sub1" class="code" title="subfunction b = convert2b(inputvalue,inputvarname,isflat)">convert2b</a>(1./inputvalue-1,<span class="string">'N'</span>,isflat);
+0102    <span class="keyword">end</span>
+0103 <span class="keyword">end</span>
+0104 
+0105 <a name="_sub2" href="#_subfunctions" class="code">function varargout = convertb(b,outputvarname,isflat)</a>
+0106    <span class="comment">%BCONVERSIONS Convert the recession flow power law exponent b to any of</span>
+0107    <span class="comment">%several other recession flow parameters.</span>
+0108    <span class="comment">%</span>
+0109    <span class="comment">%  Inputs:        b,    from dQ(t)=a*Q^b</span>
+0110    <span class="comment">%            isflat,    true if flat aquifer</span>
+0111    <span class="comment">%</span>
+0112    <span class="comment">%  Outputs:   alpha,    from Q ~ t*^-alpha</span>
+0113    <span class="comment">%              beta,    from Q ~ S^-beta (beta = -d)</span>
+0114    <span class="comment">%             gamma,    from 1/gamma = 1/alpha + 1/beta</span>
+0115    <span class="comment">%                 N,    from a = c1*D^N, where c1 is a coefficient</span>
+0116    <span class="comment">%             Nstar,    from N* = 1/(N+1)</span>
+0117    <span class="comment">%                 d,    from Q = cS^d, where d = 1/(2-b)</span>
+0118    <span class="comment">%                 n,    from k(z) = kD(z/D)^n,</span>
+0119    <span class="comment">%                 k,    from p(tau) ~ tau^-(1+1/k)</span>
+0120    <span class="comment">%</span>
+0121    <span class="comment">% k is the gpfit shape parameter: the gpd tail pdf ~ x^-(1+1/k) equals the</span>
+0122    <span class="comment">% timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).</span>
+0123 
+0124    alpha = 1./(b-1);       <span class="comment">% power law exponent alpha</span>
+0125    beta  = 1./(b-2);
+0126    gamma = 1./(2.*b-3);
+0127    d     = 1./(2-b);
+0128    k     = (1-b)./(b-2);
+0129 
+0130    <span class="keyword">switch</span> isflat
+0131       <span class="keyword">case</span> true
+0132          n = (3-2.*b)./(b-2);   <span class="comment">% saturated hyd. cond. power function exponent</span>
+0133          N = 3-2.*b;            <span class="comment">% scale parameter power law exponent N</span>
+0134          Nstar = 1./(4-2.*b);
+0135 
+0136       <span class="keyword">case</span> false
+0137          n = (1-b)./(b-2);
+0138          N = 1-b;
+0139          Nstar = 1./(2-b);
+0140    <span class="keyword">end</span>
+0141 
+0142    <span class="keyword">switch</span> outputvarname
+0143       <span class="keyword">case</span> <span class="string">'b'</span>
+0144          varargout{1} = b;
+0145       <span class="keyword">case</span> <span class="string">'alpha'</span>
+0146          varargout{1} = alpha;
+0147       <span class="keyword">case</span> <span class="string">'beta'</span>
+0148          varargout{1} = beta;
+0149       <span class="keyword">case</span> <span class="string">'gamma'</span>
+0150          varargout{1} = gamma;
+0151       <span class="keyword">case</span> <span class="string">'d'</span>
+0152          varargout{1} = d;
+0153       <span class="keyword">case</span> <span class="string">'k'</span>
+0154          varargout{1} = k;
+0155       <span class="keyword">case</span> <span class="string">'n'</span>
+0156          varargout{1} = n;
+0157       <span class="keyword">case</span> <span class="string">'N'</span>
+0158          varargout{1} = N;
+0159       <span class="keyword">case</span> <span class="string">'Nstar'</span>
+0160          varargout{1} = Nstar;
+0161    <span class="keyword">end</span>
+0162 <span class="keyword">end</span>
 0163 
-0164    validvarnames = {<span class="string">'b'</span>, <span class="string">'alpha'</span>, <span class="string">'beta'</span>, <span class="string">'gamma'</span>, <span class="string">'d'</span>, <span class="string">'k'</span>, <span class="string">'n'</span>, <span class="string">'N'</span>, <span class="string">'Nstar'</span>};
-0165 
-0166    parser = inputParser;
-0167    parser.FunctionName = <span class="string">'baseflow.conversions'</span>;
-0168 
-0169    parser.addRequired(<span class="string">'inputvalue'</span>, @isnumeric);
-0170    parser.addRequired(<span class="string">'inputvarname'</span>, <span class="keyword">...</span>
-0171       @(x) ~isempty(validatestring(x, validvarnames)));
-0172    parser.addRequired(<span class="string">'outputvarname'</span>, <span class="keyword">...</span>
-0173       @(x) ~isempty(validatestring(x, validvarnames)));
-0174    parser.addParameter(<span class="string">'isflat'</span>, true, @islogical);
-0175 
-0176    parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});
-0177 
-0178    inputvalue = parser.Results.inputvalue;
-0179    inputvarname = parser.Results.inputvarname;
-0180    outputvarname = parser.Results.outputvarname;
-0181    isflat = parser.Results.isflat;
-0182 <span class="keyword">end</span></pre></div>
+0164 <span class="comment">%% INPUT PARSER</span>
+0165 <a name="_sub3" href="#_subfunctions" class="code">function [inputvalue, inputvarname, outputvarname, isflat] = parseinputs( </a><span class="keyword">...</span>
+0166       inputvalue, inputvarname, outputvarname, varargin)
+0167 
+0168    validvarnames = {<span class="string">'b'</span>, <span class="string">'alpha'</span>, <span class="string">'beta'</span>, <span class="string">'gamma'</span>, <span class="string">'d'</span>, <span class="string">'k'</span>, <span class="string">'n'</span>, <span class="string">'N'</span>, <span class="string">'Nstar'</span>};
+0169 
+0170    parser = inputParser;
+0171    parser.FunctionName = <span class="string">'baseflow.conversions'</span>;
+0172 
+0173    parser.addRequired(<span class="string">'inputvalue'</span>, @isnumeric);
+0174    parser.addRequired(<span class="string">'inputvarname'</span>, <span class="keyword">...</span>
+0175       @(x) ~isempty(validatestring(x, validvarnames)));
+0176    parser.addRequired(<span class="string">'outputvarname'</span>, <span class="keyword">...</span>
+0177       @(x) ~isempty(validatestring(x, validvarnames)));
+0178    parser.addParameter(<span class="string">'isflat'</span>, true, @islogical);
+0179 
+0180    parser.parse(inputvalue, inputvarname, outputvarname, varargin{:});
+0181 
+0182    inputvalue = parser.Results.inputvalue;
+0183    inputvarname = parser.Results.inputvarname;
+0184    outputvarname = parser.Results.outputvarname;
+0185    isflat = parser.Results.isflat;
+0186 <span class="keyword">end</span></pre></div>
 </body>
 </html>

@@ -33,6 +33,9 @@
 
   [ddt,err] = printtrend(Data,varargin)
 
+  ddt is the trend per year. The printed total change is ddt times the
+  years from the first to the last row of Data.
+
  See also: <a href="aquifertrend.html" class="code" title="function [D,dDdt,dDadt,C] = aquifertrend(tau,phi,N,Qb,dQbdt)">aquifertrend</a>, <a href="baseflowtrend.html" class="code" title="function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)">baseflowtrend</a></pre></div>
 
 
@@ -65,60 +68,63 @@ This function is called by:
 0005    <span class="comment">%</span>
 0006    <span class="comment">%  [ddt,err] = printtrend(Data,varargin)</span>
 0007    <span class="comment">%</span>
-0008    <span class="comment">% See also: aquifertrend, baseflowtrend</span>
-0009 
-0010    <span class="comment">% PARSE INPUTS</span>
-0011    [Data, method, var, cf, alpha, qtl] = <a href="#_sub1" class="code" title="subfunction [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)">parseinputs</a>(Data, varargin{:});
+0008    <span class="comment">%  ddt is the trend per year. The printed total change is ddt times the</span>
+0009    <span class="comment">%  years from the first to the last row of Data.</span>
+0010    <span class="comment">%</span>
+0011    <span class="comment">% See also: aquifertrend, baseflowtrend</span>
 0012 
-0013    <span class="comment">% create a regular time in years, works for both months and years</span>
-0014    t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
-0015    dt = numel(t);
-0016    dat = Data.(var); <span class="comment">% cm/yr -&gt; cm/day</span>
-0017 
-0018    <span class="keyword">switch</span> method
-0019       <span class="keyword">case</span> <span class="string">'ols'</span>
-0020          mdl = fitlm(t,dat);
-0021          ddt = mdl.Coefficients.Estimate(2);  <span class="comment">% cm/day/year</span>
-0022          CIs = coefCI(mdl,alpha);
-0023          err = CIs(2,2)-ddt;
-0024       <span class="keyword">case</span> <span class="string">'qtl'</span>
-0025          [ab,S] = quantreg(t,dat,qtl,1,1000,alpha);
-0026          ddt = ab(2);
-0027          CIs = S.ci_boot';
-0028          err = CIs(2,2)-ddt;
-0029    <span class="keyword">end</span>
-0030    <span class="comment">% adjust the trend and error units using the conversion factor</span>
-0031    ddt = cf*ddt;
-0032    d = ddt*dt;
-0033    err = cf*err;
-0034    derr = err*dt;
-0035    errstr = num2str(round(100*(1-alpha)));
-0036    str = [<span class="string">'\nd'</span> var <span class="string">'/dt = %.3f '</span> char(177) <span class="string">' %.3f ('</span> errstr <span class="string">'%% CI) '</span>];
-0037    str = [str <span class="string">', d'</span> var <span class="string">' = %.3f '</span> char(177) <span class="string">' %.3f \n\n'</span>];
-0038    fprintf(str,ddt,err,d,derr);
-0039 <span class="keyword">end</span>
-0040 
-0041 <span class="comment">%% PARSE INPUTS</span>
-0042 <a name="_sub1" href="#_subfunctions" class="code">function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)</a>
-0043    parser = inputParser;
-0044    <span class="comment">% this has to be true to use autocomplete fieldname</span>
-0045    parser.StructExpand = true;
-0046    parser.FunctionName = <span class="string">'baseflow.printtrend'</span>;
-0047    parser.addRequired(<span class="string">'Data'</span>, @istimetable);
-0048    parser.addParameter(<span class="string">'var'</span>, <span class="string">'Qb'</span>, @ischar);
-0049    parser.addParameter(<span class="string">'alpha'</span>, 0.05, @isnumeric);
-0050    parser.addParameter(<span class="string">'metric'</span>, <span class="string">'CI'</span>, @ischar);
-0051    parser.addParameter(<span class="string">'method'</span>, <span class="string">'ols'</span>, @ischar);
-0052    parser.addParameter(<span class="string">'quantile'</span>, nan, @isnumeric);
-0053    parser.addParameter(<span class="string">'unitconversion'</span>, 1, @isnumeric);
-0054 
-0055    parser.parse(Data, varargin{:});
-0056 
-0057    cf = parser.Results.unitconversion;
-0058    var  = parser.Results.var;
-0059    qtl = parser.Results.quantile;
-0060    alpha = parser.Results.alpha;
-0061    method = parser.Results.method;
-0062 <span class="keyword">end</span></pre></div>
+0013    <span class="comment">% PARSE INPUTS</span>
+0014    [Data, method, var, cf, alpha, qtl] = <a href="#_sub1" class="code" title="subfunction [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)">parseinputs</a>(Data, varargin{:});
+0015 
+0016    <span class="comment">% create a regular time in years, works for both months and years</span>
+0017    t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
+0018    dt = t(end)-t(1); <span class="comment">% years spanned, which scales the trend to a total change</span>
+0019    dat = Data.(var); <span class="comment">% cm/yr -&gt; cm/day</span>
+0020 
+0021    <span class="keyword">switch</span> method
+0022       <span class="keyword">case</span> <span class="string">'ols'</span>
+0023          mdl = fitlm(t,dat);
+0024          ddt = mdl.Coefficients.Estimate(2);  <span class="comment">% cm/day/year</span>
+0025          CIs = coefCI(mdl,alpha);
+0026          err = CIs(2,2)-ddt;
+0027       <span class="keyword">case</span> <span class="string">'qtl'</span>
+0028          [ab,S] = quantreg(t,dat,qtl,1,1000,alpha);
+0029          ddt = ab(2);
+0030          CIs = S.ci_boot';
+0031          err = CIs(2,2)-ddt;
+0032    <span class="keyword">end</span>
+0033    <span class="comment">% adjust the trend and error units using the conversion factor</span>
+0034    ddt = cf*ddt;
+0035    d = ddt*dt;
+0036    err = cf*err;
+0037    derr = err*dt;
+0038    errstr = num2str(round(100*(1-alpha)));
+0039    str = [<span class="string">'\nd'</span> var <span class="string">'/dt = %.3f '</span> char(177) <span class="string">' %.3f ('</span> errstr <span class="string">'%% CI) '</span>];
+0040    str = [str <span class="string">', d'</span> var <span class="string">' = %.3f '</span> char(177) <span class="string">' %.3f \n\n'</span>];
+0041    fprintf(str,ddt,err,d,derr);
+0042 <span class="keyword">end</span>
+0043 
+0044 <span class="comment">%% PARSE INPUTS</span>
+0045 <a name="_sub1" href="#_subfunctions" class="code">function [Data, method, var, cf, alpha, qtl] = parseinputs(Data, varargin)</a>
+0046    parser = inputParser;
+0047    <span class="comment">% this has to be true to use autocomplete fieldname</span>
+0048    parser.StructExpand = true;
+0049    parser.FunctionName = <span class="string">'baseflow.printtrend'</span>;
+0050    parser.addRequired(<span class="string">'Data'</span>, @istimetable);
+0051    parser.addParameter(<span class="string">'var'</span>, <span class="string">'Qb'</span>, @ischar);
+0052    parser.addParameter(<span class="string">'alpha'</span>, 0.05, @isnumeric);
+0053    parser.addParameter(<span class="string">'metric'</span>, <span class="string">'CI'</span>, @ischar);
+0054    parser.addParameter(<span class="string">'method'</span>, <span class="string">'ols'</span>, @ischar);
+0055    parser.addParameter(<span class="string">'quantile'</span>, nan, @isnumeric);
+0056    parser.addParameter(<span class="string">'unitconversion'</span>, 1, @isnumeric);
+0057 
+0058    parser.parse(Data, varargin{:});
+0059 
+0060    cf = parser.Results.unitconversion;
+0061    var  = parser.Results.var;
+0062    qtl = parser.Results.quantile;
+0063    alpha = parser.Results.alpha;
+0064    method = parser.Results.method;
+0065 <span class="keyword">end</span></pre></div>
 </body>
 </html>

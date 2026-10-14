@@ -63,6 +63,10 @@
                  The late-time line uses the input method, and only
                  method 'envelope' reads lateqtls. Default is
                  [0.5 0.5].
+     userab      late-time [a b] of a line the user chose. cloudphi then
+                 uses this line in place of the line it fits at blate,
+                 and blate does not enter phi. Default is [] (fit the
+                 late-time line).
      mask        logical mask to exclude data
      theta       effective slope of basin contributing area
      isflat      logical flag indicating if horizontal or sloped aquifer
@@ -143,152 +147,160 @@ This function is called by:
 0035    <span class="comment">%                 The late-time line uses the input method, and only</span>
 0036    <span class="comment">%                 method 'envelope' reads lateqtls. Default is</span>
 0037    <span class="comment">%                 [0.5 0.5].</span>
-0038    <span class="comment">%     mask        logical mask to exclude data</span>
-0039    <span class="comment">%     theta       effective slope of basin contributing area</span>
-0040    <span class="comment">%     isflat      logical flag indicating if horizontal or sloped aquifer</span>
-0041    <span class="comment">%                 solution is applicable</span>
-0042    <span class="comment">%     soln1       optional early-time theoretical solution</span>
-0043    <span class="comment">%     soln2       optional late-time theoretical solution</span>
-0044    <span class="comment">%     dispfit     logical flag indicating whether fitphi prints each phi</span>
-0045    <span class="comment">%                 value. Default is false.</span>
-0046    <span class="comment">%     plotfit     logical flag indicating whether to draw the point cloud,</span>
-0047    <span class="comment">%                 the early-time and fitted late-time lines, and the phi</span>
-0048    <span class="comment">%                 legend. Default is true.</span>
-0049    <span class="comment">%</span>
-0050    <span class="comment">% See also: eventphi, fitphi, fitphidist</span>
-0051    <span class="comment">%</span>
-0052    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0038    <span class="comment">%     userab      late-time [a b] of a line the user chose. cloudphi then</span>
+0039    <span class="comment">%                 uses this line in place of the line it fits at blate,</span>
+0040    <span class="comment">%                 and blate does not enter phi. Default is [] (fit the</span>
+0041    <span class="comment">%                 late-time line).</span>
+0042    <span class="comment">%     mask        logical mask to exclude data</span>
+0043    <span class="comment">%     theta       effective slope of basin contributing area</span>
+0044    <span class="comment">%     isflat      logical flag indicating if horizontal or sloped aquifer</span>
+0045    <span class="comment">%                 solution is applicable</span>
+0046    <span class="comment">%     soln1       optional early-time theoretical solution</span>
+0047    <span class="comment">%     soln2       optional late-time theoretical solution</span>
+0048    <span class="comment">%     dispfit     logical flag indicating whether fitphi prints each phi</span>
+0049    <span class="comment">%                 value. Default is false.</span>
+0050    <span class="comment">%     plotfit     logical flag indicating whether to draw the point cloud,</span>
+0051    <span class="comment">%                 the early-time and fitted late-time lines, and the phi</span>
+0052    <span class="comment">%                 legend. Default is true.</span>
 0053    <span class="comment">%</span>
-0054    <span class="comment">% Note: The method used for ahat = pointcloudintercept should also be used</span>
-0055    <span class="comment">% here for consistency.</span>
-0056 
-0057    <span class="comment">% if called with no input, open this file</span>
-0058    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0059 
-0060    <span class="comment">% parse inputs</span>
-0061    [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, <span class="keyword">...</span>
-0062       ~, isflat, ~, ~, dispfit, plotfit] = parseinputs(q, dqdt, blate, <span class="keyword">...</span>
-0063       A, D, L, method, varargin{:});
-0064 
-0065    <span class="comment">% the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could</span>
-0066    <span class="comment">% also be used but this function is intended to fit phi once b is known (or</span>
-0067    <span class="comment">% prescribed)</span>
+0054    <span class="comment">% See also: eventphi, fitphi, fitphidist</span>
+0055    <span class="comment">%</span>
+0056    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0057    <span class="comment">%</span>
+0058    <span class="comment">% Note: The method used for ahat = pointcloudintercept should also be used</span>
+0059    <span class="comment">% here for consistency.</span>
+0060 
+0061    <span class="comment">% if called with no input, open this file</span>
+0062    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0063 
+0064    <span class="comment">% parse inputs</span>
+0065    [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, <span class="keyword">...</span>
+0066       ~, isflat, ~, ~, dispfit, plotfit] = parseinputs(q, dqdt, blate, <span class="keyword">...</span>
+0067       A, D, L, method, varargin{:});
 0068 
-0069    <span class="comment">% a1 = early-time a</span>
-0070    <span class="comment">% b1 = 3 (not involved)</span>
-0071    <span class="comment">% a2 = late-time a</span>
-0072    <span class="comment">% b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)</span>
-0073 
-0074    <span class="keyword">if</span> isnan(userab)
-0075       b2 = blate;
-0076       a1 = baseflow.pointcloudintercept(q,dqdt,3,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
-0077       a2 = baseflow.pointcloudintercept(q,dqdt,b2,method,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
-0078    <span class="keyword">else</span>
-0079 
-0080    <span class="keyword">end</span>
-0081 
-0082    <span class="keyword">switch</span> b2
-0083       <span class="keyword">case</span> 1
-0084          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
-0085             <span class="string">'soln2'</span>,<span class="string">'BS03'</span>,<span class="string">'dispfit'</span>,dispfit);
-0086       <span class="keyword">case</span> 3/2
-0087          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
-0088             <span class="string">'soln2'</span>,<span class="string">'BS04'</span>,<span class="string">'dispfit'</span>,dispfit);
-0089       <span class="keyword">otherwise</span>
-0090          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'RS05'</span>,  <span class="keyword">...</span>
-0091             <span class="string">'soln2'</span>,<span class="string">'RS05'</span>,<span class="string">'dispfit'</span>,dispfit);
-0092    <span class="keyword">end</span>
-0093    a = a2;
-0094 
-0095    <span class="comment">% Skip the figure when plotfit is false. globalfit passes its plotfits</span>
-0096    <span class="comment">% flag here, so a global fit with plotfits false opens no figure.</span>
-0097    <span class="keyword">if</span> plotfit
-0098       <span class="comment">% make a dummy handle for the legend and print the value of phi</span>
-0099       baseflow.pointcloudplot(q,dqdt,<span class="string">'blate'</span>,blate,<span class="string">'mask'</span>,mask,<span class="string">'reflines'</span>, <span class="keyword">...</span>
-0100          {<span class="string">'early'</span>,<span class="string">'userfit'</span>},<span class="string">'userab'</span>,[a2 blate],<span class="string">'reflabels'</span>,true);
-0101       hdum = plot(0,0,<span class="string">'Color'</span>,<span class="string">'none'</span>,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
-0102 
-0103       <span class="keyword">if</span> isoctave
-0104          txt = sprintf(<span class="string">'\\phi = %.2f'</span>,phi);
-0105          legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>, <span class="keyword">...</span>
-0106             <span class="string">'box'</span>,<span class="string">'off'</span>);
-0107       <span class="keyword">else</span>
-0108          txt = sprintf(<span class="string">'$\\phi_{b=%.2f}=%.3f$'</span>,b2,phi);
-0109          legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>, <span class="keyword">...</span>
-0110             <span class="string">'box'</span>,<span class="string">'off'</span>);
-0111       <span class="keyword">end</span>
-0112    <span class="keyword">end</span>
-0113 <span class="keyword">end</span>
-0114 
-0115 <span class="comment">%% input parser</span>
-0116 <a name="_sub1" href="#_subfunctions" class="code">function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, </a><span class="keyword">...</span>
-0117       theta, isflat, soln1, soln2, dispfit, plotfit] = parseinputs(q, dqdt, <span class="keyword">...</span>
-0118       blate, A, D, L, method, varargin)
-0119 
-0120    parser = inputParser;
-0121    parser.StructExpand = false;
-0122    parser.FunctionName = <span class="string">'baseflow.cloudphi'</span>;
-0123 
-0124    addRequired(parser, <span class="string">'q'</span>, @isnumeric);
-0125    addRequired(parser, <span class="string">'dqdt'</span>, @isnumeric);
-0126    addRequired(parser, <span class="string">'blate'</span>, @isnumeric);
-0127    addRequired(parser, <span class="string">'A'</span>, @isnumeric);
-0128    addRequired(parser, <span class="string">'D'</span>, @isnumeric);
-0129    addRequired(parser, <span class="string">'L'</span>, @isnumeric);
-0130    addRequired(parser, <span class="string">'method'</span>, @ischar);
-0131    addParameter(parser,<span class="string">'earlyqtls'</span>,[0.95 0.95], @isnumeric);
-0132    addParameter(parser,<span class="string">'lateqtls'</span>, [0.5 0.5], @isnumeric);
-0133    addParameter(parser,<span class="string">'userab'</span>, nan, @isnumeric);
-0134    addParameter(parser,<span class="string">'mask'</span>, true(size(q)), @islogical);
-0135    addParameter(parser,<span class="string">'theta'</span>, 0, @isnumeric);
-0136    addParameter(parser,<span class="string">'isflat'</span>, true,  @islogical);
-0137    addParameter(parser,<span class="string">'soln1'</span>, <span class="string">'RS05'</span>, @ischar);
-0138    addParameter(parser,<span class="string">'soln2'</span>, <span class="string">'RS05'</span>, @ischar);
-0139    addParameter(parser,<span class="string">'dispfit'</span>, false, @islogical);
-0140    addParameter(parser,<span class="string">'plotfit'</span>, true, @islogical);
-0141 
-0142    parse(parser,q,dqdt,blate,A,D,L,method,varargin{:});
-0143 
-0144    earlyqtls   = parser.Results.earlyqtls;
-0145    lateqtls    = parser.Results.lateqtls;
-0146    userab      = parser.Results.userab;
-0147    mask        = parser.Results.mask;
-0148    theta       = parser.Results.theta;
-0149    isflat      = parser.Results.isflat;
-0150    soln1       = parser.Results.soln1;
-0151    soln2       = parser.Results.soln2;
-0152    dispfit     = parser.Results.dispfit;
-0153    plotfit     = parser.Results.plotfit;
-0154 <span class="keyword">end</span>
-0155 
-0156 <span class="comment">%%</span>
-0157 <span class="comment">% found this in an older test version, need to integrate or delete</span>
-0158 <span class="comment">%</span>
-0159 <span class="comment">% if isflat</span>
-0160 <span class="comment">%    switch blate</span>
-0161 <span class="comment">%       case 1</span>
-0162 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
-0163 <span class="comment">%             'soln2','BS03','dispfit',dispfit);</span>
-0164 <span class="comment">%       case 3/2</span>
-0165 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
-0166 <span class="comment">%             'soln2','BS04','dispfit',dispfit);</span>
-0167 <span class="comment">%       otherwise</span>
-0168 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...</span>
-0169 <span class="comment">%             'soln2','RS05','dispfit',dispfit);</span>
-0170 <span class="comment">%    end</span>
-0171 <span class="comment">% else</span>
-0172 <span class="comment">%    switch blate</span>
-0173 <span class="comment">%       case 1</span>
-0174 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
-0175 <span class="comment">%             'soln2','BR94','dispfit',dispfit,'theta',theta);</span>
-0176 <span class="comment">%       case 3/2</span>
-0177 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
-0178 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
-0179 <span class="comment">%       otherwise</span>
-0180 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...</span>
-0181 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
-0182 <span class="comment">%    end</span>
-0183 <span class="comment">% end</span>
-0184 <span class="comment">% a = a2;</span></pre></div>
+0069    <span class="comment">% the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could</span>
+0070    <span class="comment">% also be used but this function is intended to fit phi once b is known (or</span>
+0071    <span class="comment">% prescribed)</span>
+0072 
+0073    <span class="comment">% a1 = early-time a</span>
+0074    <span class="comment">% b1 = 3 (not involved)</span>
+0075    <span class="comment">% a2 = late-time a</span>
+0076    <span class="comment">% b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)</span>
+0077 
+0078    <span class="comment">% The early-time line always comes from the point cloud. A user line in</span>
+0079    <span class="comment">% userab replaces the late-time line fitted at blate.</span>
+0080    a1 = baseflow.pointcloudintercept(q,dqdt,3,<span class="string">'envelope'</span>,<span class="string">'refqtls'</span>,earlyqtls);
+0081    <span class="keyword">if</span> isempty(userab)
+0082       b2 = blate;
+0083       a2 = baseflow.pointcloudintercept(q,dqdt,b2,method,<span class="string">'refqtls'</span>,lateqtls,<span class="string">'mask'</span>,mask);
+0084    <span class="keyword">else</span>
+0085       a2 = userab(1);
+0086       b2 = userab(2);
+0087    <span class="keyword">end</span>
+0088 
+0089    <span class="keyword">switch</span> b2
+0090       <span class="keyword">case</span> 1
+0091          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
+0092             <span class="string">'soln2'</span>,<span class="string">'BS03'</span>,<span class="string">'dispfit'</span>,dispfit);
+0093       <span class="keyword">case</span> 3/2
+0094          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'PK62'</span>, <span class="keyword">...</span>
+0095             <span class="string">'soln2'</span>,<span class="string">'BS04'</span>,<span class="string">'dispfit'</span>,dispfit);
+0096       <span class="keyword">otherwise</span>
+0097          phi = baseflow.fitphi(a1,a2,b2,A,D,L,<span class="string">'isflat'</span>,isflat,<span class="string">'soln1'</span>,<span class="string">'RS05'</span>,  <span class="keyword">...</span>
+0098             <span class="string">'soln2'</span>,<span class="string">'RS05'</span>,<span class="string">'dispfit'</span>,dispfit);
+0099    <span class="keyword">end</span>
+0100    a = a2;
+0101 
+0102    <span class="comment">% Skip the figure when plotfit is false. globalfit passes its plotfits</span>
+0103    <span class="comment">% flag here, so a global fit with plotfits false opens no figure.</span>
+0104    <span class="keyword">if</span> plotfit
+0105       <span class="comment">% make a dummy handle for the legend and print the value of phi</span>
+0106       baseflow.pointcloudplot(q,dqdt,<span class="string">'blate'</span>,blate,<span class="string">'mask'</span>,mask,<span class="string">'reflines'</span>, <span class="keyword">...</span>
+0107          {<span class="string">'early'</span>,<span class="string">'userfit'</span>},<span class="string">'userab'</span>,[a2 b2],<span class="string">'reflabels'</span>,true);
+0108       hdum = plot(0,0,<span class="string">'Color'</span>,<span class="string">'none'</span>,<span class="string">'HandleVisibility'</span>,<span class="string">'off'</span>);
+0109 
+0110       <span class="keyword">if</span> isoctave
+0111          txt = sprintf(<span class="string">'\\phi = %.2f'</span>,phi);
+0112          legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'tex'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>, <span class="keyword">...</span>
+0113             <span class="string">'box'</span>,<span class="string">'off'</span>);
+0114       <span class="keyword">else</span>
+0115          txt = sprintf(<span class="string">'$\\phi_{b=%.2f}=%.3f$'</span>,b2,phi);
+0116          legend(hdum,txt,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Location'</span>,<span class="string">'northwest'</span>, <span class="keyword">...</span>
+0117             <span class="string">'box'</span>,<span class="string">'off'</span>);
+0118       <span class="keyword">end</span>
+0119    <span class="keyword">end</span>
+0120 <span class="keyword">end</span>
+0121 
+0122 <span class="comment">%% input parser</span>
+0123 <a name="_sub1" href="#_subfunctions" class="code">function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, </a><span class="keyword">...</span>
+0124       theta, isflat, soln1, soln2, dispfit, plotfit] = parseinputs(q, dqdt, <span class="keyword">...</span>
+0125       blate, A, D, L, method, varargin)
+0126 
+0127    parser = inputParser;
+0128    parser.StructExpand = false;
+0129    parser.FunctionName = <span class="string">'baseflow.cloudphi'</span>;
+0130 
+0131    addRequired(parser, <span class="string">'q'</span>, @isnumeric);
+0132    addRequired(parser, <span class="string">'dqdt'</span>, @isnumeric);
+0133    addRequired(parser, <span class="string">'blate'</span>, @isnumeric);
+0134    addRequired(parser, <span class="string">'A'</span>, @isnumeric);
+0135    addRequired(parser, <span class="string">'D'</span>, @isnumeric);
+0136    addRequired(parser, <span class="string">'L'</span>, @isnumeric);
+0137    addRequired(parser, <span class="string">'method'</span>, @ischar);
+0138    addParameter(parser,<span class="string">'earlyqtls'</span>,[0.95 0.95], @isnumeric);
+0139    addParameter(parser,<span class="string">'lateqtls'</span>, [0.5 0.5], @isnumeric);
+0140    addParameter(parser,<span class="string">'userab'</span>, [], <span class="keyword">...</span>
+0141       @(x) isempty(x) || isnumericvector(x) &amp;&amp; numel(x) == 2);
+0142    addParameter(parser,<span class="string">'mask'</span>, true(size(q)), @islogical);
+0143    addParameter(parser,<span class="string">'theta'</span>, 0, @isnumeric);
+0144    addParameter(parser,<span class="string">'isflat'</span>, true,  @islogical);
+0145    addParameter(parser,<span class="string">'soln1'</span>, <span class="string">'RS05'</span>, @ischar);
+0146    addParameter(parser,<span class="string">'soln2'</span>, <span class="string">'RS05'</span>, @ischar);
+0147    addParameter(parser,<span class="string">'dispfit'</span>, false, @islogical);
+0148    addParameter(parser,<span class="string">'plotfit'</span>, true, @islogical);
+0149 
+0150    parse(parser,q,dqdt,blate,A,D,L,method,varargin{:});
+0151 
+0152    earlyqtls   = parser.Results.earlyqtls;
+0153    lateqtls    = parser.Results.lateqtls;
+0154    userab      = parser.Results.userab;
+0155    mask        = parser.Results.mask;
+0156    theta       = parser.Results.theta;
+0157    isflat      = parser.Results.isflat;
+0158    soln1       = parser.Results.soln1;
+0159    soln2       = parser.Results.soln2;
+0160    dispfit     = parser.Results.dispfit;
+0161    plotfit     = parser.Results.plotfit;
+0162 <span class="keyword">end</span>
+0163 
+0164 <span class="comment">%%</span>
+0165 <span class="comment">% found this in an older test version, need to integrate or delete</span>
+0166 <span class="comment">%</span>
+0167 <span class="comment">% if isflat</span>
+0168 <span class="comment">%    switch blate</span>
+0169 <span class="comment">%       case 1</span>
+0170 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
+0171 <span class="comment">%             'soln2','BS03','dispfit',dispfit);</span>
+0172 <span class="comment">%       case 3/2</span>
+0173 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','PK62', ...</span>
+0174 <span class="comment">%             'soln2','BS04','dispfit',dispfit);</span>
+0175 <span class="comment">%       otherwise</span>
+0176 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','RS05',  ...</span>
+0177 <span class="comment">%             'soln2','RS05','dispfit',dispfit);</span>
+0178 <span class="comment">%    end</span>
+0179 <span class="comment">% else</span>
+0180 <span class="comment">%    switch blate</span>
+0181 <span class="comment">%       case 1</span>
+0182 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
+0183 <span class="comment">%             'soln2','BR94','dispfit',dispfit,'theta',theta);</span>
+0184 <span class="comment">%       case 3/2</span>
+0185 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94', ...</span>
+0186 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
+0187 <span class="comment">%       otherwise</span>
+0188 <span class="comment">%          phi = baseflow_fitphi(a1,a2,b2,A,D,L,'isflat',isflat,'soln1','BR94',  ...</span>
+0189 <span class="comment">%             'soln2','RS06','dispfit',dispfit,'theta',theta);</span>
+0190 <span class="comment">%    end</span>
+0191 <span class="comment">% end</span>
+0192 <span class="comment">% a = a2;</span></pre></div>
 </body>
 </html>
