@@ -10,17 +10,19 @@ semantic versioning.
 
 - The unit tests of `tests/TestBaseflow.m` live in per-function suites,
   `tests/test_<function_name>.m`. `TestBaseflow` is the integration suite
-  of the documented workflow. It runs `baseflow_demo_kuparuk` once and
+  of the documented workflow. It runs the chain of `baseflow_demo_kuparuk`
+  once, with the demo options but without figures or the bootstrap. It
   checks each stage against the stage before it. It also checks the
-  published Kuparuk recession exponent, the BS04 and RS05 aquifer
-  properties at b = 3/2, and a synthetic divergent tail. `test_corechain`
-  is retired; its workflow checks moved to `TestBaseflow` and its
-  function checks to the suites of those functions.
+  Kuparuk recession exponent, the BS04 and RS05 aquifer
+  properties at b = 3/2, and a synthetic divergent tail. `TestBaseflow`
+  holds the workflow checks of the removed `tests/test_corechain.m`, and
+  the per-function suites hold its function checks.
 - One private function, `expectedtau`, computes the mean tau for
   `gpfitb`, `plfitb`, `plplotb`, and `baseflow.getfunction`. It alone
   raises the pole warning, `baseflow:expectedtau:tauPole`, with the count
-  of values of b that give no finite mean tau. That identifier replaces
-  `baseflow:plfitb:tauPoleReplicates`.
+  of values of b that give no finite mean tau. No function raises
+  `baseflow:plfitb:tauPoleReplicates`. Suppress
+  `baseflow:expectedtau:tauPole` to silence the pole warning.
 
 ### Fixed
 

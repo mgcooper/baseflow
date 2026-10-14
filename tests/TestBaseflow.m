@@ -9,7 +9,7 @@ classdef TestBaseflow < matlab.unittest.TestCase
    % independent value or relationship:
    %     1) the event-detection defaults and rmax guard of getevents,
    %        eventfinder, and wrapevents
-   %     2) the published Kuparuk recession exponent (Cooper et al., 2023)
+   %     2) the recession exponent of the Kuparuk annual workflow
    %     3) the tail, mean tau, and expected flows of globalfit, and its
    %        check of a given streamlength against a given drainage density
    %     4) the baseflow trend at the expected-flow quantile
@@ -42,9 +42,9 @@ classdef TestBaseflow < matlab.unittest.TestCase
       Dd = 0.8
       D = 0.47
 
-      % The recession exponent that Cooper et al. (2023) publish for the
-      % Kuparuk annual workflow, and the rounding of the published value.
-      publishedb = 1.3540
+      % The recession exponent of the Kuparuk annual workflow, as the 1.1.0
+      % release notes record it, and the rounding of that value.
+      kuparukb = 1.3540
       btol = 5e-4
 
       % The synthetic recessions follow -dQ/dt = a*Q^b for eight days. The
@@ -68,11 +68,12 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
    methods (TestClassSetup)
       function runkuparukchain(testCase)
-         % Run baseflow_demo_kuparuk once, without figures or the bootstrap.
+         % Run the chain of baseflow_demo_kuparuk once, with the demo
+         % options but without figures or the bootstrap.
          % trendplot draws its figures off screen whatever showfig asks, so
          % close the figures the chain leaves.
-         figsbefore = findall(0, 'Type', 'figure');
-         testCase.addTeardown(@() closenewfigs(figsbefore));
+         setupfigs = findall(0, 'Type', 'figure');
+         testCase.addTeardown(@() closenewfigs(setupfigs));
          L = testCase.A*testCase.Dd/1000;
          [T, Q, R] = baseflow.loadExampleData('kuparuk');
          opts = baseflow.setopts('globalfit', 'drainagearea', testCase.A, ...
@@ -180,12 +181,12 @@ classdef TestBaseflow < matlab.unittest.TestCase
             ['MATLAB:' validator ':notGreater'])
       end
 
-      function test_publishedRecessionExponent(testCase)
-         % globalfit recovers the published Kuparuk recession exponent from
-         % the tau sample of the event fits.
+      function test_kuparukRecessionExponent(testCase)
+         % globalfit recovers the recession exponent of the Kuparuk annual
+         % workflow from the tau sample of the event fits.
          returned = testCase.Chain.GlobalFit.b;
 
-         testCase.verifyEqual(returned, testCase.publishedb, ...
+         testCase.verifyEqual(returned, testCase.kuparukb, ...
             'AbsTol', testCase.btol)
       end
 
@@ -318,7 +319,8 @@ classdef TestBaseflow < matlab.unittest.TestCase
          % At b = 3/2 the RS05 solution has n = 0, where it reduces to the
          % BS04 solution. So the two give the same k, D, and Q0. The BS04
          % constant 4.804 is published to three decimals. The inputs follow
-         % baseflow_demo_3: the point cloud, its nls a, and phi = 0.033.
+         % the steps of baseflow_demo_3 on the Kuparuk point cloud of the
+         % class setup: its nls a, and phi = 0.033.
          q = testCase.Chain.Fits.q;
          dqdt = testCase.Chain.Fits.dqdt;
          Fit = baseflow.fitab(q, dqdt, 'nls');
