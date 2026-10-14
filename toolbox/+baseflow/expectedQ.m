@@ -3,9 +3,16 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
    %
    % Syntax
    %
-   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau);
-   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,'pctls',Q) returns the percentiles
-   %              of Qexp/Q0 relative to the input Q
+   %  [Qexp,Q0] = baseflow.EXPECTEDQ(a,b,tau,q,dqdt,tau0);
+   %  [Qexp,Q0,pQexp,pQ0] = baseflow.EXPECTEDQ(_,'qtls',Q) returns the
+   %              percentiles of Qexp/Q0 relative to the input Q
+   %
+   % Description
+   %
+   %  Qexp is the flow at the mean tau, (a*tau)^(1/(1-b)), and
+   %  Q0 = Qexp*(3-b)/(2-b). The mean tau diverges beyond the tau pole at
+   %  alpha = 2, where plfitb returns Inf. A tau that is not finite gives
+   %  NaN for every output.
    %
    % See also: aquifertrend, baseflowtrend
    %
@@ -19,6 +26,9 @@ function [Qexp,Q0,pQexp,pQ0] = expectedQ(a,b,tau,q,dqdt,tau0,varargin)
       a, b, tau, q, dqdt, tau0, varargin{:}); %#ok<*ASGLU>
 
    % MAIN FUNCTION
+   % a mean tau that does not exist has no flow, rather than the zero flow
+   % that an infinite tau gives
+   tau(~isfinite(tau)) = nan;
    Qexp = (a*tau)^(1/(1-b));
    Q0 = Qexp*(3-b)/(2-b);
 

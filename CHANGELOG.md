@@ -11,9 +11,31 @@ semantic versioning.
 - The unit tests of `tests/TestBaseflow.m` live in per-function suites,
   `tests/test_<function_name>.m`. `TestBaseflow` keeps the workflow
   checks that span the event-detection entry points.
+- One private function, `expectedtau`, computes the mean tau for
+  `gpfitb`, `plfitb`, `plplotb`, and `baseflow.getfunction`. It alone
+  raises the pole warning, `baseflow:expectedtau:tauPole`, with the count
+  of values of b that give no finite mean tau. That identifier replaces
+  `baseflow:plfitb:tauPoleReplicates`.
 
 ### Fixed
 
+- `gpfitb` and `plfitb` return Inf for the mean tau at or below the tau
+  pole at alpha 2. The mean of a Pareto tail diverges there. The formula
+  tau0*(2-b)/(3-2*b) is negative below the pole, so `gpfitb` reported a
+  tauExp of -10.01 for a sample with alpha 1.5. The mean is NaN where no
+  Pareto tail exists, at alpha 1 or below.
+- `gpfitb` and `plplotb` draw no mean-tau label where the mean or its
+  bounds diverge, so no label names a negative or infinite tau.
+- A `plfitb` bootstrap replicate at or below alpha 2 has an infinite tau,
+  so `tau_sig`, `tau_L`, and `tau_H` are NaN.
+- `expectedQ` returns NaN for `Qexp`, `Q0`, `pQexp`, and `pQ0` when tau
+  is not finite. So `globalfit` reports no expected flow on data with b
+  at or above 3/2. It returned 0 at b = 3/2 and complex values between
+  3/2 and 2, where the negative tau entered a fractional power.
+- `fdcurve` returns a reference value for each reference point, and NaN
+  for a point that is NaN or above every flow. It sized its output from
+  the first point only. Missing flows stay out of the plotting
+  positions.
 - `gpfitb`, `plplotb` and `fitphidist` print nothing when they label a
   figure. The private `drawarrow` assigned its output whether or not the
   caller asked for it, and no call site ended with a semicolon, so each
