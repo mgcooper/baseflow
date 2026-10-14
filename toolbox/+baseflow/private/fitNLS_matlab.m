@@ -3,6 +3,9 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
    %
    %  [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    %
+   %  alpha is a confidence level, as in fitab, so nlparci and regress
+   %  take the significance level 1-alpha.
+   %
    % See also:
 
    % initial estimates using log-log linear fit
@@ -174,11 +177,11 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
          ci = [nan nan; nan nan];
 
       case 'nlinfit_robust'
-         ci = nlparci(ab1,R1,'covariance',C1,'alpha',alpha);
+         ci = nlparci(ab1,R1,'covariance',C1,'alpha',1-alpha);
          ab = ab1;
 
       case 'nlinfit'
-         ci = nlparci(ab2,R2,'covariance',C2,'alpha',0.68);
+         ci = nlparci(ab2,R2,'covariance',C2,'alpha',1-alpha);
          ab = ab2;
 
       case 'fit_robust'
@@ -191,7 +194,7 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
 
       case 'linear'
 
-         [ab,ci] = regress(logy,[ones(size(y)) logx]);
+         [ab,ci] = regress(logy,[ones(size(y)) logx],1-alpha);
          ci(1,:) = exp(ci(1,:));
          ab = [exp(ab(1)); ab(2)];
 

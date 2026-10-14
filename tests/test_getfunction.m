@@ -73,5 +73,31 @@ classdef test_getfunction < matlab.unittest.TestCase
          testCase.verifySubstring(err_returned.message, '2 of 3 values of b')
       end
 
+      function test_expectedTimeSharesThePole(testCase)
+         % tau0/(3-2*b) is 10/0.5 at b = 1.25 and diverges at b = 1.6.
+         testCase.applyFixture( ...
+            matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+            testCase.poleid));
+         Fnc = baseflow.getfunction('expectedTime');
+         expected = [20 Inf];
+
+         returned = Fnc(testCase.tau0, [1.25 1.6]);
+
+         testCase.verifyEqual(returned, expected, ...
+            'AbsTol', testCase.tolerance)
+      end
+
+      function test_boftautau0InvertsExpectedTau(testCase)
+         % boftautau0 inverts the mean tau elementwise, so a vector of b
+         % comes back from its own mean tau.
+         expected = [1.1 1.25 1.4];
+         tau = baseflow.getfunction('expectedTau');
+         boftautau0 = baseflow.getfunction('boftautau0');
+
+         returned = boftautau0(tau(testCase.tau0, expected), testCase.tau0);
+
+         testCase.verifyEqual(returned, expected, ...
+            'AbsTol', testCase.tolerance)
+      end
    end
 end

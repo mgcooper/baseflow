@@ -48,15 +48,10 @@ function [t, q, dqdt] = generateTestData(a, b, q0, t)
 
    t = t(:);
 
-   switch b
-      case 1
-         q = q0.*exp(-a.*t);
-         dqdt = -a.*q;
-         %q = (q(1:end)+q(2:end-1))./2;
-         %dqdt = diff(q);
-      otherwise
-         [q,dqdt,t] = baseflow.Qnonlin(a,b,q0,t,false); % false = don't make fig
-   end
+   % Qnonlin covers every b, including the exponential case b = 1
+   %q = (q(1:end)+q(2:end-1))./2;
+   %dqdt = diff(q);
+   [q,dqdt,t] = baseflow.Qnonlin(a,b,q0,t,false); % false = don't make fig
 end
 
 % % this was in baseflow.test suite ParameterizedTestBfra. I am not certain why

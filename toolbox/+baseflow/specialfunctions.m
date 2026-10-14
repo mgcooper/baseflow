@@ -76,8 +76,10 @@ function fR1 = getfR1(n)
 end
 
 function fR2 = getfR2(n)
+   % late-time constant of Rupp and Selker (2005). At n = 0 it is the
+   % Brutsaert and Nieber (1977) constant 4.804 that fitphi uses for BS04.
    BR2 = beta((n+2) ./ (n+3), 1/2);
-   fR2 = (n+2) .* (BR2 ./ (n+3)) .^ (1./(n+2));
+   fR2 = (n+2) .* (BR2.^(n+3) ./ (n+3)) .^ (1./(n+2));
 end
 
 function fLo = getfLo(h0overD,soln)

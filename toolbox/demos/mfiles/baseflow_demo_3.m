@@ -155,9 +155,9 @@ D = 0.5;
 phi = baseflow.cloudphi(q,dqdt,bhat,A,D,L,'brutsaert','lateqtls',...
    opts.globalfit.lateqtls,'earlyqtls',opts.globalfit.earlyqtls);
 %% 
-% The value obtained for $\phi$ is ~0.03-0.04, similar to values obtained in 
+% The value obtained for $\phi$ is similar to values obtained in
 % other baseflow recession analysis studies. If this value is used in the |aquiferprops| 
-% function instead of the assumed value 0.01, we obtain different estimates of 
+% function instead of the assumed value 0.033, we obtain different estimates of
 % _k_ and _D_.
 
 Props = baseflow.aquiferprops(q, dqdt, ahat, bhat, 'RS05', phi, ...

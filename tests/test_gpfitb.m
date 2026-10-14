@@ -45,14 +45,18 @@ classdef test_gpfitb < matlab.unittest.TestCase
    end
 
    methods (Access = private)
-      function x = paretosample(testCase, alpha)
+      function x = paretosample(testCase, alpha, n)
          %PARETOSAMPLE Draw a fixed Pareto sample with pdf exponent alpha.
          %
          %  x = paretosample(testCase, alpha) returns testCase.nsamples
          %  values with lower bound testCase.xmin from the inverse CDF at
          %  midpoint quantiles. A pdf exponent alpha gives the CDF
-         %  exponent alpha - 1.
-         u = ((1:testCase.nsamples)' - 0.5)/testCase.nsamples;
+         %  exponent alpha - 1. x = paretosample(testCase, alpha, n)
+         %  returns n values.
+         if nargin < 3
+            n = testCase.nsamples;
+         end
+         u = ((1:n)' - 0.5)/n;
          x = testCase.xmin * (1 - u).^(-1/(alpha - 1));
       end
    end
@@ -82,6 +86,24 @@ classdef test_gpfitb < matlab.unittest.TestCase
 
          returned = Fit.tauExp;
          testCase.verifyEqual(returned, expected)
+      end
+
+      function test_bootstrapTau0IsSigmaOverK(testCase)
+         % The tau0 replicates are sigma/k, like the point estimate, so
+         % their mean is near tau0 rather than near sigma = k*tau0. The
+         % bootstrap resamples, so fix the seed and restore the caller's.
+         rngstate = rng;
+         testCase.addTeardown(@() rng(rngstate));
+         % gpfitb draws 1000 replicates, so a small sample keeps it fast.
+         rng(1)
+         x = testCase.paretosample(3, 500);
+         expected = testCase.xmin;
+
+         Fit = baseflow.gpfitb(x, 'xmin', testCase.xmin, ...
+            'plotfit', false, 'bootfit', true);
+
+         returned = mean(Fit.tau0reps);
+         testCase.verifyEqual(returned, expected, 'RelTol', testCase.reltol)
       end
 
       function test_labelOmitsDivergentMean(testCase)

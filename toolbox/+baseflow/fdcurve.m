@@ -60,7 +60,7 @@ function fdc = fdcurve(flow,varargin)
       end
 
       ylabel(['$x$ [' units ']']);
-      xlabel 'flow exceedence probability, $P(Q\ge x)$'
+      xlabel 'flow non-exceedance probability, $P(Q<x)$'
 
       ax.YAxis.TickLabels = compose('%g',ax.YAxis.TickValues);
       ax.XAxis.TickLabels = compose('$%g\\%%$',ax.XAxis.TickValues);

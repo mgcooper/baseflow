@@ -202,6 +202,17 @@ classdef test_plfitb < matlab.unittest.TestCase
             'RelTol', testCase.meanreltol)
       end
 
+      function test_tailMaskIncludesXmin(testCase)
+         % plfit fits the tail x >= xmin, and xmin is one of the samples, so
+         % the tail mask that globalfit uses keeps that sample.
+         x = testCase.paretosample(testCase.tailexponent, testCase.nsample);
+
+         Fit = baseflow.plfitb(x);
+
+         testCase.assertTrue(any(x == Fit.tau0))
+         testCase.verifyTrue(all(Fit.taumask(x == Fit.tau0)))
+      end
+
       function test_meanTauDivergesBelowPole(testCase)
          % Below the pole, the mean tau is infinite and plfitb warns with
          % an identifier that names the pole.

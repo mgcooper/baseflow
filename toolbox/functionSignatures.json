@@ -92,8 +92,8 @@
       "inputs":
       [
          {"name":"inputvalue",    "kind":"required",   "type":["double"]}, 
-         {"name":"inputvarname",  "kind":"required",   "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
-         {"name":"outputvarname", "kind":"required",   "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N'}"]]},
+         {"name":"inputvarname",  "kind":"required",   "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N','Nstar'}"]]},
+         {"name":"outputvarname", "kind":"required",   "type":[["scalar"],["char","choices={'b','alpha','beta','gamma','d','k','n','N','Nstar'}"]]},
          {"name":"isflat",        "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
       ]
    },

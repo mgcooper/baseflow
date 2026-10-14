@@ -52,8 +52,11 @@
 %   test_plotdqdt          - Test the plotdqdt reference lines, ticks, and labels
 %   test_plotrefline       - Test the plotrefline label position
 %   test_plplotb           - Test the plplotb mean-tau label below the tau pole
+%   test_pointcloudintercept - Test the intercept bounds of pointcloudintercept
 %   test_pointcloudplot    - Test the pointcloudplot ticks, limits, and axes
 %   test_preparecalendar   - Test the private preparecalendar helper
+%   test_printtrend        - Test the total change baseflow.printtrend reports
+%   test_Qnonlin           - Test the recession solution of baseflow.Qnonlin
 %   test_relayoutloglogtext - Test the angle reset of a rotated log-log label
 %   test_rotatedLogLogText - Test the rotated log-log label angle
 %   test_setlogticks       - Test the private setlogticks decade ticks
@@ -63,6 +66,7 @@
 %   test_sizefigure        - Test the size of a point-cloud figure
 %   test_smoothnoise       - Test the private smoothnoise helper
 %   test_snaploglims       - Test the private snaploglims limit policy
+%   test_specialfunctions  - Test the Rupp and Selker (2005) constants
 %   test_todatenum         - Test baseflow/private/todatenum
 %   test_trendplot         - Test the trendplot 'ols' trend and confidence bounds
 %   test_version           - Assert the version metadata locations agree

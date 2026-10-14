@@ -15,6 +15,9 @@ function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)
    %     weights  =  nx1 double of weights for the fitting algorithm
    %     mask     =  nx1 logical mask to exclude values from fitting
    %
+   %  note: a point with mask false or zero weight leaves every output, so
+   %  it takes no part in any fit, its residuals, or its point count
+   %
    %  note: dqdt comes in as its actual value i.e. negative
    %
    % See also: fitab
@@ -22,15 +25,11 @@ function [x,y,logx,logy,w,ok] = prepfits(q,dqdt,varargin)
    % PARSE INPUTS
    [q, dqdt, w, m] = parseinputs(q, dqdt, varargin{:});
 
-   % keep the negative dq/dt values
-   keep = dqdt<0;
+   % keep the negative dq/dt values that the mask and weights leave in the fit
+   keep = dqdt<0 & m & w>0;
    x = abs(q(keep));
    y = abs(dqdt(keep));
    w = w(keep);
-   m = m(keep);
-
-   % convert the mask to weights
-   w(m==false) = 0;
 
    [x, y, w] = prepCurveData(x, y, w);
    [logx, logy, w] = prepCurveData(log(x), log(y), w);

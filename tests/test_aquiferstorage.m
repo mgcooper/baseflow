@@ -39,5 +39,17 @@ classdef test_aquiferstorage < matlab.unittest.TestCase
 
       end
 
+      function test_ktimeStorage(testCase,RecessionExponent)
+         % With the drainage timescale Ktime = Q^(1-b)/a given, storage is
+         % S = Ktime*q/(2-b), which is positive for b < 2: 10*[1 100]/1
+         % for b = 1 and 10*[1 100]/0.5 for b = 1.5.
+         Ktime = 10;
+         S_expected = Ktime*[1 100]/(2-RecessionExponent);
+
+         [Smin_returned,Smax_returned] = baseflow.aquiferstorage( ...
+            1,RecessionExponent,1,100,Ktime);
+
+         testCase.verifyEqual([Smin_returned,Smax_returned],S_expected);
+      end
    end
 end

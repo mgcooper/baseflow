@@ -26,7 +26,7 @@ function varargout = plfitb(x,varargin)
    %
    %     xmin     scalar double indicating the lower bound of the distribution
    %     range    the range of scaling parameters considered (see plfit.m)
-   %     limit    scalar double that sets the upper bound of fitted exponent
+   %     limit    scalar double that sets the upper bound of the fitted xmin
    %     method   char indicating one of two algorithms (Clauset's or Hanel's)
    %     bootfit  logical indicating whether to bootstrap the uncertainties
    %              (slow)
@@ -96,7 +96,7 @@ function varargout = plfitb(x,varargin)
    Fit.L       = L;
    Fit.D       = D;
    Fit.k       = 1/(Fit.alpha-1);
-   Fit.taumask = x0>xmin;
+   Fit.taumask = x0>=xmin; % plfit fits the tail x >= xmin
 
    if bootfit == true
       Fit.b_L = Fit.b - BootFit.b_sig;

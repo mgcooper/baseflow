@@ -72,7 +72,7 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
    if bootfit == true
       freps = bootstrp(1000,@gpfit,x); % fit
       kreps = freps(:,1); % exponent
-      sreps = freps(:,2); % tau0
+      sreps = freps(:,2)./kreps; % tau0 = sigma/k, as for the point estimate
       breps = baseflow.conversions(kreps,'k','b');
       areps = baseflow.conversions(kreps,'k','alpha');
 

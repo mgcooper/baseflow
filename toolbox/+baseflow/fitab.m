@@ -34,7 +34,7 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    %              plotfit); an unknown field is an error
    %
    % Notes
-   %     weights are set zero anywhere mask is false
+   %     masked points and zero-weight points take no part in the fit
    %
    %     Use method 'envelope' to pass a line through an arbitrary x,y pair
    %     (refpoints), specified in terms of the quantile of the x/y data
@@ -94,18 +94,18 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
       case 'ols'
          [ab,ci,ok] = fitOLS(logx,logy,weights,alpha);
       case 'qtl'
-         [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave);
+         [ab,ci,ok] = fitQTL(logx,logy,alpha,order,qtl,Nboot,inoctave);
       case 'mle'
          error('mle fitting not currently supported');
          % [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);
       case 'nls'
          [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave);
       case 'mean'
-         [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order);
+         [ab,ci,ok] = fitLIN(logx,logy,alpha,order);
       case 'median'
-         [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave);
+         [ab,ci,ok] = fitMED(logx,logy,order,inoctave);
       case 'envelope'
-         [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave);
+         [ab,ci,ok] = fitENV(logx,logy,order,refqtls,inoctave);
    end
 
    % EVALUATE THE FIT
@@ -154,8 +154,8 @@ function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
    % confint(fit(logx,logy,'poly1'), alpha) with fitoptions Weights.
 
    % Scale each row by the square root of its weight, so the unweighted
-   % solve minimizes sum(weights.*resid.^2). Masked points have zero weight
-   % and add nothing to the coefficients or the residuals.
+   % solve minimizes sum(weights.*resid.^2). prepfits removes masked
+   % points, so every row has a positive weight.
    sw = sqrt(weights);
    X = [sw, sw.*logx];
    [Qx,R] = qr(X,0);
@@ -163,8 +163,7 @@ function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
    resid = sw.*logy - X*ab;
 
    % Compute coefficient standard errors from inv(X'*X) = inv(R)*inv(R)'.
-   % fit counts zero-weight (masked) points in the n-2 residual degrees of
-   % freedom, so count them here too to match confint.
+   % The n-2 residual degrees of freedom count the fitted points only.
    dfe = numel(logy) - 2;
    Rinv = R \ eye(2);
    se = sqrt(diag(Rinv*Rinv') * sum(resid.^2) / dfe);
@@ -183,14 +182,10 @@ function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)
    ok = all(isreal(ab));
 end
 
-function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)
+function [ab,ci,ok] = fitLIN(logx,logy,alpha,order)
    % linear model fit in log-log, equivalent to forcing a line of slope 1
    % through the mean x-y, with option to control the slope using input
    % parameter 'order'
-
-   % apply the mask / weights
-   logx = logx(weights>0);
-   logy = logy(weights>0);
 
    % impose model order if provided
    if ~isnan(order)
@@ -209,12 +204,8 @@ function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)
    ok = all(isreal(ab));
 end
 
-function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)
+function [ab,ci,ok] = fitMED(logx,logy,order,inoctave)
    % force a line of slope 'order' through the median x-y
-
-   % apply the mask / weights
-   logx = logx(weights>0);
-   logy = logy(weights>0);
 
    logx = order*logx;
 
@@ -238,7 +229,7 @@ function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)
    ok = all(isreal(ab));
 end
 
-function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)
+function [ab,ci,ok] = fitENV(logx,logy,order,refqtls,inoctave)
    % force a line of slope 'order' through any two points 'refpoints' that
    % together define an 'envelope'. default x refpoint is median(x). To control
    % the vertical location of the line, set y refpoint higher or lower while
@@ -247,9 +238,6 @@ function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)
    % note: require that quantiles are passed in rather than precomputed
    % refpoints so this can use the log values or linear values
 
-   % apply the mask / weights
-   logx = logx(weights>0);
-   logy = logy(weights>0);
    logx = order.*logx;
 
    % force the line through the provided quantile
@@ -271,7 +259,7 @@ function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)
    ok = all(isreal(ab));
 end
 
-function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)
+function [ab,ci,ok] = fitQTL(logx,logy,alpha,order,qtl,Nboot,inoctave)
 
    % quantile regression
    if inoctave
@@ -288,10 +276,6 @@ function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)
    if isnan(order)
       order = 1;
    end
-
-   % apply the mask / weights
-   logx = logx(weights>0);
-   logy = logy(weights>0);
 
    % fit a,b using quantile regression
    [ab,s] = quantreg(logx,logy,qtl,order,Nboot,1-alpha);

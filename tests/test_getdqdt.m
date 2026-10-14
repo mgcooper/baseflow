@@ -117,6 +117,33 @@ classdef test_getdqdt < matlab.unittest.TestCase
 
       end
 
+      function test_etsKeepsRejectedWindowsEmpty(testCase)
+         % A rise inside a recession gives windows with a positive slope,
+         % which ETS rejects. They stay nan, rather than taking the slope of
+         % the windows around them.
+         t = (0:59)';
+         q = 100*exp(-t/20);
+         rise = t >= 25 & t <= 28;
+         q(rise) = q(rise) + 5*(t(rise) - 24);
+
+         [~,dqdt] = baseflow.getdqdt(t,q,zeros(size(q)),'ETS');
+
+         testCase.verifyTrue(any(isnan(dqdt(rise))))
+         testCase.verifyFalse(any(dqdt > 0))
+      end
+
+      function test_vtsWidensAcrossFlatSteps(testCase)
+         % A recession reported in whole units has flat steps. VTS widens
+         % its window across a flat step until the flow drops, so no
+         % estimate is a zero slope (Rupp and Selker, 2006).
+         t = (0:99)';
+         q = round(20*exp(-0.02*t));
+
+         [~,dqdt] = baseflow.getdqdt(t,q,zeros(size(q)),'VTS');
+
+         testCase.assertNotEmpty(dqdt(dqdt < 0))
+         testCase.verifyFalse(any(dqdt == 0))
+      end
    end
 
    methods (Access = private)

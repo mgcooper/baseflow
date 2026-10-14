@@ -167,9 +167,15 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    % sample to correlate against the three event variables. A constant
    % column makes corr return nan, so build the correlation matrix from
    % the event variables and hold dq/dt uncorrelated with them.
+   %
+   % phifitensemble sets out-of-range phi to nan, so correlate the event
+   % variables over the events where all three exist. Dropping whole rows
+   % keeps the correlation matrix valid for the quadratic forms below.
+   events = [tau, phi, Np1];
+   R = corr(events(all(~isnan(events), 2), :));
    u = [sig_tau, sig_phi, sig_Np1, sig_dbfdt];
    C = eye(4);
-   C(1:3, 1:3) = corr([tau, phi, Np1]);
+   C(1:3, 1:3) = R;
    V = C .* u .* u';
    sig_dndt = coveragefactor * sqrt(J * V * J');
    % w/o correlated errors: sqrt(sum((J .* u).^2))
@@ -177,7 +183,7 @@ function [sig_dndt, sig_lamda] = dndtuncertainty(T, Qb, Results, Fits, ...
    % Compute the uncertainty on lambda (repeat above steps)
    J = [lambda./tauhat, -lambda./phihat, lambda./Nhat];
    u = [sig_tau, sig_phi, sig_Np1];
-   V = corr([tau, phi, Np1]) .* u .* u';
+   V = R .* u .* u';
    sig_lamda = coveragefactor * sqrt(J * V * J');
    % w/o correlated errors: sqrt(sum((J .* u).^2))
 

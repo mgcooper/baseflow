@@ -169,9 +169,10 @@ classdef test_fitab < matlab.unittest.TestCase
             'mask',mask,'alpha',alpha);
 
          % Expected values: a weighted poly1 fit of log(-dq/dt) on log(q).
-         % fitab documents that masked points get zero weight.
+         % fitab documents that masked points take no part in the fit, so
+         % exclude them, which also removes them from the degrees of freedom.
          fopts = fitoptions('Method','LinearLeastSquares', ...
-            'Weights',weights.*mask);
+            'Weights',weights,'Exclude',~mask);
          f = fit(log(q),log(-dqdt),'poly1',fopts);
 
          % coeffvalues is [slope intercept]. confint has rows [lower; upper]
@@ -190,5 +191,43 @@ classdef test_fitab < matlab.unittest.TestCase
          testCase.verifyEqual(ci_returned,ci_expected,'RelTol',tol);
       end
 
+      function test_nlsIntervalFollowsAlpha(testCase)
+         % alpha is a confidence level, so the 95% interval is wider than
+         % the 68% one by the ratio of their t quantiles. Reading alpha as
+         % a significance level inverts the ratio.
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+         q = q .* (1 + 0.2*sin((1:numel(q))'));
+         Fit68 = baseflow.fitab(q,dqdt,'nls','alpha',0.68);
+         Fit95 = baseflow.fitab(q,dqdt,'nls','alpha',0.95);
+         dfe = Fit68.N - 2;
+         expected = tinv(0.975,dfe) / tinv(0.84,dfe);
+         tol = 1e-6;
+
+         returned = (Fit95.bH - Fit95.bL) / (Fit68.bH - Fit68.bL);
+
+         testCase.verifyEqual(returned,expected,'RelTol',tol)
+      end
+
+      function test_nlsHonorsMask(testCase)
+         % A masked fit equals the fit of the points the mask keeps.
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+         q = q .* (1 + 0.2*sin((1:numel(q))'));
+         mask = mod((1:numel(q))',5) ~= 0;
+         FitSubset = baseflow.fitab(q(mask),dqdt(mask),'nls');
+         expected = FitSubset.ab;
+
+         FitMasked = baseflow.fitab(q,dqdt,'nls','mask',mask);
+         returned = FitMasked.ab;
+
+         testCase.verifyEqual(returned,expected)
+      end
    end
 end

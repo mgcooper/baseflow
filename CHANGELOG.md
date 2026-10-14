@@ -19,6 +19,15 @@ semantic versioning.
 
 ### Fixed
 
+- The late-time Rupp and Selker (2005) constant in `specialfunctions`
+  raises the Beta function to the power n+3. At n = 0 it gives 4.805, the
+  Brutsaert and Nieber (1977) constant 4.804; it gave 1.857. `globalfit`
+  uses the RS05 solutions by default, so its phi changes for every b
+  other than 1 and 3/2. `aquiferprops` 'RS05' gives the 'BS04' k at
+  b = 3/2. The early-time constant fR1 still disagrees with its n = 0
+  limit, 1.133.
+- `plfitb` puts the xmin sample in the tail mask, as `plfit` fits the
+  tail x >= xmin. So the `globalfit` a and expected flows change.
 - `gpfitb` and `plfitb` return Inf for the mean tau at or below the tau
   pole at alpha 2. The mean of a Pareto tail diverges there. The formula
   tau0*(2-b)/(3-2*b) is negative below the pole, so `gpfitb` reported a
@@ -36,6 +45,47 @@ semantic versioning.
   for a point that is NaN or above every flow. It sized its output from
   the first point only. Missing flows stay out of the plotting
   positions.
+- `baseflow.getfunction('expectedTime')` shares the tau pole. The
+  `'boftautau0'` and `'aofa0'` handles apply elementwise, so array input
+  gives one value per element instead of a matrix division.
+- `fitab` 'nls' reports its interval at the confidence level `alpha`.
+  `nlparci` and `regress` take a significance level, so the default 0.68
+  gave a 32% interval, and the linear fallback a 95% one. The Octave path
+  used one degree of freedom.
+- `prepfits` drops masked and zero-weight points, so every `fitab` method
+  fits the same points. 'nls' honors the mask, and the OLS interval and
+  `Fit.N` count the fitted points only.
+- The CTS stencils B2, F2, C2, and C4 pair each derivative with the flow
+  at the same time. B2 and F2 paired it with a flow half a step away.
+  That biased a by about 5% at a step of a tenth of tau.
+- The ETS method leaves a rejected window empty. It interpolated over
+  the rejected windows, so a rise inside a recession took the slope of
+  the windows around it. The example data has no such window, so its
+  results are unchanged.
+- The VTS method widens its window across a flat step, so a record in
+  whole units gives no zero slopes (Rupp and Selker, 2006).
+- `pointcloudintercept` orders its a bounds for flows below 1. Its 'mean'
+  method pivots through the geometric means of q and -dq/dt, so its
+  bounds are in flow units.
+- `dndtuncertainty` correlates the event variables over the events where
+  all three exist, so a nan phi from `phifitensemble` leaves the
+  uncertainty finite.
+- `aquiferstorage` uses one path for scalar and array input. The scalar
+  path with a `Ktime` input returned negative storage for 1 < b < 2.
+- `Qnonlin` gives the exponential recession at b = 1, and for b < 1 a
+  flow that stays 0 once the reservoir empties. `generateTestData` uses
+  it for every b.
+- `printtrend` scales the trend by the years the record spans to report
+  the total change. It used the sample count.
+- `conversions` accepts 'Nstar' as an input, and its help gives k and
+  alpha from the pdf of tau.
+- `gpfitb` returns the bootstrap replicates of tau0 = sigma/k in
+  `tau0reps`. It returned sigma.
+- `quantreg` flags a significant slope when its bootstrap interval
+  excludes zero. A z test on the replicates divided their spread by the
+  square root of the replicate count.
+- The `fdcurve` x label names the non-exceedance probability it plots,
+  and the `plfitb` help says that `limit` bounds xmin.
 - `gpfitb`, `plplotb` and `fitphidist` print nothing when they label a
   figure. The private `drawarrow` assigned its output whether or not the
   caller asked for it, and no call site ended with a semicolon, so each
