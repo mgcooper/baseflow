@@ -1,13 +1,15 @@
 classdef test_gpfitb < matlab.unittest.TestCase
-   %TEST_GPFITB Test the gpfitb mean tau above and below the tau pole.
+   %TEST_GPFITB Test the gpfitb parameters, mean tau, and labels.
    %
-   % A Pareto sample with lower bound xmin and pdf exponent alpha has the
-   % mean xmin*(alpha-1)/(alpha-2) for alpha > 2. The mean diverges at or
-   % below the tau pole at alpha = 2, so gpfitb must return Inf there,
-   % warn, and draw no mean-tau label. Every sample is a deterministic
-   % inverse-CDF draw, so the fit carries no sampling randomness.
+   % gpfitb recovers b, k, and tau0 of a Pareto sample. A pdf exponent of
+   % 2.5 gives b = 1.4 and k = 2/3, with tau0 = xmin. A Pareto sample with
+   % lower bound xmin and pdf exponent alpha has the mean
+   % xmin*(alpha-1)/(alpha-2) for alpha > 2. The mean diverges at or below
+   % the tau pole at alpha = 2, so gpfitb must return Inf there, warn, and
+   % draw no mean-tau label. Every sample is a deterministic inverse-CDF
+   % draw, so the fit carries no sampling randomness.
    %
-   % See also: test_corechain, test_getfunction
+   % See also: test_getfunction
 
    properties (TestParameter)
       % Each case holds a pdf exponent above the pole and the mean for
@@ -62,6 +64,45 @@ classdef test_gpfitb < matlab.unittest.TestCase
    end
 
    methods (Test)
+      function test_recoversParetoParameters(testCase)
+         % gpfitb recovers b, k, and tau0 of a sample with pdf exponent 2.5,
+         % with no figures when the plot and bootstrap options are off.
+         % The default call runs private/ccdf.m, which must read the
+         % makeplot option as p.Results.makeplot; a read of p.makeplot
+         % errors.
+         x = testCase.paretosample(2.5);
+         b_expected = 1.4;
+         k_expected = 2/3;
+         tol = 0.02;
+
+         returned = baseflow.gpfitb(x, 'xmin', testCase.xmin, ...
+            'plotfit', false, 'bootfit', false);
+
+         testCase.verifyEqual(returned.b, b_expected, 'AbsTol', tol)
+         testCase.verifyEqual(returned.k, k_expected, 'AbsTol', tol)
+         testCase.verifyEqual(returned.tau0, testCase.xmin, ...
+            'RelTol', testCase.reltol)
+         testCase.verifyEmpty(setdiff(findall(0, 'Type', 'figure'), ...
+            testCase.figsbefore))
+      end
+
+      function test_labelDrawsTwoArrows(testCase)
+         % Above the tau pole, gpfitb labels tau0 and the mean tau with an
+         % arrow each. drawarrow draws each arrow as a tagged head patch and
+         % a tagged shaft line.
+         x = testCase.paretosample(2.5);
+         nlabels_expected = 2;
+
+         baseflow.gpfitb(x, 'xmin', testCase.xmin, 'plotfit', true, ...
+            'bootfit', false, 'labelplot', true);
+
+         ax = gca;
+         testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+            nlabels_expected)
+         testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowshaft'), ...
+            nlabels_expected)
+      end
+
       function test_finiteMeanAbovePole(testCase, finitetail)
          % Above the pole, tauExp is the Pareto mean and gpfitb does not
          % warn.

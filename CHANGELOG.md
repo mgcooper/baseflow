@@ -9,8 +9,13 @@ semantic versioning.
 ### Changed
 
 - The unit tests of `tests/TestBaseflow.m` live in per-function suites,
-  `tests/test_<function_name>.m`. `TestBaseflow` keeps the workflow
-  checks that span the event-detection entry points.
+  `tests/test_<function_name>.m`. `TestBaseflow` is the integration suite
+  of the documented workflow. It runs `baseflow_demo_kuparuk` once and
+  checks each stage against the stage before it. It also checks the
+  published Kuparuk recession exponent, the BS04 and RS05 aquifer
+  properties at b = 3/2, and a synthetic divergent tail. `test_corechain`
+  is retired; its workflow checks moved to `TestBaseflow` and its
+  function checks to the suites of those functions.
 - One private function, `expectedtau`, computes the mean tau for
   `gpfitb`, `plfitb`, `plplotb`, and `baseflow.getfunction`. It alone
   raises the pole warning, `baseflow:expectedtau:tauPole`, with the count
@@ -28,6 +33,9 @@ semantic versioning.
   limit, 1.133.
 - `plfitb` puts the xmin sample in the tail mask, as `plfit` fits the
   tail x >= xmin. So the `globalfit` a and expected flows change.
+- `baseflowtrend` requires `pctl` in (0,1). A NaN `pctl`, which a
+  divergent mean tau gives through `pQexp`, made `trendplot` fit the mean
+  flow, so the baseflow equalled the mean flow.
 - `gpfitb` and `plfitb` return Inf for the mean tau at or below the tau
   pole at alpha 2. The mean of a Pareto tail diverges there. The formula
   tau0*(2-b)/(3-2*b) is negative below the pole, so `gpfitb` reported a

@@ -19,6 +19,13 @@ function [Qb,dQbdt,Qa,dQadt,hb,ha] = baseflowtrend(t,Q,A,varargin)
    %     Q: discharge [m3/d], posted daily, numeric vector
    %     A: basin area [m2], numeric scalar
    %
+   % Optional name-value inputs
+   %
+   %     pctl: quantile of the baseflow regression, in (0,1). Default 0.25.
+   %     globalfit returns pQexp, the quantile of the expected flow. pQexp is
+   %     NaN when the mean tau diverges, and baseflowtrend rejects it rather
+   %     than fit the mean flow.
+   %
    % Outputs
    %
    %     Qb: baseflow expected value [cm/d], posted annually, numeric vector
@@ -81,7 +88,8 @@ function [t, Q, A, method, prctle, showfig] = parseinputs(t, Q, A, varargin)
    parser.addRequired('Q', @isnumericvector);
    parser.addRequired('A', @isnumericscalar);
    parser.addParameter('method', 'ols', @ischarlike);
-   parser.addParameter('pctl', 0.25, @isnumericscalar);
+   parser.addParameter('pctl', 0.25, ...
+      @(x) isnumericscalar(x) && x > 0 && x < 1);
    parser.addParameter('showfig', false, @islogicalscalar);
    parser.parse(t,Q,A,varargin{:});
 

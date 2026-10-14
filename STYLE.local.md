@@ -13,7 +13,7 @@ merged into it).
 - `TestBaseflow.m` is the integration suite for the toolbox workflow, so
   it keeps its PascalCase name.
 - A suite that tests several functions together keeps a descriptive
-  name: `test_corechain`, `test_eqstrings`, and `test_internal`.
+  name: `test_eqstrings` and `test_internal`.
 - Variables use short lowercase or camelCase names (`q`, `dqdt`, `gotopath`).
 
 ## Formatting

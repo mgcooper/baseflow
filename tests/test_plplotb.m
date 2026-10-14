@@ -1,9 +1,9 @@
 function tests = test_plplotb
-   %TEST_PLPLOTB Test the plplotb mean-tau label below the tau pole.
+   %TEST_PLPLOTB Test the tau0 and mean-tau labels of baseflow.plplotb.
    %
    % The mean of a Pareto tail diverges at or below the tau pole at
-   % alpha = 2, so the label has no point on the axes to name. The label
-   % above the pole is tested in test_corechain.
+   % alpha = 2, so the label has no point on the axes to name. Above the
+   % pole, the label names tau0 and the mean tau.
    tests = functiontests(localfunctions);
 end
 
@@ -32,4 +32,24 @@ function test_labelOmitsDivergentMean(testCase)
       narrows_expected)
    labels_returned = get(findall(h.ax, 'Type', 'text'), 'String');
    testCase.verifyFalse(any(contains(labels_returned, 'langle')))
+end
+
+function test_plplotbLabelDrawsAnArrow(testCase)
+   % plplotb labels tau0 and the mean tau with the same arrow.
+   figsbefore = findall(0, 'Type', 'figure');
+   testCase.addTeardown(@() closenewfigs(figsbefore));
+   nsamples = 5000;
+   pdfexponent = 2.5;
+   xmin = 1;
+   nlabels_expected = 2;
+
+   u = ((1:nsamples)' - 0.5)/nsamples;
+   x = (1 - u).^(-1/(pdfexponent - 1));
+   baseflow.plplotb(x, xmin, pdfexponent, 'labelplot', true);
+
+   ax = gca;
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowhead'), ...
+      nlabels_expected)
+   testCase.verifyNumElements(findall(ax, 'Tag', 'refarrowshaft'), ...
+      nlabels_expected)
 end

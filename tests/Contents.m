@@ -9,18 +9,19 @@
 %   closenewfigs           - Delete figures opened since the FIGSBEFORE snapshot
 %   verifydecadeticks      - Verify every decade inside the axis limits has a tick
 %   octave_smoke           - Core-chain smoke test runnable in GNU Octave and MATLAB
-%   TestBaseflow           - Test the baseflow toolbox workflow (integration class)
+%   TestBaseflow           - Integration tests of the documented workflow (parameterized class)
 %   test_anomaly           - Test the private anomaly helper with vector input
 %   test_aquiferstorage    - Test the storage bounds of baseflow.aquiferstorage
 %   test_aquiferthickness  - Test the thickness of baseflow.aquiferthickness
 %   test_basinname         - Test the basin-name lookup of baseflow.basinname
 %   test_checkevent        - Test the baseflow.checkevent event plot
+%   test_cloudphi          - Test the plotfit option of baseflow.cloudphi
 %   test_breflinetext      - Test the b value text of a reference-line label
 %   test_conversions       - Test baseflow.conversions
-%   test_corechain         - Core-workflow coverage for eventtau, globalfit, cloudphi, fitphi, dndtuncertainty, gpfitb, fitphidist, aQbString
 %   test_demos             - Run every demo script in toolbox/demos/mfiles headless
 %   test_drawarrow         - Test the arrow of a reference-line label
 %   test_dependencies      - Test the dependency tooling and list agreement
+%   test_dndtuncertainty   - Test the input checks of baseflow.dndtuncertainty
 %   test_fdcurve           - Test the reference points of baseflow.fdcurve
 %   test_eqstrings         - Test the equation label helpers
 %   test_eventfinder       - Test the events baseflow.eventfinder finds in a sine
@@ -31,10 +32,12 @@
 %   test_figurevisibility  - Test the visibility of a figure asked to show
 %   test_fitevents         - Test the fitevents plotfits, fitorder, and ctsmethod options
 %   test_fitopts           - Test the fitab fitopts pass-through
+%   test_fitphi            - Test the drainable porosity of baseflow.fitphi
+%   test_fitphidist        - Test the phi distribution fit of baseflow.fitphidist
 %   test_getdqdt           - Test the getdqdt derivative and fit-plot option
 %   test_getfunction       - Test the expected-tau handle of baseflow.getfunction
 %   test_getstring         - Test the latex labels of baseflow.getstring
-%   test_gpfitb            - Test the gpfitb mean tau above and below the tau pole
+%   test_gpfitb            - Test the gpfitb parameters, mean tau, and labels
 %   test_hyetograph        - Test the figure that baseflow.hyetograph draws in
 %   test_internal          - Test the toolbox internal functions
 %   test_islabelcolor      - Test the private islabelcolor validator
@@ -51,7 +54,7 @@
 %   test_plotaquifertrend  - Test the plotaquifertrend branch handles
 %   test_plotdqdt          - Test the plotdqdt reference lines, ticks, and labels
 %   test_plotrefline       - Test the plotrefline label position
-%   test_plplotb           - Test the plplotb mean-tau label below the tau pole
+%   test_plplotb           - Test the tau0 and mean-tau labels of baseflow.plplotb
 %   test_pointcloudintercept - Test the intercept bounds of pointcloudintercept
 %   test_pointcloudplot    - Test the pointcloudplot ticks, limits, and axes
 %   test_preparecalendar   - Test the private preparecalendar helper
