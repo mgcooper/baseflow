@@ -29,8 +29,17 @@ semantic versioning.
   Brutsaert and Nieber (1977) constant 4.804; it gave 1.857. `globalfit`
   uses the RS05 solutions by default, so its phi changes for every b
   other than 1 and 3/2. `aquiferprops` 'RS05' gives the 'BS04' k at
-  b = 3/2. The early-time constant fR1 still disagrees with its n = 0
-  limit, 1.133.
+  b = 3/2. fR2/2 matches the Phi2 column of Rupp and Selker (2005)
+  Table 1 for n from 0 to 64.
+- The early-time Rupp and Selker (2005) constant fR1 in
+  `specialfunctions` divides the root mu by 4-2*gamma, as their equation
+  33 prints. It divided by 4*(1-2*gamma), which gave 0.869 at n = 0, a
+  pole at n = 1, and negative values above n = 2.4.
+  fR1/(n+1) matches the Phi1 column (m = 1) of their Table 1 for n from 0
+  to 64, with 1.108 at n = 0. So `globalfit` phi changes again for every
+  b other than 1 and 3/2. A result that divides by phi, such as the
+  thickness from `aquiferthickness` and `aquifertrend`, changes with it.
+  A storage trend does not depend on phi.
 - `plfitb` puts the xmin sample in the tail mask, as `plfit` fits the
   tail x >= xmin. So the `globalfit` a and expected flows change.
 - `baseflowtrend` requires `pctl` in (0,1). A NaN `pctl`, which a
