@@ -6,8 +6,112 @@ semantic versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- The unit tests of `tests/TestBaseflow.m` live in per-function suites,
+  `tests/test_<function_name>.m`. `TestBaseflow` is the integration suite
+  of the documented workflow. It runs the chain of `baseflow_demo_kuparuk`
+  once, with the demo options but without figures or the bootstrap. It
+  checks each stage against the stage before it. It also checks the
+  Kuparuk recession exponent, the BS04 and RS05 aquifer
+  properties at b = 3/2, and a synthetic divergent tail. `TestBaseflow`
+  holds the workflow checks of the removed `tests/test_corechain.m`, and
+  the per-function suites hold its function checks.
+- One private function, `expectedtau`, computes the mean tau for
+  `gpfitb`, `plfitb`, `plplotb`, and `baseflow.getfunction`. It alone
+  raises the pole warning, `baseflow:expectedtau:tauPole`, with the count
+  of values of b that give no finite mean tau. No function raises
+  `baseflow:plfitb:tauPoleReplicates`. Suppress
+  `baseflow:expectedtau:tauPole` to silence the pole warning.
+- Git does not track `toolbox/docs/html/custom_toolbox.json`.
+  `builddocsearchdb`, which `baseflow.internal.makedocs` calls for the
+  'docsearch' option, writes it again on each build, with the absolute
+  path of the build folder. A copy names a folder that exists only on the
+  machine that built it. The search database in `helpsearch-v4_en` still
+  ships, and `toolbox/toolbox.ignore` leaves the file out of a toolbox
+  package.
+
 ### Fixed
 
+- The late-time Rupp and Selker (2005) constant in `specialfunctions`
+  raises the Beta function to the power n+3. At n = 0 it gives 4.805, the
+  Brutsaert and Nieber (1977) constant 4.804; it gave 1.857. `globalfit`
+  uses the RS05 solutions by default, so its phi changes for every b
+  other than 1 and 3/2. `aquiferprops` 'RS05' gives the 'BS04' k at
+  b = 3/2. fR2/2 matches the Phi2 column of Rupp and Selker (2005)
+  Table 1 for n from 0 to 64.
+- The early-time Rupp and Selker (2005) constant fR1 in
+  `specialfunctions` divides the root mu by 4-2*gamma, as their equation
+  33 prints. It divided by 4*(1-2*gamma), which gave 0.869 at n = 0, a
+  pole at n = 1, and negative values above n = 2.4.
+  fR1/(n+1) matches the Phi1 column (m = 1) of their Table 1 for n from 0
+  to 64, with 1.108 at n = 0. So `globalfit` phi changes again for every
+  b other than 1 and 3/2. A result that divides by phi, such as the
+  thickness from `aquiferthickness` and `aquifertrend`, changes with it.
+  A storage trend does not depend on phi.
+- `plfitb` puts the xmin sample in the tail mask, as `plfit` fits the
+  tail x >= xmin. So the `globalfit` a and expected flows change.
+- `baseflowtrend` requires `pctl` in (0,1). A NaN `pctl`, which a
+  divergent mean tau gives through `pQexp`, made `trendplot` fit the mean
+  flow, so the baseflow equalled the mean flow.
+- `gpfitb` and `plfitb` return Inf for the mean tau at or below the tau
+  pole at alpha 2. The mean of a Pareto tail diverges there. The formula
+  tau0*(2-b)/(3-2*b) is negative below the pole, so `gpfitb` reported a
+  tauExp of -10.01 for a sample with alpha 1.5. The mean is NaN where no
+  Pareto tail exists, at alpha 1 or below.
+- `gpfitb` and `plplotb` draw no mean-tau label where the mean or its
+  bounds diverge, so no label names a negative or infinite tau.
+- A `plfitb` bootstrap replicate at or below alpha 2 has an infinite tau,
+  so `tau_sig`, `tau_L`, and `tau_H` are NaN.
+- `expectedQ` returns NaN for `Qexp`, `Q0`, `pQexp`, and `pQ0` when tau
+  is not finite. So `globalfit` reports no expected flow on data with b
+  at or above 3/2. It returned 0 at b = 3/2 and complex values between
+  3/2 and 2, where the negative tau entered a fractional power.
+- `fdcurve` returns a reference value for each reference point, and NaN
+  for a point that is NaN or above every flow. It sized its output from
+  the first point only. Missing flows stay out of the plotting
+  positions.
+- `baseflow.getfunction('expectedTime')` shares the tau pole. The
+  `'boftautau0'` and `'aofa0'` handles apply elementwise, so array input
+  gives one value per element instead of a matrix division.
+- `fitab` 'nls' reports its interval at the confidence level `alpha`.
+  `nlparci` and `regress` take a significance level, so the default 0.68
+  gave a 32% interval, and the linear fallback a 95% one. The Octave path
+  used one degree of freedom.
+- `prepfits` drops masked and zero-weight points, so every `fitab` method
+  fits the same points. 'nls' honors the mask, and the OLS interval and
+  `Fit.N` count the fitted points only.
+- The CTS stencils B2, F2, C2, and C4 pair each derivative with the flow
+  at the same time. B2 and F2 paired it with a flow half a step away.
+  That biased a by about 5% at a step of a tenth of tau.
+- The ETS method leaves a rejected window empty. It interpolated over
+  the rejected windows, so a rise inside a recession took the slope of
+  the windows around it. The example data has no such window, so its
+  results are unchanged.
+- The VTS method widens its window across a flat step, so a record in
+  whole units gives no zero slopes (Rupp and Selker, 2006).
+- `pointcloudintercept` orders its a bounds for flows below 1. Its 'mean'
+  method pivots through the geometric means of q and -dq/dt, so its
+  bounds are in flow units.
+- `dndtuncertainty` correlates the event variables over the events where
+  all three exist, so a nan phi from `phifitensemble` leaves the
+  uncertainty finite.
+- `aquiferstorage` uses one path for scalar and array input. The scalar
+  path with a `Ktime` input returned negative storage for 1 < b < 2.
+- `Qnonlin` gives the exponential recession at b = 1, and for b < 1 a
+  flow that stays 0 once the reservoir empties. `generateTestData` uses
+  it for every b.
+- `printtrend` scales the trend by the years the record spans to report
+  the total change. It used the sample count.
+- `conversions` accepts 'Nstar' as an input, and its help gives k and
+  alpha from the pdf of tau.
+- `gpfitb` returns the bootstrap replicates of tau0 = sigma/k in
+  `tau0reps`. It returned sigma.
+- `quantreg` flags a significant slope when its bootstrap interval
+  excludes zero. A z test on the replicates divided their spread by the
+  square root of the replicate count.
+- The `fdcurve` x label names the non-exceedance probability it plots,
+  and the `plfitb` help says that `limit` bounds xmin.
 - `gpfitb`, `plplotb` and `fitphidist` print nothing when they label a
   figure. The private `drawarrow` assigned its output whether or not the
   caller asked for it, and no call site ended with a semicolon, so each
@@ -35,6 +139,33 @@ semantic versioning.
   catch one by name. The tests that ask for a solution pair `fitphi`
   falls back from now suppress the warning they expect, as do the tests
   that run a fit to the iteration limit of `nlinfit`.
+- `cloudphi` uses the `userab` line as the late-time line and still fits
+  the early-time line to the point cloud. A call with `userab` failed
+  with an undefined variable.
+- `fitphidist` leaves a phi outside [0, 1] out of the beta fit and warns
+  `baseflow:fitphidist:phiOutsideUnitInterval` with the count. `betafit`
+  errored on such a value, so `globalfit` 'distfit' failed when one event
+  gave a phi above 1. 'phicombo' set those values to NaN without a
+  warning, and it shares the `fitphidist` check.
+- `globalfit` keeps a `streamlength` given without `drainagedensity`.
+  `setopts` and `globalfit` gave `drainagedensity` a default of 0.8,
+  which replaced that `streamlength` with A*0.8/1000 and warned. The
+  default is NaN. A `streamlength` within rounding of A*Dd/1000 raises no
+  warning, and the warning has the identifier
+  `baseflow:globalfit:inconsistentStreamlength`. The flat-aquifer phi
+  solutions do not use L, so no result changes.
+- `aquiferstorage` runs on Octave. It rounded b with `round(b,2)`, and
+  the Octave `round` takes one argument. It rounds b to two decimals
+  only to choose the formula, and the power-law formulas use the
+  unrounded b. At b = 1.567 the rounded b changed the storage by +2.1% at
+  q = 0.01 and -3.4% at q = 1e6.
+- `dndtuncertainty` accepts a daily calendar with leap days. It reshaped
+  the record into 365-day rows, which a leap day breaks. It takes the
+  years that T spans directly, so the result on a no-leap calendar is
+  unchanged.
+- `fitab` 'mean', 'median', and 'envelope' fit a line of slope 1 when
+  `order` is not given, and return b = 1. 'mean' returned b = NaN,
+  'median' failed in `signrank`, and 'envelope' returned NaN.
 
 ## [1.2.0] - 2026-09-17
 

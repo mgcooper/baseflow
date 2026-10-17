@@ -91,12 +91,6 @@ function makedocs(varargin)
       % scripts to m-files, run convertlivescripts and review the diff.
    end
 
-   %% build a doc search database
-
-   if opts.docsearch == true
-      builddocsearchdb(htmlpath)
-   end
-
    %% publish the example documentation using publish
 
    if opts.docpages == true
@@ -174,6 +168,14 @@ function makedocs(varargin)
          'ignored', ignored, ...              % dirs to ignore
          'verbose', 'on' ...
          );
+   end
+
+   %% build a doc search database
+
+   % Build the search database last, so it indexes the pages this call
+   % published rather than the pages of the previous build.
+   if opts.docsearch == true
+      builddocsearchdb(htmlpath)
    end
 end
 

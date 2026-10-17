@@ -122,10 +122,12 @@ function [q,dqdt,dt,tq,rq,dq] = fitets(T,Q,R,varargin)
    % compute dq
    dq = dqdt.*dt; % need to check this, right now it isn't used anywhere
 
-   % retime to the original timestep
-   q = interp1(tq(~isnan(q)),q(~isnan(q)),T);
-   dq = interp1(tq(~isnan(dq)),dq(~isnan(dq)),T);
-   dqdt = interp1(tq(~isnan(dqdt)),dqdt(~isnan(dqdt)),T);
+   % retime to the original timestep. Interpolate over every fitted window,
+   % so a rejected window stays nan rather than taking its neighbors' slope.
+   iwin = ~isnan(tq);
+   q = interp1(tq(iwin),q(iwin),T);
+   dq = interp1(tq(iwin),dq(iwin),T);
+   dqdt = interp1(tq(iwin),dqdt(iwin),T);
 
    % Patch: post the estimates on the original time vector. It is unclear
    % what value should be used, but anything other than the original time

@@ -23,7 +23,8 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
    %     reference point that the line passes through. For 'envelope', they
    %     are the refqtls quantiles of q and -dqdt. For 'median' and
    %     'brutsaert', they are the medians of q and -dqdt. For 'mean', they
-   %     are the means of log(q) and log(-dqdt).
+   %     are the geometric means of q and -dqdt. ahatLH pivots the line
+   %     through (xbar, ybar) with the slopes in bci.
    %
    % Required inputs
    %
@@ -38,7 +39,7 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
    %  refqtls  =  reference quantiles that together define a pivot point through
    %              which the straight line must pass. use with method 'envelope'.
    %  bci      =  [bL bH] confidence interval of bhat, used to compute the
-   %              bounds ahatLH (default nan, which returns NaN bounds)
+   %              bounds ahatLH (default [nan nan], which returns NaN bounds)
    %
    %
    % See also: fitab
@@ -66,9 +67,11 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
       case 'mean'
          %ybar = mean(-dqdt(mask),'omitnan');
          %xbar = mean(q(mask),'omitnan');
-         ybar = mean(log(-dqdt(mask)),'omitnan');
-         xbar = mean(log(q(mask)),'omitnan');
-         ahat = exp(ybar - bhat*xbar);
+         % the line through the log means passes through the geometric
+         % means, which keeps xbar and ybar in linear space like the others
+         ybar = exp(mean(log(-dqdt(mask)),'omitnan'));
+         xbar = exp(mean(log(q(mask)),'omitnan'));
+         ahat = ybar/xbar^bhat;
       case 'median'
          xbar = median(q(mask),'omitnan');
          ybar = median(-dqdt(mask),'omitnan');
@@ -132,15 +135,9 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
    end
 
    % NOTE: this isn't the best way to get aL/H, but use it for now
-   if ~isnan(bci)
-      bhatL = bci(1);
-      bhatH = bci(2);
-      ahatH = ybar/xbar^bhatL;
-      ahatL = ybar/xbar^bhatH;
-   else
-      ahatH = nan;
-      ahatL = nan;
-   end
+   % which b bound gives the lower a depends on the sign of log(xbar), so
+   % sort the pair. A nan bci gives nan bounds.
+   ahatLH = sort(ybar./xbar.^bci(:).');
 
    % PARSE OUTPUTS
    switch nargout
@@ -148,14 +145,14 @@ function varargout = pointcloudintercept(q,dqdt,bhat,method,varargin)
          varargout{1} = ahat;
       case 2
          varargout{1} = ahat;
-         varargout{2} = [ahatL ahatH];
+         varargout{2} = ahatLH;
       case 3
          varargout{1} = ahat;
          varargout{2} = xbar;
          varargout{3} = ybar;
       case 4
          varargout{1} = ahat;
-         varargout{2} = [ahatL ahatH];
+         varargout{2} = ahatLH;
          varargout{3} = xbar;
          varargout{4} = ybar;
    end
@@ -179,7 +176,7 @@ function [q, dqdt, bhat, method, thresh, mask, qtls, bci, tau, tau0] = ...
    parser.addOptional('threshold',0.05, @isnumeric);
    parser.addParameter('mask', true(size(q)), @islogical);
    parser.addParameter('refqtls', [0.5 0.5], @isnumeric);
-   parser.addParameter('bci', nan, @isnumeric);
+   parser.addParameter('bci', [nan nan], @isnumeric);
    parser.addParameter('tau', nan, @isnumeric);
    parser.addParameter('tau0', nan, @isnumeric);
 

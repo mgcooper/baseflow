@@ -58,8 +58,9 @@ function [q,dqdt,dt,tq,rq,dq] = fitvts(T,Q,R,varargin)
          dq(n) = Q(n) - Q(n-m);
          % see notes at end on C criteria from Rupp and Selker
 
-         % dq is zero or (+), or is (-) and meets the limit criteria
-         if dq(n) >= 0 || round(abs(dq(n))) > vtsparam
+         % dq is (+), or is (-) and meets the limit criteria. A zero dq
+         % widens the window, because a flat step carries no slope.
+         if dq(n) > 0 || round(abs(dq(n))) > vtsparam
             q(n)     = 1/(m+1) * sum(Q(n-m:n));
             tq(n)    = mean(T(n-m:n)); % 1/(m+1) * sum(t(n-m:n));
             rq(n)    = 1/(m+1) * sum(R(n-m:n)); % rain

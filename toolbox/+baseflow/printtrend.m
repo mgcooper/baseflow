@@ -5,6 +5,9 @@ function [ddt, err] = printtrend(Data, varargin)
    %
    %  [ddt,err] = printtrend(Data,varargin)
    %
+   %  ddt is the trend per year. The printed total change is ddt times the
+   %  years from the first to the last row of Data.
+   %
    % See also: aquifertrend, baseflowtrend
 
    % PARSE INPUTS
@@ -12,7 +15,7 @@ function [ddt, err] = printtrend(Data, varargin)
 
    % create a regular time in years, works for both months and years
    t = years(Data.Time-Data.Time(1)) + year(Data.Time(1));
-   dt = numel(t);
+   dt = t(end)-t(1); % years spanned, which scales the trend to a total change
    dat = Data.(var); % cm/yr -> cm/day
 
    switch method

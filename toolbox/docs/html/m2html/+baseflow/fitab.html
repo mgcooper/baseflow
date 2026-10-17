@@ -51,7 +51,9 @@
 
      weights  vector double of weights for the fitting algorithm
      mask     vector logical mask to exclude values from fitting
-     order    scalar, exponent in -dq/dt = aQ^b
+     order    scalar, exponent in -dq/dt = aQ^b. Methods 'mean',
+              'median', and 'envelope' fix the slope to order, which
+              is 1 when it is not given.
      refqtls  2x1 double, x/y quantiles used if 'method' == 'envelope'
      quantile scalar double, quantile used if 'method' == 'qtl' (quantile
               regression)
@@ -62,7 +64,7 @@
               plotfit); an unknown field is an error
 
  Notes
-     weights are set zero anywhere mask is false
+     masked points and zero-weight points take no part in the fit
 
      Use method 'envelope' to pass a line through an arbitrary x,y pair
      (refpoints), specified in terms of the quantile of the x/y data
@@ -105,10 +107,10 @@ This function is called by:
 <ul style="list-style-image:url(../html_img/matlabicon.gif)">
 
 <li><a href="#_sub1" class="code">function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)</a></li>
-<li><a href="#_sub2" class="code">function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)</a></li>
-<li><a href="#_sub3" class="code">function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)</a></li>
-<li><a href="#_sub4" class="code">function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)</a></li>
-<li><a href="#_sub5" class="code">function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)</a></li>
+<li><a href="#_sub2" class="code">function [ab,ci,ok] = fitLIN(logx,logy,alpha,order)</a></li>
+<li><a href="#_sub3" class="code">function [ab,ci,ok] = fitMED(logx,logy,order,inoctave)</a></li>
+<li><a href="#_sub4" class="code">function [ab,ci,ok] = fitENV(logx,logy,order,refqtls,inoctave)</a></li>
+<li><a href="#_sub5" class="code">function [ab,ci,ok] = fitQTL(logx,logy,alpha,order,qtl,Nboot,inoctave)</a></li>
 <li><a href="#_sub6" class="code">function [ab,ci,ok] = fitMLE(logx,logy,~,alpha,sigx,sigy,rxy)</a></li>
 <li><a href="#_sub7" class="code">function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave)</a></li>
 <li><a href="#_sub8" class="code">function [Fit,ok] = evalFit(ab,x,y,ci,ok)</a></li>
@@ -142,470 +144,460 @@ This function is called by:
 0023    <span class="comment">%</span>
 0024    <span class="comment">%     weights  vector double of weights for the fitting algorithm</span>
 0025    <span class="comment">%     mask     vector logical mask to exclude values from fitting</span>
-0026    <span class="comment">%     order    scalar, exponent in -dq/dt = aQ^b</span>
-0027    <span class="comment">%     refqtls  2x1 double, x/y quantiles used if 'method' == 'envelope'</span>
-0028    <span class="comment">%     quantile scalar double, quantile used if 'method' == 'qtl' (quantile</span>
-0029    <span class="comment">%              regression)</span>
-0030    <span class="comment">%     Nboot    scalar double, bootstrap sample size for quantile regression</span>
-0031    <span class="comment">%     plotfit  logical scalar indicating whether to make a plot or not</span>
-0032    <span class="comment">%     fitopts  struct whose fields override the same-named options above</span>
-0033    <span class="comment">%              (weights, order, mask, quantile, refqtls, Nboot, alpha,</span>
-0034    <span class="comment">%              plotfit); an unknown field is an error</span>
-0035    <span class="comment">%</span>
-0036    <span class="comment">% Notes</span>
-0037    <span class="comment">%     weights are set zero anywhere mask is false</span>
-0038    <span class="comment">%</span>
-0039    <span class="comment">%     Use method 'envelope' to pass a line through an arbitrary x,y pair</span>
-0040    <span class="comment">%     (refpoints), specified in terms of the quantile of the x/y data</span>
-0041    <span class="comment">%     distributions. this method is similar to 'mean' or 'median', but allows</span>
-0042    <span class="comment">%     different ref points for the x/y values, for example the median of the</span>
-0043    <span class="comment">%     x values (0.50 quantile) and some other quantile of the y values. The</span>
-0044    <span class="comment">%     default (recommended) behavior is to keep the x-quantile = 0.5 and vary</span>
-0045    <span class="comment">%     the y-quantile to move the line up and down as desired to define an</span>
-0046    <span class="comment">%     &quot;envelope&quot;</span>
-0047    <span class="comment">%</span>
-0048    <span class="comment">% Example</span>
+0026    <span class="comment">%     order    scalar, exponent in -dq/dt = aQ^b. Methods 'mean',</span>
+0027    <span class="comment">%              'median', and 'envelope' fix the slope to order, which</span>
+0028    <span class="comment">%              is 1 when it is not given.</span>
+0029    <span class="comment">%     refqtls  2x1 double, x/y quantiles used if 'method' == 'envelope'</span>
+0030    <span class="comment">%     quantile scalar double, quantile used if 'method' == 'qtl' (quantile</span>
+0031    <span class="comment">%              regression)</span>
+0032    <span class="comment">%     Nboot    scalar double, bootstrap sample size for quantile regression</span>
+0033    <span class="comment">%     plotfit  logical scalar indicating whether to make a plot or not</span>
+0034    <span class="comment">%     fitopts  struct whose fields override the same-named options above</span>
+0035    <span class="comment">%              (weights, order, mask, quantile, refqtls, Nboot, alpha,</span>
+0036    <span class="comment">%              plotfit); an unknown field is an error</span>
+0037    <span class="comment">%</span>
+0038    <span class="comment">% Notes</span>
+0039    <span class="comment">%     masked points and zero-weight points take no part in the fit</span>
+0040    <span class="comment">%</span>
+0041    <span class="comment">%     Use method 'envelope' to pass a line through an arbitrary x,y pair</span>
+0042    <span class="comment">%     (refpoints), specified in terms of the quantile of the x/y data</span>
+0043    <span class="comment">%     distributions. this method is similar to 'mean' or 'median', but allows</span>
+0044    <span class="comment">%     different ref points for the x/y values, for example the median of the</span>
+0045    <span class="comment">%     x values (0.50 quantile) and some other quantile of the y values. The</span>
+0046    <span class="comment">%     default (recommended) behavior is to keep the x-quantile = 0.5 and vary</span>
+0047    <span class="comment">%     the y-quantile to move the line up and down as desired to define an</span>
+0048    <span class="comment">%     &quot;envelope&quot;</span>
 0049    <span class="comment">%</span>
-0050    <span class="comment">%  Generate test data with known parameters a and b, then fit them:</span>
+0050    <span class="comment">% Example</span>
 0051    <span class="comment">%</span>
-0052    <span class="comment">%     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);</span>
-0053    <span class="comment">%     Fit = baseflow.fitab(q, dqdt, 'nls');</span>
-0054    <span class="comment">%     fprintf('a = %.4f, b = %.2f\n', Fit.a, Fit.b)</span>
-0055    <span class="comment">%</span>
-0056    <span class="comment">%  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0052    <span class="comment">%  Generate test data with known parameters a and b, then fit them:</span>
+0053    <span class="comment">%</span>
+0054    <span class="comment">%     [t, q, dqdt] = baseflow.generateTestData(1e-2, 1.5, 100);</span>
+0055    <span class="comment">%     Fit = baseflow.fitab(q, dqdt, 'nls');</span>
+0056    <span class="comment">%     fprintf('a = %.4f, b = %.2f\n', Fit.a, Fit.b)</span>
 0057    <span class="comment">%</span>
-0058    <span class="comment">% See also: prepfits, fitevents</span>
-0059 
-0060    <span class="comment">% if called with no input, open this file</span>
-0061    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0062 
-0063    <span class="keyword">persistent</span> inoctave
-0064    <span class="keyword">if</span> isempty(inoctave); inoctave = exist(&quot;OCTAVE_VERSION&quot;, &quot;builtin&quot;)&gt;0;
-0065    <span class="keyword">end</span>
-0066 
-0067    <span class="comment">% PARSE INPUTS</span>
-0068    [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = parseinputs( <span class="keyword">...</span>
-0069       q, dqdt, method, mfilename, varargin{:});
-0070 
-0071    <span class="comment">% PREP FITS</span>
-0072    [x, y, logx, logy, weights, ok] = baseflow.prepfits( <span class="keyword">...</span>
-0073       q, dqdt, <span class="string">'weights'</span>, weights, <span class="string">'mask'</span>, mask);
-0074 
-0075    <span class="comment">% FAST EXIT</span>
-0076    <span class="keyword">if</span> ok == false
-0077       Fit = nan; <span class="keyword">return</span>;
-0078    <span class="keyword">end</span>
-0079 
-0080    <span class="comment">% If 'order' = 1 and the method is 'ols' or 'nls', switch to 'mean'.</span>
-0081    <span class="comment">% The 'mean' method forces a line of slope 1. fitOLS and fitNLS ignore</span>
-0082    <span class="comment">% 'order'. Do not switch the other methods. The 'mean', 'median', and</span>
-0083    <span class="comment">% 'envelope' methods force a line of slope 'order'. plotrefline relies</span>
-0084    <span class="comment">% on 'envelope' with 'order' = 1. 'qtl' passes 'order' to quantreg as</span>
-0085    <span class="comment">% the polynomial degree. 'mle' errors as unsupported.</span>
-0086    <span class="keyword">if</span> order == 1 &amp;&amp; any(strcmp(method, {<span class="string">'ols'</span>, <span class="string">'nls'</span>}))
-0087       method = <span class="string">'mean'</span>;
-0088    <span class="keyword">end</span>
-0089 
-0090    <span class="comment">% SWITCH YARD</span>
-0091    fselect = method;
-0092 
-0093    <span class="keyword">switch</span> method
-0094       <span class="keyword">case</span> <span class="string">'ols'</span>
-0095          [ab,ci,ok] = <a href="#_sub1" class="code" title="subfunction [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)">fitOLS</a>(logx,logy,weights,alpha);
-0096       <span class="keyword">case</span> <span class="string">'qtl'</span>
-0097          [ab,ci,ok] = <a href="#_sub5" class="code" title="subfunction [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)">fitQTL</a>(logx,logy,weights,alpha,order,qtl,Nboot,inoctave);
-0098       <span class="keyword">case</span> <span class="string">'mle'</span>
-0099          error(<span class="string">'mle fitting not currently supported'</span>);
-0100          <span class="comment">% [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);</span>
-0101       <span class="keyword">case</span> <span class="string">'nls'</span>
-0102          [ab,ci,ok,fselect] = <a href="#_sub7" class="code" title="subfunction [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave)">fitNLS</a>(x,y,logx,logy,weights,alpha,inoctave);
-0103       <span class="keyword">case</span> <span class="string">'mean'</span>
-0104          [ab,ci,ok] = <a href="#_sub2" class="code" title="subfunction [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)">fitLIN</a>(logx,logy,weights,alpha,order);
-0105       <span class="keyword">case</span> <span class="string">'median'</span>
-0106          [ab,ci,ok] = <a href="#_sub3" class="code" title="subfunction [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)">fitMED</a>(logx,logy,weights,order,inoctave);
-0107       <span class="keyword">case</span> <span class="string">'envelope'</span>
-0108          [ab,ci,ok] = <a href="#_sub4" class="code" title="subfunction [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)">fitENV</a>(logx,logy,weights,order,refqtls,inoctave);
-0109    <span class="keyword">end</span>
-0110 
-0111    <span class="comment">% EVALUATE THE FIT</span>
-0112    [Fit,ok] = <a href="#_sub8" class="code" title="subfunction [Fit,ok] = evalFit(ab,x,y,ci,ok)">evalFit</a>(ab,x,y,ci,ok);
-0113 
-0114    <span class="keyword">if</span> exist(<span class="string">'fselect'</span>,<span class="string">'var'</span>)
-0115       Fit.fselect = fselect;
-0116    <span class="keyword">end</span>
-0117 
-0118    <span class="keyword">if</span> plotfit == true
-0119       Fit.h = baseflow.pointcloudplot(q,dqdt,<span class="string">'reflines'</span>,{<span class="string">'userfit'</span>}, <span class="keyword">...</span>
-0120          <span class="string">'userab'</span>,ab,<span class="string">'mask'</span>,mask,<span class="string">'usertext'</span>,method);
-0121    <span class="keyword">end</span>
-0122 
-0123    <span class="comment">% use this when stepping through nlinfit</span>
-0124    debug = false;
-0125    <span class="keyword">if</span> debug == true
-0126       pos = get(0,<span class="string">'defaultfigureposition'</span>);
-0127       figure(<span class="string">'Position'</span>, [pos(1) pos(2) 2*pos(3) pos(4)])
-0128       subplot(1, 2, 1)
-0129       hold on
-0130       loglog(X, y, <span class="string">'-o'</span>);
-0131       <span class="comment">% Jul 2024 - yfit undefined so commented it out</span>
-0132       <span class="comment">% plot(X, yfit, ':');</span>
-0133       xlabel(<span class="string">'log Q'</span>);
-0134       ylabel(<span class="string">'log -dQ/dt'</span>);
-0135       legend(<span class="string">'data'</span>, <span class="string">'fit'</span>);
-0136 
-0137       subplot(1, 2, 2)
-0138       hold on
-0139       plot(X, y, <span class="string">'-o'</span>);
-0140       <span class="comment">% Jul 2024 - yfit undefined so commented it out</span>
-0141       <span class="comment">% plot(X, yfit, ':');</span>
-0142       xlabel(<span class="string">'Q'</span>);
-0143       ylabel(<span class="string">'-dQ/dt'</span>);
-0144       legend(<span class="string">'data'</span>, <span class="string">'fit'</span>);
-0145    <span class="keyword">end</span>
-0146 <span class="keyword">end</span>
-0147 
-0148 <span class="comment">% FITTING METHODS</span>
-0149 <a name="_sub1" href="#_subfunctions" class="code">function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)</a>
-0150    <span class="comment">% ordinary least squares linear regression in log-log</span>
-0151    <span class="comment">%</span>
-0152    <span class="comment">% Solve weighted least squares with plain linear algebra, so the method</span>
-0153    <span class="comment">% runs on MATLAB and Octave. The result matches the Curve Fitting Toolbox</span>
-0154    <span class="comment">% confint(fit(logx,logy,'poly1'), alpha) with fitoptions Weights.</span>
-0155 
-0156    <span class="comment">% Scale each row by the square root of its weight, so the unweighted</span>
-0157    <span class="comment">% solve minimizes sum(weights.*resid.^2). Masked points have zero weight</span>
-0158    <span class="comment">% and add nothing to the coefficients or the residuals.</span>
-0159    sw = sqrt(weights);
-0160    X = [sw, sw.*logx];
-0161    [Qx,R] = qr(X,0);
-0162    ab = R \ (Qx'*(sw.*logy));
-0163    resid = sw.*logy - X*ab;
-0164 
-0165    <span class="comment">% Compute coefficient standard errors from inv(X'*X) = inv(R)*inv(R)'.</span>
-0166    <span class="comment">% fit counts zero-weight (masked) points in the n-2 residual degrees of</span>
-0167    <span class="comment">% freedom, so count them here too to match confint.</span>
-0168    dfe = numel(logy) - 2;
-0169    Rinv = R \ eye(2);
-0170    se = sqrt(diag(Rinv*Rinv') * sum(resid.^2) / dfe);
-0171 
-0172    <span class="comment">% Compute t-based intervals at confidence level alpha, one row per</span>
-0173    <span class="comment">% coefficient, in the order [intercept; slope]. This is the rot90(confint)</span>
-0174    <span class="comment">% layout, which is consistent with the stats functions.</span>
-0175    tcrit = tinv((1 + alpha) / 2, dfe);
-0176    ci = [ab - tcrit*se, ab + tcrit*se];
-0177 
-0178    <span class="comment">% transform a to linear space and package a/b</span>
-0179    ab = [exp(ab(1)); ab(2)];
-0180    ci(1,:) = exp(ci(1,:));
-0181 
-0182    <span class="comment">% generic failure check</span>
-0183    ok = all(isreal(ab));
-0184 <span class="keyword">end</span>
-0185 
-0186 <a name="_sub2" href="#_subfunctions" class="code">function [ab,ci,ok] = fitLIN(logx,logy,weights,alpha,order)</a>
-0187    <span class="comment">% linear model fit in log-log, equivalent to forcing a line of slope 1</span>
-0188    <span class="comment">% through the mean x-y, with option to control the slope using input</span>
-0189    <span class="comment">% parameter 'order'</span>
-0190 
-0191    <span class="comment">% apply the mask / weights</span>
-0192    logx = logx(weights&gt;0);
-0193    logy = logy(weights&gt;0);
+0058    <span class="comment">%  Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0059    <span class="comment">%</span>
+0060    <span class="comment">% See also: prepfits, fitevents</span>
+0061 
+0062    <span class="comment">% if called with no input, open this file</span>
+0063    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0064 
+0065    <span class="keyword">persistent</span> inoctave
+0066    <span class="keyword">if</span> isempty(inoctave); inoctave = exist(&quot;OCTAVE_VERSION&quot;, &quot;builtin&quot;)&gt;0;
+0067    <span class="keyword">end</span>
+0068 
+0069    <span class="comment">% PARSE INPUTS</span>
+0070    [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = parseinputs( <span class="keyword">...</span>
+0071       q, dqdt, method, mfilename, varargin{:});
+0072 
+0073    <span class="comment">% PREP FITS</span>
+0074    [x, y, logx, logy, weights, ok] = baseflow.prepfits( <span class="keyword">...</span>
+0075       q, dqdt, <span class="string">'weights'</span>, weights, <span class="string">'mask'</span>, mask);
+0076 
+0077    <span class="comment">% FAST EXIT</span>
+0078    <span class="keyword">if</span> ok == false
+0079       Fit = nan; <span class="keyword">return</span>;
+0080    <span class="keyword">end</span>
+0081 
+0082    <span class="comment">% If 'order' = 1 and the method is 'ols' or 'nls', switch to 'mean'.</span>
+0083    <span class="comment">% The 'mean' method forces a line of slope 1. fitOLS and fitNLS ignore</span>
+0084    <span class="comment">% 'order'. Do not switch the other methods. The 'mean', 'median', and</span>
+0085    <span class="comment">% 'envelope' methods force a line of slope 'order'. plotrefline relies</span>
+0086    <span class="comment">% on 'envelope' with 'order' = 1. 'qtl' passes 'order' to quantreg as</span>
+0087    <span class="comment">% the polynomial degree. 'mle' errors as unsupported.</span>
+0088    <span class="keyword">if</span> order == 1 &amp;&amp; any(strcmp(method, {<span class="string">'ols'</span>, <span class="string">'nls'</span>}))
+0089       method = <span class="string">'mean'</span>;
+0090    <span class="keyword">end</span>
+0091 
+0092    <span class="comment">% SWITCH YARD</span>
+0093    fselect = method;
+0094 
+0095    <span class="keyword">switch</span> method
+0096       <span class="keyword">case</span> <span class="string">'ols'</span>
+0097          [ab,ci,ok] = <a href="#_sub1" class="code" title="subfunction [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)">fitOLS</a>(logx,logy,weights,alpha);
+0098       <span class="keyword">case</span> <span class="string">'qtl'</span>
+0099          [ab,ci,ok] = <a href="#_sub5" class="code" title="subfunction [ab,ci,ok] = fitQTL(logx,logy,alpha,order,qtl,Nboot,inoctave)">fitQTL</a>(logx,logy,alpha,order,qtl,Nboot,inoctave);
+0100       <span class="keyword">case</span> <span class="string">'mle'</span>
+0101          error(<span class="string">'mle fitting not currently supported'</span>);
+0102          <span class="comment">% [ab,ci,ok] = fitMLE(logx,logy,weights,alpha,sigx,sigy,rxy);</span>
+0103       <span class="keyword">case</span> <span class="string">'nls'</span>
+0104          [ab,ci,ok,fselect] = <a href="#_sub7" class="code" title="subfunction [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave)">fitNLS</a>(x,y,logx,logy,weights,alpha,inoctave);
+0105       <span class="keyword">case</span> <span class="string">'mean'</span>
+0106          [ab,ci,ok] = <a href="#_sub2" class="code" title="subfunction [ab,ci,ok] = fitLIN(logx,logy,alpha,order)">fitLIN</a>(logx,logy,alpha,order);
+0107       <span class="keyword">case</span> <span class="string">'median'</span>
+0108          [ab,ci,ok] = <a href="#_sub3" class="code" title="subfunction [ab,ci,ok] = fitMED(logx,logy,order,inoctave)">fitMED</a>(logx,logy,order,inoctave);
+0109       <span class="keyword">case</span> <span class="string">'envelope'</span>
+0110          [ab,ci,ok] = <a href="#_sub4" class="code" title="subfunction [ab,ci,ok] = fitENV(logx,logy,order,refqtls,inoctave)">fitENV</a>(logx,logy,order,refqtls,inoctave);
+0111    <span class="keyword">end</span>
+0112 
+0113    <span class="comment">% EVALUATE THE FIT</span>
+0114    [Fit,ok] = <a href="#_sub8" class="code" title="subfunction [Fit,ok] = evalFit(ab,x,y,ci,ok)">evalFit</a>(ab,x,y,ci,ok);
+0115 
+0116    <span class="keyword">if</span> exist(<span class="string">'fselect'</span>,<span class="string">'var'</span>)
+0117       Fit.fselect = fselect;
+0118    <span class="keyword">end</span>
+0119 
+0120    <span class="keyword">if</span> plotfit == true
+0121       Fit.h = baseflow.pointcloudplot(q,dqdt,<span class="string">'reflines'</span>,{<span class="string">'userfit'</span>}, <span class="keyword">...</span>
+0122          <span class="string">'userab'</span>,ab,<span class="string">'mask'</span>,mask,<span class="string">'usertext'</span>,method);
+0123    <span class="keyword">end</span>
+0124 
+0125    <span class="comment">% use this when stepping through nlinfit</span>
+0126    debug = false;
+0127    <span class="keyword">if</span> debug == true
+0128       pos = get(0,<span class="string">'defaultfigureposition'</span>);
+0129       figure(<span class="string">'Position'</span>, [pos(1) pos(2) 2*pos(3) pos(4)])
+0130       subplot(1, 2, 1)
+0131       hold on
+0132       loglog(X, y, <span class="string">'-o'</span>);
+0133       <span class="comment">% Jul 2024 - yfit undefined so commented it out</span>
+0134       <span class="comment">% plot(X, yfit, ':');</span>
+0135       xlabel(<span class="string">'log Q'</span>);
+0136       ylabel(<span class="string">'log -dQ/dt'</span>);
+0137       legend(<span class="string">'data'</span>, <span class="string">'fit'</span>);
+0138 
+0139       subplot(1, 2, 2)
+0140       hold on
+0141       plot(X, y, <span class="string">'-o'</span>);
+0142       <span class="comment">% Jul 2024 - yfit undefined so commented it out</span>
+0143       <span class="comment">% plot(X, yfit, ':');</span>
+0144       xlabel(<span class="string">'Q'</span>);
+0145       ylabel(<span class="string">'-dQ/dt'</span>);
+0146       legend(<span class="string">'data'</span>, <span class="string">'fit'</span>);
+0147    <span class="keyword">end</span>
+0148 <span class="keyword">end</span>
+0149 
+0150 <span class="comment">% FITTING METHODS</span>
+0151 <a name="_sub1" href="#_subfunctions" class="code">function [ab,ci,ok] = fitOLS(logx,logy,weights,alpha)</a>
+0152    <span class="comment">% ordinary least squares linear regression in log-log</span>
+0153    <span class="comment">%</span>
+0154    <span class="comment">% Solve weighted least squares with plain linear algebra, so the method</span>
+0155    <span class="comment">% runs on MATLAB and Octave. The result matches the Curve Fitting Toolbox</span>
+0156    <span class="comment">% confint(fit(logx,logy,'poly1'), alpha) with fitoptions Weights.</span>
+0157 
+0158    <span class="comment">% Scale each row by the square root of its weight, so the unweighted</span>
+0159    <span class="comment">% solve minimizes sum(weights.*resid.^2). prepfits removes masked</span>
+0160    <span class="comment">% points, so every row has a positive weight.</span>
+0161    sw = sqrt(weights);
+0162    X = [sw, sw.*logx];
+0163    [Qx,R] = qr(X,0);
+0164    ab = R \ (Qx'*(sw.*logy));
+0165    resid = sw.*logy - X*ab;
+0166 
+0167    <span class="comment">% Compute coefficient standard errors from inv(X'*X) = inv(R)*inv(R)'.</span>
+0168    <span class="comment">% The n-2 residual degrees of freedom count the fitted points only.</span>
+0169    dfe = numel(logy) - 2;
+0170    Rinv = R \ eye(2);
+0171    se = sqrt(diag(Rinv*Rinv') * sum(resid.^2) / dfe);
+0172 
+0173    <span class="comment">% Compute t-based intervals at confidence level alpha, one row per</span>
+0174    <span class="comment">% coefficient, in the order [intercept; slope]. This is the rot90(confint)</span>
+0175    <span class="comment">% layout, which is consistent with the stats functions.</span>
+0176    tcrit = tinv((1 + alpha) / 2, dfe);
+0177    ci = [ab - tcrit*se, ab + tcrit*se];
+0178 
+0179    <span class="comment">% transform a to linear space and package a/b</span>
+0180    ab = [exp(ab(1)); ab(2)];
+0181    ci(1,:) = exp(ci(1,:));
+0182 
+0183    <span class="comment">% generic failure check</span>
+0184    ok = all(isreal(ab));
+0185 <span class="keyword">end</span>
+0186 
+0187 <a name="_sub2" href="#_subfunctions" class="code">function [ab,ci,ok] = fitLIN(logx,logy,alpha,order)</a>
+0188    <span class="comment">% linear model fit in log-log, equivalent to forcing a line of slope 1</span>
+0189    <span class="comment">% through the mean x-y, with option to control the slope using input</span>
+0190    <span class="comment">% parameter 'order'</span>
+0191 
+0192    <span class="comment">% impose model order. parseinputs sets order 1 when it is not given.</span>
+0193    logx = order.*logx;
 0194 
-0195    <span class="comment">% impose model order if provided</span>
-0196    <span class="keyword">if</span> ~isnan(order)
-0197       logx = order.*logx;
-0198    <span class="keyword">end</span>
+0195    [~,~,ci] = ttest(-logx,-logy,<span class="string">'Alpha'</span>,1-alpha);
+0196 
+0197    <span class="comment">% note: mean(x-y) = mean(x)-mean(y)</span>
+0198    ab = [exp(-(mean(logx)-mean(logy))); order];
 0199 
-0200    [~,~,ci] = ttest(-logx,-logy,<span class="string">'Alpha'</span>,1-alpha);
-0201 
-0202    <span class="comment">% note: mean(x-y) = mean(x)-mean(y)</span>
-0203    ab = [exp(-(mean(logx)-mean(logy))); order];
-0204 
-0205    <span class="comment">% transpose ci to be consistent with stats functions</span>
-0206    ci = [exp(ci(1)) exp(ci(2)); ab(2), ab(2)];
-0207 
-0208    <span class="comment">% generic failure check</span>
-0209    ok = all(isreal(ab));
-0210 <span class="keyword">end</span>
+0200    <span class="comment">% transpose ci to be consistent with stats functions</span>
+0201    ci = [exp(ci(1)) exp(ci(2)); ab(2), ab(2)];
+0202 
+0203    <span class="comment">% generic failure check</span>
+0204    ok = all(isreal(ab));
+0205 <span class="keyword">end</span>
+0206 
+0207 <a name="_sub3" href="#_subfunctions" class="code">function [ab,ci,ok] = fitMED(logx,logy,order,inoctave)</a>
+0208    <span class="comment">% force a line of slope 'order' through the median x-y</span>
+0209 
+0210    logx = order*logx;
 0211 
-0212 <a name="_sub3" href="#_subfunctions" class="code">function [ab,ci,ok] = fitMED(logx,logy,weights,order,inoctave)</a>
-0213    <span class="comment">% force a line of slope 'order' through the median x-y</span>
-0214 
-0215    <span class="comment">% apply the mask / weights</span>
-0216    logx = logx(weights&gt;0);
-0217    logy = logy(weights&gt;0);
-0218 
-0219    logx = order*logx;
+0212    <span class="keyword">if</span> inoctave
+0213       pval = nan; <span class="comment">% ranksum and kruskalwallis both supported, need to implement</span>
+0214    <span class="keyword">else</span>
+0215       pval = signrank(-logx,-logy); <span class="comment">% or ranksum or kruskalwallis</span>
+0216    <span class="keyword">end</span>
+0217 
+0218    <span class="comment">% med(x-y)!=med(x)-med(y)</span>
+0219    ab = [exp(-(median(logx)-median(logy))); order];
 0220 
-0221    <span class="keyword">if</span> inoctave
-0222       pval = nan; <span class="comment">% ranksum and kruskalwallis both supported, need to implement</span>
-0223    <span class="keyword">else</span>
-0224       pval = signrank(-logx,-logy); <span class="comment">% or ranksum or kruskalwallis</span>
-0225    <span class="keyword">end</span>
-0226 
-0227    <span class="comment">% med(x-y)!=med(x)-med(y)</span>
-0228    ab = [exp(-(median(logx)-median(logy))); order];
-0229 
-0230    <span class="comment">% non-parametric test, no ci</span>
-0231    ci = [ab(1), ab(1); ab(2), ab(2)];
-0232 
-0233    <span class="comment">% could return to this later</span>
-0234    <span class="comment">%bootfun = @(x,y)(median(y)-median(x));</span>
-0235    <span class="comment">%bootci(100,bootfun(logx,logy))</span>
-0236 
-0237    <span class="comment">% generic failure check</span>
-0238    ok = all(isreal(ab));
-0239 <span class="keyword">end</span>
+0221    <span class="comment">% non-parametric test, no ci</span>
+0222    ci = [ab(1), ab(1); ab(2), ab(2)];
+0223 
+0224    <span class="comment">% could return to this later</span>
+0225    <span class="comment">%bootfun = @(x,y)(median(y)-median(x));</span>
+0226    <span class="comment">%bootci(100,bootfun(logx,logy))</span>
+0227 
+0228    <span class="comment">% generic failure check</span>
+0229    ok = all(isreal(ab));
+0230 <span class="keyword">end</span>
+0231 
+0232 <a name="_sub4" href="#_subfunctions" class="code">function [ab,ci,ok] = fitENV(logx,logy,order,refqtls,inoctave)</a>
+0233    <span class="comment">% force a line of slope 'order' through any two points 'refpoints' that</span>
+0234    <span class="comment">% together define an 'envelope'. default x refpoint is median(x). To control</span>
+0235    <span class="comment">% the vertical location of the line, set y refpoint higher or lower while</span>
+0236    <span class="comment">% keeping x refpoint constant.</span>
+0237 
+0238    <span class="comment">% note: require that quantiles are passed in rather than precomputed</span>
+0239    <span class="comment">% refpoints so this can use the log values or linear values</span>
 0240 
-0241 <a name="_sub4" href="#_subfunctions" class="code">function [ab,ci,ok] = fitENV(logx,logy,weights,order,refqtls,inoctave)</a>
-0242    <span class="comment">% force a line of slope 'order' through any two points 'refpoints' that</span>
-0243    <span class="comment">% together define an 'envelope'. default x refpoint is median(x). To control</span>
-0244    <span class="comment">% the vertical location of the line, set y refpoint higher or lower while</span>
-0245    <span class="comment">% keeping x refpoint constant.</span>
-0246 
-0247    <span class="comment">% note: require that quantiles are passed in rather than precomputed</span>
-0248    <span class="comment">% refpoints so this can use the log values or linear values</span>
-0249 
-0250    <span class="comment">% apply the mask / weights</span>
-0251    logx = logx(weights&gt;0);
-0252    logy = logy(weights&gt;0);
-0253    logx = order.*logx;
+0241    logx = order.*logx;
+0242 
+0243    <span class="comment">% force the line through the provided quantile</span>
+0244    <span class="keyword">if</span> inoctave
+0245       xbar = quantile(logx,refqtls(1),1,8);
+0246       ybar = quantile(logy,refqtls(2),1,8);
+0247    <span class="keyword">else</span>
+0248       xbar = quantile(logx,refqtls(1),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0249       ybar = quantile(logy,refqtls(2),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
+0250    <span class="keyword">end</span>
+0251 
+0252    <span class="comment">% note: mean(x-y) = mean(x)-mean(y)</span>
+0253    ab = [ exp(-(xbar-ybar)); order];
 0254 
-0255    <span class="comment">% force the line through the provided quantile</span>
-0256    <span class="keyword">if</span> inoctave
-0257       xbar = quantile(logx,refqtls(1),1,8);
-0258       ybar = quantile(logy,refqtls(2),1,8);
-0259    <span class="keyword">else</span>
-0260       xbar = quantile(logx,refqtls(1),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0261       ybar = quantile(logy,refqtls(2),<span class="string">'Method'</span>,<span class="string">'approximate'</span>);
-0262    <span class="keyword">end</span>
+0255    <span class="comment">% transpose ci to be consistent with stats functions</span>
+0256    ci = [nan nan; nan, nan];
+0257 
+0258    <span class="comment">% generic failure check</span>
+0259    ok = all(isreal(ab));
+0260 <span class="keyword">end</span>
+0261 
+0262 <a name="_sub5" href="#_subfunctions" class="code">function [ab,ci,ok] = fitQTL(logx,logy,alpha,order,qtl,Nboot,inoctave)</a>
 0263 
-0264    <span class="comment">% note: mean(x-y) = mean(x)-mean(y)</span>
-0265    ab = [ exp(-(xbar-ybar)); order];
-0266 
-0267    <span class="comment">% transpose ci to be consistent with stats functions</span>
-0268    ci = [nan nan; nan, nan];
-0269 
-0270    <span class="comment">% generic failure check</span>
-0271    ok = all(isreal(ab));
-0272 <span class="keyword">end</span>
-0273 
-0274 <a name="_sub5" href="#_subfunctions" class="code">function [ab,ci,ok] = fitQTL(logx,logy,weights,alpha,order,qtl,Nboot,inoctave)</a>
-0275 
-0276    <span class="comment">% quantile regression</span>
-0277    <span class="keyword">if</span> inoctave
-0278       error(<span class="string">'quantile regression not currently supported in octave, use nls'</span>)
-0279    <span class="keyword">end</span>
-0280 
-0281    <span class="keyword">if</span> isnan(qtl)
-0282       qtl = 0.05;
-0283    <span class="keyword">end</span>
-0284 
-0285    <span class="comment">% 'order' is the quantreg polynomial degree. The fitab parser default</span>
-0286    <span class="comment">% is nan, which crashes the quantreg indexing, so apply the quantreg</span>
-0287    <span class="comment">% default of 1 (a straight-line quantile fit).</span>
-0288    <span class="keyword">if</span> isnan(order)
-0289       order = 1;
-0290    <span class="keyword">end</span>
-0291 
-0292    <span class="comment">% apply the mask / weights</span>
-0293    logx = logx(weights&gt;0);
-0294    logy = logy(weights&gt;0);
+0264    <span class="comment">% quantile regression</span>
+0265    <span class="keyword">if</span> inoctave
+0266       error(<span class="string">'quantile regression not currently supported in octave, use nls'</span>)
+0267    <span class="keyword">end</span>
+0268 
+0269    <span class="keyword">if</span> isnan(qtl)
+0270       qtl = 0.05;
+0271    <span class="keyword">end</span>
+0272 
+0273    <span class="comment">% 'order' is the quantreg polynomial degree. The fitab parser default</span>
+0274    <span class="comment">% is nan, which crashes the quantreg indexing, so apply the quantreg</span>
+0275    <span class="comment">% default of 1 (a straight-line quantile fit).</span>
+0276    <span class="keyword">if</span> isnan(order)
+0277       order = 1;
+0278    <span class="keyword">end</span>
+0279 
+0280    <span class="comment">% fit a,b using quantile regression</span>
+0281    [ab,s] = quantreg(logx,logy,qtl,order,Nboot,1-alpha);
+0282 
+0283    <span class="comment">% transform a to linear space and package a/b</span>
+0284    ab = [exp(ab(1)); ab(2)];
+0285 
+0286    <span class="comment">% transpose ci to be consistent with stats functions</span>
+0287    ci = transpose(s.ci_boot);   <span class="comment">% comes in the same order as confint</span>
+0288    ci(1,:) = exp(ci(1,:));
+0289 
+0290    <span class="comment">% generic failure check</span>
+0291    ok = all(isreal(ab));
+0292 <span class="keyword">end</span>
+0293 
+0294 <a name="_sub6" href="#_subfunctions" class="code">function [ab,ci,ok] = fitMLE(logx,logy,~,alpha,sigx,sigy,rxy) </a><span class="comment">%#ok&lt;DEFNU&gt;</span>
 0295 
-0296    <span class="comment">% fit a,b using quantile regression</span>
-0297    [ab,s] = quantreg(logx,logy,qtl,order,Nboot,1-alpha);
-0298 
-0299    <span class="comment">% transform a to linear space and package a/b</span>
-0300    ab = [exp(ab(1)); ab(2)];
-0301 
-0302    <span class="comment">% transpose ci to be consistent with stats functions</span>
-0303    ci = transpose(s.ci_boot);   <span class="comment">% comes in the same order as confint</span>
-0304    ci(1,:) = exp(ci(1,:));
-0305 
-0306    <span class="comment">% generic failure check</span>
-0307    ok = all(isreal(ab));
-0308 <span class="keyword">end</span>
-0309 
-0310 <a name="_sub6" href="#_subfunctions" class="code">function [ab,ci,ok] = fitMLE(logx,logy,~,alpha,sigx,sigy,rxy) </a><span class="comment">%#ok&lt;DEFNU&gt;</span>
+0296    <span class="comment">% Set default values for maximum likelihood estimation</span>
+0297    <span class="keyword">if</span> nargin == 2
+0298       sigx     =  std(logx);       <span class="comment">% error in x</span>
+0299       sigy     =  std(logy);       <span class="comment">% error in y</span>
+0300       rxy      =  0;               <span class="comment">% correlation b/w error in x and y</span>
+0301       alpha    =  0.68;            <span class="comment">% confidence level</span>
+0302    <span class="keyword">end</span>
+0303 
+0304    <span class="comment">% fit</span>
+0305    [ab,s] = yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
+0306 
+0307    ab = [exp(ab(1)); ab(2)];
+0308 
+0309    <span class="comment">% transpose ci to be consistent with stats functions</span>
+0310    ci = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
 0311 
-0312    <span class="comment">% Set default values for maximum likelihood estimation</span>
-0313    <span class="keyword">if</span> nargin == 2
-0314       sigx     =  std(logx);       <span class="comment">% error in x</span>
-0315       sigy     =  std(logy);       <span class="comment">% error in y</span>
-0316       rxy      =  0;               <span class="comment">% correlation b/w error in x and y</span>
-0317       alpha    =  0.68;            <span class="comment">% confidence level</span>
-0318    <span class="keyword">end</span>
-0319 
-0320    <span class="comment">% fit</span>
-0321    [ab,s] = yorkfit(logx,logy,sigx,sigy,rxy,1-alpha);
-0322 
-0323    ab = [exp(ab(1)); ab(2)];
-0324 
-0325    <span class="comment">% transpose ci to be consistent with stats functions</span>
-0326    ci = [exp(s.a_L), exp(s.a_H); s.b_L, s.b_H];
-0327 
-0328    <span class="comment">% generic failure check</span>
-0329    ok = true;
-0330    <span class="keyword">if</span> any(~isreal(ab))
-0331       ok = false;
-0332    <span class="keyword">end</span>
-0333 <span class="keyword">end</span>
-0334 
-0335 <a name="_sub7" href="#_subfunctions" class="code">function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave)</a>
-0336 
-0337    <span class="keyword">if</span> inoctave
-0338       [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha);
-0339    <span class="keyword">else</span>
-0340       <span class="keyword">try</span>
-0341          [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha);
-0342       <span class="keyword">catch</span>
-0343          [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha);
-0344       <span class="keyword">end</span>
-0345    <span class="keyword">end</span>
-0346 <span class="keyword">end</span>
-0347 
-0348 <a name="_sub8" href="#_subfunctions" class="code">function [Fit,ok] = evalFit(ab,x,y,ci,ok)</a>
-0349 
-0350    <span class="comment">% ok is from the fitting function, passed in here but not used</span>
-0351    <span class="keyword">if</span> ok == false
-0352       <span class="comment">% error?</span>
-0353    <span class="keyword">end</span>
+0312    <span class="comment">% generic failure check</span>
+0313    ok = true;
+0314    <span class="keyword">if</span> any(~isreal(ab))
+0315       ok = false;
+0316    <span class="keyword">end</span>
+0317 <span class="keyword">end</span>
+0318 
+0319 <a name="_sub7" href="#_subfunctions" class="code">function [ab,ci,ok,fselect] = fitNLS(x,y,logx,logy,weights,alpha,inoctave)</a>
+0320 
+0321    <span class="keyword">if</span> inoctave
+0322       [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha);
+0323    <span class="keyword">else</span>
+0324       <span class="keyword">try</span>
+0325          [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha);
+0326       <span class="keyword">catch</span>
+0327          [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha);
+0328       <span class="keyword">end</span>
+0329    <span class="keyword">end</span>
+0330 <span class="keyword">end</span>
+0331 
+0332 <a name="_sub8" href="#_subfunctions" class="code">function [Fit,ok] = evalFit(ab,x,y,ci,ok)</a>
+0333 
+0334    <span class="comment">% ok is from the fitting function, passed in here but not used</span>
+0335    <span class="keyword">if</span> ok == false
+0336       <span class="comment">% error?</span>
+0337    <span class="keyword">end</span>
+0338 
+0339    Fit.ab = ab;
+0340 
+0341    <span class="comment">% all ci's should already be transformed to this form:</span>
+0342    Fit.a = ab(1);
+0343    Fit.b = ab(2);
+0344    Fit.aL = ci(1,1);
+0345    Fit.aH = ci(1,2);
+0346    Fit.bL = ci(2,1);
+0347    Fit.bH = ci(2,2);
+0348 
+0349    Fit.rsq = baseflow.deps.rsquare(y,ab(1).*x.^ab(2));
+0350    Fit.pvalue = nan;
+0351    Fit.N = numel(y);
+0352    Fit.x = x;
+0353    Fit.y = y;
 0354 
-0355    Fit.ab = ab;
-0356 
-0357    <span class="comment">% all ci's should already be transformed to this form:</span>
-0358    Fit.a = ab(1);
-0359    Fit.b = ab(2);
-0360    Fit.aL = ci(1,1);
-0361    Fit.aH = ci(1,2);
-0362    Fit.bL = ci(2,1);
-0363    Fit.bH = ci(2,2);
-0364 
-0365    Fit.rsq = baseflow.deps.rsquare(y,ab(1).*x.^ab(2));
-0366    Fit.pvalue = nan;
-0367    Fit.N = numel(y);
-0368    Fit.x = x;
-0369    Fit.y = y;
-0370 
-0371    <span class="comment">% generic failure check</span>
-0372    ok = all(isreal(ab));
-0373 
-0374    <span class="comment">%    % any log-log regressions need the ci's transormed like this:</span>
-0375    <span class="comment">%    aL      = exp(ci(1,1)); % 95% CI</span>
-0376    <span class="comment">%    aH      = exp(ci(1,2));</span>
-0377    <span class="comment">%    bL      = ci(2,1);      % = betaL</span>
-0378    <span class="comment">%    bH      = ci(2,2);      % = betaH</span>
-0379 
-0380    <span class="comment">%    % any nlinfit regressions should already be in teh right order:</span>
-0381    <span class="comment">%    aL      = ci(1,1); % for confint: ci(1,1);</span>
-0382    <span class="comment">%    aH      = ci(1,2); % for confint: ci(2,1);</span>
-0383    <span class="comment">%    bL      = ci(2,1); % for confint: ci(1,2);</span>
-0384    <span class="comment">%    bH      = ci(2,2); % for confint: ci(2,2);</span>
-0385 
-0386    <span class="comment">% this does not work if robust fitting is used</span>
-0387    <span class="comment">%r2      = 1-sum(R.^2)/sum((y-mean(y)).^2); % for fit: gof.rsquare;</span>
-0388    <span class="comment">%figure; loglog(x,y,'o'); hold on; loglog(x,ab(1).*x.^ab(2))</span>
-0389 <span class="keyword">end</span>
-0390 
-0391 <span class="comment">%% INPUT PARSER</span>
-0392 <a name="_sub9" href="#_subfunctions" class="code">function [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = </a><span class="keyword">...</span>
-0393       parseinputs(q, dqdt, method, funcname, varargin)
-0394 
-0395    methodslist = {<span class="string">'nls'</span>,<span class="string">'ols'</span>,<span class="string">'mle'</span>,<span class="string">'qtl'</span>,<span class="string">'mean'</span>,<span class="string">'median'</span>,<span class="string">'envelope'</span>};
-0396    validmethod = @(x) any(validatestring(x, methodslist));
-0397 
-0398    <span class="keyword">persistent</span> parser
-0399    <span class="keyword">if</span> isempty(parser)
-0400       parser = inputParser;
-0401       parser.StructExpand = false;
-0402       parser.addRequired( <span class="string">'q'</span>,                          @isnumeric   );
-0403       parser.addRequired( <span class="string">'dqdt'</span>,                       @isnumeric   );
-0404       parser.addRequired( <span class="string">'method'</span>,                     validmethod  );
-0405       parser.addParameter(<span class="string">'weights'</span>,  1,                @isnumeric   );
-0406       parser.addParameter(<span class="string">'order'</span>,    nan,              @isnumeric   );
-0407       parser.addParameter(<span class="string">'mask'</span>,     1,                @islogical   );
-0408       parser.addParameter(<span class="string">'quantile'</span>, 0.05,             @isnumeric   );
-0409       parser.addParameter(<span class="string">'refqtls'</span>,  [0.50 0.50],      @isnumeric   );
-0410       parser.addParameter(<span class="string">'Nboot'</span>,    100,              @isnumeric   );
-0411       parser.addParameter(<span class="string">'alpha'</span>,    0.68,             @isnumeric   );
-0412       parser.addParameter(<span class="string">'plotfit'</span>,  false,            @islogical   );
-0413       parser.addParameter(<span class="string">'fitopts'</span>,  struct(),         @isstruct    );
-0414    <span class="keyword">end</span>
-0415    parser.FunctionName = funcname;
-0416    parse(parser,q,dqdt,method,varargin{:});
-0417 
-0418    weights  = parser.Results.weights;
-0419    order    = parser.Results.order;
-0420    mask     = parser.Results.mask;
-0421    qtl      = parser.Results.quantile;
-0422    refqtls  = parser.Results.refqtls;
-0423    Nboot    = parser.Results.Nboot;
-0424    alpha    = parser.Results.alpha;
-0425    plotfit  = parser.Results.plotfit;
-0426    fitopts  = parser.Results.fitopts;
-0427 
-0428    <span class="comment">% Override each same-named parameter with its fitopts field after a type</span>
-0429    <span class="comment">% check. fitevents passes this struct to fitab, so a caller can set the</span>
-0430    <span class="comment">% per-fit options once. fitab errors on an unknown field or a wrong type,</span>
-0431    <span class="comment">% so it never ignores a fitopts field.</span>
-0432    <span class="keyword">for</span> f = transpose(fieldnames(fitopts))
-0433       value = fitopts.(f{1});
-0434       <span class="keyword">switch</span> f{1}
-0435          <span class="keyword">case</span> <span class="string">'weights'</span>
+0355    <span class="comment">% generic failure check</span>
+0356    ok = all(isreal(ab));
+0357 
+0358    <span class="comment">%    % any log-log regressions need the ci's transormed like this:</span>
+0359    <span class="comment">%    aL      = exp(ci(1,1)); % 95% CI</span>
+0360    <span class="comment">%    aH      = exp(ci(1,2));</span>
+0361    <span class="comment">%    bL      = ci(2,1);      % = betaL</span>
+0362    <span class="comment">%    bH      = ci(2,2);      % = betaH</span>
+0363 
+0364    <span class="comment">%    % any nlinfit regressions should already be in teh right order:</span>
+0365    <span class="comment">%    aL      = ci(1,1); % for confint: ci(1,1);</span>
+0366    <span class="comment">%    aH      = ci(1,2); % for confint: ci(2,1);</span>
+0367    <span class="comment">%    bL      = ci(2,1); % for confint: ci(1,2);</span>
+0368    <span class="comment">%    bH      = ci(2,2); % for confint: ci(2,2);</span>
+0369 
+0370    <span class="comment">% this does not work if robust fitting is used</span>
+0371    <span class="comment">%r2      = 1-sum(R.^2)/sum((y-mean(y)).^2); % for fit: gof.rsquare;</span>
+0372    <span class="comment">%figure; loglog(x,y,'o'); hold on; loglog(x,ab(1).*x.^ab(2))</span>
+0373 <span class="keyword">end</span>
+0374 
+0375 <span class="comment">%% INPUT PARSER</span>
+0376 <a name="_sub9" href="#_subfunctions" class="code">function [weights, order, mask, qtl, refqtls, Nboot, alpha, plotfit] = </a><span class="keyword">...</span>
+0377       parseinputs(q, dqdt, method, funcname, varargin)
+0378 
+0379    methodslist = {<span class="string">'nls'</span>,<span class="string">'ols'</span>,<span class="string">'mle'</span>,<span class="string">'qtl'</span>,<span class="string">'mean'</span>,<span class="string">'median'</span>,<span class="string">'envelope'</span>};
+0380    validmethod = @(x) any(validatestring(x, methodslist));
+0381 
+0382    <span class="keyword">persistent</span> parser
+0383    <span class="keyword">if</span> isempty(parser)
+0384       parser = inputParser;
+0385       parser.StructExpand = false;
+0386       parser.addRequired( <span class="string">'q'</span>,                          @isnumeric   );
+0387       parser.addRequired( <span class="string">'dqdt'</span>,                       @isnumeric   );
+0388       parser.addRequired( <span class="string">'method'</span>,                     validmethod  );
+0389       parser.addParameter(<span class="string">'weights'</span>,  1,                @isnumeric   );
+0390       parser.addParameter(<span class="string">'order'</span>,    nan,              @isnumeric   );
+0391       parser.addParameter(<span class="string">'mask'</span>,     1,                @islogical   );
+0392       parser.addParameter(<span class="string">'quantile'</span>, 0.05,             @isnumeric   );
+0393       parser.addParameter(<span class="string">'refqtls'</span>,  [0.50 0.50],      @isnumeric   );
+0394       parser.addParameter(<span class="string">'Nboot'</span>,    100,              @isnumeric   );
+0395       parser.addParameter(<span class="string">'alpha'</span>,    0.68,             @isnumeric   );
+0396       parser.addParameter(<span class="string">'plotfit'</span>,  false,            @islogical   );
+0397       parser.addParameter(<span class="string">'fitopts'</span>,  struct(),         @isstruct    );
+0398    <span class="keyword">end</span>
+0399    parser.FunctionName = funcname;
+0400    parse(parser,q,dqdt,method,varargin{:});
+0401 
+0402    weights  = parser.Results.weights;
+0403    order    = parser.Results.order;
+0404    mask     = parser.Results.mask;
+0405    qtl      = parser.Results.quantile;
+0406    refqtls  = parser.Results.refqtls;
+0407    Nboot    = parser.Results.Nboot;
+0408    alpha    = parser.Results.alpha;
+0409    plotfit  = parser.Results.plotfit;
+0410    fitopts  = parser.Results.fitopts;
+0411 
+0412    <span class="comment">% Override each same-named parameter with its fitopts field after a type</span>
+0413    <span class="comment">% check. fitevents passes this struct to fitab, so a caller can set the</span>
+0414    <span class="comment">% per-fit options once. fitab errors on an unknown field or a wrong type,</span>
+0415    <span class="comment">% so it never ignores a fitopts field.</span>
+0416    <span class="keyword">for</span> f = transpose(fieldnames(fitopts))
+0417       value = fitopts.(f{1});
+0418       <span class="keyword">switch</span> f{1}
+0419          <span class="keyword">case</span> <span class="string">'weights'</span>
+0420             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
+0421                <span class="string">'fitopts.weights must be numeric'</span>);
+0422             weights = value;
+0423          <span class="keyword">case</span> <span class="string">'order'</span>
+0424             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
+0425                <span class="string">'fitopts.order must be numeric'</span>);
+0426             order = value;
+0427          <span class="keyword">case</span> <span class="string">'mask'</span>
+0428             assert(islogical(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
+0429                <span class="string">'fitopts.mask must be logical'</span>);
+0430             mask = value;
+0431          <span class="keyword">case</span> <span class="string">'quantile'</span>
+0432             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
+0433                <span class="string">'fitopts.quantile must be numeric'</span>);
+0434             qtl = value;
+0435          <span class="keyword">case</span> <span class="string">'refqtls'</span>
 0436             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0437                <span class="string">'fitopts.weights must be numeric'</span>);
-0438             weights = value;
-0439          <span class="keyword">case</span> <span class="string">'order'</span>
+0437                <span class="string">'fitopts.refqtls must be numeric'</span>);
+0438             refqtls = value;
+0439          <span class="keyword">case</span> <span class="string">'Nboot'</span>
 0440             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0441                <span class="string">'fitopts.order must be numeric'</span>);
-0442             order = value;
-0443          <span class="keyword">case</span> <span class="string">'mask'</span>
-0444             assert(islogical(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0445                <span class="string">'fitopts.mask must be logical'</span>);
-0446             mask = value;
-0447          <span class="keyword">case</span> <span class="string">'quantile'</span>
-0448             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0449                <span class="string">'fitopts.quantile must be numeric'</span>);
-0450             qtl = value;
-0451          <span class="keyword">case</span> <span class="string">'refqtls'</span>
-0452             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0453                <span class="string">'fitopts.refqtls must be numeric'</span>);
-0454             refqtls = value;
-0455          <span class="keyword">case</span> <span class="string">'Nboot'</span>
-0456             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0457                <span class="string">'fitopts.Nboot must be numeric'</span>);
-0458             Nboot = value;
-0459          <span class="keyword">case</span> <span class="string">'alpha'</span>
-0460             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0461                <span class="string">'fitopts.alpha must be numeric'</span>);
-0462             alpha = value;
-0463          <span class="keyword">case</span> <span class="string">'plotfit'</span>
-0464             assert(islogical(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
-0465                <span class="string">'fitopts.plotfit must be logical'</span>);
-0466             plotfit = value;
-0467          <span class="keyword">otherwise</span>
-0468             error(<span class="string">'baseflow:fitab:unknownFitopt'</span>, <span class="keyword">...</span>
-0469                [<span class="string">'unknown fitopts field %s; allowed: weights, order, '</span> <span class="keyword">...</span>
-0470                <span class="string">'mask, quantile, refqtls, Nboot, alpha, plotfit'</span>], f{1});
-0471       <span class="keyword">end</span>
-0472    <span class="keyword">end</span>
-0473 
-0474    <span class="comment">% Expand a scalar weight or mask to every point, because prepfits</span>
-0475    <span class="comment">% indexes both point by point. The parser default for mask is the</span>
-0476    <span class="comment">% numeric 1, so convert it to logical for prepfits.</span>
-0477    <span class="keyword">if</span> isscalar(weights)
-0478       weights = weights*ones(size(q));
-0479    <span class="keyword">end</span>
-0480 
-0481    <span class="keyword">if</span> isscalar(mask)
-0482       mask = repmat(logical(mask), size(q));
-0483    <span class="keyword">end</span>
-0484 
-0485    <span class="comment">% Fields that fitopts could hold later, by method (parked design notes):</span>
-0486    <span class="comment">% if method = 'qtl', fitopts.quantile, fitopts.Nboot</span>
-0487    <span class="comment">% if method = 'mle', fitopts.sigx, fitopts.sigy, fitopts.rxy</span>
-0488    <span class="comment">% for all methods, fitopts.order, fitopts.alpha, fitopts.</span>
-0489 
-0490 <span class="keyword">end</span></pre></div>
+0441                <span class="string">'fitopts.Nboot must be numeric'</span>);
+0442             Nboot = value;
+0443          <span class="keyword">case</span> <span class="string">'alpha'</span>
+0444             assert(isnumeric(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
+0445                <span class="string">'fitopts.alpha must be numeric'</span>);
+0446             alpha = value;
+0447          <span class="keyword">case</span> <span class="string">'plotfit'</span>
+0448             assert(islogical(value), <span class="string">'baseflow:fitab:invalidFitopt'</span>, <span class="keyword">...</span>
+0449                <span class="string">'fitopts.plotfit must be logical'</span>);
+0450             plotfit = value;
+0451          <span class="keyword">otherwise</span>
+0452             error(<span class="string">'baseflow:fitab:unknownFitopt'</span>, <span class="keyword">...</span>
+0453                [<span class="string">'unknown fitopts field %s; allowed: weights, order, '</span> <span class="keyword">...</span>
+0454                <span class="string">'mask, quantile, refqtls, Nboot, alpha, plotfit'</span>], f{1});
+0455       <span class="keyword">end</span>
+0456    <span class="keyword">end</span>
+0457 
+0458    <span class="comment">% 'mean', 'median', and 'envelope' fix the slope of the line. Without</span>
+0459    <span class="comment">% 'order' the slope is 1, the linear reservoir.</span>
+0460    <span class="keyword">if</span> isnan(order) &amp;&amp; any(strcmp(method, {<span class="string">'mean'</span>, <span class="string">'median'</span>, <span class="string">'envelope'</span>}))
+0461       order = 1;
+0462    <span class="keyword">end</span>
+0463 
+0464    <span class="comment">% Expand a scalar weight or mask to every point, because prepfits</span>
+0465    <span class="comment">% indexes both point by point. The parser default for mask is the</span>
+0466    <span class="comment">% numeric 1, so convert it to logical for prepfits.</span>
+0467    <span class="keyword">if</span> isscalar(weights)
+0468       weights = weights*ones(size(q));
+0469    <span class="keyword">end</span>
+0470 
+0471    <span class="keyword">if</span> isscalar(mask)
+0472       mask = repmat(logical(mask), size(q));
+0473    <span class="keyword">end</span>
+0474 
+0475    <span class="comment">% Fields that fitopts could hold later, by method (parked design notes):</span>
+0476    <span class="comment">% if method = 'qtl', fitopts.quantile, fitopts.Nboot</span>
+0477    <span class="comment">% if method = 'mle', fitopts.sigx, fitopts.sigy, fitopts.rxy</span>
+0478    <span class="comment">% for all methods, fitopts.order, fitopts.alpha, fitopts.</span>
+0479 
+0480 <span class="keyword">end</span></pre></div>
 </body>
 </html>

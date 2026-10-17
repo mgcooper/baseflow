@@ -3,6 +3,12 @@ function fdc = fdcurve(flow,varargin)
    %
    %     fdc = fdcurve(flow,varargin)
    %
+   %     fdc.f is the non-exceedance position 1 - M/(N+1) of each flow in
+   %     fdc.x, which is sorted largest first. M counts the flows at or above
+   %     that flow, and N counts the flows that are not missing. fdc.fref and
+   %     fdc.xref hold one value for each 'refpoints' value, NaN for a NaN
+   %     point or a point above every flow.
+   %
    % See also: hyetograph
 
    % if called with no input, open this file
@@ -13,21 +19,21 @@ function fdc = fdcurve(flow,varargin)
 
    % main function
 
+   % a missing flow has no rank, so it stays out of the plotting positions
+   flow = flow(~isnan(flow));
    N = length(flow);
    M = 1:N;
    x = sort(flow,'descend');
    f = 1-M./(N+1);
 
-   % if requested, compute reference point values
-   xref = nan(numel(refpoints,1));
-   fref = nan(numel(refpoints,1));
-   if ~isnan(refpoints)
-      for n = 1:numel(refpoints)
-         iref = find(x>=refpoints(n),1,'last');
-         xref(n) = x(iref);
-         fref(n) = f(iref);
-      end
-   end
+   % if requested, compute reference point values. x is sorted descending,
+   % so the count of flows at or above a point is the index of the last one.
+   % A nan point, or one above every flow, has no index and stays nan.
+   xref = nan(size(refpoints));
+   fref = nan(size(refpoints));
+   iref = sum(x(:)>=refpoints(:).',1);
+   xref(iref>0) = x(iref(iref>0));
+   fref(iref>0) = f(iref(iref>0));
 
    % plot the curve if requested
    if plotfit == true
@@ -54,7 +60,7 @@ function fdc = fdcurve(flow,varargin)
       end
 
       ylabel(['$x$ [' units ']']);
-      xlabel 'flow exceedence probability, $P(Q\ge x)$'
+      xlabel 'flow non-exceedance probability, $P(Q<x)$'
 
       ax.YAxis.TickLabels = compose('%g',ax.YAxis.TickValues);
       ax.XAxis.TickLabels = compose('$%g\\%%$',ax.XAxis.TickValues);

@@ -42,7 +42,9 @@ function opts = setopts(funcname,varargin)
    %
    %     derivmethod    : derivative (dQ/dt) method: 'ETS', 'VTS', or 'CTS'
    %     fitmethod      : -dQ/dt = aQb fitting method
-   %     fitorder       : fitting order (value of exponent b)
+   %     fitorder       : fitting order (value of exponent b). fitmethod
+   %                      'mean', 'median', or 'envelope' uses 1 when it
+   %                      is nan; see fitab.
    %     pickfits       : pick fits manually?
    %     pickmethod     : method to fit picks manually
    %     plotfits       : plot each event fit? fitevents passes this flag
@@ -69,6 +71,9 @@ function opts = setopts(funcname,varargin)
    %
    %     drainagearea   : drainage area [m2]
    %     drainagedensity: drainage density [km-1] = streamlength/drainagearea
+   %                      (default nan). When both are given and differ,
+   %                      globalfit uses streamlength = drainagearea*
+   %                      drainagedensity/1000.
    %     aquiferdepth   : reference aquifer thickness [m]
    %     streamlength   : effective channel length [m]
    %     aquiferslope   : effective aquifer slope
@@ -144,7 +149,7 @@ function opts = setopts(funcname,varargin)
       case 'globalfit'
 
          addParameter(p,   'drainagearea',      nan,        @isnumericscalar );
-         addParameter(p,   'drainagedensity',   0.8,        @isnumericscalar );
+         addParameter(p,   'drainagedensity',   nan,        @isnumericscalar );
          addParameter(p,   'aquiferdepth',      nan,        @isnumericscalar );
          addParameter(p,   'streamlength',      nan,        @isnumericscalar );
          addParameter(p,   'aquiferslope',      0.0,        @isnumericscalar );

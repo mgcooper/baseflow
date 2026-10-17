@@ -82,13 +82,14 @@ function stats = bootstrapci(x,y,ab0,Fcost,Nboot,alpha,opts)
    yhatci = prctile(yyhat',conflevs)';
    yfitci = prctile(yyfit',conflevs)';
 
-   % Test for slope significance. The null hyp is that the mean is zero. If the
-   % mean is not zero, the slope is significant, reject the null (h=1).
-   b_samp = abboot(:,1); % slope is the first column (flipped in output)
-   [h, ~] = ztest(b_samp,0,std(b_samp));
+   % Test for slope significance. The null hyp is that the slope is zero. The
+   % slope is significant (h=1) when its bootstrap interval excludes zero. A
+   % z test on the replicates would divide their spread by sqrt(Nboot).
+   % The slope is the first column (flipped in output).
+   h = prod(sign(abci(:,1))) > 0;
 
    % Plot the resampled slopes
-   % figure; histogram(b_samp);
+   % figure; histogram(abboot(:,1));
 
    % Package output
    ab0               = fliplr(ab0');

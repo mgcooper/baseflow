@@ -1,23 +1,27 @@
 classdef TestBaseflow < matlab.unittest.TestCase
-   %TESTBASEFLOW Test the baseflow toolbox.
-   % 
-   % TestBaseflow contains a set of parameterized unit tests:
-   %     1) an equality test for a string variable
-   %     2) an equality test for a database lookup (basin-name) variable
-   %     3) an equality test for a derivative calculation 
-   %     4) an equality test for event curve-fitting using nonlinear regression
-   %     5) an equality test for parameter conversions
-   %     6) an equality test for power law distribution fitting
-   %     7) an equality test for aquifer storage estimation
-   %     8) an equality test for aquifer thickness estimation
-   %     9) an equality test for the fitevents 'ctsmethod' option
-   %    10) an equality test for the fitab 'ols' method against the Curve
-   %        Fitting Toolbox fit and confint
-   %    11) an equality test for the private islocalmax and islocalmin
-   %        against the MATLAB islocalmax and islocalmin functions
-   %    12) an equality test for the getevents, eventfinder, and wrapevents
-   %        defaults against baseflow.setopts('getevents'), and a negative
-   %        test for rmax <= 1
+   %TESTBASEFLOW Test the baseflow toolbox workflow.
+   %
+   % TestBaseflow is the integration suite for the documented workflow of
+   % baseflow_demo_kuparuk and baseflow_demo_3. The class setup runs that
+   % chain once on the Kuparuk record: wrapevents, fitevents, globalfit,
+   % baseflowtrend at the expected-flow quantile, and aquiferthickness.
+   % Each test checks one stage against the stages before it and against an
+   % independent value or relationship:
+   %     1) the event-detection defaults and rmax guard of getevents,
+   %        eventfinder, and wrapevents
+   %     2) the recession exponent of the Kuparuk annual workflow
+   %     3) the tail, mean tau, and expected flows of globalfit, and its
+   %        check of a given streamlength against a given drainage density
+   %     4) the baseflow trend at the expected-flow quantile
+   %     5) the aquifer thickness from that trend, and its uncertainty on
+   %        calendars with and without leap days
+   %     6) the BS04 and RS05 aquifer properties at b = 3/2, where the two
+   %        solutions coincide
+   %
+   % A synthetic set of exact recessions, whose starting tau follows a
+   % Pareto tail with alpha = 1.5, checks the event fits and the tau sample
+   % against the known recession, and the divergent case, where the mean
+   % tau and the expected flow do not exist.
    %
    % Notes:
    %     A) A negative test verifies that the code errors/fails in an
@@ -28,31 +32,26 @@ classdef TestBaseflow < matlab.unittest.TestCase
 
    properties (TestParameter)
       SetupOption = {'install','uninstall','dependencies','addpath','savepath','rmpath','delpath'};
-      VarStr = {'Q','dQdt','aQb'};
-      DerivMethod = {'CTS'}; % {'ETS','VTS','CTS'}
-      CtsMethod = {'B1','B2','F1','F2','C2','C4'};
-      FitMethod = {'ols','nls','mean','median'};
-      RecessionExponent = {1.0,1.5}; % linear and non-linear
-      OrderOption = struct('default', {{}}, 'order1', {{'order', 1}});
-      RecessionParameterNames = {'b','n','alpha'};
-      PowerLawExponent = {1.5, 2.0, 2.5, 3.0, 3.5};
-      TauValue = {10, 100, 1000};
-      PhiValue = {0.001, 0.01, 0.1};
-      BasinName = {'ALL_BASINS','KUPARUK R NR DEADHORSE AK'};
-      MinEventDuration = {3,6,9};
-      RmConvex = {false, true};
-
-      % Short signals with one peak, one valley, or several extrema. The
-      % one-extremum signals check the peakfinder monotone branch.
-      ExtremaSignal = struct( ...
-         'onepeak', [1 2 3 2 1], ...
-         'peakthenfall', [2 3 1 0 -1], ...
-         'threepoints', [0 1 0], ...
-         'twopeaks', [1 2 3 2 5 1], ...
-         'peakvalleypeak', [10 12 15 13 11 12 11], ...
-         'onevalley', [10 9 8 9 10]);
-      ExtremaFunction = {'islocalmax', 'islocalmin'};
       EventFunction = {'getevents', 'eventfinder', 'wrapevents'};
+   end
+
+   properties (Constant)
+      % Kuparuk basin area [m2], drainage density [1/km], and reference
+      % aquifer thickness [m] of baseflow_demo_kuparuk.
+      A = 8.6545e9
+      Dd = 0.8
+      D = 0.47
+
+      % The recession exponent of the Kuparuk annual workflow, as the 1.1.0
+      % release notes record it, and the rounding of that value.
+      kuparukb = 1.3540
+      btol = 5e-4
+
+      % The synthetic recessions follow -dQ/dt = a*Q^b for eight days. The
+      % starting tau of each event comes from a Pareto tail with pdf
+      % exponent alpha and lower bound tau0 days.
+      synth = struct('a', 1e-3, 'b', 1.5, 'alpha', 1.5, 'tau0', 5, ...
+         'nevents', 60, 'ndays', 8)
    end
 
    properties (Access = private)
@@ -61,23 +60,69 @@ classdef TestBaseflow < matlab.unittest.TestCase
       % zero open figures without touching pre-existing user figures.
       figsbefore
 
-      % The first recession event in the example data. The class setup
-      % builds it once so the fitevents tests do not repeat getevents.
-      firstevent
+      % Outputs of the Kuparuk chain, and the synthetic events, their
+      % fits, and their true tau.
+      Chain
+      Synth
    end
 
    methods (TestClassSetup)
-      function loadfirstevent(testCase)
-         % Detect events in the example data. Keep only the first event so
-         % each fitevents call fits one event and the tests stay fast.
-         [T, Q, R] = baseflow.loadExampleData();
-         Events = baseflow.getevents(T, Q, R);
-         ievent = Events.eventTags == 1;
-         testCase.firstevent = struct( ...
-            'eventTime', Events.eventTime(ievent), ...
-            'eventFlow', Events.eventFlow(ievent), ...
-            'eventRain', Events.eventRain(ievent), ...
-            'eventTags', Events.eventTags(ievent));
+      function runkuparukchain(testCase)
+         % Run the chain of baseflow_demo_kuparuk once, with the demo
+         % options but without figures or the bootstrap.
+         % trendplot draws its figures off screen whatever showfig asks, so
+         % close the figures the chain leaves.
+         setupfigs = findall(0, 'Type', 'figure');
+         testCase.addTeardown(@() closenewfigs(setupfigs));
+         L = testCase.A*testCase.Dd/1000;
+         [T, Q, R] = baseflow.loadExampleData('kuparuk');
+         opts = baseflow.setopts('globalfit', 'drainagearea', testCase.A, ...
+            'aquiferdepth', testCase.D, 'streamlength', L, ...
+            'drainagedensity', testCase.Dd, 'bootfit', false, ...
+            'plotfits', false);
+         Events = baseflow.wrapevents(T, Q, R, ...
+            baseflow.setopts('getevents', 'asannual', true));
+         [Fits, K] = baseflow.fitevents(Events, baseflow.setopts('fitevents'));
+         GlobalFit = baseflow.globalfit(K, Events, Fits, opts);
+         [Qb, dQbdt, Qa] = baseflow.baseflowtrend(T, Q, testCase.A, ...
+            'pctl', GlobalFit.pQexp);
+         [Db, Sb] = baseflow.aquiferthickness(GlobalFit.b, GlobalFit.tau, ...
+            GlobalFit.phi, Qb, true);
+
+         testCase.Chain = struct('T', T, 'Q', Q, 'Events', Events, ...
+            'Fits', Fits, 'K', K, 'GlobalFit', GlobalFit, 'opts', opts, ...
+            'Qb', Qb, 'dQbdt', dQbdt, 'Qa', Qa, 'Db', Db, 'Sb', Sb, 'L', L);
+      end
+
+      function buildsyntheticevents(testCase)
+         % Exact recessions from Qnonlin, one per event, fit with the CTS
+         % stencil. tau = Q^(1-b)/a grows by b-1 per day, so day t of an
+         % event that starts at tau0 has tau = tau0 + (b-1)*t.
+         s = testCase.synth;
+         u = ((1:s.nevents)' - 0.5)/s.nevents;
+         taustart = s.tau0*(1 - u).^(-1/(s.alpha - 1));
+         tday = (0:s.ndays-1)';
+         [t, Q, tags, tautrue] = deal(cell(s.nevents, 1));
+         for k = 1:s.nevents
+            Q0 = (s.a*taustart(k))^(1/(1-s.b));
+            Q{k} = baseflow.Qnonlin(s.a, s.b, Q0, tday);
+            t{k} = 20*(k-1) + tday;
+            tags{k} = k*ones(s.ndays, 1);
+            tautrue{k} = taustart(k) + (s.b-1)*tday;
+         end
+         Events = struct('eventTime', vertcat(t{:}), ...
+            'eventFlow', vertcat(Q{:}), 'eventTags', vertcat(tags{:}));
+         Events.eventRain = zeros(size(Events.eventFlow));
+         Events.inputFlow = Events.eventFlow;
+         [Fits, K] = baseflow.fitevents(Events, 'derivmethod', 'CTS');
+
+         area = 1e9;
+         opts = baseflow.setopts('globalfit', 'drainagearea', area, ...
+            'aquiferdepth', 0.5, 'streamlength', area*testCase.Dd/1000, ...
+            'drainagedensity', testCase.Dd, 'bootfit', false, ...
+            'plotfits', false);
+         testCase.Synth = struct('Events', Events, 'Fits', Fits, 'K', K, ...
+            'opts', opts, 'tautrue', vertcat(tautrue{:}));
       end
    end
 
@@ -96,554 +141,6 @@ classdef TestBaseflow < matlab.unittest.TestCase
    end
 
    methods (Test)
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_getstring(testCase,VarStr)
-
-         switch VarStr
-            case 'Q'
-               expected = '$Q$';
-            case 'dQdt'
-               expected = '$-\mathrm{d}Q/\mathrm{d}t$';
-            case 'aQb'
-               expected = '$-\mathrm{d}Q/\mathrm{d}t = aQ^b$';
-         end
-
-         % Get actual result
-         returned = baseflow.getstring(VarStr);
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual(returned,expected)
-      end
-
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_basinname(testCase,BasinName)
-
-         % get the basin name from the database
-         returned = baseflow.basinname(BasinName);
-
-         % A valid basin name maps to itself
-         expected = BasinName;
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual(returned,expected);
-      end
-      
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_getdqdt(testCase,DerivMethod)
-
-         % define the test data
-         a = 1e-2;
-         b = 1.5;
-         q0 = 1;
-         [t, q] = baseflow.generateTestData(a,b,q0);
-
-         % Calculate expected result for CTS method
-         dq = q-[nan; q(1:end-1)];
-         dt = (t(2)-t(1));
-         expected = dq./dt;
-
-         % Get the actual result. The test data has no rainfall record.
-         [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual(returned,expected)
-
-         % for testing:
-         % DerivMethod = 'CTS';
-         % [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
-         % isequal(returned,expected)
-         % scatterfit(returned,expected)
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitab(testCase,RecessionExponent,FitMethod)
-
-         % define values to generate the test data
-         a = 1e-2;
-         q0 = 100;
-         t = 1:100;
-         b = RecessionExponent;
-
-         % for testing
-         % FitMethod = 'ols';
-         % b = 1.5;
-         % [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-         % figure; loglog(q,-dqdt,'o')
-         % also useful to see this:
-         % baseflow.Qnonlin(a,b,q0,t,true)
-
-         % f = baseflow.fitab(q,dqdt,'mean'); ab = f.ab
-         % f = baseflow.fitab(q,dqdt,'ols'); ab = f.ab
-         % f = baseflow.fitab(q,dqdt,'nls'); ab = f.ab
-         % f = baseflow.fitab(q,dqdt,'median'); ab = f.ab
-
-         % generate the test data
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-
-         % fit the data
-         switch FitMethod
-            case {'mean','median'}
-               Fit = baseflow.fitab(q,dqdt,FitMethod,'order',b);
-            otherwise
-               Fit = baseflow.fitab(q,dqdt,FitMethod);
-         end
-
-         % Get the expected result
-         expected = [a;b];
-
-         % Get the actual result
-         returned = Fit.ab;
-
-         % for testing:
-         % f = baseflow.fitab(q,dqdt,FitMethod); returned = f.ab
-         % isequal(returned,expected)
-
-         % Allow a 1 percent relative error in each of a and b
-         tol = [0.01; 0.01];
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual(returned,expected,'RelTol',tol)
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitab_order1(testCase,FitMethod)
-
-         % generate nonlinear (b = 1.5) test data
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-
-         % fit with 'order' = 1: methods that estimate the slope redirect
-         % to 'mean'; 'mean' and 'median' force the slope directly
-         Fit = baseflow.fitab(q,dqdt,FitMethod,'order',1);
-
-         % Verify the fitted exponent is forced to 1 (linear reservoir)
-         returned = Fit.ab(2); % Fit.ab stores [a; b]
-         expected = 1;
-         testCase.verifyEqual(returned,expected);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitab_order1_envelope(testCase)
-
-         % generate test data with deterministic scatter so the 0.95
-         % quantile envelope and the mean give different intercepts
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-         q = q .* (1 + 0.2*sin((1:numel(q))'));
-
-         % 'envelope' with 'order' = 1 must stay an envelope fit through
-         % 'refqtls'; it must not redirect to the 'mean' method
-         FitE = baseflow.fitab(q,dqdt,'envelope', ...
-            'refqtls',[0.95 0.95],'order',1);
-         FitM = baseflow.fitab(q,dqdt,'mean','order',1);
-
-         % Verify the slope is 1 and the intercept differs from the mean
-         % fit. Fit.ab stores [a; b].
-         b_returned = FitE.ab(2);
-         b_expected = 1;
-         testCase.verifyEqual(b_returned,b_expected);
-         a_returned = FitE.ab(1);
-         a_notexpected = FitM.ab(1);
-         testCase.verifyNotEqual(a_returned,a_notexpected);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitab_order_scope(testCase,OrderOption)
-
-         % generate nonlinear (b = 1.5) test data
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-
-         % 'qtl' passes 'order' to quantreg as the polynomial degree, so
-         % 'order' = 1 must run quantile regression, not the 'mean' method.
-         % 'qtl' with no 'order' must apply the quantreg default of 1 and
-         % run quantile regression. A nan parser default for 'order' crashes it.
-         Fit = baseflow.fitab(q,dqdt,'qtl',OrderOption{:});
-         returned = Fit.fselect;
-         expected = 'qtl';
-         testCase.verifyEqual(returned,expected);
-
-         % 'mle' is unsupported and must error with or without 'order' = 1
-         testCase.verifyError( ...
-            @() baseflow.fitab(q,dqdt,'mle',OrderOption{:}), ?MException);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitab_ols_confint(testCase)
-
-         % The Curve Fitting Toolbox fit and confint give independent expected
-         % values for the 'ols' method, so skip the test without the toolbox
-         testCase.assumeFalse(isempty(ver('curvefit')), ...
-            'test_fitab_ols_confint requires the Curve Fitting Toolbox');
-
-         % generate nonlinear (b = 1.5) test data with deterministic
-         % scatter, unequal weights, and a mask that drops every fifth point
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-         k = (1:numel(q))';
-         q = q .* (1 + 0.2*sin(k));
-         weights = 1 + mod(k,3);
-         mask = mod(k,5) ~= 0;
-         alpha = 0.9;
-
-         % fit -dq/dt = aQ^b with the 'ols' method
-         Fit = baseflow.fitab(q,dqdt,'ols','weights',weights, ...
-            'mask',mask,'alpha',alpha);
-
-         % Expected values: a weighted poly1 fit of log(-dq/dt) on log(q).
-         % fitab documents that masked points get zero weight.
-         fopts = fitoptions('Method','LinearLeastSquares', ...
-            'Weights',weights.*mask);
-         f = fit(log(q),log(-dqdt),'poly1',fopts);
-
-         % coeffvalues is [slope intercept]. confint has rows [lower; upper]
-         % with the same column order. Fit stores a = exp(intercept).
-         p = coeffvalues(f);
-         pci = confint(f,alpha);
-         ab_expected = [exp(p(2)); p(1)];
-         ci_expected = [exp(pci(:,2)'); pci(:,1)'];
-
-         ab_returned = Fit.ab;
-         ci_returned = [Fit.aL Fit.aH; Fit.bL Fit.bH];
-
-         % Both are least-squares solutions, so allow rounding error only
-         tol = 1e-10;
-         testCase.verifyEqual(ab_returned,ab_expected,'RelTol',tol);
-         testCase.verifyEqual(ci_returned,ci_expected,'RelTol',tol);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_plotdqdt_labelplot(testCase)
-
-         % generate nonlinear (b = 1.5) test data
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
-
-         % Count refline arrows. labelrefline draws each one as a patch
-         % with HandleVisibility off, so findall finds it and findobj does
-         % not.
-         arrowtype = 'patch';
-
-         % 'labelplot' defaults to false: no refline arrows
-         h = baseflow.plotdqdt(q,dqdt);
-         narrows_returned = numel(findall(h.ax,'Type',arrowtype));
-         narrows_expected = 0;
-         testCase.verifyEqual(narrows_returned,narrows_expected);
-         % Close only the figure this test created, so a pre-existing user
-         % figure survives; plotdqdt opens a fresh figure for the next call.
-         closenewfigs(testCase.figsbefore)
-
-         % 'labelplot' true draws at least one refline arrow (see
-         % labelReflines)
-         h = baseflow.plotdqdt(q,dqdt,'labelplot',true);
-         nlabeled_returned = numel(findall(h.ax,'Type',arrowtype));
-         testCase.verifyGreaterThan(nlabeled_returned,0);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitevents_fitorder(testCase)
-
-         % build a one-event Events structure from nonlinear test data
-         a = 1e-2;
-         b = 1.5;
-         q0 = 100;
-         t = 1:100;
-         % Note: generateTestData returns its own t, sized to match q
-         [t,q] = baseflow.generateTestData(a,b,q0,t);
-         Events.eventTime = t;
-         Events.eventFlow = q;
-         Events.eventRain = zeros(size(q));
-         Events.eventTags = ones(size(q));
-
-         % fitevents must pass 'fitorder' to fitab so the event is fit
-         % with a linear reservoir model
-         [~,Results] = baseflow.fitevents(Events,'fitorder',1);
-
-         % Verify a fit was returned and the exponent is forced to 1
-         returned = Results.b;
-         testCase.verifyNotEmpty(returned);
-         expected = ones(size(returned));
-         testCase.verifyEqual(returned,expected);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_fitevents_ctsmethod(testCase,CtsMethod)
-
-         % fitevents must pass 'ctsmethod' to getdqdt, so the dq/dt it
-         % stores for the event equals a direct getdqdt call
-         Event = testCase.firstevent;
-         [~,expected] = baseflow.getdqdt(Event.eventTime, ...
-            Event.eventFlow,Event.eventRain,'CTS','ctsmethod',CtsMethod);
-         returned = baseflow.fitevents(Event,'derivmethod','CTS', ...
-            'ctsmethod',CtsMethod,'plotfits',false);
-         testCase.verifyEqual(returned.dqdt,expected);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_setopts_ctsmethod(testCase)
-
-         % The fitevents options default to the traditional backward
-         % first-order stencil
-         returned = baseflow.setopts('fitevents');
-         expected = 'B1';
-         testCase.verifyEqual(returned.ctsmethod,expected);
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_conversions(testCase,RecessionParameterNames)
-
-         switch RecessionParameterNames
-            case 'b'
-               % convert the recession exponent b to n for a flat aquifer
-               b = 1.5;
-               expected = 0; % n = (3 - 2b)/(b - 2)
-               returned = baseflow.conversions(b,'b','n','isflat',true);
-
-               % Verify that the actual result matches the expected result
-               testCase.verifyEqual(returned,expected);
-
-            case 'n'
-               % convert the conductivity exponent n to b for a flat aquifer
-               n = -1;
-               expected = 1; % b = (2n + 3)/(n + 2)
-               returned = baseflow.conversions(n,'n','b','isflat',true);
-
-               % Verify that the actual result matches the expected result
-               testCase.verifyEqual(returned,expected);
-
-            case 'alpha'
-               % convert the power law exponent alpha to b
-               alpha = 4.0;
-               expected = 1.25; % b = 1 + 1/alpha
-               returned = baseflow.conversions(alpha,'alpha','b', ...
-                  'isflat',true);
-
-               % Verify that the actual result matches the expected result
-               testCase.verifyEqual(returned,expected);
-         end
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_plfitb(testCase,PowerLawExponent)
-
-         % generate power-law distributed test data
-         x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
-
-         % compute the fit
-         [~,returned] = baseflow.plfitb(x); % the second output is alpha
-         expected = PowerLawExponent;
-
-         % The estimate from random samples varies. Allow 0.1 absolute error.
-         tol = 0.1;
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual(returned,expected,'AbsTol',tol);
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_aquiferstorage(testCase,RecessionExponent)
-
-         % make test data
-         qmin = 1;
-         qmax = 100;
-         a = 1;
-         b = RecessionExponent;
-
-         % compute the expected result
-         switch RecessionExponent
-            case 1.0
-               Smin_expected = 1/a*qmin;
-               Smax_expected = 1/a*qmax;
-
-            case 1.5
-               Smin_expected = 1/a/(2-b).*(qmin.^(2-b));
-               Smax_expected = 1/a/(2-b).*(qmax.^(2-b));
-         end
-
-         % get the actual result
-         [Smin_returned,Smax_returned] = baseflow.aquiferstorage( ...
-            a,b,qmin,qmax);
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual([Smin_returned,Smax_returned], ...
-            [Smin_expected,Smax_expected]);
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_aquiferthickness(testCase,RecessionExponent,TauValue,PhiValue)
-
-         % note: this implicitly tests baseflow.conversions
-
-         % make test data
-         Qb = 2;
-         b = RecessionExponent;
-         tau = TauValue;
-         phi = PhiValue;
-
-         % compute the expected result
-         D_expected = tau/phi/(4-2*b)*Qb;
-         S_expected = D_expected*phi;
-
-         % get the actual result
-         [D_returned,S_returned] = baseflow.aquiferthickness(b,tau,phi,Qb);
-
-         % Verify that the actual result matches the expected result
-         testCase.verifyEqual([D_returned,S_returned],[D_expected,S_expected]);
-
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_eventfinder(testCase, MinEventDuration, RmConvex)
-
-         % MinEventDuration = 9;
-         % RmConvex = true;
-
-         % Generate synthetic data. prec controls how large the test vectors are
-         prec = 2;
-         [t, q] = prepareEventData(testCase, prec); %#ok<*INUSD>
-         [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex);
-
-         % Define expected t and q
-         t_expected = cell(numel(starts), 1);
-         q_expected = cell(numel(starts), 1);
-         for n = 1:numel(starts)
-            t_expected{n, 1} = transpose(t(starts(n):ends(n)));
-            q_expected{n, 1} = transpose(q(starts(n):ends(n)));
-         end
-
-         % get the actual result. The synthetic signal has no rainfall record.
-         % rmnochange is false, so rmax has no effect, but it must be > 1.
-         [t_returned,q_returned] = baseflow.eventfinder(t,q,[], ...
-            'nmin',MinEventDuration,'fmax',0,'rmax',2,'rmin',0, ...
-            'rmconvex',RmConvex,'rmnochange',false,'rmrain',false);
-
-         % Largest allowed count of event times that are in only one of the
-         % expected and returned series (see numdiff below)
-         maxdiff = 4;
-
-         % % Verify that the actual result matches the expected result to within
-         % a difference of up to two elements to account for the +/- 1 day
-         % criteria applied in the eventfinder filters.
-         for n = 1:numel(t_returned)
-            [commonT, ia, ib] = intersect(t_expected{n}, t_returned{n});
-            numdiff = length(t_expected{n}) + length(t_returned{n}) ...
-               - 2*length(commonT);
-
-            if numdiff <= maxdiff
-               testCase.verifyEqual(t_returned{n}(ib), t_expected{n}(ia));
-               testCase.verifyEqual(q_returned{n}(ib), q_expected{n}(ia));
-            else
-               error('Difference greater than 2 elements detected.');
-            end
-         end
-
-         % Plot the result
-         if MinEventDuration == 3
-            % For now, use the first test value to determine whether to plot the
-            % result. TODO: add a method to plot in a subplot for each test
-            % parameter.
-            figure; plot(t,q); hold on;
-            plot(t(inflect), q(inflect), 'x', 'MarkerSize', 20, 'Color', 'r');
-
-            for n = 1:numel(t_returned)
-               plot(t_expected{n}, q_expected{n}, 'LineWidth', 2, 'Color', 'k');
-               plot(t_returned{n},q_returned{n},':','Color', 'g');
-            end
-
-            % Adjust legend and title based on rmconvex
-            if RmConvex
-               legend('Signal', 'Inflection Points',  ...
-                  'True Concave Up Declining Flow', 'eventfinder');
-               title('test rmconvex')
-            else
-               legend('Signal', 'Inflection Points', ...
-                  'True Declining Flow', 'eventfinder');
-               title('test eventfinder')
-            end
-         end
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_MinEventDuration(testCase, MinEventDuration, RmConvex)
-
-         % Generate synthetic data. prec controls how large the test vectors are
-         prec = 2;
-         [t, q] = prepareEventData(testCase, prec);
-         [starts, ends] = eventIndices(testCase, t, prec, RmConvex);
-
-         % test an event that is shorter than the MinEventDuration
-         idx = sort(randi(ends(1)-starts(1), MinEventDuration-1, 1));
-         t = t(starts(1)+idx);
-         q = q(starts(1)+idx);
-
-         t_expected = [];
-         q_expected = [];
-
-         % figure; plot(t_expected, q_expected, '-o')
-         % The synthetic signal has no rainfall record. rmnochange is false,
-         % so rmax has no effect, but it must be > 1.
-         [t_returned,q_returned] = baseflow.eventfinder(t, q, [], 'nmin', ...
-            MinEventDuration, 'fmax', 0, 'rmax', 2, 'rmin', 0, 'rmconvex', ...
-            RmConvex, 'rmnochange', false, 'rmrain', false);
-
-         testCase.verifyEqual(t_returned, t_expected);
-         testCase.verifyEqual(q_returned, q_expected);
-
-         % eventfinder returns empty, not an error, for an event shorter than
-         % nmin; the equality checks above cover that case.
-      end
-
-      %-------------------------------------------
-      %-------------------------------------------
-      function test_islocalextrema(testCase, ExtremaSignal, ExtremaFunction)
-
-         % The private peakfinder wrappers must find the same interior
-         % extrema as the MATLAB functions of the same name
-         customfunction = baseflow.privatefunction(ExtremaFunction);
-         expected = feval(ExtremaFunction, ExtremaSignal);
-         returned = customfunction(ExtremaSignal);
-         testCase.verifyEqual(returned, expected)
-      end
 
       %-------------------------------------------
       %-------------------------------------------
@@ -684,109 +181,198 @@ classdef TestBaseflow < matlab.unittest.TestCase
             ['MATLAB:' validator ':notGreater'])
       end
 
-   end
+      function test_kuparukRecessionExponent(testCase)
+         % globalfit recovers the recession exponent of the Kuparuk annual
+         % workflow from the tau sample of the event fits.
+         returned = testCase.Chain.GlobalFit.b;
 
-   methods (Access = private) % Helper methods
-
-      function [t, q] = prepareEventData(testCase, prec) %#ok<*INUSD>
-         % This function handles some common operations related to test data
-
-         if nargin < 2
-            prec = 2; % precision, controls how large the test vectors are
-         end
-
-         % generate synthetic data
-         dpi = 10^-prec;
-         t = -2*pi:dpi:2*pi;
-         q = 1 + sin(t);
+         testCase.verifyEqual(returned, testCase.kuparukb, ...
+            'AbsTol', testCase.btol)
       end
 
-      function [starts, ends, inflect] = eventIndices(testCase, t, prec, RmConvex)
+      function test_globalFitUsesTheTail(testCase)
+         % The tail starts at the tau0 sample and holds no tau below it. The
+         % mean tau follows tau0 and b, and the expected flows follow a, b,
+         % and the mean tau. pQexp is the share of daily flows below Qexp.
+         % a is positive and phi is a drainable porosity in (0, 1).
+         G = testCase.Chain.GlobalFit;
+         flow = testCase.Chain.Events.inputFlow;
+         flow = flow(flow > 0);
+         tol = 1e-12;
 
-         if RmConvex
-            % Find the points where the first derivative cos(t) is negative and
-            % the second derivative -sin(t) is positive.
-            idxconcave = find(cos(t) < 0 & (-sin(t)) > 0);
-            intervals = [find(diff(idxconcave) ~= 1)' numel(idxconcave)];
-            starts = [idxconcave(1); idxconcave(intervals(1:end-1) + 1)];
-            ends = idxconcave(intervals);
+         testCase.verifyTrue(all(G.taumask(G.x == G.tau0)))
+         testCase.verifyTrue(all(G.x(G.taumask) >= G.tau0))
+         testCase.verifyEqual(G.tau, G.tau0*(2-G.b)/(3-2*G.b), 'RelTol', tol)
+         testCase.verifyEqual(G.Qexp, (G.a*G.tau)^(1/(1-G.b)), 'RelTol', tol)
+         testCase.verifyEqual(G.Q0, G.Qexp*(3-G.b)/(2-G.b), 'RelTol', tol)
+         testCase.verifyEqual(G.pQexp, mean(flow < G.Qexp), ...
+            'AbsTol', 2/numel(flow))
+         testCase.verifyGreaterThan(G.a, 0)
+         testCase.verifyGreaterThan(G.phi, 0)
+         testCase.verifyLessThan(G.phi, 1)
+      end
 
-            % Inflection points where the second derivative equals zero
-            inflect = find(abs(-sin(t)) <= 10^-prec);
+      function test_streamlengthKeptUnlessInconsistent(testCase)
+         % globalfit replaces a given streamlength with A*Dd/1000 only when
+         % a given drainage density disagrees with it. So the Kuparuk fit
+         % raises no warning for a streamlength given alone. It also raises
+         % none for a streamlength that equals A*Dd/1000 up to the rounding
+         % of the product order. For an area of 3e9 and a density of 0.7,
+         % A*Dd/1000 and Dd/1000*A differ in the last bit.
+         C = testCase.Chain;
+         area = 3e9;
+         density = 0.7;
+         alone = C.opts;
+         alone.drainagedensity = nan;
+         alone.streamlength = testCase.A/1000;
+         rounded = C.opts;
+         rounded.drainagearea = area;
+         rounded.drainagedensity = density;
+         rounded.streamlength = area*density/1000;
+         inconsistent = alone;
+         inconsistent.drainagedensity = density;
+         fit = @(opts) baseflow.globalfit(C.K, C.Events, C.Fits, opts);
 
-         else
-            % Find the maxima and minima (where d/dt sin(t) == 0)
-            idxminmax = find(round(cos(t),prec)==0);
-            starts = idxminmax(1:2:end); % +1 or +2 depending on eventfinder
-            ends = idxminmax(2:2:end); % -1
-            inflect = idxminmax;
-         end
+         testCase.verifyWarningFree(@() fit(alone))
+         testCase.verifyWarningFree(@() fit(rounded))
+         testCase.verifyWarning(@() fit(inconsistent), ...
+            'baseflow:globalfit:inconsistentStreamlength')
+      end
+
+      function test_baseflowTrendAtExpectedFlowQuantile(testCase)
+         % baseflowtrend fits the pQexp quantile of the annual flow. So, within
+         % one year, at most pQexp of the years lie strictly below its line,
+         % and at least pQexp lie on or below it.
+         pQexp = testCase.Chain.GlobalFit.pQexp;
+         Qa = testCase.Chain.Qa;
+         trendline = testCase.Chain.dQbdt;
+         slack = 1/numel(Qa);
+
+         testCase.verifyLessThanOrEqual(mean(Qa < trendline), pQexp + slack)
+         testCase.verifyGreaterThanOrEqual(mean(Qa <= trendline), ...
+            pQexp - slack)
+      end
+
+      function test_thicknessFollowsBaseflow(testCase)
+         % aquiferthickness scales the baseflow of each year by one factor
+         % of tau, phi, and b, and the storage is phi times the thickness.
+         G = testCase.Chain.GlobalFit;
+         Db = testCase.Chain.Db;
+         ratio = Db./testCase.Chain.Qb;
+         tol = 1e-12;
+
+         testCase.verifyEqual(ratio, ratio(1)*ones(size(ratio)), 'RelTol', tol)
+         testCase.verifyEqual(testCase.Chain.Sb, G.phi*Db, 'RelTol', tol)
+      end
+
+      function test_uncertaintyCoverageFactor(testCase)
+         % dndtuncertainty multiplies its combined standard uncertainty by
+         % the coverage factor norminv(1-alpha/2). So the result for alpha
+         % 0.32 is the result for alpha 0.05 times the ratio of the factors.
+         % One seed gives both calls the same phi bootstrap. Qb is in cm/yr,
+         % as baseflow_demo_kuparuk passes it. No figure stays open.
+         C = testCase.Chain;
+         alpha_default = 0.05;
+         alpha_onesigma = 0.32;
+         ratio_expected = norminv(1 - alpha_onesigma/2) ...
+            / norminv(1 - alpha_default/2);
+         tol = 0.01;
+         rngstate = rng;
+         testCase.addTeardown(@() rng(rngstate));
+
+         rng(1)
+         sig_default = baseflow.dndtuncertainty(C.T, C.Qb.*365.25, C.K, ...
+            C.Fits, C.GlobalFit, C.opts, alpha_default);
+         rng(1)
+         sig_onesigma = baseflow.dndtuncertainty(C.T, C.Qb.*365.25, C.K, ...
+            C.Fits, C.GlobalFit, C.opts, alpha_onesigma);
+
+         testCase.verifyTrue(isfinite(sig_default))
+         testCase.verifyEqual(sig_onesigma/sig_default, ratio_expected, ...
+            'RelTol', tol)
+         testCase.verifyEmpty(setdiff(findall(0, 'Type', 'figure'), ...
+            testCase.figsbefore))
+      end
+
+      function test_uncertaintyAcceptsLeapDays(testCase)
+         % dndtuncertainty uses T only for the calendar years of Qb. A daily
+         % calendar with leap days spans the same years as the Kuparuk
+         % record, which has none. So one seed gives the same uncertainty
+         % for both.
+         C = testCase.Chain;
+         years = year(C.T([1 end]));
+         Tleap = transpose(datetime(years(1), 1, 1):datetime(years(2), 12, 31));
+         rngstate = rng;
+         testCase.addTeardown(@() rng(rngstate));
+
+         rng(1)
+         expected = baseflow.dndtuncertainty(C.T, C.Qb.*365.25, C.K, ...
+            C.Fits, C.GlobalFit, C.opts);
+         rng(1)
+         returned = baseflow.dndtuncertainty(Tleap, C.Qb.*365.25, C.K, ...
+            C.Fits, C.GlobalFit, C.opts);
+
+         testCase.verifyEqual(returned, expected)
+      end
+
+      function test_aquiferPropsAgreeAtHomogeneousLimit(testCase)
+         % At b = 3/2 the RS05 solution has n = 0, where it reduces to the
+         % BS04 solution. So the two give the same k, D, and Q0. The BS04
+         % constant 4.804 is published to three decimals. The inputs follow
+         % the steps of baseflow_demo_3 on the Kuparuk point cloud of the
+         % class setup: its nls a, and phi = 0.033.
+         q = testCase.Chain.Fits.q;
+         dqdt = testCase.Chain.Fits.dqdt;
+         Fit = baseflow.fitab(q, dqdt, 'nls');
+         phi = 0.033;
+         Dref = 0.5;
+         tol = 1e-3;
+
+         P_expected = baseflow.aquiferprops(q, dqdt, Fit.a, 1.5, 'BS04', ...
+            phi, testCase.A, testCase.Chain.L);
+         P_returned = baseflow.aquiferprops(q, dqdt, Fit.a, 1.5, 'RS05', ...
+            phi, testCase.A, testCase.Chain.L, 'D', Dref);
+
+         testCase.verifyEqual([P_returned.k P_returned.D P_returned.Q0], ...
+            [P_expected.k P_expected.D P_expected.Q0], 'RelTol', tol)
+      end
+
+      function test_eventFitsRecoverTheRecession(testCase)
+         % fitevents recovers the b of each exact recession, and eventtau
+         % turns the event flows into the true tau of each day.
+         S = testCase.Synth;
+         b_expected = testCase.synth.b*ones(size([S.K.b]));
+         tol = 1e-2;
+
+         [tau_returned, ~, ~, tags_returned] = baseflow.eventtau(S.K, ...
+            S.Events, S.Fits, 'usefits', false);
+
+         testCase.verifyEqual([S.K.b], b_expected, 'RelTol', tol)
+         testCase.verifyEqual(tags_returned, S.Events.eventTags)
+         testCase.verifyEqual(tau_returned, S.tautrue, 'RelTol', tol)
+      end
+
+      function test_divergentTailHasNoExpectedFlow(testCase)
+         % The tau sample has alpha near 1.5, beyond the tau pole at
+         % alpha = 2, so the mean tau diverges. globalfit warns, the mean tau
+         % is Inf, and the four expected-flow outputs are NaN. The baseflow
+         % trend then has no quantile to fit, so it rejects pQexp. With
+         % plotfits false, globalfit opens no figure.
+         S = testCase.Synth;
+         poleid = 'baseflow:expectedtau:tauPole';
+         nan_expected = nan(1, 4);
+
+         G = testCase.verifyWarning(@() baseflow.globalfit(S.K, S.Events, ...
+            S.Fits, S.opts), poleid);
+
+         testCase.verifyLessThanOrEqual(G.alpha, 2)
+         testCase.verifyEqual(G.tau, Inf)
+         testCase.verifyEqual([G.Qexp G.Q0 G.pQexp G.pQ0], nan_expected)
+         testCase.verifyEmpty(setdiff(findall(0, 'Type', 'figure'), ...
+            testCase.figsbefore))
+         testCase.verifyError(@() baseflow.baseflowtrend(testCase.Chain.T, ...
+            testCase.Chain.Q, testCase.A, 'pctl', G.pQexp), ...
+            'MATLAB:InputParser:ArgumentFailedValidation')
       end
    end
 end
-
-
-%       % for debugging test_eventfinder
-%       % --------------
-%
-%       % if t_expected, t_returned sizes don't match, try adjusting whether the
-%       % point prior to the min is removed. For example, if the test uses this
-%       % syntax:
-%       %
-%       % ievent = idx(n,1)+2 : idx(n,2);
-%       %
-%       % Then try changing it to:
-%       %
-%       % ievent = idx(n,1)+2 : idx(n,2) - 1;
-%       %
-%       % i.e., remove the one prior to the min.
-%       %
-%       % and visa versa
-%
-%       % Try removing the min, then see if they are equal
-%       ievent1 = idx(1,1)+2 : idx(1,2)-1;
-%       ievent2 = idx(2,1)+2 : idx(2,2)-1;
-%
-%       % Try NOT removing the min
-%       % ievent1 = idx(1,1)+2 : idx(1,2);
-%       % ievent2 = idx(2,1)+2 : idx(2,2);
-%
-%       t_expected{1} = transpose(t(ievent1));
-%       q_expected{1} = transpose(q(ievent1));
-%       t_expected{2} = transpose(t(ievent2));
-%       q_expected{2} = transpose(q(ievent2));
-%
-%       isequal(t_expected{1},t_returned{1})
-%       isequal(t_expected{2},t_returned{2})
-%
-%       % If that says they are equal, then the issue is with removing the min.
-%
-%       % Below here is ohter stuff I used for debugging.
-%       [size(t_expected{1}); size(t_returned{1})]
-%       [size(t_expected{2}); size(t_returned{2})]
-%
-%       % depending on which one is missing, reverse the setdiff
-%       [val1, i1] = setdiff(t_expected{1}, t_returned{1});
-%       [val1, i1] = setdiff(t_returned{1}, t_expected{1});
-%
-%       [val2, i2] = setdiff(t_expected{2}, t_returned{2})
-%       [val2, i2] = setdiff(t_returned{2}, t_expected{2})
-%
-%       loc = ~ismember(t_expected{1}, t_returned{1})
-%
-%       figure; plot(t,q); hold on;
-%       plot(t_expected{1},q_expected{1});
-%       plot(t_expected{2},q_expected{2});
-%       plot(t_returned{1},q_returned{1},'o','MarkerSize',6);
-%       plot(t_returned{2},q_returned{2},'o');
-%
-%       % minima should be at -pi/2, 3*pi/2
-%       % maxima should be at pi/2, -3*pi/2
-%       s1 = find(t+3*pi/2>0,1,'first')-1;
-%       e1 = find(t+pi/2>0,1,'first')-1;
-%       s2 = find(t-pi/2>0,1,'first')-1;
-%       e2 = find(t-3*pi/2>0,1,'first')-1;
-%
-%       % remove the peak + 1 day, and the min
-%       s1 = s1+2; s2 = s2+2;
-%       e1 = e1-1; e2 = e2-1;

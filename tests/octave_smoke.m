@@ -3,7 +3,8 @@
 % Plain script with bare asserts: load the example data, detect events,
 % fit events, fit the a-b parameters with 'nls' and 'ols', then draw the
 % point cloud, the event-scale fit plot, and a labeled reference line,
-% which are the figures with an Octave-specific branch.
+% which are the figures with an Octave-specific branch. Last, compute
+% aquifer storage, which must use a round that Octave supports.
 % TestSuite.fromFolder skips this script (not a valid test file), so it
 % does not join the MATLAB suite. Run it directly with
 % run('tests/octave_smoke.m') in either language. The script closes the
@@ -139,5 +140,15 @@ nshafts = numel(findall(axarrow, 'Tag', 'refarrowshaft'));
 close(figarrow);
 assert(nheads == 1)
 assert(nshafts == 1)
+
+% compute aquifer storage. aquiferstorage rounds b to two decimals to
+% choose its formula, with the one-argument round, which Octave also
+% provides. For b = 3/2, the storage of flow q is q^(2-b)/(a*(2-b)).
+astore = 1e-2;
+bstore = 1.5;
+qstore = [1 4];
+[Smin, Smax] = baseflow.aquiferstorage(astore, bstore, qstore(1), qstore(2));
+S_expected = qstore.^(2-bstore)/(astore*(2-bstore));
+assert(max(abs([Smin Smax] - S_expected)) <= 1e-12*max(S_expected))
 
 disp('octave_smoke: all asserts passed')

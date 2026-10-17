@@ -124,7 +124,7 @@
 %%
 % 
 %       drainagearea      : (numeric scalar) Drainage area upstream of streamflow gauge [m2]. Default = NaN.
-%       drainagedensity   : (numeric scalar) Drainage density = streamlength/drainagearea [km-1]. Default = 0.8.
+%       drainagedensity   : (numeric scalar) Drainage density = streamlength/drainagearea [km-1]. Default = NaN.
 %       aquiferdepth      : (numeric scalar) Reference aquifer thickness [m]. Default = NaN.
 %       streamlength      : (numeric scalar) Effective channel length [m]. Default = NaN.
 %       aquiferslope      : (numeric scalar) Effective aquifer slope [-]. Default = 0.0.

@@ -1,7 +1,10 @@
-function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,~)
+function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,alpha)
    %FITNLS_OCTAVE Fit -dQ/dt = aQ^b by nonlinear least squares in Octave.
    %
    %  [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,weights,alpha)
+   %
+   %  alpha is a confidence level, as in fitab, so regress takes the
+   %  significance level 1-alpha.
    %
    % See also
 
@@ -66,30 +69,31 @@ function [ab,ci,ok,fselect] = fitNLS_octave(x,y,logx,logy,~,~)
          ci = [nan nan; nan nan];
 
       case 'nlinfit'
-         ci = nlparci_octave(ab2, C2, 0.68);
+         ci = nlparci_octave(ab2, C2, alpha, numel(y));
          ab = ab2;
 
       case 'linear'
          %[B, BINT, R, RINT, STATS] = regress (Y, X, [ALPHA])
-         [ab,ci] = regress(logy,[ones(size(y)) logx]);
+         [ab,ci] = regress(logy,[ones(size(y)) logx],1-alpha);
          ci(1,:) = exp(ci(1,:));
          ab = [exp(ab(1)); ab(2)];
    end
 end
 
-function ci = nlparci_octave(beta, CovB, alpha)
+function ci = nlparci_octave(beta, CovB, alpha, nobs)
 
    % INPUTS:
    %   beta: coefficients from nlinfit
    %   CovB: covariance matrix from nlinfit
    %   alpha: desired confidence level (e.g., 0.68 for 68%)
+   %   nobs: number of fitted observations
    %
    % OUTPUTS:
    %   ci_lower: lower bounds of the confidence intervals
    %   ci_upper: upper bounds of the confidence intervals
 
    n = length(beta); % Number of coefficients
-   dof = n - 1; % Degrees of freedom
+   dof = nobs - n; % Residual degrees of freedom
    % t-score for desired confidence level
    t_score = tinv(1 - (1 - alpha) / 2, dof);
    se = sqrt(diag(CovB)); % Standard errors of the coefficients

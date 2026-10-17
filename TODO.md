@@ -276,6 +276,10 @@ reaches as known external. The rows below record the earlier state.
     (`globalfit.m:91-93`). `tests/test_corechain.m` requires zero new
     figures from a global fit with `plotfits` false, and
     `test_cloudphiPlotfit` covers both flag values.
+  - update (2026-10-13): `tests/test_corechain.m` is removed.
+    `TestBaseflow/test_divergentTailHasNoExpectedFlow` holds its check
+    that a global fit with `plotfits` false opens no figure. This
+    update supersedes the test_corechain names above.
 
 ## Sandbox rehabilitation (bfra-3kh.20 stub, W2)
 

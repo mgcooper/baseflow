@@ -29,7 +29,9 @@
 <h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../html_img/up.png"></a></h2>
 <div class="fragment"><pre class="comment"> SPECIALFUNCTIONS Special function ibarary required for recession analysis.
 
-  fnc = specialfunctions(fR1) returns the inverse incomplete beta function
+  fR1 = specialfunctions('fR1', n) and fR2 = specialfunctions('fR2', n)
+  return the early-time and late-time constants of Rupp and Selker
+  (2005) for the conductivity profile k(z) = kD*(z/D)^n.
 
  See also: <a href="Qnonlin.html" class="code" title="function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)">Qnonlin</a>
 
@@ -63,109 +65,117 @@ This function is called by:
 <div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function varargout = specialfunctions(funcname, varargin)</a>
 0002    <span class="comment">% SPECIALFUNCTIONS Special function ibarary required for recession analysis.</span>
 0003    <span class="comment">%</span>
-0004    <span class="comment">%  fnc = specialfunctions(fR1) returns the inverse incomplete beta function</span>
-0005    <span class="comment">%</span>
-0006    <span class="comment">% See also: Qnonlin</span>
+0004    <span class="comment">%  fR1 = specialfunctions('fR1', n) and fR2 = specialfunctions('fR2', n)</span>
+0005    <span class="comment">%  return the early-time and late-time constants of Rupp and Selker</span>
+0006    <span class="comment">%  (2005) for the conductivity profile k(z) = kD*(z/D)^n.</span>
 0007    <span class="comment">%</span>
-0008    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0009 
-0010    <span class="comment">% L2      = L.*L;</span>
-0011    <span class="comment">% phiA2   = phi.*A.^2;</span>
-0012    <span class="comment">% phiL2   = phi.*L.^2;</span>
-0013    <span class="comment">% kL2     = kD.*L.^2;</span>
-0014 
-0015    <span class="keyword">switch</span> funcname
+0008    <span class="comment">% See also: Qnonlin</span>
+0009    <span class="comment">%</span>
+0010    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0011 
+0012    <span class="comment">% L2      = L.*L;</span>
+0013    <span class="comment">% phiA2   = phi.*A.^2;</span>
+0014    <span class="comment">% phiL2   = phi.*L.^2;</span>
+0015    <span class="comment">% kL2     = kD.*L.^2;</span>
 0016 
-0017       <span class="keyword">case</span> <span class="string">'fR1'</span>
+0017    <span class="keyword">switch</span> funcname
 0018 
-0019          n     = varargin{1};
-0020          fR1   = <a href="#_sub1" class="code" title="subfunction fR1 = getfR1(n)">getfR1</a>(n);
-0021 
-0022          <span class="comment">% prep output</span>
-0023          varargout{1}   = fR1;
-0024 
-0025          <span class="comment">% % for extended functionality</span>
-0026          <span class="comment">% kD    = varargin{2};</span>
-0027          <span class="comment">% L     = varargin{3};</span>
-0028          <span class="comment">% phi   = varargin{4};</span>
-0029          <span class="comment">% b     = 3;</span>
-0030          <span class="comment">% N     = -3;</span>
-0031          <span class="comment">% c     = fR1./(kD.*phi.*L.^2);</span>
-0032 
-0033       <span class="keyword">case</span> <span class="string">'fR2'</span>
+0019       <span class="keyword">case</span> <span class="string">'fR1'</span>
+0020 
+0021          n     = varargin{1};
+0022          fR1   = <a href="#_sub1" class="code" title="subfunction fR1 = getfR1(n)">getfR1</a>(n);
+0023 
+0024          <span class="comment">% prep output</span>
+0025          varargout{1}   = fR1;
+0026 
+0027          <span class="comment">% % for extended functionality</span>
+0028          <span class="comment">% kD    = varargin{2};</span>
+0029          <span class="comment">% L     = varargin{3};</span>
+0030          <span class="comment">% phi   = varargin{4};</span>
+0031          <span class="comment">% b     = 3;</span>
+0032          <span class="comment">% N     = -3;</span>
+0033          <span class="comment">% c     = fR1./(kD.*phi.*L.^2);</span>
 0034 
-0035          n     = varargin{1};
-0036          fR2   = <a href="#_sub2" class="code" title="subfunction fR2 = getfR2(n)">getfR2</a>(n);
-0037 
-0038          <span class="comment">% prep output</span>
-0039          varargout{1}   = fR2;
-0040 
-0041          <span class="comment">% % for extended functionality</span>
-0042          <span class="comment">% kD    = varargin{2};</span>
-0043          <span class="comment">% L     = varargin{3};</span>
-0044          <span class="comment">% phi   = varargin{4};</span>
-0045          <span class="comment">% A     = varargin{5};</span>
-0046          <span class="comment">%</span>
-0047          <span class="comment">% b     = (2.*n+3)./(n+2);</span>
-0048          <span class="comment">% N     = -n./(n+2);</span>
-0049          <span class="comment">% c     = fR2./phi.*( (kD.*L.*L) ./ (2.^n.*(n+1).*A.^(n+3)));</span>
-0050 
-0051       <span class="keyword">case</span> <span class="string">'fLo'</span>
-0052          
-0053          assert(numel(varargin) &gt;= 4)
-0054          kD = varargin{2};
-0055          L = varargin{3};
-0056          phi = varargin{4};
-0057          
-0058          phiL2 = phi.*L.^2;
-0059 
-0060          h0overD = 0.0; <span class="comment">% assume h0=0, fLo=1.1361</span>
-0061          soln = 2; <span class="comment">% jul 2024 - soln was unset, so I used Lockington.</span>
-0062          fLo = <a href="#_sub3" class="code" title="subfunction fLo = getfLo(h0overD,soln)">getfLo</a>(h0overD, soln);
-0063 
-0064          b = 3;
-0065          N = -3;
-0066          c = fLo./(kD.*phiL2);
-0067    <span class="keyword">end</span>
-0068 <span class="keyword">end</span>
-0069 
-0070 <span class="comment">%% Local Functions</span>
-0071 <a name="_sub1" href="#_subfunctions" class="code">function fR1 = getfR1(n)</a>
-0072    BR1     = beta(n+2, 2);
-0073    gamma   = 2 * (n+2) .* BR1;
-0074    mu      = (4 - 3*gamma - sqrt(gamma.^2 - 2*gamma + 4)) ./ (4*(1 - 2*gamma));
-0075    fR1     = (1-mu) .* (n+1) .* (n+2) ./ (2 * (1 - 2*mu));
-0076 <span class="keyword">end</span>
-0077 
-0078 <a name="_sub2" href="#_subfunctions" class="code">function fR2 = getfR2(n)</a>
-0079    BR2 = beta((n+2) ./ (n+3), 1/2);
-0080    fR2 = (n+2) .* (BR2 ./ (n+3)) .^ (1./(n+2));
+0035       <span class="keyword">case</span> <span class="string">'fR2'</span>
+0036 
+0037          n     = varargin{1};
+0038          fR2   = <a href="#_sub2" class="code" title="subfunction fR2 = getfR2(n)">getfR2</a>(n);
+0039 
+0040          <span class="comment">% prep output</span>
+0041          varargout{1}   = fR2;
+0042 
+0043          <span class="comment">% % for extended functionality</span>
+0044          <span class="comment">% kD    = varargin{2};</span>
+0045          <span class="comment">% L     = varargin{3};</span>
+0046          <span class="comment">% phi   = varargin{4};</span>
+0047          <span class="comment">% A     = varargin{5};</span>
+0048          <span class="comment">%</span>
+0049          <span class="comment">% b     = (2.*n+3)./(n+2);</span>
+0050          <span class="comment">% N     = -n./(n+2);</span>
+0051          <span class="comment">% c     = fR2./phi.*( (kD.*L.*L) ./ (2.^n.*(n+1).*A.^(n+3)));</span>
+0052 
+0053       <span class="keyword">case</span> <span class="string">'fLo'</span>
+0054          
+0055          assert(numel(varargin) &gt;= 4)
+0056          kD = varargin{2};
+0057          L = varargin{3};
+0058          phi = varargin{4};
+0059          
+0060          phiL2 = phi.*L.^2;
+0061 
+0062          h0overD = 0.0; <span class="comment">% assume h0=0, fLo=1.1361</span>
+0063          soln = 2; <span class="comment">% jul 2024 - soln was unset, so I used Lockington.</span>
+0064          fLo = <a href="#_sub3" class="code" title="subfunction fLo = getfLo(h0overD,soln)">getfLo</a>(h0overD, soln);
+0065 
+0066          b = 3;
+0067          N = -3;
+0068          c = fLo./(kD.*phiL2);
+0069    <span class="keyword">end</span>
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="comment">%% Local Functions</span>
+0073 <a name="_sub1" href="#_subfunctions" class="code">function fR1 = getfR1(n)</a>
+0074    <span class="comment">% early-time constant of Rupp and Selker (2005), eqs 33 and 56, m = 1.</span>
+0075    <span class="comment">% gamma is their A (eq 28). fR1/(n+1) is their Phi1 (Table 1: 1.108 at</span>
+0076    <span class="comment">% n = 0), because a1 here uses kD, as their eq 54 does.</span>
+0077    BR1     = beta(n+2, 2);
+0078    gamma   = 2 * (n+2) .* BR1;
+0079    mu      = (4 - 3*gamma - sqrt(gamma.^2 - 2*gamma + 4)) ./ (4 - 2*gamma);
+0080    fR1     = (1-mu) .* (n+1) .* (n+2) ./ (2 * (1 - 2*mu));
 0081 <span class="keyword">end</span>
 0082 
-0083 <a name="_sub3" href="#_subfunctions" class="code">function fLo = getfLo(h0overD,soln)</a>
-0084 
-0085    <span class="comment">% various solutions exist, all depend on ratio of water level in stream</span>
-0086    <span class="comment">% (h0) to initial water table level (h_infinity, or as I call it D)</span>
-0087 
-0088    <span class="keyword">switch</span> soln
-0089       <span class="keyword">case</span> 2              <span class="comment">% Lockington</span>
+0083 <a name="_sub2" href="#_subfunctions" class="code">function fR2 = getfR2(n)</a>
+0084    <span class="comment">% late-time constant of Rupp and Selker (2005). At n = 0 it is the</span>
+0085    <span class="comment">% Brutsaert and Nieber (1977) constant 4.804 that fitphi uses for BS04.</span>
+0086    <span class="comment">% fR2/2 is their Phi2 (eq 59; Table 1: 2.402 at n = 0).</span>
+0087    BR2 = beta((n+2) ./ (n+3), 1/2);
+0088    fR2 = (n+2) .* (BR2.^(n+3) ./ (n+3)) .^ (1./(n+2));
+0089 <span class="keyword">end</span>
 0090 
-0091          a   = -0.4604;
-0092          b   = 1.0734;
-0093          c   = -0.9673;
-0094          d   = 1.1361;
+0091 <a name="_sub3" href="#_subfunctions" class="code">function fLo = getfLo(h0overD,soln)</a>
+0092 
+0093    <span class="comment">% various solutions exist, all depend on ratio of water level in stream</span>
+0094    <span class="comment">% (h0) to initial water table level (h_infinity, or as I call it D)</span>
 0095 
-0096          fLo = a.*h0overD.^3 + b.*h0overD.^2 + c.*h0overD + d;
-0097 
-0098       <span class="keyword">case</span> 20             <span class="comment">% Hayek</span>
-0099 
-0100          <span class="comment">% not sure exactly how to represent Hayek's function, the</span>
-0101          <span class="comment">% a/b/c/d values are functions of D, whereas Rupp gave a single</span>
-0102          <span class="comment">% set for all D, I think, but that set might be an</span>
-0103          <span class="comment">% approximation that works well for all D. See tabl 3 of Hayek</span>
-0104 
-0105       <span class="keyword">case</span> 21             <span class="comment">% Basha</span>
-0106    <span class="keyword">end</span>
-0107 <span class="keyword">end</span></pre></div>
+0096    <span class="keyword">switch</span> soln
+0097       <span class="keyword">case</span> 2              <span class="comment">% Lockington</span>
+0098 
+0099          a   = -0.4604;
+0100          b   = 1.0734;
+0101          c   = -0.9673;
+0102          d   = 1.1361;
+0103 
+0104          fLo = a.*h0overD.^3 + b.*h0overD.^2 + c.*h0overD + d;
+0105 
+0106       <span class="keyword">case</span> 20             <span class="comment">% Hayek</span>
+0107 
+0108          <span class="comment">% not sure exactly how to represent Hayek's function, the</span>
+0109          <span class="comment">% a/b/c/d values are functions of D, whereas Rupp gave a single</span>
+0110          <span class="comment">% set for all D, I think, but that set might be an</span>
+0111          <span class="comment">% approximation that works well for all D. See tabl 3 of Hayek</span>
+0112 
+0113       <span class="keyword">case</span> 21             <span class="comment">% Basha</span>
+0114    <span class="keyword">end</span>
+0115 <span class="keyword">end</span></pre></div>
 </body>
 </html>

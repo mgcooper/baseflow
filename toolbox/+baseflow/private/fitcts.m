@@ -23,15 +23,15 @@ function [q,dqdt,dt,tq,rq,dq,tqmid] = fitcts(T,Q,R,varargin)
    %        'C2'  centered, second order
    %        'C4'  centered, fourth order
    %
-   %     Outputs q (stencil-averaged flow), dqdt (dq./dt), dt (the
+   %     Outputs q (the flow paired with dqdt), dqdt (dq./dt), dt (the
    %     constant step), tq (the input time vector, see the note below),
    %     rq (rain posted on the same time vector), dq (the raw
-   %     difference), and tqmid (the midpoint times of the flow average q).
-   %     For B1, F1, C2, and C4, dqdt also estimates the derivative at
-   %     tqmid. For B2 and F2, dqdt estimates the derivative at tq, and
-   %     tqmid is half a step earlier (B2) or later (F2). Stencil edge
-   %     samples are nan. A single sample has no time step, so q, dqdt,
-   %     dt, dq, and tqmid are nan.
+   %     difference), and tqmid (the time of q and of the derivative that
+   %     dqdt estimates). B1 and F1 estimate the derivative half a step
+   %     back or forward, so q is the two-sample flow average. B2, F2, C2,
+   %     and C4 estimate it at the sample, so q is the sample flow. Stencil
+   %     edge samples are nan. A single sample has no time step, so q,
+   %     dqdt, dt, dq, and tqmid are nan.
    %
    % See also: fitets, fitvts, getdqdt
    %
@@ -85,13 +85,11 @@ function [q,dqdt,dt,tq,rq,dq,tqmid] = fitcts(T,Q,R,varargin)
    % at the end (since those values are the average flow over two steps)
    Qfwd = (Qi+Qip1) / 2;
    Qbwd = (Qi+Qim1) / 2;
-   Qctr = (Qip1+Qim1) / 2;
 
-   % forward, backward, and centered midpoint times, the natural posting
-   % for the stencil-averaged flow
+   % forward and backward midpoint times, where a one-step difference
+   % estimates the derivative and the two-sample average estimates the flow
    Tbwd = (Ti+Tim1) / 2;            % new
    Tfwd = (Ti+Tip1) / 2;
-   Tctr = (Tip1+Tim1) / 2;
 
    switch method
       case 'B1'                                 % backward, version 1
@@ -100,26 +98,30 @@ function [q,dqdt,dt,tq,rq,dq,tqmid] = fitcts(T,Q,R,varargin)
          tqmid = Tbwd;
       case 'B2'                                 % backward, version 2
          dq  = (3*Qi - 4*Qim1 + Qim2) / 2;
-         q   = Qbwd;
-         tqmid = Tbwd;
+         q   = Qi;
+         tqmid = Ti;
       case 'F1'                                 % forward, version 1
          dq  = Qip1-Qi;
          q   = Qfwd;
          tqmid = Tfwd;
       case 'F2'                                 % forward, version 2
          dq  = (-Qip2+4 .* Qip1 - 3*Qi) / 2;
-         q   = Qfwd;
-         tqmid = Tfwd;
+         q   = Qi;
+         tqmid = Ti;
       case 'C2'                                 % centered, version 1
          dq  = (Qip1-Qim1) / 2;
-         q   = Qctr;
-         tqmid = Tctr;
+         q   = Qi;
+         tqmid = Ti;
       case 'C4'                                 % centered, version 2
          dq  = (-Qip2 + 8*Qip1 - 8*Qim1 + Qim2) / 12;
-         q   = Qctr;
-         tqmid = Tctr;
+         q   = Qi;
+         tqmid = Ti;
    end
    dqdt = dq./dt;
+
+   % a stencil edge has no difference, so it has no paired flow or time
+   q(isnan(dq)) = nan;
+   tqmid(isnan(dq)) = nan;
 
    % Rain posts on the same time vector as tq, as in the ETS method.
    rq = R;

@@ -22,23 +22,24 @@ classdef test_fitcts < matlab.unittest.TestCase
          'C4', {{'C4', 1e-4}})
 
       % Each case holds a stencil name and the formula for its tqmid
-      % midpoint times: backward stencils post at (T(i)+T(i-1))/2, forward
-      % stencils at (T(i)+T(i+1))/2, and centered stencils at
-      % (T(i+1)+T(i-1))/2. Edge samples are nan.
+      % times, where the stencil estimates the derivative: B1 posts at
+      % (T(i)+T(i-1))/2, F1 at (T(i)+T(i+1))/2, and B2, F2, C2, and C4 at
+      % T(i). Edge samples, where a stencil reaches past the data, are nan.
       midpoint = struct( ...
          'B1', {{'B1', @(T) [nan; (T(2:end) + T(1:end-1)) / 2]}}, ...
-         'B2', {{'B2', @(T) [nan; (T(2:end) + T(1:end-1)) / 2]}}, ...
+         'B2', {{'B2', @(T) [nan; nan; T(3:end)]}}, ...
          'F1', {{'F1', @(T) [(T(1:end-1) + T(2:end)) / 2; nan]}}, ...
-         'F2', {{'F2', @(T) [(T(1:end-1) + T(2:end)) / 2; nan]}}, ...
-         'C2', {{'C2', @(T) [nan; (T(3:end) + T(1:end-2)) / 2; nan]}}, ...
-         'C4', {{'C4', @(T) [nan; (T(3:end) + T(1:end-2)) / 2; nan]}})
+         'F2', {{'F2', @(T) [T(1:end-2); nan; nan]}}, ...
+         'C2', {{'C2', @(T) [nan; T(2:end-1); nan]}}, ...
+         'C4', {{'C4', @(T) [nan; nan; T(3:end-2); nan; nan]}})
    end
 
    properties
-      % The private fitcts function handle, the recession signal, and its
-      % analytic derivative.
+      % The private fitcts function handle, the recession timescale and
+      % signal, and its analytic derivative.
       fitcts
       daystep
+      tau
       T
       Q
       R
@@ -50,6 +51,7 @@ classdef test_fitcts < matlab.unittest.TestCase
          % Daily exponential recession: q = q0 exp(-t/tau), dq/dt = -q/tau.
          testCase.fitcts = baseflow.privatefunction('fitcts');
          tau = 20;
+         testCase.tau = tau;
          q0 = 100;
          testCase.daystep = 1;
          ndays = 60;
@@ -79,6 +81,22 @@ classdef test_fitcts < matlab.unittest.TestCase
          testCase.verifyLessThan(returned, reltol, sprintf( ...
             'stencil %s relative error %.2g exceeds %.2g', method, ...
             returned, reltol))
+      end
+
+      function test_flowPairsWithDerivative(testCase, stencil)
+         % fitab regresses dqdt on q, so each derivative must pair with
+         % the flow at the same time. The recession has -dQ/dt = Q/tau at
+         % every instant, so -dqdt./q is 1/tau within the stencil error.
+         [method, reltol] = stencil{:};
+         [q, dqdt] = testCase.fitcts(testCase.T, testCase.Q, ...
+            testCase.R, method);
+         expected = 1/testCase.tau;
+         keep = ~isnan(dqdt);
+
+         returned = -dqdt(keep)./q(keep);
+
+         testCase.verifyEqual(returned, expected*ones(nnz(keep), 1), ...
+            'RelTol', reltol)
       end
 
       function test_defaultsAndAlignment(testCase)
