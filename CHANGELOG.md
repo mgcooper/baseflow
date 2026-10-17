@@ -23,6 +23,13 @@ semantic versioning.
   of values of b that give no finite mean tau. No function raises
   `baseflow:plfitb:tauPoleReplicates`. Suppress
   `baseflow:expectedtau:tauPole` to silence the pole warning.
+- Git does not track `toolbox/docs/html/custom_toolbox.json`.
+  `builddocsearchdb`, which `baseflow.internal.makedocs` calls for the
+  'docsearch' option, writes it again on each build, with the absolute
+  path of the build folder. A copy names a folder that exists only on the
+  machine that built it. The search database in `helpsearch-v4_en` still
+  ships, and `toolbox/toolbox.ignore` leaves the file out of a toolbox
+  package.
 
 ### Fixed
 

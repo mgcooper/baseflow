@@ -72,6 +72,9 @@ codegen/
 *.slxc
 .MATLABDriveTag
 
+# Written by the Help browser search-database build beside the docs; not a source file.
+custom_toolbox.json
+
 # -----------------
 # ---- PYTHON -----
 # -----------------
