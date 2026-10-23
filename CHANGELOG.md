@@ -33,6 +33,13 @@ semantic versioning.
 
 ### Fixed
 
+- The `hyetograph` help names the tags the code sets. The figure has the
+  Name 'Hyetograph' and the Tag 'HyetographFigure'. The streamflow axes is
+  'HyetographAxis', and the series are 'StreamflowPlot' and
+  'PrecipitationPlot'. The help searched for 'StreamflowAxis' and
+  'PrecipitationAxis', which no object has. A search of all of H returns
+  the streamflow axes twice, so the examples search from the figure H(1).
+  The precipitation axes has no tag; `ancestor(H(4), 'axes')` finds it.
 - The late-time Rupp and Selker (2005) constant in `specialfunctions`
   raises the Beta function to the power n+3. At n = 0 it gives 4.805, the
   Brutsaert and Nieber (1977) constant 4.804; it gave 1.857. `globalfit`
