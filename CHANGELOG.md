@@ -33,6 +33,9 @@ semantic versioning.
 
 ### Fixed
 
+- `wrapevents` removes February 29 before annual grouping and keeps the
+  remaining timestamps, flow and rainfall rows aligned. Leap-year input
+  previously failed the complete-year check.
 - The `hyetograph` help names the tags the code sets. The figure has the
   Name 'Hyetograph' and the Tag 'HyetographFigure'. The streamflow axes is
   'HyetographAxis', and the series are 'StreamflowPlot' and
