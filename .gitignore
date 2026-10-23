@@ -624,3 +624,5 @@ TSWLatexianTemp*
 # project's state is machine-local, not source.
 **/resources/*
 !**/resources/project/
+
+**/resources/project/uuid-*.xml
