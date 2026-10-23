@@ -18,9 +18,8 @@ merged into it).
 
 ## Formatting
 
-- Indent with 3 spaces; no tabs.
-- Wrap at roughly 80 columns; continue long lines with `...`.
-- Close every function with an explicit `end`.
+Use the shared MATLAB formatting rules in `STYLE.md`.
+
 - Function help uses an uppercase H1 (`%FITAB fit event-scale ...`) followed
   by `Syntax`, `Description`, input, and output sections for public
   functions. See `toolbox/+baseflow/fitab.m` for the reference format.
