@@ -108,12 +108,11 @@ This function is called by:
 <li><a href="#_sub2" class="code">function Fits = pickFitter(Picks,fitmethod)</a></li>
 <li><a href="#_sub3" class="code">function h = plotFits(Fits,Picks,fitmethod,ax,plotfits,</a></li>
 <li><a href="#_sub4" class="code">function labelReflines(h, labelcolor, labelfontsize, labelstyle)</a></li>
-<li><a href="#_sub5" class="code">function h = plotrain(h,rain,x,y)</a></li>
-<li><a href="#_sub6" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos)</a></li>
-<li><a href="#_sub7" class="code">function pickFig = eventPlotter(q,dqdt)</a></li>
-<li><a href="#_sub8" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a></li>
-<li><a href="#_sub9" class="code">function [hFits, Fits, Picks] = initOutput()</a></li>
-<li><a href="#_sub10" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights,</a></li></ul>
+<li><a href="#_sub5" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos)</a></li>
+<li><a href="#_sub6" class="code">function pickFig = eventPlotter(q,dqdt)</a></li>
+<li><a href="#_sub7" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a></li>
+<li><a href="#_sub8" class="code">function [hFits, Fits, Picks] = initOutput()</a></li>
+<li><a href="#_sub9" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights,</a></li></ul>
 
 
 
@@ -196,7 +195,7 @@ This function is called by:
 0076       parseinputs(q, dqdt, mfilename, varargin{:});
 0077 
 0078    <span class="comment">% INIT OUTPUT</span>
-0079    [hFits, Fits, Picks] = <a href="#_sub9" class="code" title="subfunction [hFits, Fits, Picks] = initOutput()">initOutput</a>();
+0079    [hFits, Fits, Picks] = <a href="#_sub8" class="code" title="subfunction [hFits, Fits, Picks] = initOutput()">initOutput</a>();
 0080 
 0081    <span class="comment">% Prep fits</span>
 0082    [~, ~, logx, logy, weights, ok] = baseflow.prepfits(q, dqdt, <span class="keyword">...</span>
@@ -251,7 +250,7 @@ This function is called by:
 0131       <span class="keyword">case</span> <span class="string">'manual'</span>
 0132 
 0133          <span class="comment">% pause helps with buggy ginput</span>
-0134          pickFig     = <a href="#_sub7" class="code" title="subfunction pickFig = eventPlotter(q,dqdt)">eventPlotter</a>(q, dqdt); pause(0.5);
+0134          pickFig     = <a href="#_sub6" class="code" title="subfunction pickFig = eventPlotter(q,dqdt)">eventPlotter</a>(q, dqdt); pause(0.5);
 0135          pickedPts   = baseflow.deps.ginputc(); pause(0.5);
 0136          startPts    = pickedPts(1:2:end);
 0137          endPts      = pickedPts(2:2:end);
@@ -525,7 +524,7 @@ This function is called by:
 0405    <span class="comment">% because Octave installs no listener to do it.</span>
 0406    relayoutloglogtext(h.ax);
 0407 
-0408    h = <a href="#_sub5" class="code" title="subfunction h = plotrain(h,rain,x,y)">plotrain</a>(h, rain, x, y);
+0408    h.hrain = plotrain(h.ax, h.scatter, rain, x, y);
 0409 
 0410    <span class="comment">% I added this so rain is in the legend. plotrain returns the handles of</span>
 0411    <span class="comment">% the rain circles, or nan when no rain is plotted, so the guard tests</span>
@@ -583,205 +582,176 @@ This function is called by:
 0463 <span class="keyword">end</span>
 0464 
 0465 <span class="comment">%%</span>
-0466 <a name="_sub5" href="#_subfunctions" class="code">function h = plotrain(h,rain,x,y)</a>
+0466 <a name="_sub5" href="#_subfunctions" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos) </a><span class="comment">%#ok&lt;*DEFNU&gt;</span>
 0467 
-0468    <span class="comment">% add rain. scale the circles such that 1 mm of rain equals the size of</span>
-0469    <span class="comment">% the plotted circles</span>
-0470    <span class="keyword">if</span> sum(rain)==0
-0471       h.hrain = nan;
-0472    <span class="keyword">else</span>
-0473 
-0474       <span class="comment">% scatter is producing pixelated symbols so I use plot instead</span>
-0475       <span class="comment">%sz    = h.scatter.SizeData + pi.*(rain(rain&gt;0)).^2;</span>
-0476       <span class="comment">%scatter(x(rain&gt;0),y(rain&gt;0),sz,'LineWidth',2)</span>
-0477 
-0478       <span class="comment">% this mimics the way scatter scales the circles. Read the size with</span>
-0479       <span class="comment">% get, because Octave returns a numeric handle, which takes no dot.</span>
-0480       s = get(h.scatter, <span class="string">'MarkerSize'</span>) + sqrt(pi.*(rain(rain&gt;0)).^2);
-0481       x = x(rain&gt;0);
-0482       y = y(rain&gt;0);
+0468    <span class="comment">% https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib</span>
+0469 
+0470    <span class="comment">% to add text, need the slope in figure space</span>
+0471    xlims = xlim;
+0472    ylims = ylim;
+0473    xfact = axpos(1)/(log(xlims(2))-log(xlims(1)));
+0474    yfact = axpos(2)/(log(ylims(2))-log(ylims(1)));   <span class="comment">% slope adjustment</span>
+0475    atext = slope*atand(yfact/xfact);           <span class="comment">% adjust angle</span>
+0476 
+0477    text( xtxt,ytxt,txt,                   <span class="keyword">...</span>
+0478       <span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,     <span class="keyword">...</span>
+0479       <span class="string">'VerticalAlignment'</span>, <span class="string">'bottom'</span>,      <span class="keyword">...</span>
+0480       <span class="string">'FontSize'</span>,12,                      <span class="keyword">...</span>
+0481       <span class="string">'rotation'</span>,atext);
+0482 <span class="keyword">end</span>
 0483 
-0484       hold(h.ax, <span class="string">'on'</span>);
-0485 
-0486       <span class="comment">% Count down so the handle array takes its size on the first pass.</span>
-0487       <span class="keyword">for</span> n = numel(s):-1:1
-0488          h.hrain(n) = plot(h.ax,x(n),y(n),<span class="string">'o'</span>,<span class="string">'MarkerSize'</span>,s(n), <span class="keyword">...</span>
-0489             <span class="string">'MarkerFaceColor'</span>,<span class="string">'none'</span>,<span class="string">'Color'</span>,<span class="string">'m'</span>,<span class="string">'LineWidth'</span>,1);
-0490       <span class="keyword">end</span>
-0491    <span class="keyword">end</span>
-0492 <span class="keyword">end</span>
-0493 
-0494 <span class="comment">%%</span>
-0495 <a name="_sub6" href="#_subfunctions" class="code">function addRotatedText(xtxt,ytxt,txt,slope,axpos) </a><span class="comment">%#ok&lt;*DEFNU&gt;</span>
-0496 
-0497    <span class="comment">% https://stackoverflow.com/questions/52928360/rotating-text-onto-a-line-on-a-log-scale-in-matplotlib</span>
+0484 <span class="comment">%% PLOT EVENT</span>
+0485 <a name="_sub6" href="#_subfunctions" class="code">function pickFig = eventPlotter(q,dqdt)</a>
+0486    pickFig = figure;
+0487    scatter(q,dqdt,36,[0,0.447,0.741],<span class="string">'filled'</span>);
+0488 <span class="keyword">end</span>
+0489 
+0490 <span class="comment">%% DETECT TRANSITION</span>
+0491 <a name="_sub7" href="#_subfunctions" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a>
+0492 
+0493    nPicks   = numel(istart);
+0494    rlengths = istop-istart+1;
+0495 
+0496    <span class="keyword">if</span> nPicks == 3
+0497       <span class="comment">% if rlengths(1)&gt;rlengths(2) &amp;&amp; rlengths(3)&gt;rlengths(2)</span>
 0498 
-0499    <span class="comment">% to add text, need the slope in figure space</span>
-0500    xlims = xlim;
-0501    ylims = ylim;
-0502    xfact = axpos(1)/(log(xlims(2))-log(xlims(1)));
-0503    yfact = axpos(2)/(log(ylims(2))-log(ylims(1)));   <span class="comment">% slope adjustment</span>
-0504    atext = slope*atand(yfact/xfact);           <span class="comment">% adjust angle</span>
+0499       q1    = q(istart(1):istop(1));
+0500       q2    = q(istart(2):istop(2));
+0501       q3    = q(istart(3):istop(3));
+0502       dq1   = dqdt(istart(1):istop(1));
+0503       dq2   = dqdt(istart(2):istop(2));
+0504       dq3   = dqdt(istart(3):istop(3));
 0505 
-0506    text( xtxt,ytxt,txt,                   <span class="keyword">...</span>
-0507       <span class="string">'HorizontalAlignment'</span>,<span class="string">'center'</span>,     <span class="keyword">...</span>
-0508       <span class="string">'VerticalAlignment'</span>, <span class="string">'bottom'</span>,      <span class="keyword">...</span>
-0509       <span class="string">'FontSize'</span>,12,                      <span class="keyword">...</span>
-0510       <span class="string">'rotation'</span>,atext);
-0511 <span class="keyword">end</span>
-0512 
-0513 <span class="comment">%% PLOT EVENT</span>
-0514 <a name="_sub7" href="#_subfunctions" class="code">function pickFig = eventPlotter(q,dqdt)</a>
-0515    pickFig = figure;
-0516    scatter(q,dqdt,36,[0,0.447,0.741],<span class="string">'filled'</span>);
-0517 <span class="keyword">end</span>
-0518 
-0519 <span class="comment">%% DETECT TRANSITION</span>
-0520 <a name="_sub8" href="#_subfunctions" class="code">function [istart, istop] = detectTransition(q,dqdt,istart,istop)</a>
-0521 
-0522    nPicks   = numel(istart);
-0523    rlengths = istop-istart+1;
-0524 
-0525    <span class="keyword">if</span> nPicks == 3
-0526       <span class="comment">% if rlengths(1)&gt;rlengths(2) &amp;&amp; rlengths(3)&gt;rlengths(2)</span>
-0527 
-0528       q1    = q(istart(1):istop(1));
-0529       q2    = q(istart(2):istop(2));
-0530       q3    = q(istart(3):istop(3));
-0531       dq1   = dqdt(istart(1):istop(1));
-0532       dq2   = dqdt(istart(2):istop(2));
-0533       dq3   = dqdt(istart(3):istop(3));
-0534 
-0535       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
-0536       <span class="comment">% Not sure if this is supposed to be &quot;ols&quot; or a weighted version.</span>
-0537       <span class="comment">% ab1   = baseflow.wols(log(q1), log(-dq1));</span>
-0538       <span class="comment">% ab2   = baseflow.wols(log(q2), log(-dq2));</span>
-0539       <span class="comment">% ab3   = baseflow.wols(log(q3), log(-dq3));</span>
-0540 
-0541       <span class="comment">% three cases we want to :</span>
-0542       <span class="comment">% 1: a flat period between two recessions</span>
-0543       <span class="comment">% 2: a flat period followed by another one then a recession</span>
-0544       <span class="comment">% 2: a recession followed by two flat periods</span>
-0545 
-0546       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
-0547       <span class="comment">% if ab1(2)&gt;1 &amp;&amp; ab2(2)&lt;1 &amp;&amp; ab3(2)&gt;1</span>
-0548       <span class="comment">%    istart(2)   = [];</span>
-0549       <span class="comment">%    istop(2)    = [];</span>
-0550       <span class="comment">% end</span>
-0551       <span class="comment">%end</span>
-0552    <span class="keyword">end</span>
-0553 <span class="keyword">end</span>
+0506       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
+0507       <span class="comment">% Not sure if this is supposed to be &quot;ols&quot; or a weighted version.</span>
+0508       <span class="comment">% ab1   = baseflow.wols(log(q1), log(-dq1));</span>
+0509       <span class="comment">% ab2   = baseflow.wols(log(q2), log(-dq2));</span>
+0510       <span class="comment">% ab3   = baseflow.wols(log(q3), log(-dq3));</span>
+0511 
+0512       <span class="comment">% three cases we want to :</span>
+0513       <span class="comment">% 1: a flat period between two recessions</span>
+0514       <span class="comment">% 2: a flat period followed by another one then a recession</span>
+0515       <span class="comment">% 2: a recession followed by two flat periods</span>
+0516 
+0517       <span class="comment">% Jul 2024 - commented out b/c &quot;wols&quot; is not a function in the toolbox.</span>
+0518       <span class="comment">% if ab1(2)&gt;1 &amp;&amp; ab2(2)&lt;1 &amp;&amp; ab3(2)&gt;1</span>
+0519       <span class="comment">%    istart(2)   = [];</span>
+0520       <span class="comment">%    istop(2)    = [];</span>
+0521       <span class="comment">% end</span>
+0522       <span class="comment">%end</span>
+0523    <span class="keyword">end</span>
+0524 <span class="keyword">end</span>
+0525 
+0526 <span class="comment">%% Initialize output</span>
+0527 <a name="_sub8" href="#_subfunctions" class="code">function [hFits, Fits, Picks] = initOutput()</a>
+0528    Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
+0529    Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
+0530    Picks.nPicks = nan; hFits = nan;
+0531 <span class="keyword">end</span>
+0532 
+0533 <span class="comment">%% INPUT PARSER</span>
+0534 <a name="_sub9" href="#_subfunctions" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, </a><span class="keyword">...</span>
+0535       rain, ax, blate, precision, timestep, eventID, labelplot, reflines, <span class="keyword">...</span>
+0536       axislimits, labelcolor, labelfontsize, labelstyle, fontsize, <span class="keyword">...</span>
+0537       legendfontsize] = parseinputs(<span class="keyword">...</span>
+0538       q, dqdt, mfilename, varargin)
+0539 
+0540    <span class="comment">% The reference lines plotFits draws. The names are the ones</span>
+0541    <span class="comment">% pointcloudplot uses, so one value means the same line in both</span>
+0542    <span class="comment">% functions, and the default draws the set this function always drew.</span>
+0543    defaultreflines = {<span class="string">'upperenvelope'</span>, <span class="string">'lowerenvelope'</span>, <span class="string">'late'</span>, <span class="string">'early'</span>};
+0544 
+0545    <span class="comment">% The axis-limit policies snaploglims accepts, with the default first.</span>
+0546    axislimitvalues = {<span class="string">'snap'</span>, <span class="string">'decades'</span>, <span class="string">'none'</span>};
+0547 
+0548    <span class="comment">% The label styles labelrefline draws, with the default first.</span>
+0549    labelstyles = {<span class="string">'arrow'</span>, <span class="string">'line'</span>};
+0550 
+0551    <span class="comment">% The MATLAB factory axes font size. A startup file can raise the axes</span>
+0552    <span class="comment">% font size, so the labels take their size from this value instead.</span>
+0553    defaultfontsize = 10;
 0554 
-0555 <span class="comment">%% Initialize output</span>
-0556 <a name="_sub9" href="#_subfunctions" class="code">function [hFits, Fits, Picks] = initOutput()</a>
-0557    Fits.h = nan; Fits.abols= nan; Fits.abnls = nan; Fits.abqtl = nan;
-0558    Picks.Q = nan; Picks.T = nan; Picks.dQdt = nan; Picks.R = nan;
-0559    Picks.nPicks = nan; hFits = nan;
-0560 <span class="keyword">end</span>
-0561 
-0562 <span class="comment">%% INPUT PARSER</span>
-0563 <a name="_sub10" href="#_subfunctions" class="code">function [q, dqdt, fitmethod, pickmethod, plotfits, showfig, weights, </a><span class="keyword">...</span>
-0564       rain, ax, blate, precision, timestep, eventID, labelplot, reflines, <span class="keyword">...</span>
-0565       axislimits, labelcolor, labelfontsize, labelstyle, fontsize, <span class="keyword">...</span>
-0566       legendfontsize] = parseinputs(<span class="keyword">...</span>
-0567       q, dqdt, mfilename, varargin)
-0568 
-0569    <span class="comment">% The reference lines plotFits draws. The names are the ones</span>
-0570    <span class="comment">% pointcloudplot uses, so one value means the same line in both</span>
-0571    <span class="comment">% functions, and the default draws the set this function always drew.</span>
-0572    defaultreflines = {<span class="string">'upperenvelope'</span>, <span class="string">'lowerenvelope'</span>, <span class="string">'late'</span>, <span class="string">'early'</span>};
-0573 
-0574    <span class="comment">% The axis-limit policies snaploglims accepts, with the default first.</span>
-0575    axislimitvalues = {<span class="string">'snap'</span>, <span class="string">'decades'</span>, <span class="string">'none'</span>};
-0576 
-0577    <span class="comment">% The label styles labelrefline draws, with the default first.</span>
-0578    labelstyles = {<span class="string">'arrow'</span>, <span class="string">'line'</span>};
-0579 
-0580    <span class="comment">% The MATLAB factory axes font size. A startup file can raise the axes</span>
-0581    <span class="comment">% font size, so the labels take their size from this value instead.</span>
-0582    defaultfontsize = 10;
-0583 
-0584    <span class="comment">% The axes font size this function sets, which pointcloudplot also uses.</span>
-0585    defaultaxesfontsize = 12;
+0555    <span class="comment">% The axes font size this function sets, which pointcloudplot also uses.</span>
+0556    defaultaxesfontsize = 12;
+0557 
+0558    parser = inputParser;
+0559    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
+0560    parser.CaseSensitive = false;
+0561    parser.addRequired(<span class="string">'q'</span>);
+0562    parser.addRequired(<span class="string">'dqdt'</span>);
+0563    parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>);
+0564    parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>);
+0565    parser.addParameter(<span class="string">'plotfits'</span>, true);
+0566    parser.addParameter(<span class="string">'showfig'</span>, true, @islogical);
+0567    parser.addParameter(<span class="string">'weights'</span>, ones(size(q)));
+0568    parser.addParameter(<span class="string">'rain'</span>, zeros(size(q)));
+0569    parser.addParameter(<span class="string">'ax'</span>, <span class="string">'none'</span>);
+0570    parser.addParameter(<span class="string">'blate'</span>, 1.0);
+0571    parser.addParameter(<span class="string">'precision'</span>, 1);
+0572    parser.addParameter(<span class="string">'timestep'</span>, 1);
+0573    parser.addParameter(<span class="string">'eventID'</span>, <span class="string">''</span>, @ischar);
+0574    parser.addParameter(<span class="string">'labelplot'</span>, false, @islogical);
+0575    parser.addParameter(<span class="string">'reflines'</span>, defaultreflines, @iscell);
+0576    parser.addParameter(<span class="string">'axislimits'</span>, axislimitvalues{1}, <span class="keyword">...</span>
+0577       @(policy) any(validatestring(policy, axislimitvalues)));
+0578    parser.addParameter(<span class="string">'labelcolor'</span>, [0 0 0], @islabelcolor);
+0579    parser.addParameter(<span class="string">'labelfontsize'</span>, defaultfontsize, @(x) isnumericscalar(x) &amp;&amp; x &gt; 0);
+0580    parser.addParameter(<span class="string">'labelstyle'</span>, labelstyles{1}, <span class="keyword">...</span>
+0581       @(style) any(validatestring(style, labelstyles)));
+0582    parser.addParameter(<span class="string">'fontsize'</span>, defaultaxesfontsize, <span class="keyword">...</span>
+0583       @(value) isnumericscalar(value) &amp;&amp; value &gt; 0);
+0584    parser.addParameter(<span class="string">'legendfontsize'</span>, defaultaxesfontsize, <span class="keyword">...</span>
+0585       @(value) isnumericscalar(value) &amp;&amp; value &gt; 0);
 0586 
-0587    parser = inputParser;
-0588    parser.FunctionName = [<span class="string">'baseflow.'</span> mfilename];
-0589    parser.CaseSensitive = false;
-0590    parser.addRequired(<span class="string">'q'</span>);
-0591    parser.addRequired(<span class="string">'dqdt'</span>);
-0592    parser.addParameter(<span class="string">'fitmethod'</span>, <span class="string">'nls'</span>);
-0593    parser.addParameter(<span class="string">'pickmethod'</span>, <span class="string">'none'</span>);
-0594    parser.addParameter(<span class="string">'plotfits'</span>, true);
-0595    parser.addParameter(<span class="string">'showfig'</span>, true, @islogical);
-0596    parser.addParameter(<span class="string">'weights'</span>, ones(size(q)));
-0597    parser.addParameter(<span class="string">'rain'</span>, zeros(size(q)));
-0598    parser.addParameter(<span class="string">'ax'</span>, <span class="string">'none'</span>);
-0599    parser.addParameter(<span class="string">'blate'</span>, 1.0);
-0600    parser.addParameter(<span class="string">'precision'</span>, 1);
-0601    parser.addParameter(<span class="string">'timestep'</span>, 1);
-0602    parser.addParameter(<span class="string">'eventID'</span>, <span class="string">''</span>, @ischar);
-0603    parser.addParameter(<span class="string">'labelplot'</span>, false, @islogical);
-0604    parser.addParameter(<span class="string">'reflines'</span>, defaultreflines, @iscell);
-0605    parser.addParameter(<span class="string">'axislimits'</span>, axislimitvalues{1}, <span class="keyword">...</span>
-0606       @(policy) any(validatestring(policy, axislimitvalues)));
-0607    parser.addParameter(<span class="string">'labelcolor'</span>, [0 0 0], @islabelcolor);
-0608    parser.addParameter(<span class="string">'labelfontsize'</span>, defaultfontsize, @(x) isnumericscalar(x) &amp;&amp; x &gt; 0);
-0609    parser.addParameter(<span class="string">'labelstyle'</span>, labelstyles{1}, <span class="keyword">...</span>
-0610       @(style) any(validatestring(style, labelstyles)));
-0611    parser.addParameter(<span class="string">'fontsize'</span>, defaultaxesfontsize, <span class="keyword">...</span>
-0612       @(value) isnumericscalar(value) &amp;&amp; value &gt; 0);
-0613    parser.addParameter(<span class="string">'legendfontsize'</span>, defaultaxesfontsize, <span class="keyword">...</span>
-0614       @(value) isnumericscalar(value) &amp;&amp; value &gt; 0);
-0615 
-0616    parser.parse(q, dqdt, varargin{:});
-0617 
-0618    q = parser.Results.q;
-0619    ax = parser.Results.ax;
-0620    dqdt = parser.Results.dqdt;
-0621    rain = parser.Results.rain;
-0622    blate = parser.Results.blate;
-0623    showfig = parser.Results.showfig;
-0624    weights = parser.Results.weights;
-0625    eventID = parser.Results.eventID;
-0626    timestep = parser.Results.timestep;
-0627    plotfits = parser.Results.plotfits;
-0628    labelplot = parser.Results.labelplot;
-0629    precision = parser.Results.precision;
-0630    fitmethod = parser.Results.fitmethod;
-0631    pickmethod = parser.Results.pickmethod;
-0632    reflines = parser.Results.reflines;
-0633    labelcolor = parser.Results.labelcolor;
-0634 
-0635    <span class="comment">% islabelcolor accepts empty, which asks for the default label color.</span>
-0636    <span class="keyword">if</span> isempty(labelcolor)
-0637       labelcolor = [0 0 0];
-0638    <span class="keyword">end</span>
-0639    labelfontsize = parser.Results.labelfontsize;
-0640 
-0641    <span class="comment">% validatestring returns the member of the list, so a partial value such</span>
-0642    <span class="comment">% as 'dec' reaches snaploglims as 'decades'.</span>
-0643    axislimits = validatestring(parser.Results.axislimits, axislimitvalues);
-0644    labelstyle = validatestring(parser.Results.labelstyle, labelstyles);
-0645    fontsize = parser.Results.fontsize;
-0646    legendfontsize = parser.Results.legendfontsize;
-0647 
-0648    <span class="keyword">if</span> ~ischar(ax)
-0649       validateattributes(ax, {<span class="string">'matlab.graphics.axis.Axes'</span>},{<span class="string">'scalar'</span>}, mfilename);
-0650    <span class="keyword">end</span>
-0651 
-0652    validateattributes(q, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'q'</span>);
-0653    validateattributes(dqdt, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'dqdt'</span>);
-0654    validateattributes(rain, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
-0655    validateattributes(blate, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'scalar'</span>}, mfilename);
-0656    validateattributes(weights, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
-0657    validateattributes(timestep, {<span class="string">'numeric'</span>, <span class="string">'duration'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
-0658    validateattributes(plotfits, {<span class="string">'logical'</span>}, {<span class="string">'scalar'</span>}, mfilename);
-0659    validateattributes(precision, {<span class="string">'numeric'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
-0660    <span class="comment">% Require text, and check the value itself below. The Octave</span>
-0661    <span class="comment">% validateattributes has no 'scalartext' attribute, and plotdqdt runs</span>
-0662    <span class="comment">% on Octave through getdqdt with plotfits true.</span>
-0663    validateattributes(fitmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
-0664    validateattributes(pickmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
-0665 <span class="keyword">end</span></pre></div>
+0587    parser.parse(q, dqdt, varargin{:});
+0588 
+0589    q = parser.Results.q;
+0590    ax = parser.Results.ax;
+0591    dqdt = parser.Results.dqdt;
+0592    rain = parser.Results.rain;
+0593    blate = parser.Results.blate;
+0594    showfig = parser.Results.showfig;
+0595    weights = parser.Results.weights;
+0596    eventID = parser.Results.eventID;
+0597    timestep = parser.Results.timestep;
+0598    plotfits = parser.Results.plotfits;
+0599    labelplot = parser.Results.labelplot;
+0600    precision = parser.Results.precision;
+0601    fitmethod = parser.Results.fitmethod;
+0602    pickmethod = parser.Results.pickmethod;
+0603    reflines = parser.Results.reflines;
+0604    labelcolor = parser.Results.labelcolor;
+0605 
+0606    <span class="comment">% islabelcolor accepts empty, which asks for the default label color.</span>
+0607    <span class="keyword">if</span> isempty(labelcolor)
+0608       labelcolor = [0 0 0];
+0609    <span class="keyword">end</span>
+0610    labelfontsize = parser.Results.labelfontsize;
+0611 
+0612    <span class="comment">% validatestring returns the member of the list, so a partial value such</span>
+0613    <span class="comment">% as 'dec' reaches snaploglims as 'decades'.</span>
+0614    axislimits = validatestring(parser.Results.axislimits, axislimitvalues);
+0615    labelstyle = validatestring(parser.Results.labelstyle, labelstyles);
+0616    fontsize = parser.Results.fontsize;
+0617    legendfontsize = parser.Results.legendfontsize;
+0618 
+0619    <span class="keyword">if</span> ~ischar(ax)
+0620       validateattributes(ax, {<span class="string">'matlab.graphics.axis.Axes'</span>},{<span class="string">'scalar'</span>}, mfilename);
+0621    <span class="keyword">end</span>
+0622 
+0623    validateattributes(q, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'q'</span>);
+0624    validateattributes(dqdt, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename, <span class="string">'dqdt'</span>);
+0625    validateattributes(rain, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
+0626    validateattributes(blate, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'scalar'</span>}, mfilename);
+0627    validateattributes(weights, {<span class="string">'numeric'</span>}, {<span class="string">'real'</span>,<span class="string">'column'</span>}, mfilename);
+0628    validateattributes(timestep, {<span class="string">'numeric'</span>, <span class="string">'duration'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
+0629    validateattributes(plotfits, {<span class="string">'logical'</span>}, {<span class="string">'scalar'</span>}, mfilename);
+0630    validateattributes(precision, {<span class="string">'numeric'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
+0631    <span class="comment">% Require text, and check the value itself below. The Octave</span>
+0632    <span class="comment">% validateattributes has no 'scalartext' attribute, and plotdqdt runs</span>
+0633    <span class="comment">% on Octave through getdqdt with plotfits true.</span>
+0634    validateattributes(fitmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
+0635    validateattributes(pickmethod, {<span class="string">'char'</span>, <span class="string">'string'</span>}, {<span class="string">'nonempty'</span>}, mfilename);
+0636 <span class="keyword">end</span></pre></div>
 </body>
 </html>
