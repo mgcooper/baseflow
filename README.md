@@ -56,8 +56,7 @@ and `tau` conventions.
 
 ## Install
 
-- Clone this repo or use [`mpm`](http://mobeets.github.io/mpm/) in your Matlab terminal:
-  - `mpm install baseflow`
+- Clone this repository.
 - cd into the `toolbox` directory.
 - Run `Setup.m`:
   - Type `msg = Setup('install')` at the command window then press enter.
@@ -67,6 +66,19 @@ and `tau` conventions.
   - Type `runtests('tests')` at the command window and press enter.
   - To debug, try `runtests('tests', 'Debug', true)`.
 - In new Matlab sessions, cd to the toolbox directory and try `Setup('addpath')` or just `Setup` to add the toolbox to your search path (or manage the search path however you normally do).
+
+The optional [Matlab Package Installer (MPI)](https://github.com/mobeets/mpm)
+route uses this repository's explicit URL and a numeric release tag:
+
+```matlab
+mpi install -u https://github.com/mgcooper/baseflow.git -t <numeric-tag>
+```
+
+The selected release must include a root `pathList.m` containing `toolbox`.
+It must also pass an installation check from a clean checkout.
+No existing release has been qualified for this command.
+Use the clone route until a qualified release is published.
+Do not install this project by the bare name `baseflow`.
 
 For more options, see [Configuration](#configuration).  
 For Octave compatibility, see [Octave](#octave).  
