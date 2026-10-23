@@ -110,7 +110,8 @@
          {"name":"rmin",         "kind":"namevalue",  "type":["double","scalar"]},
          {"name":"rmconvex",     "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
          {"name":"rmnochange",   "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
-         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"}
+         {"name":"rmrain",       "kind":"namevalue",  "type":["logical","scalar"],"purpose":"Option"},
+         {"name":"qerror",       "kind":"namevalue",  "type":["double","scalar",">=0"]}
       ]
    },
    "baseflow.eventpicker":

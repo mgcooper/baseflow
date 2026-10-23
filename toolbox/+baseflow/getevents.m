@@ -112,8 +112,12 @@ function [Events,Info] = getevents(T,Q,R,varargin)
    % If events are detected on an annual basis, option to smooth measurement
    % noise. If multi-year timeseries are used, smoothing is not effective, there
    % is too much variability to select consistent smoothing parameters.
+   % smoothflow returns the rounding bound of the values it smooths.
+   % eventfinder uses it as the numerical zero of its filters; without
+   % smoothing, eventfinder assumes one rounding per value.
+   qerror = [];
    if asannual
-      Q = smoothflow(Q);
+      [Q, ~, qerror] = smoothflow(Q);
    end
 
    if isempty(Q) || ( sum(~isnan(Q)) < nmin ) % fast exit
@@ -127,7 +131,8 @@ function [Events,Info] = getevents(T,Q,R,varargin)
          'rmin',        rmin,          ...
          'rmconvex',    rmconvex,      ...
          'rmnochange',  rmnochange,    ...
-         'rmrain',      rmrain         );
+         'rmrain',      rmrain,        ...
+         'qerror',      qerror         );
 
       Info = updateinfo(Info,iF,numdata);
 

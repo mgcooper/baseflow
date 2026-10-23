@@ -12,6 +12,7 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %     [T,Q,R,Info] = eventfinder(_, 'rmrain', false)
    %     [T,Q,R,Info] = eventfinder(_, 'rmconvex', true)
    %     [T,Q,R,Info] = eventfinder(_, 'rmnochange', false)
+   %     [T,Q,R,Info] = eventfinder(_, 'qerror', qerror)
    %
    % Description
    %
@@ -38,12 +39,34 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    %     rmconvex    remove convex derivatives
    %     rmnochange  remove consecutive constant derivates
    %     rmrain      remove rainfall
+   %     qerror      bound on the rounding error of each value of q, in the
+   %                 units of q. Default u*max(abs(q)), one rounding.
+   %                 getevents passes the bound that its smoothing returns.
    %
-   %     Each option default is the baseflow.setopts('getevents') value.
-   %     nmin must be greater than 2. rmax must be greater than 1: the
-   %     rmnochange filter marks nonzero d2q/dt2 values nan. Each nan
-   %     counts as a run of length 1, so an rmax of 1 or less rejects
-   %     every day.
+   %     Each option default except qerror is the
+   %     baseflow.setopts('getevents') value. nmin must be greater than 2.
+   %     rmax must be greater than 1: the rmnochange filter marks d2q/dt2
+   %     values beyond the numerical-zero curvature nan. Each nan counts as
+   %     a run of length 1, so an rmax of 1 or less rejects every day.
+   %
+   % Numerical zero
+   %
+   %     The filters test the sign of dq/dt and d2q/dt2, the extrema of q
+   %     and dq/dt, and the trend of q and dq/dt over an event. Exact
+   %     arithmetic gives a zero slope on a constant stretch and a zero
+   %     curvature on a straight stretch, but computed values carry
+   %     rounding, and the smoothing that getevents applies makes it
+   %     depend on the MATLAB release. So each test treats a value as zero
+   %     when its magnitude does not exceed the rounding error of its own
+   %     computation. With u = eps/2 and s = max(abs(q)), each flow value
+   %     carries at most qerror, and E1 = qerror + 2*u*s adds the rounding
+   %     of one difference. A slope is zero within 2*E1 and a curvature
+   %     within 4*E1, the sums of absolute weights of a first and a second
+   %     difference. An extremum must rise above its neighbours by more
+   %     than that amount. The 3-day moving mean adds 3*u*s. Each test
+   %     compares a per-sample difference with a threshold in the same
+   %     units, so the time unit does not matter. The rule scales with q,
+   %     so a positive factor on q does not change the events.
    %
    % Example
    %
@@ -64,10 +87,16 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    [t, q, r, opts] = parseinputs(t, q, r, mfilename, varargin{:});
 
    % MAIN CODE
+   % Bound the rounding error of the flow values once for the whole
+   % series. getevents smooths the whole series, so each segment carries
+   % the error of the whole series (see Numerical zero in the help).
+   [E1, qscale] = roundingbound(q, opts.qerror);
+
    [iS, iE] = nonnansegments(q, opts.nmin);
 
    [T, Q, R, Info] = arrayfun(@(s, e) ...
-      eventsplitter(t(s:e), q(s:e), r(s:e), opts), iS, iE, 'Uniform', false);
+      eventsplitter(t(s:e), q(s:e), r(s:e), opts, E1, qscale), iS, iE, ...
+      'Uniform', false);
 
    if isempty(T)
       [T, Q, R, Info] = setEventEmpty();
@@ -86,12 +115,12 @@ function [T, Q, R, Info] = eventfinder(t, q, r, varargin)
    Info = catstructfields(1, Info{:});
 end
 
-function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
+function [T, Q, R, Info] = eventsplitter(t, q, r, opts, E1, qscale)
    %eventsplitter Split detected recession events into segments for fitting.
    %
    % Syntax
    %
-   %     [T,Q,R,Info] = eventsplitter(t,q,r,opts)
+   %     [T,Q,R,Info] = eventsplitter(t,q,r,opts,E1,qscale)
    %
    % Description
    %
@@ -115,6 +144,8 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    %     rmconvex    remove convex derivatives
    %     rmnochange  remove consecutive constant derivates
    %     rmrain      remove rainfall
+   %     E1          rounding bound of the flow values and one difference
+   %     qscale      max(abs(q)) of the whole series (see roundingbound)
    %
    % See also getevents, eventfinder, eventpicker, eventplotter
 
@@ -138,15 +169,29 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    d2qdt = [0; diff(dqdt)];
    d2qdtS = [0; diff(dqdtS)];
 
+   % Numerical-zero thresholds, in the units of each difference. A first
+   % difference has absolute weights that sum to 2, and a second
+   % difference 4. The 3-day mean adds at most 3*u*qscale. Below these
+   % amounts a slope or curvature is rounding, not signal.
+   E1S = E1 + 3 * (eps/2) * qscale;
+   tslope = 2 * E1;
+   tcurve = 4 * E1;
+   tcurveS = 4 * E1S;
+
    % Part 1: find data to be excluded (run the filters)
 
    % filters: positive dq/dt, peaks +1 day, convex +1 day, and minima -1 day
    % islocalmax and islocalmin are the private peakfinder wrappers, because
    % Octave has no islocalmax or islocalmin.
-   ipos = find(dqdt > 0); % increasing flow (positive dq/dt)
-   imax = find(islocalmax(q)); % local maxima
-   imin = find(islocalmin(q)); % local minima
-   icon = find(islocalmax(dqdt) & islocalmax(dqdtS)) + 1;  % convex + 1 day
+   % Each test uses its numerical-zero threshold. An extremum of q must
+   % rise above its neighbours by more than a slope threshold, and an
+   % extremum of dq/dt by more than a curvature threshold, because
+   % neighbouring slopes differ by a curvature.
+   ipos = find(dqdt > tslope); % increasing flow (positive dq/dt)
+   imax = find(islocalmax(q, tslope)); % local maxima
+   imin = find(islocalmin(q, tslope)); % local minima
+   icon = find(islocalmax(dqdt, tcurve) & islocalmax(dqdtS, tcurveS)) ...
+      + 1; % convex + 1 day
 
    % This also finds the transitions from convex up to concave up
    % icon = find( (islocalmax(dqdt) & islocalmax(dqdtS)) | ...
@@ -154,18 +199,19 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
 
    % Dralle: keep if dq/dt<0 AND d2q/dt2>0 (concave up) in BOTH the raw and
    % smoothed data, i.e. exclude if both raw AND smoothed data are convex
-   icon2 = find(d2qdt <= 0 & d2qdtS <= 0) - 1;
+   icon2 = find(d2qdt <= tcurve & d2qdtS <= tcurveS) - 1;
    icon2 = icon2(icon2 > 0);
 
    % icon always occurs on peaks and one day prior, remove them from icon,
    % the peak will remain in imax, and one day prior in ipos
    icon = icon(~ismember((icon), imax));
 
-   % if the first (last) point is a local max (min), add them here
-   if q(2) < q(1)
+   % if the first (last) point is a local max (min), add them here. The
+   % endpoint step is a slope, so it must exceed the slope threshold.
+   if q(1) - q(2) > tslope
       imax = [1; imax];
    end
-   if q(end) < q(end-1)
+   if q(end-1) - q(end) > tslope
       imin = [imin; length(q)];
    end
 
@@ -191,7 +237,12 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
 
    % exclude sequences of two or more of (dq/dt = 0) (see setconstantnan)
    if opts.rmnochange == true
-      inoc = d2qdt; inoc(inoc ~= 0) = nan;
+      % runlength counts runs of equal values, so a numerically zero
+      % curvature becomes exactly 0 and a real one becomes nan.
+      inoc = d2qdt;
+      iszero = abs(inoc) <= tcurve;
+      inoc(iszero) = 0;
+      inoc(~iszero) = nan;
       inoc = find(isminlength(inoc, opts.rmax));
       ibad = [ibad; inoc];
    end
@@ -214,7 +265,9 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
    % Remove events shorter than nmin and concave increasing flows
    keep = eventlength >= opts.nmin;
    for n = 1:numel(is)
-      if islineconvex(q(is(n):ie(n))) || islinepositive(q(is(n):ie(n)))
+      % The trend tests take the rounding bound of the flow values.
+      if islineconvex(q(is(n):ie(n)), E1) ...
+         || islinepositive(q(is(n):ie(n)), E1)
          keep(n) = false;
       end
    end
@@ -259,6 +312,26 @@ function [T, Q, R, Info] = eventsplitter(t, q, r, opts)
 
 end
 
+%% ROUNDING BOUND
+function [E1, qscale] = roundingbound(q, qerror)
+   %ROUNDINGBOUND Bound the rounding error of the flow values.
+   %
+   %  [E1, qscale] = roundingbound(q, qerror) returns qscale = max(abs(q))
+   %  over the finite values of q and E1 = qerror + 2*u*qscale, with
+   %  u = eps/2. qerror bounds the rounding error of each value of q, and
+   %  2*u*qscale covers the rounding of one difference. An empty qerror
+   %  means one rounding per value, u*qscale. A series with no finite
+   %  value gives E1 = 0.
+   qscale = max(abs(q(isfinite(q))));
+   if isempty(qscale)
+      qscale = 0;
+   end
+   if isempty(qerror)
+      qerror = (eps/2) * qscale;
+   end
+   E1 = qerror + 2 * (eps/2) * qscale;
+end
+
 %% INPUT PARSER
 function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)
 
@@ -278,6 +351,9 @@ function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)
       addParameter(parser,'rmconvex',   defaults.rmconvex,   @islogicalscalar);
       addParameter(parser,'rmnochange', defaults.rmnochange, @islogicalscalar);
       addParameter(parser,'rmrain',     defaults.rmrain,     @islogicalscalar);
+      % The rounding bound of q is a property of the data, not a setopts
+      % policy, so its default is empty: one rounding per value.
+      addParameter(parser,'qerror',     [],                  @isqerror);
    end
    parser.FunctionName = funcname;
    parse(parser,t,q,r,varargin{:});
@@ -298,4 +374,9 @@ function [t, q, r, opts] = parseinputs(t, q, r, funcname, varargin)
 
    % Convert to columns, in case this is not called from baseflow.getevents
    [t, q, r] = deal(t(:), q(:), r(:));
+end
+
+function tf = isqerror(x)
+   %ISQERROR True for an empty value or a nonnegative finite scalar.
+   tf = isempty(x) || (isnumeric(x) && isscalar(x) && isfinite(x) && x >= 0);
 end

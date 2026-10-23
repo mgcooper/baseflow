@@ -42,9 +42,12 @@ classdef TestBaseflow < matlab.unittest.TestCase
       Dd = 0.8
       D = 0.47
 
-      % The recession exponent of the Kuparuk annual workflow, as the 1.1.0
-      % release notes record it, and the rounding of that value.
-      kuparukb = 1.3540
+      % The recession exponent of the Kuparuk annual workflow, and the
+      % rounding of that value. With the numerical-zero rule of
+      % eventfinder, R2025b gives 1.346467 and R2026a 1.346470. R2024b
+      % selects the same events but gives 1.3577, because its per-event
+      % fits differ, so this check fails on R2024b.
+      kuparukb = 1.3465
       btol = 5e-4
 
       % The synthetic recessions follow -dQ/dt = a*Q^b for eight days. The

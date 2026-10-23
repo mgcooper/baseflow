@@ -33,6 +33,24 @@ semantic versioning.
 
 ### Fixed
 
+- The `eventfinder` filters treat a slope or curvature as zero when its
+  magnitude does not exceed the rounding error of its own computation.
+  Exact arithmetic gives a zero curvature on a straight stretch of flow,
+  but the computed values carry rounding, and the smoothing that
+  `getevents` applies makes it depend on the MATLAB release. So the
+  filters selected different events on different releases. The bound
+  scales with the flow and, after smoothing, with the smoothing window;
+  the `eventfinder` help states it. `getevents` passes the bound of its
+  smoothing through the new `eventfinder` option `'qerror'`, and
+  unsmoothed input counts one rounding per value. The Kuparuk annual
+  workflow selects the same 231 events on R2024b, R2025b, and R2026a,
+  where it selected 229 or 230. Against the earlier R2025b result, the
+  `rmnochange` filter excludes 46 more late-season days on straight
+  stretches, which shortens or splits some events. The workflow's
+  recession exponent b is 1.3465 on R2025b and R2026a, against 1.3541
+  in the 1.1.0 release notes, and `TestBaseflow` checks that value.
+  R2024b selects the same events but gives 1.3577, because its
+  per-event nonlinear fits differ.
 - `baseflow.deps.peakfinder` returns no peak when no extremum passes the
   selectivity with the endpoints excluded. It read an unset candidate and
   errored for a positive selectivity on a series that ends below its

@@ -5,11 +5,42 @@ classdef test_eventfinder < matlab.unittest.TestCase
    % so the expected declining and concave-up declining segments follow
    % from its derivatives. The defaults and the rmax guard of eventfinder
    % are integration checks in TestBaseflow.
+   %
+   % The numerical-zero cases check the day-level filters through Info.
+   % Exact arithmetic gives a zero slope on a constant stretch and a zero
+   % curvature on a straight stretch. eventfinder must classify those days
+   % as exact arithmetic does, whatever rounding the computed values
+   % carry, and must keep a real curvature. Each case runs at three
+   % positive flow scales, because the rule scales with the flow.
 
    properties (TestParameter)
       % The minimum event lengths and the rmconvex option of each case.
       MinEventDuration = {3,6,9};
       RmConvex = {false, true};
+
+      % Positive flow scales: unit, an exact power of two, and a factor
+      % that is not a power of two.
+      flowscale = struct('unit', 1, 'powerOfTwo', 2^-20, 'other', 3.7e5)
+
+      % The curvature of the near-threshold case as a multiple of the
+      % numerical-zero threshold, and whether eventfinder must treat the
+      % stretch as straight. A quarter of the threshold is rounding size;
+      % four times the threshold is a real curvature.
+      nearzero = struct('belowThreshold', {{0.25, true}}, ...
+         'aboveThreshold', {{4, false}})
+   end
+
+   properties (Constant)
+      % Days in each numerical-zero series, and the eventfinder options
+      % of those cases: no rain record, no gap filling, and rmax 2.
+      ndays = 60
+      nmin = 4
+
+      % Roundings per value of each constructed series, which set its
+      % qerror bound: a - b*k and (c*k)/k round twice; adding a curvature
+      % term, or computing an exponential, rounds at most twice more.
+      roundingsline = 2
+      roundingscurved = 4
    end
 
    properties (Access = private)
@@ -139,7 +170,142 @@ classdef test_eventfinder < matlab.unittest.TestCase
       end
    end
 
+   methods (Test)
+
+      function test_straightStretchIsNoChange(testCase, flowscale)
+         % A straight decline has zero curvature, so the rmnochange filter
+         % excludes every day of it and no event remains. The computed
+         % values carry rounding, so some second differences are not
+         % exactly zero.
+         q = testCase.straightdecline(flowscale);
+         testCase.assumeTrue(any(diff(diff(q)) ~= 0), ...
+            'the straight decline carries no rounding to test')
+         expected = zeros(0, 1);
+
+         [~, ~, ~, Info] = testCase.findevents(q, true, ...
+            testCase.roundingsline);
+
+         returned = Info.icandidate(:);
+         testCase.verifyEqual(returned, expected)
+      end
+
+      function test_constantStretchHasNoSlope(testCase, flowscale)
+         % A constant stretch has zero slope and no extremum, so no day of
+         % it is rising or a peak, and every day stays a candidate. Its
+         % least-squares trend is zero, so it is neither convex nor rising
+         % and stays one event. The values differ from the constant by at
+         % most one rounding unit.
+         q = testCase.constantstretch(flowscale);
+         testCase.assumeTrue(numel(unique(q)) > 1, ...
+            'the constant stretch carries no rounding to test')
+         candidates_expected = (1:testCase.ndays)';
+         span_expected = [1 testCase.ndays];
+
+         [~, ~, ~, Info] = testCase.findevents(q, false, ...
+            testCase.roundingsline);
+
+         candidates_returned = Info.icandidate(:);
+         span_returned = [Info.istart(:) Info.istop(:)];
+         testCase.verifyEqual(candidates_returned, candidates_expected)
+         testCase.verifyEqual(span_returned, span_expected)
+      end
+
+      function test_straightStretchIsNotConvex(testCase, flowscale)
+         % With rmnochange false, a straight decline stays one event: its
+         % first differences have a zero trend, so it is not convex, and
+         % it falls, so it is not rising. The first two days and the last
+         % day are the endpoint extrema that eventfinder excludes.
+         q = testCase.straightdecline(flowscale);
+         testCase.assumeTrue(any(diff(diff(q)) ~= 0), ...
+            'the straight decline carries no rounding to test')
+         expected = [3 testCase.ndays-1];
+
+         [~, ~, ~, Info] = testCase.findevents(q, false, ...
+            testCase.roundingsline);
+
+         returned = [Info.istart(:) Info.istop(:)];
+         testCase.verifyEqual(returned, expected)
+      end
+
+      function test_curvedRecessionKeepsItsDays(testCase, flowscale)
+         % An exponential recession has a real curvature, so the rule
+         % removes none of its days. The first two days and the last day
+         % are the endpoint extrema that eventfinder always excludes.
+         t = (0:testCase.ndays-1)';
+         timescale = 20; % recession timescale [days]
+         q = flowscale * 1e3 * exp(-t / timescale);
+         expected = (3:testCase.ndays-1)';
+
+         [~, ~, ~, Info] = testCase.findevents(q, true, ...
+            testCase.roundingscurved);
+
+         returned = Info.icandidate(:);
+         testCase.verifyEqual(returned, expected)
+      end
+
+      function test_nearThresholdCurvature(testCase, flowscale, nearzero)
+         % A straight decline plus a curvature that is a multiple of the
+         % documented threshold. Below the threshold the stretch counts as
+         % straight and no day remains. Above it the curvature is real and
+         % the interior days remain.
+         [multiple, isstraight] = nearzero{:};
+         q = testCase.straightdecline(flowscale);
+         k = (0:testCase.ndays-1)';
+         curvature = multiple * testCase.curvaturethreshold(q, ...
+            testCase.roundingscurved);
+         q = q + curvature / 2 * (k - k(end)/2).^2;
+
+         [~, ~, ~, Info] = testCase.findevents(q, true, ...
+            testCase.roundingscurved);
+
+         returned = isempty(Info.icandidate);
+         testCase.verifyEqual(returned, isstraight)
+      end
+   end
+
    methods (Access = private) % Helper methods
+
+      function [T, Q, R, Info] = findevents(testCase, q, rmnochange, ...
+         roundings)
+         %FINDEVENTS Run eventfinder on a daily series without rain.
+         %
+         %  roundings is the number of roundings each value of q carries,
+         %  so qerror = roundings*u*max(abs(q)) with u = eps/2.
+         t = (1:numel(q))';
+         qerror = roundings * (eps/2) * max(abs(q));
+         [T, Q, R, Info] = baseflow.eventfinder(t, q, zeros(size(q)), ...
+            'nmin', testCase.nmin, 'fmax', 0, 'rmax', 2, 'rmin', 0, ...
+            'rmconvex', false, 'rmnochange', rmnochange, ...
+            'rmrain', false, 'qerror', qerror);
+      end
+
+      function q = straightdecline(testCase, flowscale)
+         %STRAIGHTDECLINE Return a straight daily decline with rounding.
+         %
+         %  The start and the daily step are not exact binary fractions, so
+         %  the computed values carry rounding.
+         k = (0:testCase.ndays-1)';
+         q = flowscale * (1e3 + pi) - flowscale * (10/3) * k;
+      end
+
+      function q = constantstretch(testCase, flowscale)
+         %CONSTANTSTRETCH Return a constant series with rounding.
+         %
+         %  (c*k)/k equals c in exact arithmetic but can differ from c by
+         %  one rounding unit.
+         k = (1:testCase.ndays)';
+         c = flowscale * (1e3 + pi);
+         q = (c * k) ./ k;
+      end
+
+      function t2 = curvaturethreshold(~, q, roundings)
+         %CURVATURETHRESHOLD The documented numerical-zero curvature.
+         %
+         %  4*E1, with E1 = qerror + 2*u*max(abs(q)), u = eps/2, and
+         %  qerror = roundings*u*max(abs(q)), as the eventfinder help
+         %  states.
+         t2 = 4 * (roundings + 2) * (eps/2) * max(abs(q));
+      end
 
       function [t, q] = prepareEventData(testCase, prec) %#ok<*INUSD>
          % This function handles some common operations related to test data
