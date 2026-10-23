@@ -33,6 +33,10 @@ semantic versioning.
 
 ### Fixed
 
+- `baseflow.deps.peakfinder` returns no peak when no extremum passes the
+  selectivity with the endpoints excluded. It read an unset candidate and
+  errored for a positive selectivity on a series that ends below its
+  extrema.
 - `wrapevents` removes February 29 before annual grouping and keeps the
   remaining timestamps, flow and rainfall rows aligned. Leap-year input
   previously failed the complete-year check.
