@@ -18,6 +18,16 @@ function varargout = plfitb(x,varargin)
    %     there. A bootstrap replicate beyond the pole makes tau_sig, tau_L,
    %     and tau_H NaN. plfitb then warns with baseflow:expectedtau:tauPole.
    %
+   % Fit.Percentiles summarizes retained alpha, b, tau0, tau and ntail
+   % bootstrap samples at probabilities [0.025,0.975]. Each parameter has
+   % bounds, available, sampleCount, invalidCount, poleCount and reason.
+   % The midpoint method linearly interpolates sorted values at (k-0.5)/n
+   % and clamps beyond endpoint knots. These descriptive percentiles do not
+   % establish coverage. The one-sigma and BootFit fields remain separate.
+   % A nonfinite sample makes that parameter unavailable; samples are never
+   % discarded or redrawn. Tau poles are counted separately. No bootstrap
+   % gives unavailable bounds with reason notBootstrapped.
+   %
    % Required inputs
    %
    %     x        data believed to follow an untruncated Pareto distribution
@@ -110,6 +120,8 @@ function varargout = plfitb(x,varargin)
       Fit.reps = BootFit.reps;
       BootFit = rmfield(BootFit,'reps');
       Fit.BootFit = BootFit;
+      % Describe the retained draws without changing uncertainty propagation.
+      Fit.Percentiles = baseflow.internal.bootstrappercentiles(Fit.reps);
    else
       % assign null confidence bounds so other functions will work
       Fit.b_L = Fit.b;
@@ -120,6 +132,7 @@ function varargout = plfitb(x,varargin)
       Fit.tau0_H = Fit.tau0;
       Fit.tau_L = Fit.tau;
       Fit.tau_H = Fit.tau;
+      Fit.Percentiles = baseflow.internal.bootstrappercentiles();
    end
 
    % also: b = (2*k+1)/(k+1)
