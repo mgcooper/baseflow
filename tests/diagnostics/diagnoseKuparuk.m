@@ -52,7 +52,7 @@ function diagnoseKuparuk(root, outdir)
       'bootfit', false, 'plotfits', false);
    R.options = struct('events', eventopts, 'fits', fitopts, 'global', opts);
    [T, Q, rain] = baseflow.loadExampleData('kuparuk');
-   R.in = struct('T', arrayhash(convertTo(T, 'datenum')), ...
+   R.in = struct('T', arrayhash(T), ...
       'Q', arrayhash(Q), ...
       'R', arrayhash(rain));
 
@@ -78,7 +78,7 @@ function diagnoseKuparuk(root, outdir)
    R.rngUnchanged = isequal(R.rngBefore, R.rngAfter);
 
    % Numeric time copies permit comparison without MATLAB object decoding.
-   inputTime = convertTo(T, 'datenum');
+   inputTime = T;
    eventTime = Events.eventTime;
    if isdatetime(eventTime)
       eventTime = convertTo(eventTime, 'datenum');
