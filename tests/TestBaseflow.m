@@ -193,6 +193,27 @@ classdef TestBaseflow < matlab.unittest.TestCase
             'AbsTol', testCase.btol)
       end
 
+      function test_globalFitRejectsSlopedBeforeBootstrap(testCase)
+         % Invalid geometry must stop before bootstrap and figure work.
+         C = testCase.Chain;
+         opts = C.opts;
+         opts.isflat = false;
+         opts.bootfit = true;
+         opts.plotfits = true;
+         state = rng;
+         testCase.addTeardown(@() rng(state));
+         figures = findall(groot,'Type','figure');
+         phiMethods = {'pointcloud','distfit','phicombo'};
+         for k = 1:numel(phiMethods)
+            opts.phimethod = phiMethods{k};
+            testCase.verifyError(@() baseflow.globalfit( ...
+               C.K,C.Events,C.Fits,opts), ...
+               'baseflow:unsupportedSlopedAquifer');
+         end
+         testCase.verifyEqual(rng,state);
+         testCase.verifyEqual(findall(groot,'Type','figure'),figures);
+      end
+
       function test_globalFitUsesTheTail(testCase)
          % The tail starts at the tau0 sample and holds no tau below it. The
          % mean tau follows tau0 and b, and the expected flows follow a, b,

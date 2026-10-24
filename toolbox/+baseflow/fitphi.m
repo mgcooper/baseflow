@@ -24,10 +24,15 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
    % Optional inputs
    %
    %     theta    effective slope of basin contributing area
-   %     isflat   logical flag indicating horizontal or sloped aquifer solution
+   %     isflat   true only; false raises an unsupported-workflow error
    %     soln1    optional early-time theoretical solution
    %     soln2    optional late-time theoretical solution
    %     dispfit  logical flag indicating whether to print each phi value
+   %
+   % Theta remains a compatibility input and is unused for flat solutions.
+   % Sloped pairs and all-pair requests raise
+   % baseflow:unsupportedSlopedAquifer. The raw sloped formulas and catalog
+   % below are retained for research; they are not qualified callable results.
    %
    % Example
    %
@@ -94,6 +99,8 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
    % PARSE INPUTS
    [a1, a2, b2, A, D, L, theta, isflat, dispfit, soln1, soln2] = ...
       parseinputs(a1, a2, b2, A, D, L, varargin{:});
+   % Reject unsupported geometry before fitting or drawing samples.
+   requireflat(isflat,soln1,soln2);
 
    % MAIN FUNCTION
 
@@ -212,12 +219,13 @@ function [phi,solns,desc] = fitphi(a1,a2,b2,A,D,L,varargin)
 
             % phi = c1c2/a1a2;
 
+            % These diagnostic relations do not contribute to returned phi.
             % multiply by *100/86400 to go from m/d to cm/s
-            k1 = 1.133/(D^3*L^2*a1*c1c2/a1a2);   % early
-            k2 = ((a2*A^(3/2)*c1c2/a1a2)/(4.804*L))^2;
+            % k1 = 1.133/(D^3*L^2*a1*c1c2/a1a2);   % early
+            % k2 = ((a2*A^(3/2)*c1c2/a1a2)/(4.804*L))^2;
 
             % compute Q0
-            Q0 = 3.448*k1*D^2*L^2/A; % or: 3.448*k1*D^2*Dd*L if Dd is used
+            % Q0 = 3.448*k1*D^2*L^2/A; % or: 3.448*k1*D^2*Dd*L if Dd is used
 
             % once phi and k are known, we can check D
 
@@ -311,7 +319,7 @@ function [soln,desc,b2] = parsesolutions(soln1,soln2,b2,isflat)
          b2 = 1;
       end
    else
-      if strcmp(soln1,'RS05') && (b2 < 3/2 || b2>=2)
+      if strcmp(soln2,'RS05') && (b2 < 3/2 || b2>=2)
          warning('baseflow:fitphi:incompatibleLateTimeSolution', ...
             ['Requested late-time solution (Rupp and Selker, 2005) ' ...
             'is incompatible with b<1.5 or b>=2, using Boussinesq, 1903, b=1'])
