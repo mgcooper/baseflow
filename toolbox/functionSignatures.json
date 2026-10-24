@@ -81,8 +81,8 @@
          {"name":"mask",      "kind": "namevalue", "type": ["vector","logical"]},
          {"name":"theta",     "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"isflat",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','Brutsaert, 1994','PK62','RS05','BR94'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
-         {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','Brutsaert, 1994','Rupp and Selker, 2006 b=1','Rupp and Selker, 2006 b=f(n)','BS04','BS03','BR94','RS06b1','RS06','RS05'}"],"default":"'RS05bn'","purpose":"Option"},
+         {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','PK62','RS05'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
+         {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','BS04','BS03','RS05'}"],"default":"'RS05'","purpose":"Option"},
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"plotfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
       ]
@@ -144,19 +144,16 @@
    {
       "inputs":
       [
-         {"name":"Results",   "kind": "required",  "type": ["table"]},
+         {"name":"Results",   "kind": "required",  "type": ["struct"]},
          {"name":"Fits",      "kind": "required",  "type": ["struct"]},
          {"name":"A",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"D",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"L",         "kind": "required",  "type": ["scalar","double"]},
          {"name":"blate",     "kind": "required",  "type": ["scalar","double"]},
-         {"name":"method",    "kind": "required",  "type": ["char", "choices={'mean','median','envelope'}"],"default":"'median'","purpose":"Option"},
-         {"name":"refqtls",   "kind": "namevalue", "type": ["vector","double"]},
-         {"name":"theta",     "kind": "namevalue", "type": ["scalar","double"]},
-         {"name":"isflat",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','Brutsaert, 1994','PK62','RS05','BR94'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
-         {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','Brutsaert, 1994','Rupp and Selker, 2006 b=1','Rupp and Selker, 2006 b=f(n)','BS04','BS03','BR94','RS06b1','RS06','RS05'}"],"default":"'RS05bn'","purpose":"Option"},
-         {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"}
+         {"name":"earlyqtls", "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"lateqtls",  "kind": "namevalue", "type": ["vector","double"]},
+         {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','PK62','RS05'}"],"default":"''","purpose":"Option"},
+         {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','BS04','BS03','RS05'}"],"default":"''","purpose":"Option"}
       ]
    },
    "baseflow.eventtau":
@@ -247,8 +244,8 @@
          {"name":"theta",     "kind": "namevalue", "type": ["scalar","double"]},
          {"name":"isflat",    "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
          {"name":"dispfit",   "kind": "namevalue", "type": ["logical","scalar"],"purpose":"Option"},
-         {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','Brutsaert, 1994','PK62','RS05','BR94'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
-         {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','Brutsaert, 1994','Rupp and Selker, 2006 b=1','Rupp and Selker, 2006 b=f(n)','BS04','BS03','BR94','RS06b1','RS06','RS05'}"],"default":"'RS05bn'","purpose":"Option"}
+         {"name":"soln1",     "kind": "namevalue", "type": ["char", "choices={'Polubarinova-Kochina, 1962','Rupp and Selker, 2005','PK62','RS05'}"],"default":"'Rupp and Selker, 2005'","purpose":"Option"},
+         {"name":"soln2",     "kind": "namevalue", "type": ["char", "choices={'Boussinesq, 1904 b=3/2','Rupp and Selker, 2005 b=f(n)','Boussinesq, 1903 b=1','BS04','BS03','RS05'}"],"default":"'RS05'","purpose":"Option"}
       ]
    },
    "baseflow.fitphidist":

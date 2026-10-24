@@ -51,6 +51,11 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    %                 the early-time and fitted late-time lines, and the phi
    %                 legend. Default is true.
    %
+   % Only flat fits are supported. isflat=false and sloped solution names
+   % raise baseflow:unsupportedSlopedAquifer before fitting or plotting.
+   % The function selects flat pairs from blate (or userab). soln1, soln2
+   % and theta are retained compatibility options, not a sloped workflow.
+   %
    % See also: eventphi, fitphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
@@ -63,8 +68,11 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 
    % parse inputs
    [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ...
-      ~, isflat, ~, ~, dispfit, plotfit] = parseinputs(q, dqdt, blate, ...
+      ~, isflat, soln1, soln2, dispfit, plotfit] = parseinputs( ...
+      q, dqdt, blate, ...
       A, D, L, method, varargin{:});
+   % Reject unsupported geometry before fitting or drawing samples.
+   requireflat(isflat,soln1,soln2);
 
    % the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could
    % also be used but this function is intended to fit phi once b is known (or

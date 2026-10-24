@@ -38,6 +38,9 @@ function GlobalFit = globalfit(Results,Events,Fits,varargin)
    %     fprintf('b = %.2f, tau = %.0f days, phi = %.3f\n', ...
    %        GlobalFit.b, GlobalFit.tau, GlobalFit.phi)
    %
+   % Only flat aquifer fits are supported. isflat=false raises
+   % baseflow:unsupportedSlopedAquifer before fitting or plotting.
+   %
    % See also: setopts, getevents, fitevents, fitphi, eventphi, eventtau
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
@@ -185,6 +188,8 @@ function [Q, A, Dd, D, L, theta, B, phi, plotfits, bootfit, bootreps, ...
    earlyqtls   = parser.Results.earlyqtls;
    lateqtls    = parser.Results.lateqtls;
    isflat      = parser.Results.isflat;
+   % Reject unsupported geometry before fitting or drawing samples.
+   requireflat(isflat,'','');
 
    % if stream length and drainage density are both provided, check that they
    % are consistent with the provided area. note: Dd comes in as 1/km b/c that's
