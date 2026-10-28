@@ -38,6 +38,11 @@ function [Fit,ok] = fitab(q,dqdt,method,varargin)
    % Notes
    %     masked points and zero-weight points take no part in the fit
    %
+   %     MATLAB NLS solvers fit scaled discharge and derivative values to
+   %     reduce numerical conditioning errors. Fit coefficients and their
+   %     confidence intervals use the original input units. The solver
+   %     sequence rejects a Curve Fitting iterate that did not converge.
+   %
    %     Use method 'envelope' to pass a line through an arbitrary x,y pair
    %     (refpoints), specified in terms of the quantile of the x/y data
    %     distributions. this method is similar to 'mean' or 'median', but allows
