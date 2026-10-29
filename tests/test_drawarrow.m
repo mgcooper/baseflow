@@ -199,9 +199,9 @@ classdef test_drawarrow < matlab.unittest.TestCase
       function test_nonpositiveLogCoordinateDrawsNothing(testCase)
          % log10 of a value at or below zero is complex, and a complex
          % coordinate draws the arrow reflected through the origin, at a
-         % point the data never reaches. gpfitb reaches this with a
-         % negative tauExp, which the tail of a power law below alpha 2
-         % gives it.
+         % point the data never reaches. The mean-tau formula
+         % tau0*(2-b)/(3-2*b) is negative below the tau pole at alpha 2,
+         % so a label of that value reaches this.
          ax = testCase.testaxes('log', 'log');
          negativepoint = [-10 1e3];
 

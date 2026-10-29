@@ -193,7 +193,7 @@ This function is called by:
 0097             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
 0098          phi2 = baseflow.eventphi(Results, Fits, A, D, L, 3/2, <span class="keyword">...</span>
 0099             <span class="string">'lateqtls'</span>, lateqtls, <span class="string">'earlyqtls'</span>, earlyqtls);
-0100          phid = vertcat(phi1, phi2); phid(phid&gt;1) = nan; phid(phid&lt;0) = nan;
+0100          phid = vertcat(phi1, phi2);
 0101          phi = baseflow.fitphidist(phid, <span class="string">'mean'</span>, <span class="string">'cdf'</span>, plotfits);
 0102    <span class="keyword">end</span>
 0103 
@@ -249,7 +249,7 @@ This function is called by:
 0153    parser.addRequired(<span class="string">'Events'</span>, @isstruct);
 0154    parser.addRequired(<span class="string">'Fits'</span>, @isstruct);
 0155    parser.addParameter(<span class="string">'drainagearea'</span>, nan, @isnumericscalar);
-0156    parser.addParameter(<span class="string">'drainagedensity'</span>, 0.8, @isnumericscalar);
+0156    parser.addParameter(<span class="string">'drainagedensity'</span>, nan, @isnumericscalar);
 0157    parser.addParameter(<span class="string">'aquiferdepth'</span>, nan, @isnumericscalar);
 0158    parser.addParameter(<span class="string">'streamlength'</span>, nan, @isnumericscalar);
 0159    parser.addParameter(<span class="string">'aquiferslope'</span>, 0, @isnumericscalar);
@@ -285,16 +285,19 @@ This function is called by:
 0189    <span class="comment">% if stream length and drainage density are both provided, check that they</span>
 0190    <span class="comment">% are consistent with the provided area. note: Dd comes in as 1/km b/c that's</span>
 0191    <span class="comment">% how it is almost always reported (km/km2). divide by 1000 to get 1/m.</span>
-0192    <span class="keyword">if</span> ~isnan(Dd) &amp;&amp; ~isnan(L)
-0193       <span class="keyword">if</span> Dd/1000*A ~= L        <span class="comment">% 1/m * m^2 = m</span>
-0194          warning( <span class="keyword">...</span>
-0195             <span class="string">'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd'</span>);
-0196          L = Dd/1000*A;
-0197       <span class="keyword">end</span>
-0198    <span class="keyword">end</span>
-0199 
-0200    <span class="comment">% take values out of the data structures that are needed</span>
-0201    Q = Events.inputFlow;       <span class="comment">% daily streamflow [m3 d-1]</span>
-0202 <span class="keyword">end</span></pre></div>
+0192    <span class="comment">% Both default to nan, so a default never replaces a provided L. The</span>
+0193    <span class="comment">% relative tolerance accepts the rounding of L = A*Dd/1000 computed in</span>
+0194    <span class="comment">% another order.</span>
+0195    <span class="keyword">if</span> ~isnan(Dd) &amp;&amp; ~isnan(L)
+0196       <span class="keyword">if</span> abs(Dd/1000*A - L) &gt; sqrt(eps)*L        <span class="comment">% 1/m * m^2 = m</span>
+0197          warning(<span class="string">'baseflow:globalfit:inconsistentStreamlength'</span>, <span class="keyword">...</span>
+0198             <span class="string">'provided streamlength, L, inconsistent with L=A*Dd. Using L=A*Dd'</span>);
+0199          L = Dd/1000*A;
+0200       <span class="keyword">end</span>
+0201    <span class="keyword">end</span>
+0202 
+0203    <span class="comment">% take values out of the data structures that are needed</span>
+0204    Q = Events.inputFlow;       <span class="comment">% daily streamflow [m3 d-1]</span>
+0205 <span class="keyword">end</span></pre></div>
 </body>
 </html>

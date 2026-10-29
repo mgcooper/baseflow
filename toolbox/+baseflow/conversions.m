@@ -50,7 +50,7 @@ function b = convert2b(inputvalue,inputvarname,isflat)
    %             Nstar,    from N* = 1/(N+1)
    %                 d,    from Q = cS^d, where d = 1/(2-b)
    %                 n,    from k(z) = kD(z/D)^n,
-   %                 k,    from P(Q) ~ Q^-(1+1/k)
+   %                 k,    from p(tau) ~ tau^-(1+1/k)
    %            isflat,    true if flat aquifer
    %
    %  Outputs:       b,    from dQ(t)=a*Q^b
@@ -95,6 +95,10 @@ function b = convert2b(inputvalue,inputvarname,isflat)
             case false
                b = 1-N;
          end
+
+      case 'Nstar'
+         % N* = 1/(N+1), so convert through N
+         b = convert2b(1./inputvalue-1,'N',isflat);
    end
 end
 
@@ -105,14 +109,14 @@ function varargout = convertb(b,outputvarname,isflat)
    %  Inputs:        b,    from dQ(t)=a*Q^b
    %            isflat,    true if flat aquifer
    %
-   %  Outputs:   alpha,    from P(Q) ~ t*^-alpha
+   %  Outputs:   alpha,    from Q ~ t*^-alpha
    %              beta,    from Q ~ S^-beta (beta = -d)
    %             gamma,    from 1/gamma = 1/alpha + 1/beta
    %                 N,    from a = c1*D^N, where c1 is a coefficient
    %             Nstar,    from N* = 1/(N+1)
    %                 d,    from Q = cS^d, where d = 1/(2-b)
    %                 n,    from k(z) = kD(z/D)^n,
-   %                 k,    from P(Q) ~ Q^-(1+1/k)
+   %                 k,    from p(tau) ~ tau^-(1+1/k)
    %
    % k is the gpfit shape parameter: the gpd tail pdf ~ x^-(1+1/k) equals the
    % timescale pdf ~ x^-alpha, so k = 1/(alpha-1) = (1-b)/(b-2).

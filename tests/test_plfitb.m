@@ -1,15 +1,18 @@
 classdef test_plfitb < matlab.unittest.TestCase
-   %TEST_PLFITB Test the plfitb bootstrap seed, tau pole, and plot legend.
+   %TEST_PLFITB Test the plfitb exponent, mean tau, tau pole, and legend.
    %
-   % plfitb bootstraps with baseflow.deps.plvar, which resamples the data,
-   % so a caller seed must fix the replicates. tau = tau0*(2-b)/(3-2*b) has
-   % a pole at b = 3/2, which is alpha = 2, and plfitb warns when a
-   % replicate reaches it. The legend plfitb draws through plplotb carries
-   % one bootstrap standard deviation, so it must name no coverage level.
-   % Every sample is a deterministic Pareto draw, which leaves the
-   % bootstrap resampling as the only random step.
+   % plfitb recovers the exponent of a power-law sample. plfitb bootstraps
+   % with baseflow.deps.plvar, which resamples the data, so a caller seed
+   % must fix the replicates. tau = tau0*(2-b)/(3-2*b) has a pole at
+   % b = 3/2, which is alpha = 2. The mean tau of a Pareto tail diverges at
+   % or below the pole, so plfitb returns Inf there. plfitb warns for the
+   % point estimate and for the replicates. The legend plfitb draws through
+   % plplotb carries one bootstrap standard deviation, so it must name no
+   % coverage level. Every sample except the exponent-recovery sample is a
+   % deterministic Pareto draw, which leaves the bootstrap resampling as
+   % the only random step.
    %
-   % See also: test_plfitb_hanel
+   % See also: test_plfitb_hanel, test_getfunction
 
    properties (TestParameter)
       % Seeds for the reproducibility test. Each value seeds two identical
@@ -19,6 +22,13 @@ classdef test_plfitb < matlab.unittest.TestCase
       % Pareto exponents at and near the tau pole. Both put several of the
       % replicates at or below alpha = 2.
       poleexponent = struct('atpole', 2.00, 'nearpole', 2.05)
+
+      % Pareto exponents the exponent-recovery test samples.
+      PowerLawExponent = {1.5, 2.0, 2.5, 3.0, 3.5};
+
+      % Each case holds a pdf exponent above the pole and the Pareto mean
+      % tau0*(alpha-1)/(alpha-2) for tau0 = 10: 10*2/1 and 10*3/2.
+      meantail = struct('alpha3', {{3, 20}}, 'alpha4', {{4, 15}})
    end
 
    properties (Constant)
@@ -39,12 +49,19 @@ classdef test_plfitb < matlab.unittest.TestCase
       % count at the pole depends on it.
       poleseed = 1
 
-      % The exponent at the pole. A replicate at or below it returns a
-      % negative or unbounded tau.
+      % The exponent at the pole. A replicate at or below it has a
+      % divergent mean tau, which plfitb returns as Inf.
       polealpha = 2
 
-      % The identifier plfitb warns with at the pole.
-      poleid = 'baseflow:plfitb:tauPoleReplicates'
+      % The identifier expectedtau warns with at the pole, for the point
+      % estimate and the replicates alike.
+      poleid = 'baseflow:expectedtau:tauPole'
+
+      % A pdf exponent below the pole.
+      belowpolealpha = 1.5
+
+      % Relative error allowed between the fitted and the true mean tau.
+      meanreltol = 0.05
    end
 
    properties
@@ -141,7 +158,7 @@ classdef test_plfitb < matlab.unittest.TestCase
 
          % The message names the count and the replicate total.
          testCase.verifySubstring(err_returned.message, ...
-            sprintf('of %d bootstrap replicates', testCase.nreps))
+            sprintf('of %d values of b', testCase.nreps))
       end
 
       function test_poleWarningKeepsReturnedValues(testCase, poleexponent)
@@ -149,23 +166,90 @@ classdef test_plfitb < matlab.unittest.TestCase
          x = testCase.paretosample(poleexponent, testCase.npolesample);
 
          % Silence the expected warning: this test reads the values.
-         warnstate = warning('off', testCase.poleid);
-         testCase.addTeardown(@() warning(warnstate));
+         testCase.applyFixture( ...
+            matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+            testCase.poleid));
 
          returned = testCase.runbootfit(x, testCase.poleseed);
 
-         % The sample sits at the pole, so some replicates cross it.
-         npole_returned = sum(returned.reps.alpha <= testCase.polealpha);
-         testCase.verifyGreaterThan(npole_returned, 0)
+         % The sample sits at the pole, so some replicates cross it. The
+         % mean tau of each such replicate diverges.
+         ispole = returned.reps.alpha <= testCase.polealpha;
+         testCase.verifyGreaterThan(nnz(ispole), 0)
+         testCase.verifyEqual(returned.reps.tau(ispole), Inf(nnz(ispole), 1))
 
-         % tau is the point estimate, and the bounds stay one sigma wide.
-         tau_expected = returned.tau0 ...
-            * (2-returned.b) / (3-2*returned.b);
+         % tau is the point estimate of a fit without the bootstrap, and
+         % the bounds stay one sigma wide.
+         nobootfit = baseflow.plfitb(x);
+         tau_expected = nobootfit.tau;
          testCase.verifyEqual(returned.tau, tau_expected)
          testCase.verifyEqual(returned.tau_L, ...
             returned.tau - returned.BootFit.tau_sig)
          testCase.verifyEqual(returned.tau_H, ...
             returned.tau + returned.BootFit.tau_sig)
+      end
+
+      function test_meanTauAbovePole(testCase, meantail)
+         % Above the pole, tau is the Pareto mean and plfitb does not warn.
+         [alpha, expected] = meantail{:};
+         x = testCase.paretosample(alpha, testCase.nsample);
+
+         Fit = testCase.verifyWarningFree(@() baseflow.plfitb(x, ...
+            'xmin', testCase.tau0));
+
+         returned = Fit.tau;
+         testCase.verifyEqual(returned, expected, ...
+            'RelTol', testCase.meanreltol)
+      end
+
+      function test_tailMaskIncludesXmin(testCase)
+         % plfit fits the tail x >= xmin, and xmin is one of the samples, so
+         % the tail mask that globalfit uses keeps that sample.
+         x = testCase.paretosample(testCase.tailexponent, testCase.nsample);
+
+         Fit = baseflow.plfitb(x);
+
+         testCase.assertTrue(any(x == Fit.tau0))
+         testCase.verifyTrue(all(Fit.taumask(x == Fit.tau0)))
+      end
+
+      function test_meanTauDivergesBelowPole(testCase)
+         % Below the pole, the mean tau is infinite and plfitb warns with
+         % an identifier that names the pole.
+         x = testCase.paretosample(testCase.belowpolealpha, ...
+            testCase.nsample);
+         expected = Inf;
+
+         Fit = testCase.verifyWarning(@() baseflow.plfitb(x, ...
+            'xmin', testCase.tau0), testCase.poleid);
+
+         returned = Fit.tau;
+         testCase.verifyEqual(returned, expected)
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_recoversExponent(testCase,PowerLawExponent)
+
+         % An exponent at or below 2 puts the point estimate at the tau
+         % pole, so plfitb warns. This test reads the exponent only.
+         testCase.applyFixture( ...
+            matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+            testCase.poleid));
+
+         % generate power-law distributed test data
+         x = (1-rand(10000,1)).^(-1/(PowerLawExponent-1));
+
+         % compute the fit
+         [~,returned] = baseflow.plfitb(x); % the second output is alpha
+         expected = PowerLawExponent;
+
+         % The estimate from random samples varies. Allow 0.1 absolute error.
+         tol = 0.1;
+
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(returned,expected,'AbsTol',tol);
+
       end
 
       function test_noPoleWarningAwayFromPole(testCase)

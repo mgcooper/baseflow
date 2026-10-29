@@ -343,36 +343,6 @@ function varargout = pointcloudplot(q,dqdt,varargin)
 end
 
 %% LOCAL FUNCTIONS
-function hrain = plotrain(ax,h,rain,x,y)
-
-   % ax is the axis to plot into
-   % h is the handle of the plotted q/dqdt to get the marker size to scale
-   % the rain circles
-   % x and y are q -dqdt
-
-   % add rain. scale the circles such that 1 mm of rain equals the size of
-   % the plotted circles
-   if sum(rain)==0
-      hrain = nan;
-   else
-
-      % scatter is producing pixelated symbols so I use plot instead
-      % sz = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
-      % scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
-
-      % this mimics the way scatter scales the circles
-      sz = get(h,'MarkerSize') + sqrt(pi.*(rain(rain>0)).^2);
-      x = x(rain>0);
-      y = y(rain>0);
-
-      hold(ax, 'on');
-      for n = numel(sz):-1:1
-         hrain(n) = plot(ax,x(n),y(n),'o','MarkerSize',sz(n), ...
-            'MarkerFaceColor','none','Color','m','LineWidth',1);
-      end
-   end
-end
-
 %% INPUT PARSER
 function [q, dqdt, mask, reflines, reflabels, blate, userab, precision, ...
       timestep, addlegend, usertext, rain, axislimits, labelstyle, ...

@@ -35,6 +35,10 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    %                 The late-time line uses the input method, and only
    %                 method 'envelope' reads lateqtls. Default is
    %                 [0.5 0.5].
+   %     userab      late-time [a b] of a line the user chose. cloudphi then
+   %                 uses this line in place of the line it fits at blate,
+   %                 and blate does not enter phi. Default is [] (fit the
+   %                 late-time line).
    %     mask        logical mask to exclude data
    %     theta       effective slope of basin contributing area
    %     isflat      logical flag indicating if horizontal or sloped aquifer
@@ -46,6 +50,11 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    %     plotfit     logical flag indicating whether to draw the point cloud,
    %                 the early-time and fitted late-time lines, and the phi
    %                 legend. Default is true.
+   %
+   % Only flat fits are supported. isflat=false and sloped solution names
+   % raise baseflow:unsupportedSlopedAquifer before fitting or plotting.
+   % The function selects flat pairs from blate (or userab). soln1, soln2
+   % and theta are retained compatibility options, not a sloped workflow.
    %
    % See also: eventphi, fitphi, fitphidist
    %
@@ -59,8 +68,11 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
 
    % parse inputs
    [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ...
-      ~, isflat, ~, ~, dispfit, plotfit] = parseinputs(q, dqdt, blate, ...
+      ~, isflat, soln1, soln2, dispfit, plotfit] = parseinputs( ...
+      q, dqdt, blate, ...
       A, D, L, method, varargin{:});
+   % Reject unsupported geometry before fitting or drawing samples.
+   requireflat(isflat,soln1,soln2);
 
    % the easiest way to get a1/a2 is pointcloudintercept. baseflow.fitab could
    % also be used but this function is intended to fit phi once b is known (or
@@ -71,12 +83,15 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    % a2 = late-time a
    % b2 = late-time b (bhat or theoretical solution b=1 or b=3/2)
 
-   if isnan(userab)
+   % The early-time line always comes from the point cloud. A user line in
+   % userab replaces the late-time line fitted at blate.
+   a1 = baseflow.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
+   if isempty(userab)
       b2 = blate;
-      a1 = baseflow.pointcloudintercept(q,dqdt,3,'envelope','refqtls',earlyqtls);
       a2 = baseflow.pointcloudintercept(q,dqdt,b2,method,'refqtls',lateqtls,'mask',mask);
    else
-
+      a2 = userab(1);
+      b2 = userab(2);
    end
 
    switch b2
@@ -97,7 +112,7 @@ function [phi,a] = cloudphi(q,dqdt,blate,A,D,L,method,varargin)
    if plotfit
       % make a dummy handle for the legend and print the value of phi
       baseflow.pointcloudplot(q,dqdt,'blate',blate,'mask',mask,'reflines', ...
-         {'early','userfit'},'userab',[a2 blate],'reflabels',true);
+         {'early','userfit'},'userab',[a2 b2],'reflabels',true);
       hdum = plot(0,0,'Color','none','HandleVisibility','off');
 
       if isoctave
@@ -130,7 +145,8 @@ function [q, dqdt, blate, A, D, L, method, earlyqtls, lateqtls, userab, mask, ..
    addRequired(parser, 'method', @ischar);
    addParameter(parser,'earlyqtls',[0.95 0.95], @isnumeric);
    addParameter(parser,'lateqtls', [0.5 0.5], @isnumeric);
-   addParameter(parser,'userab', nan, @isnumeric);
+   addParameter(parser,'userab', [], ...
+      @(x) isempty(x) || isnumericvector(x) && numel(x) == 2);
    addParameter(parser,'mask', true(size(q)), @islogical);
    addParameter(parser,'theta', 0, @isnumeric);
    addParameter(parser,'isflat', true,  @islogical);

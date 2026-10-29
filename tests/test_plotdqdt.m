@@ -6,7 +6,8 @@ classdef test_plotdqdt < matlab.unittest.TestCase
    % decade inside the final limits carries a tick, and the axislimits
    % option selects how far a limit moves to reach its decade. The labels
    % take an explicit color and font size, the rain circles reach the
-   % legend, and a supplied axes receives every part of the figure.
+   % legend, and a supplied axes receives every part of the figure. The
+   % labelplot option draws the reference-line arrows only on request.
 
    properties (TestParameter)
       % The axis-limit policies. 'none' keeps the limits the data sets.
@@ -276,22 +277,22 @@ classdef test_plotdqdt < matlab.unittest.TestCase
          testCase.verifyTrue(any(strcmp(h.leg.String, 'rain')))
       end
 
-      function test_theFigureKeepsThePositionItWasGiven(testCase)
-         % A figure pinned to [1 1] opens in the bottom-left corner of the
+      function test_theFigureTakesTheSharedSize(testCase)
+         % The figure was pinned to [1 1], the bottom-left corner of the
          % screen, where the dock covers the axis labels. Only the size
          % belongs to this function, and pointcloudplot sizes its figure
-         % through the same private helper.
+         % through the same private helper. Its own suite,
+         % tests/test_sizefigure.m, covers the position that is kept: a
+         % window manager may move any figure to fit the screen, so a
+         % position read here says nothing.
+         sizefigure = baseflow.privatefunction('sizefigure');
          reference = figure('Visible', 'off');
          testCase.addTeardown(@close, reference)
-         position_expected = get(reference, 'Position');
-         sizefigure = baseflow.privatefunction('sizefigure');
          size_expected = get(sizefigure(reference), 'Position');
 
          h = baseflow.plotdqdt(testCase.q, testCase.dqdt);
 
          position_returned = get(ancestor(h.ax, 'figure'), 'Position');
-         testCase.verifyEqual(position_returned(1:2), ...
-            position_expected(1:2))
          testCase.verifyEqual(position_returned(3:4), size_expected(3:4))
       end
 
@@ -304,7 +305,9 @@ classdef test_plotdqdt < matlab.unittest.TestCase
          target = subplot(1, 2, 1, 'Parent', fig);
          other = subplot(1, 2, 2, 'Parent', fig);
          plot(other, 1:10, 1:10);
-         axes(other)
+         % Make the other panel current without axes(), which shows and
+         % raises the figure whatever the root default asks for.
+         set(fig, 'CurrentAxes', other)
          nfigs_expected = numel(findall(0, 'Type', 'figure'));
 
          h = baseflow.plotdqdt(testCase.q, testCase.dqdt, 'ax', target, ...
@@ -316,6 +319,38 @@ classdef test_plotdqdt < matlab.unittest.TestCase
             nlines_expected)
          testCase.verifyEqual(numel(findall(0, 'Type', 'figure')), ...
             nfigs_expected)
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_plotdqdt_labelplot(testCase)
+
+         % generate nonlinear (b = 1.5) test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 100;
+         t = 1:100;
+         [~,q,dqdt] = baseflow.generateTestData(a,b,q0,t);
+
+         % Count refline arrows. labelrefline draws each one as a patch
+         % with HandleVisibility off, so findall finds it and findobj does
+         % not.
+         arrowtype = 'patch';
+
+         % 'labelplot' defaults to false: no refline arrows
+         h = baseflow.plotdqdt(q,dqdt);
+         narrows_returned = numel(findall(h.ax,'Type',arrowtype));
+         narrows_expected = 0;
+         testCase.verifyEqual(narrows_returned,narrows_expected);
+         % Close only the figure this test created, so a pre-existing user
+         % figure survives; plotdqdt opens a fresh figure for the next call.
+         closenewfigs(testCase.figsbefore)
+
+         % 'labelplot' true draws at least one refline arrow (see
+         % labelReflines)
+         h = baseflow.plotdqdt(q,dqdt,'labelplot',true);
+         nlabeled_returned = numel(findall(h.ax,'Type',arrowtype));
+         testCase.verifyGreaterThan(nlabeled_returned,0);
       end
    end
 end

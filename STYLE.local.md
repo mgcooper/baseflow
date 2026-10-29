@@ -12,13 +12,14 @@ merged into it).
 - Give a class suite the same name as its file (`test_fitab`).
 - `TestBaseflow.m` is the integration suite for the toolbox workflow, so
   it keeps its PascalCase name.
+- A suite that tests several functions together keeps a descriptive
+  name: `test_eqstrings` and `test_internal`.
 - Variables use short lowercase or camelCase names (`q`, `dqdt`, `gotopath`).
 
 ## Formatting
 
-- Indent with 3 spaces; no tabs.
-- Wrap at roughly 80 columns; continue long lines with `...`.
-- Close every function with an explicit `end`.
+Use the shared MATLAB formatting rules in `STYLE.md`.
+
 - Function help uses an uppercase H1 (`%FITAB fit event-scale ...`) followed
   by `Syntax`, `Description`, input, and output sections for public
   functions. See `toolbox/+baseflow/fitab.m` for the reference format.
@@ -78,3 +79,7 @@ as this:
 
 > This method fails when nmin is 0, and possibly when nmin is 1. runlength
 > returns 1 for consecutive nan values. See isminlength.
+
+## Other project conventions
+
+The New-test convention section defines this repository's additional test requirements.

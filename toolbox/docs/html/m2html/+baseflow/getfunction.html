@@ -41,6 +41,12 @@
      Fnc = baseflow.getfunction('expectedQ') returns anonymous function
      handle for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)
 
+     Fnc = baseflow.getfunction('expectedTau') returns a function handle
+     for the mean tau, tau(tau0,b) = tau0*(2-b)/(3-2*b). The mean diverges
+     at the tau pole b = 3/2 (alpha = 2) and beyond, so the handle returns
+     Inf there. It returns NaN where no Pareto tail exists (b &lt; 1 or
+     b &gt;= 2). The 'expectedTime' handle, tau0/(3-2*b), shares that pole.
+
      Use tab-completion to see full list of options
 
  See also: baseflow.<a href="getstring.html" class="code" title="function str = getstring(request, varargin)">getstring</a>
@@ -83,35 +89,42 @@ This function is called by:
 0013    <span class="comment">%     Fnc = baseflow.getfunction('expectedQ') returns anonymous function</span>
 0014    <span class="comment">%     handle for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)</span>
 0015    <span class="comment">%</span>
-0016    <span class="comment">%     Use tab-completion to see full list of options</span>
-0017    <span class="comment">%</span>
-0018    <span class="comment">% See also: baseflow.getstring</span>
-0019    <span class="comment">%</span>
-0020    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
-0021 
-0022    <span class="comment">% if called with no input, open this file</span>
-0023    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
-0024 
-0025    <span class="keyword">switch</span> funcname
-0026       <span class="keyword">case</span> <span class="string">'SofabQ'</span>
-0027          Fnc = @(a,b,Q) (1./(a.*(2-b))).*Q.^(2-b);
-0028       <span class="keyword">case</span> <span class="string">'tauofabQ'</span>
-0029          Fnc = @(a,b,Q) (1./a).*Q.^(1-b);
-0030       <span class="keyword">case</span> <span class="string">'tauofabQ0'</span>
-0031          Fnc = @(a,b,Q0) (1./a).*Q0.^(1-b);
-0032       <span class="keyword">case</span> <span class="string">'Qofabtau'</span>
-0033          Fnc = @(a,b,tau) (a.*tau).^(1./(1-b));
-0034       <span class="keyword">case</span> <span class="string">'expectedQ'</span>
-0035          Fnc = @(Q0,b) Q0.*(2-b)./(3-b);  <span class="comment">% expected value of Q</span>
-0036       <span class="keyword">case</span> <span class="string">'expectedTau'</span>
-0037          Fnc = @(tau0,b) tau0.*(2-b)./(3-2.*b);  <span class="comment">% expected value of tau</span>
-0038       <span class="keyword">case</span> <span class="string">'expectedTime'</span>
-0039          Fnc = @(tau0,b) tau0./(3-2.*b);  <span class="comment">% expected duration of baseflow</span>
-0040       <span class="keyword">case</span> <span class="string">'boftautau0'</span>
-0041          Fnc = @(tau,tau0) (2*(tau-tau0)+tau)/(2*(tau-tau0)+tau0);
-0042       <span class="keyword">case</span> <span class="string">'aofa0'</span>
-0043          Fnc = @(a0,b,tau,tau0) (1/tau)*(sqrt(a0*tau0)*(b-3)/(b-2))^(b-1);
-0044    <span class="keyword">end</span>
-0045 <span class="keyword">end</span></pre></div>
+0016    <span class="comment">%     Fnc = baseflow.getfunction('expectedTau') returns a function handle</span>
+0017    <span class="comment">%     for the mean tau, tau(tau0,b) = tau0*(2-b)/(3-2*b). The mean diverges</span>
+0018    <span class="comment">%     at the tau pole b = 3/2 (alpha = 2) and beyond, so the handle returns</span>
+0019    <span class="comment">%     Inf there. It returns NaN where no Pareto tail exists (b &lt; 1 or</span>
+0020    <span class="comment">%     b &gt;= 2). The 'expectedTime' handle, tau0/(3-2*b), shares that pole.</span>
+0021    <span class="comment">%</span>
+0022    <span class="comment">%     Use tab-completion to see full list of options</span>
+0023    <span class="comment">%</span>
+0024    <span class="comment">% See also: baseflow.getstring</span>
+0025    <span class="comment">%</span>
+0026    <span class="comment">% Matt Cooper, 04-Nov-2022, https://github.com/mgcooper</span>
+0027 
+0028    <span class="comment">% if called with no input, open this file</span>
+0029    <span class="keyword">if</span> nargin == 0; <a href="open.html" class="code" title="function open(varargin)">open</a>(mfilename(<span class="string">'fullpath'</span>)); <span class="keyword">return</span>; <span class="keyword">end</span>
+0030 
+0031    <span class="keyword">switch</span> funcname
+0032       <span class="keyword">case</span> <span class="string">'SofabQ'</span>
+0033          Fnc = @(a,b,Q) (1./(a.*(2-b))).*Q.^(2-b);
+0034       <span class="keyword">case</span> <span class="string">'tauofabQ'</span>
+0035          Fnc = @(a,b,Q) (1./a).*Q.^(1-b);
+0036       <span class="keyword">case</span> <span class="string">'tauofabQ0'</span>
+0037          Fnc = @(a,b,Q0) (1./a).*Q0.^(1-b);
+0038       <span class="keyword">case</span> <span class="string">'Qofabtau'</span>
+0039          Fnc = @(a,b,tau) (a.*tau).^(1./(1-b));
+0040       <span class="keyword">case</span> <span class="string">'expectedQ'</span>
+0041          Fnc = @(Q0,b) Q0.*(2-b)./(3-b);  <span class="comment">% expected value of Q</span>
+0042       <span class="keyword">case</span> <span class="string">'expectedTau'</span>
+0043          Fnc = @expectedtau;  <span class="comment">% expected value of tau</span>
+0044       <span class="keyword">case</span> <span class="string">'expectedTime'</span>
+0045          <span class="comment">% expected duration of baseflow, tau0/(3-2*b), with the tau pole</span>
+0046          Fnc = @(tau0,b) expectedtau(tau0,b)./(2-b);
+0047       <span class="keyword">case</span> <span class="string">'boftautau0'</span>
+0048          Fnc = @(tau,tau0) (2.*(tau-tau0)+tau)./(2.*(tau-tau0)+tau0);
+0049       <span class="keyword">case</span> <span class="string">'aofa0'</span>
+0050          Fnc = @(a0,b,tau,tau0) (1./tau).*(sqrt(a0.*tau0).*(b-3)./(b-2)).^(b-1);
+0051    <span class="keyword">end</span>
+0052 <span class="keyword">end</span></pre></div>
 </body>
 </html>

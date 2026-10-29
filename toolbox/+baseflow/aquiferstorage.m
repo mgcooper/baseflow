@@ -20,26 +20,25 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
    if nargin == 0; open(mfilename('fullpath')); return; end
 
    % input checks
-   b = round(b,2);
    a = a(:);
    b = b(:);
    qmin = qmin(:);
    qmax = qmax(:);
 
    % make a and b the same size
-   if numel(a) ~= numel(b) && numel(a) == 1
+   if numel(a) ~= numel(b) && isscalar(a)
       a = a.*ones(size(b));
-   elseif numel(a) ~= numel(b) && numel(b) == 1
+   elseif numel(a) ~= numel(b) && isscalar(b)
       b = b.*ones(size(a));
    end
 
    % make qmin/qmax the same size as a/b
    if numel(qmin) ~= numel(qmax)
       error('qmin and qmax must be the same size');
-   elseif numel(qmin) == numel(qmax) && numel(qmin) == 1
+   elseif numel(qmin) == numel(qmax) && isscalar(qmin)
       qmin = qmin.*ones(size(a));
       qmax = qmax.*ones(size(a));
-   elseif numel(qmin) == numel(qmax) && numel(a) == 1
+   elseif numel(qmin) == numel(qmax) && isscalar(a)
       a = a.*ones(size(qmin));
       b = b.*ones(size(qmin));
    elseif numel(qmin) == numel(qmax) && numel(qmin) ~= numel(a)
@@ -47,70 +46,30 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
    end
 
    % v3 merges KtimeS
-   kflag = false;
    Ktime = nan(size(b));
    if nargin > 4
-      kflag = true;
       Ktime = varargin{1};
    end
-   if numel(Ktime) == 1 && numel(Ktime) ~= numel(b)
+   if isscalar(Ktime) && numel(Ktime) ~= numel(b)
       Ktime = Ktime.*ones(size(b));
    end
 
-   if numel(a) == numel(b) && numel(a) == 1
-
-      if b >= 0.95 && b <= 1.05           % linear reservoir
-
-         if kflag == true
-            Smin = Ktime*qmin;
-            Smax = Ktime*qmax;
-         else
-            Smin = 1/a.*qmin;
-            Smax = 1/a.*qmax;
-         end
-
-      elseif b >= 1.95 && b <= 2.05       % exponential
-
-         if kflag == true
-            Smin = 1/a.*log(a.*Ktime.*qmin.^2);
-            Smax = 1/a.*log(a.*Ktime.*qmax.^2);
-         else
-            Smin = 1/a.*log(qmin);
-            Smax = 1/a.*log(qmax);
-         end
-
-      elseif b>2.05                   % super exponential
-         if kflag == true
-            Smin = -Ktime/(2-b).*qmin;
-            Smax = -Ktime/(2-b).*qmax;
-         else
-            Smin = -1/a/(2-b).*(qmax.^(2-b));
-            Smax = -1/a/(2-b).*(qmin.^(2-b));
-            %dS = -1/a/(2-b).*(qmax.^(2-b)-qmin.^(2-b));
-         end
-      else                            % sub exponential
-         if kflag == true
-            Smin = -Ktime/(2-b).*qmin;
-            Smax = -Ktime/(2-b).*qmax;
-         else
-            Smin = 1/a/(2-b).*(qmin.^(2-b));
-            Smax = 1/a/(2-b).*(qmax.^(2-b));
-            %dS = 1/a/(2-b).*(qmin.^(2-b)-qmax.^(2-b));
-         end
-      end
-
-      dS = Smax-Smin;
-
-   elseif numel(a) == numel(b) && (numel(a) == numel(qmin) || numel(qmin) == 1)
+   % one path for scalar and array input, since the checks above give a, b,
+   % qmin, and qmax the same size
+   if numel(a) == numel(b) && (numel(a) == numel(qmin) || isscalar(qmin))
 
       % first determine b = 1, b = 2, and otherwise
       Smin = nan(size(a));
       Smax = nan(size(a));
 
-      % find indices where b = 1, b = 2, and b! = 2
-      ib1 = b >= 0.95 & b <= 1.05;
-      ib2 = b >= 1.95 & b <= 2.05;
-      ib2p = b>2.05;
+      % find indices where b = 1, b = 2, and b! = 2. Round b to two
+      % decimals only to choose the formula; the power-law formulas use
+      % the unrounded b. Octave's round takes no digit count, so round
+      % 100*b and divide by 100.
+      bround = round(100*b)/100;
+      ib1 = bround >= 0.95 & bround <= 1.05;
+      ib2 = bround >= 1.95 & bround <= 2.05;
+      ib2p = bround>2.05;
       ib2m = true(size(b)); ib2m(ib1|ib2|ib2p) = false;
       b(ib1) = 1.0;
       b(ib2) = 2.0;
@@ -119,7 +78,7 @@ function [Smin,Smax,dS] = aquiferstorage(a,b,qmin,qmax,varargin)
       % now b is ready to be used in each expression
 
       % dynamic a/b, mean qmin/qmax
-      if numel(qmin) == 1
+      if isscalar(qmin)
          qmin_b1 = qmin;
          qmin_b2 = qmin;
          qmin_b2p = qmin;
@@ -200,6 +159,7 @@ function [Smin,Smax] = dynamicS_b2m(a,b,qmin,qmax,ktime)
    else
       Smin = 1./a./(2-b).*(qmin.^(2-b));
       Smax = 1./a./(2-b).*(qmax.^(2-b));
+      %dS = 1/a/(2-b).*(qmin.^(2-b)-qmax.^(2-b));
    end
 end
 
@@ -211,5 +171,6 @@ function [Smin,Smax] = dynamicS_b2p(a,b,qmin,qmax,ktime)
       %ktime = -1./a./(2-b).*qmax;
       Smin = -1./a./(2-b).*(qmax.^(2-b));
       Smax = -1./a./(2-b).*(qmin.^(2-b));
+      %dS = -1/a/(2-b).*(qmax.^(2-b)-qmin.^(2-b));
    end
 end

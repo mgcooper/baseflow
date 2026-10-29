@@ -24,17 +24,17 @@ live in `STYLE.local.md`. Match surrounding code first; these are defaults.
 
 ## Comments and documentation
 
-Comment discipline is **strict and non-negotiable** — a hard requirement, not a
-preference.
+Comment discipline is **strict and non-negotiable**. It is a hard requirement,
+not a preference.
 
 - **Never write uncommented code.** Every new function gets a docstring/header, and
   every block of code gets an explanatory comment that says *why*, not just *what*.
   Do not skip a comment because the code looks trivial, simple, obvious, or
-  self-explanatory — that is not an exception. Uncommented code is incomplete and
+  self-explanatory. That is not an exception. Uncommented code is incomplete and
   must not be submitted.
 - **Never remove existing comments.** A comment may be removed *only* when the code it
   documents is itself removed. It is never acceptable to delete, trim, shorten,
-  summarize away, or "clean up" comments — not for brevity, not for tidiness, and not
+  summarize away, or "clean up" comments, whether for brevity, for tidiness, or
   because a comment seems obvious or redundant.
 - **Edit existing comments only for accuracy.** When you change code, update the
   affected comments and docstrings so they stay correct, preserving the information
@@ -87,6 +87,21 @@ project text:
   "replaced". Describe the code, not its history.
 - A comment longer than the code it explains.
 - A sentence that repeats another sentence.
+
+### Check before you finish
+
+Before you finish a change, check each new or changed comment, docstring,
+and prose sentence against these rules:
+
+- 20 words or fewer for an instruction, 25 or fewer for a description;
+- one instruction per sentence;
+- the active voice with a named actor;
+- verbs, not noun forms of verbs;
+- noun clusters of three words or fewer;
+- nothing from the "Do not write" list;
+- a comment that says why for every block of code.
+
+Fix each violation before you report the change as done.
 
 ### Never remove
 
@@ -168,8 +183,34 @@ rules above. Opinionated, project-varying choices belong in `STYLE.local.md`.
 
 ## Formatting
 
-- Wrap code and comments at roughly 80 columns; continue long lines with `...`.
-  (Indentation width is project-specific — see `STYLE.local.md`.)
+- Keep code and prose comments within 80 columns; continue code with `...`.
+  Record lines that cannot be wrapped without changing their meaning or use.
+- Indent blocks with 3 spaces. Indent continuations 3 additional spaces from
+  their statement, without aligning them under an opening bracket.
+  MATLAB Editor Smart Indent determines indentation; configure it for these widths.
+  Keep MISS_HIT's indentation rule disabled so it does not undo that layout.
+- Put exactly one space on each side of assignment `=` signs.
+  Remove padding used to align assignments, other code tokens or trailing comments.
+  Keep one space before a trailing comment and preserve its attachment to the code.
+  Preserve whitespace that separates MATLAB array elements.
+- Use plain section headers such as `%% Header`, without decorative borders.
+  Keep meaningful comment text and execution cell boundaries.
+- Preserve the H1 help convention `%FUNCTION brief description`, without a space
+  after `%`. Use a space after `%` in ordinary prose comments.
+  Keep pragmas, block-comment delimiters and commented-out code intact.
+- Use the shared MATLAB MISS_HIT profile in a repository-root `miss_hit.cfg`.
+  Set `project_root`, `line_length: 80`, `tab_width: 3`, and both bracket-alignment
+  options to `false`. Suppress `operator_after_continuation` to allow leading
+  continuation operators without moving them for style.
+  Suppress `whitespace_comments` because MISS_HIT has no H1-specific spacing exception.
+  Keep the shared profile's name, token and encoding protections during formatting.
+- Keep frozen dependencies and project-specific exceptions in local configurations.
+  Record the formatter path, selected files and justified exceptions in `STYLE.local.md`.
+  Run `mh_style --fix` only on the selected files, then check Smart Indent and
+  remove remaining alignment padding. MISS_HIT alone does not enforce every rule above.
+- Formatting must preserve behavior, data, RNG order, displayed output, comments
+  and encoding. Renaming, scalar-operator substitutions, quote rewrites and
+  scientific changes need their own scope.
 
 ## Testing
 

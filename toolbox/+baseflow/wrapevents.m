@@ -16,6 +16,9 @@ function [EventsData, Info] = wrapevents(T,Q,R,varargin)
    % an adaptive sgolay filter that adjusts the filter parameters on an annual
    % (or shorter) basis.
    %
+   % February 29 is removed from T, Q, and R before grouping complete
+   % calendar years into 365-day columns. The remaining rows stay aligned.
+   %
    % Required inputs:
    %   T          =  nx1 array of dates
    %   Q          =  nxm array of daily flow in units m3/day, organized as
@@ -190,8 +193,8 @@ function [T,Q,R,numyears] = prepinput(T,Q,R)
    monthnums = nan(size(T));
    daynums = nan(size(T));
    for n = 1:numel(T)
-      monthnums = month(T(n));
-      daynums = day(T(n));
+      monthnums(n) = month(T(n));
+      daynums(n) = day(T(n));
    end
    leapidx = monthnums==2 & daynums==29;
    T(leapidx) = [];

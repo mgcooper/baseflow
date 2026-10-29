@@ -13,6 +13,21 @@ function varargout = plfitb(x,varargin)
    %     xhat=x-xmin. Any inputs to plfit can be passed in as varargin, where
    %     plfit is Aaron Clauset's function.
    %
+   %     Fit.tau is the mean tau of the fitted Pareto tail. The mean
+   %     diverges at or below the tau pole at alpha = 2, so Fit.tau is Inf
+   %     there. A bootstrap replicate beyond the pole makes tau_sig, tau_L,
+   %     and tau_H NaN. plfitb then warns with baseflow:expectedtau:tauPole.
+   %
+   % Fit.Percentiles summarizes retained alpha, b, tau0, tau and ntail
+   % bootstrap samples at probabilities [0.025,0.975]. Each parameter has
+   % bounds, available, sampleCount, invalidCount, poleCount and reason.
+   % The midpoint method linearly interpolates sorted values at (k-0.5)/n
+   % and clamps beyond endpoint knots. These descriptive percentiles do not
+   % establish coverage. The one-sigma and BootFit fields remain separate.
+   % A nonfinite sample makes that parameter unavailable; samples are never
+   % discarded or redrawn. Tau poles are counted separately. No bootstrap
+   % gives unavailable bounds with reason notBootstrapped.
+   %
    % Required inputs
    %
    %     x        data believed to follow an untruncated Pareto distribution
@@ -21,7 +36,7 @@ function varargout = plfitb(x,varargin)
    %
    %     xmin     scalar double indicating the lower bound of the distribution
    %     range    the range of scaling parameters considered (see plfit.m)
-   %     limit    scalar double that sets the upper bound of fitted exponent
+   %     limit    scalar double that sets the upper bound of the fitted xmin
    %     method   char indicating one of two algorithms (Clauset's or Hanel's)
    %     bootfit  logical indicating whether to bootstrap the uncertainties
    %              (slow)
@@ -86,12 +101,12 @@ function varargout = plfitb(x,varargin)
    Fit.x       = x0; % keep the input data
    Fit.alpha   = alpha;
    Fit.b       = 1+1/Fit.alpha;
-   Fit.tau     = xmin*(2-Fit.b)/(3-2*Fit.b);
+   Fit.tau     = expectedtau(xmin,Fit.b); % Inf beyond the tau pole
    Fit.tau0    = xmin;
    Fit.L       = L;
    Fit.D       = D;
    Fit.k       = 1/(Fit.alpha-1);
-   Fit.taumask = x0>xmin;
+   Fit.taumask = x0>=xmin; % plfit fits the tail x >= xmin
 
    if bootfit == true
       Fit.b_L = Fit.b - BootFit.b_sig;
@@ -105,6 +120,8 @@ function varargout = plfitb(x,varargin)
       Fit.reps = BootFit.reps;
       BootFit = rmfield(BootFit,'reps');
       Fit.BootFit = BootFit;
+      % Describe the retained draws without changing uncertainty propagation.
+      Fit.Percentiles = baseflow.internal.bootstrappercentiles(Fit.reps);
    else
       % assign null confidence bounds so other functions will work
       Fit.b_L = Fit.b;
@@ -115,6 +132,7 @@ function varargout = plfitb(x,varargin)
       Fit.tau0_H = Fit.tau0;
       Fit.tau_L = Fit.tau;
       Fit.tau_H = Fit.tau;
+      Fit.Percentiles = baseflow.internal.bootstrappercentiles();
    end
 
    % also: b = (2*k+1)/(k+1)
@@ -164,19 +182,11 @@ function Fit = plbootfit(x,range,limit,nreps)
    reps.tau0   = repsmat(:,2);
    reps.alpha  = repsmat(:,3);
    reps.b      = baseflow.conversions(reps.alpha,'alpha','b');
-   reps.tau    = reps.tau0.*(2-reps.b)./(3-2.*reps.b);
+   reps.tau    = expectedtau(reps.tau0,reps.b);
 
    % tau = tau0*(2-b)/(3-2*b) has a pole at b = 3/2, which is alpha = 2. A
-   % replicate at or below alpha = 2 returns a negative or unbounded tau.
-   % Such a replicate makes std(reps.tau) meaningless. Warn with the count,
-   % so the caller does not trust the reported tau_sig.
-   npole = sum(reps.alpha <= 2);
-   if npole > 0
-      warning('baseflow:plfitb:tauPoleReplicates', ...
-         ['%d of %d bootstrap replicates have alpha <= 2, where tau is ' ...
-         'unbounded. Treat tau_sig, tau_L, and tau_H as invalid.'], ...
-         npole, numel(reps.alpha))
-   end
+   % replicate beyond it has an infinite tau, so the tau mean and sigma are
+   % Inf or NaN, and expectedtau warns with the count of such replicates.
 
    for n = 1:numel(vars)
       var = vars{n};

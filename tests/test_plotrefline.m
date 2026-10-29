@@ -92,7 +92,9 @@ classdef test_plotrefline < matlab.unittest.TestCase
          target = subplot(1, 2, 1, 'Parent', fig);
          other = subplot(1, 2, 2, 'Parent', fig);
          set(target, 'XScale', 'log', 'YScale', 'log')
-         axes(other)
+         % Make the other panel current without axes(), which shows and
+         % raises the figure whatever the root default asks for.
+         set(fig, 'CurrentAxes', other)
          nlines_expected = 0;
 
          baseflow.plotrefline(testCase.q(), testCase.q(), ...

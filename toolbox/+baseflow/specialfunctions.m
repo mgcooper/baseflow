@@ -1,7 +1,9 @@
 function varargout = specialfunctions(funcname, varargin)
    % SPECIALFUNCTIONS Special function ibarary required for recession analysis.
    %
-   %  fnc = specialfunctions(fR1) returns the inverse incomplete beta function
+   %  fR1 = specialfunctions('fR1', n) and fR2 = specialfunctions('fR2', n)
+   %  return the early-time and late-time constants of Rupp and Selker
+   %  (2005) for the conductivity profile k(z) = kD*(z/D)^n.
    %
    % See also: Qnonlin
    %
@@ -69,15 +71,21 @@ end
 
 %% Local Functions
 function fR1 = getfR1(n)
+   % early-time constant of Rupp and Selker (2005), eqs 33 and 56, m = 1.
+   % gamma is their A (eq 28). fR1/(n+1) is their Phi1 (Table 1: 1.108 at
+   % n = 0), because a1 here uses kD, as their eq 54 does.
    BR1     = beta(n+2, 2);
    gamma   = 2 * (n+2) .* BR1;
-   mu      = (4 - 3*gamma - sqrt(gamma.^2 - 2*gamma + 4)) ./ (4*(1 - 2*gamma));
+   mu      = (4 - 3*gamma - sqrt(gamma.^2 - 2*gamma + 4)) ./ (4 - 2*gamma);
    fR1     = (1-mu) .* (n+1) .* (n+2) ./ (2 * (1 - 2*mu));
 end
 
 function fR2 = getfR2(n)
+   % late-time constant of Rupp and Selker (2005). At n = 0 it is the
+   % Brutsaert and Nieber (1977) constant 4.804 that fitphi uses for BS04.
+   % fR2/2 is their Phi2 (eq 59; Table 1: 2.402 at n = 0).
    BR2 = beta((n+2) ./ (n+3), 1/2);
-   fR2 = (n+2) .* (BR2 ./ (n+3)) .^ (1./(n+2));
+   fR2 = (n+2) .* (BR2.^(n+3) ./ (n+3)) .^ (1./(n+2));
 end
 
 function fLo = getfLo(h0overD,soln)

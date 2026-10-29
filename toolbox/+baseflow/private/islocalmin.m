@@ -1,4 +1,4 @@
-function tf = islocalmin(X)
+function tf = islocalmin(X, sel)
    %ISLOCALMIN Return true for local minimum indices of X.
    %
    %  tf = islocalmin(X) returns a logical array the size of X that is true
@@ -7,9 +7,18 @@ function tf = islocalmin(X)
    %  without flat runs, the result matches the MATLAB islocalmin function,
    %  which Octave does not have.
    %
+   %  tf = islocalmin(X, sel) passes sel to peakfinder as the selectivity: a
+   %  local minimum must differ from the neighbouring opposite extrema by
+   %  more than sel, in the units of X. eventfinder passes its
+   %  numerical-zero threshold, so rounding-size wiggles are not extrema.
+   %
    %  See also: islocalmax
 
-   % peakfinder(X,sel=0,threshold=[],extrema=-1,includeendpoints=false)
+   % peakfinder(X,sel,threshold=[],extrema=-1,includeendpoints=false)
    tf = false(size(X));
-   tf(baseflow.deps.peakfinder(X,0,[],-1,false)) = true;
+   % A selectivity of 0 keeps every sign change of the derivative.
+   if nargin < 2
+      sel = 0;
+   end
+   tf(baseflow.deps.peakfinder(X,sel,[],-1,false)) = true;
 end

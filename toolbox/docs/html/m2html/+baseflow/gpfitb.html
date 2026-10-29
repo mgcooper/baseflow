@@ -45,6 +45,12 @@
      [Fit,b,alpha,k] = gpfitb(x,'xmin',xmin) subtracts user-provided xmin
      from data in x. xmin is the threshold parameter.
 
+     Fit.tauExp is the mean tau of the fitted Pareto tail, with bounds
+     tauExpL and tauExpH. The mean diverges at or below the tau pole at
+     alpha = 2, so a value there is Inf, or NaN without a Pareto tail.
+     gpfitb then warns with baseflow:expectedtau:tauPole, and the plot
+     label omits the mean tau.
+
  Example
 
   Sample a Pareto distribution with tau0 = 20 days and b = 1.4, then
@@ -102,243 +108,256 @@ This function is called by:
 0017    <span class="comment">%     [Fit,b,alpha,k] = gpfitb(x,'xmin',xmin) subtracts user-provided xmin</span>
 0018    <span class="comment">%     from data in x. xmin is the threshold parameter.</span>
 0019    <span class="comment">%</span>
-0020    <span class="comment">% Example</span>
-0021    <span class="comment">%</span>
-0022    <span class="comment">%  Sample a Pareto distribution with tau0 = 20 days and b = 1.4, then</span>
-0023    <span class="comment">%  fit the exceedances above the threshold xmin = 20:</span>
-0024    <span class="comment">%</span>
-0025    <span class="comment">%     rng('default')</span>
-0026    <span class="comment">%     x = 20 * rand(5000, 1) .^ (-2/3);</span>
-0027    <span class="comment">%     Fit = baseflow.gpfitb(x, 'xmin', 20, 'plotfit', false);</span>
-0028    <span class="comment">%     fprintf('tau0 = %.1f days, b = %.2f\n', Fit.tau0, Fit.b)</span>
-0029    <span class="comment">%</span>
-0030    <span class="comment">% See also: plfitb</span>
-0031    <span class="comment">%</span>
-0032    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
-0033 
-0034    <span class="comment">% PARSE INPUTS</span>
-0035    [x, xmin, varsymb, bootfit, plotfit, labelplot] = <a href="#_sub2" class="code" title="subfunction [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)">parseinputs</a>(x, varargin{:});
-0036 
-0037    <span class="keyword">if</span> nargin == 1
-0038       xmin = 0;
-0039    <span class="keyword">end</span>
-0040    X = x;
-0041    x = x(x&gt;xmin)-xmin;
-0042    [x,~] = prepCurveData(x,x);
-0043 
-0044    <span class="comment">% get k, klow, and khigh then convert to b</span>
-0045    Dist = fitdist(x,<span class="string">'GeneralizedPareto'</span>);
-0046    k_ci = paramci(Dist);
-0047 
-0048    kM = Dist.k;
-0049    kL = k_ci(1,1);
-0050    kH = k_ci(2,1);
-0051 
-0052    bL = baseflow.conversions(kL,<span class="string">'k'</span>,<span class="string">'b'</span>);
-0053    bM = baseflow.conversions(kM,<span class="string">'k'</span>,<span class="string">'b'</span>);
-0054    bH = baseflow.conversions(kH,<span class="string">'k'</span>,<span class="string">'b'</span>);
-0055 
-0056    alphaM = 1+1/kM;
-0057    alphaL = 1+1/kH;
-0058    alphaH = 1+1/kL;
-0059 
-0060    <span class="comment">% need to correct the error term propagation later</span>
-0061    tau0M = Dist.sigma/Dist.k;
-0062    tau0L = k_ci(1,2)/Dist.k;
-0063    tau0H = k_ci(2,2)/Dist.k;
-0064 
-0065    <span class="comment">% bootstrap confidence intervals</span>
-0066    <span class="keyword">if</span> bootfit == true
-0067       freps = bootstrp(1000,@gpfit,x); <span class="comment">% fit</span>
-0068       kreps = freps(:,1); <span class="comment">% exponent</span>
-0069       sreps = freps(:,2); <span class="comment">% tau0</span>
-0070       breps = baseflow.conversions(kreps,<span class="string">'k'</span>,<span class="string">'b'</span>);
-0071       areps = baseflow.conversions(kreps,<span class="string">'k'</span>,<span class="string">'alpha'</span>);
-0072 
-0073       <span class="comment">% As a rough check on the sampling distribution of the parameter</span>
-0074       <span class="comment">% estimators, we can look at histograms of the bootstrap replicates.</span>
-0075       figure; subplot(2,2,1);
-0076       histogram(breps);
-0077       title(<span class="string">'Bootstrap estimates of $b$'</span>);
-0078       subplot(2,2,2);
-0079       histogram(sreps);
-0080       title(<span class="string">'Bootstrap estimates of $\tau_0$'</span>);
-0081       subplot(2,2,3);
-0082       histogram(areps);
-0083       title(<span class="string">'Bootstrap estimates of $\alpha$'</span>);
-0084       subplot(2,2,4);
-0085       histogram(kreps);
-0086       title(<span class="string">'Bootstrap estimates of $k$'</span>);
-0087 
-0088    <span class="keyword">end</span>
-0089 
-0090    <span class="comment">% package output</span>
-0091    Fit.gpdist  = Dist;
-0092    Fit.xmin    = xmin;
-0093    Fit.b       = bM;
-0094    Fit.tau0    = tau0M;
-0095    Fit.tauExp  = tau0M*(2-bM)/(3-2*bM);
-0096    <span class="comment">%Fit.tauExp  = gpdist.mean+tau0;</span>
-0097    Fit.k       = kM;
-0098    Fit.alpha   = alphaM;
-0099    Fit.bL      = bL;
-0100    Fit.bH      = bH;
-0101    Fit.kL      = kL;
-0102    Fit.kH      = kH;
-0103    Fit.alphaL  = alphaL;
-0104    Fit.alphaH  = alphaH;
-0105    Fit.tau0L   = tau0L;
-0106    Fit.tau0H   = tau0H;
-0107    Fit.tauExpL = tau0L*(2-bL)/(3-2*bL);
-0108    Fit.tauExpH = tau0H*(2-bH)/(3-2*bH);
-0109    Fit.numtau  = numel(X(X&gt;xmin));
-0110 
-0111    <span class="keyword">if</span> bootfit == true
-0112       Fit.breps = breps;
-0113       Fit.tau0reps = sreps;
-0114    <span class="keyword">end</span>
-0115 
-0116    <span class="keyword">if</span> plotfit == true
-0117 
-0118       <span class="comment">% fit a ccdf to the original data and the x-xmin data</span>
-0119       [F,X] = ccdf(X);
-0120       [~,x] = ccdf(x);
-0121 
-0122       <span class="comment">% either use x (ie x-xmin) w/theta=0 or x+xmin w/ theta=xmin</span>
-0123       F2 = gpcdf(x,kM,Dist.sigma,Dist.theta,<span class="string">'upper'</span>);
+0020    <span class="comment">%     Fit.tauExp is the mean tau of the fitted Pareto tail, with bounds</span>
+0021    <span class="comment">%     tauExpL and tauExpH. The mean diverges at or below the tau pole at</span>
+0022    <span class="comment">%     alpha = 2, so a value there is Inf, or NaN without a Pareto tail.</span>
+0023    <span class="comment">%     gpfitb then warns with baseflow:expectedtau:tauPole, and the plot</span>
+0024    <span class="comment">%     label omits the mean tau.</span>
+0025    <span class="comment">%</span>
+0026    <span class="comment">% Example</span>
+0027    <span class="comment">%</span>
+0028    <span class="comment">%  Sample a Pareto distribution with tau0 = 20 days and b = 1.4, then</span>
+0029    <span class="comment">%  fit the exceedances above the threshold xmin = 20:</span>
+0030    <span class="comment">%</span>
+0031    <span class="comment">%     rng('default')</span>
+0032    <span class="comment">%     x = 20 * rand(5000, 1) .^ (-2/3);</span>
+0033    <span class="comment">%     Fit = baseflow.gpfitb(x, 'xmin', 20, 'plotfit', false);</span>
+0034    <span class="comment">%     fprintf('tau0 = %.1f days, b = %.2f\n', Fit.tau0, Fit.b)</span>
+0035    <span class="comment">%</span>
+0036    <span class="comment">% See also: plfitb</span>
+0037    <span class="comment">%</span>
+0038    <span class="comment">% Matt Cooper, 22-Oct-2022, https://github.com/mgcooper</span>
+0039 
+0040    <span class="comment">% PARSE INPUTS</span>
+0041    [x, xmin, varsymb, bootfit, plotfit, labelplot] = <a href="#_sub2" class="code" title="subfunction [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)">parseinputs</a>(x, varargin{:});
+0042 
+0043    <span class="keyword">if</span> nargin == 1
+0044       xmin = 0;
+0045    <span class="keyword">end</span>
+0046    X = x;
+0047    x = x(x&gt;xmin)-xmin;
+0048    [x,~] = prepCurveData(x,x);
+0049 
+0050    <span class="comment">% get k, klow, and khigh then convert to b</span>
+0051    Dist = fitdist(x,<span class="string">'GeneralizedPareto'</span>);
+0052    k_ci = paramci(Dist);
+0053 
+0054    kM = Dist.k;
+0055    kL = k_ci(1,1);
+0056    kH = k_ci(2,1);
+0057 
+0058    bL = baseflow.conversions(kL,<span class="string">'k'</span>,<span class="string">'b'</span>);
+0059    bM = baseflow.conversions(kM,<span class="string">'k'</span>,<span class="string">'b'</span>);
+0060    bH = baseflow.conversions(kH,<span class="string">'k'</span>,<span class="string">'b'</span>);
+0061 
+0062    alphaM = 1+1/kM;
+0063    alphaL = 1+1/kH;
+0064    alphaH = 1+1/kL;
+0065 
+0066    <span class="comment">% need to correct the error term propagation later</span>
+0067    tau0M = Dist.sigma/Dist.k;
+0068    tau0L = k_ci(1,2)/Dist.k;
+0069    tau0H = k_ci(2,2)/Dist.k;
+0070 
+0071    <span class="comment">% bootstrap confidence intervals</span>
+0072    <span class="keyword">if</span> bootfit == true
+0073       freps = bootstrp(1000,@gpfit,x); <span class="comment">% fit</span>
+0074       kreps = freps(:,1); <span class="comment">% exponent</span>
+0075       sreps = freps(:,2)./kreps; <span class="comment">% tau0 = sigma/k, as for the point estimate</span>
+0076       breps = baseflow.conversions(kreps,<span class="string">'k'</span>,<span class="string">'b'</span>);
+0077       areps = baseflow.conversions(kreps,<span class="string">'k'</span>,<span class="string">'alpha'</span>);
+0078 
+0079       <span class="comment">% As a rough check on the sampling distribution of the parameter</span>
+0080       <span class="comment">% estimators, we can look at histograms of the bootstrap replicates.</span>
+0081       figure; subplot(2,2,1);
+0082       histogram(breps);
+0083       title(<span class="string">'Bootstrap estimates of $b$'</span>);
+0084       subplot(2,2,2);
+0085       histogram(sreps);
+0086       title(<span class="string">'Bootstrap estimates of $\tau_0$'</span>);
+0087       subplot(2,2,3);
+0088       histogram(areps);
+0089       title(<span class="string">'Bootstrap estimates of $\alpha$'</span>);
+0090       subplot(2,2,4);
+0091       histogram(kreps);
+0092       title(<span class="string">'Bootstrap estimates of $k$'</span>);
+0093 
+0094    <span class="keyword">end</span>
+0095 
+0096    <span class="comment">% mean tau of the fitted tail and its bounds (see expectedtau)</span>
+0097    tauExp = expectedtau([tau0M tau0L tau0H],[bM bL bH]);
+0098 
+0099    <span class="comment">% package output</span>
+0100    Fit.gpdist  = Dist;
+0101    Fit.xmin    = xmin;
+0102    Fit.b       = bM;
+0103    Fit.tau0    = tau0M;
+0104    Fit.tauExp  = tauExp(1);
+0105    <span class="comment">%Fit.tauExp  = gpdist.mean+tau0;</span>
+0106    Fit.k       = kM;
+0107    Fit.alpha   = alphaM;
+0108    Fit.bL      = bL;
+0109    Fit.bH      = bH;
+0110    Fit.kL      = kL;
+0111    Fit.kH      = kH;
+0112    Fit.alphaL  = alphaL;
+0113    Fit.alphaH  = alphaH;
+0114    Fit.tau0L   = tau0L;
+0115    Fit.tau0H   = tau0H;
+0116    Fit.tauExpL = tauExp(2);
+0117    Fit.tauExpH = tauExp(3);
+0118    Fit.numtau  = numel(X(X&gt;xmin));
+0119 
+0120    <span class="keyword">if</span> bootfit == true
+0121       Fit.breps = breps;
+0122       Fit.tau0reps = sreps;
+0123    <span class="keyword">end</span>
 0124 
-0125       <span class="comment">% add xmin back for the plot, and find the threshold probability</span>
-0126       xplot = x+xmin;
-0127       yref = F(find(X&gt;=xplot(1),1,<span class="string">'first'</span>));
-0128 
-0129       makesubplot = false;
+0125    <span class="keyword">if</span> plotfit == true
+0126 
+0127       <span class="comment">% fit a ccdf to the original data and the x-xmin data</span>
+0128       [F,X] = ccdf(X);
+0129       [~,x] = ccdf(x);
 0130 
-0131       <span class="comment">% make the figure</span>
-0132       <span class="keyword">if</span> makesubplot == true
+0131       <span class="comment">% either use x (ie x-xmin) w/theta=0 or x+xmin w/ theta=xmin</span>
+0132       F2 = gpcdf(x,kM,Dist.sigma,Dist.theta,<span class="string">'upper'</span>);
 0133 
-0134          <span class="comment">% plot the ccdf and histogram subplot</span>
-0135          figure(<span class="string">'Position'</span>,[147   170   831   418]);
-0136 
-0137          s1 = subtight(1,2,1, <span class="keyword">...</span>
-0138             <span class="string">'wstyle'</span>,<span class="string">'fitted'</span>,<span class="string">'hstyle'</span>,<span class="string">'loose'</span>,<span class="string">'gapstyle'</span>,<span class="string">'fitted'</span>);
+0134       <span class="comment">% add xmin back for the plot, and find the threshold probability</span>
+0135       xplot = x+xmin;
+0136       yref = F(find(X&gt;=xplot(1),1,<span class="string">'first'</span>));
+0137 
+0138       makesubplot = false;
 0139 
-0140       <span class="keyword">else</span>
-0141          figure;
-0142       <span class="keyword">end</span>
-0143 
-0144       <span class="comment">% resume plotting</span>
-0145       h.data = loglog(X,F,<span class="string">'o'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'MarkerSize'</span>,10,   <span class="keyword">...</span>
-0146          <span class="string">'MarkerFaceColor'</span>,<span class="string">'w'</span>); hold on;
-0147       h.fit = loglog(xplot,F2.*yref,<span class="string">'LineStyle'</span>,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,3);
+0140       <span class="comment">% make the figure</span>
+0141       <span class="keyword">if</span> makesubplot == true
+0142 
+0143          <span class="comment">% plot the ccdf and histogram subplot</span>
+0144          figure(<span class="string">'Position'</span>,[147   170   831   418]);
+0145 
+0146          s1 = subtight(1,2,1, <span class="keyword">...</span>
+0147             <span class="string">'wstyle'</span>,<span class="string">'fitted'</span>,<span class="string">'hstyle'</span>,<span class="string">'loose'</span>,<span class="string">'gapstyle'</span>,<span class="string">'fitted'</span>);
 0148 
-0149       <span class="comment">% h.data = loglog(xplot,F1,'o'); hold on;</span>
-0150       <span class="comment">% h.fit = loglog(xplot,F2);</span>
-0151 
-0152       xlabel(<span class="string">'$x$'</span>);
-0153       ylabel([<span class="string">'$p('</span> varsymb <span class="string">'\ge x)$'</span>],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
-0154 
-0155       ltext1 = [<span class="string">'$'</span> varsymb <span class="string">'$ (data)'</span>];
-0156       ltext2 = sprintf(<span class="string">'MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)'</span>,bM,bL,bH);
-0157       h.legend = legend(ltext1,ltext2,<span class="string">'interpreter'</span>,<span class="string">'latex'</span>);
-0158       ax = gca; ax.YLim(2) = 1.5; ax.XLim(2) = xplot(end)*1.2;
-0159 
-0160       <span class="comment">% this works well via guess and check</span>
-0161       h.legend.Position = [0.19 0.38 0.54 0.1];
-0162       <span class="comment">% h.legend.Position(1) = 0.9*h.legend.Position(1);</span>
-0163       <span class="comment">% h.legend.Position(2) = 0.8*h.legend.Position(2);</span>
-0164 
-0165       <span class="keyword">if</span> labelplot == true
-0166          <a href="#_sub1" class="code" title="subfunction addlabels(Fit,xmin,yref)">addlabels</a>(Fit,xmin,yref);
-0167       <span class="keyword">end</span>
+0149       <span class="keyword">else</span>
+0150          figure;
+0151       <span class="keyword">end</span>
+0152 
+0153       <span class="comment">% resume plotting</span>
+0154       h.data = loglog(X,F,<span class="string">'o'</span>,<span class="string">'LineWidth'</span>,0.5,<span class="string">'MarkerSize'</span>,10,   <span class="keyword">...</span>
+0155          <span class="string">'MarkerFaceColor'</span>,<span class="string">'w'</span>); hold on;
+0156       h.fit = loglog(xplot,F2.*yref,<span class="string">'LineStyle'</span>,<span class="string">'-'</span>,<span class="string">'LineWidth'</span>,3);
+0157 
+0158       <span class="comment">% h.data = loglog(xplot,F1,'o'); hold on;</span>
+0159       <span class="comment">% h.fit = loglog(xplot,F2);</span>
+0160 
+0161       xlabel(<span class="string">'$x$'</span>);
+0162       ylabel([<span class="string">'$p('</span> varsymb <span class="string">'\ge x)$'</span>],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0163 
+0164       ltext1 = [<span class="string">'$'</span> varsymb <span class="string">'$ (data)'</span>];
+0165       ltext2 = sprintf(<span class="string">'MLE fit ($\\hat{b}=%.2f\\ [$%.2f,%.2f$]\\ 95\\%%$ CI)'</span>,bM,bL,bH);
+0166       h.legend = legend(ltext1,ltext2,<span class="string">'interpreter'</span>,<span class="string">'latex'</span>);
+0167       ax = gca; ax.YLim(2) = 1.5; ax.XLim(2) = xplot(end)*1.2;
 0168 
-0169       <span class="keyword">if</span> makesubplot == true
-0170 
-0171          s2 = subtight(1,2,2, <span class="keyword">...</span>
-0172             <span class="string">'wstyle'</span>,<span class="string">'fitted'</span>,<span class="string">'hstyle'</span>,<span class="string">'loose'</span>,<span class="string">'gapstyle'</span>,<span class="string">'fitted'</span>);
-0173          <span class="comment">% [~,~,~,h.histfit] = loghist(X,'dist','GeneralizedPareto','theta',xmin);</span>
-0174 
-0175          xlabel([<span class="string">'$'</span> varsymb <span class="string">'$'</span>]);
-0176          ylabel([<span class="string">'$p('</span> varsymb <span class="string">')$'</span>],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0169       <span class="comment">% this works well via guess and check</span>
+0170       h.legend.Position = [0.19 0.38 0.54 0.1];
+0171       <span class="comment">% h.legend.Position(1) = 0.9*h.legend.Position(1);</span>
+0172       <span class="comment">% h.legend.Position(2) = 0.8*h.legend.Position(2);</span>
+0173 
+0174       <span class="keyword">if</span> labelplot == true
+0175          <a href="#_sub1" class="code" title="subfunction addlabels(Fit,xmin,yref)">addlabels</a>(Fit,xmin,yref);
+0176       <span class="keyword">end</span>
 0177 
-0178          <span class="comment">% commented out for compatibility</span>
-0179          <span class="comment">% h.ff = figformat('suppliedline',h.histfit,'linelinewidth',3);</span>
-0180 
-0181          s2.XLim = s1.XLim;
-0182          h.histlegend = legend(h.ff.backgroundAxis,ltext1,ltext2, <span class="keyword">...</span>
-0183             <span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
-0184 
-0185          childs = h.ff.mainAxis.Children;
-0186          childs(2).FaceAlpha = 0;
-0187 
-0188          setlogticks(s1);
-0189          setlogticks(s2);
-0190       <span class="keyword">end</span>
-0191 
-0192 
-0193       Fit.thresholdprobability = yref;
-0194       Fit.xplot = xplot;
-0195       Fit.Fplot = F2.*yref;
+0178       <span class="keyword">if</span> makesubplot == true
+0179 
+0180          s2 = subtight(1,2,2, <span class="keyword">...</span>
+0181             <span class="string">'wstyle'</span>,<span class="string">'fitted'</span>,<span class="string">'hstyle'</span>,<span class="string">'loose'</span>,<span class="string">'gapstyle'</span>,<span class="string">'fitted'</span>);
+0182          <span class="comment">% [~,~,~,h.histfit] = loghist(X,'dist','GeneralizedPareto','theta',xmin);</span>
+0183 
+0184          xlabel([<span class="string">'$'</span> varsymb <span class="string">'$'</span>]);
+0185          ylabel([<span class="string">'$p('</span> varsymb <span class="string">')$'</span>],<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>);
+0186 
+0187          <span class="comment">% commented out for compatibility</span>
+0188          <span class="comment">% h.ff = figformat('suppliedline',h.histfit,'linelinewidth',3);</span>
+0189 
+0190          s2.XLim = s1.XLim;
+0191          h.histlegend = legend(h.ff.backgroundAxis,ltext1,ltext2, <span class="keyword">...</span>
+0192             <span class="string">'interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'location'</span>,<span class="string">'southwest'</span>);
+0193 
+0194          childs = h.ff.mainAxis.Children;
+0195          childs(2).FaceAlpha = 0;
 0196 
-0197       <span class="comment">% % test using plplot instead</span>
-0198       <span class="comment">% aci = [alphaH alphaL];</span>
-0199       <span class="comment">% x = X(X&gt;0);</span>
-0200       <span class="comment">% [x,~] = prepCurveData(x,x);</span>
-0201       <span class="comment">% figure;</span>
-0202       <span class="comment">% baseflow.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);</span>
-0203    <span class="keyword">end</span>
-0204 <span class="keyword">end</span>
+0197          setlogticks(s1);
+0198          setlogticks(s2);
+0199       <span class="keyword">end</span>
+0200 
+0201 
+0202       Fit.thresholdprobability = yref;
+0203       Fit.xplot = xplot;
+0204       Fit.Fplot = F2.*yref;
 0205 
-0206 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(Fit,xmin,yref)</a>
-0207    <span class="comment">%ADDLABELS add an arrow pointing to tau0 and tau_exp</span>
-0208    <span class="comment">%</span>
-0209    <span class="comment">% drawarrow draws in the current axes, which is the axes the caller</span>
-0210    <span class="comment">% plotted into, as the text calls below do.</span>
-0211 
-0212    <span class="comment">% tau0</span>
-0213    xminc = (Fit.tau0H-Fit.tau0+Fit.tau0-Fit.tau0L)/2;
-0214    xa = [xmin-xmin/2 xmin];
-0215    ya = Fit.gpdist.cdf(0,<span class="string">'upper'</span>)*yref;
-0216    ya = [ya ya];
-0217    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,xmin,xminc);
-0218 
-0219    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
-0220    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
-0221 
-0222    <span class="comment">% use these to put the text on the right side of the curve</span>
-0223    <span class="comment">% xa = [xmin+xmin/2 xmin];</span>
-0224    <span class="comment">% text(1.05*xa(1),ya(1),ta)</span>
-0225 
-0226    <span class="comment">% tauExp</span>
-0227    xexp = Fit.tauExp; <span class="comment">% just use xmin to keep syntax</span>
-0228    xexpc = (Fit.tauExpH-Fit.tauExp+Fit.tauExp-Fit.tauExpL)/2;
-0229    xa = [xexp-xexp/2 xexp];
+0206       <span class="comment">% % test using plplot instead</span>
+0207       <span class="comment">% aci = [alphaH alphaL];</span>
+0208       <span class="comment">% x = X(X&gt;0);</span>
+0209       <span class="comment">% [x,~] = prepCurveData(x,x);</span>
+0210       <span class="comment">% figure;</span>
+0211       <span class="comment">% baseflow.plplotb(x,xmin,alpha,'trimline',true,'alphaci',aci,'labelplot',true);</span>
+0212    <span class="keyword">end</span>
+0213 <span class="keyword">end</span>
+0214 
+0215 <a name="_sub1" href="#_subfunctions" class="code">function addlabels(Fit,xmin,yref)</a>
+0216    <span class="comment">%ADDLABELS add an arrow pointing to tau0 and tau_exp</span>
+0217    <span class="comment">%</span>
+0218    <span class="comment">% drawarrow draws in the current axes, which is the axes the caller</span>
+0219    <span class="comment">% plotted into, as the text calls below do.</span>
+0220 
+0221    <span class="comment">% tau0</span>
+0222    xminc = (Fit.tau0H-Fit.tau0+Fit.tau0-Fit.tau0L)/2;
+0223    xa = [xmin-xmin/2 xmin];
+0224    ya = Fit.gpdist.cdf(0,<span class="string">'upper'</span>)*yref;
+0225    ya = [ya ya];
+0226    ta = sprintf(<span class="string">'$\\hat{\\tau}_0=%.0f\\pm%.0f$ days'</span>,xmin,xminc);
+0227 
+0228    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
+0229    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
 0230 
-0231    ya = Fit.gpdist.cdf(xexp-xmin,<span class="string">'upper'</span>)*yref;
-0232    ya = [ya ya];
-0233    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
+0231    <span class="comment">% use these to put the text on the right side of the curve</span>
+0232    <span class="comment">% xa = [xmin+xmin/2 xmin];</span>
+0233    <span class="comment">% text(1.05*xa(1),ya(1),ta)</span>
 0234 
-0235    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
-0236    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
-0237 <span class="keyword">end</span>
-0238 
-0239 <span class="comment">%% INPUT PARSER</span>
-0240 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)</a>
-0241    
-0242    parser = inputParser;
-0243    parser.FunctionName = <span class="string">'baseflow.gpfitb'</span>;
-0244    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
-0245    parser.addParameter(<span class="string">'xmin'</span>, 0, @isnumeric);
-0246    parser.addParameter(<span class="string">'varsym'</span>, <span class="string">'\tau'</span>, @ischar);
-0247    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogical);
-0248    parser.addParameter(<span class="string">'plotfit'</span>, true, @islogical);
-0249    parser.addParameter(<span class="string">'labelplot'</span>, true, @islogical);
-0250    parser.parse(x, varargin{:});
+0235    <span class="comment">% tauExp</span>
+0236    <span class="comment">% a mean or bound beyond the tau pole has no point on the axes to label</span>
+0237    <span class="keyword">if</span> ~all(isfinite([Fit.tauExp Fit.tauExpL Fit.tauExpH]))
+0238       <span class="keyword">return</span>
+0239    <span class="keyword">end</span>
+0240    xexp = Fit.tauExp; <span class="comment">% just use xmin to keep syntax</span>
+0241    xexpc = (Fit.tauExpH-Fit.tauExp+Fit.tauExp-Fit.tauExpL)/2;
+0242    xa = [xexp-xexp/2 xexp];
+0243 
+0244    ya = Fit.gpdist.cdf(xexp-xmin,<span class="string">'upper'</span>)*yref;
+0245    ya = [ya ya];
+0246    ta = sprintf(<span class="string">'$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days'</span>,xexp,xexpc);
+0247 
+0248    drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
+0249    text(0.95*xa(1),ya(1),ta,<span class="string">'HorizontalAlignment'</span>,<span class="string">'right'</span>)
+0250 <span class="keyword">end</span>
 0251 
-0252    xmin     = parser.Results.xmin;
-0253    varsymb  = parser.Results.varsym;
-0254    bootfit  = parser.Results.bootfit;
-0255    plotfit  = parser.Results.plotfit;
-0256    labelplot = parser.Results.labelplot;
-0257 <span class="keyword">end</span></pre></div>
+0252 <span class="comment">%% INPUT PARSER</span>
+0253 <a name="_sub2" href="#_subfunctions" class="code">function [x, xmin, varsymb, bootfit, plotfit, labelplot] = parseinputs(x, varargin)</a>
+0254    
+0255    parser = inputParser;
+0256    parser.FunctionName = <span class="string">'baseflow.gpfitb'</span>;
+0257    parser.addRequired(<span class="string">'x'</span>, @isnumeric);
+0258    parser.addParameter(<span class="string">'xmin'</span>, 0, @isnumeric);
+0259    parser.addParameter(<span class="string">'varsym'</span>, <span class="string">'\tau'</span>, @ischar);
+0260    parser.addParameter(<span class="string">'bootfit'</span>, false, @islogical);
+0261    parser.addParameter(<span class="string">'plotfit'</span>, true, @islogical);
+0262    parser.addParameter(<span class="string">'labelplot'</span>, true, @islogical);
+0263    parser.parse(x, varargin{:});
+0264 
+0265    xmin     = parser.Results.xmin;
+0266    varsymb  = parser.Results.varsym;
+0267    bootfit  = parser.Results.bootfit;
+0268    plotfit  = parser.Results.plotfit;
+0269    labelplot = parser.Results.labelplot;
+0270 <span class="keyword">end</span></pre></div>
 </body>
 </html>

@@ -1,0 +1,5 @@
+% Files that the Package Toolbox task leaves out of the toolbox. Paths are
+% relative to this folder, one rule per line. MATLAB reads this file only
+% from the toolbox root folder.
+% Written by the Help browser search-database build beside the docs
+**/custom_toolbox.json

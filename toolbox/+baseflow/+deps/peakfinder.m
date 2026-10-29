@@ -225,6 +225,10 @@ function [peakInds,peakMags] = peakfinder(x0, sel, thresh, extrema, includeEndpo
       peakLoc = zeros(maxPeaks,1);
       peakMag = zeros(maxPeaks,1);
       cInd = 1;
+      % Local change: start with no candidate peak. With sel > 0 no extremum
+      % can pass the selectivity test, and the end check below must then
+      % add nothing rather than read an unset tempLoc.
+      tempLoc = [];
       % Loop through extrema which should be peaks and then valleys
       while ii < len
          ii = ii+1; % This is a peak
@@ -276,7 +280,7 @@ function [peakInds,peakMags] = peakfinder(x0, sel, thresh, extrema, includeEndpo
             peakLoc(cInd) = len;
             peakMag(cInd) = x(end);
             cInd = cInd + 1;
-         elseif tempMag > min(x0(end), x(end)) + sel
+         elseif ~isempty(tempLoc) && tempMag > min(x0(end), x(end)) + sel
             peakLoc(cInd) = tempLoc;
             peakMag(cInd) = tempMag;
             cInd = cInd + 1;

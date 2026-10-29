@@ -35,7 +35,9 @@ function h = plplotb(x,xmin,alpha,varargin)
    %                 similar to 'axis tight' option (b/c power law data is often
    %                 covering many orders of magnitude).
    %     labelplot = logical scalar indicating whether to add a label showing
-   %                 the value of xmin and the expected value of x.
+   %                 the value of xmin and the expected value of x. The
+   %                 expected value diverges at alpha <= 2, so the label
+   %                 omits it there.
    %     ax        = graphic axis to plot into.
    %
    % See also: plfit, plfitb, gpfitb, eventtau
@@ -165,7 +167,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
 
    % draw the arrow in the current axes, which is the axes the caller
    % plotted into, as the text call below uses
-   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)]);
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 
@@ -173,13 +175,17 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
    %----------------------------------------------------------------------------
    % test using the new xminL/H
    % deactivate this and reactive the two lines below to go back
-   xexp = tau0*(2-b)/(3-2*b);
-   tauL = tau0L*(2-b)/(3-2*b);
-   tauH = tau0H*(2-b)/(3-2*b);
-   xexpc = (tauH-tauL)/2;
+   tauexp = expectedtau([tau0 tau0L tau0H],b);
+   xexp = tauexp(1);
+   xexpc = (tauexp(3)-tauexp(2))/2;
    % xexp  = mean((tau0*(2-bL)/(3-2*bL) + tau0*(2-bH)/(3-2*bH))/2);
    % xexpc = mean(abs(xexp-[tau0*(2-bL)/(3-2*bL), tau0*(2-bH)/(3-2*bH)]));
    %----------------------------------------------------------------------------
+
+   % a mean beyond the tau pole has no point on the axes to label
+   if ~isfinite(xexp)
+      return
+   end
 
    xarrw = [10^(log10(xexp)-ndecx/10) xexp];
    yarrw = yfit(find(xfit>=xarrw(2),1,'first'));
@@ -192,7 +198,7 @@ function addlabels(xfit,yfit,tau0,tau0L,tau0H,b)
       ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
    end
 
-   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)])
+   drawarrow(gca, [xarrw(1),yarrw(1)], [xarrw(2),yarrw(2)]);
    text(0.95*xarrw(1),yarrw(1),ta, ...
       'HorizontalAlignment','right','FontSize',14,'Interpreter','latex')
 end

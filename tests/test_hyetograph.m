@@ -4,10 +4,21 @@ classdef test_hyetograph < matlab.unittest.TestCase
    % hyetograph resizes and retags its figure. Each case opens a visible
    % figure first and checks which figure hyetograph uses: a new figure
    % when no axes is passed, or the figure of the axes that is passed.
+   % The lookups in the hyetograph help must each return one handle: the
+   % element of H that the help names.
 
    properties (TestParameter)
       % Whether the call passes the axes of the figure opened first.
       passaxes = struct('newFigure', false, 'suppliedAxes', true)
+
+      % Each lookup in the hyetograph help: the property, its value, and
+      % the element of H that the lookup must return.
+      lookup = struct( ...
+         'figureName', {{'Name', 'Hyetograph', 1}}, ...
+         'figureTag', {{'Tag', 'HyetographFigure', 1}}, ...
+         'streamflowAxes', {{'Tag', 'HyetographAxis', 2}}, ...
+         'streamflowLine', {{'Tag', 'StreamflowPlot', 3}}, ...
+         'precipitationBars', {{'Tag', 'PrecipitationPlot', 4}})
    end
 
    properties
@@ -58,6 +69,45 @@ classdef test_hyetograph < matlab.unittest.TestCase
          if ~passaxes
             testCase.verifyEqual(get(userfig, 'Name'), userfigname)
          end
+      end
+
+      function test_helpLookupFindsOneHandle(testCase, lookup)
+         % A lookup from the figure H(1) returns exactly the element of H
+         % that the help names, once.
+         [property, value, index] = lookup{:};
+         H = testCase.drawhyetograph();
+
+         returned = findobj(H(1), property, value);
+
+         testCase.verifyEqual(returned, H(index))
+      end
+
+      function test_precipitationAxesFromItsBars(testCase)
+         % The precipitation axes has no tag. The help finds it as the
+         % parent axes of the bars H(4): the reversed right-hand axes, not
+         % the streamflow axes H(2).
+         H = testCase.drawhyetograph();
+
+         returned = ancestor(H(4), 'axes');
+
+         testCase.verifyNotEqual(returned, H(2))
+         testCase.verifyEqual(get(returned, 'YDir'), 'reverse')
+      end
+   end
+
+   methods (Access = private)
+      function H = drawhyetograph(~)
+         %DRAWHYETOGRAPH Draw a 60-day hyetograph in a new figure.
+         %
+         %  H = drawhyetograph(testCase) returns the handles of
+         %  baseflow.hyetograph for a falling flow with one rain day.
+         ndays = 60;
+         time = transpose(datetime(2001, 1, 1:ndays));
+         flow = transpose(linspace(10, 1, ndays));
+         prec = zeros(ndays, 1);
+         prec(10) = 5;
+         H = baseflow.hyetograph(time, flow, prec, time(1) - 1, ...
+            time(end) + 1);
       end
    end
 end

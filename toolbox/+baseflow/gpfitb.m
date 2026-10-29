@@ -17,6 +17,12 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
    %     [Fit,b,alpha,k] = gpfitb(x,'xmin',xmin) subtracts user-provided xmin
    %     from data in x. xmin is the threshold parameter.
    %
+   %     Fit.tauExp is the mean tau of the fitted Pareto tail, with bounds
+   %     tauExpL and tauExpH. The mean diverges at or below the tau pole at
+   %     alpha = 2, so a value there is Inf, or NaN without a Pareto tail.
+   %     gpfitb then warns with baseflow:expectedtau:tauPole, and the plot
+   %     label omits the mean tau.
+   %
    % Example
    %
    %  Sample a Pareto distribution with tau0 = 20 days and b = 1.4, then
@@ -66,7 +72,7 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
    if bootfit == true
       freps = bootstrp(1000,@gpfit,x); % fit
       kreps = freps(:,1); % exponent
-      sreps = freps(:,2); % tau0
+      sreps = freps(:,2)./kreps; % tau0 = sigma/k, as for the point estimate
       breps = baseflow.conversions(kreps,'k','b');
       areps = baseflow.conversions(kreps,'k','alpha');
 
@@ -87,12 +93,15 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
 
    end
 
+   % mean tau of the fitted tail and its bounds (see expectedtau)
+   tauExp = expectedtau([tau0M tau0L tau0H],[bM bL bH]);
+
    % package output
    Fit.gpdist  = Dist;
    Fit.xmin    = xmin;
    Fit.b       = bM;
    Fit.tau0    = tau0M;
-   Fit.tauExp  = tau0M*(2-bM)/(3-2*bM);
+   Fit.tauExp  = tauExp(1);
    %Fit.tauExp  = gpdist.mean+tau0;
    Fit.k       = kM;
    Fit.alpha   = alphaM;
@@ -104,8 +113,8 @@ function [Fit, bM, alphaM, kM] = gpfitb(x, varargin)
    Fit.alphaH  = alphaH;
    Fit.tau0L   = tau0L;
    Fit.tau0H   = tau0H;
-   Fit.tauExpL = tau0L*(2-bL)/(3-2*bL);
-   Fit.tauExpH = tau0H*(2-bH)/(3-2*bH);
+   Fit.tauExpL = tauExp(2);
+   Fit.tauExpH = tauExp(3);
    Fit.numtau  = numel(X(X>xmin));
 
    if bootfit == true
@@ -216,7 +225,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\hat{\\tau}_0=%.0f\\pm%.0f$ days',xmin,xminc);
 
-   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 
    % use these to put the text on the right side of the curve
@@ -224,6 +233,10 @@ function addlabels(Fit,xmin,yref)
    % text(1.05*xa(1),ya(1),ta)
 
    % tauExp
+   % a mean or bound beyond the tau pole has no point on the axes to label
+   if ~all(isfinite([Fit.tauExp Fit.tauExpL Fit.tauExpH]))
+      return
+   end
    xexp = Fit.tauExp; % just use xmin to keep syntax
    xexpc = (Fit.tauExpH-Fit.tauExp+Fit.tauExp-Fit.tauExpL)/2;
    xa = [xexp-xexp/2 xexp];
@@ -232,7 +245,7 @@ function addlabels(Fit,xmin,yref)
    ya = [ya ya];
    ta = sprintf('$\\langle\\tau\\rangle=%.0f\\pm%.0f$ days',xexp,xexpc);
 
-   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)])
+   drawarrow(gca, [xa(1),ya(1)], [xa(2),ya(2)]);
    text(0.95*xa(1),ya(1),ta,'HorizontalAlignment','right')
 end
 

@@ -12,11 +12,19 @@ function H = hyetograph(time, flow, prec, varargin)
    % Example, how to later access the plot objects
    %  H = hyetograph(...);
    %
-   % Find specific handles using 'Tag' or 'Name'
+   % H holds the figure, the streamflow axes, the streamflow line, and the
+   % precipitation bars, in that order. Find specific handles using 'Tag'
+   % or 'Name'. Search from the figure H(1): a search of all of H returns
+   % the streamflow axes twice, as H(2) and as a child of H(1).
    %
-   % fig = findobj(H, 'Name', 'Hyetograph');
-   % ax_streamflow = findobj(H, 'Tag', 'StreamflowAxis');
-   % ax_precipitation = findobj(H, 'Tag', 'PrecipitationAxis');
+   % fig = findobj(H(1), 'Name', 'Hyetograph'); % Tag 'HyetographFigure'
+   % ax_streamflow = findobj(H(1), 'Tag', 'HyetographAxis');
+   % h_streamflow = findobj(H(1), 'Tag', 'StreamflowPlot');
+   % h_precipitation = findobj(H(1), 'Tag', 'PrecipitationPlot');
+   %
+   % The precipitation axes has no tag. Get it from its bars:
+   %
+   % ax_precipitation = ancestor(H(4), 'axes');
    %
    % See also:
 

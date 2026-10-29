@@ -95,8 +95,9 @@ GlobalFit = baseflow.globalfit(FitsTable, EventData, EventFits, opts.globalfit);
 %% Check the fitted recession parameters
 % The recession parameters _a_ and _b_ are available in the |GlobalFit| struct.
 
-GlobalFit.a % late-time recession constant in equation -dQ/dt = aQ^b
-GlobalFit.b % late-time recession constant in equation -dQ/dt = aQ^b
+% late-time recession constants in the equation -dQ/dt = aQ^b
+fprintf('a = %.4f\n', GlobalFit.a)
+fprintf('b = %.4f\n', GlobalFit.b)
 %% 
 % In addition, the |GlobalFit| struct contains the Pareto distribution exponent 
 % $\alpha$, the Pareto scale parameter $\tau_0$, the expected value $\langle\tau\rangle$, 
@@ -111,11 +112,11 @@ GlobalFit.b % late-time recession constant in equation -dQ/dt = aQ^b
 % 
 % Use the function to convert from $\alpha$ to $b$.
 
-baseflow.conversions(GlobalFit.b, 'b', 'alpha')
+fprintf('alpha = %.4f\n', baseflow.conversions(GlobalFit.b, 'b', 'alpha'))
 %% 
 % Compare that to the value of $\alpha$ in the GlobalFit struct:
 
-GlobalFit.alpha
+fprintf('GlobalFit.alpha = %.4f\n', GlobalFit.alpha)
 %% 
 % Like all functions in the toolbox, |baseflow.conversions| supports tab-completion. 
 % Users are encouraged to explore the conversions supported by this function which 

@@ -43,8 +43,12 @@ function [t,q,r,Info] = findevents(T,Q,R,varargin)
    Q           = fillnans(Q,fmax);        % gap fill missing values
 
    % smooth measurement noise
+   % smoothflow returns the rounding bound of the values it smooths.
+   % eventfinder uses it as the numerical zero of its filters; without
+   % smoothing, eventfinder assumes one rounding per value.
+   qerror = [];
    if asannual
-      Q = smoothflow(Q);
+      [Q, ~, qerror] = smoothflow(Q);
    end
 
    % % for reference, two other options I tested
@@ -62,7 +66,8 @@ function [t,q,r,Info] = findevents(T,Q,R,varargin)
          'rmin',        rmin,          ...
          'rmconvex',    rmconvex,      ...
          'rmnochange',  rmnochange,    ...
-         'rmrain',      rmrain         );
+         'rmrain',      rmrain,        ...
+         'qerror',      qerror         );
 
       Info = updateinfo(Info,iF,numdata);
 

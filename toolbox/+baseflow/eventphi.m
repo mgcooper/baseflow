@@ -36,6 +36,9 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    %     soln1       String indicating early-time theoretical solution.
    %     soln2       String indicating late-time theoretical solution.
    %
+   % Sloped solution names raise baseflow:unsupportedSlopedAquifer before
+   % reading event data or fitting. This function has no isflat/theta option.
+   %
    % See also: cloudphi, fitphi, fitphidist
    %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
@@ -46,6 +49,8 @@ function [phi, a] = eventphi(Results, Fits, A, D, L, blate, varargin)
    % PARSE INPUTS
    [Results, Fits, A, D, L, b2, earlyqtls, lateqtls, soln1, soln2] = ...
       parseinputs(Results, Fits, A, D, L, blate, varargin{:});
+   % Reject unsupported geometry before fitting or drawing samples.
+   requireflat(true,soln1,soln2);
 
    % warning off % commented out for octave, need msgid
 

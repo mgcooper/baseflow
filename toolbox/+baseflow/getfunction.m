@@ -13,6 +13,12 @@ function Fnc = getfunction(funcname)
    %     Fnc = baseflow.getfunction('expectedQ') returns anonymous function
    %     handle for expected value of baseflow function Q(Q0,b) = Q0*(2-b)/(3-b)
    %
+   %     Fnc = baseflow.getfunction('expectedTau') returns a function handle
+   %     for the mean tau, tau(tau0,b) = tau0*(2-b)/(3-2*b). The mean diverges
+   %     at the tau pole b = 3/2 (alpha = 2) and beyond, so the handle returns
+   %     Inf there. It returns NaN where no Pareto tail exists (b < 1 or
+   %     b >= 2). The 'expectedTime' handle, tau0/(3-2*b), shares that pole.
+   %
    %     Use tab-completion to see full list of options
    %
    % See also: baseflow.getstring
@@ -34,12 +40,13 @@ function Fnc = getfunction(funcname)
       case 'expectedQ'
          Fnc = @(Q0,b) Q0.*(2-b)./(3-b);  % expected value of Q
       case 'expectedTau'
-         Fnc = @(tau0,b) tau0.*(2-b)./(3-2.*b);  % expected value of tau
+         Fnc = @expectedtau;  % expected value of tau
       case 'expectedTime'
-         Fnc = @(tau0,b) tau0./(3-2.*b);  % expected duration of baseflow
+         % expected duration of baseflow, tau0/(3-2*b), with the tau pole
+         Fnc = @(tau0,b) expectedtau(tau0,b)./(2-b);
       case 'boftautau0'
-         Fnc = @(tau,tau0) (2*(tau-tau0)+tau)/(2*(tau-tau0)+tau0);
+         Fnc = @(tau,tau0) (2.*(tau-tau0)+tau)./(2.*(tau-tau0)+tau0);
       case 'aofa0'
-         Fnc = @(a0,b,tau,tau0) (1/tau)*(sqrt(a0*tau0)*(b-3)/(b-2))^(b-1);
+         Fnc = @(a0,b,tau,tau0) (1./tau).*(sqrt(a0.*tau0).*(b-3)./(b-2)).^(b-1);
    end
 end

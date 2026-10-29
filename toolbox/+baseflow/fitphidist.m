@@ -28,6 +28,11 @@ function [Fit,h] = fitphidist(phi,varargin)
    %     showfit is a logical flag (default true). With showfit false, these
    %     two types delete their figure. For 'pdf', h is an empty struct.
    %
+   %     The beta fit uses the values of phi in [0, 1] and ignores nan.
+   %     fitphidist leaves a value outside [0, 1] out of the fit and raises
+   %     the warning baseflow:fitphidist:phiOutsideUnitInterval with the
+   %     count.
+   %
    % See also: eventphi, fitphi, fitphidist
    %
    % Matt Cooper, 22-Oct-2022, https://github.com/mgcooper
@@ -40,6 +45,17 @@ function [Fit,h] = fitphidist(phi,varargin)
 
    % Force all inputs to be column vectors
    phi = phi(:);
+
+   % The beta distribution holds values in [0, 1], and a phi outside that
+   % interval is not a porosity. Leave those values out of the fit, and
+   % warn with their count so the caller knows the sample shrank.
+   outside = phi < 0 | phi > 1;
+   if any(outside)
+      warning('baseflow:fitphidist:phiOutsideUnitInterval', ...
+         ['%d of %d values of phi lie outside [0, 1], so the beta fit ' ...
+         'leaves them out.'], nnz(outside), numel(phi))
+      phi = phi(~outside);
+   end
 
    % Fit the beta distribution
    [PARAMHAT, PARAMCI] = betafit(phi);
@@ -82,7 +98,7 @@ function h = cdfplotphi(phi, PD, showfit)
    [cdfY, cdfX] = ecdf(phi, 'Function', 'cdf');
    
    % Create the figure
-   h.figure = figure('Visible', showfit);
+   h.figure = figure('Visible', figurevisibility(showfit));
    h.data = plot(cdfX, cdfY, 'o', 'MarkerFaceColor', [0 0.447 0.741], ...
       'MarkerEdgeColor', 'none', 'Visible', showfit); hold on;
 
@@ -124,7 +140,7 @@ function h = cdfplotphi(phi, PD, showfit)
       xarrow = [PD.mean 1.3*PD.mean];
       yarrow = [betacdf(PD.mean, PD.a, PD.b) betacdf(PD.mean, PD.a, PD.b)];
       % the head points left, at the mean, from a tail to its right
-      drawarrow(gca, [xarrow(2), yarrow(2)], [xarrow(1), yarrow(1)])
+      drawarrow(gca, [xarrow(2), yarrow(2)], [xarrow(1), yarrow(1)]);
       text(0.95*xarrow(2), yarrow(2), arrowtxt, 'HorizontalAlignment','left')
 
       h.legend = legend(ltxt, 'Location', 'east', 'Interpreter', 'tex');
@@ -152,7 +168,7 @@ function h = probplotphi(phi, PD, showfit)
    end
 
    % Create the figure. It is hidden when showfit is false.
-   h.figure = figure('Visible', showfit);
+   h.figure = figure('Visible', figurevisibility(showfit));
 
    % plot the data, suppressing the normal plot with 'noref'
    h.data = probplot('normal', phi, [], [], 'noref'); hold on;

@@ -3,7 +3,22 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
    %
    %  [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,weights,alpha)
    %
+   %  alpha is a confidence level, as in fitab, so nlparci and regress
+   %  take the significance level 1-alpha.
+   %
    % See also:
+
+   % Scale the same power law before solving. Large differences between
+   % Jacobian columns can stop the solver before it reaches the best fit.
+   % Keep the original logs for the unchanged linear fallback.
+   logxOriginal = logx;
+   logyOriginal = logy;
+   xScale = exp(mean(logx));
+   yScale = exp(mean(logy));
+   x = x/xScale;
+   y = y/yScale;
+   logx = log(x);
+   logy = log(y);
 
    % initial estimates using log-log linear fit
    ok = true;
@@ -52,17 +67,9 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
       [ab1,R1,~,C1] = nlinfit(x,y,fnc,ab0,opts1); % R=resids,C=error variance
       rsq1 = baseflow.deps.rsquare(y,ab1(1).*x.^ab1(2));
 
-   catch ME
-
-      if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
-
-         msg = 'Fitting failed using nlinfit at ab1';
-         causeException = MException('BFRA:fitab:fitting',msg);
-         ME = addCause(ME,causeException);
-
-      end
+   catch
+      % Continue to the next solver if this solver cannot fit the data.
       ab1ok = false;
-      % rethrow(ME)
    end
 
    % if nlinfit worked and it's 'better' than rsq (here, rsq0), select it
@@ -73,22 +80,15 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
    else
 
       % try curve fitting functions
-      ab3ok = true;
       try
-         f3 = fit(x,y,ftype,opts3);
+         [f3,~,output3] = fit(x,y,ftype,opts3);
+         % Accept the returned iterate only if the solver converged.
+         ab3ok = output3.exitflag > 0;
          ab3 = coeffvalues(f3);
          rsq3 = baseflow.deps.rsquare(y,ab3(1).*x.^ab3(2));
 
-      catch ME
-
-         if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
-
-            msg = 'Fitting failed using fit at ab3';
-            causeException = MException('BFRA:fitab:fitting',msg);
-            ME = addCause(ME,causeException);
-         end
+      catch
          ab3ok = false;
-         % rethrow(ME)
       end
 
       % if fit worked, select it
@@ -110,16 +110,8 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
          [ab2,R2,~,C2] = nlinfit(x,y,fnc,ab0,opts2);
          rsq2 = baseflow.deps.rsquare(y,ab2(1).*x.^ab2(2));
 
-      catch ME
-
-         if (strcmp(ME.identifier,'stats:nlinfit:NoUsableObservations'))
-
-            msg = 'Fitting failed using nlinfit at ab2';
-            causeException = MException('BFRA:fitab:fitting',msg);
-            ME = addCause(ME,causeException);
-         end
+      catch
          ab2ok = false;
-         %rethrow(ME)
       end
 
       if ab2ok && rsq2 > rsq && rsq2 > 0
@@ -129,21 +121,14 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
 
       else                            % try curve fitting functions
 
-         ab4ok = true;
          try
-            f4 = fit(x,y,ftype,opts4); ab4 = coeffvalues(f4);
+            [f4,~,output4] = fit(x,y,ftype,opts4);
+            ab4ok = output4.exitflag > 0;
+            ab4 = coeffvalues(f4);
             rsq4 = baseflow.deps.rsquare(y,ab4(1).*x.^ab4(2));
 
-         catch ME
-
-            if (strcmp(ME.identifier,'curvefit:fit:infComputed'))
-
-               msg = 'Fitting failed using fit at ab4';
-               causeException = MException('BFRA:fitab:fitting',msg);
-               ME = addCause(ME,causeException);
-            end
+         catch
             ab4ok = false;
-            %rethrow(ME)
          end
 
          % we don't compare with rsq2 because we already know its <rsq0
@@ -174,24 +159,22 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
          ci = [nan nan; nan nan];
 
       case 'nlinfit_robust'
-         ci = nlparci(ab1,R1,'covariance',C1,'alpha',alpha);
-         ab = ab1;
+         [ab,C] = restoreParameters(ab1,C1,xScale,yScale);
+         ci = nlparci(ab,yScale*R1,'covariance',C,'alpha',1-alpha);
 
       case 'nlinfit'
-         ci = nlparci(ab2,R2,'covariance',C2,'alpha',0.68);
-         ab = ab2;
+         [ab,C] = restoreParameters(ab2,C2,xScale,yScale);
+         ci = nlparci(ab,yScale*R2,'covariance',C,'alpha',1-alpha);
 
       case 'fit_robust'
-         ab = ab3;
-         ci = transpose(confint(f3,alpha));
+         [ab,ci] = restoreCurveFit(f3,xScale,yScale,alpha);
 
       case 'fit'
-         ab = ab4;
-         ci = transpose(confint(f4,alpha));
+         [ab,ci] = restoreCurveFit(f4,xScale,yScale,alpha);
 
       case 'linear'
 
-         [ab,ci] = regress(logy,[ones(size(y)) logx]);
+         [ab,ci] = regress(logyOriginal,[ones(size(y)) logxOriginal],1-alpha);
          ci(1,:) = exp(ci(1,:));
          ab = [exp(ab(1)); ab(2)];
 
@@ -199,4 +182,20 @@ function [ab,ci,ok,fselect] = fitNLS_matlab(x,y,logx,logy,~,alpha)
          % xmin is some very small flow value below which the data is corrupt
    end
 
+end
+
+function [ab,C] = restoreParameters(theta,Ctheta,xScale,yScale)
+   multiplier = yScale/xScale^theta(2);
+   ab = [theta(1)*multiplier, theta(2)];
+   % Propagate the full covariance through a = yScale*A/xScale^b.
+   D = [multiplier, -ab(1)*log(xScale); 0, 1];
+   C = D*Ctheta*D';
+end
+
+function [ab,ci] = restoreCurveFit(f,xScale,yScale,alpha)
+   theta = coeffvalues(f);
+   ab = [theta(1)*yScale/xScale^theta(2), theta(2)];
+   ci = transpose(confint(f,alpha));
+   % At original Q=1, the fitted mean is the original coefficient a.
+   ci(1,:) = yScale*predint(f,1/xScale,alpha,'functional','off');
 end

@@ -1,13 +1,18 @@
 classdef test_getdqdt < matlab.unittest.TestCase
-   %TEST_GETDQDT Test the getdqdt fit-plot option.
+   %TEST_GETDQDT Test the getdqdt derivative and fit-plot option.
    %
-   % getdqdt passes plotfits to plotdqdt, which fits the point cloud to
-   % draw its line. fitmethod 'none' asks for no fit, so getdqdt draws
-   % nothing for that method.
+   % The CTS derivative of baseflow.generateTestData output with the
+   % default stencil equals the backward difference of q. getdqdt passes
+   % plotfits to plotdqdt, which fits the point cloud to draw its line.
+   % fitmethod 'none' asks for no fit, so getdqdt draws nothing for that
+   % method.
 
    properties (TestParameter)
       % The fit method getdqdt passes to plotdqdt.
       fitmethod = struct('nls', 'nls', 'none', 'none')
+
+      % The derivative method of the backward-difference test.
+      DerivMethod = {'CTS'}; % {'ETS','VTS','CTS'}
    end
 
    properties
@@ -39,6 +44,14 @@ classdef test_getdqdt < matlab.unittest.TestCase
          % Close the figures each case opens.
          testCase.figsbefore = findall(0, 'Type', 'figure');
          testCase.addTeardown(@() closenewfigs(testCase.figsbefore));
+
+         % A nonlinear fit that stops at the iteration limit warns. The
+         % fit plots reach that limit on the example record, so the
+         % warning is expected output here rather than a problem to print.
+         % A user still sees it.
+         testCase.applyFixture( ...
+            matlab.unittest.fixtures.SuppressedWarningsFixture( ...
+            'stats:nlinfit:IterationLimitExceeded'));
       end
    end
 
@@ -73,6 +86,63 @@ classdef test_getdqdt < matlab.unittest.TestCase
             newfigs_expected = 1;
          end
          testCase.verifyEqual(newfigs_returned, newfigs_expected)
+      end
+
+      %-------------------------------------------
+      %-------------------------------------------
+      function test_ctsBackwardDifference(testCase,DerivMethod)
+
+         % define the test data
+         a = 1e-2;
+         b = 1.5;
+         q0 = 1;
+         [t, q] = baseflow.generateTestData(a,b,q0);
+
+         % Calculate expected result for CTS method
+         dq = q-[nan; q(1:end-1)];
+         dt = (t(2)-t(1));
+         expected = dq./dt;
+
+         % Get the actual result. The test data has no rainfall record.
+         [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
+
+         % Verify that the actual result matches the expected result
+         testCase.verifyEqual(returned,expected)
+
+         % for testing:
+         % DerivMethod = 'CTS';
+         % [~,returned] = baseflow.getdqdt(t,q,[],DerivMethod);
+         % isequal(returned,expected)
+         % scatterfit(returned,expected)
+
+      end
+
+      function test_etsKeepsRejectedWindowsEmpty(testCase)
+         % A rise inside a recession gives windows with a positive slope,
+         % which ETS rejects. They stay nan, rather than taking the slope of
+         % the windows around them.
+         t = (0:59)';
+         q = 100*exp(-t/20);
+         rise = t >= 25 & t <= 28;
+         q(rise) = q(rise) + 5*(t(rise) - 24);
+
+         [~,dqdt] = baseflow.getdqdt(t,q,zeros(size(q)),'ETS');
+
+         testCase.verifyTrue(any(isnan(dqdt(rise))))
+         testCase.verifyFalse(any(dqdt > 0))
+      end
+
+      function test_vtsWidensAcrossFlatSteps(testCase)
+         % A recession reported in whole units has flat steps. VTS widens
+         % its window across a flat step until the flow drops, so no
+         % estimate is a zero slope (Rupp and Selker, 2006).
+         t = (0:99)';
+         q = round(20*exp(-0.02*t));
+
+         [~,dqdt] = baseflow.getdqdt(t,q,zeros(size(q)),'VTS');
+
+         testCase.assertNotEmpty(dqdt(dqdt < 0))
+         testCase.verifyFalse(any(dqdt == 0))
       end
    end
 

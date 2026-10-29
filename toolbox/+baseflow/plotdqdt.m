@@ -405,7 +405,7 @@ function h = plotFits(Fits,Picks,fitmethod,ax,plotfits, ...
    % because Octave installs no listener to do it.
    relayoutloglogtext(h.ax);
 
-   h = plotrain(h, rain, x, y);
+   h.hrain = plotrain(h.ax, h.scatter, rain, x, y);
 
    % I added this so rain is in the legend. plotrain returns the handles of
    % the rain circles, or nan when no rain is plotted, so the guard tests
@@ -459,35 +459,6 @@ function labelReflines(h, labelcolor, labelfontsize, labelstyle)
          breflinetext(h.bEarly, isestimate, interpreter), ...
          'Style', labelstyle, 'Color', labelcolor, ...
          'FontSize', labelfontsize, 'Interpreter', interpreter);
-   end
-end
-
-%%
-function h = plotrain(h,rain,x,y)
-
-   % add rain. scale the circles such that 1 mm of rain equals the size of
-   % the plotted circles
-   if sum(rain)==0
-      h.hrain = nan;
-   else
-
-      % scatter is producing pixelated symbols so I use plot instead
-      %sz    = h.scatter.SizeData + pi.*(rain(rain>0)).^2;
-      %scatter(x(rain>0),y(rain>0),sz,'LineWidth',2)
-
-      % this mimics the way scatter scales the circles. Read the size with
-      % get, because Octave returns a numeric handle, which takes no dot.
-      s = get(h.scatter, 'MarkerSize') + sqrt(pi.*(rain(rain>0)).^2);
-      x = x(rain>0);
-      y = y(rain>0);
-
-      hold(h.ax, 'on');
-
-      % Count down so the handle array takes its size on the first pass.
-      for n = numel(s):-1:1
-         h.hrain(n) = plot(h.ax,x(n),y(n),'o','MarkerSize',s(n), ...
-            'MarkerFaceColor','none','Color','m','LineWidth',1);
-      end
    end
 end
 

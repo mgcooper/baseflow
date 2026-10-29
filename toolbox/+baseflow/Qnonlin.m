@@ -4,6 +4,9 @@ function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
    % [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t) plots a theoretical discharge predicted
    % by a/b values for Q = (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));
    %
+   % b = 1 gives the exponential limit Q = Q0*exp(-a*t). For b < 1 the
+   % reservoir empties in finite time, after which Q is 0.
+   %
    % Matt Cooper, 04-Nov-2022, https://github.com/mgcooper
    %
    % See also: getfunction, QtauString, QtString
@@ -31,7 +34,7 @@ function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
    Q = nan(numA,numB,numQ,numT);
    dQdt = nan(numA,numB,numQ,numT);
 
-   f = @(a,b,Q0,t) (Q0^(1-b)+a*(b-1).*t).^(1/(1-b));
+   f = @qsolution;
 
    % this loop is the easiest way to allow any size a,b,Q0.
    % if I wanted to restrict two of the three a,b,Q0 to be scalar and let
@@ -41,9 +44,9 @@ function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
       for m = 1:numB
          for p = 1:numQ
 
-            qtmp = f(a(n),b(m),Q0(p),t);
+            [qtmp, dqtmp] = f(a(n),b(m),Q0(p),t);
             Q(n,m,p,:) = qtmp;
-            dQdt(n,m,p,:) = -a(n).*qtmp.^b(m);
+            dQdt(n,m,p,:) = dqtmp;
 
          end
       end
@@ -121,4 +124,23 @@ function [Q,dQdt,t,hFig] = Qnonlin(a,b,Q0,t,varargin)
    %     flin    = @(a,Q0,t) Q0.*exp(-t.*a);
    %     out.Qlin    = fnlin(a,Q0,t);
    %     out.dQlin   = a.*Qnlin;
+end
 
+%% LOCAL FUNCTIONS
+function [Q,dQdt] = qsolution(a,b,Q0,t)
+   %QSOLUTION Flow of -dQ/dt = aQ^b at times t, from Q(0) = Q0, and its rate.
+
+   % the power law has its exponential limit at b = 1, where 1/(1-b) is Inf.
+   % For b < 1 the base reaches zero when the reservoir empties, and a
+   % negative base would give a rebound or a complex flow.
+   if b == 1
+      Q = Q0.*exp(-a.*t);
+   else
+      Q = max(Q0^(1-b)+a*(b-1).*t, 0).^(1/(1-b));
+   end
+
+   % an empty reservoir loses no more flow, but a*Q^b is not 0 at Q = 0
+   % for b <= 0
+   dQdt = -a.*Q.^b;
+   dQdt(Q == 0) = 0;
+end
